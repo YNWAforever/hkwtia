@@ -1,3 +1,4 @@
+import {writeFileSync} from "node:fs";
 import {AxeBuilder} from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 
@@ -17,7 +18,8 @@ async function expectNoSeriousOrCritical(page: import("@playwright/test").Page, 
   const builder = new AxeBuilder({page});
   const results = await (surface ? builder.include(surface) : builder).analyze();
   const violations = results.violations.filter(({impact}) => impact === "serious" || impact === "critical");
-  expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+  if (violations.length) writeFileSync(".playwright/t22-accessibility-safe-" + new URL(page.url()).pathname.replaceAll("/", "_") + ".json", JSON.stringify(violations.map(v => ({id:v.id,impact:v.impact,nodes:v.nodes.map(n => ({target:n.target,checks:n.any.map(c => ({id:c.id,contrastRatio:c.data?.contrastRatio,foregroundColor:c.data?.fgColor,backgroundColor:c.data?.bgColor}))}))})), null, 2));
+  expect(violations.map(v => ({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
 }
 
 async function expectFullscreenModal(page: import("@playwright/test").Page) {

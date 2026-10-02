@@ -95,6 +95,9 @@ export function MediaPicker({
           value={selected}
           aria-invalid={invalid}
           aria-describedby={errorId}
+          // Native selects emit input before change. Let change commit the value
+          // before the parent's dirty-state rerender can restore the old selection.
+          onInput={(event) => event.stopPropagation()}
           onChange={(event) => setSelected(event.target.value)}
         >
           <option value="">{labels.none}</option>

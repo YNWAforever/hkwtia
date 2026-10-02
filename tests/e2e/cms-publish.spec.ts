@@ -9,7 +9,7 @@ const en = JSON.parse(
 const zh = JSON.parse(
   readFileSync("messages/zh-HK.json", "utf8"),
 ) as typeof import("../../messages/zh-HK.json");
-test.use({ trace: "off", video: "off" });
+test.use({ trace: "off", video: "off", channel: "chromium" });
 test("private bilingual CMS draft, real layout, second editor conflict and explicit publication revert", async ({
   browser,
   baseURL,
@@ -33,17 +33,21 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
   const run = "Synthetic CMS " + randomUUID(),
     hash = (value: string) =>
       createHash("sha256").update(value).digest("hex").slice(0, 16);
+  writeFileSync(".playwright/t22-cms-setup-safe.json",JSON.stringify({stage:"before-contexts"}));
   const contexts = await Promise.all([
     browser.newContext(),
     browser.newContext(),
     browser.newContext(),
     browser.newContext(),
   ]);
+  writeFileSync(".playwright/t22-cms-setup-safe.json",JSON.stringify({stage:"contexts-created"}));
   const [staff, other, anonymous, device] = await Promise.all(
     contexts.map((context) => context.newPage()),
   );
   const copy = en.Admin.pageCopy,
     server = copy.serverDraft;
+  const checkpoints: string[] = [];
+  const checkpoint = (stage: string) => { checkpoints.push(stage); writeFileSync(".playwright/t22-cms-steps-safe.json", JSON.stringify({stages: checkpoints})); };
   const facts: Record<string, unknown> = {
     scope:
       "confirmed isolated Neon/Auth; synthetic identities; actual built Next/browser/repository",
@@ -94,6 +98,7 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
         ).rows[0].n,
       ),
     ).toBe(56);
+    checkpoint("staff-login");
     await signInForM2(staff, "staff");
     await signInForM2(other, "superadmin");
     const identities = await Promise.all(
@@ -114,9 +119,11 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
     expect(profileIds).toHaveLength(2);
     const staffId = profileIds.find((row) => row.role === "staff")!.id,
       otherId = profileIds.find((row) => row.role === "superadmin")!.id;
+    checkpoint("identities-linked");
     // Never overwrite another test/operator's open server draft.
     expect(await own(staffId)).toBeUndefined();
     expect(await own(otherId)).toBeUndefined();
+    checkpoint("drafts-empty");
     const publicBefore = (
       await pool.query(
         "SELECT locale,key_path,value FROM page_copy WHERE namespace='Home' ORDER BY locale,key_path",
@@ -124,12 +131,14 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
     ).rows;
     await anonymous.goto("/");
     const original = await anonymous.locator("#hero-title").innerText();
+    checkpoint("open-editor");
     await editor(staff);
     expect(await staff.locator("textarea").count()).toBeLessThanOrEqual(40);
     await staff.locator('textarea[name="copy:en:hero.title"]').fill(run);
     await staff
       .locator('textarea[name="copy:zh-HK:hero.title"]')
       .fill("合成私人文案 " + run);
+    checkpoint("private-save");
     await submit(staff, server.save);
     await expect(staff.getByText(server.saved, { exact: true })).toBeVisible();
     await expect(
@@ -152,6 +161,7 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
     await expect(
       device.locator('textarea[name="copy:en:hero.title"]'),
     ).toHaveValue(run);
+    checkpoint("other-editor");
     await editor(other);
     await other
       .locator('textarea[name="copy:en:hero.title"]')
@@ -165,6 +175,7 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
     await expect(anonymous.locator("#hero-title")).toHaveCount(0);
     expect(await anonymous.content()).not.toContain(run);
     await editor(other);
+    checkpoint("preview-layout");
     for (const [prefix, locale, width] of [
       ["", "en", 1440],
       ["/zh", "zh-HK", 390],
@@ -213,6 +224,7 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
     await staff.screenshot({
       path: ".playwright/t17-editor-en-mobile-viewport.png",
     });
+    checkpoint("keyboard-publish");
     // Actual keyboard activation of the separate publish button.
     const publish = staff.getByRole("button", {
       name: server.publish,
@@ -236,6 +248,7 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
     await staff
       .getByRole("checkbox", { name: server.previousCopy, exact: true })
       .check();
+    checkpoint("publication-revert");
     await submit(staff, server.restore);
     await expect(
       staff.getByText(server.restored, { exact: true }),
@@ -321,12 +334,14 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
       JSON.stringify(facts, null, 2),
     );
   } finally {
+    checkpoint("cleanup");
     await Promise.all(contexts.map((context) => context.close()));
     await pool.end();
   }
 });
 
-test("registered media search over 79 real static fixture images in bilingual event forms", async ({
+test.describe("native media picker", () => {
+  test("registered media search over 79 real static fixture images in bilingual event forms", async ({
   browser,
   baseURL,
 }) => {
@@ -348,6 +363,7 @@ test("registered media search over 79 real static fixture images in bilingual ev
     page = await context.newPage();
   const run = randomUUID(),
     ids: string[] = [];
+  const checkpoint = (stage: string) => writeFileSync(".playwright/t22-media-steps-safe.json", JSON.stringify({stage}));
   try {
     expect(
       Number(
@@ -384,12 +400,14 @@ test("registered media search over 79 real static fixture images in bilingual ev
     );
     const before = (await pool.query("SELECT count(*) AS n FROM events"))
       .rows[0].n;
-    await signInForM2(page, "staff");
+    checkpoint("fixture-ready");
+      await signInForM2(page, "staff");
     for (const [prefix, messages, width] of [
       ["", en, 1440],
       ["/zh", zh, 390],
     ] as const) {
       await page.setViewportSize({ width, height: 844 });
+      checkpoint("media-route");
       await page.goto(prefix + "/admin/events-mgmt");
       const labels = messages.Admin.eventsMgmt;
       const search = page.getByRole("searchbox", {
@@ -400,6 +418,7 @@ test("registered media search over 79 real static fixture images in bilingual ev
         name: labels.heroMediaId,
         exact: true,
       });
+      checkpoint("search");
       await search.focus();
       await search.fill(`Synthetic media ${run}`);
       await expect(select.locator("option")).toHaveCount(80);
@@ -407,7 +426,21 @@ test("registered media search over 79 real static fixture images in bilingual ev
       await expect(select.locator("option")).toHaveCount(2);
       await search.press("Tab");
       await expect(select).toBeFocused();
-      await select.selectOption(fixture[78].id);
+      // Observe native event order without storing media identifiers or page content.
+      await select.evaluate(element => {
+        const target = element as HTMLSelectElement & {auditEvents?: {type: string; index: number}[]};
+        target.auditEvents=[];
+        for(const type of ["input","change"])target.addEventListener(type,()=>target.auditEvents!.push({type,index:target.selectedIndex}),{capture:true});
+      });
+      // Exercise the actual native selection via keyboard, not a DOM value setter.
+      checkpoint("keyboard-start");
+      await select.press("Home");
+      checkpoint("keyboard-down");
+      await select.press("ArrowDown");
+      checkpoint("keyboard-commit");
+      await select.press("Tab");
+      checkpoint("value");
+      writeFileSync(".playwright/t22-media-native-events-safe.json",JSON.stringify(await select.evaluate(element => ({index:(element as HTMLSelectElement).selectedIndex,focused:document.activeElement===element,events:(element as HTMLSelectElement & {auditEvents?: {type: string;index: number}[]}).auditEvents}))));
       await expect(select).toHaveValue(fixture[78].id);
       const thumbnail = page.getByRole("img", {
         name: fixture[78].alt_en,
@@ -440,7 +473,7 @@ test("registered media search over 79 real static fixture images in bilingual ev
           fixtureCount: 79,
           locales: ["en", "zh-HK"],
           keyboardFocus: true,
-          selection: "native browser selectOption",
+          selection: "native select Home, ArrowDown, Tab",
           realThumbnail: true,
           eventWrites: 0,
           providerUploads: 0,
@@ -450,6 +483,8 @@ test("registered media search over 79 real static fixture images in bilingual ev
       ),
     );
   } finally {
+    checkpoint("cleanup");
+      await page.keyboard.press("Escape").catch(() => undefined);
     await context.close();
     if (ids.length)
       await pool.query(
@@ -458,4 +493,5 @@ test("registered media search over 79 real static fixture images in bilingual ev
       );
     await pool.end();
   }
+});
 });

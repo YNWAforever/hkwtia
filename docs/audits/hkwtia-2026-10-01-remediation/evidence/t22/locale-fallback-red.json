@@ -1,0 +1,68 @@
+{
+  "scope": "Actual focused local execution; synthetic input; skipped is not passed",
+  "pass": 11,
+  "fail": 1,
+  "skip": 0,
+  "cases": [
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "cannot consume a click in the pending search-state fallback",
+      "status": "failed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "retains every parsed Showcase filter and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "retains the selected Event status and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves the current fragment after path and query when switching locale",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves serialized query values when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "does not append a bare query separator when switching from English to Chinese without search state",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves an empty-valued query parameter when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves serialized query values when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "does not append a bare query separator when switching from Chinese to English without search state",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves an empty-valued query parameter when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "keeps the current locale when an unsaved editor rejects the switch",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "renders a 44px locale target in each Suspense state",
+      "status": "passed"
+    }
+  ]
+}

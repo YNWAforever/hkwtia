@@ -553,3 +553,7 @@ html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto;
 .impact-metrics.aiops-metrics>div { border-color: var(--wt-line); background: var(--wt-paper-bright); }
 .impact-metrics.aiops-metrics strong { color: var(--wt-ink); }
 .impact-metrics.aiops-metrics small { color: #4a6570; }
+
+/* Actual populated news cards: donor accent text measured 3.73:1 on white. */
+.archive-grid > article > .status-label,
+.archive-grid > article > p > span { color: #4a6570; }

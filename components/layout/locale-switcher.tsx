@@ -100,6 +100,7 @@ function LocaleSwitcherButton({
         className,
       )}
       aria-label={accessibleLabel}
+      disabled={!onClick}
       onClick={onClick}
     >
       {label}
