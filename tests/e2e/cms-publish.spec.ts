@@ -1,4 +1,4 @@
-import { randomUUID, createHash } from "node:crypto";
+import { randomUUID, randomBytes, createHash } from "node:crypto";
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { Pool } from "pg";
 import { expect, test, type Page } from "@playwright/test";
@@ -99,8 +99,30 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
       ),
     ).toBe(56);
     checkpoint("staff-login");
-    await signInForM2(staff, "staff");
-    await signInForM2(other, "superadmin");
+    // Fresh reserved identities keep another run/operator's private drafts intact.
+    // The surrounding G0/host/project/sentinel guards are checked before either
+    // provider registration or this isolated fixture role binding. The app still
+    // resolves every action's actor from Auth + the authoritative profile row.
+    async function isolatedEditor(page: Page, role: "staff" | "superadmin") {
+      const profileId = "cms-editor-" + randomUUID();
+      const email = profileId + "@example.test";
+      const password = randomBytes(32).toString("base64url");
+      const response = await page.request.post("/api/auth/sign-up/email", {
+        headers: {Origin: baseURL!},
+        data: {email, password, name: "Synthetic CMS editor"},
+      });
+      expect(response.ok()).toBe(true);
+      const session = await page.request.get("/api/auth/get-session");
+      expect(session.ok()).toBe(true);
+      const identity = (await session.json()).user;
+      expect(typeof identity?.id).toBe("string");
+      expect(identity.email).toBe(email);
+      expect((await pool.query("SELECT id FROM profiles WHERE auth_user_id=$1", [identity.id])).rows).toHaveLength(0);
+      await pool.query("INSERT INTO profiles(id,auth_user_id,email,display_name,role,locale,consent_marketing,directory_visible) VALUES($1,$2,$3,'Synthetic CMS editor',$4,'en',false,false)", [profileId,identity.id,email,role]);
+      return {profileId, email, password, authUserId: identity.id as string};
+    }
+    const staffEditor = await isolatedEditor(staff, "staff");
+    await isolatedEditor(other, "superadmin");
     const identities = await Promise.all(
       [staff, other].map(async (page) => {
         const response = await page.request.get("/api/auth/get-session");
@@ -156,7 +178,14 @@ test("private bilingual CMS draft, real layout, second editor conflict and expli
         )
       ).rows,
     ).toEqual(publicBefore);
-    await signInForM2(device, "staff");
+    const deviceLogin = await device.request.post("/api/auth/sign-in/email", {
+      headers: {Origin: baseURL!},
+      data: {email: staffEditor.email, password: staffEditor.password},
+    });
+    expect(deviceLogin.ok()).toBe(true);
+    const deviceSession = await device.request.get("/api/auth/get-session");
+    expect(deviceSession.ok()).toBe(true);
+    expect((await deviceSession.json()).user?.id).toBe(staffEditor.authUserId);
     await editor(device, "/zh");
     await expect(
       device.locator('textarea[name="copy:en:hero.title"]'),
