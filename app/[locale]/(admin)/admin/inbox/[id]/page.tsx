@@ -8,7 +8,7 @@ import {
 } from "@/lib/admin/support-followup-types";
 import { inboxRepository } from "@/lib/db/repos/inbox";
 import { adminMembersRepository } from "@/lib/db/repos/admin-members";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 

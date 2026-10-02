@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {notFound} from "next/navigation";
 import {WorkQueueTable} from "@/components/admin/work-queue-table";
 import {WORK_ACTIONS,WORK_KINDS,listMyWork,workQueueQuerySchema} from "@/lib/admin/work-queue";

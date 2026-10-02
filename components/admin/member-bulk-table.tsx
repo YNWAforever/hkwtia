@@ -7,7 +7,7 @@ import {prepareAdminBatchAction} from "@/lib/admin/batches/actions";
 import type {BatchOperation} from "@/lib/admin/batches/types";
 import type {AdminMemberQuery} from "@/lib/admin/member-query";
 import {localizedPath} from "@/lib/urls";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import type {AdminMemberListItem} from "@/lib/admin/member-types";
 import type {AppLocale} from "@/i18n/routing";

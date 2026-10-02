@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {useActionState, useState} from "react";
 
 import {HeroUpload, type HeroUploadLabels} from "@/components/portal/hero-upload";

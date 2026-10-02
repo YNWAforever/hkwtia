@@ -1,7 +1,7 @@
 "use client";
 
 import {createContext, useCallback, useContext, useEffect, useMemo, useState, type ComponentProps, type ReactNode} from "react";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 type UnsavedChanges = Readonly<{dirty: boolean; setDirty: (dirty: boolean) => void; confirmLeave: () => boolean}>;
 const context = createContext<UnsavedChanges>({dirty: false, setDirty: () => {}, confirmLeave: () => true});

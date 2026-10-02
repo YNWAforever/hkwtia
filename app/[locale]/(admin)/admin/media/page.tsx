@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { MediaForm } from "@/components/admin/media-form";
