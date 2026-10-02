@@ -46,6 +46,13 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     afterAll(async () => {
       if (f) await f.close();
     });
+    it("projects the actual live and expired claim and accepted provider reference", async () => {
+      await f.pool.query("INSERT INTO messages(conversation_id,role,channel,direction,content,delivery_status,send_claim_expires_at,provider_message_id) VALUES($1,'staff','whatsapp','outbound','Synthetic live claim','queued',now()+interval '1 day',NULL),($1,'staff','whatsapp','outbound','Synthetic expired claim','queued',now()-interval '1 day',NULL),($1,'staff','whatsapp','outbound','Synthetic accepted','sent',NULL,'synthetic-provider-accepted')",[conversation]);
+      const rows=(await repo.getTranscript(staff,conversation))!.messages;
+      expect(rows.find(row=>row.content==="Synthetic live claim")).toMatchObject({sendClaimLive:true,sendClaimExpiresAt:expect.any(Date)});
+      expect(rows.find(row=>row.content==="Synthetic expired claim")).toMatchObject({sendClaimLive:false,sendClaimExpiresAt:expect.any(Date)});
+      expect(rows.find(row=>row.content==="Synthetic accepted")).toMatchObject({providerMessageId:"synthetic-provider-accepted"});
+    });
     it("refuses a member as staff assignee without changing owner or audit", async () => {
       await expect(
         repo.assign(staff, {

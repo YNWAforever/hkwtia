@@ -755,7 +755,8 @@ export function createInboxRepository(
       if (!header) return null;
       const transcript = rowsFrom(
         await database.execute(sql`
-        SELECT id, role, direction, channel, content, delivery_status, template_key, error_code, created_at
+        SELECT id, role, direction, channel, content, delivery_status, template_key, error_code, created_at,
+               provider_message_id, send_claim_expires_at, (send_claim_expires_at > now()) AS send_claim_live
         FROM ${messages}
         WHERE conversation_id = ${id}
         ORDER BY created_at ASC, id ASC
