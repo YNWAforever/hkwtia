@@ -39,10 +39,10 @@ describe("isolated browser session reuse", () => {
 describe("protected session probe locale", () => {
   it.each(["/zh", "/zh/", "/zh/events"])("keeps the current Chinese locale after %s", (path) => {
     expect(m2ProtectedPath(false, path)).toBe("/zh/admin");
-    expect(m2ProtectedPath(true, path)).toBe("/zh/portal/profile");
+    expect(m2ProtectedPath(true, path)).toBe("/zh/portal/billing");
   });
   it.each(["/", "/events", "/zh-other"])("keeps unprefixed paths after %s", (path) => {
     expect(m2ProtectedPath(false, path)).toBe("/admin");
-    expect(m2ProtectedPath(true, path)).toBe("/portal/profile");
+    expect(m2ProtectedPath(true, path)).toBe("/portal/billing");
   });
 });

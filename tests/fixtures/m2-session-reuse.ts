@@ -5,7 +5,7 @@ type SessionPage = Readonly<{
   request: Readonly<{get: (path: string, options?: {maxRedirects: number}) => Promise<Readonly<{ok: () => boolean; json: () => Promise<unknown>}>>}>;
 }>;
 
-export async function reuseM2Session(page: SessionPage, cookies: Cookie[], expectedEmail: string, protectedPath: "/admin" | "/zh/admin" | "/portal/profile" | "/zh/portal/profile"): Promise<boolean> {
+export async function reuseM2Session(page: SessionPage, cookies: Cookie[], expectedEmail: string, protectedPath: "/admin" | "/zh/admin" | "/portal/billing" | "/zh/portal/billing"): Promise<boolean> {
   await page.context().addCookies(cookies.filter((cookie) => cookie.name !== "NEXT_LOCALE"));
   const response = await page.request.get("/api/auth/get-session");
   if (!response.ok()) return false;
@@ -21,7 +21,7 @@ export async function reuseM2Session(page: SessionPage, cookies: Cookie[], expec
   return (await page.request.get(protectedPath, {maxRedirects: 0})).ok();
 }
 
-export function m2ProtectedPath(member: boolean, pathname: string): "/admin" | "/zh/admin" | "/portal/profile" | "/zh/portal/profile" {
+export function m2ProtectedPath(member: boolean, pathname: string): "/admin" | "/zh/admin" | "/portal/billing" | "/zh/portal/billing" {
   const prefix = /^\/zh(?:\/|$)/.test(pathname) ? "/zh" : "";
-  return member ? `${prefix}/portal/profile` : `${prefix}/admin`;
+  return member ? `${prefix}/portal/billing` : `${prefix}/admin`;
 }
