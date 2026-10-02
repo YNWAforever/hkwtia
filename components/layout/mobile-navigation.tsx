@@ -1,6 +1,6 @@
 "use client";
 
-import {useRef, useState} from "react";
+import {useRef, useState, useSyncExternalStore} from "react";
 
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
@@ -52,11 +52,16 @@ function mobileLinksFor(group: LocalizedNavigationGroup, viewOverviewLabel: stri
   ];
 }
 
+const subscribeToHydration = () => () => {};
+const clientHydrationSnapshot = () => true;
+const serverHydrationSnapshot = () => false;
+
 // Donor commit f91ecc5 :446-469 — top bar, priority actions, utilities, the eyebrow and the
 // accordions. Radix Dialog supplies the focus trap, Escape close and scroll lock the donor
 // writes by hand.
 export function MobileNavigation({locale, navigation, labels, brand}: MobileNavigationProps) {
   const pathname = usePathname();
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
   const [open, setOpen] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState("");
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -90,7 +95,7 @@ export function MobileNavigation({locale, navigation, labels, brand}: MobileNavi
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <button ref={triggerRef} type="button" className="mobile-trigger" aria-label={labels.open}>
+        <button ref={triggerRef} type="button" disabled={!hydrated} className="mobile-trigger" aria-label={labels.open}>
           <span aria-hidden="true" />
           <span aria-hidden="true" />
         </button>

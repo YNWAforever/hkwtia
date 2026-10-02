@@ -20,3 +20,8 @@ export async function reuseM2Session(page: SessionPage, cookies: Cookie[], expec
   // Require the protected server journey to validate its session too.
   return (await page.request.get(protectedPath, {maxRedirects: 0})).ok();
 }
+
+export function m2ProtectedPath(member: boolean, pathname: string): "/admin" | "/zh/admin" | "/portal/profile" | "/zh/portal/profile" {
+  const prefix = /^\/zh(?:\/|$)/.test(pathname) ? "/zh" : "";
+  return member ? `${prefix}/portal/profile` : `${prefix}/admin`;
+}

@@ -6,7 +6,7 @@ import {expect, type Cookie, type Page} from "@playwright/test";
 
 import {M2_LIVE_ENV_NAMES, missingM2IdentityEnvironment, missingM2LiveEnvironment} from "@/tests/fixtures/m2-runtime-env";
 
-import {reuseM2Session} from "./m2-session-reuse";
+import {m2ProtectedPath, reuseM2Session} from "./m2-session-reuse";
 
 export {M2_LIVE_ENV_NAMES, missingM2IdentityEnvironment, missingM2LiveEnvironment};
 
@@ -26,8 +26,7 @@ export async function signInForM2(page: Page, role: TestRole): Promise<void> {
   mkdirSync(directory, {recursive: true});
   const scope = createHash("sha256").update(new URL(page.url()).origin + "|" + (process.env.NEON_AUTH_BASE_URL ?? "") + "|" + role).digest("hex");
   const statePath = resolve(directory, scope + ".json");
-  const localePrefix = new URL(page.url()).pathname.startsWith("/zh/") ? "/zh" : "";
-  const protectedPath = role === "member" || role === "company-admin" ? `${localePrefix}/portal/profile` as const : `${localePrefix}/admin` as const;
+  const protectedPath = m2ProtectedPath(role === "member" || role === "company-admin", new URL(page.url()).pathname);
   try {
     const state = JSON.parse(readFileSync(statePath, "utf8")) as {cookies: Cookie[]};
     if (Array.isArray(state.cookies) && await reuseM2Session(page, state.cookies, email!, protectedPath)) return;

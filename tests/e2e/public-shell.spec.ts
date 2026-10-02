@@ -47,6 +47,7 @@ test("mobile Sheet traps focus, resets Accordion, closes on navigation, and rest
   await page.setViewportSize({width: 375, height: 800});
   await page.goto("/zh/events");
   const trigger = page.getByRole("button", {name: "開啟導覽選單"});
+  await expect(trigger).toBeEnabled();
   await trigger.focus();
   await trigger.press("Enter");
   const dialog = page.getByRole("dialog");

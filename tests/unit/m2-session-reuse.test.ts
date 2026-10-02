@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {reuseM2Session} from "@/tests/fixtures/m2-session-reuse";
+import {m2ProtectedPath, reuseM2Session} from "@/tests/fixtures/m2-session-reuse";
 
 function fixture(user: unknown, ok = true) {
   const addCookies = vi.fn(async () => undefined);
@@ -33,5 +33,16 @@ describe("isolated browser session reuse", () => {
     for (const f of [fixture(null), fixture({id: "synthetic-staff", email: "staff@example.test"}, false)]) {
       expect(await reuseM2Session(f.page, cookies, "staff@example.test", "/admin")).toBe(false);
     }
+  });
+});
+
+describe("protected session probe locale", () => {
+  it.each(["/zh", "/zh/", "/zh/events"])("keeps the current Chinese locale after %s", (path) => {
+    expect(m2ProtectedPath(false, path)).toBe("/zh/admin");
+    expect(m2ProtectedPath(true, path)).toBe("/zh/portal/profile");
+  });
+  it.each(["/", "/events", "/zh-other"])("keeps unprefixed paths after %s", (path) => {
+    expect(m2ProtectedPath(false, path)).toBe("/admin");
+    expect(m2ProtectedPath(true, path)).toBe("/portal/profile");
   });
 });
