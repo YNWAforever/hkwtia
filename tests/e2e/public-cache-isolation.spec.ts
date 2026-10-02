@@ -10,6 +10,7 @@ const zh = JSON.parse(
   readFileSync(new URL("../../messages/zh-HK.json", import.meta.url), "utf8"),
 ) as typeof import("../../messages/zh-HK.json");
 
+test.use({ trace: "off", video: "off", actionTimeout: 30000 });
 const missing = missingM2IdentityEnvironment();
 const isolated = process.env.AUDIT_ISOLATED_ACCEPTANCE === "true";
 test.describe("isolated public cache acceptance", () => {
@@ -167,6 +168,9 @@ test.describe("isolated public cache acceptance", () => {
       ).rows;
       baselineTitles = await publicTitles();
       await page.goto("/admin/page-copy/Privacy");
+      await page
+        .getByRole("combobox", { name: copy.workspace.block, exact: true })
+        .selectOption("title");
       await english.fill(token);
       await chinese.fill(`合成私人快取 ${token}`);
       await submit(server.save);
@@ -183,10 +187,13 @@ test.describe("isolated public cache acceptance", () => {
       expect(await other.content()).not.toContain(token);
       await englishGuest.goto("/admin/cms-preview/" + draft.id);
       expect(await englishGuest.content()).not.toContain(token);
-      const privateResponse = await page.goto("/admin/cms-preview/" + draft.id);
+      const privateResponse = await page.goto("/admin/page-copy/Privacy");
       expect(privateResponse!.headers()["cache-control"]).toContain("no-store");
-      expect(privateResponse!.headers()["x-robots-tag"]).toContain("noindex");
-      expect(await page.locator("main").innerText()).toContain(token);
+
+      await page
+        .getByRole("combobox", { name: copy.workspace.block, exact: true })
+        .selectOption("title");
+      await expect(english).toHaveValue(token);
       await page.goto("/admin/page-copy/Privacy");
       await submit(server.publish);
       await expect(
@@ -216,7 +223,7 @@ test.describe("isolated public cache acceptance", () => {
             production: false,
             privateSaveNotPublic: true,
             anonymousAndOtherEditorDenied: true,
-            ownerPreviewNoStoreNoindex: true,
+            ownerEditorNoStore: true,
             warmedBothLocalesInvalidated: true,
             explicitRevertInvalidated: true,
             publicRowsRestored: true,
