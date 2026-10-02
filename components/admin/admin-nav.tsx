@@ -25,7 +25,7 @@ export const groupLabelKeys = {
 /** Maps each config link id to the Admin.navigation message key that resolves its nav label. */
 export const linkLabelKeys = {
   applications:"applicationQueue.title",
-  "job-health":"jobHealth.title",
+  "job-health":"jobHealth.heading",
   dashboard: "navigation.dashboard",
   members: "navigation.members",
   batches: "navigation.batches",

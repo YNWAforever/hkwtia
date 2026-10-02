@@ -1,4 +1,5 @@
 import "server-only";
+import { SUPPORT_NEXT_ACTIONS } from "@/lib/admin/support-followup-types";
 import { sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/authorize";
@@ -14,6 +15,7 @@ export const WORK_KINDS = [
   "content",
 ] as const;
 export const WORK_ACTIONS = [
+  ...SUPPORT_NEXT_ACTIONS,
   "open_case",
   "contact_applicant",
   "await_documents",
@@ -141,8 +143,8 @@ export function createWorkQueueRepository(
      AND m.grant_effective_at IS NULL AND m.grant_expires_at IS NULL
      AND m.billing_period_end>=${asOf} AND m.billing_period_end<=${renewalBefore}
     UNION ALL
-    SELECT 'support:'||c.id::text,'support',coalesce(p.display_name,''),c.assigned_to_profile_id,NULL::timestamptz,c.created_at,'open_conversation','/admin/inbox/'||c.id::text,'human'
-    FROM conversations c LEFT JOIN profiles p ON p.id=c.profile_id WHERE c.handling='human' AND c.status='active'
+    SELECT 'support:'||c.id::text,'support',coalesce(p.display_name,''),c.assigned_to_profile_id,NULLIF(f.context->>'dueAt','')::timestamptz,c.created_at,coalesce(f.context->>'nextActionCode','open_conversation'),'/admin/inbox/'||c.id::text,'human'
+    FROM conversations c LEFT JOIN profiles p ON p.id=c.profile_id LEFT JOIN staff_tasks f ON f.kind='support_followup' AND f.dedupe_key='support-followup:'||c.id::text WHERE c.handling='human' AND c.status='active'
     UNION ALL
     SELECT 'support:'||t.id::text,'support',coalesce(p.display_name,''),NULLIF(t.context->>'ownerProfileId',''),NULLIF(t.context->>'dueAt','')::timestamptz,t.created_at,'review_task','/admin/tasks','open'
     FROM staff_tasks t LEFT JOIN profiles p ON p.id=t.profile_id WHERE t.status='open' AND t.kind<>'membership_application'

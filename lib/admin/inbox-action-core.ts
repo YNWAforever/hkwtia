@@ -1,16 +1,23 @@
 import "server-only";
 
-import {createHash} from "node:crypto";
+import { createHash } from "node:crypto";
 
-import {z} from "zod";
+import { z } from "zod";
 
-import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
-import {woztellCredentialsFrom} from "@/lib/ai/woztell-credentials";
-import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
-import {requireAdmin} from "@/lib/auth/authorize";
-import type {ChannelAdapter, WhatsAppRecipient} from "@/lib/channels/types";
-import {createWoztellAdapter, CUSTOMER_SERVICE_WINDOW_MS, WoztellDeliveryFailure} from "@/lib/channels/woztell";
-import {aiEnv} from "@/lib/config/env";
+import {
+  WHATSAPP_TEMPLATES,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
+import { woztellCredentialsFrom } from "@/lib/ai/woztell-credentials";
+import { isAuthorizationDenial } from "@/lib/auth/authorization-denial";
+import { requireAdmin } from "@/lib/auth/authorize";
+import type { ChannelAdapter, WhatsAppRecipient } from "@/lib/channels/types";
+import {
+  createWoztellAdapter,
+  CUSTOMER_SERVICE_WINDOW_MS,
+  WoztellDeliveryFailure,
+} from "@/lib/channels/woztell";
+import { aiEnv } from "@/lib/config/env";
 import {
   inboxRepository,
   providerRefusedSend,
@@ -24,9 +31,9 @@ import {
   type WhatsAppEligibility,
   type WhatsAppEligibilityBlockReason,
 } from "@/lib/db/repos/message-eligibility";
-import type {Actor} from "@/lib/membership/lifecycle";
-import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
-import {resolveTemplateBody} from "@/lib/whatsapp/template-body";
+import type { Actor } from "@/lib/membership/lifecycle";
+import { approvedTemplateKeys } from "@/lib/whatsapp/approved-templates";
+import { resolveTemplateBody } from "@/lib/whatsapp/template-body";
 
 /**
  * The actor-taking core of the inbox reply lane. It must never live in a
@@ -47,7 +54,7 @@ import {resolveTemplateBody} from "@/lib/whatsapp/template-body";
 // `sendSessionMessage` actually enforces against; a retyped `24 * 60 * 60 *
 // 1_000` here is how a countdown comes to promise a window the adapter then
 // refuses. Re-exported so Task 8's composer reads the same one.
-export {CUSTOMER_SERVICE_WINDOW_MS};
+export { CUSTOMER_SERVICE_WINDOW_MS };
 
 export type InboxReplyInput = Readonly<{
   conversationId: string;
@@ -62,7 +69,10 @@ export type InboxReplyInput = Readonly<{
   attemptId: string;
 }>;
 
-export type InboxReplyResult = Readonly<{status: "sent" | "already_sent"; messageId: string}>;
+export type InboxReplyResult = Readonly<{
+  status: "sent" | "already_sent";
+  messageId: string;
+}>;
 
 /**
  * Every code the composer can render, and every one of them has a producer
@@ -113,7 +123,9 @@ export class InboxReplyError extends Error {
  * several (`INBOX_CONVERSATION_NOT_FOUND`, `INBOX_MESSAGE_NOT_FOUND`) that are
  * bugs, not messages for staff.
  */
-export function inboxReplyErrorCode(error: unknown): InboxReplyErrorCode | null {
+export function inboxReplyErrorCode(
+  error: unknown,
+): InboxReplyErrorCode | null {
   if (error instanceof InboxReplyError) return error.code;
   // Covers `requireAdmin`'s own AuthorizationError and any denial raised inside
   // a repository this core called.
@@ -134,7 +146,10 @@ export type InboxReplyState = Readonly<{
   messageId?: string;
 }>;
 
-export type ReplyWindow = Readonly<{state: "open" | "closed" | "never"; remainingMs: number}>;
+export type ReplyWindow = Readonly<{
+  state: "open" | "closed" | "never";
+  remainingMs: number;
+}>;
 
 /**
  * The 24-hour customer-service window, as the composer's countdown and as this
@@ -146,13 +161,23 @@ export type ReplyWindow = Readonly<{state: "open" | "closed" | "never"; remainin
  * written into has no window at all, and reading a missing timestamp as an open
  * one would offer staff a free-text reply WhatsApp will refuse.
  */
-export function replyWindow(lastInboundAt: Date | null, now: Date = new Date()): ReplyWindow {
-  if (!(lastInboundAt instanceof Date) || !Number.isFinite(lastInboundAt.getTime())) {
-    return {state: "never", remainingMs: 0};
+export function replyWindow(
+  lastInboundAt: Date | null,
+  now: Date = new Date(),
+): ReplyWindow {
+  if (
+    !(lastInboundAt instanceof Date) ||
+    !Number.isFinite(lastInboundAt.getTime())
+  ) {
+    return { state: "never", remainingMs: 0 };
   }
   const elapsed = now.getTime() - lastInboundAt.getTime();
-  if (elapsed > CUSTOMER_SERVICE_WINDOW_MS) return {state: "closed", remainingMs: 0};
-  return {state: "open", remainingMs: Math.max(0, CUSTOMER_SERVICE_WINDOW_MS - elapsed)};
+  if (elapsed > CUSTOMER_SERVICE_WINDOW_MS)
+    return { state: "closed", remainingMs: 0 };
+  return {
+    state: "open",
+    remainingMs: Math.max(0, CUSTOMER_SERVICE_WINDOW_MS - elapsed),
+  };
 }
 
 /**
@@ -169,8 +194,11 @@ export function replyWindow(lastInboundAt: Date | null, now: Date = new Date()):
  * Floored rather than rounded: "1h 0m left" that is really 30 seconds is a
  * promise the adapter breaks.
  */
-export function formatReplyWindow(window: ReplyWindow): Readonly<{hours: string; minutes: string}> {
-  const remaining = window.state === "open" ? Math.max(0, window.remainingMs) : 0;
+export function formatReplyWindow(
+  window: ReplyWindow,
+): Readonly<{ hours: string; minutes: string }> {
+  const remaining =
+    window.state === "open" ? Math.max(0, window.remainingMs) : 0;
   return {
     hours: String(Math.floor(remaining / 3_600_000)),
     minutes: String(Math.floor((remaining % 3_600_000) / 60_000)),
@@ -178,7 +206,10 @@ export function formatReplyWindow(window: ReplyWindow): Readonly<{hours: string;
 }
 
 export type InboxReplyDependencies = Readonly<{
-  inbox: Pick<InboxRepository, "getTranscript" | "queueStaffMessage" | "settleStaffMessage">;
+  inbox: Pick<
+    InboxRepository,
+    "getTranscript" | "queueStaffMessage" | "settleStaffMessage"
+  >;
   eligibility: Pick<MessageEligibilityRepository, "whatsAppEligibility">;
   channel: Pick<ChannelAdapter, "sendSessionMessage" | "sendTemplateMessage">;
   /**
@@ -188,11 +219,16 @@ export type InboxReplyDependencies = Readonly<{
    * fixture that had to become a promise would have been eight files of churn
    * for a gate they are not testing.
    */
-  approvedTemplateKeys: () => ReadonlySet<WhatsAppTemplateKey> | Promise<ReadonlySet<WhatsAppTemplateKey>>;
+  approvedTemplateKeys: () =>
+    | ReadonlySet<WhatsAppTemplateKey>
+    | Promise<ReadonlySet<WhatsAppTemplateKey>>;
   now: () => Date;
 }>;
 
-export type InboxConversationWriter = Pick<InboxRepository, "setHandling" | "assign" | "markRead" | "close">;
+export type InboxConversationWriter = Pick<
+  InboxRepository,
+  "setHandling" | "assign" | "markRead" | "close"
+>;
 
 function defaultInboxReplyDependencies(): InboxReplyDependencies {
   const ai = aiEnv();
@@ -217,7 +253,9 @@ function defaultInboxReplyDependencies(): InboxReplyDependencies {
   };
 }
 
-const conversationIdSchema = z.string().uuid()
+const conversationIdSchema = z
+  .string()
+  .uuid()
   // The repository's `outbound_key` regex is `[0-9a-f-]{36}` and its second
   // refine requires the key to start with `inbox:<conversationId>:`. An
   // upper-case uuid would satisfy `z.string().uuid()` here, mint a key the
@@ -225,19 +263,26 @@ const conversationIdSchema = z.string().uuid()
   // two layers down. Normalise once, at the boundary that mints the key.
   .transform((value) => value.toLowerCase());
 
-const replyInputSchema = z.object({
-  conversationId: conversationIdSchema,
-  kind: z.enum(["session", "template"]),
-  content: z.string().trim().min(1).max(4_096),
-  templateKey: z.string().trim().min(1).max(120).nullable().default(null),
-  templateVariables: z.record(z.string().max(1_000)).default({}),
-  // Required, never defaulted: see `outboundKeyFor`. Lower-cased for the reason
-  // `conversationIdSchema` is — the key it feeds has to be reproducible byte for
-  // byte by the next submit of the same attempt, and a client that upper-cased
-  // a uuid would mint a second key for one attempt.
-  attemptId: z.string().uuid().transform((value) => value.toLowerCase()),
-}).strict()
-  .refine((value) => value.kind === "session" || value.templateKey !== null, {message: "TEMPLATE_KEY_REQUIRED"});
+const replyInputSchema = z
+  .object({
+    conversationId: conversationIdSchema,
+    kind: z.enum(["session", "template"]),
+    content: z.string().trim().min(1).max(4_096),
+    templateKey: z.string().trim().min(1).max(120).nullable().default(null),
+    templateVariables: z.record(z.string().max(1_000)).default({}),
+    // Required, never defaulted: see `outboundKeyFor`. Lower-cased for the reason
+    // `conversationIdSchema` is — the key it feeds has to be reproducible byte for
+    // byte by the next submit of the same attempt, and a client that upper-cased
+    // a uuid would mint a second key for one attempt.
+    attemptId: z
+      .string()
+      .uuid()
+      .transform((value) => value.toLowerCase()),
+  })
+  .strict()
+  .refine((value) => value.kind === "session" || value.templateKey !== null, {
+    message: "TEMPLATE_KEY_REQUIRED",
+  });
 
 const handlingSchema = z.enum(["bot", "human", "closed"]);
 const assigneeSchema = z.preprocess(
@@ -258,7 +303,10 @@ const ELIGIBILITY_CODES = {
   not_opted_in: "NOT_OPTED_IN",
   opted_out: "OPTED_OUT",
   suppressed: "SUPPRESSED",
-} as const satisfies Record<WhatsAppEligibilityBlockReason, InboxReplyErrorCode>;
+} as const satisfies Record<
+  WhatsAppEligibilityBlockReason,
+  InboxReplyErrorCode
+>;
 
 /** Errors the repository raises that are staff-facing rather than bugs. */
 const REPOSITORY_CODES: Readonly<Record<string, InboxReplyErrorCode>> = {
@@ -275,9 +323,13 @@ const REPOSITORY_CODES: Readonly<Record<string, InboxReplyErrorCode>> = {
  * `| undefined` — the sort of widening that ends in a `?? {}` at the call site
  * and a silently empty template-variable bag.
  */
-function parsed<S extends z.ZodTypeAny>(schema: S, value: unknown): z.output<S> {
+function parsed<S extends z.ZodTypeAny>(
+  schema: S,
+  value: unknown,
+): z.output<S> {
   const result = schema.safeParse(value);
-  if (!result.success) throw new InboxReplyError("INVALID", {cause: result.error});
+  if (!result.success)
+    throw new InboxReplyError("INVALID", { cause: result.error });
   return result.data;
 }
 
@@ -294,9 +346,11 @@ async function throughRepository<T>(work: () => Promise<T>): Promise<T> {
     return await work();
   } catch (error) {
     if (isAuthorizationDenial(error)) throw error;
-    if (error instanceof z.ZodError) throw new InboxReplyError("INVALID", {cause: error});
-    const code = error instanceof Error ? REPOSITORY_CODES[error.message] : undefined;
-    if (code) throw new InboxReplyError(code, {cause: error});
+    if (error instanceof z.ZodError)
+      throw new InboxReplyError("INVALID", { cause: error });
+    const code =
+      error instanceof Error ? REPOSITORY_CODES[error.message] : undefined;
+    if (code) throw new InboxReplyError(code, { cause: error });
     throw error;
   }
 }
@@ -324,9 +378,12 @@ async function throughRepository<T>(work: () => Promise<T>): Promise<T> {
  * The number is eligibility's too, read from the row rather than supplied by the
  * caller, so a reply can only ever reach a recipient we hold consent facts for.
  */
-export function adapterRecipient(eligibility: WhatsAppEligibility): WhatsAppRecipient {
+export function adapterRecipient(
+  eligibility: WhatsAppEligibility,
+): WhatsAppRecipient {
   return {
-    whatsappNumber: eligibility.status === "eligible" ? eligibility.phoneE164 : null,
+    whatsappNumber:
+      eligibility.status === "eligible" ? eligibility.phoneE164 : null,
     whatsappOptIn: eligibility.status === "eligible",
   };
 }
@@ -391,7 +448,15 @@ export function outboundKeyFor(input: InboxReplyInput): string {
     .sort()
     .map((key) => [key, input.templateVariables[key] ?? ""]);
   const digest = createHash("sha256")
-    .update(JSON.stringify([input.kind, input.content, input.templateKey, variables, input.attemptId]))
+    .update(
+      JSON.stringify([
+        input.kind,
+        input.content,
+        input.templateKey,
+        variables,
+        input.attemptId,
+      ]),
+    )
     .digest("hex")
     .slice(0, 32);
   return `inbox:${input.conversationId}:${digest}`;
@@ -416,7 +481,9 @@ export function outboundKeyFor(input: InboxReplyInput): string {
  * is why it is routed rather than assumed away.
  */
 function deliveryFailureCode(errorCode: string): InboxReplyErrorCode {
-  return providerRefusedSend(errorCode) ? "DELIVERY_FAILED" : "DELIVERY_UNCERTAIN";
+  return providerRefusedSend(errorCode)
+    ? "DELIVERY_FAILED"
+    : "DELIVERY_UNCERTAIN";
 }
 
 /**
@@ -447,30 +514,40 @@ export async function sendInboxReply(
   requireAdmin(actor);
   const reply = parsed(replyInputSchema, input);
 
-  const transcript = await throughRepository(() => deps.inbox.getTranscript(actor, reply.conversationId));
+  const transcript = await throughRepository(() =>
+    deps.inbox.getTranscript(actor, reply.conversationId),
+  );
   if (transcript === null) throw new InboxReplyError("INVALID");
   const conversation = transcript.conversation;
   // The row-level checks in `queueStaffMessage` are the authority — only it
   // holds `FOR UPDATE`. These two are here so the eligibility read and the
   // window arithmetic are not run for a thread that plainly cannot be replied
   // to, and so the codes have a producer that does not depend on a race.
-  if (conversation.channel !== "whatsapp") throw new InboxReplyError("INVALID_INBOX_CHANNEL");
-  if (conversation.handling !== "human") throw new InboxReplyError("INVALID_INBOX_HANDLING");
+  if (conversation.channel !== "whatsapp")
+    throw new InboxReplyError("INVALID_INBOX_CHANNEL");
+  if (conversation.handling !== "human")
+    throw new InboxReplyError("INVALID_INBOX_HANDLING");
 
-  const eligibility = await throughRepository(() => deps.eligibility.whatsAppEligibility(actor, {
-    profileId: conversation.profileId,
-    contactId: conversation.contactId,
-    // The module parses this and then ignores it: the number it answers with is
-    // read from the row, never supplied by a caller. Passing null keeps that
-    // honest rather than round-tripping a value we did not read.
-    phoneE164: null,
-    // A free-text reply inside the window is a direct answer to a message the
-    // recipient sent us minutes ago; an approved template outside it is not.
-    purpose: reply.kind === "session" ? "service" : "marketing",
-  }));
-  if (eligibility.status === "blocked") throw new InboxReplyError(ELIGIBILITY_CODES[eligibility.reason]);
+  const eligibility = await throughRepository(() =>
+    deps.eligibility.whatsAppEligibility(actor, {
+      profileId: conversation.profileId,
+      contactId: conversation.contactId,
+      // The module parses this and then ignores it: the number it answers with is
+      // read from the row, never supplied by a caller. Passing null keeps that
+      // honest rather than round-tripping a value we did not read.
+      phoneE164: null,
+      // A free-text reply inside the window is a direct answer to a message the
+      // recipient sent us minutes ago; an approved template outside it is not.
+      purpose: reply.kind === "session" ? "service" : "marketing",
+    }),
+  );
+  if (eligibility.status === "blocked")
+    throw new InboxReplyError(ELIGIBILITY_CODES[eligibility.reason]);
 
-  if (reply.kind === "session" && replyWindow(conversation.lastInboundAt, deps.now()).state !== "open") {
+  if (
+    reply.kind === "session" &&
+    replyWindow(conversation.lastInboundAt, deps.now()).state !== "open"
+  ) {
     throw new InboxReplyError("WINDOW_CLOSED");
   }
 
@@ -481,14 +558,21 @@ export async function sendInboxReply(
     // 1. `sendTemplateMessage` does a bare property lookup
     //    (`WHATSAPP_TEMPLATES[input.template].name`), so an unknown key is a
     //    TypeError mid-send rather than a typed delivery failure.
-    if (templateKey === null || !Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, templateKey)) {
+    if (
+      templateKey === null ||
+      !Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, templateKey)
+    ) {
       throw new InboxReplyError("INVALID");
     }
     // 2. Approval, from the same module the picker reads. Enforcing this in a
     //    `<select>` alone would let a hand-posted formData carrying any config
     //    key reach `sendTemplateMessage` — an unapproved elementName is a
     //    provider 4xx, a permanent failure and a staff task per recipient (O-7).
-    if (!(await deps.approvedTemplateKeys()).has(templateKey as WhatsAppTemplateKey)) {
+    if (
+      !(await deps.approvedTemplateKeys()).has(
+        templateKey as WhatsAppTemplateKey,
+      )
+    ) {
       throw new InboxReplyError("TEMPLATE_NOT_APPROVED");
     }
     // 3. Every declared BODY parameter, actually resolved (C-9 review). The
@@ -500,7 +584,12 @@ export async function sendInboxReply(
     //    reply staff believe they sent. `INVALID` rather than a new code on
     //    purpose: "Check the message and the template" is exactly the correction
     //    needed, and the code set the composer can render is a pinned set.
-    if (resolveTemplateBody(templateKey as WhatsAppTemplateKey, reply.templateVariables) === null) {
+    if (
+      resolveTemplateBody(
+        templateKey as WhatsAppTemplateKey,
+        reply.templateVariables,
+      ) === null
+    ) {
       throw new InboxReplyError("INVALID");
     }
   }
@@ -517,82 +606,106 @@ export async function sendInboxReply(
   // `attemptId` is deliberately not among these: it is already folded into
   // `outboundKey`, and a column the repository would store it in would be a
   // second, weaker copy of the same fact.
-  const queued = await throughRepository(() => deps.inbox.queueStaffMessage(actor, {
-    conversationId: reply.conversationId,
-    kind: reply.kind,
-    content: reply.content,
-    templateKey: reply.templateKey,
-    templateVariables: reply.templateVariables,
-    outboundKey,
-  }));
+  const queued = await throughRepository(() =>
+    deps.inbox.queueStaffMessage(actor, {
+      conversationId: reply.conversationId,
+      kind: reply.kind,
+      content: reply.content,
+      templateKey: reply.templateKey,
+      templateVariables: reply.templateVariables,
+      outboundKey,
+    }),
+  );
   // Both short-circuits skip the adapter and they mean different things (S-8).
   // `already_sent` is a settled row: this draft has already gone. `already_queued`
   // is a LIVE send claim held by another submit — a double-click, or a Server
   // Action the client retried — and calling the adapter anyway is how one
   // messages row and one audit row become two WhatsApp messages to the member.
-  if (queued.disposition === "already_sent") return {status: "already_sent", messageId: queued.messageId};
-  if (queued.disposition === "already_queued") throw new InboxReplyError("SEND_IN_PROGRESS");
+  if (queued.disposition === "already_sent")
+    return { status: "already_sent", messageId: queued.messageId };
+  if (queued.disposition === "already_queued")
+    throw new InboxReplyError("SEND_IN_PROGRESS");
 
   const recipient = adapterRecipient(eligibility);
   let outcome;
   try {
-    outcome = reply.kind === "session"
-      ? await deps.channel.sendSessionMessage({
-        ...recipient,
-        text: reply.content,
-        idempotencyKey: outboundKey,
-        // The PERSISTED window clock, read inside the same transaction that
-        // claimed the send — not the summary the page rendered from, which may
-        // be minutes stale, and not a value the client supplied. A null here
-        // means the row says nobody has ever written in; `new Date(0)` is the
-        // inert choice, because the adapter refuses it and the refusal maps to
-        // the same WINDOW_CLOSED the pre-flight check would have produced.
-        lastCustomerMessageAt: queued.lastInboundAt ?? new Date(0),
-      })
-      : await deps.channel.sendTemplateMessage({
-        ...recipient,
-        template: templateKey as WhatsAppTemplateKey,
-        variables: reply.templateVariables,
-        idempotencyKey: outboundKey,
-      });
+    outcome =
+      reply.kind === "session"
+        ? await deps.channel.sendSessionMessage({
+            ...recipient,
+            text: reply.content,
+            idempotencyKey: outboundKey,
+            // The PERSISTED window clock, read inside the same transaction that
+            // claimed the send — not the summary the page rendered from, which may
+            // be minutes stale, and not a value the client supplied. A null here
+            // means the row says nobody has ever written in; `new Date(0)` is the
+            // inert choice, because the adapter refuses it and the refusal maps to
+            // the same WINDOW_CLOSED the pre-flight check would have produced.
+            lastCustomerMessageAt: queued.lastInboundAt ?? new Date(0),
+          })
+        : await deps.channel.sendTemplateMessage({
+            ...recipient,
+            template: templateKey as WhatsAppTemplateKey,
+            variables: reply.templateVariables,
+            idempotencyKey: outboundKey,
+          });
   } catch (error) {
     if (!(error instanceof WoztellDeliveryFailure)) throw error;
     // `error.code` verbatim. `queueStaffMessage` decides whether a failed row
     // may be re-taken by reading exactly this column, so a caller that
     // substitutes a summary of its own makes every failure un-resendable —
     // fail-closed, but silently.
-    await settle(actor, deps, outboundKey, {status: "failed", errorCode: error.code});
+    await settle(actor, deps, outboundKey, {
+      status: "failed",
+      errorCode: error.code,
+    });
     // The SAME column decides which of the two codes staff see, so the message
     // and the statement that will answer their next click cannot disagree.
-    throw new InboxReplyError(deliveryFailureCode(error.code), {cause: error});
+    throw new InboxReplyError(deliveryFailureCode(error.code), {
+      cause: error,
+    });
   }
 
   if (outcome.status === "blocked") {
     // The adapter's own window check refused it. Mapped to the same code the
     // countdown uses: two enforcement points, one thing to tell staff, and
     // neither of them may be the only check.
-    await settle(actor, deps, outboundKey, {status: "failed", errorCode: outcome.reason});
+    await settle(actor, deps, outboundKey, {
+      status: "failed",
+      errorCode: outcome.reason,
+    });
     throw new InboxReplyError("WINDOW_CLOSED");
   }
   if (outcome.status === "skipped") {
     // Unreachable while `adapterRecipient` is derived from an `eligible`
     // answer — which is exactly why it is recorded rather than assumed away: if
     // it ever fires, the row says which gate disagreed with which.
-    await settle(actor, deps, outboundKey, {status: "failed", errorCode: outcome.reason});
+    await settle(actor, deps, outboundKey, {
+      status: "failed",
+      errorCode: outcome.reason,
+    });
     throw new InboxReplyError(deliveryFailureCode(outcome.reason));
   }
 
-  await settle(actor, deps, outboundKey, {status: "sent", providerId: outcome.providerId});
-  return {status: "sent", messageId: queued.messageId};
+  await settle(actor, deps, outboundKey, {
+    status: "sent",
+    providerId: outcome.providerId,
+  });
+  return { status: "sent", messageId: queued.messageId };
 }
 
 async function settle(
   actor: Actor,
   deps: InboxReplyDependencies,
   outboundKey: string,
-  outcome: Readonly<{status: "sent"; providerId: string} | {status: "failed"; errorCode: string}>,
+  outcome: Readonly<
+    | { status: "sent"; providerId: string }
+    | { status: "failed"; errorCode: string }
+  >,
 ): Promise<void> {
-  await throughRepository(() => deps.inbox.settleStaffMessage(actor, {outboundKey, outcome}));
+  await throughRepository(() =>
+    deps.inbox.settleStaffMessage(actor, { outboundKey, outcome }),
+  );
 }
 
 export async function setInboxHandling(
@@ -602,10 +715,12 @@ export async function setInboxHandling(
   deps: InboxConversationWriter = inboxRepository,
 ): Promise<InboxConversationSummary> {
   requireAdmin(actor);
-  return await throughRepository(() => deps.setHandling(actor, {
-    conversationId: parsed(conversationIdSchema, conversationId),
-    handling: parsed(handlingSchema, handling),
-  }));
+  return await throughRepository(() =>
+    deps.setHandling(actor, {
+      conversationId: parsed(conversationIdSchema, conversationId),
+      handling: parsed(handlingSchema, handling),
+    }),
+  );
 }
 
 export async function assignInboxConversation(
@@ -613,12 +728,19 @@ export async function assignInboxConversation(
   conversationId: unknown,
   assignee: unknown,
   deps: InboxConversationWriter = inboxRepository,
+  expectedAssignedToProfileId: unknown = undefined,
 ): Promise<InboxConversationSummary> {
   requireAdmin(actor);
-  return await throughRepository(() => deps.assign(actor, {
-    conversationId: parsed(conversationIdSchema, conversationId),
-    assignedToProfileId: parsed(assigneeSchema, assignee),
-  }));
+  return await throughRepository(() =>
+    deps.assign(actor, {
+      conversationId: parsed(conversationIdSchema, conversationId),
+      assignedToProfileId: parsed(assigneeSchema, assignee),
+      expectedAssignedToProfileId: parsed(
+        z.string().min(1).max(255).nullable(),
+        expectedAssignedToProfileId,
+      ),
+    }),
+  );
 }
 
 export async function markInboxRead(
@@ -627,7 +749,9 @@ export async function markInboxRead(
   deps: InboxConversationWriter = inboxRepository,
 ): Promise<void> {
   requireAdmin(actor);
-  await throughRepository(() => deps.markRead(actor, parsed(conversationIdSchema, conversationId)));
+  await throughRepository(() =>
+    deps.markRead(actor, parsed(conversationIdSchema, conversationId)),
+  );
 }
 
 export async function closeInboxConversation(
@@ -636,5 +760,7 @@ export async function closeInboxConversation(
   deps: InboxConversationWriter = inboxRepository,
 ): Promise<InboxConversationSummary> {
   requireAdmin(actor);
-  return await throughRepository(() => deps.close(actor, parsed(conversationIdSchema, conversationId)));
+  return await throughRepository(() =>
+    deps.close(actor, parsed(conversationIdSchema, conversationId)),
+  );
 }

@@ -1,5 +1,6 @@
-import type {AppLocale} from "@/i18n/routing";
-import type {InboxMessage, InboxTranscript} from "@/lib/db/repos/inbox";
+import { providerRefusedSend } from "@/lib/db/repos/inbox";
+import type { AppLocale } from "@/i18n/routing";
+import type { InboxMessage, InboxTranscript } from "@/lib/db/repos/inbox";
 
 /**
  * The staff-facing transcript. A Server Component, and it stays one: the repo
@@ -16,8 +17,20 @@ import type {InboxMessage, InboxTranscript} from "@/lib/db/repos/inbox";
  * an invention.
  */
 type Labels = Readonly<{
-  roles: Readonly<{user: string; assistant: string; tool: string; staff: string}>;
-  delivery: Readonly<{queued: string; sent: string; delivered: string; read: string; failed: string}>;
+  roles: Readonly<{
+    user: string;
+    assistant: string;
+    tool: string;
+    staff: string;
+  }>;
+  delivery: Readonly<{
+    queued: string;
+    sent: string;
+    delivered: string;
+    read: string;
+    failed: string;
+    uncertain: string;
+  }>;
 }>;
 
 /**
@@ -32,21 +45,47 @@ function rowClassName(message: InboxMessage): string {
     : "mr-auto max-w-[42rem] rounded-md border border-border bg-background p-4";
 }
 
-function DeliveryIndicator({labels, message}: Readonly<{labels: Labels; message: InboxMessage}>) {
+function DeliveryIndicator({
+  labels,
+  message,
+}: Readonly<{ labels: Labels; message: InboxMessage }>) {
   if (message.deliveryStatus === null) return null;
-  const text = labels.delivery[message.deliveryStatus];
+  const uncertain =
+    message.deliveryStatus === "failed" &&
+    message.errorCode !== "outside_customer_service_window" &&
+    (message.errorCode === null || !providerRefusedSend(message.errorCode));
+  const text = uncertain
+    ? labels.delivery.uncertain
+    : labels.delivery[message.deliveryStatus];
   // Text, not a tick glyph: a ✓✓ alone is unreadable to a screen reader and
   // ambiguous to everyone else. A failure carries the provider's own code, which
   // is the one string that tells staff whether to retry or to escalate — and
   // `queueStaffMessage` reads that same column to decide whether the reply may
   // be re-taken at all, so showing it is showing the state the retry depends on.
-  return message.deliveryStatus === "failed"
-    ? <span className="text-destructive">{text}{message.errorCode === null ? null : ` · ${message.errorCode}`}</span>
-    : <span>{text}</span>;
+  return message.deliveryStatus === "failed" ? (
+    <span className="text-red-700">
+      {text}
+      {message.errorCode === null ? null : ` · ${message.errorCode}`}
+    </span>
+  ) : (
+    <span>{text}</span>
+  );
 }
 
-export function InboxThread({locale, transcript, labels}: Readonly<{locale: AppLocale; transcript: InboxTranscript; labels: Labels}>) {
-  const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
+export function InboxThread({
+  locale,
+  transcript,
+  labels,
+}: Readonly<{
+  locale: AppLocale;
+  transcript: InboxTranscript;
+  labels: Labels;
+}>) {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Hong_Kong",
+  });
   return (
     <ol className="space-y-3">
       {transcript.messages.map((message) => (
@@ -73,8 +112,12 @@ export function InboxThread({locale, transcript, labels}: Readonly<{locale: AppL
                 <span aria-hidden="true">·</span>
               </>
             )}
-            <time dateTime={message.createdAt.toISOString()}>{formatter.format(message.createdAt)}</time>
-            {message.deliveryStatus === null ? null : <span aria-hidden="true">·</span>}
+            <time dateTime={message.createdAt.toISOString()}>
+              {formatter.format(message.createdAt)}
+            </time>
+            {message.deliveryStatus === null ? null : (
+              <span aria-hidden="true">·</span>
+            )}
             <DeliveryIndicator labels={labels} message={message} />
           </p>
           <p className="whitespace-pre-wrap">{message.content}</p>

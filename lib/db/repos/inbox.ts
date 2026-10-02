@@ -1,17 +1,24 @@
 import "server-only";
 
-import {sql} from "drizzle-orm";
-import type {SQL} from "drizzle-orm";
-import {z} from "zod";
+import { randomUUID } from "node:crypto";
+import {
+  supportFollowUpContextSchema,
+  supportFollowUpPatchSchema,
+  type SupportFollowUp,
+  type SupportFollowUpContext,
+} from "@/lib/admin/support-followup-types";
+import { sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import { z } from "zod";
 
-import {requireAdmin} from "@/lib/auth/authorize";
+import { requireAdmin } from "@/lib/auth/authorize";
 // Type-only, so nothing of the adapter (or its `server-only` import) is pulled
 // into this module at runtime — the same shape `lib/db/repos/deliveries.ts` uses
 // for `DeliveryFailureCode`. The union is imported rather than retyped because
 // the classification below has to stay exhaustive over the codes the adapter
 // actually throws; a local copy would go stale silently.
-import type {WoztellDeliveryFailureCode} from "@/lib/channels/woztell";
-import {derivedMessageDirection} from "@/lib/db/message-direction";
+import type { WoztellDeliveryFailureCode } from "@/lib/channels/woztell";
+import { derivedMessageDirection } from "@/lib/db/message-direction";
 import {
   auditEvents,
   contacts,
@@ -22,11 +29,17 @@ import {
   staffTasks,
   type MessageDeliveryStatus,
 } from "@/lib/db/server-schema";
-import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {getDb} from "@/lib/db/repos/common";
-import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
+import type {
+  AutomationDatabase,
+  AutomationDatabaseLoader,
+  AutomationSqlExecutor,
+} from "@/lib/db/repos/journeys";
+import { getDb } from "@/lib/db/repos/common";
+import type { Actor, AdminActor } from "@/lib/membership/lifecycle";
 
 export type InboxChannelFilter = "all" | "whatsapp" | "web";
+
+export type InboxScope = "all" | "mine" | "unassigned" | "overdue";
 
 export type InboxHandling = "bot" | "human" | "closed";
 
@@ -51,6 +64,8 @@ export type InboxConversationSummary = Readonly<{
   unread: boolean;
   messageCount: number;
   escalated: boolean;
+  dueAt?: Date | null;
+  nextActionCode?: string | null;
 }>;
 
 export type InboxMessage = Readonly<{
@@ -65,7 +80,10 @@ export type InboxMessage = Readonly<{
   createdAt: Date;
 }>;
 
-export type InboxTranscript = Readonly<{conversation: InboxConversationSummary; messages: readonly InboxMessage[]}>;
+export type InboxTranscript = Readonly<{
+  conversation: InboxConversationSummary;
+  messages: readonly InboxMessage[];
+}>;
 
 export type StaffOutboundKind = "session" | "template";
 
@@ -78,23 +96,31 @@ export type QueuedStaffMessage = Readonly<{
    * (fresh or inherited); the other two are short-circuits (S-8).
    */
   disposition: "queued" | "already_queued" | "already_sent";
-  recipient: Readonly<{phoneE164: string | null; profileId: string | null; contactId: string | null; whatsappOptIn: boolean}>;
+  recipient: Readonly<{
+    phoneE164: string | null;
+    profileId: string | null;
+    contactId: string | null;
+    whatsappOptIn: boolean;
+  }>;
   /** Read from the row, not from the caller: the window is a persisted fact. */
   lastInboundAt: Date | null;
 }>;
 
 export type InboxHandlingFilter = "all" | InboxHandling;
 
-const listOptionsSchema = z.object({
-  channel: z.enum(["all", "whatsapp", "web"]).default("all"),
-  // C-2 Task 8. The filter is here rather than a `.filter()` over the rows the
-  // page received, because this query carries a `LIMIT`: filtering after it
-  // would show "handled by a person" as whichever of those threads happened to
-  // fall inside the newest hundred, and would go quietly emptier as the inbox
-  // grew. Defaulted so every existing caller keeps its meaning.
-  handling: z.enum(["all", "bot", "human", "closed"]).default("all"),
-  limit: z.number().int().min(1).max(200).default(50),
-}).strict();
+const listOptionsSchema = z
+  .object({
+    channel: z.enum(["all", "whatsapp", "web"]).default("all"),
+    // C-2 Task 8. The filter is here rather than a `.filter()` over the rows the
+    // page received, because this query carries a `LIMIT`: filtering after it
+    // would show "handled by a person" as whichever of those threads happened to
+    // fall inside the newest hundred, and would go quietly emptier as the inbox
+    // grew. Defaulted so every existing caller keeps its meaning.
+    handling: z.enum(["all", "bot", "human", "closed"]).default("all"),
+    scope: z.enum(["all", "mine", "unassigned", "overdue"]).default("all"),
+    limit: z.number().int().min(1).max(200).default(50),
+  })
+  .strict();
 
 /**
  * `lib/admin/inbox-action-core.ts` mints this as
@@ -103,17 +129,23 @@ const listOptionsSchema = z.object({
  * quietly opt out of `messages_outbound_key_unique` — an outbound key that is
  * not deterministic in the draft is a key that dedupes nothing.
  */
-const outboundKeySchema = z.string().regex(/^inbox:[0-9a-f-]{36}:[0-9a-f]{32}$/);
+const outboundKeySchema = z
+  .string()
+  .regex(/^inbox:[0-9a-f-]{36}:[0-9a-f]{32}$/);
 
-const queueStaffMessageSchema = z.object({
-  conversationId: z.string().uuid(),
-  kind: z.enum(["session", "template"]),
-  content: z.string().trim().min(1).max(4_096),
-  templateKey: z.string().trim().min(1).max(120).nullable().default(null),
-  templateVariables: z.record(z.string().max(1_000)).default({}),
-  outboundKey: outboundKeySchema,
-}).strict()
-  .refine((value) => value.kind === "session" || value.templateKey !== null, {message: "TEMPLATE_KEY_REQUIRED"})
+const queueStaffMessageSchema = z
+  .object({
+    conversationId: z.string().uuid(),
+    kind: z.enum(["session", "template"]),
+    content: z.string().trim().min(1).max(4_096),
+    templateKey: z.string().trim().min(1).max(120).nullable().default(null),
+    templateVariables: z.record(z.string().max(1_000)).default({}),
+    outboundKey: outboundKeySchema,
+  })
+  .strict()
+  .refine((value) => value.kind === "session" || value.templateKey !== null, {
+    message: "TEMPLATE_KEY_REQUIRED",
+  })
   // The key embeds a conversation id, and the two conflict statements below
   // match on `outbound_key` alone. A key minted for a different conversation
   // would return that conversation's `messageId` beside this one's `recipient`
@@ -121,25 +153,45 @@ const queueStaffMessageSchema = z.object({
   // number of another. Only a programming error can produce that pair today,
   // because Task 7 mints the key from the same parsed input, so this is what
   // makes the branch self-consistent by construction rather than by discipline.
-  .refine((value) => value.outboundKey.startsWith(`inbox:${value.conversationId}:`), {message: "OUTBOUND_KEY_CONVERSATION_MISMATCH"});
+  .refine(
+    (value) => value.outboundKey.startsWith(`inbox:${value.conversationId}:`),
+    { message: "OUTBOUND_KEY_CONVERSATION_MISMATCH" },
+  );
 
-const settleStaffMessageSchema = z.object({
-  outboundKey: outboundKeySchema,
-  outcome: z.discriminatedUnion("status", [
-    z.object({status: z.literal("sent"), providerId: z.string().trim().min(1).max(255)}).strict(),
-    z.object({status: z.literal("failed"), errorCode: z.string().trim().min(1).max(120)}).strict(),
-  ]),
-}).strict();
+const settleStaffMessageSchema = z
+  .object({
+    outboundKey: outboundKeySchema,
+    outcome: z.discriminatedUnion("status", [
+      z
+        .object({
+          status: z.literal("sent"),
+          providerId: z.string().trim().min(1).max(255),
+        })
+        .strict(),
+      z
+        .object({
+          status: z.literal("failed"),
+          errorCode: z.string().trim().min(1).max(120),
+        })
+        .strict(),
+    ]),
+  })
+  .strict();
 
-const setHandlingSchema = z.object({
-  conversationId: z.string().uuid(),
-  handling: z.enum(["bot", "human", "closed"]),
-}).strict();
+const setHandlingSchema = z
+  .object({
+    conversationId: z.string().uuid(),
+    handling: z.enum(["bot", "human", "closed"]),
+  })
+  .strict();
 
-const assignSchema = z.object({
-  conversationId: z.string().uuid(),
-  assignedToProfileId: z.string().min(1).max(255).nullable(),
-}).strict();
+const assignSchema = z
+  .object({
+    conversationId: z.string().uuid(),
+    assignedToProfileId: z.string().min(1).max(255).nullable(),
+    expectedAssignedToProfileId: z.string().min(1).max(255).nullable(),
+  })
+  .strict();
 
 const conversationIdSchema = z.string().uuid();
 
@@ -180,12 +232,18 @@ function sendClaimLease(): SQL {
 
 function rowsFrom(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result as Record<string, unknown>[];
-  if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows as Record<string, unknown>[];
+  if (
+    result &&
+    typeof result === "object" &&
+    "rows" in result &&
+    Array.isArray(result.rows)
+  )
+    return result.rows as Record<string, unknown>[];
   return [];
 }
 
 async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
-  return await getDb() as unknown as AutomationDatabase;
+  return (await getDb()) as unknown as AutomationDatabase;
 }
 
 function dateFrom(value: unknown): Date | null {
@@ -222,7 +280,10 @@ const INBOX_ROLES = {
   assistant: "assistant",
   tool: "tool",
   staff: "staff",
-} as const satisfies Record<(typeof messageRoleEnum.enumValues)[number], InboxMessage["role"]>;
+} as const satisfies Record<
+  (typeof messageRoleEnum.enumValues)[number],
+  InboxMessage["role"]
+>;
 
 function roleFrom(value: unknown): InboxMessage["role"] {
   // The column is an enum, so the fallback is unreachable in practice; it exists
@@ -266,6 +327,8 @@ function summaryFrom(row: Record<string, unknown>): InboxConversationSummary {
   const lastMessageAt = dateFrom(row.last_message_at);
   const lastStaffReadAt = dateFrom(row.last_staff_read_at);
   return {
+    dueAt: dateFrom(row.support_due_at),
+    nextActionCode: stringFrom(row.support_next_action),
     id: String(row.id),
     channel: row.channel === "whatsapp" ? "whatsapp" : "web",
     locale: String(row.locale ?? "en"),
@@ -282,7 +345,9 @@ function summaryFrom(row: Record<string, unknown>): InboxConversationSummary {
     lastStaffReadAt,
     // A thread nobody has opened is unread even when it is silent, so a NULL
     // read stamp is unread rather than "nothing new".
-    unread: lastStaffReadAt === null || (lastMessageAt !== null && lastMessageAt > lastStaffReadAt),
+    unread:
+      lastStaffReadAt === null ||
+      (lastMessageAt !== null && lastMessageAt > lastStaffReadAt),
     messageCount: Number(row.message_count ?? 0),
     escalated: Number(row.open_task_count ?? 0) > 0,
   };
@@ -315,7 +380,9 @@ async function readSummary(
   executor: AutomationSqlExecutor,
   conversationId: string,
 ): Promise<InboxConversationSummary> {
-  const row = rowsFrom(await executor.execute(conversationHeaderQuery(conversationId)))[0];
+  const row = rowsFrom(
+    await executor.execute(conversationHeaderQuery(conversationId)),
+  )[0];
   if (!row) throw new Error("INBOX_CONVERSATION_NOT_FOUND");
   return summaryFrom(row);
 }
@@ -341,19 +408,21 @@ async function lockConversation(
   transaction: AutomationSqlExecutor,
   conversationId: string,
 ): Promise<Record<string, unknown>> {
-  const row = rowsFrom(await transaction.execute(sql`
-    SELECT c.id, c.channel, c.handling, c.assigned_to_profile_id
+  const row = rowsFrom(
+    await transaction.execute(sql`
+    SELECT c.id, c.channel, c.handling, c.assigned_to_profile_id,c.profile_id
     FROM ${conversations} c
     WHERE c.id = ${conversationId} AND c.status <> 'deleted'
     FOR UPDATE
-  `))[0];
+  `),
+  )[0];
   if (!row) throw new Error("INBOX_CONVERSATION_NOT_FOUND");
   return row;
 }
 
 function uniqueViolation(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
-  const candidate = error as {code?: unknown; cause?: unknown};
+  const candidate = error as { code?: unknown; cause?: unknown };
   return candidate.code === "23505" || uniqueViolation(candidate.cause);
 }
 
@@ -408,7 +477,9 @@ const PROVIDER_REFUSED_SEND = {
   provider_unclassified_failure: false,
 } as const satisfies Record<WoztellDeliveryFailureCode, boolean>;
 
-const PROVIDER_REFUSED_ERROR_CODES: readonly string[] = Object.entries(PROVIDER_REFUSED_SEND)
+const PROVIDER_REFUSED_ERROR_CODES: readonly string[] = Object.entries(
+  PROVIDER_REFUSED_SEND,
+)
   .filter(([, refused]) => refused)
   .map(([code]) => code);
 
@@ -437,7 +508,10 @@ export function providerRefusedSend(errorCode: string): boolean {
  */
 function refusedSendPredicate(): SQL {
   if (PROVIDER_REFUSED_ERROR_CODES.length === 0) return sql`FALSE`;
-  const codes = sql.join(PROVIDER_REFUSED_ERROR_CODES.map((code) => sql`${code}`), sql`, `);
+  const codes = sql.join(
+    PROVIDER_REFUSED_ERROR_CODES.map((code) => sql`${code}`),
+    sql`, `,
+  );
   return sql`(
                 ${messages.deliveryStatus} = 'failed'
                 AND ${messages.providerMessageId} IS NULL
@@ -457,17 +531,176 @@ function refusedSendPredicate(): SQL {
  * to prevent. Here the gate is `requireAdmin(actor)` and the sender is recorded
  * as `sent_by_profile_id = actor.profileId`.
  */
-export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
+export function createInboxRepository(
+  loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader,
+) {
   return {
-    async listConversations(actor: Actor, options: unknown): Promise<readonly InboxConversationSummary[]> {
+    async getSupportFollowUp(
+      actor: Actor,
+      id: string,
+    ): Promise<SupportFollowUp | null> {
+      requireAdmin(actor);
+      const target = conversationIdSchema.parse(id),
+        database = await loadDatabase();
+      const row = rowsFrom(
+        await database.execute(sql`SELECT c.assigned_to_profile_id,c.handling,t.context FROM ${conversations} c
+       LEFT JOIN ${staffTasks} t ON t.dedupe_key=${"support-followup:" + target} AND t.kind='support_followup'
+       WHERE c.id=${target} AND c.status<>'deleted' LIMIT 1`),
+      )[0];
+      if (!row) return null;
+      const context = row.context
+        ? supportFollowUpContextSchema.parse(row.context)
+        : null;
+      if (context && context.conversationId !== target)
+        throw Error("SUPPORT_CONTEXT_INVALID");
+      const audits = rowsFrom(
+        await database.execute(
+          sql`SELECT created_at,actor_type,metadata FROM ${auditEvents} WHERE target_type='conversation' AND target_id=${target} AND action='conversation.support.followup.updated' ORDER BY created_at DESC,id DESC LIMIT 50`,
+        ),
+      );
+      return {
+        version: context?.supportVersion ?? "0",
+        ownerProfileId: stringFrom(row.assigned_to_profile_id),
+        dueAt: context?.dueAt ?? null,
+        nextActionCode: context?.nextActionCode ?? "none",
+        handling: handlingFrom(row.handling),
+        closeReason: context?.closeReason ?? null,
+        applicationId: context?.applicationId ?? null,
+        billingAttemptId: context?.billingAttemptId ?? null,
+        supportReference: context?.supportReference ?? null,
+        handoffNote: context?.handoffNote ?? "",
+        timeline: audits.map((audit) => ({
+          at: dateFrom(audit.created_at)!.toISOString(),
+          actorType: String(audit.actor_type),
+          context: supportFollowUpContextSchema.parse(
+            (audit.metadata as { followUp: unknown }).followUp,
+          ),
+        })),
+      };
+    },
+    async updateSupportFollowUp(
+      actor: Actor,
+      input: unknown,
+    ): Promise<{ version: string }> {
+      requireAdmin(actor);
+      const patch = supportFollowUpPatchSchema.parse(input),
+        database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const current = await lockConversation(
+            transaction,
+            patch.conversationId,
+          ),
+          key = "support-followup:" + patch.conversationId;
+        const task = rowsFrom(
+          await transaction.execute(
+            sql`SELECT id,kind,context FROM ${staffTasks} WHERE dedupe_key=${key} FOR UPDATE`,
+          ),
+        )[0];
+        if (task && task.kind !== "support_followup")
+          throw Error("SUPPORT_CONTEXT_INVALID");
+        const previous = task
+          ? supportFollowUpContextSchema.parse(task.context)
+          : null;
+        if (previous && previous.conversationId !== patch.conversationId)
+          throw Error("SUPPORT_CONTEXT_INVALID");
+        if (
+          patch.expectedVersion !== (previous?.supportVersion ?? "0") ||
+          patch.expectedAssignedToProfileId !==
+            stringFrom(current.assigned_to_profile_id)
+        )
+          throw Error("SUPPORT_FOLLOWUP_CONFLICT");
+        if (patch.ownerProfileId) {
+          const owner = rowsFrom(
+            await transaction.execute(
+              sql`SELECT id FROM ${profiles} WHERE id=${patch.ownerProfileId} AND role IN ('staff','exco','superadmin') FOR SHARE`,
+            ),
+          )[0];
+          if (!owner) throw Error("INBOX_ASSIGNEE_INVALID");
+        }
+        if (
+          (patch.ownerProfileId !==
+            stringFrom(current.assigned_to_profile_id) ||
+            patch.handling === "closed") &&
+          !patch.handoffNote
+        )
+          throw Error("SUPPORT_HANDOFF_NOTE_REQUIRED");
+        if (patch.handling === "human" && current.channel !== "whatsapp")
+          throw Error("INVALID_INBOX_CHANNEL");
+        const profileId = stringFrom(current.profile_id);
+        if (patch.applicationId) {
+          const ref = rowsFrom(
+            await transaction.execute(
+              sql`SELECT id FROM membership_applications WHERE id=${patch.applicationId} AND applicant_user_id=${profileId} FOR SHARE`,
+            ),
+          )[0];
+          if (!ref) throw Error("SUPPORT_REFERENCE_INVALID");
+        }
+        if (patch.billingAttemptId) {
+          const ref = rowsFrom(
+            await transaction.execute(
+              sql`SELECT b.id FROM billing_attempts b JOIN memberships m ON m.id=b.membership_id WHERE b.id=${patch.billingAttemptId} AND (m.owner_user_id=${profileId} OR EXISTS(SELECT 1 FROM company_members cm WHERE cm.company_id=m.company_id AND cm.user_id=${profileId} AND cm.revoked_at IS NULL)) FOR SHARE OF b,m`,
+            ),
+          )[0];
+          if (!ref) throw Error("SUPPORT_REFERENCE_INVALID");
+        }
+        const { expectedVersion, expectedAssignedToProfileId, ...fields } =
+          patch;
+        const context: SupportFollowUpContext =
+          supportFollowUpContextSchema.parse({
+            ...fields,
+            supportVersion: randomUUID(),
+          });
+        const encoded = JSON.stringify(context);
+        if (new TextEncoder().encode(encoded).byteLength > 4096)
+          throw Error("SUPPORT_CONTEXT_TOO_LARGE");
+        await transaction.execute(
+          sql`UPDATE ${conversations} SET assigned_to_profile_id=${patch.ownerProfileId},handling=${patch.handling},updated_at=now() WHERE id=${patch.conversationId}`,
+        );
+        await transaction.execute(sql`INSERT INTO ${staffTasks}(profile_id,kind,dedupe_key,summary_code,context,status,resolved_at,resolved_by_profile_id)
+         VALUES(${profileId},'support_followup',${key},${patch.nextActionCode},${encoded}::jsonb,CASE WHEN ${patch.handling}='closed' THEN 'resolved'::staff_task_status ELSE 'open'::staff_task_status END,CASE WHEN ${patch.handling}='closed' THEN now() ELSE NULL END,CASE WHEN ${patch.handling}='closed' THEN ${actor.profileId} ELSE NULL END)
+         ON CONFLICT(dedupe_key) DO UPDATE SET context=EXCLUDED.context,summary_code=EXCLUDED.summary_code,status=EXCLUDED.status,resolved_at=EXCLUDED.resolved_at,resolved_by_profile_id=EXCLUDED.resolved_by_profile_id,updated_at=now()`);
+        await transaction.execute(
+          auditInsert(
+            actor,
+            "conversation.support.followup.updated",
+            patch.conversationId,
+            {
+              previousVersion: expectedVersion,
+              previousOwner: expectedAssignedToProfileId,
+              followUp: context,
+            },
+          ),
+        );
+        return { version: context.supportVersion };
+      });
+    },
+    async listConversations(
+      actor: Actor,
+      options: unknown,
+    ): Promise<readonly InboxConversationSummary[]> {
       requireAdmin(actor);
       const parsed = listOptionsSchema.parse(options);
       const database = await loadDatabase();
       // Scopes the CONVERSATION, not its newest message: `latest` no longer
       // projects a channel, because 0031 gave the conversation its own.
-      const channelFilter = parsed.channel === "all" ? sql`TRUE` : sql`c.channel = ${parsed.channel}`;
-      const handlingFilter = parsed.handling === "all" ? sql`TRUE` : sql`c.handling = ${parsed.handling}`;
-      const rows = rowsFrom(await database.execute(sql`
+      const channelFilter =
+        parsed.channel === "all"
+          ? sql`TRUE`
+          : sql`c.channel = ${parsed.channel}`;
+      const scopeFilter =
+        parsed.scope === "mine"
+          ? sql`c.assigned_to_profile_id=${actor.profileId}`
+          : parsed.scope === "unassigned"
+            ? sql`c.assigned_to_profile_id IS NULL`
+            : parsed.scope === "overdue"
+              ? sql`c.handling<>'closed' AND followup.status='open' AND NULLIF(followup.context->>'dueAt','')::timestamptz<now()`
+              : sql`TRUE`;
+      const handlingFilter =
+        parsed.handling === "all"
+          ? sql`TRUE`
+          : sql`c.handling = ${parsed.handling}`;
+      const rows = rowsFrom(
+        await database.execute(sql`
         WITH latest AS (
           SELECT DISTINCT ON (m.conversation_id)
             m.conversation_id, m.content AS last_message, m.created_at
@@ -485,36 +718,48 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
                c.last_message_at, c.last_inbound_at, c.last_staff_read_at,
                c.profile_id, c.contact_id, c.assigned_to_profile_id,
                p.display_name, assignee.display_name AS assignee_display_name,
-               latest.last_message,
+               latest.last_message, NULLIF(followup.context->>'dueAt','')::timestamptz AS support_due_at, followup.context->>'nextActionCode' AS support_next_action,
                COALESCE(counts.message_count, 0) AS message_count,
                COALESCE(tasks.open_task_count, 0) AS open_task_count
         FROM ${conversations} c
         LEFT JOIN ${profiles} p ON p.id = c.profile_id
         LEFT JOIN ${profiles} assignee ON assignee.id = c.assigned_to_profile_id
+        LEFT JOIN staff_tasks followup ON followup.kind='support_followup' AND followup.dedupe_key='support-followup:'||c.id::text
         LEFT JOIN latest ON latest.conversation_id = c.id
         LEFT JOIN counts ON counts.conversation_id = c.id
         LEFT JOIN tasks ON tasks.conversation_id = c.id::text
-        WHERE c.agent_kind = 'concierge' AND c.status <> 'deleted' AND ${channelFilter} AND ${handlingFilter}
+        WHERE c.agent_kind = 'concierge' AND c.status <> 'deleted' AND ${channelFilter} AND ${handlingFilter} AND ${scopeFilter}
         ORDER BY c.last_message_at DESC NULLS LAST, c.id DESC
         LIMIT ${parsed.limit}
-      `));
+      `),
+      );
       return rows.map(summaryFrom);
     },
 
-    async getTranscript(actor: Actor, conversationId: string): Promise<InboxTranscript | null> {
+    async getTranscript(
+      actor: Actor,
+      conversationId: string,
+    ): Promise<InboxTranscript | null> {
       requireAdmin(actor);
       const id = conversationIdSchema.parse(conversationId);
       const database = await loadDatabase();
-      const header = rowsFrom(await database.execute(conversationHeaderQuery(id)))[0];
+      const header = rowsFrom(
+        await database.execute(conversationHeaderQuery(id)),
+      )[0];
       if (!header) return null;
-      const transcript = rowsFrom(await database.execute(sql`
+      const transcript = rowsFrom(
+        await database.execute(sql`
         SELECT id, role, direction, channel, content, delivery_status, template_key, error_code, created_at
         FROM ${messages}
         WHERE conversation_id = ${id}
         ORDER BY created_at ASC, id ASC
         LIMIT 500
-      `));
-      return {conversation: summaryFrom(header), messages: transcript.map(messageFrom)};
+      `),
+      );
+      return {
+        conversation: summaryFrom(header),
+        messages: transcript.map(messageFrom),
+      };
     },
 
     /**
@@ -531,14 +776,18 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
      * produce one `messages` row, one audit row and **two WhatsApp messages to
      * the member**.
      */
-    async queueStaffMessage(actor: Actor, input: unknown): Promise<QueuedStaffMessage> {
+    async queueStaffMessage(
+      actor: Actor,
+      input: unknown,
+    ): Promise<QueuedStaffMessage> {
       requireAdmin(actor);
       const parsed = queueStaffMessageSchema.parse(input);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
         // FOR UPDATE OF c, never a bare FOR UPDATE: PostgreSQL refuses to lock
         // the nullable side of an outer join, and both joins here are LEFT.
-        const conversation = rowsFrom(await transaction.execute(sql`
+        const conversation = rowsFrom(
+          await transaction.execute(sql`
           SELECT c.id, c.channel, c.handling, c.last_inbound_at, c.profile_id, c.contact_id,
                  p.whatsapp_number AS profile_whatsapp_number,
                  p.whatsapp_opt_in AS profile_whatsapp_opt_in,
@@ -549,13 +798,16 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           LEFT JOIN ${contacts} ct ON ct.id = c.contact_id
           WHERE c.id = ${parsed.conversationId} AND c.status <> 'deleted'
           FOR UPDATE OF c
-        `))[0];
+        `),
+        )[0];
         if (!conversation) throw new Error("INBOX_CONVERSATION_NOT_FOUND");
-        if (conversation.channel !== "whatsapp") throw new Error("INVALID_INBOX_CHANNEL");
+        if (conversation.channel !== "whatsapp")
+          throw new Error("INVALID_INBOX_CHANNEL");
         // Taking a thread over is a separate, audited act. Replying into one the
         // concierge still owns would interleave a person and a bot in the same
         // thread, each unaware of the other's reply.
-        if (conversation.handling !== "human") throw new Error("INVALID_INBOX_HANDLING");
+        if (conversation.handling !== "human")
+          throw new Error("INVALID_INBOX_HANDLING");
 
         const contactId = stringFrom(conversation.contact_id);
         const contactPhone = stringFrom(conversation.contact_phone_e164);
@@ -568,7 +820,11 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           phoneE164: contactPhone ?? profilePhone,
           profileId: stringFrom(conversation.profile_id),
           contactId,
-          whatsappOptIn: Boolean(contactPhone !== null ? conversation.contact_whatsapp_opt_in : conversation.profile_whatsapp_opt_in),
+          whatsappOptIn: Boolean(
+            contactPhone !== null
+              ? conversation.contact_whatsapp_opt_in
+              : conversation.profile_whatsapp_opt_in,
+          ),
         } as const;
         const lastInboundAt = dateFrom(conversation.last_inbound_at);
 
@@ -578,7 +834,8 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
         // delivery ledger with no type error and no failing test. Kept out of
         // the SQL template so the emitted statement carries no comment naming
         // the opposite value.
-        const inserted = rowsFrom(await transaction.execute(sql`
+        const inserted = rowsFrom(
+          await transaction.execute(sql`
           INSERT INTO ${messages}
             (
               conversation_id,
@@ -598,33 +855,41 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
             ${parsed.conversationId},
             ${STAFF_ROLE},
             'whatsapp',
-            ${derivedMessageDirection({role: STAFF_ROLE})},
+            ${derivedMessageDirection({ role: STAFF_ROLE })},
             ${parsed.content},
             'queued',
             ${actor.profileId},
             ${parsed.templateKey},
             ${parsed.outboundKey},
             ${sendClaimLease()},
-            ${JSON.stringify({outboundKind: parsed.kind, templateVariables: parsed.templateVariables})}::jsonb,
+            ${JSON.stringify({ outboundKind: parsed.kind, templateVariables: parsed.templateVariables })}::jsonb,
             '[]'::jsonb
           )
           ON CONFLICT (outbound_key)
             WHERE outbound_key IS NOT NULL
           DO NOTHING
           RETURNING ${messages.id} AS id
-        `))[0];
+        `),
+        )[0];
 
         if (inserted) {
           const messageId = String(inserted.id);
           // S-7: the durable commitment to send, in the same transaction as the
           // row that carries it. The outcome lives on the messages row itself
           // and is joinable through this `messageId`.
-          await transaction.execute(auditInsert(actor, "conversation.reply.queued", parsed.conversationId, {
-            messageId,
-            outboundKey: parsed.outboundKey,
-            kind: parsed.kind,
-            templateKey: parsed.templateKey,
-          }));
+          await transaction.execute(
+            auditInsert(
+              actor,
+              "conversation.reply.queued",
+              parsed.conversationId,
+              {
+                messageId,
+                outboundKey: parsed.outboundKey,
+                kind: parsed.kind,
+                templateKey: parsed.templateKey,
+              },
+            ),
+          );
           return {
             messageId,
             conversationId: parsed.conversationId,
@@ -667,7 +932,8 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
         // without it a re-take erases the only evidence that the provider was
         // ever handed this message — which is the one fact you need to answer
         // "did the member get it twice?" after the fact.
-        const claimed = rowsFrom(await transaction.execute(sql`
+        const claimed = rowsFrom(
+          await transaction.execute(sql`
           UPDATE ${messages}
           SET delivery_status = 'queued',
               error_code = NULL,
@@ -684,7 +950,8 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
             )
             AND (${messages.sendClaimExpiresAt} IS NULL OR ${messages.sendClaimExpiresAt} <= now())
           RETURNING ${messages.id} AS id
-        `))[0];
+        `),
+        )[0];
         if (claimed) {
           // Either an abandoned send inherited — the previous attempt crashed
           // between the adapter and the settle — or a refused one re-queued.
@@ -699,12 +966,14 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           };
         }
 
-        const existing = rowsFrom(await transaction.execute(sql`
+        const existing = rowsFrom(
+          await transaction.execute(sql`
           SELECT ${messages.id} AS id, ${messages.deliveryStatus} AS delivery_status
           FROM ${messages}
           WHERE ${messages.outboundKey} = ${parsed.outboundKey}
           LIMIT 1
-        `))[0];
+        `),
+        )[0];
         if (!existing) throw new Error("INBOX_MESSAGE_NOT_FOUND");
         return {
           messageId: String(existing.id),
@@ -716,7 +985,10 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           // message WhatsApp accepted and then could not deliver), or a `failed`
           // row whose `error_code` leaves acceptance uncertain. None of them is
           // this caller's send to make.
-          disposition: existing.delivery_status === "queued" ? "already_queued" : "already_sent",
+          disposition:
+            existing.delivery_status === "queued"
+              ? "already_queued"
+              : "already_sent",
           recipient,
           lastInboundAt,
         };
@@ -772,46 +1044,93 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
     },
 
     /** Taking a thread over, or handing it back. Audited in the same transaction. */
-    async setHandling(actor: Actor, input: unknown): Promise<InboxConversationSummary> {
+    async setHandling(
+      actor: Actor,
+      input: unknown,
+    ): Promise<InboxConversationSummary> {
       requireAdmin(actor);
       const parsed = setHandlingSchema.parse(input);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
-        const current = await lockConversation(transaction, parsed.conversationId);
+        const current = await lockConversation(
+          transaction,
+          parsed.conversationId,
+        );
+        if (
+          rowsFrom(
+            await transaction.execute(
+              sql`SELECT id FROM ${staffTasks} WHERE kind='support_followup' AND dedupe_key=${"support-followup:" + parsed.conversationId} LIMIT 1`,
+            ),
+          )[0]
+        )
+          throw Error("SUPPORT_FOLLOWUP_REQUIRED");
         // A web thread has no number behind it and no customer-service window to
         // reply inside, so handing it to a person would hand them a composer
         // that cannot send. Refuse here rather than at the adapter.
-        if (parsed.handling === "human" && current.channel !== "whatsapp") throw new Error("INVALID_INBOX_CHANNEL");
+        if (parsed.handling === "human" && current.channel !== "whatsapp")
+          throw new Error("INVALID_INBOX_CHANNEL");
         await transaction.execute(sql`
           UPDATE ${conversations}
           SET handling = ${parsed.handling}, updated_at = now()
           WHERE ${conversations.id} = ${parsed.conversationId}
         `);
-        await transaction.execute(auditInsert(actor, "conversation.handling.changed", parsed.conversationId, {
-          from: handlingFrom(current.handling),
-          to: parsed.handling,
-        }));
+        await transaction.execute(
+          auditInsert(
+            actor,
+            "conversation.handling.changed",
+            parsed.conversationId,
+            {
+              from: handlingFrom(current.handling),
+              to: parsed.handling,
+            },
+          ),
+        );
         return await readSummary(transaction, parsed.conversationId);
       });
     },
 
-    async assign(actor: Actor, input: unknown): Promise<InboxConversationSummary> {
+    async assign(
+      actor: Actor,
+      input: unknown,
+    ): Promise<InboxConversationSummary> {
       requireAdmin(actor);
       const parsed = assignSchema.parse(input);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
-        const current = await lockConversation(transaction, parsed.conversationId);
-        // `assigned_to_profile_id` references `profiles.id`, so an assignee who
-        // does not exist is a 23503 rather than a silently dangling name.
+        const current = await lockConversation(
+          transaction,
+          parsed.conversationId,
+        );
+        const followUp = rowsFrom(
+          await transaction.execute(
+            sql`SELECT id FROM ${staffTasks} WHERE dedupe_key=${"support-followup:" + parsed.conversationId} AND kind='support_followup' LIMIT 1`,
+          ),
+        )[0];
+        if (followUp) throw Error("SUPPORT_FOLLOWUP_REQUIRED");
+        if (
+          stringFrom(current.assigned_to_profile_id) !==
+          parsed.expectedAssignedToProfileId
+        )
+          throw Error("INBOX_ASSIGNMENT_CONFLICT");
+        if (parsed.assignedToProfileId) {
+          const assignee = rowsFrom(
+            await transaction.execute(
+              sql`SELECT id FROM ${profiles} WHERE ${profiles.id}=${parsed.assignedToProfileId} AND ${profiles.role} IN ('staff','exco','superadmin') FOR SHARE`,
+            ),
+          )[0];
+          if (!assignee) throw Error("INBOX_ASSIGNEE_INVALID");
+        }
         await transaction.execute(sql`
           UPDATE ${conversations}
           SET assigned_to_profile_id = ${parsed.assignedToProfileId}, updated_at = now()
           WHERE ${conversations.id} = ${parsed.conversationId}
         `);
-        await transaction.execute(auditInsert(actor, "conversation.assigned", parsed.conversationId, {
-          from: stringFrom(current.assigned_to_profile_id),
-          to: parsed.assignedToProfileId,
-        }));
+        await transaction.execute(
+          auditInsert(actor, "conversation.assigned", parsed.conversationId, {
+            from: stringFrom(current.assigned_to_profile_id),
+            to: parsed.assignedToProfileId,
+          }),
+        );
         return await readSummary(transaction, parsed.conversationId);
       });
     },
@@ -822,20 +1141,33 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
      * sweeps read; flipping it here would take a thread staff merely finished
      * with out of the bot's reach as well.
      */
-    async close(actor: Actor, conversationId: string): Promise<InboxConversationSummary> {
+    async close(
+      actor: Actor,
+      conversationId: string,
+    ): Promise<InboxConversationSummary> {
       requireAdmin(actor);
       const id = conversationIdSchema.parse(conversationId);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
         const current = await lockConversation(transaction, id);
+        if (
+          rowsFrom(
+            await transaction.execute(
+              sql`SELECT id FROM ${staffTasks} WHERE kind='support_followup' AND dedupe_key=${"support-followup:" + id} LIMIT 1`,
+            ),
+          )[0]
+        )
+          throw Error("SUPPORT_FOLLOWUP_REQUIRED");
         await transaction.execute(sql`
           UPDATE ${conversations}
           SET handling = 'closed', updated_at = now()
           WHERE ${conversations.id} = ${id}
         `);
-        await transaction.execute(auditInsert(actor, "conversation.closed", id, {
-          from: handlingFrom(current.handling),
-        }));
+        await transaction.execute(
+          auditInsert(actor, "conversation.closed", id, {
+            from: handlingFrom(current.handling),
+          }),
+        );
         return await readSummary(transaction, id);
       });
     },
