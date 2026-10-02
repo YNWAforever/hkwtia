@@ -449,7 +449,8 @@ describe("complete M4 deterministic acceptance", () => {
     // `REFRESH ... CONCURRENTLY` needs. The dashboard renders that string, so the hash moved for
     // a copy change and nothing else. Re-verified deterministic across repeated runs before
     // pinning.
-    expect(opaque(safeDashboard)).toBe("6c46019928f19e8e93ba4409c5a029a98dff270583a2163148651099ebdfc012");
+    // T22: page-scoped aiops-metrics class fixes light-page contrast; all privacy invariants above remain.
+    expect(opaque(safeDashboard)).toBe("9ba3122a495a4a9674cae1d920e5e905611c54bcbd4a56e5808116479702f2fc");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();

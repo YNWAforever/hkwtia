@@ -1,0 +1,12 @@
+{
+  "numPassedTests": 12,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTotalTests": 12,
+  "startTime": 1790939612791,
+  "environment": "no DB fixtures; deterministic providers only",
+  "production": false,
+  "before": "Full suite 6303 pass / 1 public HTML hash mismatch / 329 guarded skips; focused old hash reproduced failure",
+  "renderHash": "9ba3122a495a4a9674cae1d920e5e905611c54bcbd4a56e5808116479702f2fc",
+  "privacyAssertionsPreserved": true
+}
