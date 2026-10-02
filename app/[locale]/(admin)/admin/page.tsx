@@ -72,7 +72,7 @@ export default async function AdminPage({params,searchParams}: Props) {
         }}
       />
       <section aria-labelledby="admin-recent-batches" className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold" id="admin-recent-batches">{t("batches.history.recentTitle")}</h2><Link className="text-primary underline" href={localizedPath(locale, "/admin/batches")}>{t("batches.history.viewAll")}</Link></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold" id="admin-recent-batches">{t("batches.history.recentTitle")}</h2><Link prefetch={false} className="text-primary underline" href={localizedPath(locale, "/admin/batches")}>{t("batches.history.viewAll")}</Link></div>
         {recentBatches === null ? <p className="text-muted-foreground" role="status">{t("batches.history.recentUnavailable")}</p>
           : recentBatches.length === 0 ? <p className="text-muted-foreground">{t("batches.history.recentEmpty")}</p>
           : <ul className="grid gap-3">
@@ -82,7 +82,7 @@ export default async function AdminPage({params,searchParams}: Props) {
                 <p className="text-sm text-muted-foreground">{t(`batches.states.${item.state}`)} · {item.succeeded} / {item.total} · {t("batches.history.recentFailed", {count: item.failed})}</p>
                 <p className="text-xs text-muted-foreground"><time dateTime={item.createdAt}>{hongKongDateTime.format(new Date(item.createdAt))}</time></p>
               </div>
-              <Link className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, `/admin/batches/${item.id}`)}>{t("batches.history.open")}</Link>
+              <Link prefetch={false} className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, `/admin/batches/${item.id}`)}>{t("batches.history.open")}</Link>
             </li>)}
           </ul>}
       </section>

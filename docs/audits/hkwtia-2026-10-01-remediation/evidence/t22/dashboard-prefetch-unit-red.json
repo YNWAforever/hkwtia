@@ -1,0 +1,8 @@
+{
+  "sourceSha": "af4b86564270d8dda51f67b512f96542af7380f8",
+  "passed": 2,
+  "failed": 2,
+  "skipped": 0,
+  "targetFailureConfirmed": true,
+  "target": "8 real rendered dashboard/work-queue links in each locale must set Next prefetch=false"
+}
