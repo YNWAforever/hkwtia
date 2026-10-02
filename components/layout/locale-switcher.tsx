@@ -1,7 +1,7 @@
 'use client';
 
 import {useSearchParams} from 'next/navigation';
-import {Suspense} from 'react';
+import {Suspense, useSyncExternalStore} from 'react';
 
 import type {AppLocale} from '@/i18n/routing';
 import {usePathname, useRouter} from '@/i18n/navigation';
@@ -77,6 +77,10 @@ function LocaleSwitcherContent({
   />;
 }
 
+const subscribeToHydration = () => () => {};
+const clientHydrationSnapshot = () => true;
+const serverHydrationSnapshot = () => false;
+
 function LocaleSwitcherButton({
   accessibleLabel,
   label,
@@ -88,6 +92,8 @@ function LocaleSwitcherButton({
   onClick?: () => void;
   className?: string;
 }) {
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
+
   return (
     <button
       type="button"
@@ -100,7 +106,7 @@ function LocaleSwitcherButton({
         className,
       )}
       aria-label={accessibleLabel}
-      disabled={!onClick}
+      disabled={!hydrated || !onClick}
       onClick={onClick}
     >
       {label}

@@ -1,3 +1,4 @@
+import {renderToStaticMarkup} from "react-dom/server";
 import {fireEvent, render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -35,6 +36,14 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams();
     searchState.suspended = false;
     window.history.replaceState(null, "", "/");
+  });
+
+  it("keeps the ready server-rendered control disabled until client handlers are installed", () => {
+    const markup = renderToStaticMarkup(<LocaleSwitcher locale="en" {...labels}/>);
+    const container = document.createElement("div");
+    container.innerHTML = markup;
+    expect(container.querySelector("button")).toBeDisabled();
+    expect(routerReplace).not.toHaveBeenCalled();
   });
 
   it("cannot consume a click in the pending search-state fallback", () => {
