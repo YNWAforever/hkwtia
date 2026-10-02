@@ -54,14 +54,29 @@ async function LegacyNetworkSection({ locale, copyOverrides }: HomeCopyProps) {
 }
 
 export async function HomeContent({ locale, copyOverrides }: HomeCopyProps) {
-  const hero = await Hero({ locale, copyOverrides });
+  const [hero, t] = await Promise.all([
+    Hero({ locale, copyOverrides }),
+    getHomeTranslations({ locale, copyOverrides, namespace: "Home.openNow" }),
+  ]);
 
   return (
     <>
       <StructuredData data={buildOrganizationData()} />
       <StructuredData data={buildWebSiteData()} />
       {hero}
-      <Suspense fallback={null}>
+      <Suspense
+        fallback={
+          <section
+            id="home-discover"
+            aria-busy="true"
+            className="section opportunity-section min-h-svh"
+          >
+            <div className="shell">
+              <p role="status">{t("loading")}</p>
+            </div>
+          </section>
+        }
+      >
         <OpenNow locale={locale} copyOverrides={copyOverrides} />
       </Suspense>
       <Suspense fallback={null}>

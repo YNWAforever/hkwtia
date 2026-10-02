@@ -13,9 +13,11 @@ import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 // app/styles/wisetech.css:184 .opportunity-section; :764 .open-now-actions.
 export async function OpenNow({locale, copyOverrides}: HomeCopyProps) {
   const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.openNow'});
-  const events = await eventsRepository
+  const result = await eventsRepository
     .listPublic(ANONYMOUS_ACTOR, {status: 'open', asOf: new Date(), locale, limit: 3})
-    .catch(() => []);
+    .then((events) => ({kind: "ready" as const, events}))
+    .catch(() => ({kind: "unavailable" as const, events: []}));
+  const events = result.events;
 
   return (
     <Section id="home-discover" tone="ink" labelledBy="open-now-title">
@@ -39,8 +41,8 @@ export async function OpenNow({locale, copyOverrides}: HomeCopyProps) {
       ) : (
         <HonestEmpty
           label={t('statusLabel')}
-          title={t('empty.title')}
-          copy={t('empty.copy')}
+          title={t(result.kind === 'unavailable' ? 'unavailable.title' : 'empty.title')}
+          copy={t(result.kind === 'unavailable' ? 'unavailable.copy' : 'empty.copy')}
           actions={[
             // Deep-links to the interest form on /events (Phase A, audit F7) instead of
             // the open-events list, which is empty whenever this band is shown.
