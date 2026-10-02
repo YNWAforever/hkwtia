@@ -52,7 +52,7 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
 
   return (
     <HeaderShell hasAnnouncement={hasAnnouncement}>
-      <div className="header-inner">
+      <div className="header-inner" inert={navigationPending} aria-hidden={navigationPending || undefined}>
         <DualBrandLockup labels={brand} priority />
         <Suspense fallback={<div aria-hidden="true" className="desktop-nav" />}>
           {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DesktopMegaNavigation
