@@ -1,0 +1,18 @@
+{
+  "reason": "Non-allowlisted email-shaped values appeared in historical unit case descriptions; masked before packaging. Original source tests were not changed.",
+  "files": [
+    {
+      "path": "evidence/t22/full-current-results.json",
+      "redactedOccurrences": 2,
+      "originalValuesIncluded": false,
+      "testPathsCountsResultsPreserved": true
+    },
+    {
+      "path": "evidence/t22/full-current-with-auth-tree-timeout.json",
+      "redactedOccurrences": 2,
+      "originalValuesIncluded": false,
+      "testPathsCountsResultsPreserved": true
+    }
+  ],
+  "productionMutation": false
+}

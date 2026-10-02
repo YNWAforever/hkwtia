@@ -1,0 +1,325 @@
+{
+  "sourceSha": "510d7db243d67b0e362ce952e91b30d34a9c6083",
+  "observedAt": "2026-10-02T06:13:40.353Z",
+  "production": false,
+  "dbWrites": 0,
+  "requests": "GET only; max4 concurrent;12s per hop;5 hops;no request cookies or auth",
+  "results": [
+    {
+      "partnerRefSha256": "0114b58709cc85dc933a8ad76f804d54cf23c549ecd2cf8aa467424a93b72af0",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "03f4e6293b2c1370585e0cb9f137ae0954464d75c1f2c3ef720db5f9b8b7bbf2",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "0a514eef986c3246d39f99c5c4ce20fdb062fab04f4b8a097ea56a8437778f43",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "0b9ea863336193fd52c484b93d19c2e230bddd97169b60930caa07cf2f8ad4c1",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "0e5b86438a1411799e35974a0f8959404366f64de26e7d603f71c48af491c5e2",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "0edf95be27684ffcb46f02f354e379b0eca3384c74eea6aaed71c93ec9885056",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "1031a264a7f3b4edf400bdb91826a58e4f9fc5761db4e917dc162cc8b9cb0e97",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "16cdbb9ca1204ac900560add697ee119c41d1203d958a9d461ee4a3a35297be4",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "1a943e1320a9711149542a212f7a78c8bac56039dd1ea58120efbe5bf5b2af48",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "1f74b7d844a985984edc97683ad7ac4c4fee6c1dfca2cc3b839f93705a343936",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "261f01a518440212bfa6fed72d19b0c27e9fd378265bd2bbee871ce4dd4dcc5e",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "2c56d4a98279af34bd1f22be8cd833e91e00650854ff875618a126636e2c270e",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "2d3ac25da626d0b6c2321e0d1f67efa012b0377d0432fc3753805c7e741771f1",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "2f32317db8093dc0ee48ab93706ebfe982ab14ba73c8b12debde0f4e025ab877",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "2f78f28d0dd8674602e13de243eb8d390b86d1a41170f29268e44a3d34d5b46a",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "34cfd09aeaf3de5cfcbc2cc239cbb3985a2a0f22edd825d955370e7abc67ba44",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "380d734bdf29cf70e6c2b3a2458ebcc0f8dfeff8f7b3fc5a9cf18496c223da60",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "38ab12d6113c0a09ed0dcb4edd498fdfd096b456489c6891c5bb9901e132c73f",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "3f8efa6238a1b5316390003a86de95ed0655cac04dcf71f8491b4aedc214540b",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "421ecd75ddd560c03e26bcba333982d726a89c9c23b5f00de4705885e6cfe633",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "441b700809a266bf81c7fdcd239c990be87ec17bf0826003cf5345bc489456ce",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "4485ebe70841fd4656adac1af0052ff9b2b502c70bdf0f3ca5044f916cfd78b3",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "4557057292572966892e484dc829d5d00e14c7f848bf53e09c1ecd3319a7208c",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "495ab3559c864c70ef3cb01aba6b8840e9b1e50b598f9a7a2197b2acbc4cee9a",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "4a539b32574e1e677eabb7c72344b9b9933ce2beac256da1a3dbe7911f4dac4a",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "4f3bb480db080f7e1437cd9eb324fc0d588164a6c19f00b4a822381dac4441fc",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "531dadb6d463eb0bf3fa43b5835ff16ddae7a6958d7697533974436cc59b69fc",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "573e28e8349efdc9ab6e50474d1c021c7da5bf482e732552b0b89466319b71bd",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "5ba3d7a5ef211b1d014386304b8448292b0ac9de73f3822e6e31215db1dd454d",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "5c0ee885f274246087c73d0dd85464eedbd399b75c72401d707a930cfddde205",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "613f2ee21b99470e85d196a3c81f4e2d7d489f047b0286483e73787adbf72a50",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "63341d2a4c3171f8614c21f24c7a73941a06623618659aae64af3a2bae060066",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "67a88b15b7569369f1aead0e925a93f1890f7829ca571b37cc8ad17ea082e638",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "6cf5cec1cededc1f3ca51c59fddae15077c0d96127fbac9dc7b64c2f65f7c305",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "6f2002b245c7b01113945ee24c6c98ae55c08390a81f9d880ae0b875d7fc71a1",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "71857b79e716015d5154eef72e1804bab9ab15dbf69ba6bcd6075b1ed30afba6",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "7282d0b125b009538a0dbd8fde772ebbb055a11e6e80e7af9e5c8bd1e197e667",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "7521f346611938625556526781a22735236383bbc5e172d012c9f1f0d17810e4",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "755d57e2f138afa929eb69f6b51b701109a342d75098e9e4cf985e3ce1505bb3",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "7726e05ee84b0ed5a72244ac579a678a833f65243d543f5ac5d9d0f41d33aa89",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "7a23700ffb51d1331a5bf3d5186684fafc94b894386d3d61c1f742d7a09570c8",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "7f790f644579683bc9a4fea2cf10b12ba9495e6bf6a7cc2cc1bbe4ff0e5e273f",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "8213ca73445d2d2692a99f14cbb201aeec8cc0553d421f4dce3b51545e916c5b",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "840736577c132c161ed47651cc6f5c1374f7f34eca6229899d3ed6036b46f7ae",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "87eae21f12e24b5780ae57f78c09aa6aab84670f26a195b66a3e25d3ff584183",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "8949b010e35dbd2736d95071de0a82a435157feda176b68ce651c3ab4a6da508",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "8bd03a23d085dc264330a37abc51ce02066ed65994a220e89cbcf72272e52781",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "957f7b565dbc0631bbbdd052bc2fb850a10a23562e5575ac2806b8aecd24a733",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "9b660e5ab021c45cdff20350e1e366ce36c513b9f7d424b051fe090f64b1e4f6",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "a17f77ea29999a1eefdfc7965c1b3a3353836f599603a89530065d0520fbdb90",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "a323feebe6b05ae433e5bc4fa5b98b538bbe57efff89afff2297e20776b529b6",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "a5a76972b06000d7028e216de737d72e43564dcd68c33f9f0eb2367c7cfe2476",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "add76b7f865672c5c46e6fd826e44b681395bb7592cfb0654679fb23cb67b155",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "b0062298eaa5c27a44a930cbd2c95cb22ff36472870071ccb972e3274958001d",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "b1f2dd2d1a5a7ad983fd719b20adc4fd12ea1b1ca09bd7b0099d56f3359244b0",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "b45451e3550023f35e629aff464e7a5e2de0cddf178758261a8d5d0820cdacee",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "b5b088cb76419ac88e147f42dab4d40e547d23e0bb6498a673897aa3d7eabcf9",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "b8ad98bf7d6cb916e1a4b6afb7f0d9accb61e6b4f7715dd06a72d972944f289b",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "bb5dad0fca103140c426aaad1c16e30d2647f49e8de4a76d2c5751d7ae0ffb73",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "bd40c3c118013192bd58a34d01d2d0e0c8834aa776fa9fcba3ed89351068bdec",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "c04e2f7abe5a833ebac9617fb3f15aad36f450135ff98f7df7cfd3c657f5b6c9",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "c9e9ec40948193625a46ca47468178f65e1ec0582d870de99f0cfdbb3f5286dd",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "cd669c54fbbfe09426359356acbea0b5d4e7a3446bada52faa5c6e675df1feae",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "cd87ee05ca82137add344e7d8f4f18019e9faa121c33608baeccf5cc30de9da4",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "d1aa42800345ecbd3d51836acfc868275b781f06286ea490bfe39e122369db8a",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "d2f661d52ee541994da08ebc764fc4e4ef70c77a1fad239ff383ffe2924ab30c",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "d49d69c3d33a524d72d5a7e392598b07b387e9baf9a1bbb4dd512868ef167cfd",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "da16b3d29fdd1507743cdff9c86bbba3ba2b2ff5e3e295e1d3eab30a6248c506",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "da417bd426a3028ff81786c729ff312965db0702699088e5423606b06d4ab2fb",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "e0b4c7d5f13499e2c72a3c6aa37838e52852d9f15b7fdc1d034bff39bad06c02",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "e25abb430b77489f359817c517958a4f45a4fb6353bc73ff9e36d9a41b93cef2",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "e54ffca67d3c1d2232ccc2e80d7228f255dcae974d39474fba8eb916c6090812",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "e5693b99fe8e128ca6823dfb3271769168a99a46a2972e4d7c480b13b63a757b",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "e91ea0f5efbdeca7986cd3b36d0243cb91808913f401365ba04d7598d84b79e7",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "e9f6762579e0246109a424738dff1e225ee00bed37841911f2afc49c6dae98b3",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "eb1e3fb4e829c8050679b99984c9bc814b197fa3df2554c4f43078e7cb9dd871",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "eea9420d03e06e88ae368ef105e5d830698a63d70b6f764d17255b0e86fce215",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "f99680d0f2f0c39d62b72079f7551fadb2b20d2af5fe320a10c9e9132dea751a",
+      "result": "no-link"
+    },
+    {
+      "partnerRefSha256": "ffa19eccbc6077fe8a33d6e99e6d5ce67e84a571281af1ed994b044e7fe673cc",
+      "result": "no-link"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ Partners sourceNote.title 中英仍為「Published records, not a scraped logo w
 
 只將 Partners.sourceNote.title 改為中性介紹「Meet our partners／認識合作夥伴」。hero、關係／logo確認、法律品牌、有效期間、79資料、發布predicate及媒體註冊來源保留。
 
-候選built Chromium4 pass：中英header／mobile／footer／已登入職員返回後台、79lazy images實際載入、HTTPS URL結構、published合成公開活動可見及private/demo排除。證據evidence/t20；外站HTTP可達未驗證。Production DB的CMS overrides沒有可用readonly credential；不冒充已查資料庫。已觀察到的Production rendered title確定仍是舊文案，候選DB沒有override；發布前operator需經既有CMS核對及以CAS處理任何當時override，不得盲刪所有copy。
+候選built Chromium4 pass：中英header／mobile／footer／已登入職員返回後台、79 lazy images 實際載入、非空 URL 才適用的 HTTPS predicate、published合成公開活動可見及private/demo排除。證據evidence/t20；外站HTTP可達未驗證。Production DB的CMS overrides沒有可用readonly credential；不冒充已查資料庫。已觀察到的Production rendered title確定仍是舊文案，候選DB沒有override；發布前operator需經既有CMS核對及以CAS處理任何當時override，不得盲刪所有copy。
 
 ## 內容與業務批准門檻
 
@@ -26,3 +26,8 @@ Partners sourceNote.title 中英仍為「Published records, not a scraped logo w
 | 本輪發布 | 無Production寫入或新flag啟用 | D06及具體候選版本發布批准 |
 
 本文件是工程內容核對，不是協會政策批准；registry空值、Google／mail provider、人工SOP及Production新版本均不記成pass。
+
+
+## T23 非空目的地核對
+
+再次直接只讀查現有 79 筆已發布夥伴：`website_url` 全部 NULL，79 個沒有目的地連結；外站 HTTP 呼叫 0。先前 HTTPS predicate 在空集合通過，不能作外站可達證據。圖片已實際載入與 79 logo/關係的既有批准仍成立；網站目的地若要新增，需 content owner 提供及批准逐筆 URL，再驗 HTTPS／可達性。不得推測或編造連結。此項不改動正式資料。

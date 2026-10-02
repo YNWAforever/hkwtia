@@ -1,0 +1,58 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "runId": 37056531491,
+  "observedAt": "2026-10-02T20:15:13.305842+00:00",
+  "conclusion": "success",
+  "environment": "GitHub ubuntu-latest; configured Node22; repository CI command and two shards",
+  "nativeSummaries": [
+    {
+      "job": "worker",
+      "kind": "testFiles",
+      "counts": {
+        "passed": 7
+      }
+    },
+    {
+      "job": "worker",
+      "kind": "tests",
+      "counts": {
+        "passed": 57
+      }
+    },
+    {
+      "job": "tests (1)",
+      "kind": "testFiles",
+      "counts": {
+        "passed": 377,
+        "skipped": 44
+      }
+    },
+    {
+      "job": "tests (1)",
+      "kind": "tests",
+      "counts": {
+        "passed": 2983,
+        "skipped": 166
+      }
+    },
+    {
+      "job": "tests (2)",
+      "kind": "testFiles",
+      "counts": {
+        "passed": 380,
+        "skipped": 41
+      }
+    },
+    {
+      "job": "tests (2)",
+      "kind": "tests",
+      "counts": {
+        "passed": 3362,
+        "skipped": 163
+      }
+    }
+  ],
+  "scope": "CI source gates only; not browser or live provider acceptance",
+  "rawLogPackaged": false,
+  "production": false
+}
