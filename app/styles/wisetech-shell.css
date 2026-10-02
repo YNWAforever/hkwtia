@@ -161,6 +161,11 @@
  * renders at 11px, and repeating the superseded base value would leave the two visibly apart. */
 .footer-bottom button, .footer-bottom small { font-size: 11px; }
 
+/* At the document end, the fixed Concierge covers the desktop locale control.
+ * Leave room for its 56px trigger, 22px bottom offset and keyboard focus ring.
+ * Keep this in the shell overrides; the donor stylesheet is generated. */
+.site-footer { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+
 /* Accessibility floor over the donor (spec 2.9), the same correction .brand-copy small needed
  * above. The donor's dark footer fades its own small print past AA on #363839: axe reports
  * `.footer-brand > small` -- the legal line, port rgba(255,255,255,.42) at wisetech.css:285 --
