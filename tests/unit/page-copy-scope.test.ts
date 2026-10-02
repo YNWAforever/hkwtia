@@ -16,6 +16,11 @@ import {
 } from "@/lib/i18n/page-copy-scope";
 
 describe("page copy scope", () => {
+  it.each(["openNow.loading", "openNow.unavailable.title", "openNow.unavailable.copy"])("keeps runtime recovery copy out of CMS: %s", (keyPath) => {
+    expect(pageCopyCatalog("Home").some(leaf => leaf.keyPath === keyPath)).toBe(false);
+    expect(pageCopyEnglishRejection({namespace:"Home",keyPath,value:"False success"})).toBe("KEY_PATH_UNKNOWN");
+  });
+
   it("maps every editable namespace to at least one declared public route", () => {
     for (const namespace of pageCopyNamespaces) {
       const routes = pageCopyRoutes[namespace];

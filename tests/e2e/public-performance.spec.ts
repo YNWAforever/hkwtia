@@ -53,6 +53,14 @@ test.describe("public first paint on actual built browser", () => {
     );
   });
   for (const locale of ["en", "zh-HK"] as const) {
+    test(`${locale} page hero image requests are eager and high priority`,async ({page,baseURL}) => {
+      expect(new URL(baseURL!).hostname).toBe("localhost");
+      await page.context().addCookies([{name:"NEXT_LOCALE",value:locale,url:baseURL!}]);
+      await page.goto(locale === "en" ? "/events" : "/zh/events");
+      const image=page.locator(".page-hero-photo img");
+      await expect(image).toHaveAttribute("fetchpriority","high");
+      await expect(image).toHaveAttribute("loading","eager");
+    });
     test(`${locale} hero request is explicitly eager and high priority`, async ({
       page,
       baseURL,
@@ -163,6 +171,7 @@ test.describe("public first paint on actual built browser", () => {
           2,
         ) + "\n",
       );
+      await page.screenshot({path:`docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-${locale}-390.png`});
       expect(facts!.value).toBeLessThanOrEqual(0.1);
     });
   }

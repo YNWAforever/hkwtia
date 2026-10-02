@@ -38,7 +38,7 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
         <figure className="page-hero-photo">
           {/* `.page-hero-photo` sits at `inset: 0 0 0 42%` (the right 58% of the hero) and
               switches to `inset: 0` (full width) under the port's 820px breakpoint. */}
-          <Image src={imageSrc} alt={image.alt} fill sizes="(max-width: 820px) 100vw, 58vw" priority={priority} />
+          <Image src={imageSrc} alt={image.alt} fill sizes="(max-width: 820px) 100vw, 58vw" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} />
           {image.caption ? <figcaption>{image.caption}</figcaption> : null}
         </figure>
       ) : null}
