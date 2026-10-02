@@ -134,9 +134,9 @@ export function SupportFollowUpForm({
             }}
           >
             {(["bot", "human", "closed"] as const)
-              .filter((key) => key !== "human" || channel === "whatsapp")
+              .filter((key) => key !== "human" || channel === "whatsapp" || loaded.handling==="human")
               .map((key) => (
-                <option value={key} key={key}>
+                <option value={key} key={key} disabled={key==="human"&&channel!=="whatsapp"}>
                   {labels.handlingValues[key]}
                 </option>
               ))}

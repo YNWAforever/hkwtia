@@ -292,7 +292,7 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         [conversationRow()],
         [],
         [],
-        [{ id: MESSAGE_ID, delivery_status: "queued" }],
+        [{ id: MESSAGE_ID, delivery_status: "queued",claim_live:true }],
       ]);
 
       await expect(
@@ -305,7 +305,7 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const claim = fixture.queries[2];
       const claimSql = normalized(claim?.sql);
       expect(claimSql).toMatch(/^update "messages" set/);
-      expect(claimSql).toContain(`"messages"."delivery_status" = 'queued'`);
+      expect(claimSql).not.toContain(`"messages"."delivery_status" = 'queued'`);
       expect(claimSql).toContain("is null or");
       expect(claimSql).toContain("<= now()");
       expect(
@@ -316,22 +316,22 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
     });
 
     /**
-     * The same hole reopens after any crash between the adapter returning and
-     * the settle committing: the row stays `queued`, and `queued` is the
-     * re-send state. Inheriting an expired claim is how that send is retried —
-     * and the commitment was already recorded, so it must not be recorded twice.
+     * A crash between provider acceptance and settlement leaves a queued row.
+     * An expired lease is no evidence of refusal: reconciliation is required,
+     * and the original commitment remains the single audit entry.
      */
-    it("inherits an abandoned send when the claim has expired, still without a second audit row", async () => {
+    it("requires reconciliation after an expired claim without a second audit row", async () => {
       const fixture = repository([
         [conversationRow()],
         [],
-        [{ id: MESSAGE_ID, delivery_status: "queued" }],
+        [],
+        [{ id: MESSAGE_ID, delivery_status: "queued",claim_live:false }],
       ]);
 
       await expect(
         fixture.inbox.queueStaffMessage(admin, draft()),
       ).resolves.toMatchObject({
-        disposition: "queued",
+        disposition: "uncertain",
         messageId: MESSAGE_ID,
       });
       expect(
@@ -469,7 +469,7 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       await expect(
         fixture.inbox.queueStaffMessage(admin, draft()),
       ).resolves.toMatchObject({
-        disposition: "already_sent",
+        disposition: "uncertain",
         messageId: MESSAGE_ID,
       });
 

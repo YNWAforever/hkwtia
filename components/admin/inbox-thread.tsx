@@ -51,9 +51,10 @@ function DeliveryIndicator({
 }: Readonly<{ labels: Labels; message: InboxMessage }>) {
   if (message.deliveryStatus === null) return null;
   const uncertain =
-    message.deliveryStatus === "failed" &&
+    (message.deliveryStatus==="queued"&&message.sendClaimLive===false)||
+    (message.deliveryStatus === "failed" && !message.providerMessageId &&
     message.errorCode !== "outside_customer_service_window" &&
-    (message.errorCode === null || !providerRefusedSend(message.errorCode));
+    (message.errorCode === null || !providerRefusedSend(message.errorCode)));
   const text = uncertain
     ? labels.delivery.uncertain
     : labels.delivery[message.deliveryStatus];

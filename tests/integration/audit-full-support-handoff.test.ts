@@ -1,6 +1,10 @@
 // @vitest-environment node
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createStaffTasksRepository } from "@/lib/db/repos/staff-tasks";
+import {createPostgresWoztellStore} from "@/lib/db/repos/woztell";
+import {createContactsRepository,contactWriterActor} from "@/lib/db/repos/contacts";
+import {createSuppressionsRepository,unsubscribeActor} from "@/lib/db/repos/suppressions";
+import {createMessageEligibilityRepository} from "@/lib/db/repos/message-eligibility";
 import { createWorkQueueRepository } from "@/lib/db/repos/work-queue";
 import { randomUUID } from "node:crypto";
 import { createInboxRepository } from "@/lib/db/repos/inbox";
@@ -316,9 +320,7 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
         outboundKey: key,
         outcome: { status: "failed", errorCode: "retryable_network" },
       });
-      expect((await repo.queueStaffMessage(staff, input)).disposition).toBe(
-        "already_sent",
-      );
+      expect((await repo.queueStaffMessage(staff, input)).disposition).toBe("uncertain");
       const second = {
         ...input,
         outboundKey: "inbox:" + conversation + ":" + "b".repeat(32),
@@ -344,7 +346,45 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
         ).rows,
       ).toEqual([{ n: 2 }]);
     });
-    it("validates related application and billing references and audits a closed reason without financial writes", async () => {
+    it("still retries a definitive refusal using one message and one commitment audit",async()=>{
+    const input={conversationId:conversation,kind:"session",content:"Synthetic refused send",outboundKey:"inbox:"+conversation+":"+"d".repeat(32)};
+    const first=await repo.queueStaffMessage(staff,input);await repo.settleStaffMessage(staff,{outboundKey:input.outboundKey,outcome:{status:"failed",errorCode:"provider_client_error"}});
+    expect(await repo.queueStaffMessage(staff,input)).toMatchObject({disposition:"queued",messageId:first.messageId});
+    await repo.settleStaffMessage(staff,{outboundKey:input.outboundKey,outcome:{status:"sent",providerId:"synthetic-refusal-recovered"}});
+    expect((await repo.queueStaffMessage(staff,input)).disposition).toBe("already_sent");
+    expect((await f.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE target_id=$1 AND action='conversation.reply.queued'",[conversation])).rows).toEqual([{n:1}]);
+  });
+  it("deduplicates concurrent inbound events and a completed provider replay in the actual store",async()=>{
+    const now=new Date(),store=createPostgresWoztellStore(()=>now,async()=>f.database as never),providerId="synthetic-inbound-"+randomUUID();
+    const input={owner:{kind:"profile" as const,profileId:"t19-member"},profileId:"t19-member",locale:"en" as const,memberName:"Synthetic member",whatsappOptIn:true,sender:"+85290000000",providerMessageId:providerId,receivedAt:now,content:"Synthetic inbound",channel:"whatsapp" as const,whatsappMemberId:null,contactId:null};
+    const results=await Promise.all([store.claimInbound(input),store.claimInbound(input)]);expect(results.map(row=>row.status).sort()).toEqual(["accepted","duplicate"]);
+    await store.markCompleted(providerId);expect(await store.claimInbound(input)).toEqual({status:"duplicate"});
+    expect((await f.pool.query("SELECT count(*)::int AS n FROM messages WHERE provider_message_id=$1",[providerId])).rows).toEqual([{n:1}]);
+    expect((await f.pool.query("SELECT handling FROM conversations WHERE id=$1",[conversation])).rows).toEqual([{handling:"human"}]);
+  });
+  it("persists both STOP consent legs and prevents marketing eligibility without deleting history",async()=>{
+    const phone="+85290000000",contact=randomUUID();
+    await f.pool.query("INSERT INTO contacts(id,phone_e164,source,whatsapp_opt_in) VALUES($1,$2,'whatsapp',true)",[contact,phone]);
+    await f.pool.query("UPDATE profiles SET whatsapp_number=$1,whatsapp_opt_in=true WHERE id='t19-member'",[phone]);
+    try{
+      const suppressions=createSuppressionsRepository(async()=>f.database as never),contacts=createContactsRepository(async()=>f.database as never),eligibility=createMessageEligibilityRepository(async()=>f.database as never);
+      await suppressions.optOutWhatsApp(unsubscribeActor(),"t19-member","whatsapp_stop");await contacts.markWhatsAppOptedOut(contactWriterActor("whatsapp"),phone);
+      expect((await f.pool.query("SELECT whatsapp_opt_in FROM profiles WHERE id='t19-member'")).rows).toEqual([{whatsapp_opt_in:false}]);expect((await f.pool.query("SELECT whatsapp_opt_in,whatsapp_opted_out_at IS NOT NULL AS withdrawn FROM contacts WHERE id=$1",[contact])).rows).toEqual([{whatsapp_opt_in:false,withdrawn:true}]);
+      expect(await eligibility.whatsAppEligibility(staff,{profileId:"t19-member",contactId:null,phoneE164:phone,purpose:"marketing"})).toMatchObject({status:"blocked",reason:"opted_out"});
+      expect(await eligibility.whatsAppEligibility(staff,{profileId:null,contactId:contact,phoneE164:phone,purpose:"marketing"})).toMatchObject({status:"blocked",reason:"opted_out"});
+      const count=Number((await f.pool.query("SELECT count(*) AS n FROM audit_events WHERE action='consent.whatsapp.revoked' AND target_id IN ($1,$2)",[contact,"t19-member"])).rows[0].n);expect(count).toBe(2);
+      await suppressions.optOutWhatsApp(unsubscribeActor(),"t19-member","whatsapp_stop");await contacts.markWhatsAppOptedOut(contactWriterActor("whatsapp"),phone);
+      expect(Number((await f.pool.query("SELECT count(*) AS n FROM audit_events WHERE action='consent.whatsapp.revoked' AND target_id IN ($1,$2)",[contact,"t19-member"])).rows[0].n)).toBe(count);
+    }finally{await f.pool.query("DELETE FROM contacts WHERE id=$1",[contact]);await f.pool.query("DELETE FROM message_suppressions WHERE profile_id='t19-member'");}
+  });
+  it("requires reconciliation after an expired queued claim rather than taking another send",async()=>{
+    const input={conversationId:conversation,kind:"session",content:"Synthetic accepted-timeout checkpoint",outboundKey:"inbox:"+conversation+":"+"c".repeat(32)};
+    const first=await repo.queueStaffMessage(staff,input);
+    await f.pool.query("UPDATE messages SET send_claim_expires_at=now()-interval '1 minute' WHERE id=$1",[first.messageId]);
+    expect((await repo.queueStaffMessage(staff,input)).disposition).toBe("uncertain");
+    expect((await f.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE target_id=$1 AND action='conversation.reply.queued'",[conversation])).rows).toEqual([{n:1}]);
+  });
+  it("validates related application and billing references and audits a closed reason without financial writes", async () => {
       const application = randomUUID(),
         membership = randomUUID(),
         billing = randomUUID();

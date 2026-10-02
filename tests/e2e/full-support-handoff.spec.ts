@@ -109,10 +109,11 @@ test.describe("actual isolated support handoff", () => {
         [1, "sent", null],
         [2, "delivered", null],
         [3, "failed", "retryable_network"],
+        [4,"queued",null],
       ] as const)
         await pool.query(
-          "INSERT INTO messages(conversation_id,role,channel,direction,content,delivery_status,error_code,metadata,citations) VALUES($1,'staff','whatsapp','outbound',$2,$3,$4,'{}','[]')",
-          [id, "Synthetic stored delivery " + index, status, error],
+          "INSERT INTO messages(conversation_id,role,channel,direction,content,delivery_status,error_code,send_claim_expires_at,metadata,citations) VALUES($1,'staff','whatsapp','outbound',$2,$3,$4,CASE WHEN $5=4 THEN now()+interval '10 minutes' ELSE NULL END,'{}','[]')",
+          [id, "Synthetic stored delivery " + index, status, error,index],
         );
       const before = await financialFingerprint(),
         contexts = await Promise.all([
@@ -129,8 +130,6 @@ test.describe("actual isolated support handoff", () => {
           a.goto(prefix + "/admin/inbox/" + id),
           b.goto(prefix + "/admin/inbox/" + id),
         ]);
-        await a.screenshot({path:root+locale+"-initial-debug.png",fullPage:true});
-        console.log(JSON.stringify({stage:"initial",locale,path:new URL(a.url()).pathname,followUpHeadings:await a.getByRole("heading",{name:labels.title}).count(),formCount:await a.locator("form").count(),ownerInputs:await a.getByLabel(labels.owner,{exact:true}).count()}));
         const form = a
           .locator("form")
           .filter({ has: a.getByRole("heading", { name: labels.title }) });
@@ -165,7 +164,7 @@ test.describe("actual isolated support handoff", () => {
         await stale
           .getByRole("button", { name: labels.save, exact: true })
           .click();
-        await expect(b.getByRole("alert")).toContainText(labels.conflict);
+        await expect(stale.getByRole("alert")).toContainText(labels.conflict);
         await expect(
           stale.getByLabel(labels.note, { exact: true }),
         ).toHaveValue("Synthetic retained stale handoff");
@@ -218,8 +217,12 @@ test.describe("actual isolated support handoff", () => {
             await b.locator("body").evaluate((el) => el.clientWidth),
           );
           await expect(
-            b.getByText(bundle.delivery.uncertain, { exact: false }),
+            b.getByText(bundle.delivery.uncertain, { exact: true }),
           ).toBeVisible();
+          await expect(b.getByText(bundle.delivery.uncertain+" · retryable_network",{exact:true})).toBeVisible();
+          await expect(b.getByText(bundle.delivery.queued,{exact:true})).toBeVisible();
+          await expect(b.getByText(bundle.delivery.sent,{exact:true})).toBeVisible();
+          await expect(b.getByText(bundle.delivery.delivered,{exact:true})).toBeVisible();
           const scan = await new AxeBuilder({ page: b }).analyze();
           expect(scan.violations).toEqual([]);
           scans.push({

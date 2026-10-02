@@ -77,6 +77,9 @@ export type InboxMessage = Readonly<{
   deliveryStatus: MessageDeliveryStatus | null;
   templateKey: string | null;
   errorCode: string | null;
+  providerMessageId?:string|null;
+  sendClaimExpiresAt?:Date|null;
+  sendClaimLive?:boolean;
   createdAt: Date;
 }>;
 
@@ -95,7 +98,7 @@ export type QueuedStaffMessage = Readonly<{
    * Whether THIS caller may call the adapter. `"queued"` is a live send claim
    * (fresh or inherited); the other two are short-circuits (S-8).
    */
-  disposition: "queued" | "already_queued" | "already_sent";
+  disposition: "queued" | "already_queued" | "already_sent"|"uncertain";
   recipient: Readonly<{
     phoneE164: string | null;
     profileId: string | null;
@@ -319,6 +322,9 @@ function messageFrom(row: Record<string, unknown>): InboxMessage {
     deliveryStatus: deliveryStatusFrom(row.delivery_status),
     templateKey: stringFrom(row.template_key),
     errorCode: stringFrom(row.error_code),
+    providerMessageId:stringFrom(row.provider_message_id),
+    sendClaimExpiresAt:dateFrom(row.send_claim_expires_at),
+    sendClaimLive:row.send_claim_live===true,
     createdAt: dateFrom(row.created_at) ?? new Date(0),
   };
 }
@@ -944,18 +950,14 @@ export function createInboxRepository(
                   || jsonb_build_object('at', now(), 'previousErrorCode', ${messages.errorCode})
               )
           WHERE ${messages.outboundKey} = ${parsed.outboundKey}
-            AND (
-              ${messages.deliveryStatus} = 'queued'
-              OR ${refusedSendPredicate()}
-            )
+            AND ${refusedSendPredicate()}
             AND (${messages.sendClaimExpiresAt} IS NULL OR ${messages.sendClaimExpiresAt} <= now())
           RETURNING ${messages.id} AS id
         `),
         )[0];
         if (claimed) {
-          // Either an abandoned send inherited — the previous attempt crashed
-          // between the adapter and the settle — or a refused one re-queued.
-          // Both are now `queued`, and `queued` is the re-send state.
+          // Only a recorded definite refusal can be re-queued. An expired
+          // queued lease carries no evidence of provider refusal and is never inherited.
           return {
             messageId: String(claimed.id),
             conversationId: parsed.conversationId,
@@ -968,7 +970,8 @@ export function createInboxRepository(
 
         const existing = rowsFrom(
           await transaction.execute(sql`
-          SELECT ${messages.id} AS id, ${messages.deliveryStatus} AS delivery_status
+          SELECT ${messages.id} AS id, ${messages.deliveryStatus} AS delivery_status,${messages.providerMessageId} AS provider_message_id,${messages.errorCode} AS error_code,
+           (${messages.deliveryStatus}='queued' AND ${messages.sendClaimExpiresAt}>now()) AS claim_live
           FROM ${messages}
           WHERE ${messages.outboundKey} = ${parsed.outboundKey}
           LIMIT 1
@@ -979,16 +982,13 @@ export function createInboxRepository(
           messageId: String(existing.id),
           conversationId: parsed.conversationId,
           outboundKey: parsed.outboundKey,
-          // Left `queued` means another submit holds a LIVE claim. Anything else
-          // is a settled row the claim above deliberately refused: `sent`,
-          // `delivered`, `read`, a `failed` row carrying a provider id (a
-          // message WhatsApp accepted and then could not deliver), or a `failed`
-          // row whose `error_code` leaves acceptance uncertain. None of them is
-          // this caller's send to make.
+          // A live queued claim is in progress. A queued row without a live
+          // lease, or an unconfirmed failed row, needs provider reconciliation.
+          // Neither becomes evidence of a successful send or a right to retry.
           disposition:
             existing.delivery_status === "queued"
-              ? "already_queued"
-              : "already_sent",
+              ? existing.claim_live===true?"already_queued":"uncertain"
+              : existing.delivery_status==="failed"&&!stringFrom(existing.provider_message_id)&&!providerRefusedSend(stringFrom(existing.error_code)??"")?"uncertain":"already_sent",
           recipient,
           lastInboundAt,
         };

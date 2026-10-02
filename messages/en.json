@@ -3033,6 +3033,7 @@
         "noHistory": "No recorded handoffs",
         "openApplication": "Open application case",
         "openBilling": "Open payment reconciliation",
+        "openDelivery": "Open delivery health",
         "nextActions": {
           "none": "No next step",
           "reply": "Reply",

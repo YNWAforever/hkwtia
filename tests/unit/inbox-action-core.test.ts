@@ -291,6 +291,9 @@ describe("sendInboxReply", () => {
     const inFlight = dependencies({queued: queued({disposition: "already_queued"})});
     expect(await codeOf(sendInboxReply(admin, sessionReply, inFlight.deps))).toBe("SEND_IN_PROGRESS");
     expect(inFlight.calls.order).not.toContain("sendSessionMessage");
+    const uncertain=dependencies({queued:queued({disposition:"uncertain"})});
+    expect(await codeOf(sendInboxReply(admin,sessionReply,uncertain.deps))).toBe("DELIVERY_UNCERTAIN");
+    expect(uncertain.calls.order).not.toContain("sendSessionMessage");
   });
 
   /**

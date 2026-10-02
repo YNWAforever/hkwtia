@@ -421,9 +421,8 @@ export function adapterRecipient(
  *
  *   - the double-click and the Server Action a client retried — same live form,
  *     same token, one row, and the claim lease then dedupes the send itself;
- *   - the retry after a crash between the adapter and the settle — the draft and
- *     its token both come back from `sessionStorage`, so the row is inherited
- *     rather than duplicated;
+ *   - a crash between provider acceptance and settlement: the same attempt
+ *     finds the uncertain row and requires provider reconciliation;
  *   - a re-take of a send the provider definitively refused, which is the same
  *     row under the same key.
  *
@@ -436,8 +435,8 @@ export function adapterRecipient(
  * hand-posted formData without one is `INVALID` instead. The residual is honest
  * and small: with site data blocked `sessionStorage` throws, the token lives
  * only for the life of the mounted composer, and a reload mid-send mints a new
- * one. The claim lease still covers the first two minutes of that, and beyond it
- * the old design re-took the row and sent again anyway.
+ * one. Reconciliation is required for an expired queued claim. A new attempt
+ * remains a distinct explicit send and must not be used to retry unknown effects.
  *
  * The five inputs are hashed as JSON rather than joined on "|" so a message
  * whose text contains the separator cannot collide with a different draft —
@@ -621,6 +620,7 @@ export async function sendInboxReply(
   // is a LIVE send claim held by another submit — a double-click, or a Server
   // Action the client retried — and calling the adapter anyway is how one
   // messages row and one audit row become two WhatsApp messages to the member.
+  if(queued.disposition==="uncertain")throw new InboxReplyError("DELIVERY_UNCERTAIN");
   if (queued.disposition === "already_sent")
     return { status: "already_sent", messageId: queued.messageId };
   if (queued.disposition === "already_queued")
