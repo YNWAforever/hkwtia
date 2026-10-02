@@ -24,7 +24,8 @@ for (const [locale, prefix, messages] of [["en", "", en], ["zh-HK", "/zh", zh]] 
       try {
         if (role !== "anonymous") await signInForM2(page, role);
         const response = await page.goto(path);
-        if (role === "anonymous" || role === "member") {expect(response?.status()).toBe(404);}
+        if (role === "anonymous") {expect(response?.status()).toBe(200); expect(new URL(page.url()).pathname).toBe(`${prefix}/admin-login`); await expect(page.locator('form:has(input[name="expiresAt"])')).toHaveCount(0);}
+        else if (role === "member") {expect(response?.status()).toBe(200); expect(new URL(page.url()).pathname).toBe(`${prefix}/admin-login`); await expect(page.getByRole("heading", {level: 1, name: messages.AdminLogin.accessDenied, exact: true})).toBeVisible(); await expect(page.locator('form:has(input[name="expiresAt"])')).toHaveCount(0);}
         else if (role !== "superadmin") {expect(response?.status()).toBe(200); await expect(page.locator('form:has(input[name="expiresAt"])')).toHaveCount(0);}
         else {
           const form = page.locator('form:has(input[name="expiresAt"])');

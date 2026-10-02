@@ -25,7 +25,7 @@ it("organizes six daily-work groups while retaining every existing route", () =>
     "/admin/reports",
   ])
     expect(links.some((link) => link.href === path)).toBe(true);
-  expect(links.some((link) => link.href === "/admin/system/job-health")).toBe(
+  expect(links.some((link) => link.href === "/admin/automations#verified-worker-health")).toBe(
     true,
   );
 });
