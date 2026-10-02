@@ -26,7 +26,8 @@ export async function signInForM2(page: Page, role: TestRole): Promise<void> {
   mkdirSync(directory, {recursive: true});
   const scope = createHash("sha256").update(new URL(page.url()).origin + "|" + (process.env.NEON_AUTH_BASE_URL ?? "") + "|" + role).digest("hex");
   const statePath = resolve(directory, scope + ".json");
-  const protectedPath = role === "member" || role === "company-admin" ? "/portal" : "/admin";
+  const localePrefix = new URL(page.url()).pathname.startsWith("/zh/") ? "/zh" : "";
+  const protectedPath = role === "member" || role === "company-admin" ? `${localePrefix}/portal/profile` as const : `${localePrefix}/admin` as const;
   try {
     const state = JSON.parse(readFileSync(statePath, "utf8")) as {cookies: Cookie[]};
     if (Array.isArray(state.cookies) && await reuseM2Session(page, state.cookies, email!, protectedPath)) return;

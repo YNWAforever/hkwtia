@@ -8,6 +8,12 @@ function fixture(user: unknown, ok = true) {
 }
 const cookies = [{name: "synthetic-session", value: "synthetic", domain: "localhost", path: "/", expires: -1, httpOnly: true, secure: false, sameSite: "Lax" as const}];
 describe("isolated browser session reuse", () => {
+  it("does not overwrite the current test locale with a cached identity's UI preference", async () => {
+    const f=fixture({id:"synthetic-staff",email:"staff@example.test"});
+    const localeCookie={...cookies[0],name:"NEXT_LOCALE",value:"zh-HK"};
+    expect(await reuseM2Session(f.page,[...cookies,localeCookie],"staff@example.test","/admin")).toBe(true);
+    expect(f.addCookies).toHaveBeenCalledWith(cookies);
+  });
   it("rejects a cached session when identity API succeeds but the protected server page redirects", async () => {
     const f=fixture({id:"synthetic-staff",email:"staff@example.test"});
     f.get.mockImplementation(async (path: string) => ({ok:()=>path==="/api/auth/get-session",json:async()=>({user:{id:"synthetic-staff",email:"staff@example.test"}})}));

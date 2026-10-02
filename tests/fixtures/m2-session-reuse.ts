@@ -5,8 +5,8 @@ type SessionPage = Readonly<{
   request: Readonly<{get: (path: string, options?: {maxRedirects: number}) => Promise<Readonly<{ok: () => boolean; json: () => Promise<unknown>}>>}>;
 }>;
 
-export async function reuseM2Session(page: SessionPage, cookies: Cookie[], expectedEmail: string, protectedPath: "/admin" | "/portal"): Promise<boolean> {
-  await page.context().addCookies(cookies);
+export async function reuseM2Session(page: SessionPage, cookies: Cookie[], expectedEmail: string, protectedPath: "/admin" | "/zh/admin" | "/portal/profile" | "/zh/portal/profile"): Promise<boolean> {
+  await page.context().addCookies(cookies.filter((cookie) => cookie.name !== "NEXT_LOCALE"));
   const response = await page.request.get("/api/auth/get-session");
   if (!response.ok()) return false;
   const body = await response.json();
