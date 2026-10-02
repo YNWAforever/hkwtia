@@ -1,5 +1,5 @@
 import {randomUUID} from "node:crypto";
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
 
 import {isolatedBatchDatabase} from "./admin-batch-fixture";
 import {batchOperationHandlers} from "@/lib/admin/batches/handlers/registry";
@@ -11,8 +11,8 @@ const root = {kind: "superadmin", userId: "root", profileId: "root"} as const;
 let fixture: Awaited<ReturnType<typeof isolatedBatchDatabase>>;
 
 describe.skipIf(!enabled)("policy-gated bulk grants on disposable PostgreSQL", () => {
-  beforeAll(async () => {fixture = await isolatedBatchDatabase();}, 60_000);
-  afterAll(async () => {if (fixture) await fixture.close();}, 40_000);
+  beforeAll(async () => {vi.stubEnv("ADMIN_BATCH_ENABLED", "true"); fixture = await isolatedBatchDatabase();}, 60_000);
+  afterAll(async () => {vi.unstubAllEnvs(); if (fixture) await fixture.close();}, 40_000);
   it("previews concrete targets, blocks existing memberships and commits only eligible profiles", async () => {
     const now = new Date();
     const request = batchRequestSchema.parse({operation: "membership_grant", idempotencyKey: randomUUID(), targets: [{kind: "profile", profileId: "grant-c"}, {kind: "profile", profileId: "a"}, {kind: "company", companyId: "11111111-1111-4111-8111-111111111111"}], payload: {planCode: "corporate", effectiveAt: "2026-10-01T00:00:00.000Z", expiresAt: "2026-11-01T00:00:00.000Z", reason: "Approved test scholarship"}});

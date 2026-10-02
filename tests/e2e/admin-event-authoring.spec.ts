@@ -39,8 +39,8 @@ for (const {locale, prefix} of [{locale: "en" as const, prefix: ""}, {locale: "z
       await form.locator("input[name=tags]").fill("AI, Machine Learning");
       await form.locator("select[name=visibility]").selectOption("public");
       await form.locator("input[name=published]").check();
-      await form.getByRole("button", {name: labels.create}).click();
-      await expect(form.getByRole("status")).toHaveText(labels.createSuccess);
+      await form.locator('button[type="submit"]').click();
+      await expect(form.getByRole("status").filter({hasText: labels.createSuccess})).toHaveText(labels.createSuccess);
       await page.getByRole("link", {name: title}).click();
       const edit = page.locator("form:has(input[name=slug])").first();
       await expect(edit.locator("select[name=format]")).toHaveValue(mode.format);

@@ -13,7 +13,7 @@ test.describe("isolated admin workspace shell", () => {
     await page.goto("/admin");
     const sidebar = page.getByTestId("admin-desktop-sidebar");
     await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(23);
+    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(25);
     await expect(sidebar.getByRole("link", {name: /Dashboard/})).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("link", {name: /Find a member/})).toHaveAttribute("href", "/admin/members");
     await page.getByRole("button", {name: /Collapse sidebar/}).click();
@@ -45,7 +45,7 @@ test.describe("isolated admin workspace shell", () => {
     await signInForM2(page, "superadmin");
     await page.goto("/zh/admin");
     const sidebar = page.getByTestId("admin-desktop-sidebar");
-    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(23);
+    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(25);
     await expect(sidebar.getByRole("link", {name: "控制台"})).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("超級管理員")).toBeVisible();
     await sidebar.getByRole("link", {name: "會員", exact: true}).click();
