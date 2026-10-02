@@ -1,4 +1,5 @@
 import {expect,type BrowserContext} from '@playwright/test';
+import {signInForM2} from './m2-auth';
 export async function signInRemediationIdentity(context:BrowserContext,baseURL:string,role:'SUPERADMIN'|'STAFF'|'EXCO'|'MEMBER'='SUPERADMIN'){
  expect(process.env.AUDIT_ISOLATED_ACCEPTANCE).toBe('1');
  expect(process.env.NEON_PROJECT_ID).toBe('solitary-wave-52860119');
@@ -6,6 +7,7 @@ export async function signInRemediationIdentity(context:BrowserContext,baseURL:s
  expect(new URL(baseURL).hostname).not.toBe('hkwtia.vercel.app');
  const email=process.env['M2_TEST_'+role+'_EMAIL'],password=process.env['M2_TEST_'+role+'_PASSWORD'];
  expect(email).toMatch(/@.*example\.test$/);expect(Boolean(password)).toBe(true);
- const response=await context.request.post('/api/auth/sign-in/email',{headers:{Origin:baseURL},data:{email,password,callbackURL:'/admin'}});
- expect(response.status()).toBe(200);
+ const page=await context.newPage();
+ try{await signInForM2(page,role.toLowerCase() as 'superadmin'|'staff'|'exco'|'member');}
+ finally{await page.close();}
 }

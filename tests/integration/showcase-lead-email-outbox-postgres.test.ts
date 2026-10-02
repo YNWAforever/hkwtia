@@ -80,8 +80,10 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
       repository.claimDue(actor, now, 1),
     ]);
     expect(first).toHaveLength(1);
-    expect(first[0]?.kind).toBe("ack");
     expect(second).toHaveLength(1);
+    // Concurrent claims may acquire either due notice first. Both kinds must
+    // be claimed exactly once regardless of scheduler order.
+    expect([...first, ...second].map((row) => row.kind).sort()).toEqual(["ack", "staff"]);
     expect(first[0]?.id).not.toBe(second[0]?.id);
     expect(await repository.claimDue(actor, now, 1)).toEqual([]);
 
