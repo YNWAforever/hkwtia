@@ -349,3 +349,7 @@ Actual built Chromium2pass/0skip/0fail35s; staff+superadmin (not two role=staff)
 Fixed functional9539f5b full6282pass302skip0fail,747passfiles83allskipfiles; exact skips evidence/gates/t19-skips.json. This full run preceded the one breadcrumb CSS delta; exact-final full suite remains T22/PR CI, not fabricated. Finalee00 build/lint/typecheck/strings0;267pages/308TSX/67existinglintwarnings. Path mapping/RED classifications/commands/screens/gates:evidence/t19. No migration/flag/policy/Production write. Rollback must retain versioned-support guards and definitive-refusal-only reclaim; older writer rollback requires quiescing inboxPOST and reconciliation, retaining messages/leases/audits.
 
 Parent PR118 checks/tests1/tests2/worker/quality/Vercel read back SUCCESS; https://vercel.com/ynwaforevers-projects/hkwtia/4d4Z2tebyVkRs5ztKmd2y26NPDtV . Main read-only60a272b68c334d256d578ade36d8e24ca3be5485. Preview build is not isolated cloud acceptance. T20–T23 continue.
+
+## T20 scoped public journeys
+
+Application f327fd334e7766b22102154bf1959310b658ab78:77focused0skip/0fail7files; built Next267pages;4actualChromium0skip/0fail34.3s. Existing header/mobile/footer/auth redirect and79loaded assets plus published/public vs private/demo evidence preserved; no provider writes/Production mutations. Harness/environment failures and final aggregate gates explicitly in evidence/t20/README.md. Policy/content signoff remains separate.

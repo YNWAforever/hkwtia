@@ -551,11 +551,14 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 依既有公共 header/footer 元件及頁面 contracts 修改，不改方案 ID/價格來源。會員登入 CTA → 現有 member-login；footer「職員登入」→ localized admin-login；已登入職員可回管理後台。
 
-- [ ] **建立行為證據：** 主導航/手機/頁尾兩身份入口可找到；URL locale 正確；沒有 VERIFIED WTIA ARCHIVE、不是抓取標誌牆、price ID 等內部措辭；79夥伴58/15/6、lazy images 滾動載入及有效連結；真 published 活動可見而 demo 排除。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 公開頁先回答服務、對象、價值、如何加入與聯絡；無來源的統計/合作/推薦語不得編造。政策摘要引 T09 版本；內部 verification 放維護文件。後台將 profile/申請人/有效會員/免費/付費/granted/公司席位分開；收入0與無分母N/A保留。檢查 CMS overrides，不能只改 locale JSON 卻被舊文案蓋回。
+- [x] **建立行為證據：** 主導航/手機/頁尾兩身份入口可找到；URL locale 正確；沒有 VERIFIED WTIA ARCHIVE、不是抓取標誌牆、price ID 等內部措辭；79夥伴58/15/6、lazy images 滾動載入及有效連結；真 published 活動可見而 demo 排除。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 公開頁先回答服務、對象、價值、如何加入與聯絡；無來源的統計/合作/推薦語不得編造。政策摘要引 T09 版本；內部 verification 放維護文件。後台將 profile/申請人/有效會員/免費/付費/granted/公司席位分開；收入0與無分母N/A保留。檢查 CMS overrides，不能只改 locale JSON 卻被舊文案蓋回。
 - [ ] **驗證：** npm run test:e2e -- tests/e2e/full-public-content.spec.ts；逐頁 content-signoff、desktop/mobile、匿名公開readback。
 - [ ] **結案與提交：** 不需知道URL即可找職員登入；內容可信、價值清楚，既有79夥伴與活動規則無回歸。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: clarify public membership content and staff access`。
+
+
+**實際範圍：** application f327fd33；77focused、4builtChromium0skip/0fail、79真lazy images，中英登入／private/demo scope。source修改只有Partners中性介紹標題；full aggregate T22、政策/content signoff及正式發布不稱完成。證據evidence/t20。
 
 ### T21 · 量度後的效能優化與私人快取邊界
 
