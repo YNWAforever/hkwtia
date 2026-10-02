@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-02T10:42:28.133Z",
+  "environment": "owned built Chromium, confirmed isolated Neon; synthetic metrics/build logs",
+  "sourceFiles": [
+    "components/marketing/aiops/metric-grid.tsx",
+    "app/styles/wisetech-shell.css"
+  ],
+  "tests": [
+    {
+      "title": "en exposes the complete privacy-safe dashboard",
+      "status": "expected",
+      "durationMs": 1839
+    },
+    {
+      "title": "zh-HK exposes the complete privacy-safe dashboard",
+      "status": "expected",
+      "durationMs": 1744
+    }
+  ],
+  "providerCalls": 0,
+  "production": false
+}

@@ -548,3 +548,8 @@ html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto;
     contain-intrinsic-block-size: none;
   }
 }
+
+/* AI-Ops metric cards sit on a light page; Home keeps its dark-section palette. */
+.impact-metrics.aiops-metrics>div { border-color: var(--wt-line); background: var(--wt-paper-bright); }
+.impact-metrics.aiops-metrics strong { color: var(--wt-ink); }
+.impact-metrics.aiops-metrics small { color: #4a6570; }
