@@ -1,0 +1,61 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "reviewMode": "sequential author self-review per native execution request; no agents; not independent review",
+  "reviewedCurrentChanges": [
+    "strict absent-credential session boundary",
+    "pending header inert focus behavior",
+    "public Error-only catalog and authorized private providers",
+    "native Link lint fixture",
+    "UTF8 Member360 fixture",
+    "footer hit geometry and default-locale fragment navigation"
+  ],
+  "checkedContracts": [
+    "credentialed provider strict flags and pure role/actor checks retained",
+    "beforeSwitch guard runs before document or client locale change",
+    "forced locale path computed by installed next-intl rather than new cookie scheme",
+    "generated donor CSS untouched; targeted shell override",
+    "no membership/refund/pricing/consent/legacy grant policy edits in current gate fixes",
+    "no production effects/new flags or framework upgrade",
+    "all native tests retain original pointer/keyboard and Lab thresholds"
+  ],
+  "independentWholeStackReviewer": "not performed by a second reviewer; all stacked draft PRs require review before merge",
+  "evidence": [
+    "locale-footer-focused-green.json",
+    "footer-controls-native-red.json",
+    "footer-controls-native-green.json",
+    "../t23/ci-current-native-counts.json",
+    "browser-99-single.json",
+    "browser-99-targeted.json",
+    "browser-99-failure-disposition.json"
+  ],
+  "sourceFindingsOpen": 0,
+  "externalGates": "listed in release-readiness.md, not declared fixed",
+  "reviewScope": "current PR122 application/native test fixes plus a separate critical whole-stack contract pass against60a272b audit main",
+  "criticalStackFilesReviewed": [
+    "lib/admin/membership-comp-actions.ts",
+    "lib/admin/membership-comp-action-core.ts",
+    "lib/admin/campaign-review-core.ts",
+    "lib/db/repos/campaign-approval.ts",
+    "lib/admin/payment-reconciliation.ts",
+    "lib/db/repos/billing-reconciliation.ts",
+    "lib/jobs/admin-batch-runner.ts",
+    "lib/jobs/worker-health-request.ts",
+    "lib/db/repos/page-copy.ts",
+    "lib/db/repos/ticket-check-in.ts",
+    "lib/db/repos/event-orders.ts",
+    "lib/db/repos/renewal-enrollments.ts",
+    "lib/db/repos/journeys.ts",
+    "lib/db/repos/inbox.ts",
+    "lib/admin/inbox-actions.ts",
+    "lib/admin/inbox-action-core.ts",
+    "lib/membership/policy.ts",
+    "drizzle/0052_verified_worker_health.sql",
+    "drizzle/0053_bounded_renewal_window.sql",
+    "drizzle/0054_renewal_episode_compatibility.sql",
+    "drizzle/0055_ticket_refund_pending.sql",
+    "drizzle/0056_page_copy_private_drafts.sql",
+    "workers/wrangler.acceptance.toml"
+  ],
+  "newRunbookIssue": "0054 normalized legacy-key uniqueness needs exact aggregate preflight before Production; runbook now stops on conflict without history deletion; actual isolated readonly SQL verified",
+  "fullNativeGate": "exact99 original498 cases completed332pass/4unexpected/162skip; not green; isolated provider-capacity gate and separate original-case replay; allfour originalcases passedfocused4/0/0 and90\u00d7200/0\u00d7429; full gate retainedfalse"
+}

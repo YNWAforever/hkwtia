@@ -1,0 +1,5686 @@
+{
+  "sourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "stats": {
+    "startTime": "2026-10-02T15:54:58.278Z",
+    "duration": 3261081.802,
+    "expected": 323,
+    "skipped": 162,
+    "unexpected": 2,
+    "flaky": 0
+  },
+  "environment": "Owned built Next/Chromium; confirmed isolated Neon/Auth; Stripe TEST and email sink. Scope defined by profile and guarded fixtures.",
+  "noProductionMutation": true,
+  "cases": [
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/ has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5068,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/events has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 8779,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/membership has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3172,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/news has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2962,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/about has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2915,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/about/chairman has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2686,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2672,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/programs/asa has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2936,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4416,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/events has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 9055,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/membership has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3508,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/news has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2916,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/about has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3172,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/about/chairman has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2758,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2873,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/programs/asa has no serious or critical accessibility violations",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3170,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 50,
+      "title": "open desktop and mobile navigation surfaces pass axe",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 18294,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 97,
+      "title": "the current mobile group passes axe and keeps AA contrast on the donor gradient",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 14405,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 169,
+      "title": "skip link targets the sole main content landmark",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5619,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "line": 17,
+      "title": "en: ten selected members, two controlled failures, retry only failures",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 67117,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "line": 17,
+      "title": "zh-HK: ten selected members, two controlled failures, retry only failures",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 69624,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "line": 19,
+      "title": "en: staff event modes survive create, edit and public rendering",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 106713,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "line": 19,
+      "title": "zh-HK: staff event modes survive create, edit and public rendering",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 105824,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "line": 15,
+      "title": "en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 44524,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "line": 15,
+      "title": "zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 42211,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "line": 18,
+      "title": "en: import reviews differences and commits only two eligible synthetic rows",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 42802,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "line": 18,
+      "title": "zh-HK: import reviews differences and commits only two eligible synthetic rows",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 43800,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-members-bulk.spec.ts",
+      "line": 12,
+      "title": "staff can find, reopen and safely interpret synthetic batch jobs",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 60,
+      "retry": 0,
+      "skipReasons": [
+        "Batch fixture requires the exact isolated acceptance database and opt-in"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "line": 11,
+      "title": "en: member search, detail and return retain the filter",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 16326,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "line": 11,
+      "title": "zh-HK: member search, detail and return retain the filter",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 14506,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 12,
+      "title": "staff can navigate all original destinations, use the mobile drawer and sign out",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 17263,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 39,
+      "title": "member detail keeps the Members destination current",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6387,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 46,
+      "title": "zh-HK superadmin keeps locale and authorized navigation",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6333,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 58,
+      "title": "removing a synthetic staff role denies the next server request",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 216,
+      "retry": 0,
+      "skipReasons": [
+        "Role mutation requires the exact isolated acceptance database and opt-in"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 87,
+      "title": "member identity sees denial and no workspace links",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4486,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "title": "anonymous member-login-en-desktop renders for audit evidence",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1942,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "title": "anonymous member-login-zh-mobile renders for audit evidence",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1865,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "title": "anonymous join-zh-desktop renders for audit evidence",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1991,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "en member: method readiness and safe continuation render",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1779,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "en member: sent-state recovery keeps resend waiting",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3459,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "en member: provider-error return offers email recovery",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1780,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "en admin: method readiness and safe continuation render",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1765,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "en admin: sent-state recovery keeps resend waiting",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3482,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "en admin: provider-error return offers email recovery",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1758,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "zh-HK member: method readiness and safe continuation render",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1850,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "zh-HK member: sent-state recovery keeps resend waiting",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3557,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "zh-HK member: provider-error return offers email recovery",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1808,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "zh-HK admin: method readiness and safe continuation render",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1891,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "zh-HK admin: sent-state recovery keeps resend waiting",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3506,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "zh-HK admin: provider-error return offers email recovery",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1866,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 13,
+      "title": "private bilingual CMS draft, real layout, second editor conflict and explicit publication revert",
+      "status": "failed",
+      "nativeOutcome": "unexpected",
+      "durationMs": 46387,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 365,
+      "title": "registered media search over 79 real static fixture images in bilingual event forms",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 38721,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "desktop en real-route mock provider cites sources and keeps continuity",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires the authorized local deterministic profile; cloud refuses provider doubles. Real provider acceptance remains separate."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "desktop zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires the authorized local deterministic profile; cloud refuses provider doubles. Real provider acceptance remains separate."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "mobile en real-route mock provider cites sources and keeps continuity",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires the authorized local deterministic profile; cloud refuses provider doubles. Real provider acceptance remains separate."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "mobile zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires the authorized local deterministic profile; cloud refuses provider doubles. Real provider acceptance remains separate."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 109,
+      "title": "authenticated member can use the real Concierge route from the member portal",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires the authorized local deterministic profile; cloud refuses provider doubles. Real provider acceptance remains separate."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/ renders one English heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2244,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh renders one Chinese heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2041,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/about renders one English heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1877,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/about renders one Chinese heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1899,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/about/chairman renders one English heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1795,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/about/chairman renders one Chinese heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1815,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/about/committees renders one English heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1858,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/about/committees renders one Chinese heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1930,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/membership renders one English heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1997,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/membership renders one Chinese heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1983,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/ai-ops renders one English heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1833,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/ai-ops renders one Chinese heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2079,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "title": "en: staff finds and checks in a confirmed guest at 390px",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 1,
+      "retry": 0,
+      "skipReasons": [
+        "Requires isolated staff, DB, fresh guest and Preview: HKWTIA_TEST_GUEST_CHECKIN_EVENT_ID, HKWTIA_TEST_GUEST_CHECKIN_EMAIL"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "title": "zh-HK: staff finds and checks in a confirmed guest at 390px",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires isolated staff, DB, fresh guest and Preview: HKWTIA_TEST_GUEST_CHECKIN_EVENT_ID, HKWTIA_TEST_GUEST_CHECKIN_EMAIL"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-admin-daily-work.spec.ts",
+      "line": 110,
+      "title": "en scope, company keyboard, history and Member360 facts",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 136794,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-admin-daily-work.spec.ts",
+      "line": 110,
+      "title": "zh-HK scope, company keyboard, history and Member360 facts",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 137307,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "zh-HK staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated DB/Auth required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "en staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated DB/Auth required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 48,
+      "title": "fresh login resumes the same company application with valid saved fields",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated DB/Auth required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 78,
+      "title": "another applicant cannot read company draft even with a legitimate seat in that company",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated DB/Auth required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "zh-HK GET is read-only; final draft and stale/current two-person approval",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "en GET is read-only; final draft and stale/current two-person approval",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "title": "zh-HK recovers bilingual edits after real browser history",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "title": "en recovers bilingual edits after real browser history",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 31,
+      "title": "denied storage warns truthfully and keeps edits in the form",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 38,
+      "title": "another authorized synthetic identity cannot see the prior identity draft",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "STAFF has no indefinite grant entry",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "EXCO has no indefinite grant entry",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "SUPERADMIN has no indefinite grant entry",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "line": 13,
+      "title": "en: row decisions, private correction report and exact import commit",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 79382,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "line": 13,
+      "title": "zh-HK: row decisions, private correction report and exact import commit",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 101541,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "zh-HK presents unknown/disabled/verified polling separately",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated target required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "en presents unknown/disabled/verified polling separately",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated target required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-member-payment-reconciliation.spec.ts",
+      "line": 38,
+      "title": "provider paid invoice → root replays original event → one activation and visible receipt",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Explicit Stripe test-mode opt-in required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "expired history remains accessible without entitlements",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated DB/Auth required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "cancelled history remains accessible without entitlements",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Confirmed isolated DB/Auth required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-membership-policy.spec.ts",
+      "line": 58,
+      "title": "unchecked server submission writes no payment; keyboard confirmation records one receipt and reaches real TEST checkout",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Explicit isolated synthetic-policy and Stripe TEST opt-in required"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 23,
+      "title": "en public login, partner assets and publication scope",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 158701,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 41,
+      "title": "en existing signed-in staff returns to admin",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5272,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 23,
+      "title": "zh public login, partner assets and publication scope",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 159514,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 41,
+      "title": "zh existing signed-in staff returns to admin",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5680,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "zh-HK traverses 101 rows and retains context on previous and filter reset",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic test identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "en traverses 51 rows and retains context on previous and filter reset",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires confirmed isolated DB/Auth and synthetic test identities"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "full-support-handoff.spec.ts",
+      "line": 89,
+      "title": "en stale handoff, keyboard, owner scope and truthful delivery",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 49943,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-support-handoff.spec.ts",
+      "line": 89,
+      "title": "zh stale handoff, keyboard, owner scope and truthful delivery",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 51372,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "line": 11,
+      "title": "en: empty RSVP and a lost action response stay on the form",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 15455,
+      "retry": 0,
+      "skipReasons": [
+        "No open RSVP form in the first six events; set HKWTIA_TEST_GUEST_RSVP_SLUG to an isolated fixture"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "line": 11,
+      "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 20693,
+      "retry": 0,
+      "skipReasons": [
+        "No open RSVP form in the first six events; set HKWTIA_TEST_GUEST_RSVP_SLUG to an isolated fixture"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 19,
+      "title": "en join shows localized progress and a single heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3424,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 19,
+      "title": "zh-HK join shows localized progress and a single heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3150,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 37,
+      "title": "a forged completion status still renders anonymous authentication",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3517,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 44,
+      "title": "a Startup join link never exposes a payment or portal state before authentication",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2428,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "join-resume.spec.ts",
+      "line": 14,
+      "title": "en: signed-in join start and return are resumable across tabs",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 11875,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "join-resume.spec.ts",
+      "line": 14,
+      "title": "zh-HK: signed-in join start and return are resumable across tabs",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 11474,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 390px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5878,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 768px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6225,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1024px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5779,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1280px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5088,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1366px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5474,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1440px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5250,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1920px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5040,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 390px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5089,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 768px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5098,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1024px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5253,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1280px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5473,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1366px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6007,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1440px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5194,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1920px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5391,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 26,
+      "title": "anonymous admin deep link opens staff login and preserves the allowed filter",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2231,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 64,
+      "title": "M1 join remains available in en",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2126,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 64,
+      "title": "M1 join remains available in zh-HK",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1914,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 6,
+      "title": "Startup join -> deterministic Checkout adapter -> signed webhook state is under five minutes",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1918,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 23,
+      "title": "Community and Patron plans use deterministic non-checkout branches",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 32,
+      "title": "signed webhook verification feeds the real processor and exact replay is a duplicate",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 42,
+      "title": "deterministic seat and Billing Portal contracts enforce capacity and ownership",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 55,
+      "title": "live Neon/Stripe acceptance is explicitly unimplemented when isolated credentials are absent",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Live Neon/Stripe fixture is not configured in this environment; run it separately with isolated credentials and test-clock evidence."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 66,
+      "title": "anonymous admin requests require the discoverable staff login",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1875,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 73,
+      "title": "public presentation and protected portal routes remain available without credentials",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6192,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 97,
+      "title": "staff searches Member 360 and appends a note through the real auth and database seams",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 17670,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 115,
+      "title": "the canonical segment has exact rows and CSV headers and its draft entry cannot queue on GET",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 17279,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 151,
+      "title": "the operational at-risk queue contains exactly the three engineered members in order",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 22810,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 164,
+      "title": "the report reconciles current ledger stock and committed July flow before browser mutations",
+      "status": "failed",
+      "nativeOutcome": "unexpected",
+      "durationMs": 34728,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 189,
+      "title": "event check-in appends exactly one event_attended engagement",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 202,
+      "title": "staff records one supported approval decision and persists its audit fact",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 213,
+      "title": "representative authenticated admin routes have no serious or critical axe violations",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 222,
+      "title": "Traditional Chinese admin routes render localized headings and segment recovery state",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 237,
+      "title": "anonymous, member, and company-admin identities require login or receive access denied on every admin route",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 93,
+      "title": "staff sees the English and Traditional Chinese automation consoles",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M3 authenticated Preview credentials are missing: M3_TEST_STAFF_EMAIL, M3_TEST_STAFF_PASSWORD, M3_TEST_MEMBER_EMAIL, M3_TEST_MEMBER_PASSWORD"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 113,
+      "title": "staff sees seeded automation history in Member 360",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M3 authenticated Preview credentials are missing: M3_TEST_STAFF_EMAIL, M3_TEST_STAFF_PASSWORD, M3_TEST_MEMBER_EMAIL, M3_TEST_MEMBER_PASSWORD"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 141,
+      "title": "a member receives a real 404 for both automation console locales",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M3 authenticated Preview credentials are missing: M3_TEST_STAFF_EMAIL, M3_TEST_STAFF_PASSWORD, M3_TEST_MEMBER_EMAIL, M3_TEST_MEMBER_PASSWORD"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 177,
+      "title": "confirms marketing unsubscribe in en",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 252,
+      "retry": 0,
+      "skipReasons": [
+        "M3_TEST_UNSUBSCRIBE_TOKEN_EN is required for unsubscribe confirmation."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 177,
+      "title": "confirms marketing unsubscribe in zh-HK",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 300,
+      "retry": 0,
+      "skipReasons": [
+        "M3_TEST_UNSUBSCRIBE_TOKEN_ZH_HK is required for unsubscribe confirmation."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "line": 86,
+      "title": "staff sees three approval-only drafts and one inert board preview",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M4B browser acceptance credentials are missing: M4B_TEST_STAFF_EMAIL, M4B_TEST_STAFF_PASSWORD, M4B_TEST_MEMBER_EMAIL, M4B_TEST_MEMBER_PASSWORD"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "line": 139,
+      "title": "member identities receive real 404s for both staff queues",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M4B browser acceptance credentials are missing: M4B_TEST_STAFF_EMAIL, M4B_TEST_STAFF_PASSWORD, M4B_TEST_MEMBER_EMAIL, M4B_TEST_MEMBER_PASSWORD"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "line": 64,
+      "title": "en exposes the complete privacy-safe dashboard",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5202,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "line": 64,
+      "title": "zh-HK exposes the complete privacy-safe dashboard",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5280,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "line": 142,
+      "title": "sitemap publishes the canonical AI-Ops route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 714,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 27,
+      "title": "preserves every public filter in a stable shareable query",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 32,
+      "title": "projects only public SoftwareApplication JSON-LD fields",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 39,
+      "title": "live Preview browser scenarios are explicitly gated",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 143,
+      "retry": 0,
+      "skipReasons": [
+        "Live M5 scenarios require explicit isolated Preview credentials and a non-Production PLAYWRIGHT_BASE_URL."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 85,
+      "title": "maps each fixture answer set to exactly one eligible scheme",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 104,
+      "title": "member submits through the real route and the application survives a reload",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M6 mutating real-route acceptance is restricted to Playwright's managed loopback server; an external PLAYWRIGHT_BASE_URL target is read-only for this spec."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 129,
+      "title": "staff performs legal stage moves, proves audit persistence, and sees the real Showcase projection",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "M6 mutating real-route acceptance is restricted to Playwright's managed loopback server; an external PLAYWRIGHT_BASE_URL target is read-only for this spec."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "line": 27,
+      "title": "en: company billing manager can reach billing without starting payment",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 393,
+      "retry": 0,
+      "skipReasons": [
+        "Billing entry requires the exact isolated acceptance database and opt-in"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "line": 27,
+      "title": "zh-HK: company billing manager can reach billing without starting payment",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 327,
+      "retry": 0,
+      "skipReasons": [
+        "Billing entry requires the exact isolated acceptance database and opt-in"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 16,
+      "title": "en: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 1,
+      "retry": 0,
+      "skipReasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 16,
+      "title": "zh-HK: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 51,
+      "title": "en: native membership form reaches Stripe before hydration",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 1,
+      "retry": 0,
+      "skipReasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 51,
+      "title": "zh-HK: native membership form reaches Stripe before hydration",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 4,
+      "retry": 0,
+      "skipReasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 29,
+      "title": "en: bare /join renders the plan chooser with four plans",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4952,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 44,
+      "title": "en: /events interest form acknowledges a submission",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7383,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 29,
+      "title": "zh-HK: bare /join renders the plan chooser with four plans",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4060,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 44,
+      "title": "zh-HK: /events interest form acknowledges a submission",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7839,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 65,
+      "title": "en: /admin/inbox and /admin/tasks render for staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 9584,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 65,
+      "title": "zh-HK: /admin/inbox and /admin/tasks render for staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 10324,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 83,
+      "title": "en: /events filter panel round-trips the format filter",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7142,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 97,
+      "title": "en: guest RSVP form rejects a malformed address before writing",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 15921,
+      "retry": 0,
+      "skipReasons": [
+        "environment not provisioned: none of the 6 soonest open events on /events offers the anonymous RSVP form (each is external, ticketed, or already under way)"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 83,
+      "title": "zh-HK: /events filter panel round-trips the format filter",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7097,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 97,
+      "title": "zh-HK: guest RSVP form rejects a malformed address before writing",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 15639,
+      "retry": 0,
+      "skipReasons": [
+        "environment not provisioned: none of the 6 soonest open events on /zh/events offers the anonymous RSVP form (each is external, ticketed, or already under way)"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 135,
+      "title": "the guest cancel link lands on /events for token \"not-a-token\"",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4673,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 135,
+      "title": "the guest cancel link lands on /events for token \"000000000000\"",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3092,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 149,
+      "title": "en: a submitted event reaches /events with its organiser once staff approve it",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 43615,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 149,
+      "title": "zh-HK: a submitted event reaches /events with its organiser once staff approve it",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 39859,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 53,
+      "title": "en: /members renders the directory heading and its filter form",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1824,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 64,
+      "title": "en: the industry filter round-trips through the URL",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5124,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 75,
+      "title": "en: a member page carries Organization and BreadcrumbList JSON-LD",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 1861,
+      "retry": 0,
+      "skipReasons": [
+        "no published member pages on this target"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 53,
+      "title": "zh-HK: /members renders the directory heading and its filter form",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1864,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 64,
+      "title": "zh-HK: the industry filter round-trips through the URL",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5063,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 75,
+      "title": "zh-HK: a member page carries Organization and BreadcrumbList JSON-LD",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 1953,
+      "retry": 0,
+      "skipReasons": [
+        "no published member pages on this target"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 102,
+      "title": "a company admin submits their public page and staff publishes it",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 24912,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 84,
+      "title": "en: /admin/inbox is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1970,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 95,
+      "title": "en: the inbox description no longer promises a read-only inbox",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 84,
+      "title": "zh-HK: /admin/inbox is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1896,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 95,
+      "title": "zh-HK: the inbox description no longer promises a read-only inbox",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 109,
+      "title": "en: /admin/inbox renders its heading, both filter rows and the reply-capable description",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5771,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 109,
+      "title": "zh-HK: /admin/inbox renders its heading, both filter rows and the reply-capable description",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4128,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 135,
+      "title": "staff take a WhatsApp thread over, reply inside the window and hand it back",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 4860,
+      "retry": 0,
+      "skipReasons": [
+        "no concierge-handled WhatsApp thread on this target"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "en: /admin/templates is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1771,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "en: /admin/contacts is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1861,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "en: /admin/campaigns is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1754,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "zh-HK: /admin/templates is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1829,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "zh-HK: /admin/contacts is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1801,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "zh-HK: /admin/campaigns is hidden from anyone who is not staff",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1836,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 99,
+      "title": "the send queue refuses a request with no bearer",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 90,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 117,
+      "title": "en: /admin/templates lists every seeded key with its category and approval state",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5288,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 157,
+      "title": "en: /admin/contacts round-trips the stage and source filters through the URL",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 10215,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 176,
+      "title": "en: /admin/segments can address the contacts audience",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 5445,
+      "retry": 0,
+      "skipReasons": [
+        "no WhatsApp contacts on this target"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 117,
+      "title": "zh-HK: /admin/templates lists every seeded key with its category and approval state",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5433,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 157,
+      "title": "zh-HK: /admin/contacts round-trips the stage and source filters through the URL",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 9977,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 176,
+      "title": "zh-HK: /admin/segments can address the contacts audience",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 6192,
+      "retry": 0,
+      "skipReasons": [
+        "no WhatsApp contacts on this target"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 209,
+      "title": "approving a template makes it sendable",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5944,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 226,
+      "title": "a contact with a thread links to the inbox conversation it wrote from",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 4488,
+      "retry": 0,
+      "skipReasons": [
+        "no WhatsApp contact with a conversation on this target"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 240,
+      "title": "the wizard refuses a blank template variable and previews a real eligibility partition",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 36477,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 347,
+      "title": "a second POST inside the same ten minutes is a duplicate",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 3,
+      "retry": 0,
+      "skipReasons": [
+        "Requires CRON_SECRET"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 39,
+      "title": "en: the member tools list renders",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 167,
+      "retry": 0,
+      "skipReasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 46,
+      "title": "en: an entitled member's tools page embeds the configured tool with its token",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 200,
+      "retry": 0,
+      "skipReasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 39,
+      "title": "zh-HK: the member tools list renders",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 159,
+      "retry": 0,
+      "skipReasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 46,
+      "title": "zh-HK: an entitled member's tools page embeds the configured tool with its token",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 145,
+      "retry": 0,
+      "skipReasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "line": 40,
+      "title": "staff price a ticketed event and a buyer reaches Stripe Checkout (en)",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 43161,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "line": 40,
+      "title": "staff price a ticketed event and a buyer reaches Stripe Checkout (zh-HK)",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 40669,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "line": 50,
+      "title": "en: a pass renders, admits once, reports the second scan, and is undone",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4B_PASS_URL_ONE, D4B_CHECK_IN_URL_ONE, D4B_PASS_URL_TWO_ZH, D4B_CHECK_IN_URL_TWO_ZH"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "line": 50,
+      "title": "zh-HK: a pass renders, admits once, reports the second scan, and is undone",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4B_PASS_URL_ONE, D4B_CHECK_IN_URL_ONE, D4B_PASS_URL_TWO_ZH, D4B_CHECK_IN_URL_TWO_ZH"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d4c-refunds.spec.ts",
+      "line": 117,
+      "title": "staff refund the seeded order, and both locales lose the seats",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4B_PASS_URL_ONE, D4B_PASS_URL_TWO_ZH, D4B_ORDER_REFUNDABLE=true (a d4b order backed by a retrievable Stripe test payment; db:seed:d4b is provider-free)"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "phase-d4d-event-cancellation.spec.ts",
+      "line": 102,
+      "title": "staff cancel the seeded event, and every public surface explains it",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4D_PUBLIC_URL, D4D_PASS_URL, D4D_PUBLIC_URL_ZH, D4D_PASS_URL_ZH"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 9,
+      "title": "en protects the member portal with a locale-aware continuation",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2496,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 9,
+      "title": "zh-HK protects the member portal with a locale-aware continuation",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2665,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 18,
+      "title": "portal navigation does not expose a private dashboard to an anonymous user",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2587,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 26,
+      "title": "an anonymous portal never exposes company controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2398,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-membership-recovery.spec.ts",
+      "line": 12,
+      "title": "a signed-in member with no current membership sees bilingual recovery and can sign out",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 265,
+      "retry": 0,
+      "skipReasons": [
+        "Membership mutation requires the exact isolated acceptance database and opt-in"
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member directory route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2520,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member events route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2320,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member documents route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2501,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member billing route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2428,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member directory route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2545,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member events route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2365,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member documents route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2321,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member billing route",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2258,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-cache-isolation.spec.ts",
+      "line": 29,
+      "title": "member A, company member B and guest see only the public bilingual news projection",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 18364,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-cache-isolation.spec.ts",
+      "line": 70,
+      "title": "private bilingual drafts stay out of warmed public cache; explicit publish and revert invalidate it",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 56507,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 10,
+      "title": "en: home destinations, member directory, showcase and answered FAQ",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 8174,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "en: public home and membership fit 390px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4761,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "en: public home and membership fit 768px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5134,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "en: public home and membership fit 1440px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4672,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 38,
+      "title": "en: membership FAQ and navigation have no serious axe findings",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4430,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 10,
+      "title": "/zh: home destinations, member directory, showcase and answered FAQ",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 8163,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "/zh: public home and membership fit 390px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4725,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "/zh: public home and membership fit 768px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3834,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "/zh: public home and membership fit 1440px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4112,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 38,
+      "title": "/zh: membership FAQ and navigation have no serious axe findings",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3074,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 49,
+      "title": "en: member login keeps safe return and recovery paths",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3818,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 49,
+      "title": "/zh: member login keeps safe return and recovery paths",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3566,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 10,
+      "title": "a pending real database read preserves the discovery anchor",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2403,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 56,
+      "title": "en page hero image requests are eager and high priority",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2347,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 64,
+      "title": "en hero request is explicitly eager and high priority",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2768,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 77,
+      "title": "en streamed opening section does not move the first viewport",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5167,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 56,
+      "title": "zh-HK page hero image requests are eager and high priority",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2745,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 64,
+      "title": "zh-HK hero request is explicitly eager and high priority",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2238,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 77,
+      "title": "zh-HK streamed opening section does not move the first viewport",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5889,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 4,
+      "title": "en: long home sections defer layout and reveal on keyboard focus",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 45205,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 36,
+      "title": "en: programme anchors reveal their sections and print includes the full page",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3498,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 56,
+      "title": "en: membership FAQ remains available on direct fragment navigation",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1859,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 4,
+      "title": "/zh: long home sections defer layout and reveal on keyboard focus",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 45011,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 36,
+      "title": "/zh: programme anchors reveal their sections and print includes the full page",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3571,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 56,
+      "title": "/zh: membership FAQ remains available on direct fragment navigation",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2027,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 67,
+      "title": "en: streamed home shell keeps the footer below the first viewport",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2303,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 67,
+      "title": "/zh: streamed home shell keeps the footer below the first viewport",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1934,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/showcase renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2002,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/showcase renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2034,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/launchpad renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1880,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/launchpad renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2175,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/ai-ops renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1830,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/ai-ops renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2089,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/events renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2237,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/events renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3737,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/news renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2436,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/news renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2224,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programmes renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1939,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programmes renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2066,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/partners renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1941,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/partners renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1995,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1903,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1909,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/chairman renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1779,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/chairman renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1856,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/committees renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1792,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/committees renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1940,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1838,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2083,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/2001-establishment-of-wtia renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1767,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/2001-establishment-of-wtia renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1821,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/2014-wi-fi-hk renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1890,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/2014-wi-fi-hk renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1883,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1845,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2000,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/new-term-of-executive-committee-2022-2024 renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1810,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/new-term-of-executive-committee-2022-2024 renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1873,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1830,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1869,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/asia-smart-innovation-awards-2025 renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1826,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/asia-smart-innovation-awards-2025 renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1900,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/cpai renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1841,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/cpai renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2021,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/hkict renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1851,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/hkict renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1844,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/tct renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1780,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/tct renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1899,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/asa renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1924,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/asa renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1917,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/contact renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1847,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/contact renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1881,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/privacy renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1981,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/privacy renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2024,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/ai-transparency renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1946,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/ai-transparency renders one public heading",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1915,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 3,
+      "title": "desktop navigation supports trigger traversal, open, Escape, active state, and focus return",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 24816,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 46,
+      "title": "mobile Sheet traps focus, resets Accordion, closes on navigation, and restores the trigger",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 48773,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 81,
+      "title": "captures all four open desktop menu shapes",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 22632,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 98,
+      "title": "captures / mobile Sheet review evidence",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6282,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 98,
+      "title": "captures /zh mobile Sheet review evidence",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5776,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 320px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3569,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 320px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3728,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 375px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3561,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 375px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3675,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 768px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3503,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 768px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3600,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 1120px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3883,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 1120px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3963,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 1440px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2417,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 1440px and keeps 44px controls",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2364,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 150,
+      "title": "locale switch preserves path, repeated query values, and fragment",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4081,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/events marks Events & Programmes as the active group",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2220,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/showcase marks Membership & Ecosystem as the active group",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2079,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/ai-ops marks Impact & Insights as the active group",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1989,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/about/history marks About WTIA as the active group",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2292,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 171,
+      "title": "the header floats over the hero, then goes solid past 56px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7314,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "seat-management.spec.ts",
+      "line": 4,
+      "title": "company seat route is protected and localized",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2267,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "seat-management.spec.ts",
+      "line": 11,
+      "title": "Chinese company seat route is protected",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1909,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "line": 13,
+      "title": "en: seat count, same-browser checkout recovery and owner boundary",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 47614,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "line": 13,
+      "title": "zh-HK: seat count, same-browser checkout recovery and owner boundary",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 48126,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 93,
+      "title": "/ renders the WP-3 hero over the real homepage sections",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2580,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 375px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1848,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 768px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1900,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 1024px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3458,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 1440px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3709,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 93,
+      "title": "/zh renders the WP-3 hero over the real homepage sections",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1900,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 375px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2357,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 768px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1934,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 1024px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3687,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 1440px with 44px hero actions clear of Concierge",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3625,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1784,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1864,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/chairman preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1864,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/chairman preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1963,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/committees preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1911,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/committees preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2023,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/history preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1855,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/history preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2102,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1816,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2085,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/asa preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1867,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/asa preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1891,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/cpai preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1854,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/cpai preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1914,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/hkict preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2005,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/hkict preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1925,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/tct preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1996,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/tct preserves the PR3 public route contract",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1873,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 215,
+      "title": "captures PR3 Home and programme review evidence at 375px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 4673,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 215,
+      "title": "captures PR3 Home and programme review evidence at 1440px",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6013,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 64,
+      "title": "preserves Event status and Showcase filters across locale switches",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 247,
+      "retry": 0,
+      "skipReasons": [
+        "This case proves unavailable states with repository credentials absent; run the credential-free profile."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 83,
+      "title": "keeps the bilingual Membership catalog honest without repository credentials",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 260,
+      "retry": 0,
+      "skipReasons": [
+        "This case proves catalog recovery with repository credentials absent; run the credential-free profile."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 119,
+      "title": "opens Contact Concierge, focuses the message, and restores the launcher after Escape",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5404,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 149,
+      "title": "renders exact own-origin private Event and partner media without optimization",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3143,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/why-wisetech resolves to /about",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1599,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/en/why-wisetech resolves to /about",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1578,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/zh/why-wisetech resolves to /zh/about",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1593,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/programmes/launchpad resolves to /launchpad",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1819,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/zh/join/success resolves to /zh/join/complete",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1918,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/request-introduction resolves to /showcase",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1735,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/zh/solutions/anything resolves to /zh/showcase/anything",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1908,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "nativeOutcome": "skipped",
+      "durationMs": 0,
+      "retry": 0,
+      "skipReasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3024,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/join renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2401,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1910,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about/chairman renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1958,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about/committees renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1931,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about/history renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1680,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/membership renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2301,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/showcase renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2249,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/launchpad renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2360,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/ai-ops renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1682,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/events renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3016,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/news renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3046,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/cpai renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2109,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/hkict renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1961,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/tct renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1850,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/asa renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1900,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programmes renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1667,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/contact renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2199,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/partners renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2395,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/privacy renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1939,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/refund-policy renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1884,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/ai-transparency renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1927,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/members renders in Chinese without leaks",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1985,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    }
+  ]
+}

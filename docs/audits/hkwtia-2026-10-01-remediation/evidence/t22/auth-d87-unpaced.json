@@ -1,0 +1,15 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "observedAt": "2026-10-02T20:25:43.879Z",
+  "production": false,
+  "providerStubbed": false,
+  "calls": 514,
+  "statuses": {
+    "200": 474,
+    "429": 40
+  },
+  "anonymousCalls": 0,
+  "bodyLogged": false,
+  "cookiesLogged": false,
+  "strictQueryFlagsAll": false
+}

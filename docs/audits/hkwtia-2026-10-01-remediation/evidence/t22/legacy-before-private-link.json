@@ -1,0 +1,224 @@
+{
+  "sourceSha": "5b4ac2f4f1bd875047037dcaf4f9cfae79ce4e25",
+  "stats": {
+    "startTime": "2026-10-02T17:44:43.965Z",
+    "duration": 144848.915,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  },
+  "environment": "Owned built Next/Chromium; confirmed isolated Neon/Auth; Stripe TEST and email sink. Scope defined by profile and guarded fixtures.",
+  "noProductionMutation": true,
+  "cases": [
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "zh-HK staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 10992,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "en staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 8147,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 48,
+      "title": "fresh login resumes the same company application with valid saved fields",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7983,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 78,
+      "title": "another applicant cannot read company draft even with a legitimate seat in that company",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 1951,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "zh-HK GET is read-only; final draft and stale/current two-person approval",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 17074,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "en GET is read-only; final draft and stale/current two-person approval",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 16342,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "title": "zh-HK recovers bilingual edits after real browser history",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6837,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "title": "en recovers bilingual edits after real browser history",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5839,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 31,
+      "title": "denied storage warns truthfully and keeps edits in the form",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 3660,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 38,
+      "title": "another authorized synthetic identity cannot see the prior identity draft",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 5993,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "STAFF has no indefinite grant entry",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2621,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "EXCO has no indefinite grant entry",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2570,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "SUPERADMIN has no indefinite grant entry",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 7625,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "zh-HK presents unknown/disabled/verified polling separately",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2750,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "en presents unknown/disabled/verified polling separately",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2412,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "expired history remains accessible without entitlements",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2398,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "cancelled history remains accessible without entitlements",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 2975,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "zh-HK traverses 101 rows and retains context on previous and filter reset",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 6685,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "en traverses 51 rows and retains context on previous and filter reset",
+      "status": "failed",
+      "nativeOutcome": "unexpected",
+      "durationMs": 21600,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    }
+  ]
+}

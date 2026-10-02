@@ -358,3 +358,106 @@ Application f327fd334e7766b22102154bf1959310b658ab78:77focused0skip/0fail7files;
 ## T21 measured query/cache/first paint
 
 Source2888c483/b0f3d30a/55c2d036; full ledger56 local and confirmed isolated Neon, 30warm and independent connection per operation/50-500-5000, owned cleanup verified; exact samples/plans in evidence/t21. Two actual cache Chromium pass,5actual first-paint/SQL-delayChromium pass and68Home regressions;lint/type/strings/build0. Failed-read≠empty, real pending discovery anchor, eager/high image all have valid targetREDs. Full6293pass304skip0fail preceded Home delta; final aggregateT22 is separate, never claimed exact-final. Production anonymousHTTP read-only4×31samples is current olddeployment, notcandidate acceptance. Default/supplementary Lighthouse failures, locale/config correction and remainingRUM/HK-SG/cloud/wholeHTTP releasegates explicitly recorded; thresholds unchanged. No policy/schema/Production/provider mutation.
+
+
+## T22/T23 current-source consolidation
+
+Candidate e9fa6d026be5cdbc2875b566fbd35a4bc37d6b7a: fresh full repository unit **6304 pass, 0 fail, 329 guarded skip**. Full skip inventory lists each file/test, environment names and guard line; true SQL/provider runs stay distinct. Focused current session/acceptance/hash/workspace12pass. No provider tests or skipped assertions are fabricated.
+
+The whole browser collection exposed genuine AI-Ops light-card contrast failures plus stale login/Queue/fixture assertions. Fix55676a22 is scoped to the actual AI-Ops class/shell CSS; generated wisetech.css/home palette unchanged. Real bilingual RED → built axe GREEN → cloud Preview both locale axe GREEN. Browser revisions a262d000 retain direct export404 and server session identity verification; no client actor/role bypass. M2 11 actual passes include independent complete-ledger reconciliation plus exact owned M2 2/4,1/2,3/8 and immutable audit/check-in checks. Import2actualpasses, grantfive-role/bothlocale and companyprofile submit/publish/restore passed in focused recovery. Native media keyboard actual result recorded separately after execution.
+
+Real eight-operation 50/500/5000 matrix24pass; Oct1 owned SQL73pass/59guardedskip, followed by exact guarded-Neon59pass/0skip. Historical full-schema failures and corrected focused15+5 SQL results are preserved, not relabeled as one fresh full green run. Migration recovery baseline51/fault51/rerun56 and compatible older app11read history fingerprints passed. Worker57pass/type0, dedicated workerconfigdryrun0; cloud deploy and two actual windows pending.
+
+Actual Preview e9fa6d02/dpl_4rQ5GHNGnbqRbFXqmZT5tdL9FEVz15pass: unique own news marker proves runtime isolated DB/ledger56, six public routes, real isolated Auth staff/root/member, private cache, flag-off batchhistory and existing workerhealthanchor, both AI-Ops locales metrics8/serious-critical axe0. Four actual bilingual 1440/390 public screenshots and keyboard focus/Escape accompany the receipt. The old expired protection session's HTTP200 was Vercel/login and failed the marker; fresh protection session resolved it without an app/config change. No token/cookie/header/body evidence is exported.
+
+All original U01–U60 audit statuses are retained. New columns explicitly distinguish actual fixture/result/owner: currently23scopedpass/35partial/2blocked. AssociationD01–D06, real Google/magic-link/no-profile callbacks, approved mail/WhatsApp/accepted-timeout/STOP, cloudworker service access/windows, HK/SG/RUM/Lighthousebudget, human SOP are unresolved dependencies. Production is unchanged; ledger/flags/provider unknown. See release-readiness.md, production-readback.md and the ordered release/rollback guide. This is not full fix or Production release.
+
+
+## T22 supplementary current-source regressions — 2026-10-02
+
+Source `85fbc961`: actual browser 7 pass / 0 fail / 0 skip. News cards and build-log cards share the measured accessible metadata scope. Locale fallback is disabled until its handler exists. Native media input/change ordering bug was reproduced both in full Chromium and in a unit (2 pass/1 intended fail); the minimum propagation fix passed 3 unit cases and real en/zh keyboard selection with visible loaded thumbnails and zero event/provider writes. U49/U50 automated isolated scope is now passed. Human independent SOP is still U60.
+
+First full browser collection: 302 pass / 35 fail / 150 skipped (487 total). Two subsequent collections were interrupted after confirming repeated stale synthetic-session reuse; they are not complete collections. Standalone English import and CMS audited draft/publication/revert passed. A cached identity response outlived sign-out while the protected server correctly redirected to login. Test session reuse now checks the protected server with redirects disabled; target unit RED 3 pass/1 failure → GREEN 4 pass. Auth-order browser rerun passed admin + bilingual import before reaching remaining ticket regressions. No production authorization or session guard was weakened.
+
+A later full unit run: 6304 pass / 1 fail / 329 skips; the one failure was the existing bounded dependency-tree subprocess ETIMEDOUT. Its focused rerun passed all 13, retaining the 18-second child deadline and hostile-fixture validation. This failed full run is retained, and a fresh final full suite is running separately. Lint/typecheck/strings passed after the UI/test adjustments; final current-head gate commands/results will be appended.
+
+
+## T22 current consolidation: actual setup failures and complete SQL recovery
+
+`dfc30016`: full unit 6309 pass / 0 fail / 329 guarded skip (6638 total), followed by current focused hydration/root RED 16 pass / 2 intended failures and GREEN 31 pass. Final repository suite after that UI delta is recorded separately when completed.
+
+**Actual whole historical SQL collection: 137 pass / 0 fail / 0 not executed, all 52 files.** Exact command: `RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run <52 discovered existing integration files> --maxWorkers=1 --reporter=json`; list and reproduction wrapper accompany the release evidence. DB/Auth/Stripe cloud variables were blank; only owned disposable PostgreSQL16 containers were used. Native installed Drizzle programmatic migrator and CLI also passed on separate new empty PG16 databases.
+
+Earlier 120 pass/1 fail/16 not executed and 123 pass/0 failed cases/14 not executed were **failed files due to setup hooks**, not legitimate guarded skips. A plain postgres image lacked the existing `vector` extension (SQLSTATE 0A000); M2 now uses pgvector/pgvector:pg16 and its actual migrations/guarded M1+M2 seed acceptance passed 10/10. Unix-socket pg_isready observed the temporary initialization server (actual 57P03 on the subsequent connection); 32 existing fixture waiters now check TCP 127.0.0.1, waiting for the final server. No new fixture architecture or timeout relaxation. An outbox parallel claim may legitimately return either claimed item first: the regression verifies exactly one acknowledgement and one staff item, distinct IDs and unchanged stale/replay fencing, rather than Promise completion order. Its four cases passed.
+
+Built browser profiles are separate results: legacy Oct1 guard=1 19 pass/0 skip/0 fail; credential-free profile 4 pass/0 skip/0 fail; authorized local deterministic Concierge 5 pass/0 skip/0 fail (no cloud doubles or paid model); scoped browser recovery 77 pass/14 genuinely guarded skip/0 fail. Full collection 314 pass/10 fail/163 skip remains a failed collection. Fresh anonymous context independently confirmed inbox/templates/contacts redirect to the real login with email form, Auth user=false and sidebar=0. No cached API response, mock delivery or HTTP200 protection page is used as proof of authorization.
+
+Final candidate's phone navigation is disabled until hydration; its keyboard test waits for the enabled control, then verifies Enter/focus trap/Escape/navigation. The protected Auth fixture treats `/zh` itself as Chinese and still requires the protected server to validate the session with redirects disabled. Full browser/static/unit/Preview final receipts remain distinct from the preceding source results.
+
+
+### Exact source 143f2d46 full browser and provider quota diagnosis
+
+Complete native sequential collection: **323 pass / 6 fail / 158 skip / 487**, no retry/flaky passes. Five happy-path admin/member assertions failed on the localized error boundary. The matching server diagnostics contain **7 `Too many requests` exceptions, all with the compiled getSession frame**. The protected-route fixture and mobile Sheet's keyboard/focus/navigation cases passed in this full run. The rate limiter and provider authorization remain enabled; this collection is a failure, not a completed release gate.
+
+The sixth failure was the CMS guard correctly refusing to overwrite an existing private draft. A preceding failed run had left a private draft for the reused M2 editor. The current browser test now registers two fresh reserved `.example.test` identities on the exact confirmed isolated Auth, requires their actual server session, and binds only new profile rows in the confirmed G0 DB. It retains the guard and every other editor's draft/history. No real member identity or production role is changed. A fresh real-provider browser result is required before this test adjustment is signed verified.
+
+Reproduction of provider quota recovery uses an opt-in native Playwright profile with `launchOptions.slowMo=1500`; it keeps existing assertions/deadlines and all guards. No auth/session mock, bypass, global retry or disabled limit is used. Exact unpaced failure and safe quota receipt are in evidence/t22.
+
+## 最後原生瀏覽器診斷（2026-10-03 HKT）
+
+- 143f2d46 較慢操作的全套：323 pass／2 fail／162 guarded skip／487，54分21秒、0 flaky／retry；一筆真 getSession Too many requests，另為 CMS fixture 跨裝置登入不同身份。原 assertions／deadline／server authorization／limiter 未放寬；此失敗不稱 pass。
+- 原生 built Chromium 在8秒 idle/hover觀察到29筆 protected route prefetch（僅記pathname／prefetch boolean，不記query/cookie）；無點擊前仍有額外私人讀取。2個單元 RED 確認 Next Link prefetch default/explicit true 未受控。af4b8656 僅對既有 GuardedAdminLink 設 prefetch=false，保留真正點擊、unsaved guard與每次server actor。
+- CMS 新隔離 Auth editor signup／profile binding及同身份第二裝置、另一editor隔離、CAS、explicit publish/revert：2 pass／0 fail／0 skip，129秒；app仍built143，fresh test fixture見7ea6e3e0及fresh-cms-final.json。其他 run/operator 的私人草稿、published baseline及immutable history未清除。
+- ddd1e818 修正測試 session probe：terminal member以本人billing history證明登入，而不是需要會籍權益的profile頁。目標 RED1與80 focused GREEN（0skip/0fail）包括這個探針、手機hydration、locale、環境契約、private prefetch及dirty navigation。app會籍限制沒有變更。
+- af4b8656 最後完整gates／built browser／Preview runtime仍待新結果；上述較早結果只簽各自scope。失敗full-unit的test harness強制EMAIL_DELIVERY_MODE=test已撤去；沒有改原default期望。
+
+5b4ac2f4：真 built Chromium 原操作速度、同一8秒idle/hover窗口，protected prefetch29→14→0；target1 pass／0skip／0fail，點擊到達會員route。兩語dashboard8links各有目標RED，90相關focused pass／0skip／0fail。此結果只證明已量度入口及源碼控制，並不推定provider quota設定、HK/SG/RUM或Production SLO。
+
+最新完整單元（5b4ac2f4，2026-10-02 17:10:30–17:25:29 UTC）：6321 pass／0 fail／329 guarded skip／6650；native full collection，maxWorkers2，原EMAILdefault未覆寫、DB/Auth/Stripe空及integration/load/matrix0。每個未執行case和guard另列full-current-skip-inventory.json；各真DB/provider receipts獨立，不把skip換成pass。
+
+## 私人清單預載／標誌（8119b7f3）
+
+5b4ac2f4 最新完整瀏覽器實際324 pass／3 fail／161 skip，legacy18 pass／1 fail／0 skip；不是pass。服務紀錄只讀分類4／1筆getSession Too many requests、0 SQL read error；未單憑429推定所有失敗根因。readonly approval fact仍pending/auditCount0；沒有改批准政策或刪history。
+
+真 built Chrome：en會員在8秒內11筆private prefetch，inbox22筆；兩個target assert zero RED。42930d9a以既有private route/component的51個Link caller共用PrivateLink，固定prefetch=false，props/ref/Next router/dirty-navigation保留；沒有Auth cache、limiter或role變更。Inbox en/zh unit2 RED；boundary重新放回MemberFilters舊import實際1 RED，finally恢復。35相關focused GREEN／0skip／0fail；source contents在commit前測，與8119b7f3相同。新built native5項及完整gates執行中，另記最終結果。
+
+Lighthouse5b4ac2f4原simulated收集10報告成功，但budget失敗；所有SEO1、CLS0，/、/events、/zh/events、/zh/programmes performance低於0.90。Logo響應圖片實際約40KiB浪費，2001x721原圖依預設2x載入至3840px，而tile內容實際66／88px。Logo unit目標1 RED後8119b7f3只加sizes；保留檔案、品牌、alt、priority與aspect。35focused含asset byte provenance GREEN。不得把未完成重測或單次LHR稱Production SLO。
+
+8119b7f3實際build/lint/typecheck/audit:strings exit0；native private sidebar＋en/zh會員／inbox 5 pass／0skip／0fail，55.3s；四個清單8秒窗口全0 protected prefetch。
+
+最新Preview metadata 8119b7f3／dpl_517m4WGErAjgf7gWzG4fjappKwFh READY／iad1，runtime17仍pending；不是已證provider或完整生命週期。
+
+
+## T22 continuation: native Auth absence, stable keyboard focus and client catalog (Oct3 HKT)
+
+Application commits f7599e89 / 189c075e / 999e6b78 preserve the strict Auth provider query (cookie cache and refresh disabled), all server actor/role boundaries and association/provider policy. Anonymous built route: actual upstream session read 1 -> 0, no provider substitution; credentialed/forged cookies and Authorization still reach provider validation. Focused Auth/actor/session tests: 123 pass, 0 fail, 0 skip. Strict missing Production configuration still fails closed.
+
+A real isolated `site_announcements` ACCESS EXCLUSIVE lock reproduced both locales accepting focus in the temporary header (2 intended RED). Temporary controls now inert and aria-hidden; after rollback the stable localized login focuses and Enter navigates: 2 native pass. The ordinary seven-width/two-locale login cases passed 14/14. Initial wrong table-name and shell-encoded label failures were corrected in the test, excluded from behavioural RED/GREEN, and the test now reads the actual UTF-8 message catalog.
+
+Root client messages now contain usable Error recovery only; authorized Admin/Portal layouts retain the full catalog after their own actor boundary. Both locale real Error consumers and private catalog/redirect tests: 11 pass. Native public payload 2 pass; private five-case built Auth navigation 5 pass, 0 skip with its required legacy `1` guard (a preceding wrong-flag collection skipped five and is not acceptance).
+
+Actual raw HTML transfer bytes: en 331361 -> 151231; zh-HK 320477 -> 149494. Native normalized serialized Admin namespace present -> absent, Error remains present. Body/provider payload/credential values were not recorded. These are controlled loopback before/after payload measurements, not HK/SG/RUM or a causal claim about Lighthouse scores.
+
+Exact 8119 historical full unit: 6330 pass / 1 Auth-lockfile subprocess timeout / 329 guarded skips; unchanged idle security target rerun 13/13 pass. Exact 8119 full browser: 324 pass / 6 fail / 162 guarded skips; legacy 13 pass / 6 fail / 0 skip. Those failures remain recorded. Lighthouse historical collector accidentally mixed 10 prior reports; corrected current-only fetchTime filter retains exactly 10 8119 reports and its actual three under-budget routes. Current collector now enforces that filter and route count without threshold changes.
+
+999e full-gate attempt was stopped after lint rejected two raw local-anchor test mocks. Native Next Link replaced those mock links; no lint rule, timeout or assertion was weakened. Stopped/not-executed cases are not skips or passes. Fresh full/static/browser/original Lighthouse gates will be recorded separately after completion. Production e7fa4add remains unchanged; current Preview metadata is distinct from its runtime acceptance.
+
+## 最新候選與歷史結果界線（99d5，Oct3香港時間）
+
+以上各較早章節的pending／結果只描述當時版本；最新候選99d5、app/worker equivalent3bc。Native exact CI run37068469209：6346 pass／0 fail／329 genuine guarded skip；Workerd57 pass；六named checks及Vercel成功。Preview dpl_EHC8iFrft1EZr3u2efP3ffEVhdzP實際runtime17 pass／ledger56／providerSends0／paymentWrites0。正式21:39UTC只讀仍e7fa4add；無Oct1正式發布或新migration。
+
+3bc完整browser331 pass／5 fail／162 guarded skips及actualAuth200557/4298保留；targeted6 pass和credential-free8 pass是另外的run。99d5僅修test準備條件，exact99單次full browser5000ms pacing仍執行中。3bc legacy19、Concierge5、originalLab10 routes pass；current lab最低.91/.96/1。Google/mail/provider/cloud/SOP/policy/RUM門檻未簽。各source、命令、skip與scope以最新receipt為準，不把舊full local6345或targeted pass冒充exact99單次full結果。
+
+
+## Exact99 original full native collection: completed, not green
+
+`T22_SOURCE_SHA=99d5b11974644c06318da4f91d20bf39a8615b9a`; `T22_AUTH_PROVIDER_MIN_INTERVAL_MS=5000`; `T22_REPORT_PATH=.playwright/t22-browser-final-single.json`; `node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs --workers=1`. Original498 cases, original timeouts/roles/limiter/provider retained; Windows Node24/built Chromium, confirmed G0 ledger56/Auth, TEST Stripe and email sink. Started2026-10-02T21:57:35.121Z; duration3814668ms. Actual332 pass/4 unexpected/162 genuine skips/0 flaky/0 collection errors. Native receipt `evidence/t22/browser-99-single.json` and per-case skips; actual Auth597×200/3×429, observed get-session max rolling60seconds13, quota threshold unknown/no Retry-After. This observer does not count every Auth path and cannot infer a threshold.
+
+CMS line331 timed out during other editor's private rebase after explicit publication/revert; previous public state was restored. Read-only reconciliation at23:03:22UTC proves2 owned published versions and equal effective overrides; one synthetic editor's open private draft retained, no raw cleanup/history deletion. Negative role matrix line244 and CMS line331 exceed180seconds under5000ms pacing, no429 within those cases. C2 wizard line275 shows safe app error boundary in the same window as1×429; D4a sign-in/protected probe failed in a window with2×429. These are timing/provider observations, not permission to disable Auth or claim a database cause. The same unchanged original cases passed at3bc/2000ms; fresh exact99 targeted replay is recorded separately.
+
+Operator gate: Neon/Auth owner must confirm isolated quota scope/window/reset or dedicated acceptance capacity before a new complete run. Redacted branch/config readback exposes no numeric quota setting. A proposed split of the role matrix was not applied: it would not resolve the sustained provider constraint or CMS timeout. No retry of an unknown payment/publication effect, test timeout increase, skipped assertion or production flag change.
+
+
+### 原條件定向驗證
+
+Original四個失敗案例在exact99、2000ms、原180秒timeout、原完整role matrix及真provider下定向重跑4 pass/0 fail/0 skip；90×200/0×429。CMS62435ms、negative role95997ms、wizard28402ms、en TEST checkout11045ms。程式/斷言/timeouts沒有改動；原332/4/162仍保留，不能合併為單次完整綠燈。 證據：`evidence/t22/browser-99-targeted.json`、`browser-99-failure-disposition.json`；完整quota/readback gate仍在。

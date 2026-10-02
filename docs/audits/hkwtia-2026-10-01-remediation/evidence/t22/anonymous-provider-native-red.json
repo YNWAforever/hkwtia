@@ -1,0 +1,21 @@
+{
+  "production": false,
+  "calls": [
+    {
+      "observedAt": "2026-10-02T19:14:46.444Z",
+      "path": "/get-session",
+      "cookieCredentialed": false,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    }
+  ],
+  "anonymousProviderCalls": 1,
+  "cookiesLogged": false,
+  "sourceSha": "8119b7f3477c48d1b375c8d352b5b0f5bfb47109",
+  "phase": "RED",
+  "expected": "anonymousProviderCalls == 0",
+  "actual": 1,
+  "providerStubbed": false
+}

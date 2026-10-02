@@ -1,0 +1,12 @@
+{
+  "production": false,
+  "calls": [],
+  "anonymousProviderCalls": 0,
+  "cookiesLogged": false,
+  "sourceBaseSha": "8119b7f3477c48d1b375c8d352b5b0f5bfb47109",
+  "sourceRelation": "owned native rebuilt Auth guard working tree",
+  "phase": "GREEN",
+  "expected": "anonymousProviderCalls == 0",
+  "providerStubbed": false,
+  "command": "T22_AUTH_TELEMETRY_IMPORT=1; node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs --config=.playwright/t22-anonymous-session.config.ts --workers=1"
+}

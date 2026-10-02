@@ -1,0 +1,15 @@
+{
+  "revision": "f6c6b71918f2e1c8610660e0d8e9385696894c23",
+  "uncommittedExportCapability": true,
+  "generatedAt": "2026-10-02T14:38:47.249Z",
+  "syntheticOnly": true,
+  "database": "disposable pgvector/pgvector:pg16",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "rows": 500,
+  "submitMs": 5.552100000000792,
+  "previewMs": 70.61499999999978,
+  "executionMs": 78.94959999999992,
+  "downloadMs": 15.572000000000116,
+  "completed": true
+}

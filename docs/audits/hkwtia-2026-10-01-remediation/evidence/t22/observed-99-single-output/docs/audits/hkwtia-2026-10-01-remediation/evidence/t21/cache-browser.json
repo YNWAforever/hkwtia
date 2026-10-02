@@ -1,0 +1,13 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "environment": "confirmed isolated Neon/Auth; actual built Next/browser",
+  "production": false,
+  "privateSaveNotPublic": true,
+  "anonymousAndOtherEditorDenied": true,
+  "ownerEditorNoStore": true,
+  "warmedBothLocalesInvalidated": true,
+  "explicitRevertInvalidated": true,
+  "publicRowsRestored": true,
+  "retainedPublicationHistory": true,
+  "providerEffects": 0
+}

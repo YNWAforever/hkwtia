@@ -1,0 +1,9 @@
+{
+  "sourceBaseSha": "8119b7f3477c48d1b375c8d352b5b0f5bfb47109",
+  "sourceRelation": "working tree Auth guard; native build pending",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/auth-server-runtime.test.ts tests/unit/server-action-actor-boundary.test.ts tests/unit/m2-session-reuse.test.ts",
+  "pass": 123,
+  "fail": 0,
+  "skip": 0,
+  "production": false
+}

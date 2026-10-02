@@ -1,0 +1,10 @@
+import {expect,test} from "@playwright/test";
+import {readFileSync,writeFileSync} from "node:fs";
+test("anonymous protected route does not ask a provider to identify an absent credential",async({page})=>{
+ await page.goto("/admin/members");
+ const calls=readFileSync(".playwright/t22-auth-upstream-safe.jsonl","utf8").split("\n").filter(Boolean).map(x=>JSON.parse(x));
+ const anonymous=calls.filter(x=>!x.cookieCredentialed);
+ writeFileSync(".playwright/t22-anonymous-provider-safe.json",JSON.stringify({production:false,calls,anonymousProviderCalls:anonymous.length,cookiesLogged:false},null,2));
+ expect(anonymous).toEqual([]);
+ await expect(page.locator('form:has(input[type="email"])')).toBeVisible();
+});

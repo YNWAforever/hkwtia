@@ -1,0 +1,14 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "phase": "RED",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/admin-member-view.test.tsx",
+  "passed": 1,
+  "failed": 1,
+  "skipped": 0,
+  "targetBehaviour": "zh-HK Member360 must render actual Chinese ticket title from its fixture",
+  "failedTitles": [
+    "renders the actual Chinese ticket title from the Member360 fixture"
+  ],
+  "defect": "owned test fixture was encoded cp950; product component unchanged",
+  "production": false
+}
