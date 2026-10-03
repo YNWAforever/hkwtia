@@ -583,3 +583,11 @@ npm --prefix workers test
 - [x] 已確認隔離Neon套用0058（ledger57→58／零provider），來源管理中英入口及SOP。
 - [ ] 完整gate／本次exact-source Preview／新same-origin實際synthetic角色及來源維護验收。
 - [ ] 真embedding invoice、政策owner核准、T08最終正文與draft stale、T13模型安全及正式能力發布。
+
+
+### T07 final engineering evidence — 2026-10-04 Hong Kong
+
+- [x] Exact source7c6b0844: local full6514 pass/386 guarded skips/0fail, serial3440.48s; CI37137557588 shards6514pass386skip, worker57pass. Earlier9 inventory failures and incomplete memory-pressure run retained separately.
+- [x] Typecheck/build/strings exit0; lint0errors,82 existing warnings plus1 ignored reproduction helper warning.
+- [x] Confirmed isolated PG31pass0skip, Neon0058 ledger58, exact-source Preview dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT baseline17+knowledge12 native checks. HK dates, keyboard/mobile, source creation/separate approval/withdrawal; no provider/payment/messages.
+- [ ] Actual approved embedding provider/invoice, association source/approver policy, T08/T13 final-body/stale draft/real-model safety, and specific Production release authorization.

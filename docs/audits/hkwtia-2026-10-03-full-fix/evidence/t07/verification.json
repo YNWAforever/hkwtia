@@ -1,8 +1,8 @@
 {
   "task": "T07",
   "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
-  "verifiedRuntimeCommit": null,
-  "codeState": "FOCUSED_AND_ACTUAL_DATABASE_PASS_FULL_GATES_PREVIEW_RUNNING",
+  "verifiedRuntimeCommit": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+  "codeState": "SOURCE_FULL_LOCAL_CI_PG31_NATIVE29_VERIFIED_PROVIDER_POLICY_GATES",
   "production": false,
   "providerAcceptance": false,
   "externalProviderRequests": 0,
@@ -33,6 +33,11 @@
       "failed": 3,
       "log": "action-boundary-red",
       "deliberateViolationRestored": true
+    },
+    {
+      "case": "Hong Kong date label displays previous UTC date",
+      "failed": 1,
+      "log": "hk-date-red"
     }
   ],
   "focused": {
@@ -131,6 +136,212 @@
       "name": "governance-final",
       "localLog": ".playwright/full-fix-t07-governance-final.log",
       "sha256": "0a17a61db708177b645e0429196eb089a3d10145cc6498539d45aede6f34b876"
+    },
+    {
+      "name": "hk-date-red",
+      "localLog": ".playwright/full-fix-t07-hk-date-red.log",
+      "sha256": "d6cfb4167dc5d01bc5476a79a76e4bf56ad6ddc0dbfb29e8149f186368afa1c3"
+    },
+    {
+      "name": "inventory-date-green",
+      "localLog": ".playwright/full-fix-t07-inventory-date-green.log",
+      "sha256": "5c85eff4c395773b1c4fb2e4571d7425a4470eada0fa7c7494b82876f281e30f"
+    },
+    {
+      "name": "first-full-unit",
+      "localLog": ".playwright/full-fix-t07-first-full-unit.log",
+      "sha256": "a8df4941e58706117b6a5940deb8054ff08599a20b3156a6c7dbedd7b26f7e58"
+    },
+    {
+      "name": "ci-first-failed",
+      "localLog": ".playwright/full-fix-t07-ci-first-failed.log",
+      "sha256": "778c5e27d7c82f017dec2e6e530c7bcc75ecb348e524efe188a36c0bdf9e3820"
+    },
+    {
+      "name": "full-serial-final",
+      "localLog": ".playwright/full-fix-t07-full-serial.log",
+      "sha256": "5a1ecd5a2f0ae170d40695606efde75d56208d9dfcb9fa7df90c2f461e4a3703"
     }
-  ]
+  ],
+  "firstFullRun": {
+    "passed": 6504,
+    "failed": 9,
+    "skipped": 386,
+    "durationSeconds": 1618.83,
+    "filesFailed": 3,
+    "filesPassed": 771,
+    "filesSkipped": 90,
+    "resolution": "missing exact protected knowledge ownership entry; stale navigation/inventory counts corrected without weakening discovery invariants"
+  },
+  "inventoryAndDateFocused": {
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "files": 4,
+    "durationSeconds": 16.49,
+    "command": "npx vitest run tests/unit/ai-knowledge-workspace.test.tsx tests/unit/wisetech-route-parity.test.ts tests/unit/wisetech-protected-route-ownership.test.ts tests/unit/admin-app-shell.test.tsx --maxWorkers=2"
+  },
+  "rebaseVerification": {
+    "preRebase": "6b8a817bfdc74f9b00a462cd41182c1b9502efeb",
+    "postRebase": "bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+    "base": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "command": "git diff --name-only 6b8a817bfdc74f9b00a462cd41182c1b9502efeb bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+    "result": "EMPTY_DIFF_IDENTICAL_GIT_TREE",
+    "subsequentSourceCorrection": "7c6b0844 exact inventory plus Hong Kong display dates"
+  },
+  "ci": {
+    "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+    "checks": [
+      "checks",
+      "tests (1)",
+      "tests (2)",
+      "worker",
+      "quality",
+      "Vercel",
+      "Vercel Preview Comments"
+    ],
+    "allSuccess": true,
+    "originalFailedRun": 37136241745,
+    "production": false,
+    "greenRunId": 37137557588,
+    "unitPassed": 6514,
+    "unitSkipped": 386,
+    "workerPassed": 57
+  },
+  "nativeBeforeDateCorrection": {
+    "checks": 11,
+    "sourceSha": "bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+    "sourceSaveReviewWithdraw": true,
+    "embeddingProviderAcceptance": false,
+    "harnessFailure": "Existing locale cookie redirects /admin/knowledge to /zh; fixed test navigation by using real locale-switch control. No source-create bug found."
+  },
+  "fullGates": {
+    "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "uncommittedTask": "T07",
+    "productionDeployment": false,
+    "results": [
+      {
+        "name": "full-unit",
+        "command": "npm test -- --maxWorkers=2",
+        "startedAt": "2026-10-03T16:06:08.281Z",
+        "finishedAt": "2026-10-03T16:33:17.681Z",
+        "exitCode": 1,
+        "log": ".playwright/full-fix-t07-full-unit.log"
+      },
+      {
+        "name": "lint",
+        "command": "npm run lint",
+        "startedAt": "2026-10-03T16:06:08.561Z",
+        "finishedAt": "2026-10-03T16:08:52.652Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-lint.log"
+      },
+      {
+        "name": "strings",
+        "command": "npm run audit:strings",
+        "startedAt": "2026-10-03T16:06:08.788Z",
+        "finishedAt": "2026-10-03T16:06:15.438Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-strings.log"
+      },
+      {
+        "name": "types",
+        "command": "npm run typecheck",
+        "startedAt": "2026-10-03T16:06:08.995Z",
+        "finishedAt": "2026-10-03T16:07:55.572Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-types.log"
+      },
+      {
+        "name": "build",
+        "command": "npm run build",
+        "startedAt": "2026-10-03T16:07:55.572Z",
+        "finishedAt": "2026-10-03T16:13:06.020Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-build.log"
+      }
+    ]
+  },
+  "latestFullRun": "COMPLETE_PASS_6514_SKIP386_FAIL0_SERIAL",
+  "nativePreview": {
+    "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+    "deploymentId": "dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT",
+    "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
+    "baselineChecks": 17,
+    "knowledgeChecks": 12,
+    "realNeonSyntheticPasswordSignIn": true,
+    "trustedAuthUserIdMapping": true,
+    "googleVerified": false,
+    "magicLinkVerified": false,
+    "realEmbeddingVerified": false,
+    "production": false,
+    "providerRequests": 0,
+    "paymentWrites": 0
+  },
+  "finalNonUnitGates": [
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "startedAt": "2026-10-03T16:37:49.929Z",
+      "finishedAt": "2026-10-03T16:44:05.214Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-lint.log"
+    },
+    {
+      "name": "strings",
+      "command": "npm run audit:strings",
+      "startedAt": "2026-10-03T16:37:49.945Z",
+      "finishedAt": "2026-10-03T16:37:58.072Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-strings.log"
+    },
+    {
+      "name": "types",
+      "command": "npm run typecheck",
+      "startedAt": "2026-10-03T16:37:50.004Z",
+      "finishedAt": "2026-10-03T16:43:51.005Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-types.log"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "startedAt": "2026-10-03T16:43:51.014Z",
+      "finishedAt": "2026-10-03T16:51:00.440Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-build.log"
+    }
+  ],
+  "resourceFailure": {
+    "parallelRun": "INCOMPLETE_INTERRUPTED_NOT_A_PASS",
+    "verifiedOwnedParentPID": 10968,
+    "verifiedOwnedUnitPID": 51256,
+    "effects": "unit guards off; no provider/Production effects",
+    "hostMemoryMB": 32457,
+    "freeMemoryMB": 500,
+    "timeoutsChanged": false,
+    "serialRerun": "COMPLETE_6514_PASS_386_SKIP_0_FAIL"
+  },
+  "localFullUnit": {
+    "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+    "command": "npm test -- --maxWorkers=1",
+    "startedAt": "2026-10-03T17:01:12.655Z",
+    "finishedAt": "2026-10-03T17:58:40.448Z",
+    "exitCode": 0,
+    "log": ".playwright/full-fix-t07-full-serial.log",
+    "summary": [
+      " Test Files  775 passed | 90 skipped (865)",
+      "      Tests  6514 passed | 386 skipped (6900)",
+      "   Duration  3440.48s (transform 164.98s, setup 240.85s, collect 1085.83s, tests 168.66s, environment 1112.27s, prepare 183.40s)"
+    ],
+    "production": false,
+    "timeoutChanged": false,
+    "passed": 6514,
+    "skipped": 386,
+    "failed": 0,
+    "filesPassed": 775,
+    "filesSkipped": 90,
+    "durationSeconds": 3440.48,
+    "skipReason": "guarded DB/provider acceptance not opted in for npm test; PG31 separately executed and recorded, not inferred from skipped tests"
+  }
 }
