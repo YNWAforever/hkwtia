@@ -56,6 +56,7 @@ export type Member360Labels = Readonly<{
   reasonCode: string;
   noteAuthor: string;
   noteCreatedAt: string;
+  billingDetails?:string;
   stripeCustomer: string;
   stripeSubscription: string;
 }>;
@@ -183,6 +184,7 @@ export function Member360View({
             <MemberField label={labels.renewal}>
               {view.membership.renewalAt ? <time dateTime={view.membership.renewalAt}>{dateTimeFormatter.format(new Date(view.membership.renewalAt))}</time> : labels.empty}
             </MemberField>
+            <div className="sm:col-span-2"><dt className="sr-only">{labels.billingDetails??labels.stripeCustomer}</dt><dd><details className="rounded-md border p-3"><summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">{labels.billingDetails??labels.stripeCustomer}</summary><dl className="mt-3 grid gap-3">
             <MemberField label={labels.stripeCustomer}>
               {stripeCustomerHref && view.membership.stripeCustomerId ? (
                 <a
@@ -207,18 +209,19 @@ export function Member360View({
                 </a>
               ) : labels.empty}
             </MemberField>
+            </dl></details></dd></div>
           </dl>
         ) : (
           <p className="text-sm text-muted-foreground">{labels.empty}</p>
         )}
-        {(view.memberships ?? []).length > 0 && <div className="border-t border-border pt-4">
-          <h3 className="font-medium">{labels.allMemberships}</h3>
+        {(view.memberships ?? []).length > 0 && <details className="border-t border-border pt-4">
+          <summary className="min-h-11 cursor-pointer py-2 font-medium">{labels.allMemberships}</summary>
           <ul className="mt-3 space-y-3">{(view.memberships ?? []).map((item) => <li className="rounded-md border border-border p-3" key={item.id}>
             <p>{item.companyId ? view.companies.find((company) => company.id === item.companyId)?.name ?? item.companyId : labels.personalMembership}</p>
             <p className="text-sm">{labels.planCodes[item.planCode] ?? item.planCode} · {labels.membershipStatuses[item.status] ?? item.status}</p>
             <p className="text-xs text-muted-foreground">{labels.membershipId}: <code>{item.id}</code></p>
           </li>)}</ul>
-        </div>}
+        </details>}
       </section>
 
       <section

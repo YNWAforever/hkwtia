@@ -23,25 +23,13 @@ export const portalNavigationGroups = [
 ] as const satisfies readonly InternalNavGroupConfig[];
 
 export const adminNavigationGroups = [
-  {id: "workspace", links: [
-    {id: "dashboard", href: "/admin"}, {id: "at-risk", href: "/admin/at-risk"},
-    {id: "tasks", href: "/admin/tasks"}, {id: "reports", href: "/admin/reports"},
-  ]},
-  {id: "members-organizations", links: [
-    {id: "members", href: "/admin/members"}, {id: "batches", href: "/admin/batches"}, {id: "contacts", href: "/admin/contacts"},
-    {id: "segments", href: "/admin/segments"}, {id: "listings", href: "/admin/listings-review"},
-    {id: "profiles-review", href: "/admin/profiles-review"}, {id: "cohorts", href: "/admin/cohorts"},
-  ]},
-  {id: "events", links: [
-    {id: "events", href: "/admin/events-mgmt"}, {id: "approvals", href: "/admin/approvals"},
-  ]},
-  {id: "communications-follow-up", links: [
-    {id: "inbox", href: "/admin/inbox"}, {id: "campaigns", href: "/admin/campaigns"},
-    {id: "templates", href: "/admin/templates"}, {id: "automations", href: "/admin/automations"},
-  ]},
-  {id: "content-settings", links: [
-    {id: "announcements", href: "/admin/announcements"}, {id: "news", href: "/admin/news"},
-    {id: "page-copy", href: "/admin/page-copy"}, {id: "media", href: "/admin/media"},
-    {id: "partners", href: "/admin/partners"}, {id: "landing-partners", href: "/admin/landing-partners"},
-  ]},
+  {id:"workspace",links:[{id:"dashboard",href:"/admin"},{id:"tasks",href:"/admin/tasks"}]},
+  {id:"members-organizations",links:[
+    {id:"members",href:"/admin/members"},{id:"applications",href:"/admin/members/queue"},{id:"at-risk",href:"/admin/at-risk"},
+    {id:"batches",href:"/admin/batches"},{id:"contacts",href:"/admin/contacts"},{id:"segments",href:"/admin/segments"},
+    {id:"listings",href:"/admin/listings-review"},{id:"profiles-review",href:"/admin/profiles-review"},{id:"cohorts",href:"/admin/cohorts"}]},
+  {id:"events",links:[{id:"events",href:"/admin/events-mgmt"},{id:"approvals",href:"/admin/approvals"}]},
+  {id:"communications-follow-up",links:[{id:"inbox",href:"/admin/inbox"},{id:"campaigns",href:"/admin/campaigns"},{id:"templates",href:"/admin/templates"}]},
+  {id:"content-settings",links:[{id:"announcements",href:"/admin/announcements"},{id:"news",href:"/admin/news"},{id:"page-copy",href:"/admin/page-copy"},{id:"media",href:"/admin/media"},{id:"partners",href:"/admin/partners"},{id:"landing-partners",href:"/admin/landing-partners"}]},
+  {id:"system-audit",links:[{id:"reports",href:"/admin/reports"},{id:"automations",href:"/admin/automations"},{id:"job-health",href:"/admin/system/job-health"}]},
 ] as const satisfies readonly InternalNavGroupConfig[];

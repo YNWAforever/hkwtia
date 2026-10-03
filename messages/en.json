@@ -2678,10 +2678,18 @@
       "profilesAwaitingReview": "Member pages awaiting review",
       "draftNews": "Draft news posts",
       "openTasks": "Open staff tasks",
-      "applicationQueue": "View application progress"
+      "applicationQueue": "View application progress",
+      "unfinishedApplications": "Unfinished membership applications",
+      "submittedApplications": "Submitted membership applications",
+      "denominators": "Records and entitlements",
+      "denominatorHelp": "Profiles, active membership records and company seats are different counts. Active memberships include free or special grants and do not mean every record is paid.",
+      "profileRecords": "Profile records",
+      "activeMemberships": "Active membership records",
+      "companySeats": "Unrevoked company seats"
     },
     "navigation": {
-      "groups": {"workspace": "Workspace", "membersOrganizations": "Members & organisations", "events": "Events", "communicationsFollowUp": "Communications & follow-up", "contentSettings": "Content & settings"},
+      "groups": {"workspace": "Daily work", "membersOrganizations": "Members & organisations", "events": "Events and payments", "communicationsFollowUp": "Messages and support", "contentSettings": "Site content",
+        "systemAudit": "System and audit"},
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
       "inbox": "Inbox",
@@ -3188,7 +3196,13 @@
         "unavailable": "Batch operations are not available in this environment. You can still view members and batch history.",
         "exportUnavailable": "Member export is not available in this environment."},
       "savedViews": {"title": "Saved views", "name": "View name", "save": "Save view", "saved": "View saved", "invalid": "Check the view name and filters.", "error": "Could not save the view. Try again.", "shared": "Shared with staff", "empty": "No saved views yet."},
-      "filters": {"status": "Membership status", "plan": "Plan", "renewalFrom": "Renewal from (Hong Kong date)", "renewalTo": "Renewal to (Hong Kong date)", "companyId": "Company ID", "locale": "Preferred language", "completeness": "Profile completeness", "sort": "Sort by", "apply": "Apply filters", "clear": "Clear filters", "any": "Any", "complete": "Complete", "incomplete": "Missing contact details", "nameAsc": "Name A–Z", "nameDesc": "Name Z–A", "renewalAsc": "Renewal soonest", "english": "English", "chinese": "繁體中文", "viewsLabel": "Default views", "views": {"active": "Active", "due30": "Due within 30 days", "due60": "Due within 60 days", "due90": "Due within 90 days", "pastDue": "Past due", "expired": "Expired", "missingData": "Missing details"}},
+      "filters": {"status": "Membership status", "plan": "Plan", "renewalFrom": "Renewal from (Hong Kong date)", "renewalTo": "Renewal to (Hong Kong date)", "companyId": "Company name", "locale": "Preferred language", "completeness": "Profile completeness", "sort": "Sort by", "apply": "Apply filters", "clear": "Clear filters", "any": "Any", "complete": "Complete", "incomplete": "Missing contact details", "nameAsc": "Name A–Z", "nameDesc": "Name Z–A", "renewalAsc": "Renewal soonest", "english": "English", "chinese": "繁體中文", "viewsLabel": "Default views", "views": {"active": "Active", "due30": "Due within 30 days", "due60": "Due within 60 days", "due90": "Due within 90 days", "pastDue": "Past due", "expired": "Expired", "missingData": "Missing details"},
+        "advanced": "Advanced filters",
+        "moreTools": "Member tools and saved views",
+        "companyEmpty": "No matching companies.",
+        "companyError": "Company names could not be loaded. Please retry.",
+        "companyChoose": "Choose a registered company result or clear the search.",
+        "companySearching": "Searching companies…"},
       "view": "View",
       "planCodes": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
       "statusCodes": {"active": "Active", "past_due": "Past due", "cancel_at_period_end": "Ends at period end", "pending_review": "Pending review", "pending_payment": "Awaiting payment", "cancelled": "Cancelled", "expired": "Expired"},
@@ -3961,6 +3975,68 @@
       "preview": "Preview campaign drafts",
       "error": "Unable to prepare these communications. Check the selected segment and try again.",
       "empty": "No matching members in this segment."
+    },
+    "workQueue": {
+      "title": "Daily work",
+      "description": "Review existing applications, memberships, payments and support records. Opening work does not change rights or send messages.",
+      "mine": "My work",
+      "unassigned": "Unassigned",
+      "all": "All work",
+      "empty": "No outstanding work in this scope.",
+      "unavailable": "Work could not be loaded. Please retry.",
+      "summary": "Work",
+      "owner": "Owner",
+      "due": "Due (Hong Kong time)",
+      "nextAction": "Next action",
+      "overdue": "Overdue",
+      "assigned": "Assigned",
+      "noDue": "No due date set",
+      "next": "Next work page",
+      "first": "Return to first page",
+      "kinds": {
+        "application": "Application",
+        "renewal": "Renewal",
+        "payment": "Payment follow-up",
+        "support": "Support",
+        "content": "Content"
+      },
+      "actions": {
+        "open_case": "Open case",
+        "contact_applicant": "Contact applicant",
+        "await_documents": "Follow up documents",
+        "review_ready": "Review application",
+        "await_payment": "Follow up payment",
+        "support_reconciliation": "Reconcile payment records",
+        "review_renewal": "Review renewal",
+        "open_conversation": "Open conversation",
+        "review_task": "Review task",
+        "edit_content": "Edit content",
+        "edit_private_copy": "Edit private draft"
+      },
+      "states": {
+        "draft": "Unfinished application / draft",
+        "pending_review": "Submitted for review",
+        "pending_payment": "Awaiting payment",
+        "active": "Active membership",
+        "past_due": "Payment past due",
+        "human": "Human follow-up",
+        "open": "Open"
+      }
+    },
+    "memberMaintenance": {
+      "title": "Member maintenance summary",
+      "identity": "Sign-in identity link record",
+      "linked": "Sign-in subject link recorded",
+      "unknown": "Identity link not confirmed",
+      "payment": "Payment attempt state",
+      "none": "No follow-up / record",
+      "billingDetails": "Payment provider identifiers",
+      "paymentStates": {
+        "active": "In progress",
+        "completed": "Attempt completed; verify membership separately",
+        "abandoned": "Abandoned",
+        "expired": "Expired"
+      }
     }
   },
   "MarketingExtras": {

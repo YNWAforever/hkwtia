@@ -72,7 +72,7 @@ describe("admin presentation", () => {
 
     expect(page.match(/<h1/g)).toHaveLength(1);
     expect(nav).toContain(`aria-label="${labels.navigation.label}"`);
-    expect(nav.match(/class="space-y-1"/g)).toHaveLength(5);
+    expect(nav.match(/class="space-y-1"/g)).toHaveLength(6);
     expect(nav).not.toContain("<summary");
     expect(nav).toContain(`<span>${labels.navigation.automations}</span>`);
     expect(nav).toContain("/admin/automations");

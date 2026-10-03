@@ -1,0 +1,45 @@
+{
+  "sourceSha": "57f0a8085130f82e65c02919d0681d1624d97687",
+  "environment": "Windows Node24.18.0 Next16.3.6; actual built loopback and confirmed isolated Neon/Auth are separate from Production/Preview deployment",
+  "full": {
+    "passed": 6272,
+    "skipped": 284,
+    "failed": 0,
+    "passFiles": 744,
+    "allSkipFiles": 82
+  },
+  "fullCommand": "npm.cmd test -- --maxWorkers=4 --reporter=json --outputFile=.playwright/t18-full-contrast-final-results.json",
+  "lint": {
+    "command": "npm.cmd run lint",
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 67
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exitCode": 0
+  },
+  "strings": {
+    "command": "npm.cmd run audit:strings",
+    "exitCode": 0,
+    "tsxFiles": 307
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "staticPages": 267
+  },
+  "browser": {
+    "command": "node --env-file=.env.local .playwright/t18-browser.mjs",
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 36.0,
+    "axeScans": 14,
+    "axeViolations": 0,
+    "incomplete": "Exact mobile/drawer rule IDs retained in per-locale receipts; human checks T22"
+  },
+  "production": false,
+  "migration": "none",
+  "newFlags": "none"
+}

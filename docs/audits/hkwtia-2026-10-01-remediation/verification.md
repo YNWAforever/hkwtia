@@ -325,3 +325,16 @@ Release: flag off by default; approved schema0056 first, compatible app/private 
 T17 final candidate source `7e64f35502e140f600dc8446cbc75cceb95c2c70`: full6258pass/275skip/0fail; lint0errors/67existingwarnings; typecheck0; strings304TSX/0 violations; Next16.3.6 build267static pages; built Chromium2pass/0skip/0fail54.5s. Exact commands and receipts:evidence/t17/gates.json. Media79 real static fixture images, search79→1, native selectOption, actual naturalWidth>0, English desktop/Chinese390px, eventwrites0/provideruploads0; fixtures retired after test. Tab focus verified; Windows headless native popup Arrow/End attempts failed and are not counted as successful keyboard selection. That manual keyboard criterion remains T22. Source JSON formatting was minimized with structural equality verified; existing translation values unchanged.
 
 Parent PR116 CI quality/checks/tests1/tests2/worker and Vercel Preview build read back SUCCESS. https://vercel.com/ynwaforevers-projects/hkwtia/CgaeWBmNC48N7YdpL9guvo4HZExJ . No isolated cloud acceptance claim.
+
+
+## T18 / daily workspace candidate
+
+Source `57f0a8085130f82e65c02919d0681d1624d97687`: scoped source/UI/actual isolated SQL/browser verified; no Production or provider effects. Six groups/25 old+existing destinations; bounded20 work aggregation/keyset at microsecond precision; owned private CMS drafts only; separate draft/submitted and profile/active/seat denominators; private company-name keyboard autocomplete with stale-response fencing and validity; Member360 identity-link/membership/payment-attempt/owner/next summary and folded low-frequency IDs/history. SQL remains in the existing repository layer. No migration/new flag.
+
+Actual focused185pass/1skip/0fail,13files,9SQL +176unit/actor/UI; skipped legacy Neon dashboard parity has its exact missing environment in focused.json. Another23 existing member regressions pass. Initial full7fail: old count/group/reader fixtures, actual repository-boundary violation, Auth lockfile subprocess contention; fixed fixtures and repository placement, unchanged boundary/timeout, maxWorkers4 rerun.
+
+Actual built Chromium2pass/0skip/0fail36s, en/zh390/768/1440, drawer30Tabs/trap/Escapefocusreturn, scopes/case deep link, company ArrowDown/Enter, GET/Back, truthful independent pending_payment/completed attempt. Axe exposed Overdue4.37:1; scoped deeper red repairs it. Fourteen scans0violations; incomplete mobile contrast/drawer attribute/focus rules remain recorded for humanT22. Fixture setup/cell/link locator failures are harness errors, not product fixes.
+
+Final full6272pass/284skip/0fail;744passfiles/82all-skipfiles. Exact commands/sourceSha/environment gates and skip names: evidence/t18/gates.json and evidence/gates/t18-skips.json. Lint0errors/67existingwarnings;typecheck0;strings307TSX;buildNext16.3.6/267pages. Raw receipts, path mappings and scoped UI review: evidence/t18/README.md. T19/T20/T21/T22/T23 continue; humanSOP/fullroles/financialreport/batchpreview/Preview/Production gates remain independent.
+
+Parent PR117 CI checks/quality/tests1/tests2/worker and Vercel Preview build read back SUCCESS2026-10-02: https://vercel.com/ynwaforevers-projects/hkwtia/3ouB85Z1GAJfEzz3mUHHnGqWXYkB . Build success does not establish isolated cloud acceptance.
