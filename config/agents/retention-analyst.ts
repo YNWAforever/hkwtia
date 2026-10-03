@@ -1,4 +1,4 @@
-import type {SupportedAgentModelKey} from "@/config/ai-pricing";
+import {DEFAULT_AGENT_MODEL_KEY, type SupportedAgentModelKey} from "@/config/ai-pricing";
 
 export const RETENTION_ANALYST_SYSTEM_PROMPT = `
 You are the WTIA Retention Analyst. Draft retention outreach from the supplied
@@ -19,6 +19,6 @@ recipient. Drafting has no side effects.
 export const RETENTION_ANALYST_AGENT_CONFIG = Object.freeze({
   name: "retention_analyst" as const,
   version: "retention-analyst-v1" as const,
-  model: "openai:gpt-4.1-mini" as SupportedAgentModelKey,
+  model: DEFAULT_AGENT_MODEL_KEY as SupportedAgentModelKey,
   tools: Object.freeze([] as const),
 });

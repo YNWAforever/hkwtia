@@ -15,3 +15,8 @@ export const AI_MODEL_PRICING = {
 } as const satisfies Readonly<Record<string, AgentModelPrice>>;
 
 export type SupportedAgentModelKey = keyof typeof AI_MODEL_PRICING;
+
+/** Existing model choice; provider routing imports this same server default. */
+export const DEFAULT_AGENT_MODEL_KEY = "openai:gpt-4.1-mini" as const;
+/** Historical repository rates, retained until T06 verifies a new price version. */
+export const AI_PRICING_VERSION = "legacy-2026-10-03" as const;

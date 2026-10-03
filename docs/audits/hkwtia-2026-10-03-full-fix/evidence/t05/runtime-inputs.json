@@ -1,0 +1,59 @@
+{
+  "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+  "task": "T05",
+  "files": [
+    {
+      "path": ".env.example",
+      "sha256": "b96e2d3a8537013caaaf11b9de5b41c81eb878c11bdc96812b804f70352cc1b2"
+    },
+    {
+      "path": "config/agents/board-reporter.ts",
+      "sha256": "62447b785cbbe0aa29984a25203fb7d0e8fb9e6812122af662aaf55530f14af7"
+    },
+    {
+      "path": "config/agents/retention-analyst.ts",
+      "sha256": "902544576ba1fa1d0b4acf66a3ea3d678251c9aa097c4ba3457b0d2b560e2c00"
+    },
+    {
+      "path": "config/ai-pricing.ts",
+      "sha256": "ed9d8a2c6dd69529c1cd3eef94f4975719f997f5ce25539fcf85ff4ec8f07587"
+    },
+    {
+      "path": "lib/ai/model.ts",
+      "sha256": "e406dc071bab08427c006c98745b0a7bcaf6089c6a73ff494012a2ad544514ce"
+    },
+    {
+      "path": "lib/ai/provider.ts",
+      "sha256": "7e5de7a8cff52ae3e7eb5cdbd5c473c0e32b8f4a52f9e0525dc696d098c8418c"
+    },
+    {
+      "path": "lib/ai/providers/ai-sdk.ts",
+      "sha256": "fa3bbe5d9491b93dfddc6a8a4aaa85b4459816d0776d9c6681a5d58fdacc7d1e"
+    },
+    {
+      "path": "lib/ai/providers/anthropic.ts",
+      "sha256": "e90ad54edfcd46a11ad0e695213c6e9531ffa9f9754d507256fa11f1da1a1937"
+    },
+    {
+      "path": "lib/ai/providers/openai.ts",
+      "sha256": "c113522449179d8d0dee6139f18e9ddd429395348faaeb71706a66084f508b8a"
+    },
+    {
+      "path": "lib/ai/providers/opencode.ts",
+      "sha256": "d90d60cf1787dd9f988662d801b57b0966d0cb2baa36a2c696418cbad4f33b9b"
+    },
+    {
+      "path": "lib/ai/providers/registry.ts",
+      "sha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+    },
+    {
+      "path": "lib/ai/runtime.ts",
+      "sha256": "1bb87a5f92809e84a1c9fa98df14c5a828586eeb03a5ec22f478234c7c0b0142"
+    },
+    {
+      "path": "lib/config/env.ts",
+      "sha256": "5f3c9d8e91fa4061d2f92df4389df48988b8e7f38c4e612edbf659cc30dbc44d"
+    }
+  ],
+  "verifiedRuntimeCommit": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3"
+}

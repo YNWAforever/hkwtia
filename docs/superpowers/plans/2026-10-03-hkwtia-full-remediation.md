@@ -213,11 +213,11 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `ModelRoute = {key:string;provider:'openai'|'anthropic'|'opencode';protocol:'responses'|'chat-completions'|'messages';modelId:string;approvedForAdmin:boolean;supportsTools:boolean;supportsJson:boolean;pricingVersion:string;maxInputTokens:number;maxOutputTokens:number;timeoutMs:number}`；`resolveAdminModel(task:AdminAiTask,registry:Readonly<Record<AdminAiTask,ModelRoute>>):ModelRoute` 只能解析 server 白名單。不要改變外層 AgentProvider 的 guarded tool contract。
 
-- [ ] 寫 `unapproved_route_rejected_before_network`、`protocol_matches_model_route`、`client_base_url_and_model_are_rejected`；tool/JSON 不支援時不得靜默降級成不受控文字。
-- [ ] Run `npx vitest run tests/unit/ai-provider-registry.test.ts`，先失敗。
-- [ ] 用 repo 現有 SDK adapters 實作對應 protocol；如必需加入 compatible adapter，核對鎖定 SDK 相容版本。正式 Go base 固定 `https://opencode.ai/zen/go/v1`，只有用途批准時可開；Go credentials 使用獨立 server env 名稱。
-- [ ] 合法啟用時採真實應用 UA 與不含個資的穩定 opaque session ID；禁止改 UA 偽裝用途。所有 scheduled agents 也使用同一 registry，不再散落模型選擇。
-- [ ] 用 mock endpoint contract 驗 stream、JSON、tool call、429、timeout；無 provider 採用確認時 adapter 保持 disabled，提交 `feat: add approved AI provider routing`。
+- [x] 寫 `unapproved_route_rejected_before_network`、`protocol_matches_model_route`、`client_base_url_and_model_are_rejected`；tool/JSON 不支援時不得靜默降級成不受控文字。
+- [x] Run `npx vitest run tests/unit/ai-provider-registry.test.ts`，先失敗。
+- [x] 用 repo 現有 SDK adapters 實作對應 protocol；如必需加入 compatible adapter，核對鎖定 SDK 相容版本。正式 Go base 固定 `https://opencode.ai/zen/go/v1`，只有用途批准時可開；Go credentials 使用獨立 server env 名稱。
+- [x] 合法啟用時採真實應用 UA 與不含個資的穩定 opaque session ID；禁止改 UA 偽裝用途。所有 scheduled agents 也使用同一 registry，不再散落模型選擇。
+- [x] 用 mock endpoint contract 驗 stream、JSON、tool call、429、timeout；未核准 OpenCode 行政用途保持 disabled。T05 code `d1d40fb2`：209 focused、6464 full pass／339 skip；lint/typecheck/strings/build exit0（見 `docs/audits/hkwtia-2026-10-03-full-fix/evidence/t05/verification.json`）。沒有 live provider receipt。。
 
 
 **界線：** OpenCode Go adapter 是選配。文件以證據日的官方資訊為依據，實作者启用前重新查官方服務用途、protocol、model capability、資料政策與價格；不能因 API 可連通就視為批准。client 不能傳 baseURL/model/provider。fallback 也必須是已批准模型、同一資料 scope 且預算允許；不得在 timeout 可能已收費時默默再呼叫。保留 Concierge、Writer、Retention、Board 四類舊 agent 的 guards。

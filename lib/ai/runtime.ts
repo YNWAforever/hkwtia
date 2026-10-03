@@ -1,4 +1,5 @@
 import {randomUUID} from "node:crypto";
+import {assertRouteInputWithinBounds, createAdminModelRegistry, resolveAdminModel, taskForAgent, type AdminModelRegistry} from "@/lib/ai/providers/registry";
 
 import {
   requireAgentRunActor,
@@ -176,6 +177,7 @@ export class AgentRuntimeError extends Error {
 type AgentRuntimeDependencies = Readonly<{
   agentRuns: AgentRunsLifecycle;
   providerFactories?: Readonly<Record<AgentProviderName, AgentProviderFactory>>;
+  modelRegistry?: AdminModelRegistry;
   createRunId?: () => string;
   now?: () => Date;
 }>;
@@ -183,8 +185,8 @@ type AgentRuntimeDependencies = Readonly<{
 const defaultProviderFactories: Readonly<
   Record<AgentProviderName, AgentProviderFactory>
 > = {
-  openai: ({apiKey}) => createOpenAIAgentProvider(apiKey),
-  anthropic: ({apiKey}) => createAnthropicAgentProvider(apiKey),
+  openai: ({apiKey, route}) => createOpenAIAgentProvider(apiKey, {}, route),
+  anthropic: ({apiKey, route}) => createAnthropicAgentProvider(apiKey, {}, route),
 };
 
 const ZERO_USAGE: AgentUsage = {inputTokens: 0, outputTokens: 0};
@@ -766,7 +768,16 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       let resolvedModel;
       let providerResult;
       try {
-        resolvedModel = resolveAgentModel(request.model);
+        const route = resolveAdminModel(
+          taskForAgent(actor.agent),
+          dependencies.modelRegistry ?? createAdminModelRegistry(request.model),
+        );
+        if (route.key !== request.model
+          || (Object.keys(request.tools).length > 0 && !route.supportsTools)) {
+          throw new AgentModelConfigurationError("AGENT_ROUTE_INVALID");
+        }
+        await assertRouteInputWithinBounds(route, request);
+        resolvedModel = resolveAgentModel(route.key);
         await agentRuns.configureModel(actor, {
           provider: resolvedModel.provider,
           model: resolvedModel.modelId,
@@ -776,7 +787,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           throw new AgentRuntimeError("configuration_error");
         }
         const factory = providerFactories[resolvedModel.provider];
-        const provider = factory({apiKey});
+        const provider = factory({apiKey, route});
         providerResult = await provider.stream({
           model: resolvedModel.modelId,
           system: request.system,

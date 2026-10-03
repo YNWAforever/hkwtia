@@ -1,3 +1,4 @@
+import type {ModelRoute} from "@/lib/ai/providers/registry";
 import type {ZodTypeAny} from "zod";
 
 export const MAX_AGENT_STEPS = 8;
@@ -76,7 +77,7 @@ export type AgentProvider = Readonly<{
 }>;
 
 export type AgentProviderFactory = (
-  options: Readonly<{apiKey: string}>,
+  options: Readonly<{apiKey: string; route?: ModelRoute}>,
 ) => AgentProvider;
 
 export class AgentInvalidProviderResponseError extends Error {

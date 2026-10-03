@@ -1,0 +1,22 @@
+{
+  "pullRequest": "https://github.com/YNWAforever/hkwtia/pull/125",
+  "reviewedHead": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+  "mergeSha": "4867d50e6b2399938839b78075042d74fdd6bae5",
+  "mergedAt": "2026-10-03T11:45:15Z",
+  "allChecks": [
+    "checks",
+    "quality",
+    "tests (1)",
+    "tests (2)",
+    "worker",
+    "Vercel",
+    "Vercel Preview Comments"
+  ],
+  "allChecksState": "PASS",
+  "productionBranch": "release",
+  "productionRelease": false,
+  "previewRuntimeAcceptance": "17_NATIVE_CHECKS_PASS_AT_REVIEWED_HEAD_A601",
+  "unrelatedDirtyFilesPreserved": true,
+  "previewRuntimeReceipt": "first-slice-preview-verified.json",
+  "previewInitialProtectionGatePreserved": "first-slice-preview-blocked.json"
+}

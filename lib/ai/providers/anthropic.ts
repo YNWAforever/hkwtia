@@ -1,3 +1,5 @@
+import "server-only";
+import {createAdminModelRegistry, validateModelRoute, type ModelRoute} from "@/lib/ai/providers/registry";
 import {
   createAnthropic,
   type AnthropicProviderSettings,
@@ -31,7 +33,10 @@ export type AnthropicAgentProviderDependencies =
 export function createAnthropicAgentProvider(
   apiKey: string,
   dependencies: AnthropicAgentProviderDependencies = {},
+  configuredRoute: ModelRoute = createAdminModelRegistry("anthropic:claude-sonnet-4-6").concierge,
 ): AgentProvider {
+  const route = validateModelRoute(configuredRoute);
+  if (route.provider !== "anthropic") throw new Error("AI_ROUTE_PROVIDER_MISMATCH");
   const providerFactory = dependencies.createProvider
     ?? createProductionAnthropicProvider;
   const provider = providerFactory({apiKey});
@@ -39,5 +44,6 @@ export function createAnthropicAgentProvider(
   return createAiSdkAgentProvider(
     (modelId) => provider(modelId),
     dependencies,
+    route,
   );
 }

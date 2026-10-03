@@ -1,3 +1,4 @@
+import {assertRouteInputWithinBounds, type ModelRoute} from "@/lib/ai/providers/registry";
 import {
   stepCountIs,
   streamText,
@@ -144,6 +145,7 @@ function appendCitationInputs(target: unknown[], inputs: unknown): void {
 export function createAiSdkAgentProvider(
   createModel: (modelId: string) => LanguageModel,
   overrides: AiSdkAdapterOverrides = {},
+  route?: ModelRoute,
 ): AgentProvider {
   const dependencies: AiSdkDependencies = {
     ...defaultDependencies,
@@ -152,8 +154,13 @@ export function createAiSdkAgentProvider(
 
   return {
     stream(request: AgentStreamRequest) {
+      if (route && (request.model !== route.modelId
+        || (Object.keys(request.tools).length > 0 && !route.supportsTools))) {
+        throw new Error("AI_ROUTE_REQUEST_MISMATCH");
+      }
       let toolExecutions = 0;
       let toolFailure: AgentToolExecutionError | undefined;
+      let providerFailure: unknown;
       const citationInputs: unknown[] = [];
       const tools = Object.fromEntries(
         Object.entries(request.tools).map(([name, agentTool]) => [
@@ -191,10 +198,19 @@ export function createAiSdkAgentProvider(
         tools,
         stopWhen: dependencies.createStopCondition(MAX_AGENT_STEPS),
         maxRetries: 0,
+        ...(route ? {
+          maxOutputTokens: route.maxOutputTokens, timeout: route.timeoutMs,
+          prepareStep: async ({messages}: {messages: readonly unknown[]}) => {
+            await assertRouteInputWithinBounds(route, {...request, messages});
+            return undefined;
+          },
+        } : {}),
         ...(request.abortSignal === undefined
           ? {}
           : {abortSignal: request.abortSignal}),
-        onError: () => undefined,
+        // Preserve the original status/timeout for the runtime's fixed public code.
+        // SDK usage can reject with a generic NoOutputGeneratedError instead.
+        onError: ({error}) => { providerFailure = error; },
       } satisfies AiSdkStreamOptions;
       const sdkResult = dependencies.streamText(options);
 
@@ -206,6 +222,7 @@ export function createAiSdkAgentProvider(
           Promise.resolve(sdkResult.steps),
         ]).then(([usage, finishReason, steps]) => {
           if (toolFailure) throw toolFailure;
+          if (providerFailure !== undefined) throw providerFailure;
           return {
             usage: normalizeUsage(usage),
             finishReason: normalizeFinishReason(finishReason),
@@ -213,6 +230,9 @@ export function createAiSdkAgentProvider(
             toolExecutions,
             citations: normalizeAgentCitations(citationInputs),
           };
+        }).catch((error: unknown) => {
+          if (toolFailure) throw toolFailure;
+          throw providerFailure ?? error;
         }),
       };
     },
