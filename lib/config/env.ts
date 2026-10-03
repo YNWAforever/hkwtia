@@ -3,6 +3,7 @@ import "server-only";
 import {z} from "zod";
 
 import {parseAgentModel} from "@/lib/ai/model";
+import {DEFAULT_AGENT_MODEL_KEY} from "@/config/ai-pricing";
 
 export {parseAgentModel};
 export type {AgentModel} from "@/lib/ai/model";
@@ -210,8 +211,8 @@ export const runLiveWoztellSchema = z.preprocess(
 
 const aiEnvironmentSchema = z.object({
   AGENTS_ENABLED: z.string().optional().transform((value) => value === "true"),
-  AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
-  AGENT_MODEL_WRITER: z.string().default("openai:gpt-4.1-mini"),
+  AGENT_MODEL_CONCIERGE: z.string().default(DEFAULT_AGENT_MODEL_KEY),
+  AGENT_MODEL_WRITER: z.string().default(DEFAULT_AGENT_MODEL_KEY),
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   CONCIERGE_COOKIE_SECRET: z.string().refine(

@@ -1,3 +1,5 @@
+import "server-only";
+import {DEFAULT_ADMIN_MODEL_REGISTRY, validateModelRoute, type ModelRoute} from "@/lib/ai/providers/registry";
 import {
   createOpenAI,
   type OpenAIProviderSettings,
@@ -12,14 +14,15 @@ import type {AgentProvider} from "@/lib/ai/provider";
 
 type OpenAIProviderFactory = (
   settings: OpenAIProviderSettings,
+  protocol?: ModelRoute["protocol"],
 ) => (modelId: string) => LanguageModel;
 
 const createProductionOpenAIProvider = (
-  (settings: OpenAIProviderSettings) => {
+  (settings: OpenAIProviderSettings, protocol: ModelRoute["protocol"] = "responses") => {
     const provider = createOpenAI(settings);
-    return (modelId: string) => provider(
-      modelId as Parameters<typeof provider>[0],
-    );
+    return (modelId: string) => protocol === "chat-completions"
+      ? provider.chat(modelId)
+      : provider.responses(modelId);
   }
 ) satisfies OpenAIProviderFactory;
 
@@ -30,13 +33,17 @@ export type OpenAIAgentProviderDependencies = AiSdkAdapterOverrides & Readonly<{
 export function createOpenAIAgentProvider(
   apiKey: string,
   dependencies: OpenAIAgentProviderDependencies = {},
+  configuredRoute: ModelRoute = DEFAULT_ADMIN_MODEL_REGISTRY.concierge,
 ): AgentProvider {
+  const route = validateModelRoute(configuredRoute);
+  if (route.provider !== "openai") throw new Error("AI_ROUTE_PROVIDER_MISMATCH");
   const providerFactory = dependencies.createProvider
     ?? createProductionOpenAIProvider;
-  const provider = providerFactory({apiKey});
+  const provider = providerFactory({apiKey}, route.protocol);
 
   return createAiSdkAgentProvider(
     (modelId) => provider(modelId),
     dependencies,
+    route,
   );
 }
