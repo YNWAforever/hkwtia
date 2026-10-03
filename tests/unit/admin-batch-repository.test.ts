@@ -1,6 +1,6 @@
 import {PgDialect} from "drizzle-orm/pg-core";
 import type {SQL} from "drizzle-orm";
-import {describe, expect, it} from "vitest";
+import {beforeEach, afterEach, describe, expect, it, vi} from "vitest";
 
 import {createAdminBatchesRepository} from "@/lib/db/repos/admin-batches";
 import {batchRequestSchema, batchPreviewDigest} from "@/lib/admin/batches/types";
@@ -18,6 +18,8 @@ function fakeDb(respond: (query: string, params: unknown[]) => unknown) {
 }
 
 describe("durable admin batch repository", () => {
+  beforeEach(() => vi.stubEnv("ADMIN_BATCH_ENABLED", "true"));
+  afterEach(() => vi.unstubAllEnvs());
   it("binds creation to the server actor and rejects an idempotency-key reuse with another request", async () => {
     const {database, statements} = fakeDb((query) => query.includes("INSERT INTO") ? [] : [{id: batchId, requestDigest: "different"}]);
     const repo = createAdminBatchesRepository(async () => database);

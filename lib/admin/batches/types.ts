@@ -36,7 +36,7 @@ export type BatchTarget = Readonly<{type: "profile" | "membership" | "company" |
 export const batchTargetSchema = z.object({type: z.enum(["profile", "membership", "company", "ticket_seat", "import_row", "event"]), id: z.string().trim().min(1).max(200)}).strict();
 export type BatchPreviewItem = Readonly<{target: BatchTarget; previewStatus: "eligible" | "skipped" | "blocked"; eligible: boolean; reasonCode: string | null; before: Readonly<Record<string, unknown>>; after: Readonly<Record<string, unknown>>; expectedVersion: string}>;
 export type BatchProgressItem = BatchPreviewItem & Readonly<{state: BatchItemState; attemptCount: number; errorCode: string | null; resultRef: string | null}>;
-export type BatchPreview = Readonly<{counters: Readonly<Record<BatchItemState, number>>; batchId: string; operation: BatchOperation; state: BatchState; digest: string; expiresAt: string; total: number; eligible: number; skipped: number; blocked: number; items: readonly BatchProgressItem[]; nextCursor?: string | null; retryableFailed?: boolean}>;
+export type BatchPreview = Readonly<{counters: Readonly<Record<BatchItemState, number>>; batchId: string; operation: BatchOperation; state: BatchState; digest: string; expiresAt: string; total: number; eligible: number; skipped: number; blocked: number; items: readonly BatchProgressItem[]; nextCursor?: string | null; retryableFailed?: boolean; preparationErrorCode?: string | null}>;
 
 function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);
@@ -60,9 +60,18 @@ function boundedSetting(value: string | undefined, fallback: number, min: number
 }
 export function batchRuntimeConfig(env: NodeJS.ProcessEnv = process.env) {
   return {
+    timeBudgetMs: boundedSetting(env.ADMIN_BATCH_TIME_BUDGET_MS, 6000, 1000, 7000),
     maxItems: boundedSetting(env.ADMIN_BATCH_MAX_ITEMS, 5000, 1, 5000),
     claimSize: boundedSetting(env.ADMIN_BATCH_CLAIM_SIZE, 50, 1, 50),
     maxAttempts: boundedSetting(env.ADMIN_BATCH_MAX_ATTEMPTS, 5, 1, 5),
     previewTtlMs: boundedSetting(env.ADMIN_BATCH_PREVIEW_TTL_MINUTES, 30, 1, 120) * 60_000,
   } as const;
+}
+
+/** Unknown effects require reconciliation; a transient prefix never overrides that boundary. */
+export function batchFailureRequiresReconciliation(code: string | null | undefined): boolean {
+  return Boolean(code && /uncertain|accepted_timeout|recovery_required/i.test(code));
+}
+export function batchFailureIsSafeToRetry(code: string | null | undefined, attempt: number, maxAttempts = 5): boolean {
+  return Boolean(code?.startsWith("TRANSIENT_") && !batchFailureRequiresReconciliation(code) && Number.isSafeInteger(attempt) && attempt >= 0 && attempt < maxAttempts);
 }

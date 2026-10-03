@@ -1,13 +1,14 @@
 import Link from "next/link";
 import {commitAdminBatchAction, retryAdminBatchAction, retryAdminBatchItemAction, cancelAdminBatchAction} from "@/lib/admin/batches/actions";
 import {BatchProgressPoller} from "@/components/admin/batch-progress";
-import {batchRuntimeConfig, type BatchItemFilter, type BatchPreview, type BatchProgressItem} from "@/lib/admin/batches/types";
+import {batchFailureIsSafeToRetry, batchFailureRequiresReconciliation, batchRuntimeConfig, type BatchItemFilter, type BatchPreview, type BatchProgressItem} from "@/lib/admin/batches/types";
 
 export type BatchLabels = Readonly<{
   title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>;
   total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string;
   reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string;
   empty: string; manualReview: string; more: string; progressUnavailable: string; locale: string;
+  reasonUncertain?: string; preparationFailed?: string; cancelPartial?: string; confirm?: string;
   change: string; noChange: string; idLabel: string; targetTypes: Record<string, string>;
   fieldNames: Record<string, string>; reasonTransient: string; reasonChanged: string;
   reasonUnchanged: string; reasonOther: string; allItems: string; failedItems: string; retryItem: string; itemFilter: string;
@@ -28,6 +29,7 @@ function targetName(item: BatchProgressItem): string | null {
 }
 
 function reasonLabel(code: string, labels: BatchLabels): string {
+  if (batchFailureRequiresReconciliation(code)) return labels.reasonUncertain ?? labels.manualReview;
   if (code.startsWith("TRANSIENT_")) return labels.reasonTransient;
   if (code === "UNCHANGED") return labels.reasonUnchanged;
   if (code.includes("CHANGED") || code.includes("VERSION")) return labels.reasonChanged;
@@ -37,7 +39,7 @@ function reasonLabel(code: string, labels: BatchLabels): string {
 export function BatchPreviewPanel({preview, labels, pageHref, filter = "all"}: {preview: BatchPreview; labels: BatchLabels; pageHref?: string; filter?: BatchItemFilter}) {
   const ready = preview.state === "ready" && preview.eligible > 0;
   const maxAttempts = batchRuntimeConfig().maxAttempts;
-  const retryable = ["running", "completed_with_errors"].includes(preview.state) && (preview.retryableFailed ?? preview.items.some(item => item.state === "failed" && item.errorCode?.startsWith("TRANSIENT_") && item.attemptCount < maxAttempts));
+  const retryable = ["running", "completed_with_errors"].includes(preview.state) && (preview.retryableFailed ?? preview.items.some(item => item.state === "failed" && batchFailureIsSafeToRetry(item.errorCode, item.attemptCount, maxAttempts)));
   const expires = preview.expiresAt && preview.state === "ready"
     ? new Intl.DateTimeFormat(labels.locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(new Date(preview.expiresAt)) : null;
 
@@ -46,12 +48,15 @@ export function BatchPreviewPanel({preview, labels, pageHref, filter = "all"}: {
     <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <div><dt>{labels.total}</dt><dd className="text-2xl font-semibold">{preview.total}</dd></div>
       <div><dt>{labels.eligible}</dt><dd className="text-2xl font-semibold">{preview.eligible}</dd></div>
+      <div><dt>{labels.counters.skipped}</dt><dd className="text-2xl font-semibold">{preview.skipped}</dd></div>
       <div><dt>{labels.blocked}</dt><dd className="text-2xl font-semibold">{preview.blocked}</dd></div>
     </dl>
     <BatchProgressPoller batchId={preview.batchId} state={preview.state} counters={preview.counters} labels={{states: labels.states, counters: labels.counters, unavailable: labels.progressUnavailable}}/>
     {expires ? <p className="text-sm text-muted-foreground">{labels.expires}: <time dateTime={preview.expiresAt}>{expires}</time></p> : null}
+    {preview.preparationErrorCode ? <p role="status" className="rounded-md border p-3">{labels.preparationFailed ?? labels.manualReview} <code>{preview.preparationErrorCode}</code></p> : null}
+    {(preview.state === "running" || preview.state === "cancelled") && labels.cancelPartial ? <p className="text-sm text-muted-foreground">{labels.cancelPartial}</p> : null}
     <div className="flex flex-wrap gap-3">
-      {ready ? <form action={commitAdminBatchAction.bind(null, preview.batchId, preview.digest)}><button className="min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{labels.commit}</button></form> : null}
+      {ready ? <form action={commitAdminBatchAction.bind(null, preview.batchId, preview.digest)}>{labels.confirm ? <label className="mb-3 flex items-start gap-2"><input className="mt-1 size-4" type="checkbox" required/>{labels.confirm}</label> : null}<button className="min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{labels.commit}</button></form> : null}
       {retryable ? <form action={retryAdminBatchAction.bind(null, preview.batchId)}><button className="min-h-11 rounded-md border px-4" type="submit">{labels.retry}</button></form> : null}
       {["ready", "queued", "running"].includes(preview.state) ? <form action={cancelAdminBatchAction.bind(null, preview.batchId)}><button className="min-h-11 rounded-md border px-4" type="submit">{labels.cancel}</button></form> : null}
     </div>
@@ -60,7 +65,7 @@ export function BatchPreviewPanel({preview, labels, pageHref, filter = "all"}: {
       <Link aria-current={filter === "all" ? "page" : undefined} className="text-primary underline" href={pageHref}>{labels.allItems}</Link>
       <Link aria-current={filter === "failed" ? "page" : undefined} className="text-primary underline" href={`${pageHref}?filter=failed`}>{labels.failedItems} ({preview.counters.failed})</Link>
     </nav> : null}
-    {preview.items.length ? <div className="overflow-x-auto rounded-md border"><table className="min-w-full text-left text-sm">
+    {preview.items.length ? <div className="overflow-x-auto rounded-md border" role="region" aria-label={labels.title} tabIndex={0}><table className="w-full min-w-[48rem] text-left text-sm">
       <thead className="bg-muted"><tr>
         <th className="px-3 py-2" scope="col">{labels.target}</th>
         <th className="px-3 py-2" scope="col">{labels.operation}</th>
@@ -73,7 +78,7 @@ export function BatchPreviewPanel({preview, labels, pageHref, filter = "all"}: {
         const differences = [...new Set([...Object.keys(item.before), ...Object.keys(item.after)])]
           .filter(key => JSON.stringify(item.before[key]) !== JSON.stringify(item.after[key]));
         const code = item.errorCode ?? item.reasonCode;
-        const canRetryItem = ["running", "completed_with_errors"].includes(preview.state) && item.state === "failed" && item.errorCode?.startsWith("TRANSIENT_") && item.attemptCount < maxAttempts;
+        const canRetryItem = ["running", "completed_with_errors"].includes(preview.state) && item.state === "failed" && batchFailureIsSafeToRetry(item.errorCode, item.attemptCount, maxAttempts);
         return <tr className="border-t align-top" key={`${item.target.type}:${item.target.id}`}>
           <th className="px-3 py-2" scope="row">
             <span className="block font-medium">{targetName(item) ?? labels.targetTypes[item.target.type] ?? item.target.type}</span>

@@ -1,6 +1,6 @@
 import {randomUUID} from "node:crypto";
 
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, beforeAll, beforeEach, afterEach, describe, expect, it, vi} from "vitest";
 
 import {isolatedBatchDatabase} from "./admin-batch-fixture";
 import {createAdminBatchesRepository, createAdminBatchWorkerRepository} from "@/lib/db/repos/admin-batches";
@@ -15,6 +15,8 @@ describe.skipIf(!enabled)("admin batch lease and settlement on disposable Postgr
   beforeAll(async () => {fixture = await isolatedBatchDatabase();}, 60_000);
   afterAll(async () => {if (fixture) await fixture.close();});
 
+  beforeEach(() => vi.stubEnv("ADMIN_BATCH_ENABLED", "true"));
+  afterEach(() => vi.unstubAllEnvs());
   it("fences an expired worker and commits one profile update and audit row", async () => {
     const now = new Date();
     const request = batchRequestSchema.parse({operation: "profile_patch", idempotencyKey: randomUUID(), selection: {mode: "ids", profileIds: ["a"]}, payload: {patch: {locale: "zh-HK"}, reason: "Member requested a language correction"}});

@@ -1,6 +1,6 @@
 import {PgDialect} from "drizzle-orm/pg-core";
 import type {SQL} from "drizzle-orm";
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, afterEach, describe, expect, it, vi} from "vitest";
 
 import {createAdminBatchWorkerRepository} from "@/lib/db/repos/admin-batches";
 import {batchRequestSchema} from "@/lib/admin/batches/types";
@@ -17,6 +17,8 @@ function fakeDb(respond: (query: string) => unknown) {
 }
 
 describe("admin batch item leases", () => {
+  beforeEach(() => vi.stubEnv("ADMIN_BATCH_ENABLED", "true"));
+  afterEach(() => vi.unstubAllEnvs());
   it("materializes one fixed preview in a repeatable-read worker transaction", async () => {
     const {database, statements, isolationLevels} = fakeDb((query) => {
       if (/FOR UPDATE SKIP LOCKED/i.test(query)) return [{id: batchId, actorProfileId: "staff", operation: "profile_patch", selectionSnapshot: request, requestDigest: "digest"}];
@@ -34,13 +36,14 @@ describe("admin batch item leases", () => {
   });
 
   it("claims only due items with SKIP LOCKED and a monotonic fencing token", async () => {
-    const {database, statements} = fakeDb((query) => /WITH due/i.test(query) ? [{itemId, batchId, operation: "profile_patch", actorProfileId: "staff", selectionSnapshot: request, targetType: "profile", targetId: "member-a", expectedVersion: "v1", effectKey: "effect-a", attemptCount: 2, leaseOwner: "worker-a", leaseToken: 7}] : []);
+    const {database, statements} = fakeDb((query) => /lease_token.*\+ 1/i.test(query) ? [{itemId, batchId, operation: "profile_patch", actorProfileId: "staff", selectionSnapshot: request, targetType: "profile", targetId: "member-a", expectedVersion: "v1", effectKey: "effect-a", attemptCount: 2, leaseOwner: "worker-a", leaseToken: 7}] : []);
     const repo = createAdminBatchWorkerRepository(async () => database);
     const claims = await repo.claimItems("worker-a", new Date("2026-09-27T00:00:00Z"), 50);
     expect(claims).toMatchObject([{itemId, attemptCount: 2, leaseToken: 7, request}]);
-    expect(statements[0]).toMatch(/FOR UPDATE OF i SKIP LOCKED/i);
-    expect(statements[0]).toMatch(/lease_token.*\+ 1/i);
-    expect(statements[0]).toMatch(/attempt_count.*\+ 1/i);
+    const claimStatement = statements.find((query) => /lease_token.*\+ 1/i.test(query));
+    expect(claimStatement).toBeDefined();
+    expect(claimStatement).toMatch(/FOR UPDATE OF i SKIP LOCKED/i);
+    expect(claimStatement).toMatch(/attempt_count.*\+ 1/i);
   });
 
   it("refuses an expired or superseded claim before any handler effect", async () => {

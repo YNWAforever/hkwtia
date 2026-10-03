@@ -32,6 +32,12 @@ describe("batch recovery actions", () => {
     expect(screen.getByRole("link", {name: "All items"})).toHaveAttribute("href", "/admin/batches/11111111-1111-4111-8111-111111111111");
     expect(screen.getByRole("button", {name: "Retry this item"})).toBeInTheDocument();
   });
+  it("requires reconciliation even when uncertainty has a transient prefix", () => {
+    render(<BatchPreviewPanel labels={{...labels, reasonUncertain: "Reconcile before retry"}} preview={preview("TRANSIENT_PROVIDER_ACCEPTANCE_UNCERTAIN")}/>);
+    expect(screen.queryByRole("button", {name: "Retry this item"})).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", {name: "Retry failed items"})).not.toBeInTheDocument();
+    expect(screen.getByText("Reconcile before retry")).toBeInTheDocument();
+  });
   it("never offers item retry for provider-acceptance uncertainty", () => {
     render(<BatchPreviewPanel labels={{...labels, allItems: "All items", failedItems: "Failed items", retryItem: "Retry this item"}} preview={preview("PROVIDER_ACCEPTANCE_UNCERTAIN")}/>);
     expect(screen.queryByRole("button", {name: "Retry this item"})).not.toBeInTheDocument();

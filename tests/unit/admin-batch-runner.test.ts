@@ -12,13 +12,27 @@ describe("admin batch worker runner", () => {
     const calls: string[] = [];
     const repo = {
       prepareNext: vi.fn(async () => {calls.push("prepare"); return true;}),
-      claimItems: vi.fn(async () => {calls.push("claim"); return [claim("member-a"), claim("member-b")];}),
+      claimItems: vi.fn(async () => {calls.push("claim"); return calls.filter(x => x === "claim").length <= 2 ? [claim(calls.filter(x => x === "claim").length === 1 ? "member-a" : "member-b")] : [];}),
       executeClaim: vi.fn(async (item, handler) => {calls.push(`execute:${item.itemId}`); await handler.execute({kind: "staff", userId: "staff", profileId: "staff"}, item, {} as never); return "settled" as const;}),
     } as BatchWorkerRepository;
     const handler = {prepare: vi.fn(async () => []), execute: vi.fn(async (_actor, item) => {if (item.itemId === "member-a") throw new Error("transient"); return {status: "succeeded", resultRef: "done"} as const;})} as BatchOperationHandler;
     const result = await runAdminBatchJob(new Date("2026-09-27T00:00:00Z"), {repository: repo, handlers: {profile_patch: handler}, workerId: "worker"});
-    expect(calls).toEqual(["prepare", "claim", "execute:member-a", "execute:member-b"]);
+    expect(calls).toEqual(["prepare", "claim", "execute:member-a", "claim", "execute:member-b", "claim"]);
     expect(result).toMatchObject({claimed: 2, settled: 1, failed: 1});
-    expect(repo.claimItems).toHaveBeenCalledWith("worker", expect.any(Date), 50);
+    expect(repo.claimItems).toHaveBeenCalledWith("worker", expect.any(Date), 1);
   });
+  it("claims only the next item and stops taking new work at the budget", async () => {
+    let elapsed = 0;
+    const repository: BatchWorkerRepository = {
+      prepareNext: vi.fn(async () => false),
+      claimItems: vi.fn(async (_id, _now, limit) => Array.from({length: limit}, (_, i) => claim(`synthetic-${i}`))),
+      executeClaim: vi.fn(async () => {elapsed = 6001; return "settled" as const;}),
+    };
+    const result = await runAdminBatchJob(new Date("2040-04-01"), {repository, clock: () => elapsed});
+    expect(repository.claimItems).toHaveBeenCalledTimes(1);
+    expect(repository.claimItems).toHaveBeenCalledWith(expect.any(String), expect.any(Date), 1);
+    expect(repository.executeClaim).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({claimed: 1, settled: 1, budgetExhausted: true});
+  });
+
 });

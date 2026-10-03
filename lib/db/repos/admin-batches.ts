@@ -8,12 +8,27 @@ import {decodeScopedCursor, encodeScopedCursor} from "@/lib/admin/pagination";
 import type {BatchClaim, BatchHandlerRegistry, BatchOperationHandler, BatchWorkerRepository, BatchItemOutcome} from "@/lib/admin/batches/worker-types";
 import type {BatchGateway, BatchSummary} from "@/lib/admin/batches/service";
 import {requireAdmin} from "@/lib/auth/authorize";
+import {resolveBatchCapability} from "@/lib/admin/batches/capabilities";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 import {adminBatchItems, adminBatches, auditEvents, profiles} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 
 export type BatchExecutor = Readonly<{execute: (statement: SQL) => PromiseLike<unknown>}>;
 export type BatchDatabase = BatchExecutor & Readonly<{transaction: <T>(run: (tx: BatchExecutor) => Promise<T>, config?: {isolationLevel: "read committed" | "repeatable read"}) => Promise<T>}>;
+function assertOperationAvailable(actor: AdminActor, operation: BatchRequest["operation"]): void {
+  const capability = resolveBatchCapability(actor, operation);
+  if (!capability.available) throw new Error(capability.reasonCode ?? "BATCH_OPERATION_UNAVAILABLE");
+}
+function retryableFailureSql(): SQL {
+  return sql`left(${adminBatchItems.errorCode},10)='TRANSIENT_'
+    AND lower(${adminBatchItems.errorCode}) NOT LIKE '%uncertain%'
+    AND lower(${adminBatchItems.errorCode}) NOT LIKE '%accepted_timeout%'
+    AND lower(${adminBatchItems.errorCode}) NOT LIKE '%recovery_required%'`;
+}
+function terminalPreparationCode(error: unknown): string | null {
+  const code = error instanceof Error ? error.message : "";
+  return ["BATCH_TOO_LARGE", "BATCH_OPERATION_UNAVAILABLE", "FORBIDDEN", "BATCH_OPERATION_MISMATCH", "CAMPAIGN_SEGMENT_NOT_FOUND", "EVENT_NOT_FOUND", "EXPORT_TOO_LARGE", "IMPORT_RUN_UNAVAILABLE", "IMPORT_SELECTION_INVALID"].includes(code) ? code : null;
+}
 function rows(result: unknown): unknown[] {
   if (Array.isArray(result)) return result;
   if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows;
@@ -78,7 +93,7 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
           count(*) FILTER (WHERE ${adminBatchItems.previewStatus} = 'skipped')::int AS skipped,
           count(*) FILTER (WHERE ${adminBatchItems.previewStatus} = 'blocked')::int AS blocked,
           count(*) FILTER (WHERE ${adminBatchItems.state} = 'failed'
-            AND left(${adminBatchItems.errorCode}, 10) = 'TRANSIENT_'
+            AND ${retryableFailureSql()}
             AND ${adminBatchItems.attemptCount} < ${config.maxAttempts})::int AS retryable
         FROM ${adminBatchItems} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid
       `)));
@@ -103,7 +118,9 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
       const last = items.at(-1);
       const nextCursor = data.length > pageSize && last
         ? encodeScopedCursor(scope, [last.target.type, last.target.id, ""]) : null;
+      const preparationFailure = batch.state === "expired" ? z.object({code: z.string()}).nullable().parse(firstRow(await db.execute(sql`SELECT metadata->>'errorCode' AS code FROM ${auditEvents} WHERE ${auditEvents.targetId}=${batchId} AND ${auditEvents.action}='admin.batch.prepare_failed' ORDER BY ${auditEvents.createdAt} DESC,${auditEvents.id} DESC LIMIT 1`)) ?? null) : null;
       return {
+        preparationErrorCode: preparationFailure?.code ?? null,
         batchId, operation: batch.operation,
         state: batch.state === "ready" && batch.previewExpiresAt && batch.previewExpiresAt.getTime() <= now().getTime() ? "expired" : batch.state,
         counters: countersSchema.parse(batch.counters), digest: batch.previewDigest ?? "",
@@ -117,6 +134,7 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
       const db = await loadDatabase();
       return db.transaction(async (tx) => {
         const batch = await readOwned(tx, actor.profileId, batchId, true);
+        assertOperationAvailable(actor, batch.operation);
         if (batch.state !== "ready") throw new Error("BATCH_NOT_READY");
         if (batch.previewDigest !== digest) throw new Error("BATCH_PREVIEW_MISMATCH");
         if (!batch.previewExpiresAt || batch.previewExpiresAt.getTime() <= now().getTime()) throw new Error("BATCH_PREVIEW_EXPIRED");
@@ -133,8 +151,9 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
       const db = await loadDatabase();
       return db.transaction(async (tx) => {
         const batch = await readOwned(tx, actor.profileId, id, true);
+        assertOperationAvailable(actor, batch.operation);
         if (batch.state !== "completed_with_errors" && batch.state !== "running") throw new Error("BATCH_RETRY_UNAVAILABLE");
-        const retried = firstRow(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${id}::uuid AND ${adminBatchItems.targetType} = ${target.type} AND ${adminBatchItems.targetId} = ${target.id} AND ${adminBatchItems.state} = 'failed' AND left(${adminBatchItems.errorCode}, 10) = 'TRANSIENT_' AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
+        const retried = firstRow(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${id}::uuid AND ${adminBatchItems.targetType} = ${target.type} AND ${adminBatchItems.targetId} = ${target.id} AND ${adminBatchItems.state} = 'failed' AND ${retryableFailureSql()} AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
         if (!retried || typeof retried !== "object" || !("id" in retried) || typeof retried.id !== "string") throw new Error("BATCH_NOTHING_RETRYABLE");
         await tx.execute(sql`UPDATE ${adminBatches} SET state = 'queued', updated_at = ${now()} WHERE ${adminBatches.id} = ${id}::uuid`);
         await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'admin.batch.item.retry_requested', 'admin_batch_item', ${retried.id}, jsonb_build_object('batchId', ${id}::text))`);
@@ -147,8 +166,9 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
       const db = await loadDatabase();
       return db.transaction(async (tx) => {
         const batch = await readOwned(tx, actor.profileId, batchId, true);
+        assertOperationAvailable(actor, batch.operation);
         if (batch.state !== "completed_with_errors" && batch.state !== "running") throw new Error("BATCH_RETRY_UNAVAILABLE");
-        const retried = rows(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid AND ${adminBatchItems.state} = 'failed' AND left(${adminBatchItems.errorCode}, 10) = 'TRANSIENT_' AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
+        const retried = rows(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid AND ${adminBatchItems.state} = 'failed' AND ${retryableFailureSql()} AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
         if (retried.length === 0) throw new Error("BATCH_NOTHING_RETRYABLE");
         await tx.execute(sql`UPDATE ${adminBatches} SET state = 'queued', updated_at = ${now()} WHERE ${adminBatches.id} = ${batchId}::uuid`);
         await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'admin.batch.retry_requested', 'admin_batch', ${batchId}, jsonb_build_object('count', ${retried.length}::int))`);
@@ -181,16 +201,23 @@ function toClaim(raw: unknown): BatchClaim {
   const row = claimRowSchema.parse(raw);
   return {itemId: row.itemId, batchId: row.batchId, operation: row.operation, actorProfileId: row.actorProfileId, request: batchRequestSchema.parse(row.selectionSnapshot), target: {type: row.targetType, id: row.targetId}, expectedVersion: row.expectedVersion, effectKey: row.effectKey, attemptCount: row.attemptCount, leaseOwner: row.leaseOwner, leaseToken: row.leaseToken};
 }
-async function refreshBatchCounters(tx: BatchExecutor, batchId: string, now: Date) {
+async function refreshBatchCountersFor(tx: BatchExecutor, batchIds: readonly string[], now: Date): Promise<void> {
+  const ids = [...new Set(batchIds)];
+  if (!ids.length) return;
+  if (ids.length > 100) throw new Error("INVALID_BATCH_COUNTER_SCOPE");
   await tx.execute(sql`WITH counts AS (
-    SELECT count(*) FILTER (WHERE state = 'pending')::int AS pending, count(*) FILTER (WHERE state = 'running')::int AS running,
-      count(*) FILTER (WHERE state = 'succeeded')::int AS succeeded, count(*) FILTER (WHERE state = 'skipped')::int AS skipped,
-      count(*) FILTER (WHERE state = 'failed')::int AS failed
-    FROM ${adminBatchItems} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid
-  ) UPDATE ${adminBatches} SET counters = jsonb_build_object('pending', counts.pending, 'running', counts.running, 'succeeded', counts.succeeded, 'skipped', counts.skipped, 'failed', counts.failed),
-    state = CASE WHEN ${adminBatches.state} = 'cancelled' THEN 'cancelled' WHEN counts.running > 0 THEN 'running' WHEN counts.pending > 0 THEN 'queued' WHEN counts.failed > 0 THEN 'completed_with_errors' ELSE 'completed' END,
-    updated_at = ${now}
-    FROM counts WHERE ${adminBatches.id} = ${batchId}::uuid AND ${adminBatches.state} IN ('queued','running','cancelled')`);
+    SELECT batch_id, count(*) FILTER (WHERE state='pending')::int AS pending,
+      count(*) FILTER (WHERE state='running')::int AS running,
+      count(*) FILTER (WHERE state='succeeded')::int AS succeeded,
+      count(*) FILTER (WHERE state='skipped')::int AS skipped,
+      count(*) FILTER (WHERE state='failed')::int AS failed
+    FROM ${adminBatchItems} WHERE batch_id = ANY(ARRAY[${sql.join(ids.map(id=>sql`${id}::uuid`),sql`, `)}]::uuid[]) GROUP BY batch_id
+  ) UPDATE ${adminBatches} SET counters=jsonb_build_object('pending',counts.pending,'running',counts.running,'succeeded',counts.succeeded,'skipped',counts.skipped,'failed',counts.failed),
+    state=CASE WHEN ${adminBatches.state}='cancelled' THEN 'cancelled' WHEN counts.running>0 THEN 'running' WHEN counts.pending>0 THEN 'queued' WHEN counts.failed>0 THEN 'completed_with_errors' ELSE 'completed' END,
+    updated_at=${now} FROM counts WHERE ${adminBatches.id}=counts.batch_id AND ${adminBatches.state} IN ('queued','running','cancelled')`);
+}
+async function refreshBatchCounters(tx: BatchExecutor, batchId: string, now: Date): Promise<void> {
+  await refreshBatchCountersFor(tx, [batchId], now);
 }
 class StaleBatchClaim extends Error {constructor() {super("STALE_BATCH_CLAIM");}}
 async function settleClaim(tx: BatchExecutor, claim: BatchClaim, outcome: BatchItemOutcome, now: Date): Promise<boolean> {
@@ -225,7 +252,21 @@ export function createAdminBatchWorkerRepository(loadDatabase: () => Promise<Bat
         const request = batchRequestSchema.parse(batch.selectionSnapshot);
         if (request.operation !== batch.operation) throw new Error("BATCH_REQUEST_MISMATCH");
         const actor = {kind: role.data.role, userId: batch.actorProfileId, profileId: batch.actorProfileId} as AdminActor;
-        const preview = await handler.prepare(actor, request, tx);
+        await tx.execute(sql`SAVEPOINT batch_prepare`);
+        let preview: Awaited<ReturnType<BatchOperationHandler["prepare"]>>;
+        try {
+          assertOperationAvailable(actor, batch.operation);
+          preview = await handler.prepare(actor, request, tx);
+          await tx.execute(sql`RELEASE SAVEPOINT batch_prepare`);
+        } catch (error) {
+          const errorCode = terminalPreparationCode(error);
+          if (!errorCode) throw error;
+          await tx.execute(sql`ROLLBACK TO SAVEPOINT batch_prepare`);
+          await tx.execute(sql`RELEASE SAVEPOINT batch_prepare`);
+          await tx.execute(sql`UPDATE ${adminBatches} SET state='expired',updated_at=${now} WHERE ${adminBatches.id}=${batch.id}::uuid AND ${adminBatches.state}='preparing'`);
+          await tx.execute(sql`INSERT INTO ${auditEvents}(actor_user_id,actor_type,action,target_type,target_id,metadata) VALUES (${batch.actorProfileId},'system','admin.batch.prepare_failed','admin_batch',${batch.id},jsonb_build_object('errorCode',${errorCode}::text))`);
+          return true;
+        }
         const config = batchRuntimeConfig();
         const unique = new Set(preview.map((item) => `${item.target.type}:${item.target.id}`));
         if (preview.length > config.maxItems || unique.size !== preview.length) {
@@ -247,7 +288,21 @@ export function createAdminBatchWorkerRepository(loadDatabase: () => Promise<Bat
     async claimItems(workerId, now, limit) {
       if (!workerId || workerId.length > 120 || !Number.isSafeInteger(limit) || limit < 1 || limit > batchRuntimeConfig().claimSize) throw new Error("INVALID_BATCH_CLAIM");
       const db = await loadDatabase();
-      const claimed = rows(await db.execute(sql`WITH due AS (
+      return db.transaction(async (tx) => {
+        const abandoned = rows(await tx.execute(sql`WITH due AS (
+          SELECT i.id,b.actor_profile_id,b.state AS batch_state FROM ${adminBatchItems} i JOIN ${adminBatches} b ON b.id=i.batch_id
+          WHERE i.state='running' AND i.lease_expires_at<=${now} AND b.state IN ('queued','running','cancelled')
+            AND (i.attempt_count>=${batchRuntimeConfig().maxAttempts} OR b.state='cancelled')
+          ORDER BY i.lease_expires_at,i.id FOR UPDATE OF i SKIP LOCKED LIMIT ${limit}
+        ), recovered AS (
+          UPDATE ${adminBatchItems} i SET state='failed',error_code=CASE WHEN due.batch_state='cancelled' THEN 'CANCELLED_LEASE_RECOVERY_REQUIRED' ELSE 'LEASE_RECOVERY_REQUIRED' END,
+            lease_owner=NULL,lease_expires_at=NULL,next_attempt_at=NULL,updated_at=${now}
+          FROM due WHERE i.id=due.id RETURNING i.id,i.batch_id,i.attempt_count,i.error_code,due.actor_profile_id
+        ), audited AS (
+          INSERT INTO ${auditEvents}(actor_user_id,actor_type,action,target_type,target_id,metadata)
+          SELECT actor_profile_id,'system','admin.batch.lease.reconciliation_required','admin_batch_item',id::text,jsonb_build_object('errorCode',error_code,'attempt',attempt_count) FROM recovered RETURNING id
+        ) SELECT batch_id AS "batchId" FROM recovered`));
+        const claimed = rows(await tx.execute(sql`WITH due AS (
         SELECT i.id FROM ${adminBatchItems} i INNER JOIN ${adminBatches} b ON b.id = i.batch_id
         WHERE b.state IN ('queued','running') AND i.preview_status = 'eligible' AND i.attempt_count < ${batchRuntimeConfig().maxAttempts}
           AND ((i.state = 'pending' AND (i.next_attempt_at IS NULL OR i.next_attempt_at <= ${now})) OR (i.state = 'running' AND i.lease_expires_at <= ${now}))
@@ -259,7 +314,11 @@ export function createAdminBatchWorkerRepository(loadDatabase: () => Promise<Bat
       ), started AS (
         UPDATE ${adminBatches} b SET state = 'running', updated_at = ${now} WHERE b.id IN (SELECT batch_id FROM claimed) AND b.state = 'queued' RETURNING b.id
       ) SELECT claimed.id AS "itemId", claimed.batch_id AS "batchId", b.operation, b.actor_profile_id AS "actorProfileId", b.selection_snapshot AS "selectionSnapshot", claimed.target_type AS "targetType", claimed.target_id AS "targetId", claimed.expected_version AS "expectedVersion", claimed.effect_key AS "effectKey", claimed.attempt_count AS "attemptCount", claimed.lease_owner AS "leaseOwner", claimed.lease_token AS "leaseToken" FROM claimed JOIN ${adminBatches} b ON b.id = claimed.batch_id`));
-      return claimed.map(toClaim);
+        const recoveryBatches=z.array(z.object({batchId:z.string().uuid()})).parse(abandoned).map(row=>row.batchId);
+        const claims=claimed.map(toClaim);
+        await refreshBatchCountersFor(tx,[...recoveryBatches,...claims.map(claim=>claim.batchId)],now);
+        return claims;
+      });
     },
     async executeClaim(claim, handler: BatchOperationHandler, now) {
       const db = await loadDatabase();
@@ -274,7 +333,8 @@ export function createAdminBatchWorkerRepository(loadDatabase: () => Promise<Bat
             return "settled" as const;
           }
           const actor = {kind: row.actorRole, userId: claim.actorProfileId, profileId: claim.actorProfileId} as const;
-          const outcome = await handler.execute(actor, claim, tx);
+          const capability = resolveBatchCapability(actor, claim.operation);
+          const outcome = capability.available ? await handler.execute(actor, claim, tx) : {status: "skipped" as const, reasonCode: capability.reasonCode ?? "BATCH_OPERATION_UNAVAILABLE"};
           if (!(await settleClaim(tx, claim, outcome, now))) throw new StaleBatchClaim();
           return "settled" as const;
         });
