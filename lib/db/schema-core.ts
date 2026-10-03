@@ -1,6 +1,7 @@
 import {
   type AnyPgColumn,
   boolean,
+  bigint,
   check,
   customType,
   date,
@@ -1424,6 +1425,25 @@ export const pageCopy = pgTable(
     index("page_copy_locale_idx").on(table.locale),
   ],
 );
+
+/** Private editor snapshots; only published page_copy feeds public messages. */
+export const pageCopyDrafts = pgTable("page_copy_drafts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ownerProfileId: text("owner_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  namespace: text("namespace").notNull(),
+  baseRevision: varchar("base_revision", {length: 64}).notNull(),
+  revision: varchar("revision", {length: 64}).notNull(),
+  entries: jsonb("entries").$type<readonly {locale: "en" | "zh-HK"; keyPath: string; value: string}[]>().notNull(),
+  baseEntries: jsonb("base_entries").$type<readonly {locale: "en" | "zh-HK"; keyPath: string; value: string}[]>().notNull(),
+  previousEntries: jsonb("previous_entries").$type<readonly {locale: "en" | "zh-HK"; keyPath: string; value: string}[]>(),
+  publishedAt: timestamp("published_at", {withTimezone: true}),
+  publicationSequence: bigint("publication_sequence", {mode: "number"}),
+  createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, table => [
+  uniqueIndex("page_copy_one_open_draft").on(table.ownerProfileId, table.namespace).where(sql`${table.publishedAt} IS NULL`),
+  index("page_copy_publication_history").on(table.namespace, table.publicationSequence).where(sql`${table.publishedAt} IS NOT NULL`),
+  check("page_copy_draft_publication_pair", sql`(${table.publishedAt} IS NULL) = (${table.publicationSequence} IS NULL)`),
+]);
 
 export const showcaseListings = pgTable(
   "showcase_listings",

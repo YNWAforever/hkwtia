@@ -4,10 +4,10 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {PageCopyForm, type PageCopyField} from "@/components/admin/page-copy-form";
 import type {AppLocale} from "@/i18n/routing";
-import {savePageCopyAction} from "@/lib/admin/page-copy-actions";
+import {savePageCopyAction, workspacePageCopyAction} from "@/lib/admin/page-copy-actions";
 import {pageCopyFieldName} from "@/lib/admin/page-copy-form-input";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
-import {pageCopyRepository, pageCopyRevision} from "@/lib/db/repos/page-copy";
+import {pageCopyRepository, pageCopyRevision, readCopyWorkspace} from "@/lib/db/repos/page-copy";
 import {pageCopyBundleValues, pageCopyCatalog} from "@/lib/i18n/page-copy-catalog";
 import {isPageCopyNamespace} from "@/lib/i18n/page-copy-scope";
 import {localizedPath} from "@/lib/urls";
@@ -28,6 +28,8 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
   const stored = new Map(overrides
     .filter((row) => row.namespace === namespace)
     .map((row) => [`${row.locale}:${row.keyPath}`, row.value]));
+  const workspace = process.env.CMS_SERVER_DRAFTS_ENABLED === "true" ? await readCopyWorkspace(actor, namespace) : null;
+  const edited = new Map(workspace?.draft?.entries.map(entry => [`${entry.locale}:${entry.keyPath}`, entry.value]) ?? stored);
   const enBundle = pageCopyBundleValues("en", namespace);
   const zhBundle = pageCopyBundleValues("zh-HK", namespace);
   const fields: readonly PageCopyField[] = pageCopyCatalog(namespace).map(({keyPath, value}) => ({
@@ -36,11 +38,12 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
     zhBundle: zhBundle.get(keyPath) ?? enBundle.get(keyPath) ?? value,
     enField: pageCopyFieldName("en", keyPath),
     zhField: pageCopyFieldName("zh-HK", keyPath),
-    enValue: stored.get(`en:${keyPath}`) ?? "",
-    zhValue: stored.get(`zh-HK:${keyPath}`) ?? "",
+    enValue: edited.get(`en:${keyPath}`) ?? "",
+    zhValue: edited.get(`zh-HK:${keyPath}`) ?? "",
   }));
 
-  const action = savePageCopyAction.bind(
+  const bindMessages = {successMessage: t("saveSuccess"), unchangedMessage: t("saveUnchanged"), validationMessage: t("validation"), errorMessage: t("error"), conflictMessage: t("editConflict")};
+  const action = workspace ? workspacePageCopyAction.bind(null,namespace,"/" + locale + "/admin/page-copy/" + namespace,{...bindMessages,draftSaved:t("serverDraft.saved"),published:t("serverDraft.published"),restored:t("serverDraft.restored")}) : savePageCopyAction.bind(
     null,
     namespace,
     "/" + locale + "/admin/page-copy/" + namespace,
@@ -62,16 +65,19 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
         <Link className="text-sm underline" href={localizedPath(locale, "/admin/page-copy")}>{t("back")}</Link>
       </header>
       <PageCopyForm
-        key={actor.profileId + ":" + namespace + ":" + pageCopyRevision(overrides.filter((row) => row.namespace === namespace))}
+        key={actor.profileId + ":" + namespace}
         action={action}
+        publishedBaseline={workspace ? Object.fromEntries(workspace.published.map(entry => [pageCopyFieldName(entry.locale,entry.keyPath),entry.value])) : undefined}
+        serverDraft={workspace ? {id:workspace.draft?.id ?? null,revision:workspace.draft?.revision ?? null,stale:Boolean(workspace.draft && workspace.draft.baseRevision!==workspace.revision),previewBase:namespace==="Home" ? localizedPath(locale,"/admin/cms-preview/") : "",history:workspace.history.map(item=>({id:item.id,label:new Intl.DateTimeFormat(locale,{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Hong_Kong"}).format(item.publishedAt!)})),labels:{save:t("serverDraft.save"),publish:t("serverDraft.publish"),private:t("serverDraft.private"),preview:t("serverDraft.preview"),history:t("serverDraft.history"),restore:t("serverDraft.restore"),previousCopy:t("serverDraft.previousCopy"),restored:t("serverDraft.restored"),stale:t("serverDraft.stale"),rebase:t("serverDraft.rebase"),current:t("serverDraft.current")}} : undefined}
         localDraft={{identity: actor.profileId, namespace, labels: {
           saved: String(t.raw("localDraft.saved")), unavailable: t("localDraft.unavailable"), available: t("localDraft.available"),
           restore: t("localDraft.restore"), discard: t("localDraft.discard"), conflict: t("localDraft.conflict"),
           compare: t("localDraft.compare"), current: t("localDraft.current"), draft: t("localDraft.draft"),
         }}}
         fields={fields}
-        revision={pageCopyRevision(overrides.filter((row) => row.namespace === namespace))}
+        revision={workspace?.revision ?? pageCopyRevision(overrides.filter((row) => row.namespace === namespace))}
         labels={{
+          workspace: {block: t("workspace.block"), search: t("workspace.search"), changedOnly: t("workspace.changedOnly"), previous: t("workspace.previous"), next: t("workspace.next"), reset: t("workspace.reset"), empty: t("workspace.empty")},
           english: t("english"),
           chinese: t("chinese"),
           revertHint: t("revertHint"),

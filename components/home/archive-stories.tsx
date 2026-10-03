@@ -1,17 +1,16 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 import Image from 'next/image';
 
 import {Arrow} from '@/components/wt/arrow';
 import {milestones} from '@/content/milestones';
 import {Link} from '@/i18n/navigation';
-import type {AppLocale} from '@/i18n/routing';
 import {featuredOnly} from '@/lib/history/milestones';
 
 // Section 11 of 13 (D-9). Top 4 featured milestones with at least one image; hidden
 // entirely below that. app/styles/wisetech.css:517 .archive-proof; :521 .archive-photo-grid;
 // :522 .archive-photo-card; :530 .archive-photo-feature (first card, wide).
-export async function ArchiveStories({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.archiveStories'});
+export async function ArchiveStories({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.archiveStories'});
   const useChinese = locale === 'zh-HK';
   const stories = featuredOnly(milestones)
     .filter((milestone) => milestone.images.length > 0)

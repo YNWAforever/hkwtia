@@ -7,6 +7,10 @@ export type PageCopyActionState = Readonly<{
   message?: string;
   fieldErrors?: Readonly<Record<string, string>>;
   revision?: string;
+  draftId?: string | null;
+  draftRevision?: string | null;
+  intent?: "draft" | "publish" | "restore" | "rebase";
+  values?: Readonly<Record<string,string>>;
 }>;
 
 type PageCopyFormOptions = Readonly<{
@@ -20,7 +24,7 @@ type PageCopyFormOptions = Readonly<{
 
 /**
  * Unlike the news form, submitted values are not echoed back. The form has
- * hundreds of fields across two locales; the inputs are uncontrolled and never
+ * hundreds of fields across two locales; the controlled inputs are never
  * remounted, so the browser already holds exactly what the editor typed. Round
  * -tripping all of it would cost far more than it saves, and a stale echo is
  * the one way this form could lose work.

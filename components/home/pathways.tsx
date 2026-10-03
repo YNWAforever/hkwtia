@@ -1,11 +1,10 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {Arrow} from '@/components/wt/arrow';
 import {CardIndex} from '@/components/wt/card-index';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {Link} from '@/i18n/navigation';
-import type {AppLocale} from '@/i18n/routing';
 
 // D-7: SME is an audience pathway card, not a fifth plan. Hrefs are hkwtia's canonical
 // destinations (master table row 3), not the donor's unported routes.
@@ -21,8 +20,8 @@ const items = [
 
 // Section 3 of 13. app/styles/wisetech.css:137 .audience-grid; :138 .audience-card;
 // :148 .benefit-line.
-export async function Pathways({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.pathways'});
+export async function Pathways({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.pathways'});
 
   return (
     <Section labelledBy="pathways-title" id="pathways">

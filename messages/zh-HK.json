@@ -3485,7 +3485,10 @@
           "commitFailed": "付款服務商可能已退款，但我們無法在此記錄。請先向付款服務商查核，切勿直接重試。",
           "notFound": "找不到此訂單。"
         }
-      }
+      },
+      "mediaSearch": "按檔案名稱、描述或類型搜尋已登記圖片",
+      "mediaResult": "符合的已登記圖片",
+      "mediaSelected": "已選圖片"
     },
     "announcements": {
       "eyebrow": "公告",
@@ -3655,6 +3658,31 @@
         "Programmes": "計劃總覽",
         "Partners": "合作夥伴",
         "MarketingExtras": "全站行銷文案"
+      },
+      "workspace": {
+        "block": "頁面區塊",
+        "search": "搜尋此區塊",
+        "changedOnly": "只顯示已更改欄位",
+        "previous": "上一組欄位",
+        "next": "下一組欄位",
+        "reset": "還原內置文案",
+        "empty": "沒有符合的欄位。"
+      },
+      "serverDraft": {
+        "save": "儲存私人草稿",
+        "publish": "發佈雙語文案",
+        "private": "已儲存草稿只供目前登入的編輯檔案使用；發佈是獨立操作。",
+        "saved": "私人草稿已儲存，公開文案沒有更改。",
+        "published": "雙語文案已發佈。",
+        "preview": "以頁面版面開啟已儲存草稿",
+        "history": "已發佈版本（香港時間）",
+        "restore": "還原為私人草稿",
+        "previousCopy": "還原至此版本發佈前的文案",
+        "restored": "版本已還原至私人草稿；核對後須另外發佈。",
+        "stale": "公開文案已更改，已儲存草稿仍保留。請先與目前文案比較，再發佈。未修改欄位會採用目前文案，已核對的修改仍維持私人草稿。",
+        "back": "返回編輯器",
+        "rebase": "以目前文案為基礎儲存已核對的修改",
+        "current": "目前公開文案"
       }
     },
     "news": {

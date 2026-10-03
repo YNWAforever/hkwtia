@@ -23,6 +23,8 @@ const revocationAwareConsumers = new Set([
   "app/[locale]/(public)/members/[slug]/page.tsx",
   "app/[locale]/(public)/partners/page.tsx",
   "components/admin/media-form.tsx",
+  // The searchable event picker retains the same exact private-delivery guard.
+  "components/admin/media-picker.tsx",
   // Phase B2 (B-7): the member-page queue previews the logo a member attached,
   // which is the same private-delivery reference the showcase queue renders.
   "components/admin/profile-review-table.tsx",

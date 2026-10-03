@@ -22,3 +22,8 @@
 5. 如本組 app 發布失敗，可切回目前正式 deployment；本組不改 schema、價格、退款、consent、歷史 grant 或 79 個已發布標誌。不得以回滾為名清資料或重新付款／送訊息。
 
 後續 T05–T23 會擴充此矩陣及完整 rollout／rollback 演練。
+
+
+## T17 candidate delta
+
+Source `7e64f35502e140f600dc8446cbc75cceb95c2c70`; isolated ledger56 (0056 only isolated); CMS_SERVER_DRAFTS_ENABLED defaultfalse. Full6258pass275skip0fail and2builtChromium verified. No Production migration/deployment/flag change. Rollout: approved schema0056→compatible app/private preview→retire old direct writers→verified enable. Rollback:flagoff, compatible app, retain drafts/sequence/published copy/audits. T22 upgrade/mixed-writer rehearsal and manual native-popup keyboard selection; cloud Preview and formal release gates remain. T18–T23 continuing.

@@ -1,10 +1,9 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {ActionLink} from '@/components/wt/action-link';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
-import type {AppLocale} from '@/i18n/routing';
 import {companyProfilesRepository} from '@/lib/db/repos/company-profiles';
 import {showcaseRepository} from '@/lib/db/repos/showcase';
 import {parseMemberFilters} from '@/lib/members/public';
@@ -17,8 +16,8 @@ const panels = [
 
 // Section 5 of 13. app/styles/wisetech.css:198 .product-split; :199 .product-panel;
 // :202 .product-panel-head.
-export async function MarketProducts({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.marketProducts'});
+export async function MarketProducts({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.marketProducts'});
   const [members, listings] = await Promise.all([
     companyProfilesRepository.listPublishedPage(parseMemberFilters({}), null, 1).catch(() => null),
     showcaseRepository.listPublished({}, {limit: 12}).catch(() => null),

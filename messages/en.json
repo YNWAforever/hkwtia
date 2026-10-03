@@ -3484,7 +3484,10 @@
           "commitFailed": "The payment provider may have refunded this order, but we could not record it here. Check the payment provider before trying again.",
           "notFound": "That order could not be found."
         }
-      }
+      },
+      "mediaSearch": "Search registered images by name, alt text or type",
+      "mediaResult": "Matching registered images",
+      "mediaSelected": "Selected image"
     },
     "announcements": {
       "eyebrow": "Announcements",
@@ -3626,6 +3629,31 @@
         "Programmes": "Programmes index",
         "Partners": "Partners",
         "MarketingExtras": "Sitewide marketing copy"
+      },
+      "workspace": {
+        "block": "Page block",
+        "search": "Search this block",
+        "changedOnly": "Changed fields only",
+        "previous": "Previous fields",
+        "next": "Next fields",
+        "reset": "Restore bundled copy",
+        "empty": "No matching fields."
+      },
+      "serverDraft": {
+        "save": "Save private draft",
+        "publish": "Publish bilingual copy",
+        "private": "Saved drafts are private to your signed-in editor profile. Publishing is a separate action.",
+        "saved": "Private draft saved. Public copy is unchanged.",
+        "published": "Bilingual copy published.",
+        "preview": "Open saved draft in the page layout",
+        "history": "Published version (Hong Kong time)",
+        "restore": "Restore as a private draft",
+        "previousCopy": "Restore the copy before this publication",
+        "restored": "Version restored into your private draft. Publish separately after reviewing.",
+        "stale": "Published copy changed. Your saved draft is retained. Compare it with current copy before publishing. Unchanged fields will adopt current copy; your reviewed changes remain private.",
+        "back": "Back to the editor",
+        "rebase": "Save reviewed edits against current copy",
+        "current": "Current published copy"
       }
     },
     "news": {

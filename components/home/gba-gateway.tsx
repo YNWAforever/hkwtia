@@ -1,8 +1,7 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {ActionLink} from '@/components/wt/action-link';
 import {RouteMap} from '@/components/wt/route-map';
-import type {AppLocale} from '@/i18n/routing';
 import {cohortRepository} from '@/lib/db/repos/cohorts';
 import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 
@@ -14,8 +13,8 @@ import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 // `.gba-section a`/`.gba-copy a` rule overrides link styling here (only the generic
 // `.hero-actions .button` sizing rules apply), so ActionLink's plain "button button-light"
 // output is exactly what the donor CSS expects.
-export async function GbaGateway({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.gbaGateway'});
+export async function GbaGateway({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.gbaGateway'});
   const cohorts = await cohortRepository.listPublicCohorts(ANONYMOUS_ACTOR).catch(() => []);
   const hasOpenCohort = cohorts.some((cohort) => cohort.status === 'open');
 

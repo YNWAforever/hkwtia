@@ -4,6 +4,8 @@ import {useActionState, useRef, useState} from "react";
 
 import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
 
+import {MediaPicker, type RegisteredMediaOption} from "@/components/admin/media-picker";
+
 import type {EventActionState} from "@/lib/admin/event-action-core";
 import {formatHongKongDateTimeLocal} from "@/lib/admin/event-form-input";
 
@@ -15,6 +17,7 @@ type Labels = Readonly<{
   format: string; formats: Readonly<{in_person: string; online: string; hybrid: string}>;
   onlineUrl: string; tags: string; visibility: string;
   visibilities: Readonly<{public: string; members_only: string; invite_only: string}>;
+  mediaSearch?: string; mediaResult?: string; mediaSelected?: string;
   memberOnly: string; published: string; heroMediaId: string; noHeroMedia: string; save: string; saving: string; saveDraft: string; savePublish: string; previewDraft: string; previewPrivate: string; previewEnglish: string; previewChinese: string;
 }>;
 type Values = Partial<Readonly<{
@@ -29,7 +32,7 @@ const inputClass = "mt-1 w-full rounded-md border p-2";
 
 export function EventForm({action, labels, values = {}, mediaRows = []}: Readonly<{
   action: (state: EventActionState, formData: FormData) => Promise<EventActionState>;
-  labels: Labels; values?: Values; mediaRows?: readonly {id: string; altEn: string; altZh: string}[];
+  labels: Labels; values?: Values; mediaRows?: readonly RegisteredMediaOption[];
 }>) {
   const {setDirty} = useAdminUnsavedChanges();
   const formRef = useRef<HTMLFormElement>(null);
@@ -77,7 +80,7 @@ export function EventForm({action, labels, values = {}, mediaRows = []}: Readonl
     {mode === "ticketed" ? <label>{labels.ticketPriceHkdCents}<input {...fieldProps("ticketPriceHkdCents")} className={inputClass} defaultValue={value("ticketPriceHkdCents", values.ticketPriceHkdCents == null ? "" : String(values.ticketPriceHkdCents / 100))} min="1" name="ticketPriceHkdCents" step="1" type="number"/>{error("ticketPriceHkdCents")}</label> : null}
     <label>{labels.tags}<input {...fieldProps("tags")} className={inputClass} defaultValue={value("tags", values.tags?.join(", "))} name="tags" type="text"/>{error("tags")}</label>
     <label>{labels.visibility}<select {...fieldProps("visibility")} className={inputClass} defaultValue={visibility} name="visibility">{(["public", "members_only", "invite_only"] as const).map((key) => <option key={key} value={key}>{labels.visibilities[key]}</option>)}</select>{error("visibility")}</label>
-    <label>{labels.heroMediaId}<select {...fieldProps("heroMediaId")} className={inputClass} defaultValue={value("heroMediaId", values.heroMediaId)} name="heroMediaId"><option value="">{labels.noHeroMedia}</option>{mediaRows.map((row) => <option key={row.id} value={row.id}>{row.altEn} / {row.altZh}</option>)}</select>{error("heroMediaId")}</label>
+    <div><MediaPicker rows={mediaRows} value={String(value("heroMediaId", values.heroMediaId))} name="heroMediaId" labels={{choose:labels.heroMediaId,none:labels.noHeroMedia,search:labels.mediaSearch ?? labels.heroMediaId,results:labels.mediaResult ?? labels.heroMediaId,selected:labels.mediaSelected ?? labels.heroMediaId}} invalid={Boolean(state.fieldErrors?.heroMediaId)} errorId={state.fieldErrors?.heroMediaId ? "heroMediaId-error" : undefined}/>{error("heroMediaId")}</div>
     <label className="flex items-center gap-2"><input defaultChecked={published} key={`published-${published}`} onChange={(event) => setPublishOnSave(event.currentTarget.checked)} name="published" type="checkbox"/>{labels.published}</label>
     <label className="md:col-span-2">{labels.descriptionEn}<textarea {...fieldProps("descriptionEn")} className="mt-1 min-h-24 w-full rounded-md border p-2" defaultValue={value("descriptionEn", values.descriptionEn)} name="descriptionEn" required/>{error("descriptionEn")}</label>
     <label className="md:col-span-2">{labels.descriptionZh}<textarea {...fieldProps("descriptionZh")} className="mt-1 min-h-24 w-full rounded-md border p-2" defaultValue={value("descriptionZh", values.descriptionZh)} name="descriptionZh"/>{error("descriptionZh")}</label>

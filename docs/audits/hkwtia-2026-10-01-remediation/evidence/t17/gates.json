@@ -1,0 +1,39 @@
+{
+  "environment": "Windows; Node24.18.0; Next16.3.6; default full source gate; built localhost separate from Production deployment",
+  "full": {
+    "passed": 6258,
+    "skipped": 275,
+    "failed": 0,
+    "passFiles": 742,
+    "allSkipFiles": 80
+  },
+  "lint": {
+    "command": "npm.cmd run lint",
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 67
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exitCode": 0
+  },
+  "strings": {
+    "command": "npm.cmd run audit:strings",
+    "exitCode": 0,
+    "tsxFiles": 304
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "staticPages": 267
+  },
+  "browser": {
+    "command": "node --env-file=.env.local .playwright/t17-browser.mjs",
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 54.5
+  },
+  "production": false,
+  "sourceSha": "7e64f35502e140f600dc8446cbc75cceb95c2c70"
+}

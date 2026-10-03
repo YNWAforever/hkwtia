@@ -130,7 +130,12 @@ export function anonymousAdminLoginRedirect(request: NextRequest): NextResponse 
 }
 
 export default async function middleware(request: NextRequest): Promise<NextResponse> {
-  return (await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? intlMiddleware(request);
+  const response=(await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? intlMiddleware(request);
+  if(/(?:^|\/)admin\/cms-preview(?:\/|$)/.test(request.nextUrl.pathname)) {
+    response.headers.set("Cache-Control","private, no-store, max-age=0");
+    response.headers.set("X-Robots-Tag","noindex, nofollow");
+  }
+  return response;
 }
 
 export const config = {

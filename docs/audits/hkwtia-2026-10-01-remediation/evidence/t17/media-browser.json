@@ -1,0 +1,15 @@
+{
+  "environment": "confirmed isolated Neon/Auth; built Next; synthetic registry fixtures; existing real static pixels",
+  "production": false,
+  "fixtureCount": 79,
+  "locales": [
+    "en",
+    "zh-HK"
+  ],
+  "keyboardFocus": true,
+  "selection": "native browser selectOption",
+  "realThumbnail": true,
+  "eventWrites": 0,
+  "providerUploads": 0,
+  "sourceSha": "7e64f35502e140f600dc8446cbc75cceb95c2c70"
+}

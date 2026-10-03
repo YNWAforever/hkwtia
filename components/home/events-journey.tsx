@@ -1,9 +1,8 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {CardGrid} from '@/components/wt/card-grid';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
-import type {AppLocale} from '@/i18n/routing';
 import {eventsRepository} from '@/lib/db/repos/events';
 import {formatEventDate as formatDate} from '@/lib/home/format-event-date';
 import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
@@ -11,8 +10,8 @@ import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 const stageKeys = ['before', 'during', 'after'] as const;
 
 // Section 4 of 13. app/styles/wisetech.css:227 .event-stage-grid; :232 .event-empty.
-export async function EventsJourney({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.eventsJourney'});
+export async function EventsJourney({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.eventsJourney'});
   const events = await eventsRepository
     .listFeaturedPublic(ANONYMOUS_ACTOR, {asOf: new Date(), limit: 2, locale})
     .catch(() => []);
