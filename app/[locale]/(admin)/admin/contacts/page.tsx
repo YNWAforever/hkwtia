@@ -1,5 +1,5 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import {
   ContactPipelineTable,

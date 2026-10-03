@@ -5,6 +5,7 @@ const state = vi.hoisted(() => ({redirectUrl: null as string | null}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: (key: string) => key})),
   setRequestLocale: vi.fn(),
+  getMessages: vi.fn(async () => ({})),
 }));
 // The layout's UNAUTHORIZED catch path reads request headers; unmocked, this module
 // pulls in Next internals that assume a live request context (see join-actions.test.ts

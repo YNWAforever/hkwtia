@@ -15,7 +15,7 @@ export async function isolatedBatchDatabase() {
   let pool: Pool | undefined;
   try {
     for (let attempt = 0; attempt < 60; attempt += 1) {
-      try {docker(["exec", container, "pg_isready", "-U", "postgres"]); break;} catch {await delay(100);}
+      try {docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]); break;} catch {await delay(100);}
     }
     const binding = docker(["port", container, "5432/tcp"]).trim();
     const port = binding.slice(binding.lastIndexOf(":") + 1);

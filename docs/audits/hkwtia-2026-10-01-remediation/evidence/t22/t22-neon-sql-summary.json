@@ -1,0 +1,347 @@
+{
+  "applicationShaAtStart": "55c2d036",
+  "laterDelta": "runtimeCMS-keyfilter/pageHero only; repository/domain/schema unchanged; finalCMS regression separate",
+  "scope": "confirmed isolatedNeon;8guarded files;59synthetic actualSQL; exactownedUUIDcleanup; no provider calls",
+  "command": "node node_modules/vitest/vitest.mjs run eight FULL_REMEDIATION_ACCEPTANCE_SEED=true files --maxWorkers=1",
+  "passed": 59,
+  "skipped": 0,
+  "failed": 0,
+  "files": [
+    {
+      "file": "audit-full-application-case.test.ts",
+      "tests": [
+        {
+          "name": "actual isolated application cases preserve lifecycle authority reads a new case without creating a task or granting member access",
+          "status": "passed",
+          "durationMs": 239.4815000000001
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority assigns and follows up the same application while all financial/ownership facts remain unchanged",
+          "status": "passed",
+          "durationMs": 590.8477
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority serializes parallel first updates to one unique case and refuses stale overwrite",
+          "status": "passed",
+          "durationMs": 696.6507000000001
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority cannot close an application case through the generic task action without a CAS version",
+          "status": "passed",
+          "durationMs": 447.79269999999997
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority completes and reopens follow-up only with a current version and an audit, without activating the application",
+          "status": "passed",
+          "durationMs": 717.9133999999999
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority validates the assigned owner against the current administrator role in SQL",
+          "status": "passed",
+          "durationMs": 315.59079999999994
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority strictly refuses lifecycle or arbitrary data fields; ordinary staff cannot set paid/active or move company",
+          "status": "passed",
+          "durationMs": 158.73620000000028
+        },
+        {
+          "name": "actual isolated application cases preserve lifecycle authority rolls back the operational mutation when the actual audit insert fails",
+          "status": "passed",
+          "durationMs": 456.34349999999995
+        }
+      ]
+    },
+    {
+      "file": "audit-full-auth-identity.test.ts",
+      "tests": [
+        {
+          "name": "real isolated identity provision boundary creates only a member profile and a repeated verified identity creates no entitlement",
+          "status": "passed",
+          "durationMs": 600.8509000000001
+        },
+        {
+          "name": "real isolated identity provision boundary never links a new verified subject to an existing privileged profile by email",
+          "status": "passed",
+          "durationMs": 320.1392000000001
+        },
+        {
+          "name": "real isolated identity provision boundary serializes two different subjects claiming one address without duplicate identities",
+          "status": "passed",
+          "durationMs": 443.5308
+        }
+      ]
+    },
+    {
+      "file": "audit-full-billing-scope.test.ts",
+      "tests": [
+        {
+          "name": "actual isolated billing and duplicate subscription scope returns an expired personal history without active-entitlement filters",
+          "status": "passed",
+          "durationMs": 91.29340000000002
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope permits trusted company owner/admin 0 for terminal billing",
+          "status": "passed",
+          "durationMs": 82.76819999999998
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope permits trusted company owner/admin 1 for terminal billing",
+          "status": "passed",
+          "durationMs": 82.20659999999998
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope never exposes company billing to an ordinary/revoked/foreign member 2",
+          "status": "passed",
+          "durationMs": 84.89209999999957
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope never exposes company billing to an ordinary/revoked/foreign member 3",
+          "status": "passed",
+          "durationMs": 82.12379999999985
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope never exposes company billing to an ordinary/revoked/foreign member 4",
+          "status": "passed",
+          "durationMs": 81.29410000000007
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope serializes a pending row already linked to Stripe without creating another attempt",
+          "status": "passed",
+          "durationMs": 283.20870000000014
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope scopes the default operator read to the selected Member360 target and refuses staff",
+          "status": "passed",
+          "durationMs": 86.7166000000002
+        },
+        {
+          "name": "actual isolated billing and duplicate subscription scope replays one existing correlated checkout once, with an atomic operator receipt",
+          "status": "passed",
+          "durationMs": 1787.8678999999997
+        }
+      ]
+    },
+    {
+      "file": "audit-full-campaign-entry.test.ts",
+      "tests": [
+        {
+          "name": "real isolated campaign entry boundaries retired legacy queue cannot create an immediately sendable campaign",
+          "status": "passed",
+          "durationMs": 1.4983999999999469
+        },
+        {
+          "name": "real isolated campaign entry boundaries repository rejects direct queued campaign creation through any manual writer",
+          "status": "passed",
+          "durationMs": 81.76620000000003
+        },
+        {
+          "name": "real isolated campaign entry boundaries invalidates approval when content changes before queue",
+          "status": "passed",
+          "durationMs": 1428.1009999999999
+        },
+        {
+          "name": "real isolated campaign entry boundaries invalidates approval when audience changes before queue",
+          "status": "passed",
+          "durationMs": 1369.9555999999998
+        },
+        {
+          "name": "real isolated campaign entry boundaries refuses audience append after a draft is submitted for review",
+          "status": "passed",
+          "durationMs": 853.7289999999994
+        },
+        {
+          "name": "real isolated campaign entry boundaries rejects a stale reviewer version before approval is written",
+          "status": "passed",
+          "durationMs": 1049.4048000000003
+        },
+        {
+          "name": "real isolated campaign entry boundaries worker claims only current second-person proof: legacy",
+          "status": "passed",
+          "durationMs": 1067.2310000000007
+        },
+        {
+          "name": "real isolated campaign entry boundaries worker claims only current second-person proof: changed",
+          "status": "passed",
+          "durationMs": 1305.8139999999994
+        },
+        {
+          "name": "real isolated campaign entry boundaries worker claims only current second-person proof: valid",
+          "status": "passed",
+          "durationMs": 1634.7319000000007
+        },
+        {
+          "name": "real isolated campaign entry boundaries does not promote a scheduled campaign whose approved audience changed",
+          "status": "passed",
+          "durationMs": 1292.9775000000009
+        },
+        {
+          "name": "real isolated campaign entry boundaries changes the review version when registered WhatsApp content changes",
+          "status": "passed",
+          "durationMs": 728.3239999999987
+        },
+        {
+          "name": "real isolated campaign entry boundaries keeps send-time STOP from either consent store effective after a snapshot",
+          "status": "passed",
+          "durationMs": 471.0440000000017
+        },
+        {
+          "name": "real isolated campaign entry boundaries does not widen contacts or both audiences into unrestricted membership",
+          "status": "passed",
+          "durationMs": 457.98209999999926
+        }
+      ]
+    },
+    {
+      "file": "audit-full-job-health.test.ts",
+      "tests": [
+        {
+          "name": "actual isolated verified job health GET/read does not fabricate a heartbeat and member writes fail before SQL",
+          "status": "passed",
+          "durationMs": 252.19350000000009
+        },
+        {
+          "name": "actual isolated verified job health start alone is unknown, completion with zero work is healthy and stores no arbitrary summary",
+          "status": "passed",
+          "durationMs": 370.9759999999999
+        },
+        {
+          "name": "actual isolated verified job health a crashed started poll becomes degraded and does not gain a last-success timestamp",
+          "status": "passed",
+          "durationMs": 242.17100000000028
+        },
+        {
+          "name": "actual isolated verified job health late settlement cannot overwrite the current worker/poll lease observation",
+          "status": "passed",
+          "durationMs": 370.7341999999999
+        },
+        {
+          "name": "actual isolated verified job health unknown duplicate/stale processing ledger remains uncertain without automatic retry",
+          "status": "passed",
+          "durationMs": 375.6622000000002
+        },
+        {
+          "name": "actual isolated verified job health accepted-timeout reservation stays visible and cannot become a resend reservation",
+          "status": "passed",
+          "durationMs": 424.8044
+        },
+        {
+          "name": "actual isolated verified job health rejects unregistered job keys and revision changes before persistence",
+          "status": "passed",
+          "durationMs": 161.47750000000042
+        }
+      ]
+    },
+    {
+      "file": "audit-full-policy-acceptance.test.ts",
+      "tests": [
+        {
+          "name": "actual isolated policy acceptance; synthetic policy only refuses forged ownership with zero policy receipts",
+          "status": "passed",
+          "durationMs": 260.16809999999987
+        },
+        {
+          "name": "actual isolated policy acceptance; synthetic policy only serializes identical acknowledgements to one server-time receipt and one observed hash",
+          "status": "passed",
+          "durationMs": 821.665
+        },
+        {
+          "name": "actual isolated policy acceptance; synthetic policy only a new current version requires explicit re-reading; stale posted version cannot acknowledge it",
+          "status": "passed",
+          "durationMs": 432.21159999999963
+        },
+        {
+          "name": "actual isolated policy acceptance; synthetic policy only does not reuse the same historic version for changed content",
+          "status": "passed",
+          "durationMs": 163.03549999999996
+        },
+        {
+          "name": "actual isolated policy acceptance; synthetic policy only a missing approved version never records an acceptance",
+          "status": "passed",
+          "durationMs": 0.4720999999999549
+        }
+      ]
+    },
+    {
+      "file": "audit-full-renewal-window.test.ts",
+      "tests": [
+        {
+          "name": "bounded renewal window on actual isolated SQL bounds each page and excludes out-of-window/terminal/free/granted/cancelled renewal rows",
+          "status": "passed",
+          "durationMs": 217.65550000000076
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL does not repeatedly select an unowned membership that cannot obtain a durable journey checkpoint",
+          "status": "passed",
+          "durationMs": 101.29409999999916
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL keysets5000 same-timestamp rows without missing or duplicating IDs at50/500 limits",
+          "status": "passed",
+          "durationMs": 11512.0175
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL rejects an untrusted actor or invalid bounds before opening a database",
+          "status": "passed",
+          "durationMs": 85.75800000000163
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL recovers from interruption after a durable page without duplicate enrolment or provider effects",
+          "status": "passed",
+          "durationMs": 7374.758600000001
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL rechecks a changed billing period/cancellation before the batch checkpoint is written",
+          "status": "passed",
+          "durationMs": 611.5081999999966
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL keeps concurrent checkpoints idempotent and rolls back the whole SQL statement on a constraint fault",
+          "status": "passed",
+          "durationMs": 1006.3122000000003
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL preserves scoped legacy/uncertain steps while creating only missing new episode steps",
+          "status": "passed",
+          "durationMs": 399.4203000000016
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL blocks an older writer from duplicating a new renewal episode even after rescheduling",
+          "status": "passed",
+          "durationMs": 252.5106999999989
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL persists independent personal/company episodes for the same applicant and billing period",
+          "status": "passed",
+          "durationMs": 507.10679999999775
+        },
+        {
+          "name": "bounded renewal window on actual isolated SQL preserves separate trusted dunning/winback episodes and never treats terminal renewal exclusion as loss of winback",
+          "status": "passed",
+          "durationMs": 54.17319999999745
+        }
+      ]
+    },
+    {
+      "file": "audit-full-segment-pagination.test.ts",
+      "tests": [
+        {
+          "name": "real isolated segment traversal traverses 51 SQL rows once and round trips previous page cursors",
+          "status": "passed",
+          "durationMs": 403.8887999999997
+        },
+        {
+          "name": "real isolated segment traversal traverses 101 SQL rows once and round trips previous page cursors",
+          "status": "passed",
+          "durationMs": 636.3051999999998
+        },
+        {
+          "name": "real isolated segment traversal restarts an old position against a different actual SQL audience",
+          "status": "passed",
+          "durationMs": 291.6243000000004
+        }
+      ]
+    }
+  ],
+  "production": false
+}

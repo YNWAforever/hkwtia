@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import type {AppLocale} from "@/i18n/routing";
 import type {ContactRow, ContactSource, ContactStage} from "@/lib/db/repos/contacts";

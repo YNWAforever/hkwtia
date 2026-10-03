@@ -1,0 +1,54 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "production": false,
+  "providerStubbed": false,
+  "pacingMs": 5000,
+  "statuses": {
+    "200": 597,
+    "429": 3
+  },
+  "anonymousReads": 0,
+  "observedGetSessionMaxRolling60s": 13,
+  "allAuthPathCountsRecorded": false,
+  "providerQuotaThresholdKnown": false,
+  "strictQueryCalls": 479,
+  "otherQueryCalls": 121,
+  "otherQueryContext": "Existing real m2-session-reuse /api/auth/get-session proxy has other query flags; application strict provider boundary retained",
+  "rateLimited": [
+    {
+      "observedAt": "2026-10-02T22:40:09.809Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 5000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T22:40:42.220Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false,
+      "pacingMs": 5000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T22:40:57.260Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 5000,
+      "retryAfterSeconds": null
+    }
+  ],
+  "bodyLogged": false,
+  "cookieValuesLogged": false
+}

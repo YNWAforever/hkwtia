@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {usePathname} from "next/navigation";
 import {useTranslations} from "next-intl";
 

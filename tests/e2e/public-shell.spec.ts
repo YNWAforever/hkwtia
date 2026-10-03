@@ -47,6 +47,7 @@ test("mobile Sheet traps focus, resets Accordion, closes on navigation, and rest
   await page.setViewportSize({width: 375, height: 800});
   await page.goto("/zh/events");
   const trigger = page.getByRole("button", {name: "開啟導覽選單"});
+  await expect(trigger).toBeEnabled();
   await trigger.focus();
   await trigger.press("Enter");
   const dialog = page.getByRole("dialog");
@@ -120,9 +121,10 @@ for (const width of [320, 375, 768, 1120, 1440]) {
         // out the whole 180s test timeout, which turns "no navigation surface at this width" into
         // an unreadable stall instead of a named failure.
         await expect(trigger).toBeVisible();
-        const box = await trigger.boundingBox();
-        expect(box?.width).toBeGreaterThanOrEqual(44);
-        expect(box?.height).toBeGreaterThanOrEqual(44);
+        // Hydration can replace the SSR trigger between visibility and measurement.
+        // Retry the actual dimensions while keeping the required 44px threshold.
+        await expect.poll(async () => (await trigger.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(44);
+        await expect.poll(async () => (await trigger.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
         await trigger.click();
         const dialog = page.getByRole("dialog");
         await expect(dialog).toContainText(/Find an event|尋找活動/);
@@ -170,6 +172,9 @@ test("the header floats over the hero, then goes solid past 56px", async ({page}
   await page.setViewportSize({width: 1360, height: 900});
   await page.goto("/");
   const header = page.locator("header.site-header");
+  // Streamed hydration replaces the SSR header. Assert one settled landmark
+  // before querying attributes so transient old/new nodes cannot match twice.
+  await expect.poll(() => header.count()).toBe(1);
 
   // Playwright manages a dev server with no database, so getActive rejects and the layout
   // renders no announcement: the header carries the donor's `.no-announcement` modifier and

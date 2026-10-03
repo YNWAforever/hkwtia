@@ -1,0 +1,21 @@
+{
+  "applicationSourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "lint": {
+    "exitCode": 0,
+    "warnings": 71
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "strings": {
+    "exitCode": 0
+  },
+  "build": {
+    "exitCode": 0,
+    "command": "npm.cmd run build (next build --webpack)",
+    "siteUrl": "http://localhost:3450"
+  },
+  "fullUnit": "pending final report",
+  "fullBrowser": "323pass/6fail/158skip; quota and prior draft isolation failures preserved",
+  "production": false
+}

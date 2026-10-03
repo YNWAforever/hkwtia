@@ -80,7 +80,7 @@ function docker(args: string[]): string {
 async function waitForPostgres(): Promise<void> {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
-      docker(["exec", container, "pg_isready", "-U", "postgres"]);
+      docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]);
       return;
     } catch {
       await delay(100);
@@ -119,7 +119,7 @@ async function tableCounts(): Promise<Record<string, number>> {
 describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
   beforeAll(async () => {
     if (!externalDatabaseUrl) {
-      docker(["run", "--rm", "-d", "--name", container, "-e", "POSTGRES_PASSWORD=test", "-p", "127.0.0.1::5432", "postgres:16-alpine"]);
+      docker(["run", "--rm", "-d", "--name", container, "-e", "POSTGRES_PASSWORD=test", "-p", "127.0.0.1::5432", "pgvector/pgvector:pg16"]);
       await waitForPostgres();
       const binding = docker(["port", container, "5432/tcp"]).trim();
       const port = binding.slice(binding.lastIndexOf(":") + 1);

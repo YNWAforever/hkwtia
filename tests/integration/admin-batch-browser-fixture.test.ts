@@ -1,13 +1,13 @@
 import {randomUUID} from "node:crypto";
-import {afterAll,beforeAll,describe,expect,it} from "vitest";
+import {afterAll,beforeAll,describe,expect,it,vi} from "vitest";
 import {isolatedAuditDatabase} from "./audit-database-fixture";
 import {driveAuditBatch,readAuditBatchFacts,seedAuditBatchProfiles} from "../fixtures/audit-batch-fixture";
 import {createAdminBatchesRepository,type BatchDatabase} from "@/lib/db/repos/admin-batches";
 import {batchPreviewDigest,batchRequestSchema} from "@/lib/admin/batches/types";
 let fixture:Awaited<ReturnType<typeof isolatedAuditDatabase>>;
 describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!=='1')('browser batch fixture against real transactions',()=>{
- beforeAll(async()=>{fixture=await isolatedAuditDatabase();await fixture.pool.query("INSERT INTO profiles (id,auth_user_id,role,display_name) VALUES ('browser-staff','browser-staff','staff','Synthetic Staff')");},120000);
- afterAll(async()=>{if(fixture)await fixture.close();});
+ beforeAll(async()=>{vi.stubEnv("ADMIN_BATCH_ENABLED","true");fixture=await isolatedAuditDatabase();await fixture.pool.query("INSERT INTO profiles (id,auth_user_id,role,display_name) VALUES ('browser-staff','browser-staff','staff','Synthetic Staff')");},120000);
+ afterAll(async()=>{vi.unstubAllEnvs();if(fixture)await fixture.close();});
  it('settles eight, retries exactly two with stable keys, and writes one audit per target',async()=>{
   const run=randomUUID(),{ids}=await seedAuditBatchProfiles(fixture.pool,run),db=fixture.database as unknown as BatchDatabase;
   const actor={kind:'staff',profileId:'browser-staff',userId:'browser-staff'} as const;

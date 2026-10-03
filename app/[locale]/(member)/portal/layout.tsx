@@ -1,5 +1,6 @@
 import type {Metadata} from "next";
-import {getTranslations, setRequestLocale} from "next-intl/server";
+import {NextIntlClientProvider} from "next-intl";
+import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import type {ReactNode} from "react";
@@ -52,15 +53,16 @@ export default async function PortalLayout({children, params}: Props) {
   // file to keep an admin from flashing member-portal chrome.
   if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
 
-  const [concierge, commonT] = await Promise.all([
+  const [concierge, commonT, messages] = await Promise.all([
     getTranslations({locale, namespace: "Concierge"}),
     getTranslations({locale, namespace: "Common"}),
+    getMessages(),
   ]);
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
 
   return (
-    <>
+    <NextIntlClientProvider messages={messages}>
       <InternalAppShell navigation={<PortalNav locale={locale} />} skipLabel={commonT("skipToContent")}>
         {children}
       </InternalAppShell>
@@ -69,6 +71,6 @@ export default async function PortalLayout({children, params}: Props) {
         labels={conciergeLabels}
         {...(turnstileSiteKey === undefined ? {} : {turnstileSiteKey})}
       />
-    </>
+    </NextIntlClientProvider>
   );
 }

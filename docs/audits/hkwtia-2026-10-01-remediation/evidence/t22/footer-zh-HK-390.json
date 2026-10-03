@@ -1,0 +1,26 @@
+{
+  "locale": "zh-HK",
+  "width": 390,
+  "unobscured": true,
+  "coveredByConcierge": false,
+  "button": {
+    "x": 16,
+    "y": 634.484375,
+    "width": 44,
+    "height": 44,
+    "top": 634.484375,
+    "right": 60,
+    "bottom": 678.484375,
+    "left": 16
+  },
+  "widget": {
+    "x": 236.25,
+    "y": 731,
+    "width": 139.75,
+    "height": 56,
+    "top": 731,
+    "right": 376,
+    "bottom": 787,
+    "left": 236.25
+  }
+}

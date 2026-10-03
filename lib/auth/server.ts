@@ -2,6 +2,7 @@ import "server-only";
 
 import {randomBytes} from "node:crypto";
 import {cache} from "react";
+import {headers} from "next/headers";
 
 import {createNeonAuth} from "@neondatabase/auth/next/server";
 
@@ -56,6 +57,16 @@ function isCookieMutationError(error: unknown): boolean {
 
 /** Read the current Neon Auth session from the request cookies. */
 export const getSession = cache(async function getSession(): Promise<NeonSession | null> {
+  const requestHeaders = await headers();
+  // The installed SDK forwards only __Secure-neon-auth cookies. No such
+  // cookie means it has no session credential to validate. This is only an
+  // absence check: all supplied Auth cookies still take the strict provider
+  // path below, including forged, expired and cached session data cookies.
+  const hasAuthCookie = (requestHeaders.get("cookie") ?? "").split(";").some(
+    (cookie) => cookie.trim().split("=", 1)[0].startsWith("__Secure-neon-auth"),
+  );
+  if (!hasAuthCookie && !requestHeaders.has("authorization")) return null;
+
   try {
     const result = await auth.getSession({query: {disableCookieCache: "true", disableRefresh: "true"}}) as SessionResult;
     if (result.error != null) {

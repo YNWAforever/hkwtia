@@ -36,6 +36,7 @@ export function DualBrandLockup({labels, priority = false, className}: DualBrand
           alt={labels.logoAlt}
           width={2001}
           height={721}
+          sizes="(max-width: 520px) 66px, 88px"
           priority={priority}
           className="h-full w-full object-contain"
         />

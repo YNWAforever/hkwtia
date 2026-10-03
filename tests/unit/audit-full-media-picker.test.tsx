@@ -7,6 +7,8 @@ import {
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
+import {useState} from "react";
+import {MediaPicker} from "@/components/admin/media-picker";
 import { EventForm } from "@/components/admin/event-form";
 import { AdminUnsavedChangesProvider } from "@/components/admin/unsaved-changes-guard";
 it("finds one registered image among 79 while retaining the selected image and forbidding raw URL input", () => {
@@ -83,4 +85,24 @@ it("retains the actual registered media selection after a successful form action
   expect(
     screen.getByRole("combobox", { name: labels.heroMediaId }),
   ).toHaveValue(row.id);
+});
+
+it("retains native input selection until change when the parent rerenders with registry rows", () => {
+  const row={id:"00000000-0000-4000-8000-000000000040",altEn:"Synthetic native",altZh:"合成鍵盤",url:"/archive/synthetic-40.webp"};
+  const changes: FormDataEntryValue[]=[];
+  function Parent(){
+    const [,setInputCount]=useState(0);
+    return <form onInput={()=>setInputCount(n=>n+1)} onChange={event=>changes.push(new FormData(event.currentTarget).get("heroMediaId")!)}>
+      <MediaPicker rows={[row]} value="" name="heroMediaId" labels={{choose:"Registered hero",none:"None",search:"Search registry",results:"Results",selected:"Selected"}}/>
+    </form>;
+  }
+  render(<Parent/>);
+  const select=screen.getByRole("combobox",{name:"Registered hero"}) as HTMLSelectElement;
+  // Browsers dispatch input before change for native keyboard selection.
+  // A parent input rerender used to restore the old controlled value in between.
+  select.value=row.id;
+  fireEvent.input(select);
+  fireEvent.change(select);
+  expect(select).toHaveValue(row.id);
+  expect(changes).toEqual([row.id]);
 });

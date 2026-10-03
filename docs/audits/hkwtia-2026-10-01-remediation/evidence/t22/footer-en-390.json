@@ -1,0 +1,26 @@
+{
+  "locale": "en",
+  "width": 390,
+  "unobscured": true,
+  "coveredByConcierge": false,
+  "button": {
+    "x": 16,
+    "y": 634.359375,
+    "width": 49.109375,
+    "height": 44,
+    "top": 634.359375,
+    "right": 65.109375,
+    "bottom": 678.359375,
+    "left": 16
+  },
+  "widget": {
+    "x": 216.515625,
+    "y": 731,
+    "width": 159.484375,
+    "height": 56,
+    "top": 731,
+    "right": 376,
+    "bottom": 787,
+    "left": 216.515625
+  }
+}

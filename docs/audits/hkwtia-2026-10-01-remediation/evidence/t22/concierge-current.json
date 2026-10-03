@@ -1,0 +1,15 @@
+{
+  "sourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "nativeReport": ".playwright/t22-concierge-release-final.json",
+  "stats": {
+    "startTime": "2026-10-02T21:30:18.862Z",
+    "duration": 6480.939,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "collectionErrors": 0,
+  "profile": "concierge",
+  "production": false
+}

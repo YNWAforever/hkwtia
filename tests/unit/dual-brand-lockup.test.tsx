@@ -32,6 +32,11 @@ describe("DualBrandLockup", () => {
     expect(screen.getByText(labels.descriptor).tagName).toBe("SMALL");
   });
 
+  it("requests a logo sized for the mobile and desktop tile", () => {
+    render(<DualBrandLockup labels={labels} priority />);
+    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("sizes", "(max-width: 520px) 66px, 88px");
+  });
+
   // The anchor's rendered width floor is the 108px `.brand-logo-wrap` tile, not `min-w-11`:
   // the port's `.brand { min-width: 0 }` overrides that utility at runtime. This case pins the
   // class list and the 44px height floor, which nothing in the port contests.

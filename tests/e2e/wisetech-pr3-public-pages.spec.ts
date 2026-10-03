@@ -158,6 +158,9 @@ for (const homeCase of homeCases) {
       // actually exists.
       const discoverLinkVisible = (await discoverLink.count()) > 0;
       if (discoverLinkVisible) {
+        // Streamed hydration can temporarily retain old/new markup. Require
+        // one actual target before measuring the existing visibility budget.
+        await expect(discoverTarget).toHaveCount(1);
         await expect(discoverLink).toBeInViewport();
         // Re-measured for the WP-3 hero (E-52): see Step 3's measurement script and the
         // reading this threshold is built from (recorded in the comment above the constant).

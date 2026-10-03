@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import type { AppLocale } from "@/i18n/routing";
 import type { Member360 } from "@/lib/admin/member-360";
 import type { MemberMaintenance } from "@/lib/admin/work-queue";

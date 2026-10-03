@@ -31,7 +31,7 @@ function docker(args: string[]): string {
 
 async function waitForPostgres(): Promise<void> {
   for (let attempt = 0; attempt < 60; attempt += 1) {
-    try { docker(["exec", container, "pg_isready", "-U", "postgres"]); return; }
+    try { docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]); return; }
     catch { await delay(100); }
   }
   throw new Error("disposable PostgreSQL 16 did not become ready");

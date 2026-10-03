@@ -1,0 +1,553 @@
+{
+  "sourceSha": "5b4ac2f4f1bd875047037dcaf4f9cfae79ce4e25",
+  "startTime": 1790960801132,
+  "passed": 90,
+  "failed": 0,
+  "skipped": 0,
+  "total": 90,
+  "failedFiles": [],
+  "success": true,
+  "cases": [
+    {
+      "file": "tests/unit/admin-dashboard-recent.test.tsx",
+      "test": "admin dashboard recent batch recovery shows the actor's latest job with a direct recovery link",
+      "status": "passed",
+      "durationMs": 1440.4541
+    },
+    {
+      "file": "tests/unit/admin-dashboard-recent.test.tsx",
+      "test": "admin dashboard recent batch recovery puts review queues first and links directly to application progress",
+      "status": "passed",
+      "durationMs": 138.3188999999993
+    },
+    {
+      "file": "tests/unit/admin-dashboard-recent.test.tsx",
+      "test": "admin dashboard recent batch recovery shows the batch time and failed item count for follow-up",
+      "status": "passed",
+      "durationMs": 90.41839999999956
+    },
+    {
+      "file": "tests/unit/admin-dashboard-tiles.test.tsx",
+      "test": "admin dashboard tiles shows a queue size and a way into the queue",
+      "status": "passed",
+      "durationMs": 15.764599999999973
+    },
+    {
+      "file": "tests/unit/admin-dashboard-tiles.test.tsx",
+      "test": "admin dashboard tiles renders an empty queue as zero, not as unavailable",
+      "status": "passed",
+      "durationMs": 1.2385000000003856
+    },
+    {
+      "file": "tests/unit/admin-dashboard-tiles.test.tsx",
+      "test": "admin dashboard tiles renders a failed read as unavailable, not as zero",
+      "status": "passed",
+      "durationMs": 0.9542999999998756
+    },
+    {
+      "file": "tests/unit/admin-dashboard-tiles.test.tsx",
+      "test": "admin dashboard tiles prefixes the Chinese links with /zh, not the raw locale",
+      "status": "passed",
+      "durationMs": 1.3081999999999425
+    },
+    {
+      "file": "tests/unit/admin-dashboard-tiles.test.tsx",
+      "test": "admin dashboard tiles keeps every tile independent, so one failure does not blank the rest",
+      "status": "passed",
+      "durationMs": 1.470600000000104
+    },
+    {
+      "file": "tests/unit/admin-nav.test.tsx",
+      "test": "AdminNav lets an Admin member-detail route mark the Members link current",
+      "status": "passed",
+      "durationMs": 150.60639999999967
+    },
+    {
+      "file": "tests/unit/admin-nav.test.tsx",
+      "test": "AdminNav reaches Dashboard through a real labelled link, not only the brand",
+      "status": "passed",
+      "durationMs": 156.5012999999999
+    },
+    {
+      "file": "tests/unit/admin-nav.test.tsx",
+      "test": "AdminNav groups all 22 nav links across Workspace/Content/Operations",
+      "status": "passed",
+      "durationMs": 68.7523999999994
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private admin navigation waits for navigation even when caller prefetch is undefined",
+      "status": "passed",
+      "durationMs": 73.54780000000028
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private admin navigation waits for navigation even when caller prefetch is true",
+      "status": "passed",
+      "durationMs": 8.655700000000252
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private dashboard entry points waits for intentional navigation in en",
+      "status": "passed",
+      "durationMs": 60.63740000000007
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private dashboard entry points waits for intentional navigation in zh-HK",
+      "status": "passed",
+      "durationMs": 17.213400000000092
+    },
+    {
+      "file": "tests/unit/admin-unsaved-changes-guard.test.tsx",
+      "test": "admin unsaved form navigation keeps the draft when a sidebar navigation is cancelled and warns on reload",
+      "status": "passed",
+      "durationMs": 116.66139999999996
+    },
+    {
+      "file": "tests/unit/admin-unsaved-changes-guard.test.tsx",
+      "test": "admin unsaved form navigation also protects direct links inside an editor page",
+      "status": "passed",
+      "durationMs": 17.80939999999964
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract parses a database contract without unrelated production secrets",
+      "status": "passed",
+      "durationMs": 2.3551000000002205
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract rejects a production database contract without DATABASE_URL",
+      "status": "passed",
+      "durationMs": 0.9873999999999796
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract parses auth and app contracts independently",
+      "status": "passed",
+      "durationMs": 0.35730000000012296
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract keeps the preview-only email exception inside the email contract",
+      "status": "passed",
+      "durationMs": 0.665400000000318
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract parses billing and automation contracts independently",
+      "status": "passed",
+      "durationMs": 0.5413000000003194
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract accepts production-like billing and automation profiles without unrelated keys",
+      "status": "passed",
+      "durationMs": 0.5587000000000444
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract reads feature accessors from process.env without cross-feature validation",
+      "status": "passed",
+      "durationMs": 0.7127000000000407
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract keeps the AI contract typed and validates the dedicated Concierge secret",
+      "status": "passed",
+      "durationMs": 3.1035000000001673
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract parses the live-WhatsApp switch strictly and the approved-key fallback loosely",
+      "status": "passed",
+      "durationMs": 1.001299999999901
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=true",
+      "status": "passed",
+      "durationMs": 1.0631000000003041
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=TRUE",
+      "status": "passed",
+      "durationMs": 0.3301000000001295
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=yes",
+      "status": "passed",
+      "durationMs": 0.2600999999999658
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=on",
+      "status": "passed",
+      "durationMs": 0.26119999999991705
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=2",
+      "status": "passed",
+      "durationMs": 0.2581000000000131
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to downgrade to mock mode over RUN_LIVE_WOZTELL= 1",
+      "status": "passed",
+      "durationMs": 0.266399999999976
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract reads a blank live switch as absent, not as a typo",
+      "status": "passed",
+      "durationMs": 1.0422999999996136
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract reads a blank live switch as absent, not as a typo",
+      "status": "passed",
+      "durationMs": 0.24110000000018772
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract reads a blank live switch as absent, not as a typo",
+      "status": "passed",
+      "durationMs": 0.15170000000034634
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract keeps the live switch out of the aggregate server contract",
+      "status": "passed",
+      "durationMs": 0.7916000000000167
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract rejects a deployed runtime without server credentials",
+      "status": "passed",
+      "durationMs": 0.28339999999980137
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract returns the server-only values without exposing public keys",
+      "status": "passed",
+      "durationMs": 0.44790000000011787
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract reads the public site URL without requiring server credentials",
+      "status": "passed",
+      "durationMs": 0.24040000000013606
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract uses process.env when called without an override",
+      "status": "passed",
+      "durationMs": 0.49479999999994106
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract fails closed in production when STRIPE_STARTUP_PRICE_ID is missing",
+      "status": "passed",
+      "durationMs": 0.2928999999999178
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract fails closed in production when STRIPE_CORPORATE_PRICE_ID is missing",
+      "status": "passed",
+      "durationMs": 0.15340000000014697
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract fails closed in production when RESEND_API_KEY is missing",
+      "status": "passed",
+      "durationMs": 0.282799999999952
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract fails closed in production when EMAIL_FROM is missing",
+      "status": "passed",
+      "durationMs": 0.12449999999989814
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract fails closed in production when CRON_SECRET is missing",
+      "status": "passed",
+      "durationMs": 0.13720000000012078
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract allows explicit test email delivery only in a Vercel Preview",
+      "status": "passed",
+      "durationMs": 0.4106000000001586
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract does not allow test email delivery to weaken production",
+      "status": "passed",
+      "durationMs": 0.26139999999986685
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract requires a dedicated strong Concierge cookie secret and rejects blank Turnstile configuration in production",
+      "status": "passed",
+      "durationMs": 0.9723999999996522
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to boot production with neither set",
+      "status": "passed",
+      "durationMs": 0.292699999999968
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to boot production with only the secret",
+      "status": "passed",
+      "durationMs": 0.1514999999999418
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract refuses to boot production with only the site key",
+      "status": "passed",
+      "durationMs": 0.1594000000000051
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract boots production when the pair is present",
+      "status": "passed",
+      "durationMs": 0.33150000000023283
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract exempts Vercel Preview, which is configured separately",
+      "status": "passed",
+      "durationMs": 0.3215999999997621
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract keeps a bearer credential from doubling as a signing key",
+      "status": "passed",
+      "durationMs": 0.21660000000019863
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract requires the unsubscribe signing key to be long enough to matter",
+      "status": "passed",
+      "durationMs": 0.21739999999999782
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract reads a blank member-tool token as absent, never as configured",
+      "status": "passed",
+      "durationMs": 0.31500000000005457
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract keeps the member-tool token out of the aggregate server contract",
+      "status": "passed",
+      "durationMs": 0.4471000000003187
+    },
+    {
+      "file": "tests/unit/env-contract.test.ts",
+      "test": "runtime environment contract gives the writer its own model, defaulted so a missing value degrades rather than blocks",
+      "status": "passed",
+      "durationMs": 0.7726999999999862
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher keeps the ready server-rendered control disabled until client handlers are installed",
+      "status": "passed",
+      "durationMs": 31.38760000000002
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher cannot consume a click in the pending search-state fallback",
+      "status": "passed",
+      "durationMs": 138.65380000000005
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher retains every parsed Showcase filter and fragment through the real switcher",
+      "status": "passed",
+      "durationMs": 37.68100000000004
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher retains the selected Event status and fragment through the real switcher",
+      "status": "passed",
+      "durationMs": 12.534900000000107
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher preserves the current fragment after path and query when switching locale",
+      "status": "passed",
+      "durationMs": 12.147200000000339
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher preserves serialized query values when switching from English to Chinese",
+      "status": "passed",
+      "durationMs": 6.929200000000037
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher does not append a bare query separator when switching from English to Chinese without search state",
+      "status": "passed",
+      "durationMs": 12.643399999999929
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher preserves an empty-valued query parameter when switching from English to Chinese",
+      "status": "passed",
+      "durationMs": 8.503899999999703
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher preserves serialized query values when switching from Chinese to English",
+      "status": "passed",
+      "durationMs": 7.574399999999969
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher does not append a bare query separator when switching from Chinese to English without search state",
+      "status": "passed",
+      "durationMs": 7.689600000000155
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher preserves an empty-valued query parameter when switching from Chinese to English",
+      "status": "passed",
+      "durationMs": 5.555200000000241
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher keeps the current locale when an unsaved editor rejects the switch",
+      "status": "passed",
+      "durationMs": 5.941100000000006
+    },
+    {
+      "file": "tests/unit/locale-switcher.test.tsx",
+      "test": "LocaleSwitcher renders a 44px locale target in each Suspense state",
+      "status": "passed",
+      "durationMs": 6.762000000000171
+    },
+    {
+      "file": "tests/unit/m2-session-billing-probe.test.ts",
+      "test": "terminal member authentication probe uses authorized billing history without requiring membership entitlements",
+      "status": "passed",
+      "durationMs": 1.4711999999999534
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "isolated browser session reuse does not overwrite the current test locale with a cached identity's UI preference",
+      "status": "passed",
+      "durationMs": 4.828299999999672
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "isolated browser session reuse rejects a cached session when identity API succeeds but the protected server page redirects",
+      "status": "passed",
+      "durationMs": 0.5054000000000087
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "isolated browser session reuse requires the server to confirm the same synthetic identity before reuse",
+      "status": "passed",
+      "durationMs": 0.5976000000000568
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "isolated browser session reuse rejects a different identity even when a cookie exists",
+      "status": "passed",
+      "durationMs": 0.2504999999996471
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "isolated browser session reuse rejects expired or unavailable sessions without trusting the local artifact",
+      "status": "passed",
+      "durationMs": 0.3647000000000844
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "protected session probe locale keeps the current Chinese locale after /zh",
+      "status": "passed",
+      "durationMs": 0.2802999999998974
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "protected session probe locale keeps the current Chinese locale after /zh/",
+      "status": "passed",
+      "durationMs": 0.146900000000187
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "protected session probe locale keeps the current Chinese locale after /zh/events",
+      "status": "passed",
+      "durationMs": 0.08460000000013679
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "protected session probe locale keeps unprefixed paths after /",
+      "status": "passed",
+      "durationMs": 0.21139999999968495
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "protected session probe locale keeps unprefixed paths after /events",
+      "status": "passed",
+      "durationMs": 0.1392000000000735
+    },
+    {
+      "file": "tests/unit/m2-session-reuse.test.ts",
+      "test": "protected session probe locale keeps unprefixed paths after /zh-other",
+      "status": "passed",
+      "durationMs": 0.1066000000000713
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation does not offer a keyboard trigger before its client event handlers are installed",
+      "status": "passed",
+      "durationMs": 118.87299999999959
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation puts event and join actions first, then utilities, the eyebrow and the four groups",
+      "status": "passed",
+      "durationMs": 140.46249999999964
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation shows at most five leaves per group and closes each panel with a view-all link",
+      "status": "passed",
+      "durationMs": 121.95079999999962
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation opens a group, marks the exact current leaf, closes on navigation, and returns focus",
+      "status": "passed",
+      "durationMs": 144.97649999999976
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation closes the dialog when the route changes underneath it",
+      "status": "passed",
+      "durationMs": 117.8802999999998
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation resets stale accordion state after Escape and reopen",
+      "status": "passed",
+      "durationMs": 164.33690000000024
+    },
+    {
+      "file": "tests/unit/mobile-navigation.test.tsx",
+      "test": "MobileNavigation closes and resets after the locale action while preserving locale navigation",
+      "status": "passed",
+      "durationMs": 138.96709999999985
+    }
+  ],
+  "sourceRelation": "90 focused checks before commit; only Link property indentation normalized afterward. Exact committed source is verified separately by native browser and final full suite."
+}

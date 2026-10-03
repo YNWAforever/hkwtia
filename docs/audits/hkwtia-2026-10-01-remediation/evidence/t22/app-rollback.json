@@ -1,0 +1,85 @@
+{
+  "checkedAt": "2026-10-02T05:51:29.873Z",
+  "candidateApplicationSha": "27832bdcd58dfde1f512697277960df6958fc02d",
+  "rolledBackApplicationSha": "f327fd334e7766b22102154bf1959310b658ab78",
+  "environment": "confirmed isolated Neon/Auth; locally built archived source",
+  "ledger": 56,
+  "production": false,
+  "providerPaymentsRefundsSends": 0,
+  "checks": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/zh",
+      "status": 200
+    },
+    {
+      "route": "/membership",
+      "status": 200
+    },
+    {
+      "route": "/zh/membership",
+      "status": 200
+    },
+    {
+      "route": "/partners",
+      "status": 200
+    },
+    {
+      "route": "/zh/partners",
+      "status": 200
+    },
+    {
+      "route": "/admin",
+      "status": 200,
+      "locale": "en"
+    },
+    {
+      "route": "/admin/members",
+      "status": 200,
+      "locale": "zh-HK"
+    },
+    {
+      "route": "/admin/batches",
+      "status": 200,
+      "locale": "zh-HK"
+    },
+    {
+      "route": "/admin/page-copy",
+      "status": 200,
+      "locale": "zh-HK"
+    },
+    {
+      "route": "/admin/automations",
+      "status": 200,
+      "locale": "zh-HK"
+    }
+  ],
+  "financialFingerprintsUnchanged": true,
+  "tables": {
+    "event_orders": {
+      "rows": 27,
+      "sha256": "0e97f2ec17ebee52e21a33f7a6205e8da071ad8bb3ba2de03509fdaf54d8a113"
+    },
+    "memberships": {
+      "rows": 5025,
+      "sha256": "25e1715083ced789fdd8b23eb75a00d9b45b7f8467b8ca67373b879e66d39e63"
+    }
+  },
+  "flagsOff": [
+    "AUTH_GOOGLE_ENABLED",
+    "MEMBERSHIP_GRANTS_ENABLED",
+    "ZSH_TMUX_AUTOSTART",
+    "ADMIN_BATCH_ENABLED",
+    "MEMBER_IMPORT_ENABLED",
+    "MEMBER_EXPORT_ENABLED",
+    "EVENT_ATTENDEE_EXPORT_ENABLED",
+    "MEMBERSHIP_GRANT_BATCH_ENABLED",
+    "MEMBER_COMMUNICATION_BATCH_ENABLED",
+    "TICKET_RESEND_BATCH_ENABLED",
+    "CMS_SERVER_DRAFTS_ENABLED"
+  ],
+  "scope": "actual compatible previous app public/staff readback; no arbitrary old app/worker rollback, live alias switch or gateway mutation pause claimed"
+}

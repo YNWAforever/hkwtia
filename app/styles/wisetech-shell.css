@@ -161,6 +161,11 @@
  * renders at 11px, and repeating the superseded base value would leave the two visibly apart. */
 .footer-bottom button, .footer-bottom small { font-size: 11px; }
 
+/* At the document end, the fixed Concierge covers the desktop locale control.
+ * Leave room for its 56px trigger, 22px bottom offset and keyboard focus ring.
+ * Keep this in the shell overrides; the donor stylesheet is generated. */
+.site-footer { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+
 /* Accessibility floor over the donor (spec 2.9), the same correction .brand-copy small needed
  * above. The donor's dark footer fades its own small print past AA on #363839: axe reports
  * `.footer-brand > small` -- the legal line, port rgba(255,255,255,.42) at wisetech.css:285 --
@@ -437,6 +442,9 @@
  * than a bare pass. */
 .intro-process span { color: #4a738c; }
 
+/* The numbered service links need AA contrast on their white cards. */
+.service-link>span:first-child { color: #4a738c; }
+
 /* 2. components/wt/interest-band.tsx (InterestBand), first rendered live by Task 4's /events
  * rewrite (Task 7's /showcase also uses it, but /showcase is not in this suite's route list).
  * `.event-interest` (wisetech.css:392) sets `background: var(--wt-blue)` with `color: white`,
@@ -545,3 +553,12 @@ html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto;
     contain-intrinsic-block-size: none;
   }
 }
+
+/* AI-Ops metric cards sit on a light page; Home keeps its dark-section palette. */
+.impact-metrics.aiops-metrics>div { border-color: var(--wt-line); background: var(--wt-paper-bright); }
+.impact-metrics.aiops-metrics strong { color: var(--wt-ink); }
+.impact-metrics.aiops-metrics small { color: #4a6570; }
+
+/* Actual populated news cards: donor accent text measured 3.73:1 on white. */
+.archive-grid > article > .status-label,
+.archive-grid > article > p > span { color: #4a6570; }

@@ -31,5 +31,5 @@ export const adminNavigationGroups = [
   {id:"events",links:[{id:"events",href:"/admin/events-mgmt"},{id:"approvals",href:"/admin/approvals"}]},
   {id:"communications-follow-up",links:[{id:"inbox",href:"/admin/inbox"},{id:"campaigns",href:"/admin/campaigns"},{id:"templates",href:"/admin/templates"}]},
   {id:"content-settings",links:[{id:"announcements",href:"/admin/announcements"},{id:"news",href:"/admin/news"},{id:"page-copy",href:"/admin/page-copy"},{id:"media",href:"/admin/media"},{id:"partners",href:"/admin/partners"},{id:"landing-partners",href:"/admin/landing-partners"}]},
-  {id:"system-audit",links:[{id:"reports",href:"/admin/reports"},{id:"automations",href:"/admin/automations"},{id:"job-health",href:"/admin/system/job-health"}]},
+  {id:"system-audit",links:[{id:"reports",href:"/admin/reports"},{id:"automations",href:"/admin/automations"},{id:"job-health",href:"/admin/automations#verified-worker-health"}]},
 ] as const satisfies readonly InternalNavGroupConfig[];

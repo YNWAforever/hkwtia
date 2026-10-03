@@ -35,7 +35,7 @@ async function measure(work: () => Promise<unknown>) {const values: number[] = [
 describe.skipIf(!enabled)("audit capacity with the complete schema on disposable PostgreSQL", () => {
   beforeAll(async () => {
     docker(["run", "--rm", "-d", "--name", container, "-e", "POSTGRES_PASSWORD=test", "-p", "127.0.0.1::5432", image]);
-    for (let i=0; i<60; i++) {try {docker(["exec", container, "pg_isready", "-U", "postgres"]); break;} catch {await delay(200);}}
+    for (let i=0; i<60; i++) {try {docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]); break;} catch {await delay(200);}}
     const port = docker(["port", container, "5432/tcp"]).trim().split(":").at(-1)!;
     if (!/^\d+$/.test(port)) throw new Error("DISPOSABLE_DATABASE_PORT_UNAVAILABLE");
     pool = new Pool({host: "127.0.0.1", port: Number(port), user: "postgres", password: "test", database: "postgres"});

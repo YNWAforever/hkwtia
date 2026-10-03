@@ -1,0 +1,9 @@
+{
+  "sourceBaseSha": "f7599e89",
+  "sourceRelation": "working tree root recovery catalog and authorized private catalogs",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/layout-client-messages.test.tsx tests/unit/portal-layout-admin-redirect.test.tsx tests/unit/concierge-layouts.test.ts",
+  "pass": 11,
+  "fail": 0,
+  "skip": 0,
+  "production": false
+}

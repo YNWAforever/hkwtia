@@ -62,7 +62,8 @@ describe("M2 authenticated browser release contract", () => {
     expect(spec).toContain('(role ?? "anonymous") + " segment export API"');
     expect(spec).toContain("VERCEL_SHARE_TOKEN");
     expect(runtime).not.toContain("VERCEL_SHARE_TOKEN");
-    expect(spec.match(/toBeVisible\(\{timeout: 20_000\}\)/g)).toHaveLength(2);
+    expect(spec).toContain('const entry = segment.getByRole("link", {name: en.Admin.segments.queue, exact: true})');
+    expect(spec).toContain('name: en.Admin.campaigns.actions.approveEmail, exact: true');
     expect(spec).toContain('hostname.endsWith(".vercel.app")');
     // Traces are off for the storage-state path too: a retry trace would record the `_vercel_jwt` request header.
     expect(config).toContain("trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE ? 'off' : 'on-first-retry'");

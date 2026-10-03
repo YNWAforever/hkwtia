@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import type { AppLocale } from "@/i18n/routing";
 import { localizedPath } from "@/lib/urls";
 import type {
@@ -69,6 +69,7 @@ export function WorkQueueTable({
       <nav aria-label={labels.title} className="flex flex-wrap gap-2">
         {(["mine", "unassigned", "all"] as const).map((value) => (
           <Link
+            prefetch={false}
             key={value}
             href={href(value)}
             aria-current={scope === value ? "page" : undefined}
@@ -140,6 +141,7 @@ export function WorkQueueTable({
                 </div>
               </dl>
               <Link
+                prefetch={false}
                 className="inline-flex min-h-11 items-center self-center justify-self-start rounded-md border px-3 text-sm font-medium text-primary focus-visible:outline-2 focus-visible:outline-primary"
                 href={localizedPath(locale, item.href)}
               >
@@ -153,6 +155,7 @@ export function WorkQueueTable({
         <nav aria-label={labels.nextAction} className="flex flex-wrap gap-3">
           {cursor ? (
             <Link
+              prefetch={false}
               className="inline-flex min-h-11 items-center rounded-md border px-4"
               href={href(scope)}
             >
@@ -161,6 +164,7 @@ export function WorkQueueTable({
           ) : null}
           {page?.nextCursor ? (
             <Link
+              prefetch={false}
               className="inline-flex min-h-11 items-center rounded-md border px-4"
               href={href(scope, page.nextCursor)}
             >

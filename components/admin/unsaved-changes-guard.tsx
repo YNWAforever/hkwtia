@@ -1,7 +1,7 @@
 "use client";
 
 import {createContext, useCallback, useContext, useEffect, useMemo, useState, type ComponentProps, type ReactNode} from "react";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 type UnsavedChanges = Readonly<{dirty: boolean; setDirty: (dirty: boolean) => void; confirmLeave: () => boolean}>;
 const context = createContext<UnsavedChanges>({dirty: false, setDirty: () => {}, confirmLeave: () => true});
@@ -45,7 +45,8 @@ export function useAdminUnsavedChanges() {
 
 export function GuardedAdminLink(props: ComponentProps<typeof Link>) {
   const {confirmLeave} = useAdminUnsavedChanges();
-  return <Link {...props} data-unsaved-guarded="" onNavigate={(event) => {
+  // Private sidebar/topbar routes must not fan out authenticated reads on idle or hover.
+  return <Link {...props} prefetch={false} data-unsaved-guarded="" onNavigate={(event) => {
     if (!confirmLeave()) {
       event.preventDefault();
       return;

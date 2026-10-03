@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { Pool } from "pg";
 test.use({ trace: "off", video: "off" });
@@ -52,6 +52,45 @@ test.describe("public first paint on actual built browser", () => {
       0,
     );
   });
+  for (const locale of ["en", "zh-HK"] as const) {
+    test(`${locale} pending announcement header cannot accept focus before its replacement`, async ({page, baseURL}) => {
+      expect(new URL(baseURL!).hostname).toBe("localhost");
+      expect(process.env.DATABASE_URL).toBe(process.env.DATABASE_URL_TEST);
+      expect(new URL(process.env.DATABASE_URL_TEST!).hostname).toBe("ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech");
+      expect(process.env.NEON_PROJECT_ID).toBe("solitary-wave-52860119");
+      expect(process.env.AUDIT_BATCH_WORKER_PAUSED).toBe("true");
+      const pool = new Pool({connectionString: process.env.DATABASE_URL_TEST, max: 1});
+      const client = await pool.connect();
+      try {
+        expect(Number((await client.query("SELECT count(*) AS n FROM acceptance_sentinel")).rows[0].n)).toBe(1);
+        await client.query("BEGIN");
+        await client.query("SET LOCAL idle_in_transaction_session_timeout='30s'");
+        await client.query("LOCK TABLE site_announcements IN ACCESS EXCLUSIVE MODE");
+        await page.context().addCookies([{name: "NEXT_LOCALE", value: locale, url: baseURL!}]);
+        await page.goto(locale === "en" ? "/" : "/zh", {waitUntil: "commit"});
+        await expect(page.locator("#hero-title")).toBeVisible();
+        const temporary = page.locator('header .header-inner');
+        await expect(temporary).toBeAttached({timeout: 4000});
+        const refusedFocus = await temporary.locator('.member-login-link').evaluate((link) => {
+          (link as HTMLElement).focus();
+          return document.activeElement !== link;
+        });
+        expect(refusedFocus).toBe(true);
+        await expect(temporary).toHaveAttribute("inert", "");
+        await expect(temporary).toHaveAttribute("aria-hidden", "true");
+      } finally {
+        await client.query("ROLLBACK");
+        client.release();
+        await pool.end();
+      }
+      const login = page.getByRole("banner").getByRole("link", {name: JSON.parse(readFileSync(`messages/${locale}.json`, "utf8")).Navigation.actions.memberSignIn, exact: true});
+      await expect(login).toBeVisible();
+      await login.focus();
+      await expect(login).toBeFocused();
+      await login.press("Enter");
+      await expect(page).toHaveURL(new RegExp(`${locale === "en" ? "" : "/zh"}/member-login$`));
+    });
+  }
   for (const locale of ["en", "zh-HK"] as const) {
     test(`${locale} page hero image requests are eager and high priority`,async ({page,baseURL}) => {
       expect(new URL(baseURL!).hostname).toBe("localhost");

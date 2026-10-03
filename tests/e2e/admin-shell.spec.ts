@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 import {Pool} from "pg";
+import {writeFileSync} from "node:fs";
 import {missingM2IdentityEnvironment, signInForM2} from "../fixtures/m2-auth";
 import {finalAuditIsolatedDatabaseUrl} from "../fixtures/audit-isolated-db";
 
@@ -13,7 +14,7 @@ test.describe("isolated admin workspace shell", () => {
     await page.goto("/admin");
     const sidebar = page.getByTestId("admin-desktop-sidebar");
     await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(23);
+    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(25);
     await expect(sidebar.getByRole("link", {name: /Dashboard/})).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("link", {name: /Find a member/})).toHaveAttribute("href", "/admin/members");
     await page.getByRole("button", {name: /Collapse sidebar/}).click();
@@ -37,15 +38,16 @@ test.describe("isolated admin workspace shell", () => {
 
   test("member detail keeps the Members destination current", async ({page}) => {
     await signInForM2(page, "staff");
-    await page.goto("/admin/members");
-    await expect(page.getByTestId("admin-desktop-sidebar").getByRole("link", {name: /Members/})).toHaveAttribute("aria-current", "page");
+    await page.goto("/admin/members/m2-risk-01");
+    writeFileSync(".playwright/t22-admin-current-safe.json",JSON.stringify({pathname:new URL(page.url()).pathname,lang:await page.locator("html").getAttribute("lang"),links:await page.getByTestId("admin-desktop-sidebar").locator('a[href$="/admin/members"]').evaluateAll(xs=>xs.map(x=>({href:x.getAttribute("href"),current:x.getAttribute("aria-current"),textMatches:x.textContent?.trim()==="Members"})))}));
+    await expect(page.getByTestId("admin-desktop-sidebar").getByRole("link", {name: "Members", exact: true})).toHaveAttribute("aria-current", "page");
   });
 
   test("zh-HK superadmin keeps locale and authorized navigation", async ({page}) => {
     await signInForM2(page, "superadmin");
     await page.goto("/zh/admin");
     const sidebar = page.getByTestId("admin-desktop-sidebar");
-    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(23);
+    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(25);
     await expect(sidebar.getByRole("link", {name: "控制台"})).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("超級管理員")).toBeVisible();
     await sidebar.getByRole("link", {name: "會員", exact: true}).click();

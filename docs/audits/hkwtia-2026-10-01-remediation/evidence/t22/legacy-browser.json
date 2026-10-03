@@ -1,0 +1,168 @@
+{
+  "sourceSha": "ce60f21089fff659a43acfa2472c8f98c198cf4b",
+  "environment": "confirmed isolated G0 DB/Auth; guarded AUDIT=1; TEST Stripe; sinks",
+  "stats": {
+    "startTime": "2026-10-02T13:46:39.721Z",
+    "duration": 140142.869,
+    "expected": 19,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "test": "zh-HK staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "test": "en staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 48,
+      "test": "fresh login resumes the same company application with valid saved fields",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 78,
+      "test": "another applicant cannot read company draft even with a legitimate seat in that company",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "test": "zh-HK GET is read-only; final draft and stale/current two-person approval",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "test": "en GET is read-only; final draft and stale/current two-person approval",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "test": "zh-HK recovers bilingual edits after real browser history",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "test": "en recovers bilingual edits after real browser history",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 31,
+      "test": "denied storage warns truthfully and keeps edits in the form",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 38,
+      "test": "another authorized synthetic identity cannot see the prior identity draft",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "test": "STAFF has no indefinite grant entry",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "test": "EXCO has no indefinite grant entry",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "test": "SUPERADMIN has no indefinite grant entry",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "test": "zh-HK presents unknown/disabled/verified polling separately",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "test": "en presents unknown/disabled/verified polling separately",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "test": "expired history remains accessible without entitlements",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "test": "cancelled history remains accessible without entitlements",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "test": "zh-HK traverses 101 rows and retains context on previous and filter reset",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "test": "en traverses 51 rows and retains context on previous and filter reset",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    }
+  ],
+  "providerSends": 0,
+  "production": false
+}

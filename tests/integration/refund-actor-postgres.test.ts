@@ -23,7 +23,7 @@ describe.skipIf(!enabled)("refund audit identity on disposable PostgreSQL", () =
     docker(["run", "--rm", "-d", "--name", container, "-e", "POSTGRES_PASSWORD=test", "-p", "127.0.0.1::5432", "postgres:16-alpine"]);
     let ready = false;
     for (let attempt = 0; attempt < 60; attempt++) {
-      try {docker(["exec", container, "pg_isready", "-U", "postgres"]); ready = true; break;} catch {await delay(100);}
+      try {docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]); ready = true; break;} catch {await delay(100);}
     }
     if (!ready) throw new Error("disposable PostgreSQL unavailable");
     const binding = docker(["port", container, "5432/tcp"]).trim();

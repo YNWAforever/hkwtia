@@ -1,0 +1,56 @@
+{
+  "sourceSha": "ce60f21089fff659a43acfa2472c8f98c198cf4b",
+  "environment": "owned loopback deterministic lane; test sources, no paid model",
+  "stats": {
+    "startTime": "2026-10-02T13:37:41.419Z",
+    "duration": 9133.478,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "desktop en real-route mock provider cites sources and keeps continuity",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "desktop zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "mobile en real-route mock provider cites sources and keeps continuity",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "mobile zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 102,
+      "test": "authenticated member can use the real Concierge route from the member portal",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    }
+  ],
+  "providerSends": 0,
+  "production": false
+}

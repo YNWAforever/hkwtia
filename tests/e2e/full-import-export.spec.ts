@@ -1,4 +1,4 @@
-import {readFileSync} from "node:fs";
+import {readFileSync,writeFileSync} from "node:fs";
 import {randomUUID} from "node:crypto";
 import {execFile} from "node:child_process";
 import {promisify} from "node:util";
@@ -8,6 +8,7 @@ const en=JSON.parse(readFileSync(new URL("../../messages/en.json",import.meta.ur
 const zh=JSON.parse(readFileSync(new URL("../../messages/zh-HK.json",import.meta.url),"utf8")) as typeof import("../../messages/zh-HK.json");
 const runProcess=promisify(execFile);
 async function driver(mode:string,run:string,batchId?:string){const {stdout}=await runProcess(process.execPath,['--conditions=react-server','--import','tsx','tests/fixtures/audit-batch-driver.ts',mode,run,...(batchId?[batchId]:[])],{timeout:120000});return JSON.parse(stdout) as {ids:string[];prepared:boolean;claimed:number;contactCount:number;contactOnly:boolean;changes:number;roles:number;memberships:number;locale:string};}
+test.afterEach(async ({page},info)=>{try{writeFileSync(`.playwright/t22-import-after-${info.title.startsWith("zh-HK")?"zh":"en"}-safe.json`,JSON.stringify({pathname:new URL(page.url()).pathname,lang:await page.locator("html").getAttribute("lang"),fileInputs:await page.locator('input[type="file"]').count(),enLabel:await page.getByLabel(en.Admin.imports.chooseFile,{exact:true}).count(),zhLabel:await page.getByLabel(zh.Admin.imports.chooseFile,{exact:true}).count()}));}catch{/* Test's original assertion remains the result. */}});
 for(const [locale,prefix,messages] of [['en','',en],['zh-HK','/zh',zh]] as const){
  test(`${locale}: row decisions, private correction report and exact import commit`,async({page,baseURL,browser})=>{
   test.skip(missingM2IdentityEnvironment().length>0||process.env.AUDIT_ISOLATED_ACCEPTANCE!=='true'||process.env.AUDIT_BATCH_WORKER_PAUSED!=='true','Requires confirmed isolated DB/Auth and paused batch worker');
@@ -16,7 +17,9 @@ for(const [locale,prefix,messages] of [['en','',en],['zh-HK','/zh',zh]] as const
   const email=`audit-import-${run}@example.test`,existing=(id:string)=>id+'@example.test';
   const csv=`\uFEFFMember ID,Email,Name,Locale,Plan\r\n${fixture.ids[0]},${existing(fixture.ids[0]!)},,zh-HK,corporate\r\n,${email},"陳, Synthetic\nNew",en,patron\r\n,${email.toUpperCase()},Duplicate,en,\r\n,${existing(fixture.ids[1]!)},Existing,en,\r\n,invalid,Invalid,en,\r\n`;
   await signInForM2(page,'staff');await page.goto(`${prefix}/admin/members/import`);
-  await page.getByLabel(labels.chooseFile,{exact:true}).setInputFiles({name:'synthetic-import.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});
+   writeFileSync(`.playwright/t22-import-route-${locale}-safe.json`,JSON.stringify({pathname:new URL(page.url()).pathname,lang:await page.locator("html").getAttribute("lang"),files:await page.locator('input[type="file"]').count(),matchingLabels:await page.getByLabel(labels.chooseFile,{exact:true}).count()}));
+  await expect(page.getByLabel(labels.chooseFile,{exact:true})).toBeVisible();
+   await page.getByLabel(labels.chooseFile,{exact:true}).setInputFiles({name:'synthetic-import.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});
   await page.getByRole('button',{name:labels.upload,exact:true}).click();
   for(const [field,column]of [['profileId','Member ID'],['email','Email'],['displayName','Name'],['locale','Locale'],['planCode','Plan']] as const)await page.getByRole('combobox',{name:labels.fields[field],exact:true}).selectOption(column);
   await page.getByRole('button',{name:labels.validate,exact:true}).click();

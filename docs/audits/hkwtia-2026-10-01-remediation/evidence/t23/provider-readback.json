@@ -1,0 +1,56 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "observedAt": "2026-10-02T19:55:02.293Z",
+  "production": false,
+  "mutations": 0,
+  "stripeMode": "test",
+  "accountRefSha256": "8da0ac26b54c47c6f490c90435328272d967eefaa4c12dea01e5fbc196d80d78",
+  "accountCountry": "HK",
+  "prices": [
+    {
+      "code": "startup",
+      "priceRefSha256": "84579bfccc11c4861cc7e188e88836c9bedfa2e76133a9fb1d400f4ad45c726c",
+      "livemode": false,
+      "active": true,
+      "currency": "hkd",
+      "interval": "year",
+      "intervalCount": 1,
+      "amountHkd": 2400,
+      "catalogAnnualHkd": 2400,
+      "amountMatches": true
+    },
+    {
+      "code": "corporate",
+      "priceRefSha256": "61c2867f51fbb4014a2f670d7948b5384fbdd116a5075974761681b3847af440",
+      "livemode": false,
+      "active": true,
+      "currency": "hkd",
+      "interval": "year",
+      "intervalCount": 1,
+      "amountHkd": 12000,
+      "catalogAnnualHkd": 12000,
+      "amountMatches": true
+    }
+  ],
+  "endpointClasses": [
+    {
+      "endpointRefSha256": "7b4e21035cf1e40866236c07211b60f6f5283b6567cbb0db4a75aaad8e8480ec",
+      "mode": "test",
+      "status": "enabled",
+      "target": "other",
+      "enabledEventCount": 11
+    },
+    {
+      "endpointRefSha256": "10f9ade5457ce8bab42d74bf113293b3ce805b75c72594410e6af8b1a6f25242",
+      "mode": "test",
+      "status": "enabled",
+      "target": "other",
+      "enabledEventCount": 12
+    }
+  ],
+  "webhookSecretMatchesTestScope": true,
+  "emailMode": "test sink",
+  "whatsappLive": false,
+  "providerEmailSenderVerified": false,
+  "googleCallbackVerified": false
+}

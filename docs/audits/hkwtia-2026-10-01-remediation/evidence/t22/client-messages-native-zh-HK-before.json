@@ -1,0 +1,12 @@
+{
+  "observedAt": "2026-10-02T19:34:33.643Z",
+  "locale": "zh-HK",
+  "htmlBytes": 320477,
+  "adminNamespaceSerialized": true,
+  "errorNamespaceSerialized": true,
+  "production": false,
+  "bodyLogged": false,
+  "sourceBaseSha": "f7599e89",
+  "phase": "RED",
+  "sourceRelation": "original full root catalog; inert-header working tree"
+}

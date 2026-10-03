@@ -48,7 +48,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
       <a className="skip-link" href="#main-content">
         {t('skipToContent')}
       </a>
-      <Suspense fallback={<SiteHeader locale={appLocale} />}>
+      <Suspense fallback={<SiteHeader locale={appLocale} navigationPending />}>
         <PublicHeader locale={appLocale} />
       </Suspense>
       <main id="main-content">{children}</main>
