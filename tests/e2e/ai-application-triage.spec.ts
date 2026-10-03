@@ -138,7 +138,8 @@ test.describe("actual isolated application rules and reviewed note adoption", ()
       )
     ).rows;
   });
-  test.afterAll(async () => {
+  test.afterAll(async ({ browser }, testInfo) => {
+    void browser;
     if (!pool) return;
     try {
       const after = (
@@ -147,8 +148,15 @@ test.describe("actual isolated application rules and reviewed note adoption", ()
         )
       ).rows;
       expect(after).toEqual(before);
+      const workerReceipt =
+        evidence +
+        "native-" +
+        fixtures.sourceSha.slice(0, 8) +
+        "-worker-" +
+        testInfo.workerIndex +
+        ".json";
       writeFileSync(
-        evidence + "native-receipt.json",
+        workerReceipt,
         JSON.stringify(
           {
             sourceSha: fixtures.sourceSha,
@@ -166,6 +174,10 @@ test.describe("actual isolated application rules and reviewed note adoption", ()
           null,
           2,
         ),
+      );
+      writeFileSync(
+        evidence + "native-receipt.json",
+        readFileSync(workerReceipt),
       );
     } finally {
       await pool.end();
@@ -262,9 +274,7 @@ test.describe("actual isolated application rules and reviewed note adoption", ()
         await page
           .getByRole("link", { name: labels.back, exact: true })
           .click();
-        expect(new URL(page.url()).pathname + new URL(page.url()).search).toBe(
-          paths.queue,
-        );
+        await expect(page).toHaveURL(baseURL! + paths.queue);
         receipt.push({
           locale,
           case: "required fields and manual note",

@@ -1,0 +1,37 @@
+[
+  {
+    "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37159746981/job/111311287167",
+    "name": "quality",
+    "state": "SUCCESS"
+  },
+  {
+    "link": "https://vercel.com/github",
+    "name": "Vercel Preview Comments",
+    "state": "SUCCESS"
+  },
+  {
+    "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37159746981/job/111310547470",
+    "name": "checks",
+    "state": "SUCCESS"
+  },
+  {
+    "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37159746981/job/111310547465",
+    "name": "tests (1)",
+    "state": "SUCCESS"
+  },
+  {
+    "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37159746981/job/111310547425",
+    "name": "tests (2)",
+    "state": "SUCCESS"
+  },
+  {
+    "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37159746981/job/111310547298",
+    "name": "worker",
+    "state": "SUCCESS"
+  },
+  {
+    "link": "https://vercel.com/ynwaforevers-projects/hkwtia/HKFD3MBFZDveZhEbhRv3qoLheMSZ",
+    "name": "Vercel",
+    "state": "SUCCESS"
+  }
+]
