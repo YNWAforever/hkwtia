@@ -1,0 +1,6 @@
+{
+  "firstFailure": "test locator/label mismatch",
+  "applicationDefectClaimed": false,
+  "fixed": "exact owned draft aria-labelledby selector and existing unknownCost label",
+  "production": false
+}

@@ -31,6 +31,7 @@ const vector = Object.freeze(Array.from({length: 1536}, () => 0.01));
 
 function fixture(options: {
   actor?: ConciergeAgentActor;
+  locale?: "en" | "zh-HK";
   confirmedContactEmail?: string;
   audit?: (event: ConciergeToolAuditEvent) => Promise<void>;
 } = {}) {
@@ -78,7 +79,7 @@ function fixture(options: {
   });
   const tools = createConciergeTools({
     actor: options.actor ?? actor,
-    locale: "en",
+    locale: options.locale??"en",
     repositories,
     embedding,
     ...(options.confirmedContactEmail
@@ -130,6 +131,7 @@ describe("policy-safe Concierge tool registry", () => {
       title: "Membership guide",
       url: "https://www.hkwtia.org/en/membership",
       retrievalScore: 0.9,
+      knowledgeRef:offlineKnowledgeRef("en","https://www.hkwtia.org/en/membership","Member information"),
     }]);
     expect(result.value).toEqual([expect.objectContaining({
       code: "ok",
@@ -228,7 +230,7 @@ describe("policy-safe Concierge tool registry", () => {
     expect(result.citations).toEqual([{
       sourceId: "event:member-networking",
       title: "Member networking",
-      url: "https://www.hkwtia.org/en/events/member-networking",
+      url: "https://www.hkwtia.org/events/member-networking",
       confidence: 1,
     }]);
     expect(JSON.stringify(result)).not.toMatch(/published|draft|capacity|admin/i);
@@ -538,4 +540,8 @@ describe("agent-tools production repository boundary", () => {
     expect(source).not.toMatch(/emailLog|sendEmail|stripeCustomerId|stripeSubscriptionId/);
     expect(source).not.toMatch(/select\(\)\.from\(profiles\)/);
   });
+});
+
+describe("public event citation routes",()=>{
+ it("maps the zh-HK data locale to the existing /zh app route",async()=>{const {tools}=fixture({locale:"zh-HK"});const result=await tools.list_events!.execute({from:"2026-01-01T00:00:00Z",to:"2028-01-01T00:00:00Z",limit:5},{});expect(result.citations?.[0]?.url).toBe("https://www.hkwtia.org/zh/events/member-networking");});
 });

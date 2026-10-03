@@ -1,3 +1,5 @@
+import en from "@/messages/en.json";
+import zh from "@/messages/zh-HK.json";
 import {readFileSync} from "node:fs";
 import {dirname, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
@@ -27,7 +29,7 @@ function replaceCase(
 describe("Concierge eval review regressions", () => {
   it("preserves golden corpus bytes and every business expectation while versioning known KB fixture IDs",()=>{
     const before=readFileSync(corpusPath,"utf8");const originals=before.trimEnd().split(/\r?\n/).map(line=>JSON.parse(line));const loaded=loadGoldenCases(corpusPath);expect(readFileSync(corpusPath,"utf8")).toBe(before);expect(loaded).toHaveLength(25);
-    let revised=0;for(let i=0;i<loaded.length;i++){const current=loaded[i]!,original=originals[i];expect(current.request).toEqual(original.request);expect(current.scenario).toEqual(original.scenario);const {citationsExact:currentCitations,...business}=current.expected;const {citationsExact:oldCitations,...oldBusiness}=original.expected;expect(business).toEqual(oldBusiness);expect(currentCitations.map(({title,url})=>({title,url}))).toEqual(oldCitations.map(({title,url}:{title:string;url:string})=>({title,url})));if(JSON.stringify(currentCitations)!==JSON.stringify(oldCitations))revised++;}expect(revised).toBeGreaterThan(0);
+    let revised=0;for(let i=0;i<loaded.length;i++){const current=loaded[i]!,original=originals[i];expect(current.request).toEqual(original.request);expect(current.scenario).toEqual(original.scenario);const {citationsExact:currentCitations,textExact:currentText,...business}=current.expected;const {citationsExact:oldCitations,textExact:oldText,...oldBusiness}=original.expected;expect(business).toEqual(oldBusiness);expect(Array.from(oldText as string).length).toBeLessThanOrEqual(450);expect(currentText).toBe(oldCitations.length?`${(current.locale==="zh-HK"?zh:en).aiDraftFacts.sourceDetails}: ${oldText}`:oldText);expect(currentCitations.map(({title,url})=>({title,url}))).toEqual(oldCitations.map(({title,url,sourceId}:{title:string;url:string;sourceId:string})=>({title,url:sourceId.startsWith("event:")?(current.locale==="zh-HK"?url.replace("/zh-HK/events/","/zh/events/"):url.replace("/en/events/","/events/")):url})));if(JSON.stringify(currentCitations)!==JSON.stringify(oldCitations))revised++;}expect(revised).toBeGreaterThan(0);
   });
   it("executes the shared Concierge service, runtime, and approved tool registry", async () => {
     const testCase = loadGoldenCases(corpusPath).find(

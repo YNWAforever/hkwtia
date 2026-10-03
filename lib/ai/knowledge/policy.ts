@@ -3,8 +3,8 @@ import {createHash} from "node:crypto";
 import {z} from "zod";
 import {isAdminActor} from "@/lib/auth/authorize";
 import type {Actor} from "@/lib/membership/lifecycle";
-export const knowledgeRefSchema=z.object({sourceId:z.string().uuid(),version:z.string().regex(/^[1-9]\d*$/),locale:z.enum(["en","zh-HK"]),audience:z.enum(["public","staff"]),effectiveFrom:z.string().datetime({offset:true}),effectiveTo:z.string().datetime({offset:true}).nullable(),contentHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict();
-export type KnowledgeRef=z.infer<typeof knowledgeRefSchema>;
+import {knowledgeRefSchema,type KnowledgeRef} from "./contracts";
+export {knowledgeRefSchema,type KnowledgeRef} from "./contracts";
 export type KnowledgeChunk=Readonly<{content:string;offsetStart:number;offsetEnd:number}>;
 export const structuredKnowledgeFactsSchema=z.record(z.string().regex(/^[a-z][a-zA-Z0-9_.-]{0,63}$/),z.union([z.string().max(500),z.number().finite(),z.boolean(),z.null()])).refine(value=>Object.keys(value).length<=64,"KNOWLEDGE_FACTS_TOO_MANY");
 export function sourceContentHash(content:string):string {return createHash("sha256").update(content,"utf8").digest("hex");}

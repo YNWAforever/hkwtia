@@ -1,0 +1,10 @@
+{
+  "id": "dpl_6ugvMLSDGzYUNofZ39VDBKgu7yCa",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+  "gitRef": "codex/ai-drafts-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-ai-drafts-20261003.vercel.app",
+  "production": false
+}

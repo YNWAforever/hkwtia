@@ -2193,3 +2193,63 @@ export const aiBudgetProviderReceipts = pgTable("ai_budget_provider_receipts", {
  primaryKey({columns:[t.reservationId,t.providerRequestId]}),
  check("ai_budget_provider_receipts_provider_request_id_check", sql`${t.providerRequestId} ~ '^[A-Za-z0-9_.:-]{1,200}$'`),
 ]);
+
+// T08: durable review evidence, independent of approval/send business effects.
+export const aiReviewDrafts = pgTable("ai_review_drafts", {
+ id: uuid("id").defaultRandom().primaryKey(), version: integer("version").notNull().default(1),
+ kind: text("kind").notNull(), caseId: text("case_id").notNull(), locale: text("locale").notNull(), factsHash: text("facts_hash").notNull(),
+ ownerProfileId: text("owner_profile_id").references(() => profiles.id,{onDelete:"restrict"}), dueAt: timestamp("due_at",{withTimezone:true}),
+ sourceRefs: jsonb("source_refs").notNull(), claims: jsonb("claims").notNull(), body: text("body").notNull(), renderedBody: text("rendered_body").notNull(),
+ state: text("state").notNull(), violations: jsonb("violations").notNull(), modelRoute: text("model_route").notNull(), promptVersion: text("prompt_version").notNull(),
+ runId: uuid("run_id").notNull().references(() => agentRuns.id,{onDelete:"restrict"}),
+ approvedBy: text("approved_by").references(() => profiles.id,{onDelete:"restrict"}), approvedAt: timestamp("approved_at",{withTimezone:true}), approvedVersion: integer("approved_version"),
+ createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, table => [index("ai_review_drafts_queue").on(table.state,table.updatedAt.desc(),table.id),index("ai_review_drafts_case").on(table.kind,table.caseId,table.createdAt.desc()),index("ai_review_drafts_owner_queue").on(table.ownerProfileId,table.state,table.updatedAt.desc(),table.id),
+ check("ai_review_drafts_version_check", sql`${table.version}>0`),
+ check("ai_review_drafts_kind_check", sql`${table.kind} IN ('application','support','renewal','board','content')`),
+ check("ai_review_drafts_case_id_check", sql`length(${table.caseId}) BETWEEN 1 AND 255`),
+ check("ai_review_drafts_locale_check", sql`${table.locale} IN ('en','zh-HK')`),
+ check("ai_review_drafts_facts_hash_check", sql`${table.factsHash} ~ '^[a-f0-9]{64}$'`),
+ check("ai_review_drafts_source_refs_check", sql`jsonb_typeof(${table.sourceRefs})='array'`),
+ check("ai_review_drafts_claims_check", sql`jsonb_typeof(${table.claims})='array'`),
+ check("ai_review_drafts_body_check", sql`length(${table.body}) BETWEEN 1 AND 20000`),
+ check("ai_review_drafts_state_check", sql`${table.state} IN ('proposed','needs_review','approved','rejected','stale')`),
+ check("ai_review_drafts_violations_check", sql`jsonb_typeof(${table.violations})='array'`),
+ check("ai_review_drafts_model_route_check", sql`length(${table.modelRoute}) BETWEEN 1 AND 120`),
+ check("ai_review_drafts_prompt_version_check", sql`length(${table.promptVersion}) BETWEEN 1 AND 80`),
+ check("ai_review_drafts_approved", sql`${table.state}<>'approved' OR (${table.approvedBy} IS NOT NULL AND ${table.approvedAt} IS NOT NULL AND ${table.approvedVersion} IS NOT NULL AND ${table.approvedVersion}=${table.version} AND jsonb_array_length(${table.violations})=0)`),
+ check("ai_review_drafts_unapproved", sql`${table.state}='approved' OR (${table.approvedBy} IS NULL AND ${table.approvedAt} IS NULL AND ${table.approvedVersion} IS NULL)`),
+]);
+export const aiDraftRevisions = pgTable("ai_draft_revisions", {
+ draftId: uuid("draft_id").notNull().references(() => aiReviewDrafts.id,{onDelete:"restrict"}), version: integer("version").notNull(), snapshot: jsonb("snapshot").notNull(),
+ actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id,{onDelete:"restrict"}), createdAt: createdAt("created_at"),
+}, table => [primaryKey({columns:[table.draftId,table.version]}),
+ check("ai_draft_revisions_version_check", sql`${table.version}>0`),
+ check("ai_draft_revisions_snapshot_check", sql`jsonb_typeof(${table.snapshot})='object'`),
+]);
+export const aiDraftReviews = pgTable("ai_draft_reviews", {
+ id: uuid("id").defaultRandom().primaryKey(), draftId: uuid("draft_id").notNull().references(() => aiReviewDrafts.id,{onDelete:"restrict"}),
+ expectedVersion: integer("expected_version").notNull(), resultingVersion: integer("resulting_version").notNull(), decision: text("decision").notNull(),
+ reviewerProfileId: text("reviewer_profile_id").notNull().references(() => profiles.id,{onDelete:"restrict"}), reason: text("reason"), factsHash: text("facts_hash").notNull(), createdAt: createdAt("created_at"),
+}, table => [unique("ai_draft_reviews_draft_id_expected_version_key").on(table.draftId,table.expectedVersion),
+ check("ai_draft_reviews_expected_version_check", sql`${table.expectedVersion}>0`),
+ check("ai_draft_reviews_resulting_version_check", sql`${table.resultingVersion}=${table.expectedVersion}+1`),
+ check("ai_draft_reviews_decision_check", sql`${table.decision} IN ('approve','reject')`),
+ check("ai_draft_reviews_reason_check", sql`length(${table.reason})<=1000`),
+ check("ai_draft_reviews_facts_hash_check", sql`${table.factsHash} ~ '^[a-f0-9]{64}$'`),
+]);
+export const aiDraftWork = pgTable("ai_draft_work", {
+ runId: uuid("run_id").defaultRandom().primaryKey(), kind: text("kind").notNull(), caseId: text("case_id").notNull(), factsHash: text("facts_hash").notNull(),
+ agentVersion: text("agent_version").notNull(), idempotencyKey: text("idempotency_key").notNull(), state: text("state").notNull(), claimToken: uuid("claim_token").notNull(),
+ leaseUntil: timestamp("lease_until",{withTimezone:true}).notNull(), requestStartedAt: timestamp("request_started_at",{withTimezone:true}),
+ draftId: uuid("draft_id").references(() => aiReviewDrafts.id,{onDelete:"restrict"}), providerRequestId: text("provider_request_id"), createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, table => [unique("ai_draft_work_scope_key").on(table.kind,table.caseId,table.factsHash,table.agentVersion,table.idempotencyKey),index("ai_draft_work_pending").on(table.state,table.leaseUntil),
+ check("ai_draft_work_kind_check", sql`${table.kind} IN ('application','support','renewal','board','content')`),
+ check("ai_draft_work_case_id_check", sql`length(${table.caseId}) BETWEEN 1 AND 255`),
+ check("ai_draft_work_facts_hash_check", sql`${table.factsHash} ~ '^[a-f0-9]{64}$'`),
+ check("ai_draft_work_agent_version_check", sql`length(${table.agentVersion}) BETWEEN 1 AND 120`),
+ check("ai_draft_work_idempotency_key_check", sql`length(${table.idempotencyKey}) BETWEEN 1 AND 255`),
+ check("ai_draft_work_state_check", sql`${table.state} IN ('claimed','requesting','succeeded','unknown','failed_before_request')`),
+ check("ai_draft_work_provider_request_id_check", sql`length(${table.providerRequestId}) BETWEEN 1 AND 255`),
+ check("ai_draft_work_effect_state", sql`(${table.state} IN ('claimed','failed_before_request') AND ${table.requestStartedAt} IS NULL AND ${table.draftId} IS NULL) OR (${table.state} IN ('requesting','unknown') AND ${table.requestStartedAt} IS NOT NULL AND ${table.draftId} IS NULL) OR (${table.state}='succeeded' AND ${table.requestStartedAt} IS NOT NULL AND ${table.draftId} IS NOT NULL)`),
+]);

@@ -74,7 +74,7 @@ describe("Concierge core runtime harness", () => {
       approvedToolRegistryInvoked: true,
       toolResultRejected: false,
     });
-    expect(actual.text).toBe(
+    expect(actual.text).toContain(
       "WTIA membership includes events and member programmes.",
     );
     expect(actual.toolCalls).toEqual([{
@@ -86,6 +86,7 @@ describe("Concierge core runtime harness", () => {
       sourceId: sourceId("kb", [approvedRef.sourceId,approvedRef.version,approvedRef.contentHash,approvedRef.locale].join(":")),
       title: "WTIA Membership",
       url,
+      knowledgeRef:approvedRef,
     }]);
   });
 
@@ -125,7 +126,7 @@ describe("Concierge core runtime harness", () => {
     }));
 
     expect(actual.toolCalls[0]?.name).toBe("list_events");
-    expect(actual.text).toBe(
+    expect(actual.text).toContain(
       "WTIA AI Summit 2026 — 2026-08-20T01:00:00.000Z — Cyberport",
     );
     expect(actual.citations[0]?.sourceId).toBe("event:ai-summit-2026");

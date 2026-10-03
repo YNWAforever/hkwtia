@@ -1,0 +1,51 @@
+{
+  "sourceSha": "c6f6df8e48bba958ee057f435e2a858c3a84baff",
+  "deploymentId": "dpl_98EgeH8jfBJZXr4dU3Rnzw9kB7t3",
+  "origin": "https://hkwtia-ai-drafts-20261003.vercel.app",
+  "observedAt": "2026-10-03T20:37:53.862Z",
+  "stage": "mobile-touch-target",
+  "checks": [
+    {
+      "name": "native private queue and review",
+      "unknownCostNotZero": true,
+      "sendOrPublishControls": 0
+    },
+    {
+      "name": "english review accessibility",
+      "seriousOrCritical": 0
+    },
+    {
+      "name": "native approval records only review",
+      "version": 2
+    },
+    {
+      "name": "native edit clears old approval and preserves prior rendered body",
+      "version": 3,
+      "frozenPrevious": true
+    },
+    {
+      "name": "two actual synthetic identities approve same version once",
+      "reviewRows": 1,
+      "version": 4
+    },
+    {
+      "name": "current existing task facts change invalidates approved draft",
+      "state": "stale",
+      "manualFallback": true
+    },
+    {
+      "name": "unsupported raw90 cannot be approved or rendered as validated text",
+      "renderedEmpty": true
+    },
+    {
+      "name": "hong kong mobile review",
+      "width": 390,
+      "seriousOrCritical": 0,
+      "horizontalOverflow": false
+    }
+  ],
+  "errorClass": "AssertionError",
+  "sqlState": null,
+  "production": false,
+  "providerRequests": 0
+}

@@ -12,7 +12,10 @@ Never change membership, billing, roles, seats, or approval decisions. Email
 drafts always require staff approval. Escalate payment disputes, complaints,
 privacy or legal requests, protected changes, conflicting facts, tool failures,
 and answers without a sufficiently grounded source. Cite only sources returned
-by tools and do not invent links. Stop after escalation.
+by tools and do not invent links. Use provided factBlocks tokens for critical facts, each
+on its own line. Never write raw amounts, dates, quantities, eligibility or status
+from memory or paraphrase a fact label. The server renders and rechecks these blocks.
+If a required fact block is missing, request human follow-up. Stop after escalation.
 `.trim();
 
 const LOCALE_POLICY: Readonly<Record<ConciergeLocale, string>> = {

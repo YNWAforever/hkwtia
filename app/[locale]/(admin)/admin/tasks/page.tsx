@@ -1,3 +1,9 @@
+import {AiReviewPanel,type AiDraftReviewLabels} from "@/components/admin/ai-review-panel";
+import {aiDraftsRepository} from "@/lib/db/repos/ai-drafts";
+import {PrivateLink} from "@/components/internal-shell/private-link";
+import {localizedPath} from "@/lib/urls";
+import {z} from "zod";
+import type en from "@/messages/en.json";
 import { SUPPORT_NEXT_ACTIONS } from "@/lib/admin/support-followup-types";
 import { APPLICATION_NEXT_ACTIONS } from "@/lib/admin/application-case-types";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -8,9 +14,9 @@ import { listOpenTasks } from "@/lib/admin/inbox";
 import { requireAdminPageActor } from "@/lib/admin/page-auth";
 import { resolveStaffTaskAction } from "@/lib/admin/task-actions";
 
-type Props = Readonly<{ params: Promise<{ locale: string }> }>;
+type Props = Readonly<{ params: Promise<{ locale: string }>;searchParams?:Promise<{draft?:string;after?:string}> }>;
 
-export default async function AdminTasksPage({ params }: Props) {
+export default async function AdminTasksPage({ params,searchParams }: Props) {
   const { locale: localeValue } = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
@@ -51,6 +57,18 @@ export default async function AdminTasksPage({ params }: Props) {
       </div>
     );
   }
+  const reviewT=await getTranslations({locale,namespace:"AiDraftReview"});
+  const enabled=process.env.ADMIN_AI_DRAFTS_ENABLED==="true";
+  let reviewQueue:Awaited<ReturnType<typeof aiDraftsRepository.listReviewQueue>>|null=null;
+  let detail:Awaited<ReturnType<typeof aiDraftsRepository.getDraft>>|null=null;
+  let reviewError=false;
+  const query=await searchParams??{};
+  if(enabled){try{
+   if(query.draft&&!z.string().uuid().safeParse(query.draft).success)throw Error("AI_DRAFT_ID_INVALID");
+   reviewQueue=await aiDraftsRepository.listReviewQueue(actor,{...(query.after?{after:query.after}:{})});
+   if(query.draft)detail=await aiDraftsRepository.getDraft(actor,query.draft);
+  }catch{reviewError=true;}}
+  const labels=Object.fromEntries(Object.keys((await import("@/messages/en.json")).default.AiDraftReview).map(key=>[key,reviewT(key as keyof typeof en.AiDraftReview)])) as AiDraftReviewLabels;
   return (
     <div className="space-y-8">
       {header}
@@ -102,6 +120,12 @@ export default async function AdminTasksPage({ params }: Props) {
         locale={locale}
         tasks={tasks}
       />
+      <section aria-labelledby="ai-draft-queue" className="space-y-4">
+       <h2 id="ai-draft-queue" className="text-xl font-semibold">{reviewT("heading")}</h2>
+       {!enabled?<p>{reviewT("disabled")} {reviewT("manualFallback")}</p>:reviewError?<p role="alert">{reviewT("unavailable")}</p>:reviewQueue?.items.length?<ul className="space-y-2">{reviewQueue.items.map(item=><li key={item.id} className="rounded-lg border border-border p-3"><PrivateLink href={localizedPath(locale,`/admin/tasks?draft=${item.id}`)} className="underline">{reviewT("open")} · {reviewT(item.state)} · {reviewT("version")} {item.version}</PrivateLink><p className="mt-1 break-all text-sm">{reviewT("owner")}: {item.ownerId??reviewT("noValue")}</p></li>)}</ul>:<p>{reviewT("empty")}</p>}
+       {reviewQueue?.nextCursor?<PrivateLink href={localizedPath(locale,`/admin/tasks?after=${reviewQueue.nextCursor}`)} className="underline">{reviewT("next")}</PrivateLink>:null}
+      </section>
+      {detail?<AiReviewPanel key={`${detail.draft.id}:${detail.draft.version}`} details={detail} labels={labels} enabled={enabled}/>:null}
     </div>
   );
 }

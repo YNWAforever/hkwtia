@@ -14,6 +14,9 @@ import type {
   AgentToolResult,
 } from "@/lib/ai/provider";
 import {createAgentRuntime} from "@/lib/ai/runtime";
+import {approvedFactsHash} from "@/lib/ai/drafts/validation";
+import {draftFactLabels} from "@/lib/ai/drafts/fact-labels";
+import type {ApprovedFactPack} from "@/lib/ai/drafts/contracts";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
 import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
 import type {ChannelAdapter} from "@/lib/channels/types";
@@ -423,7 +426,7 @@ export function createM4AAcceptanceBoundary(
           ? "I created a pending Platinum membership email draft for staff approval."
           : "Approved WTIA membership benefits include community events.";
       return {
-        textStream: textStream(answer),
+        textStream: textStream(wantsDraft && !isChinese ? answer : "{{facts.membershipInformation}}"),
         finish: Promise.resolve({
           usage: {inputTokens: 100, outputTokens: 20},
           finishReason: "stop",
@@ -485,6 +488,16 @@ export function createM4AAcceptanceBoundary(
     model: "openai:gpt-4.1-mini",
     credentials: {openaiApiKey: "m4a-local-acceptance-key"},
     appOrigin: "https://www.hkwtia.org",
+    // Explicit historical local-only synthetic source. This is neither production policy nor DB/provider acceptance.
+    getApprovedFacts: async input => {
+      runFor(input.actor);
+      const locale=input.locale, labels=draftFactLabels(locale);
+      const value=locale==="zh-HK" ? "已批准的 WTIA 會員福利包括社群活動。" : "Approved WTIA membership benefits include community events.";
+      const url=locale==="zh-HK" ? "https://www.hkwtia.org/zh-HK/membership" : MEMBERSHIP_URL;
+      const ref=offlineKnowledgeRef(locale,url,value);
+      const facts:ApprovedFactPack={caseId:input.conversationId,locale,versionHash:"0".repeat(64),asOf:input.asOf.toISOString(),values:{membershipInformation:{value,sourceId:ref.sourceId,label:labels.sourceDetails,format:"text"}},sourceRefs:[ref],recordSources:{},sourceUrls:{[ref.sourceId]:url},comparisonAvailable:null,displayLabels:labels.displayLabels};
+      return {...facts,versionHash:approvedFactsHash(facts)};
+    },
     conversations,
     agentTools: repositoriesWithCapabilities,
     getRuntime: (runId) => createAgentRuntime({

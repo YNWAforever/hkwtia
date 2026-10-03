@@ -270,11 +270,11 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `AdminAiDraft = {id:string;version:number;kind:'application'|'support'|'renewal'|'board'|'content';caseId:string;factsHash:string;ownerId:string|null;dueAt:string|null;sourceRefs:KnowledgeRef[];claims:{field:string;value:string|number|boolean|null;sourceId:string}[];body:string;state:'proposed'|'needs_review'|'approved'|'rejected'|'stale';modelRoute:string;promptVersion:string;runId:string}`。`validateDraft(draft:AdminAiDraft,facts:ApprovedFactPack):{valid:boolean;violations:{field:string;code:string}[]}`；`reviewDraft(actor:AdminActor,input:{draftId:string;expectedVersion:number;decision:'approve'|'reject';reason?:string}):Promise<{draft:AdminAiDraft;reviewId:string}>` 保存 decision，**不發送**。
 
-- [ ] 寫 wrong amount/date、unknown source、expired source、禁止模板變數、惡意 URL、缺比較期卻寫增長、XSS/MDX 字串測試；禁止關鍵事實放行。
-- [ ] Run unit/integration tests；寫第二位職員同時批准与 factsHash 變更測試：一個成功，另一個 conflict；失效草稿不可發送。
-- [ ] schema／validator 先 deterministic，必要 semantic check 只能補強、不得推翻硬性 guard；不因第二個模型說「可以」就改金額。
-- [ ] panel 顯示來源、facts、草稿 diff、風險、state、版本、成本；空白有原因；role 再核實；錯誤草稿提供修改／轉交。
-- [ ] 驗 server action 不接受 forged actor，提交 `feat: add traceable AI draft review`。rollback 停生成和新採用，既有 audit不刪。
+- [x] 寫 wrong amount/date、unknown source、expired source、禁止模板變數、惡意 URL、缺比較期卻寫增長、XSS/MDX 字串測試；禁止關鍵事實放行。
+- [x] Run unit/integration tests；寫第二位職員同時批准与 factsHash 變更測試：一個成功，另一個 conflict；失效草稿不可發送。
+- [x] schema／validator 先 deterministic，必要 semantic check 只能補強、不得推翻硬性 guard；不因第二個模型說「可以」就改金額。
+- [x] panel 顯示來源、facts、草稿 diff、風險、state、版本、成本；空白有原因；role 再核實；錯誤草稿提供修改／轉交。
+- [x] 驗 server action 不接受 forged actor，提交 `feat: add traceable AI draft review`。rollback 停生成和新採用，既有 audit不刪。
 
 
 **不得只驗模型自報 claims：** 固定金額、日期、權益、票價、容量、政策連結以 allowlisted placeholders 由應用 render；再驗最終可見正文，不允許正文另藏與 claims 不符的數字或承諾。保留必要 free text，但不提供任意 HTML/MDX/URL 執行。valid 只代表校驗通過，仍需人工 review。
@@ -593,3 +593,12 @@ npm --prefix workers test
 - [ ] Actual approved embedding provider/invoice, association source/approver policy, T08/T13 final-body/stale draft/real-model safety, and specific Production release authorization.
 
 - [x] Final T07 URL review correction a49e6629:5 actual RED,53focused,31actual PG, full CI6520pass386skip0fail plus worker57; lint/typecheck/build/strings passed in exact-source CI. Refreshed exact-source Preview native17+12, dpl_3roUp1uVnxwpNQehBSvqCHVhxToW. Earlier7c local serial run remains its own historical receipt.
+
+## T08 本輪工程驗證
+
+- [x] 四個 actual Concierge/runtime final-body RED→GREEN；錯90不delta、不保存；provider完成成本不退款。
+- [x] SQL concurrent review/facts stale/adoption audit與不可改寫歷史；durable work/requesting unknown/回執綁定；最新30actual PG。
+- [x] 510 broad focused及final89（含PG30）全部0skip；lint/typecheck/strings/build0。
+- [x] 已確認隔離Neon0059（58→59、profiles不變、零provider）。
+- [x] T08 exact9cf full CI6567pass416skip、worker57、native Preview17+12及mobile44px；receipt見evidence/t08。
+- [ ] T09–T12業務facts/生成、T13真模型、T14D送達及正式release各自驗證。

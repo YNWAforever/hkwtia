@@ -658,5 +658,77 @@
     "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
     "mapping": "Original golden bytes and business criteria unchanged; explicit offline matching ground-truth citation IDs migrate to new version identity.",
     "worktreeSha256": "b89b3148d3c1c292a897e3a2211009eef1d3d317069aa6f4a3f52cadd1e405ca"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "validateGroundedContent",
+    "path": "lib/ai/drafts/validation.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "createAiDraftsRepository",
+    "path": "lib/db/repos/ai-drafts.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "createDraftWorkRepository",
+    "path": "lib/db/repos/ai-draft-work.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "createPublicConciergeFactsReader",
+    "path": "lib/db/repos/ai-public-facts.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "readApprovedDraftFacts",
+    "path": "lib/ai/drafts/case-facts.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "reviewAiDraftAction",
+    "path": "lib/admin/ai-draft-actions.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "AiReviewPanel",
+    "path": "components/admin/ai-review-panel.tsx",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "TasksPage",
+    "path": "app/[locale]/(admin)/admin/tasks/page.tsx",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   }
 ]
