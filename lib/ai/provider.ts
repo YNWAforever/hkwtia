@@ -22,6 +22,8 @@ export type AgentCitationInput = Readonly<{
   title: string;
   url?: string;
   confidence?: number;
+  /** Retrieval relevance, never a probability of factual accuracy. */
+  retrievalScore?: number;
 }>;
 
 export type AgentCitation = Readonly<{
@@ -29,6 +31,8 @@ export type AgentCitation = Readonly<{
   title: string;
   url?: string;
   confidence?: number;
+  /** Retrieval relevance, never a probability of factual accuracy. */
+  retrievalScore?: number;
 }>;
 
 export type AgentToolResult = Readonly<{
@@ -136,12 +140,14 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
     let titleValue: unknown;
     let urlValue: unknown;
     let confidenceValue: unknown;
+    let relevanceValue: unknown;
     try {
       const record = input as Record<string, unknown>;
       sourceIdValue = record.sourceId;
       titleValue = record.title;
       urlValue = record.url;
       confidenceValue = record.confidence;
+      relevanceValue = record.retrievalScore;
     } catch {
       continue;
     }
@@ -168,12 +174,16 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
         : undefined;
     if (confidenceValue !== undefined && confidence === undefined) continue;
 
+    const retrievalScore = relevanceValue === undefined ? undefined : typeof relevanceValue === "number" && Number.isFinite(relevanceValue) && relevanceValue >= 0 && relevanceValue <= 1 ? relevanceValue : undefined;
+    if (relevanceValue !== undefined && retrievalScore === undefined) continue;
+
     seen.add(sourceId);
     citations.push({
       sourceId,
       title,
       ...(url === undefined ? {} : {url}),
       ...(confidence === undefined ? {} : {confidence}),
+      ...(retrievalScore === undefined ? {} : {retrievalScore}),
     });
   }
 

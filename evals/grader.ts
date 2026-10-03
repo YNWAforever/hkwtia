@@ -1,4 +1,6 @@
 import {readFileSync} from "node:fs";
+import {createHash} from "node:crypto";
+import {offlineKnowledgeRef} from "./knowledge-fixture";
 import {dirname, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
@@ -455,7 +457,17 @@ export function loadGoldenCases(path = DEFAULT_CORPUS): GoldenCase[] {
     }
   });
   validateCorpus(cases);
-  return cases;
+  // Keep the historical JSONL bytes and all business/side-effect expectations unchanged.
+  // Only the old URL-only KB fixture IDs migrate to the versioned citation contract.
+  // Resolve from declared ground truth, never from actual model output.
+  return cases.map(testCase=>({...testCase,expected:{...testCase.expected,citationsExact:testCase.expected.citationsExact.map(citation=>{
+    const legacyId="kb:"+createHash("sha256").update(citation.url).digest("hex").slice(0,24);
+    if(citation.sourceId!==legacyId)return citation;
+    const source=testCase.scenario.repositories.knowledge.find(value=>value&&typeof value==="object"&&"url" in value&&value.url===citation.url&&"title" in value&&value.title===citation.title&&"excerpt" in value&&typeof value.excerpt==="string") as {excerpt:string}|undefined;
+    if(!source)return citation;
+    const ref=offlineKnowledgeRef(testCase.locale,citation.url,source.excerpt);
+    return {...citation,sourceId:"kb:"+createHash("sha256").update([ref.sourceId,ref.version,ref.contentHash,ref.locale].join(":")).digest("hex").slice(0,24)};
+  })}}));
 }
 
 function same(left: unknown, right: unknown): boolean {

@@ -1,0 +1,34 @@
+{
+  "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+  "runId": 37137557588,
+  "conclusion": "success",
+  "summaries": [
+    "worker\tRun npm --prefix workers test\t2026-10-03T16:38:16.9270260Z  Test Files  7 passed (7)",
+    "worker\tRun npm --prefix workers test\t2026-10-03T16:38:16.9271285Z       Tests  57 passed (57)",
+    "worker\tRun npm --prefix workers test\t2026-10-03T16:38:16.9276439Z    Duration  3.30s (transform 328ms, setup 0ms, import 540ms, tests 3.40s, environment 1ms)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T16:42:12.1108197Z  Test Files  387 passed | 46 skipped (433)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T16:42:12.1125294Z       Tests  3101 passed | 205 skipped (3306)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T16:42:12.1135121Z    Duration  219.90s (transform 13.61s, setup 37.48s, collect 217.01s, tests 47.31s, environment 218.83s, prepare 50.89s)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T16:42:23.7239660Z  Test Files  388 passed | 44 skipped (432)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T16:42:23.7262500Z       Tests  3413 passed | 181 skipped (3594)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T16:42:23.7275413Z    Duration  217.20s (transform 14.98s, setup 38.68s, collect 193.45s, tests 48.39s, environment 225.53s, prepare 53.68s)"
+  ],
+  "logSha256": "969dd9f18e12c2ee03bc2f1ab4fd1338520956dc08e46886dca56eb75dc03d25",
+  "production": false,
+  "unit": {
+    "passed": 6514,
+    "skipped": 386,
+    "failed": 0,
+    "filesPassed": 775,
+    "filesSkipped": 90,
+    "command": [
+      "npx vitest run --shard=1/2",
+      "npx vitest run --shard=2/2"
+    ]
+  },
+  "worker": {
+    "passed": 57,
+    "skipped": 0,
+    "failed": 0
+  }
+}

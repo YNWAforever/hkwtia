@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import {drizzle} from "drizzle-orm/pg-proxy";
 import {describe, expect, it, vi} from "vitest";
 
+import {offlineKnowledgeRef} from "@/evals/knowledge-fixture";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 import type {EmbeddingAdapter} from "@/lib/ai/embeddings";
 import {
@@ -39,6 +40,8 @@ function fixture(options: {
       url: "https://www.hkwtia.org/en/membership",
       excerpt: "Member information",
       score: 0.9,
+      ref: offlineKnowledgeRef("en","https://www.hkwtia.org/en/membership","Member information"),
+      offsetStart:0,offsetEnd:18,
     }]),
     getMemberContext: vi.fn(async () => ({
       displayName: "Alice",
@@ -126,7 +129,7 @@ describe("policy-safe Concierge tool registry", () => {
       sourceId: expect.stringMatching(/^kb:/),
       title: "Membership guide",
       url: "https://www.hkwtia.org/en/membership",
-      confidence: 0.9,
+      retrievalScore: 0.9,
     }]);
     expect(result.value).toEqual([expect.objectContaining({
       code: "ok",

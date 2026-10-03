@@ -1,4 +1,5 @@
 import {randomUUID} from "node:crypto";
+import {offlineKnowledgeRef} from "./knowledge-fixture";
 import type {AiBudgetPort} from "@/lib/ai/budget";
 import {
   createConciergeService,
@@ -469,7 +470,7 @@ export async function executeOfflineCase(
 
   const repositories: ConciergeToolRepositories = {
     async searchKnowledge() {
-      return scenario.repositories.knowledge as Awaited<
+      return scenario.repositories.knowledge.map(value => isRecord(value) && typeof value.url === "string" && typeof value.excerpt === "string" ? {...value,ref:value.ref ?? offlineKnowledgeRef(input.locale,value.url,value.excerpt),offsetStart:0,offsetEnd:[...value.excerpt].length} : value) as Awaited<
         ReturnType<ConciergeToolRepositories["searchKnowledge"]>
       >;
     },

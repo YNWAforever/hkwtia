@@ -24,6 +24,9 @@ import {
 export type ConciergeLocale = "en" | "zh-HK";
 
 export type AgentKnowledgeRecord = Readonly<{
+  ref?: import("@/lib/ai/knowledge/policy").KnowledgeRef;
+  offsetStart?: number;
+  offsetEnd?: number;
   title: string;
   url: string;
   excerpt: string;

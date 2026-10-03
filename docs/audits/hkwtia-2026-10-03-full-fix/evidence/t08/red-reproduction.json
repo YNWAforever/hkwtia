@@ -1,0 +1,20 @@
+{
+  "task": "T08",
+  "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+  "status": "TARGET_BEHAVIOUR_RED_REPRODUCED_IMPLEMENTATION_PENDING",
+  "command": "npx vitest run --config .playwright/vitest-t08-red.config.mjs",
+  "tests": {
+    "failed": 1,
+    "passed": 0,
+    "skipped": 0,
+    "durationSeconds": 13.51
+  },
+  "behaviour": "Actual current Concierge + runtime emits The synthetic fee is HK$90. despite .99 source relevance and model claims100; expected wrong amount withheld and citations cleared. Not an import/setup failure.",
+  "existingFixPreserved": "Concierge already buffers until runtime finish; no new unverified-token stream mechanism will replace it.",
+  "transport": "explicit synthetic unit provider and lifecycle/budget doubles; not real provider, DB or browser acceptance",
+  "externalProviderRequests": 0,
+  "production": false,
+  "localLog": ".playwright/full-fix-t08-public-body-red.log",
+  "logSha256": "660d932e722940a55ae2b5bb436e65ce2d18cbba41fb908e27796e5c90b90620",
+  "pending": "deterministic final-body validator, actual draft CAS/stale/worker claims, own-actor actions, panel, native browser and full gates"
+}

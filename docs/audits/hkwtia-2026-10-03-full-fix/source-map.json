@@ -598,5 +598,65 @@
     "evidenceBasis": "source_full_gates_actual_PG_verified",
     "mapping": "Existing guarded administrative runtime, evaluation/judge budget categories, no raw provider reason in reports.",
     "worktreeSha256": "a4f566e41e428950cf1533ae43e9be23f9376235ecc5c8324e64aff10f824f7f"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "createKnowledgeGovernanceRepository",
+    "path": "lib/db/repos/knowledge-governance.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Server-only lifecycle helper uses existing kb_documents and actual DB loader; separate configured approver, version CAS, audit and embedding claim.",
+    "worktreeSha256": "f10c05c4a35e7020030512e689ebb8a1b9feb1cd583bee38fee9cbef30940b00"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "createKbDocumentRepository",
+    "path": "lib/db/repos/kb-documents.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Existing vector SQL filters approved/version/effective/review/audience before ordering; unverified historical rows stay excluded.",
+    "worktreeSha256": "4502d79fa6a014ca032a489f523c03646421ff23fc3ab49ecfafbf8b386a3bfa"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "selectApprovedKnowledge",
+    "path": "lib/ai/knowledge/policy.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Server-side actor scope and typed KnowledgeRef; semantic Unicode offsets/hash; retrievalScore is relevance, not accuracy.",
+    "worktreeSha256": "d707dae3ec030ef8e4873b8881eec6c975786f61acd3c5293208f08dc6e5e5f2"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "KnowledgeWorkspace",
+    "path": "components/admin/knowledge-workspace.tsx",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Existing authenticated SaaS workspace and bilingual navigation; save/review/index/withdraw separate; manual workflow remains available.",
+    "worktreeSha256": "fe782012cdfc6109c50502d9d0eea689e1f97e05fc19eef75153132b31be688d"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "kb_search",
+    "path": "lib/ai/tools/kb-search.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Existing public tool requires exact approved version ref; citations pinned to source/version/hash/locale.",
+    "worktreeSha256": "b12059af3e982cf0fcd5f97860826222f5de4b28b9e9baca3b4973a068a0a8d6"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "loadGoldenCases",
+    "path": "evals/grader.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Original golden bytes and business criteria unchanged; explicit offline matching ground-truth citation IDs migrate to new version identity.",
+    "worktreeSha256": "b89b3148d3c1c292a897e3a2211009eef1d3d317069aa6f4a3f52cadd1e405ca"
   }
 ]

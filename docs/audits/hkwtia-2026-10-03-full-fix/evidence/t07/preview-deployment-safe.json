@@ -1,0 +1,10 @@
+{
+  "id": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+  "gitRef": "codex/ai-knowledge-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
+  "production": false
+}

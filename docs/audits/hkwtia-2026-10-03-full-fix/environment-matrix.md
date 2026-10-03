@@ -20,3 +20,21 @@ Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real
 - T06完整gate6490 pass355skip；隔離PG16 pass0skip；新Neon ledger57是13:59UTC套用0057的run，原ledger56 receipts仍有效於其歷史時間。
 - T06分支Preview37個test配置及APP_URL、獨立service/cookie secret、exactAuth origin已配置；AI及effects closed，budget cap=0屬故意無效／停用配置，並非協會財務預設。候選部署／native receipt仍待寫入。
 - 正式13:57UTC仍36eb／dpl9j，沒有0057 migration／新flags／provider請求。
+
+## T07 新run（2026-10-03／04）
+
+- T06 PR127 已於14:47UTC合併main973a0fec；exact head e4c72c64 的17 native Preview checks及5張screenshots已存入 evidence/t06。Google、magic-link、provider、scheduled worker windows仍未驗。
+- T07 原有KB沿用，0058隔離Neon ledger57→58，profiles仍5932／reserved-domain外0／sentinel1；零provider request。Production未執行0057/0058。
+- T07 focused207／實際PG31 pass0skip；完整gate及候選Preview正在進行，必須以最終receipt結案。
+- 新Preview branch `codex/ai-knowledge-20261003`，獨立alias `hkwtia-ai-knowledge-20261003.vercel.app`；38個branch-scoped test配置及APP_URL已寫入，保留舊10個Auth origins並新增精確同源。管理僅合成資料；approval profile尚待從本次新same-origin實際session映射auth_user_id；不按相同email連結身份，不任選9個synthetic superadmin。
+- 自动審批拒绝用較舊T06 storage state查本次reviewer；尚未執行被拒动作。使用当前T07 exact-source部署及全新同源官方CLI access／隔離DB正向marker再登入。browser cookie不作worker凭证。
+- Production最後只讀15:45UTC仍36eb／dpl9j READY，release branch；新main merge不等於Production。
+
+
+## T07 final refreshed evidence — 2026-10-04 01:58 HKT
+
+- Exact source7c6b0844 local full6514pass386skip0fail; CI37137557588 green including worker57. Final typecheck/build/strings exit0 and lint0errors.
+- Isolated Preview dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT has17 baseline+12 knowledge native checks; fresh same-origin CLI protection access and positive owned DB marker preceded synthetic Neon password sign-in. Configured reviewer maps that fresh trusted auth user ID, with separate synthetic source owner.
+- This supersedes earlier pending reviewer/native/local-gate notes. Source/approver policy, real embedding credential/spend/caps/invoice, Google/magic-link and worker windows remain unresolved task-specific gates. Production0057/0058 remains unapplied by this work.
+
+- T07 refreshed02:21HKT: sourcea49e6629/dpl_3roUp1uVnxwpNQehBSvqCHVhxToW has29native and fresh fullCI6520pass386skip0fail/worker57, all repository gates successful. Shared public HTTPS policy now guards source inputs; public query URLs retained. Source/approver/provider/Production gates unchanged.

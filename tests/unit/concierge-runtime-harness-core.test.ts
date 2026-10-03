@@ -1,3 +1,4 @@
+import {offlineKnowledgeRef} from "@/evals/knowledge-fixture";
 import {createHash} from "node:crypto";
 
 import {describe, expect, it} from "vitest";
@@ -80,8 +81,9 @@ describe("Concierge core runtime harness", () => {
       name: "kb_search",
       input: {query: "WTIA membership", k: 3},
     }]);
+    const approvedRef=offlineKnowledgeRef("en",url,"WTIA membership includes events and member programmes.");
     expect(actual.citations).toEqual([{
-      sourceId: sourceId("kb", url),
+      sourceId: sourceId("kb", [approvedRef.sourceId,approvedRef.version,approvedRef.contentHash,approvedRef.locale].join(":")),
       title: "WTIA Membership",
       url,
     }]);

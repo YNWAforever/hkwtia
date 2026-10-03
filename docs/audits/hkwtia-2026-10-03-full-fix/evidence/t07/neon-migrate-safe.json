@@ -1,0 +1,33 @@
+{
+  "observedAt": "2026-10-03T15:32:04.766Z",
+  "command": "npm run db:migrate (guarded ignored local test env)",
+  "projectId": "solitary-wave-52860119",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "primary": false,
+  "default": false,
+  "protected": false,
+  "positiveIsolation": {
+    "exactDatabaseAndAuthHosts": true,
+    "sentinel": 1,
+    "outsideReservedDomains": 0
+  },
+  "before": {
+    "ledger": 57,
+    "sentinel": 1,
+    "profiles": 5932,
+    "outside": 0
+  },
+  "after": {
+    "ledger": 58,
+    "profiles": 5932,
+    "reservations": 0,
+    "control": 1
+  },
+  "migration": "0058_ai_knowledge_versions",
+  "migrationSha256": "c0bf06fdd2656ccfe164b5f42d3784157cfc65d0f7466999e7eb82ac95f1d3d3",
+  "exitCode": 0,
+  "production": false,
+  "fixturesAdded": 0,
+  "providerRequests": 0,
+  "applicationFlagsEnabled": 0
+}

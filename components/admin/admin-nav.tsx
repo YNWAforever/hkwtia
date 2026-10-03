@@ -24,6 +24,7 @@ export const groupLabelKeys = {
 
 /** Maps each config link id to the Admin.navigation message key that resolves its nav label. */
 export const linkLabelKeys = {
+  knowledge:"navigation.knowledge",
   applications:"applicationQueue.title",
   "job-health":"jobHealth.heading",
   dashboard: "navigation.dashboard",
@@ -51,7 +52,7 @@ export const linkLabelKeys = {
   templates: "navigation.templates",
 } satisfies Record<AdminNavLinkId, string>;
 
-const linkIcons={dashboard:LayoutDashboard,members:Users,applications:ListChecks,batches:Layers,"at-risk":Activity,inbox:Inbox,contacts:Contact,tasks:CheckSquare,segments:Filter,campaigns:Send,announcements:Megaphone,news:Newspaper,"page-copy":FileText,media:Image,partners:Handshake,"landing-partners":Network,events:Calendar,listings:Building2,"profiles-review":ClipboardCheck,cohorts:Users,approvals:ShieldCheck,reports:BarChart3,automations:Workflow,templates:MessageSquare,"job-health":HeartPulse} satisfies Record<AdminNavLinkId,LucideIcon>;
+const linkIcons={knowledge:FileText,dashboard:LayoutDashboard,members:Users,applications:ListChecks,batches:Layers,"at-risk":Activity,inbox:Inbox,contacts:Contact,tasks:CheckSquare,segments:Filter,campaigns:Send,announcements:Megaphone,news:Newspaper,"page-copy":FileText,media:Image,partners:Handshake,"landing-partners":Network,events:Calendar,listings:Building2,"profiles-review":ClipboardCheck,cohorts:Users,approvals:ShieldCheck,reports:BarChart3,automations:Workflow,templates:MessageSquare,"job-health":HeartPulse} satisfies Record<AdminNavLinkId,LucideIcon>;
 export function AdminNav({locale, collapsed = false, onNavigate, showBrand = true}: Readonly<{
   locale: AppLocale; collapsed?: boolean; onNavigate?: () => void; showBrand?: boolean;
 }>) {
