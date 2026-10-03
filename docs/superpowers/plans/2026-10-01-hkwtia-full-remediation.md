@@ -774,3 +774,10 @@ Checkbox 只簽其明示範圍；外部 provider、協會政策、獨立 operato
 
 
 **最新原完整結果：** exact99 source CI6346pass/0fail/329skip、Workerd57pass；完整browser332pass/4fail或timeout/162skip，Auth597×200/3×429。四個原case定向4pass/0skip，90×200/0×429；不合併宣稱完整綠燈。隔離Auth quota/window/reset或專用驗收容量由provider owner解除，其餘精確gate見release-readiness.md。
+
+
+### 2026-10-03 合併後 continuation
+
+- [x] PR107–123已正常合併，a1ab9331 main CI unit6346/0fail/329 guarded skips、worker57；不把main merge當正式發佈。
+- [x] G0重新只讀確認 branch/sentinel/ledger/reserved synthetic domains；Auth quota config 不可見的精確 gate保留。
+- [x] 新main隔離Preview runtime：Git-source a1ab9331／dpl_HEigQwRm3nqjbbooL6uKSScjucTG，17 scoped checks實際通過及中英／手機截圖；先前CLI500/42P01保留。完整G1／provider／cloud／policy／SOP／正式門檻仍未通過。

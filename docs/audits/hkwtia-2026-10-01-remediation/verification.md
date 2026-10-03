@@ -461,3 +461,19 @@ Operator gate: Neon/Auth owner must confirm isolated quota scope/window/reset or
 ### 原條件定向驗證
 
 Original四個失敗案例在exact99、2000ms、原180秒timeout、原完整role matrix及真provider下定向重跑4 pass/0 fail/0 skip；90×200/0×429。CMS62435ms、negative role95997ms、wizard28402ms、en TEST checkout11045ms。程式/斷言/timeouts沒有改動；原332/4/162仍保留，不能合併為單次完整綠燈。 證據：`evidence/t22/browser-99-targeted.json`、`browser-99-failure-disposition.json`；完整quota/readback gate仍在。
+
+
+## 2026-10-03 merged main release verification
+
+PR107–123 merged sequentially; open PR count0 at04:26UTC; main `a1ab93318d054f827034c456682156470dc0da14`. Exact main CI run37093643435 on Ubuntu/Node22: unit6346 pass/0 fail/329 real guarded skips; worker57 pass/0 fail/0skip. Actual npm ci, Auth dependency versions, strings, lint, typecheck, webpack build, production high audit gate, both unit shards and real workerd tests succeeded. Scope correction retains all package versions/resolved/integrity and moderate9; no framework upgrade or relaxed gate. The prior failed builds/ancestry and exact99 full native332/4/162 remain historical evidence.
+
+Native Git diff4747bed8→a1 lists only package.json, package-lock.json and dependency-scope doc. No app/worker/test/migration changes. G0 read-only transaction explicitly SET TRANSACTION READ ONLY and SET LOCAL statement_timeout=15s, reports ledger56/sentinel1/5932 reserved-domain profiles/0 outside reserved domains/0 normalized renewal conflicts/0 refund_pending. The initial narrow .example.test suffix was not a complete fixture classifier; the reserved .example/.test/.invalid and example.com/org/net aggregate covers the existing synthetic fixtures without printing email addresses. No Production SQL was executed.
+
+Preview setup first failed because the new branch was not pushed; exact Vercel validation message retained safely. Normal branch push resolved that prerequisite,33 scoped Preview settings exited0. Default main Preview configuration points at primary; it was not used for fixtures. CLI candidate a1 buildREADY then positive runtime DB probe500/42P01; only its owned isolated marker was archived, authentication/provider/money operations never started. Failed receipt is preserved; Git-source Preview uses the same approved test settings, exact Git source and existing isolated alias. Runtime results are recorded separately after actual execution.
+
+
+### Merged main 隔離 Preview 實際結果
+
+Git-source Preview `dpl_HEigQwRm3nqjbbooL6uKSScjucTG`／`hkwtia-pwa0eb0r6-ynwaforevers-projects.vercel.app` 已 READY；source `a1ab9331`。2026-10-03 04:47:36 UTC 真 Chromium **17 項 passed**：唯一 synthetic news 正向證明 runtime 用 G0 DB、ledger56、中英 news／AI-Ops serious/critical axe0、六公開路由、匿名需登入、staff／superadmin 真 Auth 與 private cache、member 拒絕後台、flags-off batch history 可讀、worker health anchor。另保存中英 desktop／繁中390px admin截圖並檢視。providerSends0／paymentWrites0；Google／magic-link／scheduled window 仍 false。
+
+CLI failed receipt retained；同 source／same branch config 改用 Git-source transport 後正向 DB proof200。Release runbook 要求 Git-source 預覽及正向 DB marker，不能信任 CLI git metadata 或 READY 就斷言隔離 runtime 正確。全部17項的斷言原封保留，沒有 mock session／放寬 role／改 timeout／補 primary schema。驗收只 archive 自己的 marker，沒有動其他資料或 R2。

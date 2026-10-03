@@ -70,3 +70,13 @@ Flag 關閉阻止新請求／claim／一般 retry；保留歷史讀取及已被 
 | 正式發布 | 全適用 gate 過後批准具體 source、migration、worker、flags、canary 與回退人 | Release owner |
 
 分開「程式已修／隔離已驗／Preview 已部署／正式已部署／正式已啟用／正式已驗證」。尚欠門檻不得合寫成 full fix 完成。
+
+
+## 2026-10-03 合併狀態更新
+
+原 remediation PR107–123 已合併，main code `a1ab9331` 的 CI 實際綠燈（6346 unit pass／329 genuine skips；57 worker pass）。app/worker/schema/test byte-equivalent4747；依賴 scope 修正不會改政策。Production branch 仍是 `release`，正式部署 readback仍e7fa4add。發佈來源以具體批准 SHA 為準，不能由 main merge 推定 Production 已发布。最新候選矩陣、實際隔離 Preview、失敗及 gates 在 audits 的 release-readiness.md；0052–0056 和新 flags 仍需本次正式批准。正式只讀預檢只需要 owner 核實 project/branch/host，不需要匯出全部正式 secrets。
+
+
+### Preview 運行時設定核對
+
+本輪 CLI Preview 雖含正確 gitCommitRef/gitCommitSha 且 buildREADY，實際 posts read42P01；保留失敗，沒有補 primary schema。改用同分支與同33個設定的 Git-source deployment 後，唯一G0 marker200、真Auth三角色及原17個smoke通過。之後Preview應用Git-source構建，查 deploymentId/source/target，並用隔離owned marker正向證明DB後才開始具效果驗收；不能由metadata推測DB。main預設Preview指向primary，禁止fixtures。現有驗收alias被明確指向dpl_HEigQwRm3nqjbbooL6uKSScjucTG，不影響正式alias。
