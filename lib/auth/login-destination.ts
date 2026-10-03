@@ -19,15 +19,16 @@ const EVENT_TABS = new Set(["content", "attendees", "orders", "notifications"]);
 const MEMBER_TIMELINE_SECTIONS = new Set(["engagement", "emails", "events", "purchases", "notes", "journeys", "whatsapp", "suppressions"]);
 const EVENT_DETAIL_QUERY_KEYS = ["tab", "q", "cursor"] as const;
 const MEMBER_DETAIL_QUERY_KEYS = ["section", "historyQ", "historyCursor", "q", "status", "planCode", "renewalFrom", "renewalTo", "companyId", "locale", "completeness", "sort", "limit", "cursor", "history"] as const;
-const ADMIN_NESTED_UUID_DETAIL = /^\/admin\/reports\/board-drafts\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ADMIN_NESTED_UUID_DETAIL = /^\/admin\/(?:reports\/board-drafts|members\/queue)\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ADMIN_PAGE_COPY_NAMESPACE = /^\/admin\/page-copy\/[A-Za-z][A-Za-z0-9_-]{0,79}$/;
+const INBOX_SCOPES = new Set(["all", "mine", "unassigned", "overdue"]);
 const QUERY_KEYS: Readonly<Record<string, readonly string[]>> = {
   "/admin/batches": ["state", "operation", "cursor"],
   "/admin/listings-review": ["status", "cursor"],
   "/admin/members": ["q", "status", "planCode", "renewalFrom", "renewalTo", "companyId", "locale", "completeness", "sort", "limit", "cursor", "history", "view"],
   "/admin/members/queue": ["status", "q", "limit", "cursor"],
   "/admin/contacts": ["stage", "source", "owner", "optIn", "q", "cursor", "saved"],
-  "/admin/inbox": ["channel", "handling"],
+  "/admin/inbox": ["channel", "handling", "scope"],
   "/admin/automations": ["status", "cursor"],
   "/admin/reports": ["period", "view"],
 };
@@ -75,6 +76,7 @@ export function allowedAdminDestination(raw: string | null | undefined): string 
   if (parsed.has("cursor") && (parsed.getAll("cursor").length !== 1 || !/^[A-Za-z0-9_-]+$/.test(parsed.get("cursor") ?? ""))) return null;
   if (isBatchDetail && (parsed.getAll("filter").length > 1 || (parsed.has("filter") && parsed.get("filter") !== "failed"))) return null;
   if (path === "/admin/listings-review" && (parsed.getAll("status").length > 1 || (parsed.has("status") && parsed.get("status") !== "pending_review"))) return null;
+  if (path === "/admin/inbox" && (parsed.getAll("scope").length > 1 || (parsed.has("scope") && !INBOX_SCOPES.has(parsed.get("scope") ?? "")))) return null;
   if (isEventDetail) {
     const tab = parsed.get("tab");
     if (parsed.getAll("tab").length > 1 || (tab && !EVENT_TABS.has(tab))) return null;
