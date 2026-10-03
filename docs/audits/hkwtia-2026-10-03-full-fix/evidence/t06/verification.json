@@ -1,7 +1,7 @@
 {
   "task": "T06",
   "sourceBase": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
-  "verifiedRuntimeCommit": "a8c0266800bd09ac4456ec485862c96248cf8c94",
+  "verifiedRuntimeCommit": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
   "codeState": "FULL_GATES_PASS_REAL_PROVIDER_AND_POLICY_GATED",
   "migration": "0057_ai_budget",
   "production": false,
@@ -290,5 +290,18 @@
     "skipReason": "environment/provider and opt-in DB integrations remain guarded; actual PostgreSQL budget suite separately run with 16 pass/0 skip"
   },
   "sourceHashManifest": "source-hashes.json",
-  "uc34": "uc34-safe.json"
+  "uc34": "uc34-safe.json",
+  "preRebaseTestedCommit": "a8c0266800bd09ac4456ec485862c96248cf8c94",
+  "rebaseVerification": {
+    "base": "c7257ed165e86cd4c41371cba56e15a2ac6b5859",
+    "command": [
+      "git",
+      "diff",
+      "--name-only",
+      "a8c0266800bd09ac4456ec485862c96248cf8c94",
+      "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2"
+    ],
+    "result": "EMPTY_DIFF_IDENTICAL_GIT_TREE",
+    "sourceTestsReusedOnlyBecauseSourceIdentical": true
+  }
 }
