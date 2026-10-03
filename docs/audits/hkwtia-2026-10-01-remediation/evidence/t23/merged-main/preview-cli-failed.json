@@ -1,0 +1,21 @@
+{
+  "sourceSha": "a1ab93318d054f827034c456682156470dc0da14",
+  "deploymentId": "dpl_2Qqyid4wuJhDiUayxtTdFjMjA2p9",
+  "target": "preview",
+  "buildReady": true,
+  "runtimePassed": false,
+  "failedStage": "positive-runtime-db-proof",
+  "httpStatus": 500,
+  "sqlState": "42P01",
+  "missingRelation": "posts",
+  "authenticatedProbesStarted": false,
+  "ownedSyntheticMarkerArchived": true,
+  "productionWrites": 0,
+  "providerSends": 0,
+  "paymentWrites": 0,
+  "disposition": "Preserved failed CLI Preview; test Git-source deployment with the same branch-scoped test configuration.",
+  "cleanupReadOnlyVerified": {
+    "ownedProbeArchived": 1,
+    "ownedProbeLive": 0
+  }
+}

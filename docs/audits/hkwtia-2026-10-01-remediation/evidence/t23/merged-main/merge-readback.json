@@ -1,0 +1,348 @@
+{
+  "main": "a1ab93318d054f827034c456682156470dc0da14",
+  "openPRCount": 0,
+  "mergedPRCount": 17,
+  "prs": [
+    {
+      "baseRefName": "main",
+      "headRefOid": "5a7eb9eb764251240455bea1563a29506079c3fc",
+      "mergeCommit": {
+        "oid": "2d9c23488da4ee7346e3609cfef02a3cdacce8c8"
+      },
+      "mergedAt": "2026-10-03T02:34:55Z",
+      "number": 107,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/107",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "5b12a6ecaa7070e1f5ce3f1b61c92aed8a9b54aa",
+      "mergeCommit": {
+        "oid": "7b2ae5858028fd7137c5b56b18afa95c4ae4c45d"
+      },
+      "mergedAt": "2026-10-03T03:15:34Z",
+      "number": 108,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/108",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "66a985116e0802262799e9089cda6dcc56e28b01",
+      "mergeCommit": {
+        "oid": "bb0eff2346db1322ca2acf25d076bfa7af61da11"
+      },
+      "mergedAt": "2026-10-03T03:26:48Z",
+      "number": 109,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/109",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "95cac3f321a639760d93bb22b2aa639ea939a027",
+      "mergeCommit": {
+        "oid": "dceb326e3803a74bd0c7d5e590a0776bc90e155b"
+      },
+      "mergedAt": "2026-10-03T03:27:55Z",
+      "number": 110,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/110",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "0d19f718087edd1eaed7d62120bf76619b3bea41",
+      "mergeCommit": {
+        "oid": "9cb232f5ba35eaa7d987eb367d69bb615863d849"
+      },
+      "mergedAt": "2026-10-03T03:28:41Z",
+      "number": 111,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/111",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "ad5acc86e3ec27158c4eca520f6afab59302acf0",
+      "mergeCommit": {
+        "oid": "252616cd719a81102a8b114c44bf6bba0a3e98f8"
+      },
+      "mergedAt": "2026-10-03T03:28:52Z",
+      "number": 112,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/112",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "3b1c76f6d902c40e092b30dc8011343ba07331e2",
+      "mergeCommit": {
+        "oid": "4071b1a9bfdf5c8870a270864f4dc70f3d13e11a"
+      },
+      "mergedAt": "2026-10-03T03:29:04Z",
+      "number": 113,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/113",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "8d9aad444d666aea7d608f9153edb6613ffd1d46",
+      "mergeCommit": {
+        "oid": "5db03fe115dc7e425648bb81f8cb79ff45d278b8"
+      },
+      "mergedAt": "2026-10-03T03:29:16Z",
+      "number": 114,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/114",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "795e868e8a92a90e8758041a414ae0ca93e38904",
+      "mergeCommit": {
+        "oid": "4e820dfdeedf6b730f47f249e5b6cd68dc58fbec"
+      },
+      "mergedAt": "2026-10-03T03:29:26Z",
+      "number": 115,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/115",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "37e3b063deb7dfc7bc02aca6558bda417f4e25f8",
+      "mergeCommit": {
+        "oid": "28d14bda9a5b8a099c148bd9cdd206edee411bb5"
+      },
+      "mergedAt": "2026-10-03T03:29:36Z",
+      "number": 116,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/116",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "dd6682d8dbbe264503b778553e83afc70513e65a",
+      "mergeCommit": {
+        "oid": "23aaf75f2aa0eb21a9855b0f65a6420965d84818"
+      },
+      "mergedAt": "2026-10-03T03:33:30Z",
+      "number": 117,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/117",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "6cf8db01a4dff1cc808000b4ffcb7d5de7269f1f",
+      "mergeCommit": {
+        "oid": "f23a6382f1a4d08ccd52f3be7e5d6e154a6613ca"
+      },
+      "mergedAt": "2026-10-03T03:33:40Z",
+      "number": 118,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/118",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "3359db55fd71e3b5c7145c63c6dc82cc00bc3f1e",
+      "mergeCommit": {
+        "oid": "832e58445551122d63518a37ad503e041fc8e303"
+      },
+      "mergedAt": "2026-10-03T03:33:52Z",
+      "number": 119,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/119",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "bcf77634b8bd761f92e9bfa12486453f99e39acc",
+      "mergeCommit": {
+        "oid": "9584f0f121806f3e6b813eaa7a9226559884bbb0"
+      },
+      "mergedAt": "2026-10-03T03:34:03Z",
+      "number": 120,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/120",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "437f6587332f2925250e33cfd334b5a817de6825",
+      "mergeCommit": {
+        "oid": "a1ab93318d054f827034c456682156470dc0da14"
+      },
+      "mergedAt": "2026-10-03T03:34:15Z",
+      "number": 121,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/121",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "codex/full-remediation-performance-20261001",
+      "headRefOid": "4747bed8c121c23e01cdd6949b551a3e28574a4a",
+      "mergeCommit": {
+        "oid": "40b5a5da2830393304dd2011f5dee79080ebe796"
+      },
+      "mergedAt": "2026-10-03T02:29:30Z",
+      "number": 122,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/122",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "7029302566bc8f17f9d14ae6181a240407e924e7",
+      "mergeCommit": {
+        "oid": "5d887b4acc1f551dadd9af6b8e9182daef6f13c5"
+      },
+      "mergedAt": "2026-10-03T03:02:32Z",
+      "number": 123,
+      "state": "MERGED",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/123",
+      "latestChecks": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "quality": "SUCCESS",
+        "Vercel": "SUCCESS",
+        "Vercel Preview Comments": "SUCCESS"
+      }
+    }
+  ],
+  "allMergeCommitsReachableFromMain": true,
+  "applicationSourcePreservedFrom": "4747bed8c121c23e01cdd6949b551a3e28574a4a",
+  "changedPaths": [
+    "docs/audits/hkwtia-2026-10-03-merge/ci-build-dependencies.md",
+    "package-lock.json",
+    "package.json"
+  ],
+  "ownedWorktreeClean": true,
+  "rootCheckoutUntouched": true
+}

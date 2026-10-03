@@ -1,5 +1,7 @@
 # 2026-10-01 remediation baseline
 
+Latest source readback (2026-10-03): remediation PR107-123 merged; main `a1ab93318d054f827034c456682156470dc0da14`. Root dirty work remains preserved. Historical source and acceptance receipts below retain their original scope. See release-readiness.md and evidence/t23/merged-main for current release disposition.
+
 ## Source and authorization
 
 - Repository: YNWAforever/hkwtia. Branch: `codex/full-remediation-20261001`.
