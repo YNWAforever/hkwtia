@@ -137,5 +137,27 @@
     "Original25-case golden JSONL unchanged; declared exact synthetic fixture source-detail wire projection retains original facts/tools/effects and strict grading.",
     "Google/magic-link, cloud worker windows, approved real providers and Production rollout remain task-scoped gates."
   ],
-  "verifiedRuntimeCommit": "b5e93ce985d529560847b340b873d2eaf404a454"
+  "verifiedRuntimeCommit": "b5e93ce985d529560847b340b873d2eaf404a454",
+  "firstFullCi": {
+    "runId": 37151006256,
+    "headSha": "c6f6df8e48bba958ee057f435e2a858c3a84baff",
+    "result": "FAIL",
+    "failed": 5,
+    "cause": "Four explicitly synthetic local M4A cases lack new approved-facts contract; one old search-result expectation lacks structuredFacts. Actual safety fallback remains closed.",
+    "localReproduction": {
+      "failed": 5,
+      "passed": 21,
+      "skipped": 1,
+      "durationSeconds": 30.86
+    },
+    "correctedFocused": {
+      "passed": 30,
+      "skipped": 1,
+      "failed": 0,
+      "durationSeconds": 17.55,
+      "guardedSkip": "external acceptance configuration absent; not treated as pass"
+    },
+    "originalBusinessSemanticsRetained": true,
+    "wireFormatChange": "Only application server-label prefix added; original expected membership facts and exact telemetry unchanged."
+  }
 }

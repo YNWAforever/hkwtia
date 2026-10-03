@@ -40,5 +40,8 @@
   "tests/unit/ai-tools.test.ts": "32da16585ded3308f5bfc15c63aeb3f2167bab6335f46f1c0d8d11a6c57105d4",
   "tests/unit/concierge-evals-review.test.ts": "0d2e5669a9dd4b700d961cc3349690efb30ec404164741f92381b1e9a3d0282b",
   "tests/unit/concierge-runtime-harness-core.test.ts": "8b6a61b7a6b5221942e82d9c05a862dc7b9d683cb8dd8838dd17d77f74897529",
-  "tests/unit/concierge-runtime-harness.test.ts": "ea499d423ce4b8036ed2ce058a0aaa5580bd193ffc5f80a2199f0cfa5155207a"
+  "tests/unit/concierge-runtime-harness.test.ts": "ea499d423ce4b8036ed2ce058a0aaa5580bd193ffc5f80a2199f0cfa5155207a",
+  "lib/ai/m4a-acceptance-boundary.ts": "6e43ab6f230626bdc57122992f1bb3f898c854e5ab4d6ff8ef2b0d85b558024e",
+  "tests/integration/m4a-acceptance.test.ts": "2694f8116de7f9c9cf4e7e836da819ef8abd904823d9dbac13fe6bc03972e44d",
+  "tests/unit/m4a-seed.test.ts": "9ed1b82bc63148046040ceb8684c7359a6a67adcf9e8a21faecd9b65f9dd8af8"
 }

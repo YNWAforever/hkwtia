@@ -247,7 +247,7 @@ describe("M4A deterministic acceptance", () => {
       trigger: "web",
     });
     expect(await drainText(zhTurn)).toBe(
-      "已批准的 WTIA 會員福利包括社群活動。",
+      "來源資料: 已批准的 WTIA 會員福利包括社群活動。",
     );
     const enTurn = await boundary.service.startTurn({
       owner: enOwner,
@@ -257,7 +257,7 @@ describe("M4A deterministic acceptance", () => {
       trigger: "web",
     });
     expect(await drainText(enTurn)).toBe(
-      "Approved WTIA membership benefits include community events.",
+      "Source details: Approved WTIA membership benefits include community events.",
     );
 
     expect(enTurn.conversationId).not.toBe(zhTurn.conversationId);

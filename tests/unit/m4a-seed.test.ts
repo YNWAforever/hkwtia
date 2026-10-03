@@ -222,11 +222,12 @@ describe("M4A knowledge repository", () => {
       title: "Membership",
       url: "https://www.hkwtia.org/membership",
       excerpt: "Member information",
+      structuredFacts: {},
       score: 0.75,
       ref:offlineKnowledgeRef("en","https://www.hkwtia.org/membership","Member information"),offsetStart:0,offsetEnd:18,
     }]);
     expect(Object.keys(results[0] ?? {}).sort()).toEqual(
-      ["excerpt", "offsetEnd", "offsetStart", "ref", "score", "title", "url"],
+      ["excerpt", "offsetEnd", "offsetStart", "ref", "score", "structuredFacts", "title", "url"],
     );
     expect(fixture.statements).toHaveLength(1);
     const statement = fixture.statements[0]!;
