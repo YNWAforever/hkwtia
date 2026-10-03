@@ -277,6 +277,9 @@ describe("Concierge SSE route", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("APP_URL", "https://www.hkwtia.org");
     vi.stubEnv("CONCIERGE_COOKIE_SECRET", SECRET);
+    // This test exercises a configured route factory, with a mocked provider service.
+    vi.stubEnv("AGENTS_ENABLED", "true");
+    vi.stubEnv("OPENAI_API_KEY", "synthetic-configured-provider-key");
 
     const startTurn = vi.fn(async ({owner}: {owner: unknown}) => ({
       conversationId: CONVERSATION_ID,
@@ -416,6 +419,9 @@ describe("owned Concierge feedback route", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("APP_URL", "https://www.hkwtia.org");
     vi.stubEnv("CONCIERGE_COOKIE_SECRET", SECRET);
+    // This test exercises a configured route factory, with a mocked provider service.
+    vi.stubEnv("AGENTS_ENABLED", "true");
+    vi.stubEnv("OPENAI_API_KEY", "synthetic-configured-provider-key");
 
     const recordFeedback = vi.fn(async () => ({id: RUN_ID, csatScore: 5}));
 

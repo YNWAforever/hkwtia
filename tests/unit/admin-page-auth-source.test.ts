@@ -1,6 +1,7 @@
 import {readdirSync, readFileSync} from "node:fs";
 import {join, relative, resolve} from "node:path";
 import {describe, expect, it} from "vitest";
+import ts from "typescript";
 
 const adminRoot = resolve(process.cwd(), "app/[locale]/(admin)");
 
@@ -18,11 +19,30 @@ const routes = routeFiles(adminRoot)
   .map((path) => relative(process.cwd(), path).replaceAll("\\", "/"))
   .sort();
 
+function invokesBoundary(source: string, name: string): boolean {
+  const file = ts.createSourceFile("route.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let found = false;
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === name) found = true;
+    ts.forEachChild(node, visit);
+  }
+  visit(file);
+  return found;
+}
+
 describe("every admin route uses the shared 404 auth boundary", () => {
   // Discovery, not a hand-maintained list. The previous allowlist silently
   // omitted /admin/listings-review, /admin/cohorts, /admin/automations and the
   // admin index, so those routes were unguarded by the test that exists to
   // guard them — and a new section could ship the same way with a green suite.
+  it("detects guarded and hostile shapes even with continuation arguments or decoy comments", () => {
+    expect(invokesBoundary("const actor = await requireAdminPageActor();", "requireAdminPageActor")).toBe(true);
+    expect(invokesBoundary('const actor = await requireAdminPageActor("/admin/inbox?scope=mine");', "requireAdminPageActor")).toBe(true);
+    expect(invokesBoundary("// requireAdminPageActor()\nconst actor = await requireAdminActor();", "requireAdminPageActor")).toBe(false);
+    expect(invokesBoundary('const decoy = "requireAdminPageActor()";', "requireAdminPageActor")).toBe(false);
+    expect(invokesBoundary("const actor = await requireAdminActor();", "requireAdminActor")).toBe(true);
+  });
+
   it("discovers every admin page and layout", () => {
     expect(routes.length).toBeGreaterThanOrEqual(26);
     for (const known of [
@@ -52,10 +72,10 @@ describe("every admin route uses the shared 404 auth boundary", () => {
     expect(source).toMatch(
       /import\s*\{\s*requireAdminPageActor\s*\}\s*from\s*"@\/lib\/admin\/page-auth";/,
     );
-    expect(source).toContain("requireAdminPageActor()");
+    expect(invokesBoundary(source, "requireAdminPageActor")).toBe(true);
     // requireAdminActor throws for the action boundary; a page must 404 instead
     // so the admin surface's existence is never disclosed.
-    expect(source).not.toContain("requireAdminActor()");
+    expect(invokesBoundary(source, "requireAdminActor")).toBe(false);
   });
 
   it("authorizes the member list before parsing untrusted route query values", () => {
