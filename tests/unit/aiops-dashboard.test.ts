@@ -58,6 +58,12 @@ function expectInvalid(rows: AiOpsMonthlyMetric[], now: Date) {
 }
 
 describe("AI-Ops dashboard state", () => {
+  it("keeps the six-minute estimate separate from unmeasured operational savings", () => {
+    const state = buildAiOpsDashboardState(windowRows(), NOW);
+    expect(state).toMatchObject({status: "fresh", current: {staffHoursSaved: 1.2},
+      operationsImpact: {status: "unmeasured", netMinutes: null, caseCount: null, sampleCount: 0, missingRate: null}});
+  });
+
   it("treats a refresh exactly 120 minutes old as fresh", () => {
     const rows = windowRows(new Date("2026-07-30T10:00:00.000Z"));
 

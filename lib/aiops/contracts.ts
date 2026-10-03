@@ -39,3 +39,9 @@ export const aiOpsMonthlyMetricSchema = z.object({
 });
 
 export type AiOpsMonthlyMetric = z.infer<typeof aiOpsMonthlyMetricSchema>;
+
+/** The legacy six-minute estimate has no measured human-work population. Never infer one from bot-only metrics. */
+export const unmeasuredOperationsImpact = Object.freeze({
+  status: "unmeasured" as const, netMinutes: null, caseCount: null, sampleCount: 0, missingRate: null,
+});
+export type UnmeasuredOperationsImpact = typeof unmeasuredOperationsImpact;

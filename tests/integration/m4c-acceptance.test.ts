@@ -425,6 +425,8 @@ describe("complete M4 deterministic acceptance", () => {
       // page-level PageHero, so this component-level render no longer contains labels.title --
       // assert on a label that stays in the shrunk AiOpsDashboardLabels contract instead.
       expect(html).toContain(labels.methodologyHeading);
+      expect(html).toContain(labels.operationsHeading);
+      expect(html).toContain(labels.operationsUnmeasured);
       expect(html).toContain(`aria-labelledby="ai-ops-evidence-${locale}"`);
       return {locale, html};
     });
@@ -450,7 +452,9 @@ describe("complete M4 deterministic acceptance", () => {
     // a copy change and nothing else. Re-verified deterministic across repeated runs before
     // pinning.
     // T22: page-scoped aiops-metrics class fixes light-page contrast; all privacy invariants above remain.
-    expect(opaque(safeDashboard)).toBe("9ba3122a495a4a9674cae1d920e5e905611c54bcbd4a56e5808116479702f2fc");
+    // T04 adds a separate unmeasured-impact section; privacy assertions remain above.
+    expect(state).toMatchObject({operationsImpact: {netMinutes: null, sampleCount: 0, caseCount: null}});
+    expect(opaque(safeDashboard)).toBe("f0d8b422d67b7130a374d4552401ce98c019abdc193549333111460eab94d16f");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();

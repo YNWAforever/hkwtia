@@ -1,3 +1,7 @@
+import {OperationsBaselineForm, type OperationsBaselineLabels} from "@/components/admin/operations-baseline-form";
+import {OperationsTimingForm, type OperationsTimingLabels} from "@/components/admin/operations-timing-form";
+import {operationsMetricsRepository} from "@/lib/db/repos/operations-metrics";
+import {parseReportWindow} from "@/lib/admin/reports";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {z} from "zod";
@@ -47,6 +51,11 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
     loadReport(actor, reportQuery),
     listBoardDrafts(actor),
   ]);
+  const timing = await getTranslations({locale, namespace: "OperationsTiming"});
+  const timingLabels = Object.fromEntries((["heading", "description", "formLabel", "caseId", "caseKind", "auditId", "runId", "comparisonId", "startedAt", "endedAt", "humanMinutes", "reviewMinutes", "reworkMinutes", "waitMinutes", "cohort", "baseline", "assisted", "decision", "adopted", "edited", "rejected", "manual", "reopened", "submit", "pending", "newObservation", "saved", "invalid", "unavailable", "forbidden", "application", "support", "renewal", "board", "content", "membership", "event", "cms"] as const).map(key => [key, timing(key)])) as OperationsTimingLabels;
+  const baselineLabels = Object.fromEntries((["freezeHeading", "freezeDescription", "comparisonId", "baselineFrom", "baselineTo", "freezeSubmit", "freezeSaved", "pending", "invalid", "unavailable", "forbidden"] as const).map(key => [key, timing(key)])) as OperationsBaselineLabels;
+  const impact = report ? await operationsMetricsRepository.read(actor, parseReportWindow(reportQuery).utc).catch(() => null) : null;
+  const number = new Intl.NumberFormat(locale, {maximumFractionDigits: 2});
   const from = typeof reportQuery.from === "string" ? reportQuery.from : "";
   const to = typeof reportQuery.to === "string" ? reportQuery.to : "";
   const boardDraftLabels = {
@@ -78,6 +87,23 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
       {invalid ? <p aria-live="polite" className="text-sm text-destructive sm:col-span-3" role="alert">{t("validation")}</p> : null}
     </form>
     {report ? <ReportCards labels={labels} locale={locale} report={report}/> : null}
+    <section className="space-y-4 rounded-2xl border border-border bg-card p-5" aria-labelledby="operations-timing-heading">
+      <h2 id="operations-timing-heading" className="font-serif text-2xl font-semibold">{timing("heading")}</h2>
+      <p>{timing(impact?.status === "measured" ? "measuredStatus" : "status")}</p>
+      <p className="text-sm text-muted-foreground">{timing("scope")}</p>
+      <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div><dt>{timing("period")}</dt><dd>{from} – {to}</dd></div>
+        <div><dt>{timing("cases")}</dt><dd>{impact?.caseCount == null ? timing("unknown") : number.format(impact.caseCount)}</dd></div>
+        <div><dt>{timing("samples")}</dt><dd>{impact?.sampleCount == null ? timing("unknown") : number.format(impact.sampleCount)}</dd></div>
+        <div><dt>{timing("missing")}</dt><dd>{impact?.missingRate == null ? timing("unknown") : new Intl.NumberFormat(locale, {style: "percent", maximumFractionDigits: 1}).format(impact.missingRate)}</dd></div>
+        <div><dt>{timing("net")}</dt><dd>{impact?.netMinutes == null ? timing("unknown") : number.format(impact.netMinutes)}</dd></div>
+        <div><dt>{timing("comparisonSamples")}</dt><dd>{impact?.comparisonSampleCount == null ? timing("unknown") : number.format(impact.comparisonSampleCount)}</dd></div>
+        <div><dt>{timing("comparisonMissing")}</dt><dd>{impact?.comparisonMissingRate == null ? timing("unknown") : new Intl.NumberFormat(locale, {style: "percent", maximumFractionDigits: 1}).format(impact.comparisonMissingRate)}</dd></div>
+      </dl>
+      {impact?.baselinePeriods.map(period => <p key={period.comparisonId} className="break-all text-sm">{timing("frozenPeriod")}: {period.comparisonId} · {period.from} – {period.toExclusive}</p>)}
+      <OperationsTimingForm labels={timingLabels}/>
+      <OperationsBaselineForm labels={baselineLabels}/>
+    </section>
     <BoardDraftList drafts={boardDrafts} labels={boardDraftLabels} locale={locale}/>
   </div>;
 }

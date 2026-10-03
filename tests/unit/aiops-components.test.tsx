@@ -53,6 +53,14 @@ const labels: AiOpsDashboardLabels = {
   acceptance: "M4 acceptance evidence",
   noBuildLogs: "No published build logs are available.",
   buildLogsUnavailable: "Build logs are temporarily unavailable.",
+  operationsHeading: "Measured staff time savings",
+  operationsUnmeasured: "Not measured. The six-minute estimate is not an observed saving.",
+  operationsPeriod: "Measurement period",
+  operationsCases: "Unique cases",
+  operationsSamples: "Cases with timing samples",
+  operationsMissing: "Missing timing rate",
+  operationsMethodology: "Include bot outcomes, human handoffs and reopened cases. Measure human work, review and rework separately; waiting is not staff work. Fix a comparison group before the pilot.",
+
 };
 
 function monthStartAt(index: number) {
@@ -94,6 +102,7 @@ const freshState: AiOpsDashboardState = {
   current: months[11],
   months,
   ageMs: 60 * 60 * 1000,
+  operationsImpact: {status: "unmeasured", netMinutes: null, caseCount: null, sampleCount: 0, missingRate: null},
 };
 const buildLogs = [
   {
