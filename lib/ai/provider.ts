@@ -12,6 +12,9 @@ export type AgentMessage = Readonly<{
 export type AgentUsage = Readonly<{
   inputTokens: number;
   outputTokens: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+  reasoningTokens?: number;
 }>;
 
 export type AgentCitationInput = Readonly<{
@@ -55,6 +58,7 @@ export type AgentStreamRequest = Readonly<{
   messages: AgentMessage[];
   tools: AgentToolSet;
   abortSignal?: AbortSignal;
+  onProviderReceipt?: (requestId: string) => Promise<void> | void;
 }>;
 
 export type AgentStreamFinish = Readonly<{

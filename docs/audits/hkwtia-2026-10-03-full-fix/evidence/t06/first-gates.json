@@ -1,0 +1,47 @@
+{
+  "sourceBase": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+  "uncommittedTask": "T06",
+  "productionDeployment": false,
+  "results": [
+    {
+      "name": "full-unit",
+      "command": "npm test -- --maxWorkers=2",
+      "startedAt": "2026-10-03T13:37:58.872Z",
+      "finishedAt": "2026-10-03T13:47:26.980Z",
+      "exitCode": 1,
+      "log": ".playwright/full-fix-t06-full-unit.log"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "startedAt": "2026-10-03T13:37:58.886Z",
+      "finishedAt": "2026-10-03T13:38:38.081Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t06-lint.log"
+    },
+    {
+      "name": "strings",
+      "command": "npm run audit:strings",
+      "startedAt": "2026-10-03T13:37:58.897Z",
+      "finishedAt": "2026-10-03T13:38:00.218Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t06-strings.log"
+    },
+    {
+      "name": "types",
+      "command": "npm run typecheck",
+      "startedAt": "2026-10-03T13:47:26.981Z",
+      "finishedAt": "2026-10-03T13:47:35.789Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t06-types.log"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "startedAt": "2026-10-03T13:47:35.789Z",
+      "finishedAt": "2026-10-03T13:49:02.592Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t06-build.log"
+    }
+  ]
+}

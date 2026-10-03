@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {createAdminModelRegistry, resolveAdminModel, validateModelRoute, type AdminModelRegistry, type ModelRoute} from "@/lib/ai/providers/registry";
 import {createOpenCodeAgentProvider, OPENCODE_ADMIN_ADOPTION, OPENCODE_GO_BASE_URL} from "@/lib/ai/providers/opencode";
 import {conciergeRequestSchema} from "@/lib/api/concierge-route";
@@ -9,7 +10,7 @@ const route = {
   key: "openai:gpt-4.1-mini", provider: "openai" as const,
   protocol: "responses" as const, modelId: "gpt-4.1-mini",
   approvedForAdmin: true, supportsTools: true, supportsJson: true,
-  pricingVersion: "legacy-2026-10-03", maxInputTokens: 16_000,
+  pricingVersion: "verified-2026-10-03", maxInputTokens: 16_000,
   maxOutputTokens: 4_000, timeoutMs: 30_000,
 };
 const tasks = ["concierge", "writer", "application", "support", "renewal", "board", "content"] as const;
@@ -26,7 +27,7 @@ function harness(overrides: Record<string, unknown> = {}) {
   }));
   const openai = vi.fn(() => ({stream}));
   // This injected server registry exercises the same admission used in production.
-  const dependencies = {agentRuns, providerFactories: {openai, anthropic: vi.fn()}, modelRegistry: Object.fromEntries(tasks.map(task => [task, {...route, ...overrides}])) as AdminModelRegistry};
+  const dependencies = {budget: syntheticAiBudget(), agentRuns, providerFactories: {openai, anthropic: vi.fn()}, modelRegistry: Object.fromEntries(tasks.map(task => [task, {...route, ...overrides}])) as AdminModelRegistry};
   const runtime = createAgentRuntime(dependencies);
   return {runtime, stream, openai, agentRuns};
 }

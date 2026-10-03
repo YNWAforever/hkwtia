@@ -1,0 +1,8 @@
+{
+  "observedAt": "2026-10-03T13:57:10.533Z",
+  "id": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+  "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+  "state": "READY",
+  "target": "production",
+  "branch": "main"
+}

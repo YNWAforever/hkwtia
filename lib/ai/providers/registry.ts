@@ -65,10 +65,10 @@ export function createAdminModelRegistry(model: string = DEFAULT_AGENT_MODEL_KEY
     approvedForAdmin: true, supportsTools: true, supportsJson: true,
     pricingVersion: AI_PRICING_VERSION,
     // Configurable engineering ceilings, not membership, communication or association policy.
-    maxInputTokens: 128_000, maxOutputTokens: 4_096, timeoutMs: 30_000,
+    maxInputTokens: 128_000, maxOutputTokens: 800, timeoutMs: 20_000,
   };
   return Object.freeze(Object.fromEntries(tasks.map(task => [task, Object.freeze({
-    ...route, approvedForAdmin: !["application", "support", "content"].includes(task),
+    ...route, maxOutputTokens: ["writer", "application"].includes(task) ? 1_200 : ["board", "content"].includes(task) ? 1_600 : 800, approvedForAdmin: !["application", "support", "content"].includes(task),
   })])) as Record<AdminAiTask, ModelRoute>);
 }
 export const DEFAULT_ADMIN_MODEL_REGISTRY = createAdminModelRegistry();

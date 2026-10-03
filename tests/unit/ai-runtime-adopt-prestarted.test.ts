@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {createAgentRuntime} from "@/lib/ai/runtime";
@@ -20,7 +21,7 @@ describe("AI runtime prestarted-run adoption", () => {
       escalate: vi.fn(async () => ({id: RUN_ID})),
       disable: vi.fn(async () => ({id: RUN_ID})),
     };
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({

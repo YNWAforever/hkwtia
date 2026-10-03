@@ -563,3 +563,13 @@ npm --prefix workers test
 ## 給 Codex 的執行起點
 
 把同包 `HKWTIA_Codex_GPT_6_1_Sol_Start_Prompt_2026-10-03.txt` 與原始 evidence ZIP 一起交給 Codex。起點是 T00 → T01，再按dependencies推進；執行時持續更新status，不在每個小task完成後反覆問是否繼續。只有涉及尚未授權的外部effects/正式release，才以完成的preview、測試證據和回退方案作最後決定。
+
+## T06 本輪執行紀錄
+
+- [x] 原子ledger／20 concurrent／重播與unknown TTL的實際PG行為驗證。
+- [x] 四agent、Writer原quota、SDK7 aggregate/cache/reasoning、receipt-before-body。
+- [x] embedding、背景evaluation及judge同一budget；20秒deadline與穩定人工fallback。
+- [x] 相容停用生成／保留帳本及填有歷史資料的0056→0057向前演練。
+- [x] 確認隔離Neon套用0057（ledger56→57，零provider request，profiles數量不變）。
+- [x] 最終完整gate／source review（6490 pass／355 skip；focused267／PG16）；Preview候選另記實際receipt。
+- [ ] 真provider帳單、owner上限及正式capability發布（精確owner gate已記錄，不計為pass）。

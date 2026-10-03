@@ -1,0 +1,206 @@
+[
+  {
+    "path": ".env.example",
+    "sha256": "7a16650c9f30f47f220b16d18eb3d423be30622aee9523064258c83157b99552"
+  },
+  {
+    "path": "components/marketing/aiops/metric-grid.tsx",
+    "sha256": "39ac0aa94ae24169b234aee4437d6c9c4c6b2ed6ec50c914e179302d71aa50e5"
+  },
+  {
+    "path": "config/ai-pricing.ts",
+    "sha256": "7b0214189ff22cf6ab76f1c405664afadb164bb25ce7d364ff16ed2f27cab1e5"
+  },
+  {
+    "path": "drizzle/0057_ai_budget.sql",
+    "sha256": "aeeaf37539c26a54716a554019ccb49481a76e812e9212e1f61f8dc5ca4c30e9"
+  },
+  {
+    "path": "drizzle/meta/_journal.json",
+    "sha256": "17b9f474da2ba5852d85eda911402c9a5d7ca1335e466fc60dba07800bd1e055"
+  },
+  {
+    "path": "evals/grader.ts",
+    "sha256": "a4f566e41e428950cf1533ae43e9be23f9376235ecc5c8324e64aff10f824f7f"
+  },
+  {
+    "path": "evals/runtime-harness.ts",
+    "sha256": "eb211b406e17e35a7ea7e07e9af0ec6be1779b782c1555cebbaadde2f4adac68"
+  },
+  {
+    "path": "lib/ai/budget.ts",
+    "sha256": "9999d150bfe7bc4a5e3f59920f49c7288396a8d7a08ba339bc840e0e0aca87ca"
+  },
+  {
+    "path": "lib/ai/embeddings.ts",
+    "sha256": "a8604bb7bdb82065d9e0e084751850bf78e308290aee66b7068a47c9880eee9b"
+  },
+  {
+    "path": "lib/ai/m4a-acceptance-boundary.ts",
+    "sha256": "a4ddfb160c13996aa13ebcfb89bfdd49df4932fa3b4e93ec5c173da1c3e683f7"
+  },
+  {
+    "path": "lib/ai/pricing.ts",
+    "sha256": "540e51895937cdf2bf15678936191b05e29e8634da8ee3303467dc0667e810c2"
+  },
+  {
+    "path": "lib/ai/provider.ts",
+    "sha256": "bfdc2066440270fb5a4401994b861497596dc0f158ac4342b8cfde2846e2e6e3"
+  },
+  {
+    "path": "lib/ai/providers/ai-sdk.ts",
+    "sha256": "b0161f54802b68f39298d59c4f25947af15cebc25ffcfdc34487d9d28bf2fed0"
+  },
+  {
+    "path": "lib/ai/providers/anthropic.ts",
+    "sha256": "4048804e2f1a94aa77e3903c094c46bdea65c3294f54a0b04d62f2949683221e"
+  },
+  {
+    "path": "lib/ai/providers/openai.ts",
+    "sha256": "75c6c72185d7a2dd527a158ef61c646623f16c9b376905da54538dfaa1a501b1"
+  },
+  {
+    "path": "lib/ai/providers/registry.ts",
+    "sha256": "d1a431470e1ff20e1593ea57912baf0a1746799aed07610bb9a2e3afbaef4753"
+  },
+  {
+    "path": "lib/ai/providers/request-receipt.ts",
+    "sha256": "81222bd9ff5fc24156e429c7920bf2f014f0aaa8ed23d1d0999ed12e1862967d"
+  },
+  {
+    "path": "lib/ai/readiness.ts",
+    "sha256": "d0be64341755a55b648d73e639a1316b09ca8e2f3c61e2c76853d11f551b5753"
+  },
+  {
+    "path": "lib/ai/runtime.ts",
+    "sha256": "6771c67b2cf4d71b77b59ff0f630963dfd1275ca84a604799d1508bf75a23ece"
+  },
+  {
+    "path": "lib/aiops/contracts.ts",
+    "sha256": "837576e3312e599771e6a31e8c055e7474815d4a6e63ed48170c5be05df12b50"
+  },
+  {
+    "path": "lib/db/repos/agent-runs.ts",
+    "sha256": "82798e4e4b2d455c01db6086bfaa310c08872960605095d16d38b8aa964226c2"
+  },
+  {
+    "path": "lib/db/repos/ai-budget.ts",
+    "sha256": "c9382979a1d148c7b2dfb10ba3fa3fb75668e8f8a04aa56825abb3f062972b7c"
+  },
+  {
+    "path": "lib/db/repos/aiops-public.ts",
+    "sha256": "26accb7be106962852857d924afe8eb8f33909b3a37540a92c9ef8c93cf413b6"
+  },
+  {
+    "path": "lib/db/repos/kb-documents.ts",
+    "sha256": "b7bfde73faa351ff1af32af43b5d9466a95476889b227de9cc3472e711a1140b"
+  },
+  {
+    "path": "lib/db/schema-core.ts",
+    "sha256": "f5a5645d9876d211a7cdc0a99ac0e03b633ad27ecf9cbf82984d918299a37e09"
+  },
+  {
+    "path": "package.json",
+    "sha256": "7ed201727913f0e372bf4324aba3d22eefc37facc206e6020c49ded32951796f"
+  },
+  {
+    "path": "scripts/seed-m4a-knowledge.ts",
+    "sha256": "bbf58a3a1b8f03eee8f7a5ce1f7f1d43efbdaf7d430aa2b91ea22aa11832e0db"
+  },
+  {
+    "path": "scripts/seed-m4a.ts",
+    "sha256": "4851d90f1310fae8df731a5739501b8a8ce07e01b4d2b99da5e4d6cbb8a33e8c"
+  },
+  {
+    "path": "tests/helpers/ai-budget.ts",
+    "sha256": "dae47d651fcb6780813650c86a86bcdcd8cb9807f0371e233e7f788eea2daf18"
+  },
+  {
+    "path": "tests/integration/ai-budget-concurrency.test.ts",
+    "sha256": "a205cbc6e163c70643e18e1c6f3a2731899ec8867ea433c059f2ba497a6866ee"
+  },
+  {
+    "path": "tests/integration/concierge-route.test.ts",
+    "sha256": "9905bf823c2797226246e04455363e518e116622ce28b27585dc12795c027905"
+  },
+  {
+    "path": "tests/unit/ai-embedding-budget.test.ts",
+    "sha256": "7dd82dbd456dc097719a52b01e5810ef1f0c6616b295cb87024e1c4713f7603f"
+  },
+  {
+    "path": "tests/unit/ai-judge-budget.test.ts",
+    "sha256": "2b4058c8642ed99fc0fb160a1eaabdb581479f4080c49961f9d4e7529dad580d"
+  },
+  {
+    "path": "tests/unit/ai-pricing.test.ts",
+    "sha256": "b0923348a419d2a32c27a8832b35e602060b668afe9470019922e47fa4722beb"
+  },
+  {
+    "path": "tests/unit/ai-provider-endpoint-contract.test.ts",
+    "sha256": "bd6c217f731bbdcf282df47ddcfa0c702aef03d865c7711416a81f75adf96141"
+  },
+  {
+    "path": "tests/unit/ai-provider-registry.test.ts",
+    "sha256": "7fa54cd749bdd6e2de6607819ddd156c001f41e6d5e0e76a3a97bb90b8142baa"
+  },
+  {
+    "path": "tests/unit/ai-runtime-adopt-prestarted.test.ts",
+    "sha256": "d0a25131bb869b2e993db4c9e1edad2708ea05ae19df529d10069ac3313ca7d9"
+  },
+  {
+    "path": "tests/unit/ai-runtime-budget.test.ts",
+    "sha256": "e15c5e90081d3576462187613b396ced1ef8c534c0d1339d9ac4db881a8baac9"
+  },
+  {
+    "path": "tests/unit/ai-runtime-prepared-single-use.test.ts",
+    "sha256": "7f5da7988c8dfa365321550f9deabb821650ce1896e495f1226dee2dd797875a"
+  },
+  {
+    "path": "tests/unit/ai-runtime-rereview.test.ts",
+    "sha256": "0cd7bdc9905bbfcbd59e33a23f58eb979354c6642d8980263b8bec55e8d0a4a2"
+  },
+  {
+    "path": "tests/unit/ai-runtime-review.test.ts",
+    "sha256": "624f7d37e6b7de1647b7ef6ba3bcb817283ada8e64d739a023e903e6d34553a7"
+  },
+  {
+    "path": "tests/unit/ai-runtime-source-cleanup.test.ts",
+    "sha256": "d1849db8f1c55a343ba19ea3905a56cc52d2a4a427fe358525a6c41ba27b24c2"
+  },
+  {
+    "path": "tests/unit/ai-runtime.test.ts",
+    "sha256": "c40924eb2acbd7e63b089e1b79962884d4485d0b7ef68872e2e45b48cb2c193a"
+  },
+  {
+    "path": "tests/unit/ai-usage-contract.test.ts",
+    "sha256": "f6d02cd6311de0c13f7cd85d47dc7e6a8a2979f62fd6646c424bca74800f930a"
+  },
+  {
+    "path": "tests/unit/aiops-cost-unknown.test.tsx",
+    "sha256": "154ffe4f0116ac345caad61213f3ebc3a6c3e156ac2f37f6878d2ab9e078824e"
+  },
+  {
+    "path": "tests/unit/aiops-public-repository.test.ts",
+    "sha256": "8bce68fb0a50f0c331beb50dbd1cbb9674d79932fb4b97db51761e19aefb6dcd"
+  },
+  {
+    "path": "tests/unit/concierge-cancellation-lifecycle.test.ts",
+    "sha256": "0f1fb1a9cf1f2635e84b059592910b31a52fe6d00322aa34565be29a7d9fb474"
+  },
+  {
+    "path": "tests/unit/concierge-live-evals.test.ts",
+    "sha256": "0523aed90ffa44d933a0da040f70b3297d797f48faa853f841fe173a0b7d7091"
+  },
+  {
+    "path": "tests/unit/concierge-readiness.test.ts",
+    "sha256": "c34b7721cb235089188faf72786e678f24f1a30cdeafadf61d840324225e9174"
+  },
+  {
+    "path": "tests/unit/concierge-runtime-harness-safety-channel.test.ts",
+    "sha256": "8d92b4dbe530fe23a86794f299c60aac76acb1fd0e1d5bd59fe0c615abfe5a06"
+  },
+  {
+    "path": "tests/unit/writer-agent-actor.test.ts",
+    "sha256": "e99e0aba7a55c110366f171a3dfbe34124d15d3e4db8076396dd2e60897ec235"
+  }
+]

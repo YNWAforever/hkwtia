@@ -1,3 +1,4 @@
+import {createAiBudgetRepository,configuredAiBudgetLimits} from "../lib/db/repos/ai-budget.ts";
 import {createOpenAIEmbeddingAdapter} from "../lib/ai/embeddings.ts";
 import {createKbDocumentsRepositoryForDatabaseUrl} from "../lib/db/repos/kb-documents.ts";
 import {M4A_FUNDING_SOURCES, seedM4A} from "./seed-m4a.ts";
@@ -39,7 +40,7 @@ export async function runM4AKnowledgeSeed(
   try {
     await seedM4A({
       sources: M4A_FUNDING_SOURCES,
-      embedding: createOpenAIEmbeddingAdapter(apiKey),
+      embedding: createOpenAIEmbeddingAdapter(apiKey, {budget:createAiBudgetRepository(knowledge.loadDatabase,()=>configuredAiBudgetLimits(environment))}),
       repository: knowledge.repository,
     });
   } finally {

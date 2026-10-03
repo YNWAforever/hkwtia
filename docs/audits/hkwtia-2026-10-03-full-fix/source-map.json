@@ -518,5 +518,85 @@
     "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
     "evidenceBasis": "implemented-source-verified",
     "worktreeSha256": "d90d60cf1787dd9f988662d801b57b0966d0cb2baa36a2c696418cbad4f33b9b"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "createAiBudgetRepository",
+    "path": "lib/db/repos/ai-budget.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "One shared ledger/control reuses existing DB loader and server-only boundary; integer admission and settlement.",
+    "worktreeSha256": "c9382979a1d148c7b2dfb10ba3fa3fb75668e8f8a04aa56825abb3f062972b7c"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "maximumAgentCostMicrousd",
+    "path": "lib/ai/budget.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Eight bounded steps/no SDK retries; optional server test DI retains fail-closed production default.",
+    "worktreeSha256": "9999d150bfe7bc4a5e3f59920f49c7288396a8d7a08ba339bc840e0e0aca87ca"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "createAgentRuntime",
+    "path": "lib/ai/runtime.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Preserves actor/prepared run/Writer quota/finalization; reserves before provider, late receipt reconciles billing only.",
+    "worktreeSha256": "6771c67b2cf4d71b77b59ff0f630963dfd1275ca84a604799d1508bf75a23ece"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "calculateAgentCostMicrousd",
+    "path": "lib/ai/pricing.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Preserves SDK7 aggregate usage and adds cache/reasoning fixed-point details; original pricing base retained.",
+    "worktreeSha256": "540e51895937cdf2bf15678936191b05e29e8634da8ee3303467dc0667e810c2"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "reconcileUsage",
+    "path": "lib/db/repos/agent-runs.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Existing own-actor run predicate and terminal state retained; billing-only late reconciliation.",
+    "worktreeSha256": "82798e4e4b2d455c01db6086bfaa310c08872960605095d16d38b8aa964226c2"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "receiptAwareFetch",
+    "path": "lib/ai/providers/request-receipt.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Accepted response request id persisted before body, no response/body/header secret logging.",
+    "worktreeSha256": "81222bd9ff5fc24156e429c7920bf2f014f0aaa8ed23d1d0999ed12e1862967d"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "createOpenAIEmbeddingAdapter",
+    "path": "lib/ai/embeddings.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Existing embeddings now share category embedding budget; deterministic adapter remains test-only.",
+    "worktreeSha256": "a8604bb7bdb82065d9e0e084751850bf78e308290aee66b7068a47c9880eee9b"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "defaultLiveJudge",
+    "path": "evals/grader.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Existing guarded administrative runtime, evaluation/judge budget categories, no raw provider reason in reports.",
+    "worktreeSha256": "a4f566e41e428950cf1533ae43e9be23f9376235ecc5c8324e64aff10f824f7f"
   }
 ]

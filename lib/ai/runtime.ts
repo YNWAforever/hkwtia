@@ -1,3 +1,5 @@
+import {defaultAiBudgetPort, maximumAgentCostMicrousd, type AiBudgetPort} from "@/lib/ai/budget";
+import {AI_PRICING_VERSION} from "@/config/ai-pricing";
 import {randomUUID} from "node:crypto";
 import {assertRouteInputWithinBounds, createAdminModelRegistry, resolveAdminModel, taskForAgent, type AdminModelRegistry} from "@/lib/ai/providers/registry";
 
@@ -23,7 +25,7 @@ import {
   type AgentToolSet,
   type AgentUsage,
 } from "@/lib/ai/provider";
-import {calculateAgentCostUsd} from "@/lib/ai/pricing";
+import {calculateAgentCostUsd, calculateAgentCostMicrousd, validateAgentUsage} from "@/lib/ai/pricing";
 import {createAnthropicAgentProvider} from "@/lib/ai/providers/anthropic";
 import {createOpenAIAgentProvider} from "@/lib/ai/providers/openai";
 
@@ -44,6 +46,7 @@ export type AgentEscalationCode =
 
 type AgentRunsLifecycle = Readonly<{
   start: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
+  reconcileUsage?: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
   configureModel: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
   finish: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
   fail: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
@@ -178,6 +181,8 @@ type AgentRuntimeDependencies = Readonly<{
   agentRuns: AgentRunsLifecycle;
   providerFactories?: Readonly<Record<AgentProviderName, AgentProviderFactory>>;
   modelRegistry?: AdminModelRegistry;
+  budget?: AiBudgetPort;
+  budgetScope?: "evaluation" | "judge";
   createRunId?: () => string;
   now?: () => Date;
 }>;
@@ -291,10 +296,7 @@ function normalizeUsage(value: unknown): AgentUsage {
     throw new AgentInvalidProviderResponseError();
   }
 
-  return {
-    inputTokens: Number(usage.inputTokens),
-    outputTokens: Number(usage.outputTokens),
-  };
+  try {return validateAgentUsage(value as AgentUsage);} catch {throw new AgentInvalidProviderResponseError();}
 }
 
 function normalizeProviderFinish(value: AgentStreamFinish): AgentStreamFinish {
@@ -514,6 +516,7 @@ function createEagerTextPump(
 export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
   const {
     agentRuns,
+    budget = defaultAiBudgetPort,
     providerFactories = defaultProviderFactories,
     createRunId = randomUUID,
     now = () => new Date(),
@@ -527,6 +530,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
   type RunState = {
     actor: AgentRunActor;
     streamStarted: boolean;
+    reservationId?: string;
+    dispatched?: boolean;
+    budgetKnown?: boolean;
+    billing?: Readonly<{usage: AgentUsage; costUsd: string}>;
     terminal?: Terminal;
   };
   const preparedStates = new WeakMap<AgentRuntimePreparedRun, RunState>();
@@ -557,25 +564,37 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
   async function failState(
     state: RunState,
     error: unknown,
-    billing: Readonly<{usage: AgentUsage; costUsd: string}> = {
-      usage: ZERO_USAGE,
-      costUsd: ZERO_COST,
-    },
+    billing?: Readonly<{usage: AgentUsage; costUsd: string}>,
     abortSignal?: AbortSignal,
     toolExecutions = 0,
   ): Promise<AgentRuntimeError> {
+    billing = billing ?? state.billing;
     const runtimeError = publicRuntimeError(
       error,
       abortSignal,
       toolExecutions,
     );
     try {
+      if (state.reservationId && !state.budgetKnown) {
+        if (state.dispatched) {
+          await budget.settleAiBudget({reservationId: state.reservationId, usageState: "unknown", actualMicrousd: null});
+        } else {await budget.releaseUndispatched(state.reservationId);}
+      }
+    } catch {
+      // A failed ledger write keeps its conservative hold. Still persist the run failure.
+    }
+    try {
       await settle(state, "fail", {
         completedAt: safeNow(now),
         errorCode: runtimeError.code,
-        inputTokens: billing.usage.inputTokens,
-        outputTokens: billing.usage.outputTokens,
-        costUsd: billing.costUsd,
+        inputTokens: billing?.usage.inputTokens ?? 0,
+        outputTokens: billing?.usage.outputTokens ?? 0,
+        cacheReadTokens: billing?.usage.cacheReadTokens,
+        cacheWriteTokens: billing?.usage.cacheWriteTokens,
+        reasoningTokens: billing?.usage.reasoningTokens,
+        pricingVersion: AI_PRICING_VERSION,
+        usageState: billing ? "known" : state.dispatched ? "unknown" : "not_dispatched",
+        costUsd: billing?.costUsd ?? (state.dispatched ? null : ZERO_COST),
       }, runtimeError.code);
     } catch {
       // Terminal persistence errors remain private and never trigger a second
@@ -672,6 +691,9 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         );
       }
 
+      let effectiveSignal = request.abortSignal;
+      let closeDeadline: (() => void) | undefined;
+      let abortDeadline: Promise<never> | undefined;
       const deferred = request.finalization === "deferred";
       let observedToolExecutions = 0;
       let latestBilling:
@@ -684,7 +706,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         state,
         error,
         billing,
-        request.abortSignal,
+        effectiveSignal,
         observedToolExecutions,
       );
 
@@ -705,6 +727,11 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           inputTokens: finalized.usage.inputTokens,
           outputTokens: finalized.usage.outputTokens,
           costUsd: finalized.costUsd,
+          usageState: finalized.status === "disabled" ? "not_dispatched" : "known",
+          cacheReadTokens: finalized.usage.cacheReadTokens,
+          cacheWriteTokens: finalized.usage.cacheWriteTokens,
+          reasoningTokens: finalized.usage.reasoningTokens,
+          pricingVersion: AI_PRICING_VERSION,
         };
         try {
           if (finalized.status === "disabled") {
@@ -786,18 +813,36 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         if (!apiKey?.trim()) {
           throw new AgentRuntimeError("configuration_error");
         }
+        if (request.abortSignal?.aborted) throw new AgentRuntimeError("timeout");
+        const admitted = await budget.reserveAiBudget({runKey: runId, scope: dependencies.budgetScope ?? taskForAgent(actor.agent),
+          maxCostMicrousd: maximumAgentCostMicrousd(route, resolvedModel.pricing),
+          expiresAt: new Date(safeNow(now).getTime() + route.timeoutMs).toISOString()});
+        if (!admitted.ok) throw new AgentRuntimeError(admitted.reason === "CONFIG_MISSING" ? "configuration_error" : "rate_limited");
+        activeState.reservationId = admitted.reservationId;
+        const controller = new AbortController();
+        const forwardAbort = () => controller.abort(request.abortSignal?.reason);
+        request.abortSignal?.addEventListener("abort", forwardAbort, {once: true});
+        effectiveSignal = controller.signal;
+        const timer = setTimeout(() => controller.abort(new AgentRuntimeError("timeout")), Math.min(route.timeoutMs, 20_000));
+        abortDeadline = new Promise<never>((_resolve, reject) => {
+          controller.signal.addEventListener("abort", () => reject(new AgentRuntimeError("timeout")), {once: true});
+        });
+        void abortDeadline.catch(() => undefined);
+        closeDeadline = () => {clearTimeout(timer); request.abortSignal?.removeEventListener("abort", forwardAbort);};
         const factory = providerFactories[resolvedModel.provider];
         const provider = factory({apiKey, route});
-        providerResult = await provider.stream({
+        await budget.markDispatched(admitted.reservationId);
+        activeState.dispatched = true;
+        providerResult = await Promise.race([Promise.resolve(provider.stream({
           model: resolvedModel.modelId,
           system: request.system,
           messages: request.messages,
           tools: wrappedTools,
-          ...(request.abortSignal === undefined
-            ? {}
-            : {abortSignal: request.abortSignal}),
-        });
+          abortSignal: effectiveSignal,
+          onProviderReceipt: (requestId) => budget.recordProviderReceipt?.(admitted.reservationId, requestId),
+        })), abortDeadline]);
       } catch (error) {
+        closeDeadline?.();
         throw await fail(error);
       }
 
@@ -823,11 +868,11 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         | Readonly<{status: "fulfilled"; billing: Billing}>
         | Readonly<{status: "rejected"}>
         = {status: "pending"};
-      const providerFinishOutcome: Promise<ProviderFinishOutcome> =
+      const observedProviderFinish: Promise<ProviderFinishOutcome> =
         Promise.resolve(providerResult.finish)
           .then(normalizeProviderFinish)
           .then(
-            (value) => {
+            async (value) => {
               observedToolExecutions = Math.max(
                 observedToolExecutions,
                 value.toolExecutions,
@@ -839,23 +884,40 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
                   resolvedModel.pricing,
                 ),
               };
+              await budget.settleAiBudget({reservationId: activeState.reservationId!, usageState: "known",
+                actualMicrousd: calculateAgentCostMicrousd(value.usage, resolvedModel.pricing)});
+              activeState.budgetKnown = true;
+              activeState.billing = billing;
+              if (activeState.terminal?.kind === "fail") {
+                await activeState.terminal.promise;
+                await agentRuns.reconcileUsage?.(actor, {usageState: "known", inputTokens: value.usage.inputTokens,
+                  outputTokens: value.usage.outputTokens, cacheReadTokens: value.usage.cacheReadTokens,
+                  cacheWriteTokens: value.usage.cacheWriteTokens, reasoningTokens: value.usage.reasoningTokens,
+                  costUsd: billing.costUsd, pricingVersion: AI_PRICING_VERSION});
+              }
               latestBilling = billing;
               finishState = {status: "fulfilled", billing};
               return {
-                branch: "finish",
-                status: "fulfilled",
+                branch: "finish" as const,
+                status: "fulfilled" as const,
                 value,
                 billing,
               };
             },
             (error: unknown) => {
               finishState = {status: "rejected"};
-              return {branch: "finish", status: "rejected", error};
+              return {branch: "finish" as const, status: "rejected" as const, error};
             },
-          );
+          ).catch((error: unknown) => {
+            finishState = {status: "rejected"};
+            return {branch: "finish" as const, status: "rejected" as const, error};
+          });
+      const providerFinishOutcome: Promise<ProviderFinishOutcome> = abortDeadline
+        ? Promise.race([observedProviderFinish, abortDeadline.catch(error => ({branch: "finish" as const, status: "rejected" as const, error}))])
+        : observedProviderFinish;
       const pump = createEagerTextPump(
         providerResult.textStream,
-        request.abortSignal,
+        effectiveSignal,
       );
       const pumpOutcome: Promise<PumpOutcome> = pump.completion.then(
         () => ({branch: "pump", status: "fulfilled"}),
@@ -962,7 +1024,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           steps: normalizedFinish.steps,
           citations: [...normalizedFinish.citations],
         };
-      })();
+      })().finally(() => closeDeadline?.());
 
       const finish = deferred
         ? rawFinish
@@ -971,6 +1033,9 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           | EscalatedAgentRuntimeFinish
           | RefusedAgentRuntimeFinish
         >;
+      // Eager persistence can outlive a disconnected consumer. Observe rejection
+      // without changing the returned promise or its public failure outcome.
+      void finish.catch(() => undefined);
 
       return {
         runId,

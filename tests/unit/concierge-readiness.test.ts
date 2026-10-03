@@ -33,6 +33,7 @@ function configure(secret: string | undefined, enabled = "true") {
   vi.stubEnv("OPENAI_API_KEY", "synthetic-provider-key");
   vi.stubEnv("TURNSTILE_SECRET", undefined);
   vi.stubEnv("TURNSTILE_SITE_KEY", undefined);
+  for(const key of ["AI_BUDGET_RUN_MICROUSD","AI_BUDGET_DAY_MICROUSD","AI_BUDGET_MONTH_MICROUSD"])vi.stubEnv(key,"10000000");
 }
 beforeEach(() => {vi.spyOn(console, "warn").mockImplementation(() => undefined);});
 afterEach(() => {vi.unstubAllEnvs(); vi.clearAllMocks(); vi.restoreAllMocks();});
@@ -73,4 +74,12 @@ describe("Concierge production readiness boundary", () => {
     expect(effects.service).toHaveBeenCalledOnce();
     expect(effects.databaseWrite).toHaveBeenCalledOnce();
   });
+});
+
+it("missing budget caps return safe 503 before actor, DB or provider work",async()=>{
+ configure("independent-concierge-secret-".repeat(2));
+ for(const key of ["AI_BUDGET_RUN_MICROUSD","AI_BUDGET_DAY_MICROUSD","AI_BUDGET_MONTH_MICROUSD"])vi.stubEnv(key,undefined);
+ const response=await POST(request());expect(response.status).toBe(503);
+ expect(await response.json()).toEqual({error:"AI_CONFIGURATION_UNAVAILABLE",requestId:expect.any(String)});
+ expect(effects.actor).not.toHaveBeenCalled();expect(effects.provider).not.toHaveBeenCalled();expect(effects.databaseWrite).not.toHaveBeenCalled();
 });

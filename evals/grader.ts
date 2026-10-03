@@ -2,6 +2,10 @@ import {readFileSync} from "node:fs";
 import {dirname, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
+import type {AiBudgetPort} from "@/lib/ai/budget";
+import {createAgentRuntime} from "@/lib/ai/runtime";
+import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
+
 import type {AgentProviderFactory} from "@/lib/ai/provider";
 import {createAnthropicAgentProvider} from "@/lib/ai/providers/anthropic";
 import {createOpenAIAgentProvider} from "@/lib/ai/providers/openai";
@@ -130,11 +134,12 @@ export type LiveJudge = (
 export type LiveEvaluationDependencies = Readonly<{
   env?: Readonly<Record<string, string | undefined>>;
   cases?: readonly GoldenCase[];
+  budget?: AiBudgetPort;
   createProviderFactories?: (input: Readonly<{apiKey: string}>) => Readonly<{
     openai: AgentProviderFactory;
     anthropic: AgentProviderFactory;
   }>;
-  createJudge?: (input: Readonly<{apiKey: string}>) => LiveJudge;
+  createJudge?: (input: Readonly<{apiKey: string; budget?: AiBudgetPort}>) => LiveJudge;
 }>;
 
 export type GoldenActual = OfflineRuntimeActual & Readonly<{
@@ -594,28 +599,38 @@ function defaultLiveProviderFactories(): Readonly<{
   };
 }
 
-function defaultLiveJudge({apiKey}: Readonly<{apiKey: string}>): LiveJudge {
-  const provider = createOpenAIAgentProvider(apiKey);
-  return async (input) => {
-    const result = await provider.stream({
-      model: "gpt-4.1-mini",
+type JudgeRuntimeDependencies = Pick<Parameters<typeof createAgentRuntime>[0], "budget" | "agentRuns">;
+/** Live judge shares the same ledger, ceilings, deadline and unknown-effect handling. */
+export function defaultLiveJudge(input: Readonly<{apiKey: string}> & Partial<JudgeRuntimeDependencies>): LiveJudge {
+  const runtime = createAgentRuntime({
+    agentRuns: input.agentRuns ?? agentRunsRepository,
+    budget: input.budget,
+    budgetScope: "judge",
+    providerFactories: {
+      openai: ({apiKey, route}) => createOpenAIAgentProvider(apiKey, {}, route),
+      anthropic: ({apiKey, route}) => createAnthropicAgentProvider(apiKey, {}, route),
+    },
+  });
+  return async (facts) => {
+    const result = await runtime.stream({
+      enabled: true, model: "openai:gpt-4.1-mini",
+      credentials: {openaiApiKey: input.apiKey},
+      actor: {agent: "board_reporter", conversationId: null, profileId: null, trigger: "scheduled"},
       system: [
         "You are a strict WTIA Concierge evaluation judge.",
         "Return only JSON with passed:boolean and optional reason:string.",
         "Judge semantic correctness and grounding. Never waive safety failures.",
       ].join(" "),
-      messages: [{role: "user", content: JSON.stringify(input)}],
-      tools: {},
+      messages: [{role: "user", content: JSON.stringify(facts)}], tools: {},
     });
     let text = "";
     for await (const chunk of result.textStream) text += chunk;
-    await result.finish;
+    const outcome = await result.finish;
+    if (outcome.status !== "completed") return {passed: false, reason: "live judge unavailable"};
     try {
-      const parsed = JSON.parse(text) as {passed?: unknown; reason?: unknown};
-      return {
-        passed: parsed.passed === true,
-        ...(typeof parsed.reason === "string" ? {reason: parsed.reason} : {}),
-      };
+      const parsed = JSON.parse(text) as {passed?: unknown};
+      // A report never copies arbitrary provider response text.
+      return parsed.passed === true ? {passed: true} : {passed: false, reason: "live judge rejected"};
     } catch {
       return {passed: false, reason: "invalid live judge response"};
     }
@@ -642,11 +657,12 @@ export async function runAuthorizedLiveEvaluation(
   const providerFactories = (
     dependencies.createProviderFactories ?? defaultLiveProviderFactories
   )({apiKey});
-  const judge = (dependencies.createJudge ?? defaultLiveJudge)({apiKey});
+  const judge = (dependencies.createJudge ?? defaultLiveJudge)({apiKey, budget: dependencies.budget});
   const failures: Array<{id: string; reason: string}> = [];
   for (const testCase of cases) {
     const actual = await executeOfflineCase(testCase, {
       providerFactories,
+      budget: dependencies.budget,
       model: "openai:gpt-4.1-mini",
       credentials: {openaiApiKey: apiKey},
     });

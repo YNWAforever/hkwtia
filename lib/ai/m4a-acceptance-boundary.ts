@@ -486,6 +486,14 @@ export function createM4AAcceptanceBoundary(
     agentTools: repositoriesWithCapabilities,
     getRuntime: (runId) => createAgentRuntime({
       agentRuns: lifecycle,
+      // Fixed deterministic provider only. Web entry retains its explicit
+      // loopback authorization guards; this port never dispatches external work.
+      budget: {
+        reserveAiBudget: async () => ({ok: true, reservationId: runId}),
+        markDispatched: async () => undefined,
+        releaseUndispatched: async () => undefined,
+        settleAiBudget: async () => undefined,
+      },
       providerFactories: {
         openai: providerFactory,
         anthropic: providerFactory,

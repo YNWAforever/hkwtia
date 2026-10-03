@@ -1,3 +1,4 @@
+import {validateAgentUsage} from "@/lib/ai/pricing";
 import {assertRouteInputWithinBounds, type ModelRoute} from "@/lib/ai/providers/registry";
 import {
   stepCountIs,
@@ -74,7 +75,7 @@ function normalizeUsage(value: unknown): AgentUsage {
     throw new AgentInvalidProviderResponseError();
   }
 
-  const usage = value as {inputTokens?: unknown; outputTokens?: unknown};
+  const usage = value as {inputTokens?: unknown; outputTokens?: unknown; inputTokenDetails?: {cacheReadTokens?: number; cacheWriteTokens?: number}; outputTokenDetails?: {reasoningTokens?: number}};
   if (
     !Number.isSafeInteger(usage.inputTokens)
     || Number(usage.inputTokens) < 0
@@ -84,10 +85,12 @@ function normalizeUsage(value: unknown): AgentUsage {
     throw new AgentInvalidProviderResponseError();
   }
 
-  return {
-    inputTokens: Number(usage.inputTokens),
-    outputTokens: Number(usage.outputTokens),
-  };
+  try {return validateAgentUsage({
+    inputTokens: Number(usage.inputTokens), outputTokens: Number(usage.outputTokens),
+    ...(usage.inputTokenDetails?.cacheReadTokens === undefined ? {} : {cacheReadTokens: usage.inputTokenDetails.cacheReadTokens}),
+    ...(usage.inputTokenDetails?.cacheWriteTokens === undefined ? {} : {cacheWriteTokens: usage.inputTokenDetails.cacheWriteTokens}),
+    ...(usage.outputTokenDetails?.reasoningTokens === undefined ? {} : {reasoningTokens: usage.outputTokenDetails.reasoningTokens}),
+  });} catch {throw new AgentInvalidProviderResponseError();}
 }
 
 function normalizeFinishReason(value: unknown): string {
@@ -143,7 +146,7 @@ function appendCitationInputs(target: unknown[], inputs: unknown): void {
 }
 
 export function createAiSdkAgentProvider(
-  createModel: (modelId: string) => LanguageModel,
+  createModel: (modelId: string, receipt?: AgentStreamRequest["onProviderReceipt"]) => LanguageModel,
   overrides: AiSdkAdapterOverrides = {},
   route?: ModelRoute,
 ): AgentProvider {
@@ -192,7 +195,7 @@ export function createAiSdkAgentProvider(
         ]),
       );
       const options = {
-        model: createModel(request.model),
+        model: createModel(request.model, request.onProviderReceipt),
         system: request.system,
         messages: request.messages,
         tools,
@@ -211,6 +214,7 @@ export function createAiSdkAgentProvider(
         // Preserve the original status/timeout for the runtime's fixed public code.
         // SDK usage can reject with a generic NoOutputGeneratedError instead.
         onError: ({error}) => { providerFailure = error; },
+
       } satisfies AiSdkStreamOptions;
       const sdkResult = dependencies.streamText(options);
 

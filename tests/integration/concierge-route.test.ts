@@ -280,6 +280,9 @@ describe("Concierge SSE route", () => {
     // This test exercises a configured route factory, with a mocked provider service.
     vi.stubEnv("AGENTS_ENABLED", "true");
     vi.stubEnv("OPENAI_API_KEY", "synthetic-configured-provider-key");
+    vi.stubEnv("AI_BUDGET_RUN_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_DAY_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_MONTH_MICROUSD", "1000000");
 
     const startTurn = vi.fn(async ({owner}: {owner: unknown}) => ({
       conversationId: CONVERSATION_ID,
@@ -422,6 +425,9 @@ describe("owned Concierge feedback route", () => {
     // This test exercises a configured route factory, with a mocked provider service.
     vi.stubEnv("AGENTS_ENABLED", "true");
     vi.stubEnv("OPENAI_API_KEY", "synthetic-configured-provider-key");
+    vi.stubEnv("AI_BUDGET_RUN_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_DAY_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_MONTH_MICROUSD", "1000000");
 
     const recordFeedback = vi.fn(async () => ({id: RUN_ID, csatScore: 5}));
 

@@ -2,6 +2,7 @@ import "server-only";
 
 import {randomUUID} from "node:crypto";
 
+import {microusdToUsd} from "@/lib/ai/pricing";
 import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
@@ -31,7 +32,7 @@ export type AgentRunRecord = Readonly<{
   model: string | null;
   inputTokens: number;
   outputTokens: number;
-  costUsd: string;
+  costUsd: string | null;
   latencyMs: number | null;
   summary: string | null;
   errorCode: string | null;
@@ -61,7 +62,12 @@ const configureModelInputSchema = z.object({
 const usageSchema = {
   inputTokens: z.number().int().nonnegative().optional(),
   outputTokens: z.number().int().nonnegative().optional(),
-  costUsd: z.string().regex(/^\d+(?:\.\d{1,6})?$/).optional(),
+  costUsd: z.string().regex(/^\d+(?:\.\d{1,6})?$/).nullable().optional(),
+  usageState: z.enum(["known", "unknown", "not_dispatched"]).optional(),
+  cacheReadTokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional(),
+  cacheWriteTokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional(),
+  reasoningTokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional(),
+  pricingVersion: z.string().regex(/^[A-Za-z0-9._-]{1,100}$/).optional(),
 };
 const completedSummaryCodeSchema = z.enum([
   "answered",
@@ -149,7 +155,7 @@ function runFrom(row: Record<string, unknown>): AgentRunRecord {
     model: optionalString(row.model),
     inputTokens: Number(row.input_tokens),
     outputTokens: Number(row.output_tokens),
-    costUsd: String(row.cost_usd),
+    costUsd: row.cost_microusd == null ? optionalString(row.cost_usd) : microusdToUsd(Number(row.cost_microusd)),
     latencyMs: row.latency_ms === null || row.latency_ms === undefined
       ? null
       : Number(row.latency_ms),
@@ -205,7 +211,9 @@ type TransitionValues = Readonly<{
   errorCode: string | null;
   inputTokens: number;
   outputTokens: number;
-  costUsd: string;
+  costUsd: string | null;
+  usageState: "known" | "unknown" | "not_dispatched";
+  cacheReadTokens: number | null; cacheWriteTokens: number | null; reasoningTokens: number | null; pricingVersion: string | null;
 }>;
 
 function targetSql(target: TransitionTarget): SQL {
@@ -230,7 +238,10 @@ async function transition(
       status = ${targetSql(target)},
       input_tokens = ${values.inputTokens},
       output_tokens = ${values.outputTokens},
-      cost_usd = ${values.costUsd},
+      cost_usd = CASE WHEN ${values.costUsd}::numeric <= 999999.999999 THEN ${values.costUsd}::numeric ELSE NULL END,
+      cost_microusd = ${values.costUsd}::numeric * 1000000, usage_state = ${values.usageState},
+      cache_read_tokens = ${values.cacheReadTokens}, cache_write_tokens = ${values.cacheWriteTokens},
+      reasoning_tokens = ${values.reasoningTokens}, pricing_version = ${values.pricingVersion},
       latency_ms = FLOOR(EXTRACT(EPOCH FROM (${values.completedAt} - started_at)) * 1000)::int,
       summary = CASE
         WHEN summary LIKE 'm4b-acceptance-owner:%'
@@ -257,15 +268,15 @@ async function transition(
 }
 
 function usageFrom(input: {
-  inputTokens?: number;
-  outputTokens?: number;
-  costUsd?: string;
+  inputTokens?: number; outputTokens?: number; costUsd?: string | null; usageState?: "known" | "unknown" | "not_dispatched";
+  cacheReadTokens?: number; cacheWriteTokens?: number; reasoningTokens?: number; pricingVersion?: string;
 }) {
-  return {
-    inputTokens: input.inputTokens ?? 0,
-    outputTokens: input.outputTokens ?? 0,
-    costUsd: input.costUsd ?? "0",
-  };
+  const usageState = input.usageState ?? (input.costUsd == null ? "unknown" : "known");
+  if (usageState === "known" && input.costUsd == null) throw new Error("AGENT_KNOWN_COST_REQUIRED");
+  return {inputTokens: input.inputTokens ?? 0, outputTokens: input.outputTokens ?? 0,
+    costUsd: usageState === "unknown" ? null : input.costUsd ?? "0", usageState,
+    cacheReadTokens: input.cacheReadTokens ?? null, cacheWriteTokens: input.cacheWriteTokens ?? null,
+    reasoningTokens: input.reasoningTokens ?? null, pricingVersion: input.pricingVersion ?? null};
 }
 
 export function createAgentRunsRepository(
@@ -416,6 +427,22 @@ export function createAgentRunsRepository(
       if (!row) {
         throw new Error("INVALID_AGENT_RUN_MODEL_CONFIGURATION");
       }
+      return runFrom(row);
+    },
+
+    /** Reconciled late receipt changes billing only; never resurrects or resends the failed run. */
+    async reconcileUsage(actor: AgentRunActor, input: unknown): Promise<AgentRunRecord> {
+      requireAgentRunActor(actor);
+      const parsed = z.object(usageSchema).strict().parse(input);
+      const values = usageFrom(parsed);
+      if (values.usageState !== "known") throw new Error("AGENT_KNOWN_COST_REQUIRED");
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`UPDATE ${agentRuns}
+        SET input_tokens=${values.inputTokens},output_tokens=${values.outputTokens},cost_usd=CASE WHEN ${values.costUsd}::numeric <= 999999.999999 THEN ${values.costUsd}::numeric ELSE NULL END,
+          cost_microusd=${values.costUsd}::numeric * 1000000,usage_state='known',
+          cache_read_tokens=${values.cacheReadTokens},cache_write_tokens=${values.cacheWriteTokens},reasoning_tokens=${values.reasoningTokens},pricing_version=${values.pricingVersion},updated_at=NOW()
+        WHERE ${actorRunPredicate(actor)} AND status='failed' AND usage_state='unknown' RETURNING *`))[0];
+      if (!row) throw new Error("INVALID_AGENT_BILLING_RECONCILIATION");
       return runFrom(row);
     },
 
