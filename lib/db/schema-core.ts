@@ -707,7 +707,11 @@ export const agentRuns = pgTable(
     model: text("model"),
     inputTokens: integer("input_tokens").default(0).notNull(),
     outputTokens: integer("output_tokens").default(0).notNull(),
-    costUsd: numeric("cost_usd", {precision: 12, scale: 6}).default("0").notNull(),
+    costUsd: numeric("cost_usd", {precision: 12, scale: 6}).default("0"),
+    costMicrousd: bigint("cost_microusd",{mode:"bigint"}),
+    usageState: text("usage_state").default("legacy_unknown").notNull(),
+    cacheReadTokens: bigint("cache_read_tokens",{mode:"bigint"}), cacheWriteTokens: bigint("cache_write_tokens",{mode:"bigint"}),
+    reasoningTokens: bigint("reasoning_tokens",{mode:"bigint"}), pricingVersion: text("pricing_version"),
     latencyMs: integer("latency_ms"),
     summary: text("summary"),
     errorCode: text("error_code"),
@@ -718,6 +722,8 @@ export const agentRuns = pgTable(
     updatedAt: updatedAt("updated_at"),
   },
   (table) => [
+    check("agent_runs_usage_state_check", sql`${table.usageState} IN ('known','unknown','not_dispatched','legacy_unknown')`),
+    check("agent_runs_cost_microusd_check", sql`${table.costMicrousd} >= 0 AND ${table.costMicrousd} <= 9007199254740991`),
     check("agent_runs_csat_score_check", sql`${table.csatScore} IS NULL OR (${table.csatScore} >= 1 AND ${table.csatScore} <= 5)`),
     index("agent_runs_conversation_created_idx").on(table.conversationId, table.createdAt),
     index("agent_runs_profile_idx").on(table.profileId),
@@ -2128,4 +2134,37 @@ export const jobHealth = pgTable("job_health", {
  check("job_health_outcome",sql`${table.outcome} IN ('processing','completed','disabled','failed','uncertain')`),
  check("job_health_elapsed",sql`${table.elapsedMs} IS NULL OR ${table.elapsedMs}>=0`),
  check("job_health_counts",sql`jsonb_typeof(${table.counts})='object' AND octet_length(${table.counts}::text)<=2048`),
+]);
+
+/** Shared admission lock and conservative liability ledger; retained on application rollback. */
+export const aiBudgetControl = pgTable("ai_budget_control", {
+ id: boolean("id").default(true).primaryKey(), halted: boolean("halted").default(false).notNull(),
+ reasonCode: text("reason_code"), updatedAt: updatedAt("updated_at"),
+}, t => [check("ai_budget_control_id_check", sql`${t.id}`)]);
+export const aiBudgetReservations = pgTable("ai_budget_reservations", {
+ id: uuid("id").defaultRandom().primaryKey(), runKey: uuid("run_key").notNull().unique(), scope: text("scope").notNull(),
+ maxMicrousd: bigint("max_microusd", {mode:"bigint"}).notNull(), chargedMicrousd: bigint("charged_microusd", {mode:"bigint"}).notNull(),
+ actualMicrousd: bigint("actual_microusd", {mode:"bigint"}), usageState: text("usage_state").default("held").notNull(),
+ pricingVersion: text("pricing_version").notNull(), expiresAt: timestamp("expires_at",{withTimezone:true}).notNull(),
+ acceptedAt: timestamp("accepted_at",{withTimezone:true}), dispatchedAt: timestamp("dispatched_at",{withTimezone:true}), providerRequestId: text("provider_request_id"),
+ createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, t => [
+ index("ai_budget_created_idx").on(t.createdAt),
+ index("ai_budget_unresolved_idx").on(t.usageState).where(sql`${t.usageState} IN ('held','unknown')`),
+ check("ai_budget_reservations_scope_check", sql`${t.scope} IN ('concierge','writer','application','support','renewal','board','content','evaluation','embedding','judge')`),
+ check("ai_budget_reservations_max_microusd_check", sql`${t.maxMicrousd} >= 0 AND ${t.maxMicrousd} <= 9007199254740991`),
+ check("ai_budget_reservations_charged_microusd_check", sql`${t.chargedMicrousd} >= 0 AND ${t.chargedMicrousd} <= 9007199254740991`),
+ check("ai_budget_reservations_actual_microusd_check", sql`${t.actualMicrousd} >= 0 AND ${t.actualMicrousd} <= 9007199254740991`),
+ check("ai_budget_reservations_usage_state_check", sql`${t.usageState} IN ('held','unknown','known','released')`),
+ check("ai_budget_reservations_provider_request_id_check", sql`${t.providerRequestId} IS NULL OR ${t.providerRequestId} ~ '^[A-Za-z0-9_.:-]{1,200}$'`),
+ check("ai_budget_reservations_check", sql`${t.expiresAt} > ${t.createdAt}`),
+ check("ai_budget_reservations_check1", sql`(${t.usageState} = 'known' AND ${t.actualMicrousd} IS NOT NULL AND ${t.chargedMicrousd} = ${t.actualMicrousd}) OR (${t.usageState} IN ('held','unknown') AND ${t.actualMicrousd} IS NULL AND ${t.chargedMicrousd} = ${t.maxMicrousd}) OR (${t.usageState} = 'released' AND ${t.actualMicrousd} IS NULL AND ${t.chargedMicrousd} = 0 AND ${t.dispatchedAt} IS NULL)`),
+]);
+
+export const aiBudgetProviderReceipts = pgTable("ai_budget_provider_receipts", {
+ reservationId: uuid("reservation_id").notNull().references(()=>aiBudgetReservations.id),
+ providerRequestId: text("provider_request_id").notNull(), observedAt: timestamp("observed_at",{withTimezone:true}).notNull(),
+},t=>[
+ primaryKey({columns:[t.reservationId,t.providerRequestId]}),
+ check("ai_budget_provider_receipts_provider_request_id_check", sql`${t.providerRequestId} ~ '^[A-Za-z0-9_.:-]{1,200}$'`),
 ]);

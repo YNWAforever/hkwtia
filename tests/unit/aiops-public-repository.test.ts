@@ -130,3 +130,9 @@ describe("AI-Ops public aggregate reader", () => {
     await expect(repository.readLatestTwelveMonths()).rejects.toThrow();
   });
 });
+
+it("does not turn an unresolved ledger cost into a public zero-dollar metric", async()=>{
+ const rows=Array.from({length:12},(_,i)=>({...rawRow(`2026-${String(i+1).padStart(2,"0")}-01`),llm_cost_usd:null}));
+ const repository=createAiOpsPublicRepository(async()=>({execute:async()=>rows}) as never);
+ expect((await repository.readLatestTwelveMonths())[0]!.llmCostUsd).toBeNull();
+});

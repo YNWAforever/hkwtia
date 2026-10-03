@@ -1,3 +1,4 @@
+import {receiptAwareFetch} from "@/lib/ai/providers/request-receipt";
 import "server-only";
 import {DEFAULT_ADMIN_MODEL_REGISTRY, validateModelRoute, type ModelRoute} from "@/lib/ai/providers/registry";
 import {
@@ -39,10 +40,10 @@ export function createOpenAIAgentProvider(
   if (route.provider !== "openai") throw new Error("AI_ROUTE_PROVIDER_MISMATCH");
   const providerFactory = dependencies.createProvider
     ?? createProductionOpenAIProvider;
-  const provider = providerFactory({apiKey}, route.protocol);
+  const provider = dependencies.createProvider ? providerFactory({apiKey}, route.protocol) : undefined;
 
   return createAiSdkAgentProvider(
-    (modelId) => provider(modelId),
+    (modelId, receipt) => (provider ?? createProductionOpenAIProvider({apiKey, fetch: receiptAwareFetch(receipt)}, route.protocol))(modelId),
     dependencies,
     route,
   );

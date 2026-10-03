@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {requireAgentRunActor, requireWriterAgent} from "@/lib/auth/agent-actor";
@@ -39,7 +40,7 @@ describe("writer actor through the real runtime", () => {
       escalate: vi.fn(async () => ({id: writer.runId})),
       disable: vi.fn(async () => ({id: writer.runId})),
     };
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({

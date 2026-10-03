@@ -1,5 +1,6 @@
 import "server-only";
 
+import {configuredAiBudgetLimits} from "@/lib/db/repos/ai-budget";
 import {resolveAgentModel} from "@/lib/ai/model";
 import {parseAiEnv} from "@/lib/config/env";
 
@@ -31,7 +32,9 @@ export function getAiReadiness(env: Environment = process.env): AiReadiness {
     const keys = model.provider === "anthropic"
       ? ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"] as const
       : ["OPENAI_API_KEY"] as const;
-    const missingKeys = keys.filter((key) => !env[key]?.trim());
+    const budgetKeys = ["AI_BUDGET_RUN_MICROUSD", "AI_BUDGET_DAY_MICROUSD", "AI_BUDGET_MONTH_MICROUSD"];
+    const missingKeys = [...keys.filter((key) => !env[key]?.trim()), ...budgetKeys.filter(key => !env[key]?.trim())];
+    if (!missingKeys.length && !configuredAiBudgetLimits(env)) return {state: "misconfigured", code: "CONFIG_INVALID", missingKeys: budgetKeys};
     return missingKeys.length
       ? {state: "misconfigured", code: "CONFIG_MISSING", missingKeys}
       : {state: "ready", code: "READY", missingKeys: []};

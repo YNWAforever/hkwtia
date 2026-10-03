@@ -16,7 +16,7 @@ export const aiOpsMonthlyMetricSchema = z.object({
   csatAverage: z.number().finite().min(1).max(5).nullable(),
   csatResponseCount: z.number().int().nonnegative(),
   staffHoursSaved: z.number().finite().nonnegative(),
-  llmCostUsd: z.number().finite().nonnegative(),
+  llmCostUsd: z.number().finite().nonnegative().nullable(),
   renewalDueCount: z.number().int().nonnegative(),
   renewalPaidCount: z.number().int().nonnegative(),
   renewalRate: z.number().finite().min(0).max(1).nullable(),

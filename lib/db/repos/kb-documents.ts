@@ -265,6 +265,7 @@ export function createKbDocumentsRepositoryForDatabaseUrl(
   const database = drizzle(pool) as unknown as KbDatabase;
   return Object.freeze({
     repository: createKbDocumentsRepository(async () => database),
+    loadDatabase: async () => database,
     close: async () => pool.end(),
   });
 }

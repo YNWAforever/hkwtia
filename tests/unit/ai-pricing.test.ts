@@ -10,13 +10,13 @@ describe("AI model pricing", () => {
       key: "openai:gpt-4.1-mini",
       provider: "openai",
       modelId: "gpt-4.1-mini",
-      pricing: {inputUsdPerMillion: 0.4, outputUsdPerMillion: 1.6},
+      pricing: {inputUsdPerMillion: 0.4, outputUsdPerMillion: 1.6, cacheReadUsdPerMillion: 0.1},
     });
     expect(resolveAgentModel("anthropic:claude-sonnet-4-6")).toEqual({
       key: "anthropic:claude-sonnet-4-6",
       provider: "anthropic",
       modelId: "claude-sonnet-4-6",
-      pricing: {inputUsdPerMillion: 3, outputUsdPerMillion: 15},
+      pricing: {inputUsdPerMillion: 3, outputUsdPerMillion: 15, cacheReadUsdPerMillion: 0.3, cacheWriteUsdPerMillion: 3.75},
     });
     expect(Object.keys(AI_MODEL_PRICING)).toEqual([
       "openai:gpt-4.1-mini",

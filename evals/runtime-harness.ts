@@ -1,3 +1,5 @@
+import {randomUUID} from "node:crypto";
+import type {AiBudgetPort} from "@/lib/ai/budget";
 import {
   createConciergeService,
   type ConciergeSseEvent,
@@ -100,6 +102,7 @@ type RuntimeInput = OfflineScenarioCase | OfflineRuntimeCase;
 
 export type RuntimeHarnessDependencies = Readonly<{
   providerFactories?: Readonly<Record<AgentProviderName, AgentProviderFactory>>;
+  budget?: AiBudgetPort;
   model?: string;
   credentials?: AgentRuntimeRequest["credentials"];
 }>;
@@ -444,7 +447,7 @@ export async function executeOfflineCase(
 ): Promise<OfflineRuntimeActual> {
   const scenario = normalizedScenario(input);
   const conversationId = `eval-conversation:${input.id}`;
-  const runId = `eval-run:${input.id}`;
+  const runId = randomUUID();
   const messages: Array<{
     role: "user" | "assistant";
     content: string;
@@ -525,14 +528,25 @@ export async function executeOfflineCase(
         },
       };
     };
+  // The default deterministic evaluator performs no paid/provider work. Custom
+  // providers use the real fail-closed ledger unless explicitly injected in tests.
+  const offlineBudget: AiBudgetPort = {
+    reserveAiBudget: async () => ({ok: true, reservationId: runId}),
+    markDispatched: async () => undefined, releaseUndispatched: async () => undefined,
+    settleAiBudget: async () => undefined,
+  };
   const runtime = createAgentRuntime({
     agentRuns,
+    budget: dependencies.budget ?? (dependencies.providerFactories ? undefined : offlineBudget),
+    budgetScope: "evaluation",
     providerFactories: {
       openai: instrument(selectedFactories.openai),
       anthropic: instrument(selectedFactories.anthropic),
     },
     createRunId: () => runId,
-    now: () => new Date("2026-07-27T10:00:00.000Z"),
+    // Corpus facts retain their reference instant; live budget admission must
+    // use today's clock rather than an expired fixture timestamp.
+    now: dependencies.providerFactories ? () => new Date() : () => new Date("2026-07-27T10:00:00.000Z"),
   });
   const service = createConciergeService({
     agentsEnabled: input.request.agentsEnabled,
@@ -586,7 +600,9 @@ export async function executeOfflineCase(
       audits.push(event);
     },
     createRunId: () => runId,
-    now: () => new Date("2026-07-27T10:00:00.000Z"),
+    // Corpus facts retain their reference instant; live budget admission must
+    // use today's clock rather than an expired fixture timestamp.
+    now: dependencies.providerFactories ? () => new Date() : () => new Date("2026-07-27T10:00:00.000Z"),
   });
 
   const owner = input.request.authenticatedProfileId === null

@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {
@@ -70,7 +71,7 @@ function createRuntime(
   agentRuns: ReturnType<typeof createAgentRunsFake>,
   provider: AgentProvider,
 ) {
-  return createAgentRuntime({
+  return createAgentRuntime({budget: syntheticAiBudget(),
     agentRuns,
     providerFactories: {
       openai: () => provider,
