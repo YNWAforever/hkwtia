@@ -573,3 +573,13 @@ npm --prefix workers test
 - [x] 確認隔離Neon套用0057（ledger56→57，零provider request，profiles數量不變）。
 - [x] 最終完整gate／source review（6490 pass／355 skip；focused267／PG16）；Preview候選另記實際receipt。
 - [ ] 真provider帳單、owner上限及正式capability發布（精確owner gate已記錄，不計為pass）。
+
+## T07 執行記錄（2026-10-04續接）
+
+- [x] actual SQL legacy/scope及NULL provenance先RED再修；Unicode hash/offset由DB核對。
+- [x] Approved version／owner／configured approver／HK dates／cross-locale facts／version CAS／withdraw及existing KB檢索。
+- [x] 12港英query與31actual PG pass0skip；accepted embedding timeout不自動重試。
+- [x] 207focused pass0skip；各server action自己取actor；golden原字節與業務期待保留。
+- [x] 已確認隔離Neon套用0058（ledger57→58／零provider），來源管理中英入口及SOP。
+- [ ] 完整gate／本次exact-source Preview／新same-origin實際synthetic角色及來源維護验收。
+- [ ] 真embedding invoice、政策owner核准、T08最終正文與draft stale、T13模型安全及正式能力發布。

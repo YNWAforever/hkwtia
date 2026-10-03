@@ -30,11 +30,12 @@ describe("internal navigation config", () => {
     expect(links.some((link) => link.href.includes("seats"))).toBe(false);
   });
 
-  it("retains the existing 23 destinations and exposes applications/health in six groups", () => {
+  it("retains existing destinations and exposes applications, health and knowledge in six groups", () => {
     expect(adminGroups.map((group) => group.id)).toEqual(["workspace", "members-organizations", "events", "communications-follow-up", "content-settings","system-audit"]);
     const allLinks = adminGroups.flatMap((group) => group.links);
-    expect(allLinks).toHaveLength(25);
-    expect(new Set(allLinks.map((link) => link.href)).size).toBe(25);
+    expect(allLinks).toHaveLength(26);
+    expect(allLinks).toContainEqual({id:"knowledge",href:"/admin/knowledge"});
+    expect(new Set(allLinks.map((link) => link.href)).size).toBe(26);
     expect(adminGroups.find((group) => group.id === "members-organizations")?.links.map((link) => link.id)).toEqual(["members","applications","at-risk", "batches", "contacts", "segments", "listings", "profiles-review", "cohorts"]);
     expect(adminGroups.find((group) => group.id === "communications-follow-up")?.links.map((link) => link.id)).toEqual(["inbox", "campaigns", "templates"]);
   });

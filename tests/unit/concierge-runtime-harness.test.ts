@@ -1,3 +1,4 @@
+import {offlineKnowledgeRef} from "@/evals/knowledge-fixture";
 import {createHash} from "node:crypto";
 import {resolve} from "node:path";
 
@@ -14,9 +15,8 @@ describe("Concierge runtime evaluation harness", () => {
       resolve(process.cwd(), "evals/concierge.golden.jsonl"),
     ).find(({id}) => id === "concierge-en-kb-grounding-01")!;
     const sourceUrl = "https://www.hkwtia.org/en/membership";
-    const sourceId = `kb:${
-      createHash("sha256").update(sourceUrl).digest("hex").slice(0, 24)
-    }`;
+    const ref=offlineKnowledgeRef("en",sourceUrl,(testCase.scenario.repositories.knowledge[0] as {excerpt:string}).excerpt);
+    const sourceId = `kb:${createHash("sha256").update([ref.sourceId,ref.version,ref.contentHash,ref.locale].join(":")).digest("hex").slice(0,24)}`;
 
     const actual = await executeOfflineCase(testCase);
 

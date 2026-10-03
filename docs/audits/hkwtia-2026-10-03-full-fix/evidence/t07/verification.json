@@ -1,0 +1,136 @@
+{
+  "task": "T07",
+  "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+  "verifiedRuntimeCommit": null,
+  "codeState": "FOCUSED_AND_ACTUAL_DATABASE_PASS_FULL_GATES_PREVIEW_RUNNING",
+  "production": false,
+  "providerAcceptance": false,
+  "externalProviderRequests": 0,
+  "migration": "0058_ai_knowledge_versions",
+  "behaviourRed": [
+    {
+      "case": "actual SQL denies six historical/unverified rows",
+      "failed": 6,
+      "log": "knowledge-legacy-red"
+    },
+    {
+      "case": "version hash audience and retrieval relevance contract",
+      "failed": 2,
+      "log": "tool-red"
+    },
+    {
+      "case": "runtime retains bounded retrievalScore, rejects invalid score",
+      "failed": 2,
+      "log": "runtime-relevance-red"
+    },
+    {
+      "case": "actual SQL NULL CHECK approved provenance",
+      "failed": 1,
+      "log": "null-provenance-red"
+    },
+    {
+      "case": "deliberately replace own action actor with forged actor, restore afterward",
+      "failed": 3,
+      "log": "action-boundary-red",
+      "deliberateViolationRestored": true
+    }
+  ],
+  "focused": {
+    "command": "npx vitest run tests/unit/admin-navigation-routes.test.ts tests/unit/internal-navigation-config.test.ts tests/unit/schema-contract.test.ts tests/unit/audit-full-admin-labels.test.ts tests/unit/audit-full-workspace.test.tsx tests/unit/concierge-evals-review.test.ts tests/unit/concierge-runtime-harness.test.ts tests/unit/concierge-runtime-harness-core.test.ts tests/unit/ai-tools.test.ts tests/unit/m4a-seed.test.ts tests/unit/ai-knowledge-policy.test.ts tests/unit/ai-knowledge-actions.test.ts tests/unit/server-action-actor-boundary.test.ts --maxWorkers=2",
+    "passed": 207,
+    "skipped": 0,
+    "failed": 0,
+    "files": 13,
+    "durationSeconds": 131.4
+  },
+  "actualDatabase": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/ai-knowledge-retrieval.test.ts --maxWorkers=1",
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 59.55,
+    "engine": "owned disposable loopback pgvector/PostgreSQL16",
+    "embedding": "explicit deterministic test adapter; not real provider receipt",
+    "queries": 12,
+    "boundaries": [
+      "historical deny",
+      "pre-LIMIT audience/version/effective/review filters",
+      "Unicode code-point offsets and hash checked by DB",
+      "approval configured, separate owner and approver",
+      "concurrent version CAS once",
+      "cross-locale structured facts conflict",
+      "withdrawal and exact refs revalidated without retrieval cache",
+      "accepted embedding timeout fenced and not automatically retried",
+      "approved history preserved during namespace seed replacement"
+    ]
+  },
+  "setupFailuresExcluded": [
+    "missing synthetic auth_user_id corrected before product assertions",
+    "120s beforeAll setup timeout preserved separately; no time limit widened; own verified container cleaned, serial final31 pass"
+  ],
+  "originalEvidence": {
+    "originalAuditAndUCUnchanged": true,
+    "goldenJsonlBytesUnchanged": true,
+    "legacyCitationIdProjection": "Only declared matching URL/title/excerpt ground truth IDs projected to version/hash/locale identity; text, status, business and hostile expectations unchanged; never derived from actual model output",
+    "retrievalScore": "relevance only, not accuracy or confidence; retained existing handoff threshold"
+  },
+  "unresolved": [
+    {
+      "gate": "real embedding and invoice",
+      "owner": "AI service/finance owner",
+      "minimumEvidence": "approved admin test credential and allowed spend/run/day/month caps; actual provider request and reconciled receipt"
+    },
+    {
+      "gate": "policy/source approval",
+      "owner": "Content and policy owner",
+      "minimumEvidence": "approved owner/approver identities, verified source dates/facts and review due; no policy defaults inferred"
+    },
+    {
+      "gate": "final draft body and stale drafts",
+      "owner": "Engineering under T08/T13",
+      "minimumEvidence": "deterministic final-body validation, durable stale drafts and real-model adversarial tests"
+    },
+    {
+      "gate": "Production 0057/0058 and capability release",
+      "owner": "Release owner",
+      "minimumEvidence": "specific version/migrations/scope authorization after linked acceptance gates"
+    }
+  ],
+  "logs": [
+    {
+      "name": "knowledge-legacy-red",
+      "localLog": ".playwright/full-fix-t07-knowledge-legacy-red.log",
+      "sha256": "7313d124186cad5e65990a3fb82b9a4f961e2967273c5f8bbf0cf3980650c50e"
+    },
+    {
+      "name": "tool-red",
+      "localLog": ".playwright/full-fix-t07-tool-red.log",
+      "sha256": "8b626883c0e8a7678c6fcfff9c6904dde849e3f635bc9dbcc34df82ab28dec60"
+    },
+    {
+      "name": "runtime-relevance-red",
+      "localLog": ".playwright/full-fix-t07-runtime-relevance-red.log",
+      "sha256": "a67815dcfa9acd3c3d6c37a26b9e194effa00f9276a4219f0452f5561136e021"
+    },
+    {
+      "name": "null-provenance-red",
+      "localLog": ".playwright/full-fix-t07-null-provenance-red.log",
+      "sha256": "c3d707f8d816edf9cf998ed19400d7d1f7dc239d2e306325f16bfc5cbd77530a"
+    },
+    {
+      "name": "action-boundary-red",
+      "localLog": ".playwright/full-fix-t07-action-boundary-red.log",
+      "sha256": "9d9b6b21522d330ec547c60baf4e084420d19d460ed64920229d44709a3dea4e"
+    },
+    {
+      "name": "focused-broad-final",
+      "localLog": ".playwright/full-fix-t07-focused-broad-final.log",
+      "sha256": "52675f34a0fabe7f3ced7dc2eeff102e5e031affe7226b67810fd438d5005e76"
+    },
+    {
+      "name": "governance-final",
+      "localLog": ".playwright/full-fix-t07-governance-final.log",
+      "sha256": "0a17a61db708177b645e0429196eb089a3d10145cc6498539d45aede6f34b876"
+    }
+  ]
+}

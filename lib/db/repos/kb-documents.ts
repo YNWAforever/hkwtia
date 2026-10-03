@@ -1,7 +1,9 @@
+import "server-only";
 import {Pool} from "@neondatabase/serverless";
 import {sql, type SQL} from "drizzle-orm";
 import {drizzle} from "drizzle-orm/neon-serverless";
 import {z} from "zod";
+import {knowledgeRefSchema,type KnowledgeRef} from "@/lib/ai/knowledge/policy";
 
 const EMBEDDING_DIMENSIONS = 1536;
 const namespaceSchema = z.string().min(1).max(64).regex(
@@ -31,6 +33,9 @@ export type KbSearchInput = Readonly<{
   locale: KbLocale;
   queryEmbedding: readonly number[];
   k: number;
+  /** Server-only scope. Public is the default, including member concierge requests. */
+  audience?: "public" | "staff";
+  asOf?: Date;
 }>;
 
 export type KbSearchResult = Readonly<{
@@ -38,6 +43,9 @@ export type KbSearchResult = Readonly<{
   url: string;
   excerpt: string;
   score: number;
+  ref: KnowledgeRef;
+  offsetStart: number;
+  offsetEnd: number;
 }>;
 
 type KbExecutor = Readonly<{
@@ -55,6 +63,9 @@ const searchRowSchema = z.object({
   url: z.string().url(),
   excerpt: z.string(),
   score: z.coerce.number().finite().min(0).max(1),
+  ref: knowledgeRefSchema,
+  offsetStart: z.number().int().nonnegative(),
+  offsetEnd: z.number().int().positive(),
 }).strict();
 
 function resultRows(result: unknown): unknown[] {
@@ -193,6 +204,7 @@ export function createKbDocumentsRepository(
         await transaction.execute(sql`
           DELETE FROM "kb_documents"
           WHERE "kb_documents"."namespace" = ${namespace}
+            AND "kb_documents"."approval_state" = 'unverified'
         `);
         if (!documents.length) return;
         const values = sql.join(documents.map((document) => sql`(
@@ -222,12 +234,16 @@ export function createKbDocumentsRepository(
       }
       const queryEmbedding = validVector(input.queryEmbedding, false);
       const encodedVector = vectorLiteral(queryEmbedding);
+      const at = input.asOf ?? new Date();
+      if (!Number.isFinite(at.getTime()) || !["public", "staff"].includes(input.audience ?? "public")) throw Error("KNOWLEDGE_SCOPE_INVALID");
       const database = await loadDatabase();
       const result = await database.execute(sql`
         SELECT
           "title",
           "url",
-          left("content", 400) AS "excerpt",
+          "content" AS "excerpt",
+          jsonb_build_object('sourceId',"source_id"::text,'version',"version"::text,'locale',"locale",'audience',"audience",'effectiveFrom',to_char("effective_from" AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'effectiveTo',CASE WHEN "effective_to" IS NULL THEN NULL ELSE to_char("effective_to" AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,'contentHash',"content_hash") AS "ref",
+          "chunk_start" AS "offsetStart", "chunk_end" AS "offsetEnd",
           greatest(
             0,
             least(1, 1 - ("embedding" <=> ${encodedVector}::vector))
@@ -235,6 +251,10 @@ export function createKbDocumentsRepository(
         FROM "kb_documents"
         WHERE "namespace" = ${namespace}
           AND "locale" = ${locale}
+          AND "approval_state" = 'approved' AND "index_state" = 'ready'
+          AND ("audience" = 'public' OR (${input.audience ?? "public"} = 'staff' AND "audience" = 'staff'))
+          AND "effective_from" <= ${at} AND ("effective_to" IS NULL OR "effective_to" > ${at})
+          AND "review_due" > ${at}
         ORDER BY
           "embedding" <=> ${encodedVector}::vector ASC,
           "url" ASC,

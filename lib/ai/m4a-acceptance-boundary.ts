@@ -1,6 +1,7 @@
 import "server-only";
 
 import {createHash} from "node:crypto";
+import {offlineKnowledgeRef} from "@/evals/knowledge-fixture";
 
 import {
   createConciergeService,
@@ -332,6 +333,8 @@ export function createM4AAcceptanceBoundary(
           : MEMBERSHIP_URL,
         excerpt: answer,
         score: 0.95,
+        ref: offlineKnowledgeRef(input.locale,input.locale === "zh-HK" ? "https://www.hkwtia.org/zh-HK/membership" : MEMBERSHIP_URL,answer),
+        offsetStart:0,offsetEnd:[...answer].length,
       }]);
     },
     async getMemberContext() {

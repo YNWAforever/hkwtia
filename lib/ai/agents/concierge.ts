@@ -193,8 +193,8 @@ function hasGroundedCitation(finish: AgentRuntimeFinish): boolean {
   return finish.status !== "disabled"
     && finish.citations.some(
       (citation) =>
-        citation.confidence !== undefined
-        && citation.confidence >= CONCIERGE_AGENT_CONFIG.confidenceThreshold,
+        // Relevance is only a minimum source match, not an accuracy claim.
+        (citation.retrievalScore ?? citation.confidence ?? 0) >= CONCIERGE_AGENT_CONFIG.confidenceThreshold,
     );
 }
 

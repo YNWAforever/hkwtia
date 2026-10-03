@@ -1,3 +1,4 @@
+import {offlineKnowledgeRef} from "@/evals/knowledge-fixture";
 import {createHash} from "node:crypto";
 import {readFile} from "node:fs/promises";
 import {resolve} from "node:path";
@@ -160,7 +161,7 @@ describe("M4A knowledge repository", () => {
     expect(first.transactionCount()).toBe(1);
     expect(first.statements).toHaveLength(2);
     expect(normalizedSql(first.statements[0]?.query ?? "")).toMatch(
-      /^delete from "kb_documents" where "kb_documents"\."namespace" = \$1$/i,
+      /^delete from "kb_documents" where "kb_documents"\."namespace" = \$1 and "kb_documents"\."approval_state" = 'unverified'$/i,
     );
     expect(first.statements[0]?.params).toEqual(["m4a-core-v1"]);
     expect(normalizedSql(first.statements[1]?.query ?? "")).toMatch(
@@ -183,6 +184,7 @@ describe("M4A knowledge repository", () => {
         url: "https://www.hkwtia.org/membership",
         excerpt: "Member information",
         score: 0.75,
+        ref:offlineKnowledgeRef("en","https://www.hkwtia.org/membership","Member information"),offsetStart:0,offsetEnd:18,
       },
     ]);
     const repository = createKbDocumentsRepository(
@@ -221,9 +223,10 @@ describe("M4A knowledge repository", () => {
       url: "https://www.hkwtia.org/membership",
       excerpt: "Member information",
       score: 0.75,
+      ref:offlineKnowledgeRef("en","https://www.hkwtia.org/membership","Member information"),offsetStart:0,offsetEnd:18,
     }]);
     expect(Object.keys(results[0] ?? {}).sort()).toEqual(
-      ["excerpt", "score", "title", "url"],
+      ["excerpt", "offsetEnd", "offsetStart", "ref", "score", "title", "url"],
     );
     expect(fixture.statements).toHaveLength(1);
     const statement = fixture.statements[0]!;

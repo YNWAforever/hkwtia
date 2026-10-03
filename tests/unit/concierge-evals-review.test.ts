@@ -25,6 +25,10 @@ function replaceCase(
 }
 
 describe("Concierge eval review regressions", () => {
+  it("preserves golden corpus bytes and every business expectation while versioning known KB fixture IDs",()=>{
+    const before=readFileSync(corpusPath,"utf8");const originals=before.trimEnd().split(/\r?\n/).map(line=>JSON.parse(line));const loaded=loadGoldenCases(corpusPath);expect(readFileSync(corpusPath,"utf8")).toBe(before);expect(loaded).toHaveLength(25);
+    let revised=0;for(let i=0;i<loaded.length;i++){const current=loaded[i]!,original=originals[i];expect(current.request).toEqual(original.request);expect(current.scenario).toEqual(original.scenario);const {citationsExact:currentCitations,...business}=current.expected;const {citationsExact:oldCitations,...oldBusiness}=original.expected;expect(business).toEqual(oldBusiness);expect(currentCitations.map(({title,url})=>({title,url}))).toEqual(oldCitations.map(({title,url}:{title:string;url:string})=>({title,url})));if(JSON.stringify(currentCitations)!==JSON.stringify(oldCitations))revised++;}expect(revised).toBeGreaterThan(0);
+  });
   it("executes the shared Concierge service, runtime, and approved tool registry", async () => {
     const testCase = loadGoldenCases(corpusPath).find(
       ({id}) => id === "concierge-en-kb-grounding-01",
