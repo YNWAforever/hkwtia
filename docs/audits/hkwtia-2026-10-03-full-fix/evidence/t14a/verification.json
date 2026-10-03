@@ -1,0 +1,39 @@
+{
+  "allowlistCommit": "1554959d",
+  "allowlistRed": {
+    "failed": 5,
+    "passed": 6,
+    "command": "npx vitest run tests/unit/login-case-continuation.test.ts"
+  },
+  "allowlistGreen": {
+    "passed": 48,
+    "files": 5,
+    "command": "npx vitest run tests/unit/login-case-continuation.test.ts tests/unit/login-destination.test.ts tests/unit/login-resolution.test.ts tests/unit/sign-in-form.test.tsx tests/unit/login-profile-provision.test.ts tests/unit/login-profile-provision-claim.test.ts",
+    "actualMatchedFiles": 5,
+    "note": "One supplied nonexistent pattern matched no file; this is not a test pass."
+  },
+  "guardRed": {
+    "command": "npx vitest run tests/unit/admin-login-guard.test.ts",
+    "failed": 2,
+    "passed": 6,
+    "failureBehavior": "Safe case/inbox destination omitted after authorization denial; no missing import"
+  },
+  "guardGreen": {
+    "command": "npx vitest run tests/unit/admin-login-guard.test.ts tests/unit/login-case-continuation.test.ts tests/unit/login-destination.test.ts tests/unit/admin-page-auth.test.ts",
+    "passed": 45,
+    "files": 4,
+    "skipped": 0
+  },
+  "google": "NOT_TESTED",
+  "magicLink": "NOT_TESTED",
+  "providerConfig": {
+    "branchId": "br-lingering-unit-azxl75s5",
+    "google": "shared provider configured",
+    "email": "shared Neon sender configured",
+    "localhostAllowed": true,
+    "scope": "configuration metadata only; no message requested"
+  },
+  "productionDeployment": false,
+  "sourceCommitPending": false,
+  "verifiedCodeCommit": "2c992618c5c737b98d911c086195db312a21de6f"
+}

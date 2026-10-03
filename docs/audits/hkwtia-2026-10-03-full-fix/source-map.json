@@ -374,5 +374,95 @@
     "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.news-action-core.runNewsFormAction",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
     "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "getAiReadiness",
+    "path": "lib/ai/readiness.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.readiness.getAiReadiness",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "calculateAdminImpact",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.calculateAdminImpact",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "summarizeObservedWork",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.summarizeObservedWork",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "buildOperationBaseline",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.buildOperationBaseline",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "compareObservedWork",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.compareObservedWork",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createOperationsMetricsRepository",
+    "path": "lib/db/repos/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.operations-metrics.createOperationsMetricsRepository",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "recordOperationObservationAction",
+    "path": "lib/admin/operations-metrics-actions.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.operations-metrics-actions.recordOperationObservationAction",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "freezeOperationBaselineAction",
+    "path": "lib/admin/operations-metrics-actions.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.operations-metrics-actions.freezeOperationBaselineAction",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "OperationsTimingForm",
+    "path": "components/admin/operations-timing-form.tsx",
+    "qualifiedName": "hkwtia-full-fix-20261003.components.admin.operations-timing-form.OperationsTimingForm",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "OperationsBaselineForm",
+    "path": "components/admin/operations-baseline-form.tsx",
+    "qualifiedName": "hkwtia-full-fix-20261003.components.admin.operations-baseline-form.OperationsBaselineForm",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
   }
 ]

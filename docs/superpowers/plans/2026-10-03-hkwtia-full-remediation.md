@@ -193,15 +193,17 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `calculateAdminImpact(input:{baselineMinutes:number;humanMinutes:number;reviewMinutes:number;reworkMinutes:number;caseCount:number;sampleCount:number}):{netMinutes:number|null;caseCount:number;sampleCount:number}`。计数按唯一 case ID；wait time 獨立，不混入人手工時。
 
-- [ ] 寫 `includes_handoffs_and_reopened_cases`：bot 成功、轉交、重開均進總案件分母；沒有時間樣本回 unknown，不套六分鐘變實測。
-- [ ] Run `npx vitest run tests/unit/ai-operations-metrics.test.ts`，確認初始缺功能失敗。
-- [ ] 設定最小資料收集：case kind、start/end、review、rework、採用／編輯／拒絕，不記原始對話正文；先使用現有 audit/run IDs。
-- [ ] 報表並列「估算」及「實測」，顯示樣本數、期間與缺失率；開試點前固定人工比較組。
-- [ ] focused test PASS，提交 `feat: measure verified administrative time savings`；營運樣本不足保留待收集，不虛構 ROI。
+- [x] 寫 `includes_handoffs_and_reopened_cases`：bot 成功、轉交、重開均進總案件分母；沒有時間樣本回 unknown，不套六分鐘變實測。
+- [x] Run `npx vitest run tests/unit/ai-operations-metrics.test.ts`，確認初始缺功能失敗。
+- [x] 設定最小資料收集：case kind、start/end、review、rework、採用／編輯／拒絕，不記原始對話正文；先使用現有 audit/run IDs。
+- [x] 報表並列「估算」及「實測」，顯示樣本數、期間與缺失率；開試點前固定人工比較組。
+- [x] focused test PASS，提交 `feat: measure verified administrative time savings`；營運樣本不足保留待收集，不虛構 ROI。
 
 
 **計算契約：** baselineMinutes 是同類工作按樣本加權後的總基線，不是每件6分鐘常數；humanMinutes、reviewMinutes、reworkMinutes 互斥計時。無 sample 回 null；net = baseline − human − review − rework，可以為負值，不 clamp 成0。重開是同一 case 的額外工時；首次完成率和處理次數另列。兩星期基線可在工程進行時收集，試點前凍結比較口徑。
 
+
+**本輪工程提交：** `2c992618c5c737b98d911c086195db312a21de6f`。154 focused、9 真隔離 DB、5 真瀏覽器通過；不可變比較組與樣本加權已實作。兩星期真實人工基線、完整非客服流程分母及 T16 發布尚未完成。
 
 ## T05 — Provider registry 和可選 OpenCode adapter
 
