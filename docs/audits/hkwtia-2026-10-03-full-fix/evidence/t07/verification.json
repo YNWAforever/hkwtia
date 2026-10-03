@@ -1,8 +1,8 @@
 {
   "task": "T07",
   "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
-  "verifiedRuntimeCommit": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
-  "codeState": "URL_REVIEW_FIX_FOCUSED53_PG31_PASS_CI_PREVIEW_REFRESH_PENDING",
+  "verifiedRuntimeCommit": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+  "codeState": "SOURCE_FULL_CI_PG31_NATIVE29_VERIFIED_PROVIDER_POLICY_GATES",
   "production": false,
   "providerAcceptance": false,
   "externalProviderRequests": 0,
@@ -277,10 +277,10 @@
       }
     ]
   },
-  "latestFullRun": "COMPLETE_PASS_6514_SKIP386_FAIL0_SERIAL",
+  "latestFullRun": "Latest source CI full6520pass386skip0fail; earlier exact7c local serial6514pass386skip0fail retained separately.",
   "nativePreview": {
-    "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
-    "deploymentId": "dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT",
+    "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+    "deploymentId": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
     "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
     "baselineChecks": 17,
     "knowledgeChecks": 12,
@@ -382,7 +382,64 @@
       "provider": "explicit deterministic test adapter, not real provider receipt"
     },
     "change": "Reuse lib/security/https-url canonicalHttpsUrl for source validation; preserve canonical public query URLs, reject fragments and localhost/IP/trailing-dot hosts",
-    "ci": "PENDING_CURRENT_CORRECTION",
-    "nativePreview": "PENDING_CURRENT_CORRECTION"
+    "ci": {
+      "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+      "runId": 37143368222,
+      "conclusion": "success",
+      "summaries": [
+        "worker\tRun npm --prefix workers test\t2026-10-03T18:13:25.8182395Z  Test Files  7 passed (7)",
+        "worker\tRun npm --prefix workers test\t2026-10-03T18:13:25.8183225Z       Tests  57 passed (57)",
+        "worker\tRun npm --prefix workers test\t2026-10-03T18:13:25.8184853Z    Duration  3.22s (transform 207ms, setup 0ms, import 425ms, tests 3.28s, environment 1ms)",
+        "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T18:15:39.2200197Z  Test Files  388 passed | 44 skipped (432)",
+        "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T18:15:39.2214347Z       Tests  3419 passed | 181 skipped (3600)",
+        "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T18:15:39.2226020Z    Duration  124.86s (transform 11.22s, setup 20.92s, collect 110.86s, tests 27.49s, environment 125.98s, prepare 30.36s)",
+        "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T18:16:34.2260488Z  Test Files  387 passed | 46 skipped (433)",
+        "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T18:16:34.2280754Z       Tests  3101 passed | 205 skipped (3306)",
+        "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T18:16:34.2298128Z    Duration  169.59s (transform 12.26s, setup 27.80s, collect 167.04s, tests 35.55s, environment 167.73s, prepare 38.53s)"
+      ],
+      "unit": {
+        "passed": 6520,
+        "skipped": 386,
+        "failed": 0,
+        "commands": [
+          "npx vitest run --shard=1/2",
+          "npx vitest run --shard=2/2"
+        ]
+      },
+      "worker": {
+        "passed": 57,
+        "skipped": 0,
+        "failed": 0
+      },
+      "logSha256": "26acd000a69c3c5aad9d98aed0871b1fa323bca6d05324bb8885f2406347bfc5",
+      "production": false
+    },
+    "nativePreview": {
+      "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+      "deploymentId": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
+      "observedAt": "2026-10-03T18:21:59.485Z",
+      "baselineChecks": 17,
+      "knowledgeChecks": 12,
+      "production": false,
+      "providerRequests": 0
+    }
+  },
+  "finalSourceGates": {
+    "environment": "GitHub Actions Linux exact a49e6629",
+    "runId": 37143368222,
+    "commands": [
+      "npm run audit:strings",
+      "npm run lint",
+      "npm run typecheck",
+      "npm run build",
+      "npx vitest run --shard=1/2",
+      "npx vitest run --shard=2/2",
+      "npm --prefix workers run typecheck",
+      "npm --prefix workers test"
+    ],
+    "allSuccess": true,
+    "unitPassed": 6520,
+    "unitSkipped": 386,
+    "workerPassed": 57
   }
 }

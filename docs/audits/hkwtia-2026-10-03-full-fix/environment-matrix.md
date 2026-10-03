@@ -36,3 +36,5 @@ Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real
 - Exact source7c6b0844 local full6514pass386skip0fail; CI37137557588 green including worker57. Final typecheck/build/strings exit0 and lint0errors.
 - Isolated Preview dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT has17 baseline+12 knowledge native checks; fresh same-origin CLI protection access and positive owned DB marker preceded synthetic Neon password sign-in. Configured reviewer maps that fresh trusted auth user ID, with separate synthetic source owner.
 - This supersedes earlier pending reviewer/native/local-gate notes. Source/approver policy, real embedding credential/spend/caps/invoice, Google/magic-link and worker windows remain unresolved task-specific gates. Production0057/0058 remains unapplied by this work.
+
+- T07 refreshed02:21HKT: sourcea49e6629/dpl_3roUp1uVnxwpNQehBSvqCHVhxToW has29native and fresh fullCI6520pass386skip0fail/worker57, all repository gates successful. Shared public HTTPS policy now guards source inputs; public query URLs retained. Source/approver/provider/Production gates unchanged.

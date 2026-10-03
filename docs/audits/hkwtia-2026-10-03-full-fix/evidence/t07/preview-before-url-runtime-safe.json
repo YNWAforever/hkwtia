@@ -1,15 +1,15 @@
 {
-  "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
-  "deploymentId": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
+  "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+  "deploymentId": "dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT",
   "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
-  "observedAt": "2026-10-03T18:21:04.731Z",
+  "observedAt": "2026-10-03T16:51:23.469Z",
   "production": false,
   "ledger": 58,
   "checks": [
     {
       "routeKind": "unique synthetic news",
       "status": 200,
-      "markerRefSha256": "95ee369adefe49145d0e855eb9aed33b1f7056c1fd1cca9207ed312ceb9c8f77",
+      "markerRefSha256": "181147571b8761b7e7573a8b2d60c2da274c5d6176fff2bf4237141e31562756",
       "dbSourcePositivelyProven": true
     },
     {

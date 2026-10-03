@@ -591,3 +591,5 @@ npm --prefix workers test
 - [x] Typecheck/build/strings exit0; lint0errors,82 existing warnings plus1 ignored reproduction helper warning.
 - [x] Confirmed isolated PG31pass0skip, Neon0058 ledger58, exact-source Preview dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT baseline17+knowledge12 native checks. HK dates, keyboard/mobile, source creation/separate approval/withdrawal; no provider/payment/messages.
 - [ ] Actual approved embedding provider/invoice, association source/approver policy, T08/T13 final-body/stale draft/real-model safety, and specific Production release authorization.
+
+- [x] Final T07 URL review correction a49e6629:5 actual RED,53focused,31actual PG, full CI6520pass386skip0fail plus worker57; lint/typecheck/build/strings passed in exact-source CI. Refreshed exact-source Preview native17+12, dpl_3roUp1uVnxwpNQehBSvqCHVhxToW. Earlier7c local serial run remains its own historical receipt.

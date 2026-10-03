@@ -1,8 +1,8 @@
 {
-  "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
-  "deploymentId": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
+  "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+  "deploymentId": "dpl_6XKCHM3VhF8bskXb7rb7g8Pa6gFT",
   "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
-  "observedAt": "2026-10-03T18:21:59.485Z",
+  "observedAt": "2026-10-03T16:52:29.858Z",
   "production": false,
   "checks": [
     {
