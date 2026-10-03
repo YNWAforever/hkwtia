@@ -1,3 +1,5 @@
+import {PolicyConfirmation} from "@/components/join/policy-confirmation";
+import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
@@ -41,6 +43,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
   if (!actor) redirect(`${localizedPath(locale, "/join")}?plan=${plan}`);
   const t = await getTranslations("Join");
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
+  const policyView = await getPolicyConfirmation(actor,applicationId,locale);
   const action = saveCompany.bind(null, locale, plan, applicationId);
 
   return (
@@ -49,13 +52,14 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("companyTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
+        <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
           <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" required/>
           <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" required/>
           <Field autoComplete="url" label={t("fields.website")} name="website" type="url"/>
           <Field label={t("fields.industry")} name="industry"/>
           <Field label={t("fields.sizeBand")} name="sizeBand"/>
           <div><label className="mb-2 block text-sm font-medium" htmlFor="description">{t("fields.description")}</label><textarea aria-describedby="description-error" className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2" id="description" name="description"/></div>
+          <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>
     </section>

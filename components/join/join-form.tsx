@@ -5,12 +5,13 @@ import {useActionState, type ReactNode} from "react";
 export type JoinFormState = Readonly<{message?: string; fieldErrors?: Readonly<Record<string, string>>}>;
 export const initialJoinFormState: JoinFormState = {};
 
-export function JoinForm({action, children, fieldNames, submitLabel, pendingLabel}: {
+export function JoinForm({action, children, fieldNames, submitLabel, pendingLabel, submitDisabled = false}: {
   action: (state: JoinFormState, formData: FormData) => Promise<JoinFormState>;
   children: ReactNode;
   fieldNames: readonly string[];
   submitLabel: string;
   pendingLabel: string;
+  submitDisabled?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, initialJoinFormState);
 
@@ -21,7 +22,7 @@ export function JoinForm({action, children, fieldNames, submitLabel, pendingLabe
         <p className="text-sm text-destructive" id={`${name}-error`} key={name} role="alert">{state.fieldErrors[name]}</p>
       ) : null)}
       {state.message ? <p className="text-sm text-destructive" role="alert">{state.message}</p> : null}
-      <button className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">
+      <button className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || submitDisabled} type="submit">
         {pending ? pendingLabel : submitLabel}
       </button>
     </form>

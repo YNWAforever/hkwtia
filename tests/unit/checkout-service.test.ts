@@ -5,7 +5,7 @@ import type {BillingAttempt} from "@/lib/db/server-schema";
 import type {CheckoutSessionReference} from "@/lib/db/repos/billing-attempts";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
+import {createBillingPortalSession, createCheckoutSession, startNewCheckoutAttempt} from "@/lib/billing/checkout-service";
 import * as stripeModule from "@/lib/billing/stripe";
 import {listReceipts} from "@/lib/billing/receipt-service";
 import {actorFor, FakeStripeBillingAdapter} from "@/tests/helpers/fakes";
@@ -76,6 +76,22 @@ afterEach(() => {
 });
 
 describe("membership checkout", () => {
+  it("blocks the new policy-gated checkout when no approved version exists", async () => {
+    vi.stubEnv("MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED", "true");
+    const setup = dependencies();
+    await expect(createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).rejects.toThrow("MEMBERSHIP_POLICY_UNAVAILABLE");
+    expect(setup.stripe.checkoutRequests).toHaveLength(0);
+    expect(setup.attempts.claimActive).not.toHaveBeenCalled();
+  });
+
+  it("does not bypass current policy when recovering a checkout attempt", async () => {
+    vi.stubEnv("MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED", "true");
+    const setup = dependencies();
+    await expect(startNewCheckoutAttempt(actorFor("user@example.test"), membershipId, "en", "expired", {expectedCurrentAttemptId: "attempt-1", recoveryRequestId: "request-1"}, setup.dependencies)).rejects.toThrow("MEMBERSHIP_POLICY_UNAVAILABLE");
+    expect(setup.attempts.startNewAttempt).not.toHaveBeenCalled();
+    expect(setup.stripe.checkoutRequests).toHaveLength(0);
+  });
+
   it("refuses a pending row already correlated to an existing subscription", async () => {
     const setup = dependencies(membership({stripeCustomerId: "cus_test", stripeSubscriptionId: "sub_existing"}));
     await expect(createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).rejects.toThrow("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");

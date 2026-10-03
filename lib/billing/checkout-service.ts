@@ -7,6 +7,7 @@ import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {appEnv, billingEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
+import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {localizedPath} from "@/lib/urls";
 
 type MembershipReader = {
@@ -124,6 +125,7 @@ export async function createCheckoutSession(
   const preflightMembership = await dependencies.memberships.getBillingAccess(actor, membershipId);
   if (!preflightMembership) throw new Error("FORBIDDEN");
   validateCheckoutMembership(preflightMembership);
+  await requirePolicyAcceptanceForApplication(actor,preflightMembership.applicationId);
   const priceReference = dependencies.priceForPlan(preflightMembership.planCode);
   const {attempt, membership} = await dependencies.attempts.claimActive(
     actor, preflightMembership.id, priceReference, preflightMembership.planCode,
@@ -143,6 +145,7 @@ export async function startNewCheckoutAttempt(
   const membership = await dependencies.memberships.getBillingAccess(actor, membershipId);
   if (!membership) throw new Error("FORBIDDEN");
   validateCheckoutMembership(membership);
+  await requirePolicyAcceptanceForApplication(actor,membership.applicationId);
   const priceReference = dependencies.priceForPlan(membership.planCode);
   const result = await dependencies.attempts.startNewAttempt(
     actor, membershipId, priceReference, reason, {...request, expectedPlanCode: membership.planCode},

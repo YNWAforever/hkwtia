@@ -1,3 +1,5 @@
+import {PolicyConfirmation} from "@/components/join/policy-confirmation";
+import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
@@ -62,6 +64,7 @@ export default async function CheckoutPage({params, searchParams}: Props) {
     ? tier.price.options.find((option) => option.cadence === "annual")?.amount
     : undefined;
   const t = await getTranslations("Join");
+  const policyView=await getPolicyConfirmation(state.actor,state.application.id,locale);
   const resume = `${localizedPath(locale, "/join")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`;
   const details = `${localizedPath(locale, "/join/company")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`;
   return (
@@ -73,10 +76,12 @@ export default async function CheckoutPage({params, searchParams}: Props) {
         <div><dt className="inline font-medium">{t("checkoutSummary.fee")}: </dt><dd className="inline">{annualFee ?? t("checkoutSummary.feeAtProvider")}</dd></div>
         <div><dt className="inline font-medium">{t("checkoutSummary.status")}: </dt><dd className="inline">{t("checkoutSummary.pending")}</dd></div>
       </dl>
+      {queryValue(query.policyError)?<p className="mt-4 text-destructive" role="alert">{t(queryValue(query.policyError)==="stale"?"policy.stale":"policy.required")}</p>:null}
       <form action={beginMembershipCheckoutAction} className="mt-8">
         <input name="membershipId" type="hidden" value={state.membership.id}/>
         <input name="locale" type="hidden" value={locale}/>
-        <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 text-primary-foreground" type="submit">{t("checkoutSummary.continuePayment")}</button>
+        <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
+        <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 text-primary-foreground disabled:opacity-60" disabled={!policyView.canProceed} type="submit">{t("checkoutSummary.continuePayment")}</button>
       </form>
       <div className="mt-5 flex flex-wrap gap-5 text-sm">
         <Link className="text-primary underline" href={resume}>{t("checkoutSummary.later")}</Link>

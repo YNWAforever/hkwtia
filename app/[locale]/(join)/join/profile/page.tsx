@@ -1,3 +1,5 @@
+import {PolicyConfirmation} from "@/components/join/policy-confirmation";
+import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
@@ -41,6 +43,7 @@ export default async function ProfilePage({params, searchParams}: Props) {
   const t = await getTranslations("Join");
   const companyPlan = plan === "startup" || plan === "corporate";
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
+  const policyView = await getPolicyConfirmation(actor,value(query.application),locale);
   const action = saveProfile.bind(null, locale, plan, value(query.application) ?? null);
 
   return (
@@ -49,7 +52,7 @@ export default async function ProfilePage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("profileTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("profileDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} pendingLabel={t("saving")} submitLabel={t("continue")}>
+        <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("continue")}>
           <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" required/>
           <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" type="tel"/>
           <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle"/>
@@ -61,6 +64,7 @@ export default async function ProfilePage({params, searchParams}: Props) {
             </label>
             <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")} <span className="sr-only">{t("whatsapp.textVersion")}</span></p>
           </div>
+          <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>
     </section>
