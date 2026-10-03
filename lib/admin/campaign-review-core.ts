@@ -26,7 +26,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
  */
 export type CampaignReviewDependencies = CampaignReadDependencies & Readonly<{
   submitForReview: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
-  recordReview: (actor: Actor, store: unknown, campaignId: string, decision: CampaignReviewDecision) => Promise<void>;
+  recordReview: (actor: Actor, store: unknown, campaignId: string, decision: CampaignReviewDecision, expectedRevision?: string) => Promise<void>;
   schedule: (actor: Actor, store: unknown, campaignId: string, scheduledAt: Date) => Promise<void>;
   queueApproved: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
 }>;
@@ -104,16 +104,18 @@ export async function approveCampaign(
   scheduledAt: unknown,
   dependencies: CampaignReviewDependencies = campaignsRepository,
   now: Date = new Date(),
+  expectedRevision?: string,
 ): Promise<void> {
   requireAdmin(actor);
   const parsedCampaignId = campaignIdSchema.parse(campaignId);
+  if (typeof expectedRevision !== "string" || !/^[a-f0-9]{64}$/.test(expectedRevision)) throw new Error("CAMPAIGN_REVIEW_VERSION_REQUIRED");
   const requested = scheduleInputSchema.parse(scheduledAt ?? null);
   await dependencies.transaction(actor, async (store) => {
     const campaign: CampaignRecord | null = await dependencies.campaignFor(actor, store, parsedCampaignId);
     if (!campaign) throw new Error("CAMPAIGN_NOT_FOUND");
     if (campaign.channel === "email") {
       if (requested !== null) throw new Error("EMAIL_CAMPAIGN_CANNOT_BE_SCHEDULED");
-      await dependencies.recordReview(actor, store, parsedCampaignId, {outcome: "approved"});
+      await dependencies.recordReview(actor, store, parsedCampaignId, {outcome: "approved"}, expectedRevision);
       await dependencies.queueApproved(actor, store, parsedCampaignId);
       return;
     }
@@ -122,7 +124,7 @@ export async function approveCampaign(
     // campaign in `review` rather than approved-but-unscheduled — a state whose
     // only exit is a second admin noticing.
     const when = parseScheduledAt(requested, now);
-    await dependencies.recordReview(actor, store, parsedCampaignId, {outcome: "approved"});
+    await dependencies.recordReview(actor, store, parsedCampaignId, {outcome: "approved"}, expectedRevision);
     await dependencies.schedule(actor, store, parsedCampaignId, when);
   });
 }

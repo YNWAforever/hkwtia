@@ -2704,6 +2704,12 @@
       "saved": "Contact updated."
     },
     "campaigns": {
+      "reviewContent": "Message content",
+      "reviewVersion": "Content and audience version",
+      "previewUnavailable": "Unavailable",
+      "previewBindings": "Recipient fields are resolved from the saved snapshot. Review the template and delivery counts below.",
+      "reviewBound": "Approval applies to the content and recipient snapshot shown here. Changes require a new review.",
+      "reviewStale": "This draft changed after you opened it. Review the current content and recipients before approving again.",
       "eyebrow": "Outbound",
       "title": "Campaigns",
       "description": "Name a campaign, choose a channel and template, pick a segment, check who it can actually reach, then have a second admin approve it.",
@@ -3066,7 +3072,7 @@
       "unavailable": "Not available",
       "saved": "Saved segments",
       "export": "Export CSV",
-      "queue": "Queue campaign",
+      "queue": "Create communication draft",
       "template": "Template",
       "templateRenewal": "Renewal reminder",
       "templateUpdate": "Member update",
@@ -3693,26 +3699,28 @@
       "noteError": "We could not save the staff note. Please try again."
     },
     "membershipComp": {
-      "title": "Grant a membership",
-      "description": "Creates an active membership without a payment — for a comp, a founding member, or a checkout that took money and never activated.",
+      "title": "Special membership",
+      "description": "The old indefinite grant entry is retired. Use an approved finite grant with a reason and expiry. For a payment already taken, reconcile the original payment and subscription.",
       "planLabel": "Plan",
       "submit": "Grant membership",
       "success": "Membership granted.",
       "invalid": "Choose a plan before granting a membership.",
       "error": "The membership could not be granted.",
-      "duplicate": "This member already has a membership. Open it to change the plan instead of granting a second one."
+      "duplicate": "This member already has a membership. Open it to change the plan instead of granting a second one.",
+      "retired": "This grant entry has been retired. Use the approved finite grant workflow, or payment reconciliation for an existing payment."
     },
     "membershipGrant": {
-      "title": "Finite profile grant",
+      "title": "Special membership",
       "description": "Available only with approved association policy. Enter an explicit start, expiry and reason; dates use Hong Kong time. This creates no Stripe payment.",
       "plan": "Plan",
       "start": "Starts (Hong Kong time)",
       "expiry": "Expires (Hong Kong time)",
       "reason": "Approval reason",
-      "submit": "Create finite grant",
+      "submit": "Create special membership",
       "success": "Finite grant created.",
       "invalid": "Enter a valid plan, date window and reason.",
       "duplicate": "This member already has a live membership.",
+      "conflict": "This request was already used for a different grant. Reload and review the new details before submitting.",
       "error": "The finite grant could not be created."
     },
     "communications": {

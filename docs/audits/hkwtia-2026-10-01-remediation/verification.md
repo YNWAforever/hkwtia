@@ -65,3 +65,42 @@ T01–T04 candidate at `63d28428`: full lint passed with 0 errors / 67 existing 
 - `npm.cmd run build`: exit 0, installed Next 16.3.6, compiled successfully, TypeScript completed, 267 static pages. Existing Edge/Browserslist notices retained; no framework/dependency upgrade.
 - `RUN_POSTGRES_INTEGRATION=1 npm.cmd exec -- vitest run tests/integration/page-copy-edit-concurrency-postgres.test.ts` (PowerShell env assignment): 1 pass / 0 skip, real disposable PostgreSQL 16, preserved namespace lock/CAS and audit transaction. Docker Engine 29.7.2 is available with cached postgres:16-alpine. This is existing published-copy concurrency, not T17 server draft/publish acceptance.
 - Code candidate SHA `c54e18280f3ed3532355031723545f114106748b`; subsequent evidence-only commit is source equivalent. Preview/provider/worker and T05–T23 remain pending. No Production migration, deployment, payment, refund or member message occurred.
+
+## T05 existing identity protections (partial, provider gate remains)
+
+The existing provision repository was retained: actual isolated SQL verifies unique identity creation, concurrent same-email serialization, no membership activation and no privileged email merge. Six focused files / 44 tests passed / 0 skips / 0 failures. Exact command and masked receipt: `evidence/t05/identity.json`. PostgreSQL transport alone is supplied; the production repository executes the queries. This does not prove OAuth or magic-link callback, delivery, expiry or reuse. No provider bug is inferred from the historical passkey interruption. U02–U06 remain open for the provider-specific journeys. No Auth identity or Production row was created.
+
+## T06 / O03 finite grant and legacy retirement slice
+
+**Code fixed; isolated grant boundaries verified. Payment repair U23 remains T08. Production unchanged.**
+
+The stale comp service/action/core now refuse writes, authenticate their own actor, and show localized retirement on Member360. Historic NULL/NULL grants remain byte-identical in real PostgreSQL acceptance. Staff/ExCo cannot create finite grants; their swallowed authorization denial was reproduced and repaired. The current finite grant repository retains superadmin, feature flag, target, plan, seat and time guards. Single grant retries reuse the existing transactional immutable audit with an actor-scoped request key and canonical payload digest: two concurrent requests produce one grant/audit, changed payload conflicts, expiry replay does not reactivate. Batch ledger/handler remains the existing architecture. No schema migration required.
+
+Focused actual PG16/focused run: 35 pass / 0 skip. HTTP/actor guard run: 107 pass / 0 skip. Real isolated Chromium: 3 pass / 0 skip (staff/ExCo retirement; synthetic superadmin finite grant, verified DB actor/audit, no Stripe reference). The new test initially had a TypeScript assertion annotation error; corrected using an explicitly typed authorization function. Only fresh subsequent typecheck/build success counts. Full suite after behavior corrections: 6147 pass / 180 skip / 0 fail, 726 pass files / 69 skip files; skips remain environment-gated and not acceptance passes. Full lint: 0 errors / 67 existing warnings. Commands and masked receipts: evidence/t06/grant.json.
+
+U22 grant entry/expiry boundary passed; U24 manual grant endpoint and role UI passed, whole-site roles remain T18/T22. U25 SQL parallel retry passed; two real browser windows remain T22. U23 paid activation reconciliation is not implemented by a complimentary grant and remains T08. Preview acceptance and Production release are pending.
+
+T06 fresh final gates: explicitly typed test actor authorization corrected; typecheck exit 0, HTTP test 8/0/0, strings exit 0 (297 TSX), build exit 0 (267 static pages). These successful runs supersede the earlier test-only TS2775/TS2459 failures.
+
+## T07 / O11 / U36 U37 U38 reviewed marketing entry
+
+**Code fixed; actual isolated SQL and browser review boundaries passed. Provider sends and deployed worker remain unverified.**
+
+Saved segment links carry the exact segment and validated draft UUID into the existing wizard. GET through every step writes zero rows. Only final POST creates a draft/snapshot; the legacy service/action and direct repository queued create cannot bypass review. The author cannot approve. The immutable approval audit records a digest covering campaign content, recipient identity/contact/locale/variables snapshot, registered WhatsApp content and the email catalog/render contract. Reviewer submits the version seen. Changed content/audience/template invalidates approval, queue, schedule, promotion and claims. Delivery status/attempt counters are excluded so sending the first recipient does not revoke approval of the remainder. Audience insert takes the campaign row lock and is draft-only. Claims materialize eligible campaign IDs so the digest is evaluated per campaign, not per recipient. No new schema/approval ledger.
+
+Original intended SQL red cases: 4 failures; subsequent worker/audience red cases: 4; registered-template version red: 1. Final real isolated SQL: 13 pass / 0 skip. Existing contacts/both behavior was retained: contact source/stage cannot match a member record, and fails closed; initial test expectation was corrected after reading this explicit historical policy, no code widening. Send-time actual SQL facts verify STOP from contacts and suppression store even while the member opt-in flag remains true. Existing delivery/actor focused run: 156 pass / 0 skip; review/wizard initial focused: 71 pass; final content/runner subset: 81 pass. Exact commands: evidence/t07/campaign.json. These unit doubles are not provider acceptance.
+
+Final actual Chromium: 2 pass / 0 skip, 43.9s; Chinese desktop and English 390px, keyboard entry and approval, GET row counts, unique draft/snapshot, author refusal, stale rejection with no review stamp, different synthetic ExCo successful approval and exact version audit. Screenshot inspection caught the stale warning remaining after success; behavior red then correction and browser rerun confirm it clears. Traces/videos off. No provider message dispatched.
+
+### T07 path mapping and release gate
+
+Proposed unit entry file is mapped to stronger actual-SQL tests/integration/audit-full-campaign-entry.test.ts plus existing action/wizard/resource tests. Existing createCampaignDraft, campaigns repository, immutable audit_events, campaign review actions and recipient delivery repository are reused. The shared email template map was moved into lib/admin/campaign-email-templates.ts without changing mapping or sender behavior. Independent transactional outboxes remain independent.
+
+New worker claim logic intentionally holds historical queued/scheduled campaigns lacking a current versioned approval; do not fabricate receipts or re-send historical effects. Before Production activation, inventory pending rows read-only, reconcile accepted/uncertain deliveries, and have a different authorized administrator review the current content/audience. Keep campaign sends paused during app/worker overlap. Rollback preserves the stronger worker guard and pauses campaigns; reverting to an old writer is not permission to restore the retired Queue. Production migration: none for this slice. App source deployed to Preview is not worker release or live-send authorization. U36 is isolated pass; U37 review/claim SQL and UI pass, actual worker/provider still pending; U38 STOP facts and contacts/both SQL pass, real provider journey pending.
+
+## T07 fresh repository gates
+
+- `npm.cmd test`: exit 0, 6149 pass / 193 skip / 0 fail; 726 pass files / 70 skip files, 366.59s. Exact skipped-file counts and source guards are recorded in `evidence/gates/t07-skips.json`; actual isolated SQL and Chromium counts above remain separate.
+- `npm.cmd run lint`: exit 0, 0 errors / 67 existing warnings. `npm.cmd run typecheck` and `npm.cmd run audit:strings`: exit 0, strings scanned 297 TSX files.
+- Fresh `npm.cmd run typecheck` followed by `npm.cmd run build`: both exit 0; installed Next 16.3.6, 267 static pages. No migration, provider send or Production release in this slice.
+- Corrected T06 command receipt to the exact filenames and commands in the saved successful focused logs; no test count or result changed.

@@ -1,0 +1,45 @@
+{
+  "environment": "confirmed isolated Neon DB/Auth; disposable PostgreSQL 16",
+  "production": false,
+  "source": "T06 governance slice following 50de2798",
+  "commands": [
+    "node node_modules/vitest/vitest.mjs run tests/integration/audit-full-grant-boundary.test.ts tests/integration/membership-grant.test.ts tests/unit/membership-grant-form.test.tsx tests/unit/membership-comp-form.test.tsx tests/unit/admin-member-page-lazy.test.tsx tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts tests/unit/admin-membership.test.ts tests/unit/membership-comp-action.test.ts (RUN_POSTGRES_INTEGRATION=1)",
+    "node node_modules/vitest/vitest.mjs run tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts tests/unit/audit-full-grant-action.test.ts tests/unit/server-action-actor-boundary.test.ts",
+    "node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-grant-governance.spec.ts --reporter=line (PLAYWRIGHT_BASE_URL=http://localhost:3450)"
+  ],
+  "results": {
+    "focusedAndActualPg16": {
+      "passed": 35,
+      "skipped": 0
+    },
+    "httpAndActorBoundary": {
+      "passed": 107,
+      "skipped": 0
+    },
+    "chromium": {
+      "passed": 3,
+      "skipped": 0
+    },
+    "fullUnit": {
+      "passed": 6147,
+      "skipped": 180,
+      "failed": 0
+    }
+  },
+  "red": [
+    "legacy comp wrote instead of retirement (3 behavior failures)",
+    "same request concurrent retry rejected rather than returning one grant (real PG16)",
+    "staff/ExCo grant denial swallowed by action catch (2 behavior failures)"
+  ],
+  "preserved": [
+    "historical indefinite rows unchanged",
+    "existing superadmin/flags/seat/target policy",
+    "no Stripe effect or paid activation repair via grant"
+  ],
+  "remaining": [
+    "U23 payment repair T08",
+    "U25 two browser windows T22",
+    "T18/T22 whole-site role matrix",
+    "Preview and Production release"
+  ]
+}

@@ -237,7 +237,7 @@ describe("the campaign review lifecycle", () => {
   it("rejects a schedule in the past", async () => {
     const {calls, dependencies} = reviewDependencies();
 
-    await expect(approveCampaign(creator, campaignId, "2026-09-01T09:00", dependencies, now))
+    await expect(approveCampaign(creator, campaignId, "2026-09-01T09:00", dependencies, now, "a".repeat(64)))
       .rejects.toThrow(/SCHEDULED_AT_IN_THE_PAST/);
     expect(calls.recordReview).not.toHaveBeenCalled();
     expect(calls.schedule).not.toHaveBeenCalled();
@@ -246,7 +246,7 @@ describe("the campaign review lifecycle", () => {
   it("approves and schedules a WhatsApp campaign, in Hong Kong time", async () => {
     const {calls, dependencies} = reviewDependencies();
 
-    await approveCampaign(creator, campaignId, "2026-09-12T09:00", dependencies, now);
+    await approveCampaign(creator, campaignId, "2026-09-12T09:00", dependencies, now, "a".repeat(64));
 
     expect(calls.recordReview).toHaveBeenCalled();
     // 09:00 in Hong Kong is 01:00 UTC. A `datetime-local` value carries no zone,
@@ -262,18 +262,18 @@ describe("the campaign review lifecycle", () => {
   it("queues an approved email campaign and refuses to schedule one", async () => {
     const {calls, dependencies} = reviewDependencies({channel: "email", template: "renewal-reminder", templateKey: null});
 
-    await approveCampaign(creator, campaignId, null, dependencies, now);
+    await approveCampaign(creator, campaignId, null, dependencies, now, "a".repeat(64));
     expect(calls.queueApproved).toHaveBeenCalled();
     expect(calls.schedule).not.toHaveBeenCalled();
 
-    await expect(approveCampaign(creator, campaignId, "2026-09-12T09:00", dependencies, now))
+    await expect(approveCampaign(creator, campaignId, "2026-09-12T09:00", dependencies, now, "a".repeat(64)))
       .rejects.toThrow(/EMAIL_CAMPAIGN_CANNOT_BE_SCHEDULED/);
   });
 
   it("requires a send time for a WhatsApp approval", async () => {
     const {calls, dependencies} = reviewDependencies();
 
-    await expect(approveCampaign(creator, campaignId, null, dependencies, now)).rejects.toThrow(/SCHEDULED_AT_REQUIRED/);
+    await expect(approveCampaign(creator, campaignId, null, dependencies, now, "a".repeat(64))).rejects.toThrow(/SCHEDULED_AT_REQUIRED/);
     expect(calls.recordReview).not.toHaveBeenCalled();
   });
 
@@ -283,7 +283,7 @@ describe("the campaign review lifecycle", () => {
 
     await expect(submitCampaignForReview(member, campaignId, dependencies)).rejects.toThrow();
     await expect(rejectCampaign(member, campaignId, "no", dependencies)).rejects.toThrow();
-    await expect(approveCampaign(member, campaignId, null, dependencies, now)).rejects.toThrow();
+    await expect(approveCampaign(member, campaignId, null, dependencies, now, "a".repeat(64))).rejects.toThrow();
     expect(calls.submitForReview).not.toHaveBeenCalled();
     expect(calls.recordReview).not.toHaveBeenCalled();
   });

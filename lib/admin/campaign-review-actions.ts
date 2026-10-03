@@ -1,5 +1,8 @@
 "use server";
 
+import {getLocale} from "next-intl/server";
+import {localizedPath} from "@/lib/urls";
+import type {AppLocale} from "@/i18n/routing";
 import {notFound, redirect} from "next/navigation";
 
 import {
@@ -62,10 +65,18 @@ export async function approveCampaignAction(path: string, formData: FormData): P
     // `scheduledAt` is absent for an email campaign, whose screen renders no
     // send-time field: `approveCampaign` refuses one rather than accepting a
     // schedule nothing would ever promote.
-    await approveCampaign(who, formData.get("campaignId"), formData.get("scheduledAt"));
+    const revision = formData.get("expectedRevision");
+    await approveCampaign(who, formData.get("campaignId"), formData.get("scheduledAt"), undefined, undefined, typeof revision === "string" ? revision : undefined);
     revalidateAdminPath(path);
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
+    if (error instanceof Error && ["CAMPAIGN_REVIEW_STALE", "CAMPAIGN_REVIEW_VERSION_REQUIRED"].includes(error.message)) {
+      const id = formData.get("campaignId");
+      if (typeof id === "string") {
+        const locale = await getLocale() as AppLocale;
+        redirect(`${campaignDetailPath(localizedPath(locale, "/admin/campaigns"), id)}?reviewError=stale`);
+      }
+    }
     throw error;
   }
 }

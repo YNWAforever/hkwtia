@@ -62,15 +62,15 @@ describe("campaign review boundaries", () => {
     const {database} = reviewDatabase();
     const repository = createCampaignsRepository(async () => database as never);
 
-    await expect(repository.recordReview(creator, database, campaignId, {outcome: "approved"})).rejects.toThrow();
-    await expect(repository.recordReview(reviewer, database, campaignId, {outcome: "approved"})).resolves.toBeUndefined();
+    await expect(repository.recordReview(creator, database, campaignId, {outcome: "approved"}, "a".repeat(64))).rejects.toThrow();
+    await expect(repository.recordReview(reviewer, database, campaignId, {outcome: "approved"}, "a".repeat(64))).resolves.toBeUndefined();
   });
 
   it("refuses a member before any statement reaches the database", async () => {
     const {database, statements} = reviewDatabase();
     const repository = createCampaignsRepository(async () => database as never);
 
-    await expect(repository.recordReview(member, database, campaignId, {outcome: "approved"})).rejects.toThrow();
+    await expect(repository.recordReview(member, database, campaignId, {outcome: "approved"}, "a".repeat(64))).rejects.toThrow();
     await expect(repository.schedule(member, database, campaignId, new Date("2026-10-01T00:00:00.000Z"))).rejects.toThrow();
     await expect(repository.submitForReview(member, database, campaignId)).rejects.toThrow();
     await expect(repository.campaignReportFor(member, database, campaignId)).rejects.toThrow();

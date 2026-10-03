@@ -11,10 +11,11 @@ import {requireAdminActor} from "@/lib/auth/actor";
 
 export async function queueCampaignAction(draftId: string, path: string, previousState: QueueActionState, formData: FormData): Promise<QueueActionState> {
   try {
+    const who = await requireAdminActor();
     return await createQueueCampaignAction({
       draftId,
       path,
-      dependencies: {actor: requireAdminActor, queue: queueCampaign, revalidate: revalidatePath},
+      dependencies: {actor: async () => who, queue: queueCampaign, revalidate: revalidatePath},
     })(previousState, formData);
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();

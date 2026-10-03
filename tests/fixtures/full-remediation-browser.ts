@@ -1,5 +1,5 @@
 import {expect,type BrowserContext} from '@playwright/test';
-export async function signInRemediationIdentity(context:BrowserContext,baseURL:string,role:'SUPERADMIN'|'STAFF'='SUPERADMIN'){
+export async function signInRemediationIdentity(context:BrowserContext,baseURL:string,role:'SUPERADMIN'|'STAFF'|'EXCO'|'MEMBER'='SUPERADMIN'){
  expect(process.env.AUDIT_ISOLATED_ACCEPTANCE).toBe('1');
  expect(process.env.NEON_PROJECT_ID).toBe('solitary-wave-52860119');
  expect(new URL(process.env.DATABASE_URL_TEST!).hostname).toBe('ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech');

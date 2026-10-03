@@ -1,5 +1,6 @@
 import type {CommunicationClaim} from "@/lib/db/repos/batch-handlers/communication";
 import "server-only";
+import {campaignTemplateMap, type CampaignSourceTemplate} from "@/lib/admin/campaign-email-templates";
 
 import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
 import {classifyDeliveryFailure} from "@/lib/automation/retry";
@@ -57,14 +58,7 @@ const providerFailureCodes = new Set<DeliveryFailureCode>([
   "provider_unclassified_failure",
 ]);
 
-const campaignTemplateMap = {
-  "renewal-reminder": "campaign_generic",
-  "member-update": "campaign_generic",
-  "membership_renewal": "campaign_generic",
-  "batch-renewal-reminder": "batch_membership_renewal",
-  "batch-profile-update": "batch_profile_update",
-} as const;
-type CampaignSourceTemplate = keyof typeof campaignTemplateMap;
+
 
 export type CampaignRecipientClaim = Readonly<{
   id: string;
@@ -266,7 +260,7 @@ function failureCode(error: unknown): DeliveryFailureCode {
   return "provider_unclassified_failure";
 }
 
-function campaignTemplateSelection(
+export function campaignTemplateSelection(
   source: string,
 ): Readonly<{
   sourceTemplate: CampaignSourceTemplate;

@@ -1,9 +1,11 @@
 import {describe, expect, it} from "vitest";
 
-import {isEligibleCampaignEmail, queueCampaign, resolveCampaignDraft} from "@/lib/admin/campaigns";
+import {isEligibleCampaignEmail, resolveCampaignDraft, type CampaignQueueDependencies, type QueueCampaignInput} from "@/lib/admin/campaigns";
 import {campaignsRepository, createCampaignsRepository} from "@/lib/db/repos/campaigns";
 import type {RecipientFacts} from "@/lib/db/repos/message-eligibility";
 import {auditEvents, campaignRecipients, campaigns, savedSegments} from "@/lib/db/server-schema";
+import {createCampaignDraft} from "@/lib/admin/campaign-wizard";
+import type {Actor} from "@/lib/membership/lifecycle";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
 const actor = (): AdminActor => ({kind: "staff", userId: "staff-1", profileId: "staff-1"});
@@ -13,6 +15,10 @@ const input = {
   localeStrategy: "profile" as const,
   idempotencyKey: "22222222-2222-4222-8222-222222222222",
 };
+
+function reviewedDraft(who: Actor, value: QueueCampaignInput, dependencies: CampaignQueueDependencies) {
+  return createCampaignDraft(who, {draftId: value.idempotencyKey, segmentId: value.segmentId, name: "Reviewed synthetic draft", channel: "email", template: value.template}, {campaigns: dependencies, templates: {list: async () => []}});
+}
 
 // What a `filter_version = 1` row still holds on disk, and what the same filter
 // looks like once `parseSegmentFilter` has dispatched it (C-6, S-9).
@@ -228,14 +234,14 @@ function fakeDependencies() {
   };
 }
 
-describe("campaign queue", () => {
+describe("reviewed campaign draft snapshot", () => {
   it("queues one immutable snapshot when concurrent production repository calls race", async () => {
     const race = createConcurrentCampaignDatabase();
     const repository = createCampaignsRepository(async () => race.database as never);
 
     const results = await Promise.all([
-      queueCampaign(actor(), input, repository),
-      queueCampaign(actor(), input, repository),
+      reviewedDraft(actor(), input, repository),
+      reviewedDraft(actor(), input, repository),
     ]);
 
     expect(results.map(({disposition}) => disposition).sort()).toEqual(["created", "existing"]);
@@ -256,7 +262,7 @@ describe("campaign queue", () => {
     expect(race.store.audits).toEqual([{
       actorUserId: "staff-1",
       actorType: "staff",
-      action: "campaign.queued",
+      action: "campaign.drafted",
       targetType: "campaign",
       targetId: "44444444-4444-4444-8444-444444444444",
       metadata: {eligible: 1, blocked: 0, byReason: {}},
@@ -273,7 +279,7 @@ describe("campaign queue", () => {
     const repository = createCampaignsRepository(async () => fake.database as never);
     const message = failAt === "create" ? "campaign insert failed" : failAt === "recipients" ? "recipient insert failed" : "audit insert failed";
 
-    await expect(queueCampaign(actor(), input, repository)).rejects.toThrow(message);
+    await expect(reviewedDraft(actor(), input, repository)).rejects.toThrow(message);
     expect(fake.store.campaigns).toEqual([]);
     expect(fake.store.recipients).toEqual([]);
     expect(fake.store.audits).toEqual([]);
@@ -288,7 +294,7 @@ describe("campaign queue", () => {
     await expect(campaignsRepository.audienceForSegment(anonymous, {}, dispatchedFilters)).rejects.toThrow();
     await expect(campaignsRepository.createCampaign(anonymous, {}, input)).rejects.toThrow();
     await expect(campaignsRepository.insertRecipients(anonymous, {}, "campaign-1", [])).rejects.toThrow();
-    await expect(campaignsRepository.appendAudit(anonymous, {}, "campaign-1", {action: "campaign.queued", eligible: 0, blocked: 0, byReason: {}})).rejects.toThrow();
+    await expect(campaignsRepository.appendAudit(anonymous, {}, "campaign-1", {action: "campaign.drafted", eligible: 0, blocked: 0, byReason: {}})).rejects.toThrow();
   });
   it("keeps the URL-bound draft stable until an explicit new draft is requested", () => {
     expect(resolveCampaignDraft("11111111-1111-4111-8111-111111111111", () => "new-draft")).toEqual({draftId: "11111111-1111-4111-8111-111111111111", created: false});
@@ -301,7 +307,7 @@ describe("campaign queue", () => {
   it("freezes recipient identity, locale, and variables", async () => {
     const fake = fakeDependencies();
 
-    await expect(queueCampaign(actor(), input, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "created"});
+    await expect(reviewedDraft(actor(), input, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "created"});
     expect(fake.recipients).toEqual([{
       profileId: "member-1",
       email: "member1@example.test",
@@ -316,8 +322,8 @@ describe("campaign queue", () => {
   it("returns the existing campaign for the same idempotency key", async () => {
     const fake = fakeDependencies();
 
-    await queueCampaign(actor(), input, fake.dependencies);
-    await expect(queueCampaign(actor(), input, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "existing"});
+    await reviewedDraft(actor(), input, fake.dependencies);
+    await expect(reviewedDraft(actor(), input, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "existing"});
   });
 
   // The snapshot now holds the WHOLE audience: an ineligible recipient lands
@@ -334,7 +340,7 @@ describe("campaign queue", () => {
       memberFacts({id: "lapsed", displayName: "Lapsed", email: "lapsed@example.test", locale: "en", renewalAt: null, membershipStatus: "expired"}),
     ];
 
-    await expect(queueCampaign(actor(), {...input, idempotencyKey: "33333333-3333-4333-8333-333333333333"}, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "created"});
+    await expect(reviewedDraft(actor(), {...input, idempotencyKey: "33333333-3333-4333-8333-333333333333"}, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "created"});
     expect(fake.recipients).toEqual([
       {profileId: "eligible", email: "eligible@example.test", whatsappNumber: null, locale: "en", variables: {displayName: "Eligible"}, status: "queued", blockedReason: null},
       {profileId: "no-consent", email: "no-consent@example.test", whatsappNumber: null, locale: "en", variables: {}, status: "suppressed", blockedReason: "not_opted_in"},

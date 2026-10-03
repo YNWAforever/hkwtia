@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from "@testing-library/react";
+import {render, screen} from "@testing-library/react";
 import {describe, expect, it} from "vitest";
 
 import {SegmentResults, type SegmentResultsLabels} from "@/components/admin/segment-results";
@@ -8,17 +8,20 @@ const labels: SegmentResultsLabels = {
 };
 
 describe("campaign queue form", () => {
-  it("submits without an idempotency field and renders the translated safe error", async () => {
+  it("offers a read-only reviewed draft link retaining the exact segment and draft", async () => {
     const {container} = render(<SegmentResults
       labels={labels}
       newDraftHref="/en/admin/segments?campaignDraft=22222222-2222-4222-8222-222222222222"
+      campaignBasePath="/en/admin/campaigns"
+      campaignDraft="22222222-2222-4222-8222-222222222222"
       preview={{total: 0, items: [], nextCursor: null}}
       queueAction={async () => ({disposition: null, recipientCount: 0, error: "generic"})}
       saved={[{id: "11111111-1111-4111-8111-111111111111", ownerProfileId: "staff-1", nameEn: "At risk", nameZh: null, filterVersion: 1, filters: {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null, industryTags: [], companyPlan: [], event: null, audience: "members", contactStage: [], contactSource: []}, createdAt: "2026-07-19T00:00:00.000Z", updatedAt: "2026-07-19T00:00:00.000Z"}]}
     />);
 
     expect(container.querySelector('input[name="idempotencyKey"]')).toBeNull();
-    fireEvent.click(screen.getByRole("button", {name: labels.queue}));
-    expect(await screen.findByText(labels.error)).toBeInTheDocument();
+    expect(screen.getByRole("link", {name: labels.queue})).toHaveAttribute("href", "/en/admin/campaigns?segmentId=11111111-1111-4111-8111-111111111111&campaignDraft=22222222-2222-4222-8222-222222222222");
+    expect(container.querySelector("form")).toBeNull();
+    expect(screen.queryByRole("button", {name: labels.queue})).toBeNull();
   });
 });
