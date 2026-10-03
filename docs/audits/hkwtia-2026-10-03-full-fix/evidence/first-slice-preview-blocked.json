@@ -1,0 +1,14 @@
+{
+  "sourceSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+  "deploymentId": "dpl_6LmjSs1zgMnDnGH5dCTsdbp3TUH4",
+  "origin": "https://hkwtia-full-fix-20261003.vercel.app",
+  "observedAt": "2026-10-03T11:24:40.441Z",
+  "production": false,
+  "checks": [],
+  "gate": {
+    "stage": "positive-runtime-db-proof",
+    "status": 200
+  },
+  "providerSends": 0,
+  "paymentWrites": 0
+}

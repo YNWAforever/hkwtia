@@ -464,5 +464,59 @@
     "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
     "evidenceBasis": "implemented-current-checkout",
     "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T05",
+    "symbol": "resolveAdminModel",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "validateModelRoute",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "createAdminModelRegistry",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "assertRouteInputWithinBounds",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "taskForAgent",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "createOpenCodeAgentProvider",
+    "path": "lib/ai/providers/opencode.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "d90d60cf1787dd9f988662d801b57b0966d0cb2baa36a2c696418cbad4f33b9b"
   }
 ]
