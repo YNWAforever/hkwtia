@@ -49,7 +49,7 @@ function billingPeriod(eventType: SupportedStripeEventType, object: StripeObject
   };
 }
 function subscriptionStatus(object: StripeObject): {status: MembershipStatus; cancelAtPeriodEnd: boolean} { const status = object.status; const cancelling = object.cancel_at_period_end === true; if (status === "canceled") return {status: "cancelled", cancelAtPeriodEnd: false}; if (status === "past_due" || status === "unpaid") return {status: "past_due", cancelAtPeriodEnd: cancelling}; if (status === "active" || status === "trialing") return {status: cancelling ? "cancel_at_period_end" : "active", cancelAtPeriodEnd: cancelling}; throw new WebhookInputError(); }
-function normalize(event: Stripe.Event): WebhookLifecycleCommand | null {
+export function normalizeMembershipStripeEvent(event: Stripe.Event): WebhookLifecycleCommand | null {
   if (!(supportedEventTypes as readonly string[]).includes(event.type)) return null;
   const eventType = event.type as SupportedStripeEventType; const object = objectValue(event.data?.object); const metadata = metadataFor(eventType, object);
   if (metadata.planCode !== "startup" && metadata.planCode !== "corporate") throw new WebhookInputError();
@@ -157,7 +157,7 @@ export async function processStripeEvent(
     try { return await ticketProcessor.process(actor, ticket); }
     catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "INVALID_WEBHOOK_EVENT") throw new WebhookInputError(); throw error; }
   }
-  const command = normalize(event);
+  const command = normalizeMembershipStripeEvent(event);
   if (!command) return "processed";
   try { return await processor.process(actor, command); }
   catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "INVALID_WEBHOOK_EVENT") throw new WebhookInputError(); throw error; }

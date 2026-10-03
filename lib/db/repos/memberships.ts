@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, isNull, or, sql} from "drizzle-orm";
+import {and, desc, eq, isNull, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
@@ -128,6 +128,16 @@ export const membershipsRepository = {
       .limit(1);
     if (!rows[0]) forbidden();
     return rows[0];
+  },
+
+  /** Billing history has its own scope; entitlement expiry never expands it. */
+  async listBilling(actor: Actor): Promise<Membership[]> {
+    if (actor.kind !== "member") forbidden();
+    const db = await getDb();
+    return db.select().from(membershipsTable).where(or(
+      eq(membershipsTable.ownerUserId, actor.profileId),
+      and(sql`${membershipsTable.companyId} IS NOT NULL`, companyBillingManagerScope(actor)),
+    )).orderBy(desc(membershipsTable.createdAt), desc(membershipsTable.id)).limit(50);
   },
 
   async list(actor: Actor): Promise<Membership[]> {

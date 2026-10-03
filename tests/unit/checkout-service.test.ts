@@ -76,6 +76,13 @@ afterEach(() => {
 });
 
 describe("membership checkout", () => {
+  it("refuses a pending row already correlated to an existing subscription", async () => {
+    const setup = dependencies(membership({stripeCustomerId: "cus_test", stripeSubscriptionId: "sub_existing"}));
+    await expect(createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).rejects.toThrow("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
+    expect(setup.stripe.checkoutRequests).toHaveLength(0);
+    expect(setup.attempts.claimActive).not.toHaveBeenCalled();
+  });
+
   it("uses the same idempotency key for retries of one membership", async () => {
     const setup = dependencies();
     const actor = actorFor("user@example.test");

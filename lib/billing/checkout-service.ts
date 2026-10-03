@@ -70,6 +70,7 @@ export async function getAuthorizedBillingMembership(
 
 function validateCheckoutMembership(membership: MembershipRecord): void {
   if (membership.status !== "pending_payment") throw new Error("MEMBERSHIP_NOT_PENDING_PAYMENT");
+  if (membership.stripeSubscriptionId) throw new Error("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
   if (membership.planCode !== "startup" && membership.planCode !== "corporate") {
     throw new Error("PLAN_DOES_NOT_USE_CHECKOUT");
   }
@@ -156,9 +157,17 @@ export async function createBillingPortalSession(
   dependencies: CheckoutDependencies = defaultDependencies(),
 ): Promise<{url: string}> {
   const membership = await getAuthorizedBillingMembership(actor, membershipId, dependencies);
-  if (!["active", "past_due", "cancel_at_period_end"].includes(membership.status)) {
+  if (!["active", "past_due", "cancel_at_period_end", "expired", "cancelled", "pending_payment"].includes(membership.status)) {
     throw new Error("MEMBERSHIP_BILLING_NOT_RECOVERABLE");
   }
+  if (membership.stripeSubscriptionId) {
+    const current = await dependencies.stripe.currentSubscription(membership.stripeSubscriptionId);
+    if (current.stripeCustomerId !== membership.stripeCustomerId || current.stripeSubscriptionId !== membership.stripeSubscriptionId) {
+      throw new Error("BILLING_SUBSCRIPTION_CORRELATION_FAILED");
+    }
+  }
+  // The provider portal offers existing invoices/subscription management; it
+  // does not create a replacement membership or grant an entitlement here.
   return dependencies.stripe.createBillingPortalSession({
     customerId: membership.stripeCustomerId!,
     returnUrl: `${appOrigin(dependencies.appUrl)}${localizedPath(locale, "/portal/billing")}`,
