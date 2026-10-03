@@ -18,7 +18,7 @@ export default async function ApplicationCasePage({ params }: Readonly<{
     const { locale: rawLocale, id } = await params;
     const locale = rawLocale as AppLocale;
     setRequestLocale(locale);
-    const actor = await requireAdminPageActor();
+    const actor = await requireAdminPageActor(`/admin/members/queue/${id}`);
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
         notFound();
     const record = await applicationsRepository.getApplicationCase(actor, id);
