@@ -39,3 +39,7 @@
 - `npm run lint`、`npm run typecheck`、`npm run audit:strings`、`npm run build`；完整unit suite另按exact-source CI記pass/skip，不把skip算pass。
 
 詳細RED、原始log摘要hash、固定22/28/64台帳及隔離0059 receipt見`evidence/t08/verification.json`。原始audit／UC結果與25題golden JSONL字節保持不變。
+
+## T08 本次驗收版本
+
+`9cfb70de`：CI6567pass／416skip，worker57pass及全部checks綠；真正隔離Preview以合成Neon密碼身份完成17入口＋12草稿checks。手機按鈕42px的RED已修至44px。Preview來源部署`dpl_6ugvMLSDGzYUNofZ39VDBKgu7yCa`。本次沒有真模型、Google、magic link、付款或訊息效果；0059只在隔離資料庫。完整task及case尚有獨立gate，並非fullfix。

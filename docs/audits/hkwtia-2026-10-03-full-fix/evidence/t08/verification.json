@@ -1,8 +1,8 @@
 {
   "task": "T08",
-  "observedAt": "2026-10-03T20:13:00.409522+00:00",
+  "observedAt": "2026-10-03T20:59:40.732824+00:00",
   "sourceBase": "4904e287e0702df7d642643c159d1af768b30bf3",
-  "sourceState": "Final89 inclPG30 and build ran on byte-identical42 source files in source-hashes.json; broad510 precedes formatting/schema-check synchronization; earlier typecheck/lint/strings are not exact-head CI.",
+  "sourceState": "45 source files byte-identical to exact9cf full CI and native Preview; broad510 and final89/PG30 retain their earlier provenance.",
   "production": false,
   "providerAcceptance": false,
   "realProviderRequests": 0,
@@ -78,6 +78,13 @@
       "failed": 2,
       "log": "full-fix-t08-action-boundary-red.log",
       "logSha256": "663e591498955b8de0a7990f16cae35f5bc24ebdfc33ea6d93234efc1a3c3e24"
+    },
+    {
+      "case": "actual mobile native target height42 below44",
+      "failed": 1,
+      "redReceipt": "mobile-touch-target-red.json",
+      "greenReceipt": "mobile-touch-target-green.json",
+      "sourceSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86"
     }
   ],
   "focused": {
@@ -114,11 +121,53 @@
       "exitCode": 0
     },
     "fullSuite": {
-      "state": "PENDING_EXACT_SOURCE_CI"
+      "state": "PASS_WITH_DECLARED_SKIPS",
+      "runId": 37152303723,
+      "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+      "passed": 6567,
+      "skipped": 416,
+      "failed": 0,
+      "shards": [
+        {
+          "passed": 3109,
+          "skipped": 206,
+          "durationSeconds": 220.92
+        },
+        {
+          "passed": 3458,
+          "skipped": 210,
+          "durationSeconds": 126.83
+        }
+      ],
+      "skipReason": "Guarded external DB/provider/acceptance suites are absent in default CI; no skip counted as pass. Actual own PG30 and isolated Neon/native59 receipts separate."
+    },
+    "exactHeadCi": {
+      "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+      "checks": "SUCCESS",
+      "workerTests": 57,
+      "lintErrors": 0,
+      "lintWarnings": 75,
+      "typecheck": "SUCCESS",
+      "strings": "SUCCESS",
+      "build": "SUCCESS",
+      "npmAudit": "SUCCESS",
+      "quality": "SUCCESS",
+      "logSha256": "6a677e18c9fae81ed9689df1f04a6990a054137d0478253f87116c1785b143ff"
     }
   },
   "nativeBrowser": {
-    "state": "PENDING_EXACT_SOURCE_PREVIEW"
+    "state": "ISOLATED_PREVIEW_PASS",
+    "sourceSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "baselineChecks": 17,
+    "reviewChecks": 12,
+    "deploymentId": "dpl_6ugvMLSDGzYUNofZ39VDBKgu7yCa",
+    "origin": "https://hkwtia-ai-drafts-20261003.vercel.app",
+    "actualSyntheticPasswordAuth": true,
+    "googleVerified": false,
+    "magicLinkVerified": false,
+    "ledger": 59,
+    "realProviderRequests": 0,
+    "production": false
   },
   "migration": {
     "name": "0059_ai_review_drafts",
@@ -137,7 +186,7 @@
     "Original25-case golden JSONL unchanged; declared exact synthetic fixture source-detail wire projection retains original facts/tools/effects and strict grading.",
     "Google/magic-link, cloud worker windows, approved real providers and Production rollout remain task-scoped gates."
   ],
-  "verifiedRuntimeCommit": "b5e93ce985d529560847b340b873d2eaf404a454",
+  "verifiedRuntimeCommit": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
   "firstFullCi": {
     "runId": 37151006256,
     "headSha": "c6f6df8e48bba958ee057f435e2a858c3a84baff",
@@ -159,5 +208,13 @@
     },
     "originalBusinessSemanticsRetained": true,
     "wireFormatChange": "Only application server-label prefix added; original expected membership facts and exact telemetry unchanged."
+  },
+  "followupFocused": {
+    "passed": 56,
+    "skipped": 1,
+    "failed": 0,
+    "durationSeconds": 21.29,
+    "sourceSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "guardedSkip": "external acceptance unavailable; not counted as pass"
   }
 }

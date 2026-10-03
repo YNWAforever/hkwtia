@@ -10,5 +10,13 @@
   {
     "message": "feat: integrate AI review into existing staff tasks",
     "sha": "b5e93ce985d529560847b340b873d2eaf404a454"
+  },
+  {
+    "sha": "11689820ef361aed0eb29b0709693cc071cdd936",
+    "message": "test: update explicit synthetic M4A grounding contract"
+  },
+  {
+    "sha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "message": "fix: meet mobile review touch target"
   }
 ]

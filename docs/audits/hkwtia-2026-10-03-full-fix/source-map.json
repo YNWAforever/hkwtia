@@ -663,7 +663,7 @@
     "taskId": "T08",
     "symbol": "validateGroundedContent",
     "path": "lib/ai/drafts/validation.ts",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -672,7 +672,7 @@
     "taskId": "T08",
     "symbol": "createAiDraftsRepository",
     "path": "lib/db/repos/ai-drafts.ts",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -681,7 +681,7 @@
     "taskId": "T08",
     "symbol": "createDraftWorkRepository",
     "path": "lib/db/repos/ai-draft-work.ts",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -690,7 +690,7 @@
     "taskId": "T08",
     "symbol": "createPublicConciergeFactsReader",
     "path": "lib/db/repos/ai-public-facts.ts",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -699,7 +699,7 @@
     "taskId": "T08",
     "symbol": "readApprovedDraftFacts",
     "path": "lib/ai/drafts/case-facts.ts",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -708,7 +708,7 @@
     "taskId": "T08",
     "symbol": "reviewAiDraftAction",
     "path": "lib/admin/ai-draft-actions.ts",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -717,7 +717,7 @@
     "taskId": "T08",
     "symbol": "AiReviewPanel",
     "path": "components/admin/ai-review-panel.tsx",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
@@ -726,7 +726,7 @@
     "taskId": "T08",
     "symbol": "TasksPage",
     "path": "app/[locale]/(admin)/admin/tasks/page.tsx",
-    "headSha": "b5e93ce985d529560847b340b873d2eaf404a454",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
     "state": "source committed; final focused89+PG30; exact CI/native pending",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"

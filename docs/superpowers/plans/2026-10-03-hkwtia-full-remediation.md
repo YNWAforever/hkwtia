@@ -600,4 +600,5 @@ npm --prefix workers test
 - [x] SQL concurrent review/facts stale/adoption audit與不可改寫歷史；durable work/requesting unknown/回執綁定；最新30actual PG。
 - [x] 510 broad focused及final89（含PG30）全部0skip；lint/typecheck/strings/build0。
 - [x] 已確認隔離Neon0059（58→59、profiles不變、零provider）。
-- [ ] 本次 exact-source full CI、native Preview；T09–T12業務facts/生成、T13真模型、T14D送達及正式release各自驗證。
+- [x] T08 exact9cf full CI6567pass416skip、worker57、native Preview17+12及mobile44px；receipt見evidence/t08。
+- [ ] T09–T12業務facts/生成、T13真模型、T14D送達及正式release各自驗證。
