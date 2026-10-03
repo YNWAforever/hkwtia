@@ -1,12 +1,22 @@
+import {
+  SupportFollowUpForm,
+  type SupportFollowUpLabels,
+} from "@/components/admin/support-follow-up-form";
+import {
+  SUPPORT_NEXT_ACTIONS,
+  SUPPORT_CLOSE_REASONS,
+} from "@/lib/admin/support-followup-types";
+import { inboxRepository } from "@/lib/db/repos/inbox";
+import { adminMembersRepository } from "@/lib/db/repos/admin-members";
 import Link from "next/link";
-import {getTranslations, setRequestLocale} from "next-intl/server";
-import {notFound} from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
 
-import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
-import {InboxComposer} from "@/components/admin/inbox-composer";
-import {InboxThread} from "@/components/admin/inbox-thread";
-import type {AppLocale} from "@/i18n/routing";
-import {readTranscript} from "@/lib/admin/inbox";
+import { WHATSAPP_TEMPLATES } from "@/config/whatsapp-templates";
+import { InboxComposer } from "@/components/admin/inbox-composer";
+import { InboxThread } from "@/components/admin/inbox-thread";
+import type { AppLocale } from "@/i18n/routing";
+import { readTranscript } from "@/lib/admin/inbox";
 import {
   formatReplyWindow,
   replyWindow,
@@ -14,24 +24,22 @@ import {
   type InboxReplyErrorCode,
 } from "@/lib/admin/inbox-action-core";
 import {
-  assignInboxConversationAction,
-  closeInboxConversationAction,
   markInboxReadAction,
   sendInboxReplyAction,
-  setInboxHandlingAction,
+  updateSupportFollowUpAction,
 } from "@/lib/admin/inbox-actions";
-import {requireAdminPageActor} from "@/lib/admin/page-auth";
-import {localizedPath} from "@/lib/urls";
-import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
+import { requireAdminPageActor } from "@/lib/admin/page-auth";
+import { localizedPath } from "@/lib/urls";
+import { approvedTemplateKeys } from "@/lib/whatsapp/approved-templates";
 
-type Props = Readonly<{params: Promise<{locale: string; id: string}>}>;
+type Props = Readonly<{ params: Promise<{ locale: string; id: string }> }>;
 
-export default async function AdminInboxThreadPage({params}: Props) {
-  const {locale: localeValue, id} = await params;
+export default async function AdminInboxThreadPage({ params }: Props) {
+  const { locale: localeValue, id } = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
-  const t = await getTranslations({locale, namespace: "Admin.inbox"});
+  const t = await getTranslations({ locale, namespace: "Admin.inbox" });
   const transcript = await readTranscript(actor, id);
   if (!transcript) notFound();
   const conversation = transcript.conversation;
@@ -46,9 +54,10 @@ export default async function AdminInboxThreadPage({params}: Props) {
   // global reads as a mistake even when it is not.
   const replyState = replyWindow(conversation.lastInboundAt);
   const countdown = formatReplyWindow(replyState);
-  const windowMessage = replyState.state === "open"
-    ? t("window.open", countdown)
-    : t(`window.${replyState.state}`);
+  const windowMessage =
+    replyState.state === "open"
+      ? t("window.open", countdown)
+      : t(`window.${replyState.state}`);
 
   // One call, one place, reading the same set as C1 Task 7's
   // TEMPLATE_NOT_APPROVED gate — a picker that offers a key the gate would
@@ -59,76 +68,188 @@ export default async function AdminInboxThreadPage({params}: Props) {
   // empty picker with no type error.
   const approved = await approvedTemplateKeys();
   const templates = Object.keys(WHATSAPP_TEMPLATES)
-    .filter((key): key is keyof typeof WHATSAPP_TEMPLATES => approved.has(key as keyof typeof WHATSAPP_TEMPLATES))
+    .filter((key): key is keyof typeof WHATSAPP_TEMPLATES =>
+      approved.has(key as keyof typeof WHATSAPP_TEMPLATES),
+    )
     // The provider's own element name, not a translated label: it is the string
     // staff will read back in the WOZTELL console when a template is rejected.
-    .map((key) => ({key, label: WHATSAPP_TEMPLATES[key].name}));
+    .map((key) => ({ key, label: WHATSAPP_TEMPLATES[key].name }));
 
   const errors = Object.fromEntries(
     INBOX_REPLY_ERROR_CODES.map((code) => [code, t(`errors.${code}`)]),
   ) as Record<InboxReplyErrorCode, string>;
 
-  const handlingForm = (handling: "bot" | "human", label: string) => (
-    <form action={setInboxHandlingAction.bind(null, path)}>
-      <input name="conversationId" type="hidden" value={conversation.id} />
-      <input name="handling" type="hidden" value={handling} />
-      <button className="min-h-11 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted" type="submit">{label}</button>
-    </form>
-  );
-
-  const assignForm = (assignedToProfileId: string, label: string) => (
-    <form action={assignInboxConversationAction.bind(null, path)}>
-      <input name="conversationId" type="hidden" value={conversation.id} />
-      <input name="assignedToProfileId" type="hidden" value={assignedToProfileId} />
-      <button className="min-h-11 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted" type="submit">{label}</button>
-    </form>
-  );
+  const followUp = await inboxRepository.getSupportFollowUp(actor, id);
+  if (!followUp) notFound();
+  const owners = await adminMembersRepository.listOperationOwners(actor);
+  const followLabels: SupportFollowUpLabels = {
+    title: t("followUp.title"),
+    owner: t("followUp.owner"),
+    unassigned: t("followUp.unassigned"),
+    due: t("followUp.due"),
+    next: t("followUp.next"),
+    handling: t("followUp.handling"),
+    closeReason: t("followUp.closeReason"),
+    noClose: t("followUp.noClose"),
+    application: t("followUp.application"),
+    billing: t("followUp.billing"),
+    reference: t("followUp.reference"),
+    note: t("followUp.note"),
+    privacy: t("followUp.privacy"),
+    save: t("followUp.save"),
+    saving: t("followUp.saving"),
+    saved: t("followUp.saved"),
+    conflict: t("followUp.conflict"),
+    invalid: t("followUp.invalid"),
+    unavailable: t("followUp.unavailable"),
+    reload: t("followUp.reload"),
+    nextActions: Object.fromEntries(
+      SUPPORT_NEXT_ACTIONS.map((key) => [
+        key,
+        t(`followUp.nextActions.${key}`),
+      ]),
+    ),
+    handlingValues: {
+      bot: t("handling.bot"),
+      human: t("handling.human"),
+      closed: t("handling.closed"),
+    },
+    closeReasons: Object.fromEntries(
+      SUPPORT_CLOSE_REASONS.map((key) => [
+        key,
+        t(`followUp.closeReasons.${key}`),
+      ]),
+    ),
+  };
+  const date = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Hong_Kong",
+  });
 
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <Link className="text-sm text-primary underline" href={localizedPath(locale, "/admin/inbox")}>{t("back")}</Link>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight">{conversation.ownerLabel ?? t("anonymous")}</h1>
-        <p className="text-muted-foreground">{conversation.channel} · {conversation.messageCount} · {t(`handling.${conversation.handling}`)}</p>
-        <p className="text-muted-foreground">{t("columns.assignee")}: {conversation.assigneeLabel ?? t("unassigned")}</p>
+        <Link
+          className="text-sm text-primary underline"
+          href={localizedPath(locale, "/admin/inbox")}
+        >
+          {t("back")}
+        </Link>
+        <h1 className="font-serif text-4xl font-semibold tracking-tight">
+          {conversation.ownerLabel ?? t("anonymous")}
+        </h1>
+        <p className="text-muted-foreground">
+          {conversation.channel} · {conversation.messageCount} ·{" "}
+          {t(`handling.${conversation.handling}`)}
+        </p>
+        <p className="text-muted-foreground">
+          {t("columns.assignee")}:{" "}
+          {conversation.assigneeLabel ?? t("unassigned")}
+        </p>
       </header>
       <div className="flex flex-wrap gap-3">
-        {/* The same rule the composer below states, applied to the control that
-            reaches it: `setHandling` refuses `human` on a thread that is not
-            WhatsApp (INVALID_INBOX_CHANNEL, lib/db/repos/inbox.ts), and
-            `setInboxHandlingAction` returns `void` — it has no `useActionState`
-            channel to carry an error code back, so that refusal would replace
-            the page with the generic error boundary and lose its state, on a
-            button that could never have succeeded. `Admin.inbox.errors
-            .INVALID_INBOX_CHANNEL` exists for the composer, which can show it.
-            Release needs no such gate: handing a thread back is `handling='bot'`,
-            which the repository accepts on either channel, and hiding it would
-            strand any web thread that somehow already reads `human`. */}
-        {conversation.handling === "human"
-          ? handlingForm("bot", t("actions.release"))
-          : conversation.channel === "whatsapp"
-            ? handlingForm("human", t("actions.take"))
-            : null}
-        {conversation.assignedToProfileId === actor.profileId
-          ? assignForm("", t("actions.unassign"))
-          : assignForm(actor.profileId, t("actions.assignToMe"))}
         {conversation.unread ? (
           <form action={markInboxReadAction.bind(null, path)}>
-            <input name="conversationId" type="hidden" value={conversation.id} />
-            <button className="min-h-11 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted" type="submit">{t("actions.markRead")}</button>
+            <input
+              name="conversationId"
+              type="hidden"
+              value={conversation.id}
+            />
+            <button
+              className="min-h-11 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
+              type="submit"
+            >
+              {t("actions.markRead")}
+            </button>
           </form>
         ) : null}
-        {conversation.handling === "closed" ? null : (
-          <form action={closeInboxConversationAction.bind(null, path)}>
-            <input name="conversationId" type="hidden" value={conversation.id} />
-            <button className="min-h-11 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted" type="submit">{t("actions.close")}</button>
-          </form>
-        )}
       </div>
+      <SupportFollowUpForm
+        conversationId={id}
+        value={followUp}
+        owners={owners}
+        channel={conversation.channel}
+        labels={followLabels}
+        action={updateSupportFollowUpAction.bind(null, path)}
+      />
+      <nav
+        className="flex flex-wrap gap-4"
+        aria-label={t("followUp.reference")}
+      >
+        {followUp.applicationId ? (
+          <Link
+            className="min-h-11 text-primary underline"
+            href={localizedPath(
+              locale,
+              "/admin/members/queue/" + followUp.applicationId,
+            )}
+          >
+            {t("followUp.openApplication")}
+          </Link>
+        ) : null}
+        {followUp.billingAttemptId ? (
+          <Link
+            className="min-h-11 text-primary underline"
+            href={localizedPath(
+              locale,
+              "/admin/members/" +
+                encodeURIComponent(conversation.profileId ?? ""),
+            )}
+          >
+            {t("followUp.openBilling")}
+          </Link>
+        ) : null}
+        {followUp.nextActionCode==="delivery_reconciliation"?<Link className="min-h-11 text-primary underline" href={localizedPath(locale,"/admin/system/job-health")}>{t("followUp.openDelivery")}</Link>:null}
+      </nav>
+      <section className="space-y-4 rounded-lg border p-4">
+        <h2 className="font-serif text-2xl">{t("followUp.timeline")}</h2>
+        {followUp.timeline.length ? (
+          <ol className="space-y-4">
+            {followUp.timeline.map((item) => (
+              <li key={item.context.supportVersion} className="border-b pb-3">
+                <time dateTime={item.at}>{date.format(new Date(item.at))}</time>
+                <p>
+                  {t(`followUp.nextActions.${item.context.nextActionCode}`)}
+                </p>
+                <p>
+                  {t("followUp.owner")}:{" "}
+                  {owners.find(
+                    (owner) => owner.id === item.context.ownerProfileId,
+                  )?.name ?? t("unassigned")}
+                </p>
+                <p className="whitespace-pre-wrap break-words">
+                  {item.context.handoffNote}
+                </p>
+                {item.context.closeReason ? (
+                  <p>
+                    {t("followUp.closeReason")}:{" "}
+                    {t(`followUp.closeReasons.${item.context.closeReason}`)}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p>{t("followUp.noHistory")}</p>
+        )}
+      </section>
       <InboxThread
         labels={{
-          roles: {user: t("roles.user"), assistant: t("roles.assistant"), tool: t("roles.tool"), staff: t("roles.staff")},
-          delivery: {queued: t("delivery.queued"), sent: t("delivery.sent"), delivered: t("delivery.delivered"), read: t("delivery.read"), failed: t("delivery.failed")},
+          roles: {
+            user: t("roles.user"),
+            assistant: t("roles.assistant"),
+            tool: t("roles.tool"),
+            staff: t("roles.staff"),
+          },
+          delivery: {
+            queued: t("delivery.queued"),
+            sent: t("delivery.sent"),
+            delivered: t("delivery.delivered"),
+            read: t("delivery.read"),
+            failed: t("delivery.failed"),
+            uncertain: t("delivery.uncertain"),
+          },
         }}
         locale={locale}
         transcript={transcript}
@@ -138,7 +259,8 @@ export default async function AdminInboxThreadPage({params}: Props) {
           concierge still holds, because `sendInboxReply` refuses both outright
           (INVALID_INBOX_CHANNEL, INVALID_INBOX_HANDLING) and a box that can only
           produce an error is worse than no box. */}
-      {conversation.channel === "whatsapp" && conversation.handling === "human" ? (
+      {conversation.channel === "whatsapp" &&
+      conversation.handling === "human" ? (
         <InboxComposer
           action={sendInboxReplyAction.bind(null, path)}
           conversationId={conversation.id}

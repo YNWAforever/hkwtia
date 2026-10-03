@@ -338,3 +338,14 @@ Actual built Chromium2pass/0skip/0fail36s, en/zh390/768/1440, drawer30Tabs/trap/
 Final full6272pass/284skip/0fail;744passfiles/82all-skipfiles. Exact commands/sourceSha/environment gates and skip names: evidence/t18/gates.json and evidence/gates/t18-skips.json. Lint0errors/67existingwarnings;typecheck0;strings307TSX;buildNext16.3.6/267pages. Raw receipts, path mappings and scoped UI review: evidence/t18/README.md. T19/T20/T21/T22/T23 continue; humanSOP/fullroles/financialreport/batchpreview/Preview/Production gates remain independent.
 
 Parent PR117 CI checks/quality/tests1/tests2/worker and Vercel Preview build read back SUCCESS2026-10-02: https://vercel.com/ynwaforevers-projects/hkwtia/3ouB85Z1GAJfEzz3mUHHnGqWXYkB . Build success does not establish isolated cloud acceptance.
+
+
+## T19 / support ownership, truthful send claims and follow-up
+
+Source ee00aa288e4952e4df55425307147b197a5eecbf (functional9539f5b; breadcrumb-only finaldelta): 265 focused/0skip/0fail,25actualSQL (18support+7workspace), plus15breadcrumb/workspace regressions. Actual SQL member-owner denial, CAS/handoff/strictrefs/auditrollback, legacy weak-writer blocks, inbound dedupe, bothSTOP stores/marketingblocked, identical legal new reply attempts, definitive-refusal retry and expired queued uncertainty. Built query omission first reproduced: live claim projectedfalse/null; minimum SELECT now returns provider ID/lease/databaseclock boolean.
+
+Actual built Chromium2pass/0skip/0fail35s; staff+superadmin (not two role=staff), both locales1440/390, keyboardEnter, stale-note retention, owner scopes,3close/handoff audits and financial membership/billing/order fingerprint unchanged. Four axe scans0violations; mobile color-contrast incomplete recorded. True axeRED breadcrumb lacked persistent underline (1.49:1text distinction); singleCSSclass repair, no disabled rule. Stored sent/delivered/queued fixtures are synthetic status display, provider sends0; provider receipt/approvedrecipient stillblocked.
+
+Fixed functional9539f5b full6282pass302skip0fail,747passfiles83allskipfiles; exact skips evidence/gates/t19-skips.json. This full run preceded the one breadcrumb CSS delta; exact-final full suite remains T22/PR CI, not fabricated. Finalee00 build/lint/typecheck/strings0;267pages/308TSX/67existinglintwarnings. Path mapping/RED classifications/commands/screens/gates:evidence/t19. No migration/flag/policy/Production write. Rollback must retain versioned-support guards and definitive-refusal-only reclaim; older writer rollback requires quiescing inboxPOST and reconciliation, retaining messages/leases/audits.
+
+Parent PR118 checks/tests1/tests2/worker/quality/Vercel read back SUCCESS; https://vercel.com/ynwaforevers-projects/hkwtia/4d4Z2tebyVkRs5ztKmd2y26NPDtV . Main read-only60a272b68c334d256d578ade36d8e24ca3be5485. Preview build is not isolated cloud acceptance. T20–T23 continue.

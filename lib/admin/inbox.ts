@@ -1,13 +1,14 @@
 import "server-only";
 
-import {requireAdmin} from "@/lib/auth/authorize";
+import { requireAdmin } from "@/lib/auth/authorize";
 import {
   inboxRepository,
   type InboxChannelFilter,
+  type InboxScope,
   type InboxHandlingFilter,
 } from "@/lib/db/repos/inbox";
-import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
-import type {Actor} from "@/lib/membership/lifecycle";
+import { staffTasksRepository } from "@/lib/db/repos/staff-tasks";
+import type { Actor } from "@/lib/membership/lifecycle";
 
 /**
  * The inbox READ helpers, and only those.
@@ -24,13 +25,19 @@ export async function listInbox(
   actor: Actor,
   channel: InboxChannelFilter,
   handling: InboxHandlingFilter = "all",
+  scope: InboxScope = "all",
 ) {
   requireAdmin(actor);
   // Both filters go down to the statement, not to a `.filter()` over the result:
   // this read is capped at 100 rows, and a filter applied after the cap answers
   // "handled by a person" with whichever of those threads happened to be among
   // the hundred most recent.
-  return inboxRepository.listConversations(actor, {channel, handling, limit: 100});
+  return inboxRepository.listConversations(actor, {
+    channel,
+    handling,
+    scope,
+    limit: 100,
+  });
 }
 
 export async function readTranscript(actor: Actor, conversationId: string) {

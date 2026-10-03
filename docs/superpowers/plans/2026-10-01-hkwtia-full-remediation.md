@@ -528,11 +528,13 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 重用 thread、task、provider message id/既有 dedupeKey；task context 擴充 application/payment reference 必須 strict typed allowlist，不存 token。擬新增 support disposition 為 existing task metadata，而非新 CRM。SLA 按 T09 另列營運批准值。
 
-- [ ] **建立行為證據：** 同 inbound event 去重；不同時間相同回覆可合法再發；兩職員並發回覆/接手；未送/已接收/送達/不確定分開；STOP 後 marketing blocked；一般支援不能用 profile patch 改角色或免費解決付款。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 未分派/我的/逾期視圖，owner、下一步、跟進日期與交接 note；接手動作可稽核。登入支援收 reference，不要求會員交 magic link；付款直接到 T08 對帳，未知送達到 T11 核對。歷史 Phase C WhatsApp 規則及合法 transactional purpose 保留；勿因統一 UX 破壞既有頻道同意策略。
+- [x] **建立行為證據：** 同 inbound event 去重；不同時間相同回覆可合法再發；兩職員並發回覆/接手；未送/已接收/送達/不確定分開；STOP 後 marketing blocked；一般支援不能用 profile patch 改角色或免費解決付款。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 未分派/我的/逾期視圖，owner、下一步、跟進日期與交接 note；接手動作可稽核。登入支援收 reference，不要求會員交 magic link；付款直接到 T08 對帳，未知送達到 T11 核對。歷史 Phase C WhatsApp 規則及合法 transactional purpose 保留；勿因統一 UX 破壞既有頻道同意策略。
 - [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-support-handoff.test.ts tests/unit/inbox-repeat-reply.test.ts tests/unit/woztell-consent-audit.test.ts；兩隔離職員與測試收件人完整交接。
 - [ ] **結案與提交：** 客服可找到人、接手、回覆、知道送達與關閉原因；錯誤不只能交開發者處理。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: complete support ownership and follow-up workflows`。
+
+**有限結果：** source `9539f5b4b9a7afd9f15ec55a9a9bfa4d8089a949`；265 focused／25真SQL，provider部分仍需批准WhatsApp測試收件人及實receipt。沒有migration／預設SLA／正式寫入。固定候選完整gates／built browser於evidence/t19另記；U37/U38及人工SOP未簽full pass。
 
 ### T20 · 公開內容、登入入口與會員語意
 

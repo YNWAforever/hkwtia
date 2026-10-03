@@ -29,7 +29,7 @@ export function AdminTopbar({locale, identity, role, mobileTrigger}: Readonly<{l
   return <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur sm:px-6">
     <div className="lg:hidden">{mobileTrigger}</div>
     <nav aria-label={t("shell.breadcrumbs")} className="min-w-0 flex-1 truncate text-sm">
-      <GuardedAdminLink className="text-muted-foreground hover:underline" href={localizedPath(locale, "/admin")}>{t("navigation.dashboard")}</GuardedAdminLink>
+      <GuardedAdminLink className="text-muted-foreground underline underline-offset-4" href={localizedPath(locale, "/admin")}>{t("navigation.dashboard")}</GuardedAdminLink>
       {current && current.href !== "/admin" ? <><span aria-hidden="true" className="mx-2">/</span><span aria-current="page">{t(linkLabelKeys[current.id])}</span></> : null}
     </nav>
     <GuardedAdminLink className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/admin/members")}>{t("shell.searchMembers")}</GuardedAdminLink>

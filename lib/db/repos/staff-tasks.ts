@@ -1,7 +1,7 @@
 import "server-only";
 
-import {sql} from "drizzle-orm";
-import {z} from "zod";
+import { sql } from "drizzle-orm";
+import { z } from "zod";
 
 import {
   requireConciergeAgent,
@@ -11,21 +11,33 @@ import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
-import {requireAdmin} from "@/lib/auth/authorize";
-import type {Actor} from "@/lib/membership/lifecycle";
-import {staffTasks} from "@/lib/db/server-schema";
-import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {getDb} from "@/lib/db/repos/common";
+import { requireAdmin } from "@/lib/auth/authorize";
+import type { Actor } from "@/lib/membership/lifecycle";
+import { staffTasks } from "@/lib/db/server-schema";
+import type {
+  AutomationDatabase,
+  AutomationDatabaseLoader,
+  AutomationSqlExecutor,
+} from "@/lib/db/repos/journeys";
+import { getDb } from "@/lib/db/repos/common";
 
 export type StaffTaskContext = Readonly<{
-  applicationId?: string;
+  applicationId?: string | null;
   caseVersion?: string;
+  supportVersion?: string;
+  billingAttemptId?: string | null;
+  supportReference?: string | null;
+  handoffNote?: string;
+  handling?: "bot" | "human" | "closed";
+  closeReason?:
+    "resolved" | "member_withdrew" | "duplicate" | "escalated" | null;
   ownerProfileId?: string | null;
   dueAt?: string | null;
   missingFields?: readonly string[];
   nextActionCode?: string;
   contactEmail?: string;
-  noticeKind?: "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";
+  noticeKind?:
+    "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";
   orderId?: string;
   conversationId?: string;
   agentRunId?: string;
@@ -41,9 +53,10 @@ type StaffTaskFields = Readonly<{
   context?: StaffTaskContext;
 }>;
 
-export type StaffTaskInput = StaffTaskFields & Readonly<{
-  profileId: string;
-}>;
+export type StaffTaskInput = StaffTaskFields &
+  Readonly<{
+    profileId: string;
+  }>;
 
 const agentStaffTaskSummaryCodeSchema = z.enum([
   "human_requested",
@@ -53,17 +66,20 @@ const agentStaffTaskSummaryCodeSchema = z.enum([
   "provider_handoff",
 ]);
 
-export type AgentStaffTaskSummaryCode =
-  z.infer<typeof agentStaffTaskSummaryCodeSchema>;
+export type AgentStaffTaskSummaryCode = z.infer<
+  typeof agentStaffTaskSummaryCodeSchema
+>;
 
-export type AgentStaffTaskInput = Omit<StaffTaskFields, "summaryCode"> & Readonly<{
-  profileId: string | null;
-  summaryCode: AgentStaffTaskSummaryCode;
-}>;
+export type AgentStaffTaskInput = Omit<StaffTaskFields, "summaryCode"> &
+  Readonly<{
+    profileId: string | null;
+    summaryCode: AgentStaffTaskSummaryCode;
+  }>;
 
-type AnyStaffTaskInput = StaffTaskFields & Readonly<{
-  profileId: string | null;
-}>;
+type AnyStaffTaskInput = StaffTaskFields &
+  Readonly<{
+    profileId: string | null;
+  }>;
 
 type StaffTaskRecordFields = Readonly<{
   id: string;
@@ -75,18 +91,21 @@ type StaffTaskRecordFields = Readonly<{
   status: "open" | "resolved";
 }>;
 
-export type StaffTaskRecord = StaffTaskRecordFields & Readonly<{
-  profileId: string;
-}>;
+export type StaffTaskRecord = StaffTaskRecordFields &
+  Readonly<{
+    profileId: string;
+  }>;
 
-export type AgentStaffTaskRecord = StaffTaskRecordFields & Readonly<{
-  profileId: string | null;
-  context: StaffTaskContext;
-}>;
+export type AgentStaffTaskRecord = StaffTaskRecordFields &
+  Readonly<{
+    profileId: string | null;
+    context: StaffTaskContext;
+  }>;
 
-type AnyStaffTaskRecord = StaffTaskRecordFields & Readonly<{
-  profileId: string | null;
-}>;
+type AnyStaffTaskRecord = StaffTaskRecordFields &
+  Readonly<{
+    profileId: string | null;
+  }>;
 
 /**
  * Admin queue row (Phase A, audit F2). The agent/automation record types above
@@ -101,6 +120,8 @@ export type OpenStaffTask = Readonly<{
   context: StaffTaskContext;
   status: "open" | "resolved";
   createdAt: Date;
+  profileLabel?: string | null;
+  ownerLabel?: string | null;
 }>;
 
 type StaffTaskResult<T> = Readonly<{
@@ -108,26 +129,37 @@ type StaffTaskResult<T> = Readonly<{
   disposition: "created" | "existing";
 }>;
 
-const contextSchema = z.object({
-  contactEmail: z.string().email().max(320).optional(),
-  conversationId: z.string().uuid().optional(),
-  agentRunId: z.string().uuid().optional(),
-  reasonCode: z.string().regex(/^[a-z0-9][a-z0-9_.-]{0,99}$/).optional(),
-  locale: z.enum(["en", "zh-HK"]).optional(),
-}).strict();
-const inputSchema = z.object({
-  profileId: z.string().min(1).max(255).nullable(),
-  journeyStateId: z.string().min(1).max(255).nullable(),
-  kind: z.string().min(1).max(100),
-  dedupeKey: z.string().min(1).max(255),
-  summaryCode: z.string().min(1).max(10_000),
-  context: contextSchema.optional(),
-}).strict();
-
+const contextSchema = z
+  .object({
+    contactEmail: z.string().email().max(320).optional(),
+    conversationId: z.string().uuid().optional(),
+    agentRunId: z.string().uuid().optional(),
+    reasonCode: z
+      .string()
+      .regex(/^[a-z0-9][a-z0-9_.-]{0,99}$/)
+      .optional(),
+    locale: z.enum(["en", "zh-HK"]).optional(),
+  })
+  .strict();
+const inputSchema = z
+  .object({
+    profileId: z.string().min(1).max(255).nullable(),
+    journeyStateId: z.string().min(1).max(255).nullable(),
+    kind: z.string().min(1).max(100),
+    dedupeKey: z.string().min(1).max(255),
+    summaryCode: z.string().min(1).max(10_000),
+    context: contextSchema.optional(),
+  })
+  .strict();
 
 function rowsFrom(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result as Record<string, unknown>[];
-  if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) {
+  if (
+    result &&
+    typeof result === "object" &&
+    "rows" in result &&
+    Array.isArray(result.rows)
+  ) {
     return result.rows as Record<string, unknown>[];
   }
   return [];
@@ -136,31 +168,40 @@ function rowsFrom(result: unknown): Record<string, unknown>[] {
 function taskFrom(row: Record<string, unknown>): AnyStaffTaskRecord {
   return {
     id: String(row.id),
-    profileId: row.profile_id === null || row.profile_id === undefined
-      ? null
-      : String(row.profile_id),
-    journeyStateId: row.journey_state_id === null || row.journey_state_id === undefined ? null : String(row.journey_state_id),
+    profileId:
+      row.profile_id === null || row.profile_id === undefined
+        ? null
+        : String(row.profile_id),
+    journeyStateId:
+      row.journey_state_id === null || row.journey_state_id === undefined
+        ? null
+        : String(row.journey_state_id),
     kind: String(row.kind),
     dedupeKey: String(row.dedupe_key),
     summaryCode: String(row.summary_code),
-    context: row.context && typeof row.context === "object" && !Array.isArray(row.context)
-      ? row.context as StaffTaskContext
-      : {},
+    context:
+      row.context &&
+      typeof row.context === "object" &&
+      !Array.isArray(row.context)
+        ? (row.context as StaffTaskContext)
+        : {},
     status: String(row.status) as AnyStaffTaskRecord["status"],
   };
 }
 
 async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
-  return await getDb() as unknown as AutomationDatabase;
+  return (await getDb()) as unknown as AutomationDatabase;
 }
 
 async function existingTask(
   transaction: AutomationSqlExecutor,
   dedupeKey: string,
 ): Promise<AnyStaffTaskRecord> {
-  const row = rowsFrom(await transaction.execute(sql`
+  const row = rowsFrom(
+    await transaction.execute(sql`
     SELECT * FROM ${staffTasks} WHERE dedupe_key = ${dedupeKey} LIMIT 1
-  `))[0];
+  `),
+  )[0];
   if (!row) throw new Error("STAFF_TASK_CREATE_FAILED");
   return taskFrom(row);
 }
@@ -170,9 +211,9 @@ function isOwnedByAgent(
   actor: ConciergeAgentActor,
 ): boolean {
   return (
-    record.profileId === actor.profileId
-    && record.context?.conversationId === actor.conversationId
-    && record.context?.agentRunId === actor.runId
+    record.profileId === actor.profileId &&
+    record.context?.conversationId === actor.conversationId &&
+    record.context?.agentRunId === actor.runId
   );
 }
 
@@ -181,14 +222,16 @@ async function existingAgentTask(
   actor: ConciergeAgentActor,
   dedupeKey: string,
 ): Promise<AgentStaffTaskRecord> {
-  const row = rowsFrom(await transaction.execute(sql`
+  const row = rowsFrom(
+    await transaction.execute(sql`
     SELECT * FROM ${staffTasks}
     WHERE dedupe_key = ${dedupeKey}
       AND profile_id IS NOT DISTINCT FROM ${actor.profileId}
       AND context ->> 'conversationId' = ${actor.conversationId}
       AND context ->> 'agentRunId' = ${actor.runId}
     LIMIT 1
-  `))[0];
+  `),
+  )[0];
   if (!row) throw new Error("STAFF_TASK_DEDUPE_CONFLICT");
   const record = taskFrom(row);
   if (!isOwnedByAgent(record, actor)) {
@@ -226,20 +269,19 @@ export function createStaffTasksRepository(
 
     if (actor.kind === "agent") {
       const legacyDedupeKey = `agent-run:${actor.runId}`;
-      const scopedDedupeKey =
-        `${legacyDedupeKey}:${parsed.kind}:${parsed.summaryCode}`;
+      const scopedDedupeKey = `${legacyDedupeKey}:${parsed.kind}:${parsed.summaryCode}`;
       if (
-        parsed.dedupeKey !== legacyDedupeKey
-        && parsed.dedupeKey !== scopedDedupeKey
+        parsed.dedupeKey !== legacyDedupeKey &&
+        parsed.dedupeKey !== scopedDedupeKey
       ) {
         throw new Error("INVALID_AGENT_STAFF_TASK");
       }
       if (
-        parsed.profileId !== actor.profileId
-        || context.conversationId !== actor.conversationId
-        || context.agentRunId !== actor.runId
-        || !context.reasonCode
-        || !context.locale
+        parsed.profileId !== actor.profileId ||
+        context.conversationId !== actor.conversationId ||
+        context.agentRunId !== actor.runId ||
+        !context.reasonCode ||
+        !context.locale
       ) {
         throw new Error("INVALID_AGENT_STAFF_TASK");
       }
@@ -251,9 +293,10 @@ export function createStaffTasksRepository(
       }
     }
 
-    const summaryCode = actor.kind === "agent"
-      ? agentStaffTaskSummaryCodeSchema.parse(parsed.summaryCode)
-      : parsed.summaryCode;
+    const summaryCode =
+      actor.kind === "agent"
+        ? agentStaffTaskSummaryCodeSchema.parse(parsed.summaryCode)
+        : parsed.summaryCode;
     const database = await loadDatabase();
     const result = await database.execute(sql`
       INSERT INTO ${staffTasks}
@@ -277,7 +320,7 @@ export function createStaffTasksRepository(
       RETURNING *
     `);
     const row = rowsFrom(result)[0];
-    if (row) return {record: taskFrom(row), disposition: "created"};
+    if (row) return { record: taskFrom(row), disposition: "created" };
     if (actor.kind === "agent") {
       return {
         record: await existingAgentTask(database, actor, parsed.dedupeKey),
@@ -293,40 +336,64 @@ export function createStaffTasksRepository(
   async function listOpen(actor: Actor): Promise<readonly OpenStaffTask[]> {
     requireAdmin(actor);
     const database = await loadDatabase();
-    const rows = rowsFrom(await database.execute(sql`
-      SELECT id, profile_id, kind, summary_code, context, status, created_at
-      FROM ${staffTasks}
-      WHERE status = 'open'
-      ORDER BY created_at DESC, id DESC
+    const rows = rowsFrom(
+      await database.execute(sql`
+      SELECT t.id,t.profile_id,t.kind,t.summary_code,t.context,t.status,t.created_at,p.display_name AS profile_label,owner.display_name AS owner_label
+      FROM ${staffTasks} t LEFT JOIN profiles p ON p.id=t.profile_id LEFT JOIN profiles owner ON owner.id=t.context->>'ownerProfileId'
+      WHERE t.status = 'open'
+      ORDER BY t.created_at DESC, t.id DESC
       LIMIT 200
-    `));
+    `),
+    );
     return rows.map((row) => ({
+      profileLabel:
+        typeof row.profile_label === "string" ? row.profile_label : null,
+      ownerLabel: typeof row.owner_label === "string" ? row.owner_label : null,
       id: String(row.id),
       profileId: typeof row.profile_id === "string" ? row.profile_id : null,
       kind: String(row.kind),
       summaryCode: String(row.summary_code),
-      context: (row.context && typeof row.context === "object" ? row.context : {}) as StaffTaskContext,
+      context: (row.context && typeof row.context === "object"
+        ? row.context
+        : {}) as StaffTaskContext,
       status: row.status === "resolved" ? "resolved" : "open",
-      createdAt: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
+      createdAt:
+        row.created_at instanceof Date
+          ? row.created_at
+          : new Date(String(row.created_at)),
     }));
   }
 
-  async function resolve(actor: Actor, taskId: string): Promise<Readonly<{id: string; disposition: "resolved" | "already_resolved"}>> {
+  async function resolve(
+    actor: Actor,
+    taskId: string,
+  ): Promise<
+    Readonly<{ id: string; disposition: "resolved" | "already_resolved" }>
+  > {
     requireAdmin(actor);
     const id = z.string().uuid().parse(taskId);
     const database = await loadDatabase();
-    const current = rowsFrom(await database.execute(sql`SELECT kind FROM ${staffTasks} WHERE id=${id} LIMIT 1`))[0];
-    if(current?.kind === "membership_application")throw new Error("APPLICATION_CASE_RESOLVE_REQUIRES_VERSION");
-    const row = rowsFrom(await database.execute(sql`
+    const current = rowsFrom(
+      await database.execute(
+        sql`SELECT kind FROM ${staffTasks} WHERE id=${id} LIMIT 1`,
+      ),
+    )[0];
+    if (current?.kind === "support_followup")
+      throw new Error("SUPPORT_FOLLOWUP_RESOLVE_REQUIRES_VERSION");
+    if (current?.kind === "membership_application")
+      throw new Error("APPLICATION_CASE_RESOLVE_REQUIRES_VERSION");
+    const row = rowsFrom(
+      await database.execute(sql`
       UPDATE ${staffTasks}
       SET status = 'resolved', resolved_at = now(), resolved_by_profile_id = ${actor.profileId}, updated_at = now()
-      WHERE id = ${id} AND status = 'open' AND kind <> 'membership_application'
+      WHERE id = ${id} AND status = 'open' AND kind NOT IN ('membership_application','support_followup')
       RETURNING id
-    `))[0];
-    return {id, disposition: row ? "resolved" : "already_resolved"};
+    `),
+    )[0];
+    return { id, disposition: row ? "resolved" : "already_resolved" };
   }
 
-  return {createOnce, listOpen, resolve};
+  return { createOnce, listOpen, resolve };
 }
 
 export type StaffTasksRepository = Readonly<{
@@ -343,5 +410,5 @@ export type AgentStaffTasksRepository = Readonly<{
     input: AgentStaffTaskInput,
   ) => Promise<StaffTaskResult<AgentStaffTaskRecord>>;
 }>;
-export type AllStaffTasksRepository =
-  StaffTasksRepository & AgentStaffTasksRepository;
+export type AllStaffTasksRepository = StaffTasksRepository &
+  AgentStaffTasksRepository;

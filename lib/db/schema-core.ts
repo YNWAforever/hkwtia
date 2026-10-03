@@ -733,8 +733,14 @@ export const staffTasks = pgTable("staff_tasks", {
   summaryCode: text("summary_code").notNull(),
   context: jsonb("context")
     .$type<{
-      applicationId?: string;
+      applicationId?: string | null;
       caseVersion?: string;
+      supportVersion?: string;
+      billingAttemptId?: string|null;
+      supportReference?: string|null;
+      handoffNote?: string;
+      handling?: "bot"|"human"|"closed";
+      closeReason?: "resolved"|"member_withdrew"|"duplicate"|"escalated"|null;
       ownerProfileId?: string | null;
       dueAt?: string | null;
       missingFields?: readonly string[];

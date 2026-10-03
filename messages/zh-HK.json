@@ -2921,8 +2921,22 @@
       "eyebrow": "會員及潛在客戶對話",
       "title": "訊息中心",
       "description": "網站聊天視窗及 WhatsApp 上的所有禮賓對話。接手對話即可親自回覆，完成後可交回禮賓助理。",
-      "filters": {"all": "全部", "whatsapp": "WhatsApp", "web": "網頁"},
-      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態", "handling": "處理方", "assignee": "負責人", "unread": "未讀"},
+      "filters": {
+        "all": "全部",
+        "whatsapp": "WhatsApp",
+        "web": "網頁"
+      },
+      "columns": {
+        "owner": "對象",
+        "channel": "渠道",
+        "last": "最後訊息",
+        "when": "更新時間",
+        "messages": "訊息數",
+        "status": "狀態",
+        "handling": "處理方",
+        "assignee": "負責人",
+        "unread": "未讀"
+      },
       "anonymous": "潛在客戶（非會員）",
       "escalated": "需要真人跟進",
       "empty": "尚未有對話。",
@@ -2931,13 +2945,119 @@
       "back": "返回訊息中心",
       "unassigned": "未指派",
       "unreadYes": "新訊息",
-      "roles": {"user": "發送者", "assistant": "禮賓助理", "tool": "工具", "staff": "WTIA 職員"},
-      "handling": {"bot": "禮賓助理", "human": "由職員處理", "closed": "已結束", "filterAll": "所有對話", "filterHuman": "由職員處理", "filterBot": "由禮賓助理處理"},
-      "actions": {"take": "接手此對話", "release": "交回禮賓助理", "close": "結束此對話", "assignToMe": "指派給我", "unassign": "取消指派", "markRead": "標記為已讀"},
-      "window": {"open": "尚餘 {hours} 小時 {minutes} 分鐘可自由回覆", "closed": "24 小時回覆時限已過，請改用已批核範本。", "never": "對方尚未主動傳送訊息，因此沒有開啟中的回覆時限。"},
-      "compose": {"legend": "回覆", "kindSession": "自由文字回覆", "kindTemplate": "已批核範本", "message": "你的回覆", "placeholder": "輸入回覆內容…", "template": "範本", "templateNone": "選擇範本", "send": "發送", "sending": "發送中…", "sent": "已發送。", "alreadySent": "未發送——此回覆已於本對話發送過，今次沒有發出新訊息。請先查看對話；若確實要再發一次，請修改內文。", "draftRestored": "已回復草稿。"},
-      "delivery": {"queued": "發送中", "sent": "已發送", "delivered": "已送達", "read": "已讀", "failed": "未能送達"},
-      "errors": {"INVALID": "請檢查訊息內容及範本。", "FORBIDDEN": "你無權存取此對話。", "WINDOW_CLOSED": "24 小時時限已過，請改用已批核範本。", "NOT_OPTED_IN": "對方未同意接收 WhatsApp 訊息。", "OPTED_OUT": "對方已要求停止接收訊息。", "SUPPRESSED": "對方已停止接收 WhatsApp 推廣訊息。", "NO_NUMBER": "我們沒有對方的 WhatsApp 號碼。", "INVALID_INBOX_CHANNEL": "此對話並非 WhatsApp 對話。", "INVALID_INBOX_HANDLING": "請先接手此對話才可回覆。", "TEMPLATE_NOT_APPROVED": "該範本未獲批核發送。", "SEND_IN_PROGRESS": "此回覆正在發送中，請稍候再試。", "DELIVERY_FAILED": "WhatsApp 拒絕了此訊息，請再按「發送」重試。", "DELIVERY_UNCERTAIN": "無法確認 WhatsApp 是否已接收此訊息。再次發送前請先到 WhatsApp 查看對話——再按「發送」不會重發此回覆，修改內文則會發出新訊息。"}
+      "roles": {
+        "user": "發送者",
+        "assistant": "禮賓助理",
+        "tool": "工具",
+        "staff": "WTIA 職員"
+      },
+      "handling": {
+        "bot": "禮賓助理",
+        "human": "由職員處理",
+        "closed": "已結束",
+        "filterAll": "所有對話",
+        "filterHuman": "由職員處理",
+        "filterBot": "由禮賓助理處理"
+      },
+      "actions": {
+        "take": "接手此對話",
+        "release": "交回禮賓助理",
+        "close": "結束此對話",
+        "assignToMe": "指派給我",
+        "unassign": "取消指派",
+        "markRead": "標記為已讀"
+      },
+      "window": {
+        "open": "尚餘 {hours} 小時 {minutes} 分鐘可自由回覆",
+        "closed": "24 小時回覆時限已過，請改用已批核範本。",
+        "never": "對方尚未主動傳送訊息，因此沒有開啟中的回覆時限。"
+      },
+      "compose": {
+        "legend": "回覆",
+        "kindSession": "自由文字回覆",
+        "kindTemplate": "已批核範本",
+        "message": "你的回覆",
+        "placeholder": "輸入回覆內容…",
+        "template": "範本",
+        "templateNone": "選擇範本",
+        "send": "發送",
+        "sending": "發送中…",
+        "sent": "已發送。",
+        "alreadySent": "未發送——此回覆已於本對話發送過，今次沒有發出新訊息。請先查看對話；若確實要再發一次，請修改內文。",
+        "draftRestored": "已回復草稿。"
+      },
+      "delivery": {
+        "queued": "發送中",
+        "sent": "服務商已接收",
+        "delivered": "已送達",
+        "read": "已讀",
+        "failed": "未能送達",
+        "uncertain": "送達結果未確定；先核對服務商紀錄再重試"
+      },
+      "errors": {
+        "INVALID": "請檢查訊息內容及範本。",
+        "FORBIDDEN": "你無權存取此對話。",
+        "WINDOW_CLOSED": "24 小時時限已過，請改用已批核範本。",
+        "NOT_OPTED_IN": "對方未同意接收 WhatsApp 訊息。",
+        "OPTED_OUT": "對方已要求停止接收訊息。",
+        "SUPPRESSED": "對方已停止接收 WhatsApp 推廣訊息。",
+        "NO_NUMBER": "我們沒有對方的 WhatsApp 號碼。",
+        "INVALID_INBOX_CHANNEL": "此對話並非 WhatsApp 對話。",
+        "INVALID_INBOX_HANDLING": "請先接手此對話才可回覆。",
+        "TEMPLATE_NOT_APPROVED": "該範本未獲批核發送。",
+        "SEND_IN_PROGRESS": "此回覆正在發送中，請稍候再試。",
+        "DELIVERY_FAILED": "WhatsApp 拒絕了此訊息，請再按「發送」重試。",
+        "DELIVERY_UNCERTAIN": "無法確認 WhatsApp 是否已接收此訊息。再次發送前請先到 WhatsApp 查看對話——再按「發送」不會重發此回覆，修改內文則會發出新訊息。"
+      },
+      "followUp": {
+        "title": "支援跟進",
+        "owner": "負責人",
+        "unassigned": "未指派",
+        "due": "到期時間（香港）",
+        "next": "下一步",
+        "handling": "處理方式",
+        "closeReason": "結案原因",
+        "noClose": "選擇原因",
+        "application": "申請參考編號",
+        "billing": "付款嘗試參考編號",
+        "reference": "個案參考資料",
+        "note": "交接備註",
+        "privacy": "記錄下一步及支援編號。請勿貼上登入網址、token、cookie 或密鑰。",
+        "save": "儲存跟進",
+        "saving": "儲存中…",
+        "saved": "已儲存跟進",
+        "conflict": "另一位管理員已更新此個案。請重新載入並核對保留的草稿。",
+        "invalid": "請核對負責人、參考資料及結案原因。",
+        "unavailable": "暫時無法儲存；已保留輸入內容。",
+        "reload": "重新載入個案",
+        "timeline": "交接紀錄",
+        "noHistory": "尚無交接紀錄",
+        "openApplication": "開啟申請個案",
+        "openBilling": "開啟付款對帳",
+        "openDelivery": "開啟送達及背景工作狀態",
+        "nextActions": {
+          "none": "尚無下一步",
+          "reply": "回覆",
+          "await_member": "等候會員",
+          "identity_support": "身份支援",
+          "payment_reconciliation": "付款對帳",
+          "delivery_reconciliation": "送達對帳",
+          "handoff": "交接",
+          "follow_up_complete": "跟進完成"
+        },
+        "closeReasons": {
+          "resolved": "已解決",
+          "member_withdrew": "會員撤回",
+          "duplicate": "重複個案",
+          "escalated": "已轉交"
+        },
+        "scopes": {
+          "all": "全部對話",
+          "mine": "我的對話",
+          "unassigned": "未指派",
+          "overdue": "逾期"
+        }
+      }
     },
     "tasks": {
       "eyebrow": "升級個案",
@@ -4040,7 +4160,15 @@
         "open_conversation": "開啟對話",
         "review_task": "查看待辦",
         "edit_content": "編輯內容",
-        "edit_private_copy": "編輯私人草稿"
+        "edit_private_copy": "編輯私人草稿",
+        "none": "尚無下一步",
+        "reply": "回覆",
+        "await_member": "等候會員",
+        "identity_support": "身份支援",
+        "payment_reconciliation": "付款對帳",
+        "delivery_reconciliation": "送達對帳",
+        "handoff": "交接",
+        "follow_up_complete": "跟進完成"
       },
       "states": {
         "draft": "未完成申請／草稿",

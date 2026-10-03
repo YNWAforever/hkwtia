@@ -143,8 +143,7 @@ function createLedger(clock: Clock) {
 
       const claimLive = existing.sendClaimExpiresAt !== null
         && existing.sendClaimExpiresAt.getTime() > clock.now.getTime();
-      const retakeable = existing.deliveryStatus === "queued"
-        || (existing.deliveryStatus === "failed"
+      const retakeable = (existing.deliveryStatus === "failed"
           && existing.providerMessageId === null
           && existing.errorCode !== null
           // The repository's own classifier, not a copy of its true half: a
@@ -160,7 +159,7 @@ function createLedger(clock: Clock) {
       return {
         ...settled,
         messageId: existing.id,
-        disposition: existing.deliveryStatus === "queued" ? "already_queued" : "already_sent",
+        disposition: existing.deliveryStatus === "queued" ? claimLive?"already_queued":"uncertain" : existing.deliveryStatus==="failed"&&!existing.providerMessageId&&!providerRefusedSend(existing.errorCode??"")?"uncertain":"already_sent",
       };
     },
 
@@ -373,12 +372,12 @@ describe("a staff reply that repeats an earlier sentence", () => {
 
     // Not DELIVERY_FAILED. That string says "Try again shortly", and the claim
     // UPDATE will not re-take a row whose code leaves acceptance uncertain — so
-    // the retry it invites answers `already_sent` while nothing is sent.
+    // the retry must remain uncertain without making another provider call.
     expect(await codeOf(sendInboxReply(staff, reply(CANNED, MONDAY_ATTEMPT), deps))).toBe("DELIVERY_UNCERTAIN");
     expect(delivered).toEqual([]);
 
     // And the retry, if staff press Send anyway, must report itself honestly.
-    const retried = await sendInboxReply(staff, reply(CANNED, MONDAY_ATTEMPT), deps);
-    expect(retried.status).toBe("already_sent");
+    expect(await codeOf(sendInboxReply(staff,reply(CANNED,MONDAY_ATTEMPT),deps))).toBe("DELIVERY_UNCERTAIN");
+    expect(delivered).toEqual([]);
   });
 });

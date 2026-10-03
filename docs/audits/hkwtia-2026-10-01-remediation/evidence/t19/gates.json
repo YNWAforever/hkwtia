@@ -1,0 +1,61 @@
+{
+  "sourceSha": "ee00aa288e4952e4df55425307147b197a5eecbf",
+  "environment": "Windows Node24.18.0 Next16.3.6; owned built localhost with confirmed isolated Neon/Auth; no Production/provider writes",
+  "focused": {
+    "sourceSha": "9539f5b4b9a7afd9f15ec55a9a9bfa4d8089a949",
+    "passed": 265,
+    "skipped": 0,
+    "actualSql": 25,
+    "receipt": "focused.json"
+  },
+  "breadcrumbFocused": {
+    "sourceSha": "ee00aa288e4952e4df55425307147b197a5eecbf",
+    "passed": 15,
+    "skipped": 0,
+    "failed": 0,
+    "command": "node node_modules/vitest/vitest.mjs run tests/unit/admin-app-shell.test.tsx tests/unit/audit-full-workspace.test.tsx tests/unit/audit-full-admin-labels.test.ts tests/unit/audit-full-support-status.test.tsx --maxWorkers=1"
+  },
+  "full": {
+    "sourceSha": "9539f5b4b9a7afd9f15ec55a9a9bfa4d8089a949",
+    "passed": 6282,
+    "skipped": 302,
+    "failed": 0,
+    "passFiles": 747,
+    "allSkipFiles": 83,
+    "laterChange": "one breadcrumb CSS class at ee00aa28; not counted as exact-final full suite; final aggregate T22/PR CI"
+  },
+  "lint": {
+    "command": "npm.cmd run lint",
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 67
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exitCode": 0
+  },
+  "strings": {
+    "command": "npm.cmd run audit:strings",
+    "exitCode": 0,
+    "tsxFiles": 308
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "staticPages": 267
+  },
+  "browser": {
+    "command": "AUDIT_SOURCE_SHA=(git rev-parse HEAD) node --env-file=.env.local .playwright/t19-browser.mjs",
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 35.0,
+    "axeScans": 4,
+    "axeViolations": 0,
+    "incomplete": "mobile color-contrast; exact per-locale receipts; human T22"
+  },
+  "providerAcceptance": false,
+  "migration": "none",
+  "newFlags": "none",
+  "production": false
+}

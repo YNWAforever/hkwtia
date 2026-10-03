@@ -31,3 +31,7 @@ Source `7e64f35502e140f600dc8446cbc75cceb95c2c70`; isolated ledger56 (0056 only 
 ## T18 candidate delta
 
 Source `57f0a8085130f82e65c02919d0681d1624d97687`; no migration/new flag. Isolated9SQL/2builtChromium/14axe-scans verified scoped facts; full6272pass284skip0fail. Rollback app UI/read model only; preserve all previous schema/history/roles/policies. T19–T23 continue. No Preview acceptance or Production release claim.
+
+## T19 candidate delta
+
+Source ee00aa288e4952e4df55425307147b197a5eecbf;25SQL/2builtChromium/4axe0violations;full functional9539f5b6282pass302skip0fail, exact-final aggregate T22/CI. No schema/flag. No provider acceptance or Production write. Keep owner/version guard and refusal-only retry in rollback; older writer needs paused inboxPOST and reconciliation, never lease deletion/newattemptkey/mocksend. T20–T23 continue.

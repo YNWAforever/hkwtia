@@ -1,9 +1,15 @@
-import {PgDialect} from "drizzle-orm/pg-core";
-import {describe, expect, it, vi} from "vitest";
+import { PgDialect } from "drizzle-orm/pg-core";
+import { describe, expect, it, vi } from "vitest";
 
-import type {AutomationDatabase, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {WOZTELL_REQUEST_TIMEOUT_MS} from "@/lib/channels/woztell";
-import {createInboxRepository, SEND_CLAIM_LEASE_MS} from "@/lib/db/repos/inbox";
+import type {
+  AutomationDatabase,
+  AutomationSqlExecutor,
+} from "@/lib/db/repos/journeys";
+import { WOZTELL_REQUEST_TIMEOUT_MS } from "@/lib/channels/woztell";
+import {
+  createInboxRepository,
+  SEND_CLAIM_LEASE_MS,
+} from "@/lib/db/repos/inbox";
 
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
 const MESSAGE_ID = "33333333-3333-4333-8333-333333333333";
@@ -11,8 +17,16 @@ const CONTACT_ID = "44444444-4444-4444-8444-444444444444";
 const OUTBOUND_KEY = `inbox:${CONVERSATION_ID}:${"a".repeat(32)}`;
 const LAST_INBOUND_AT = new Date("2026-09-10T08:00:00.000Z");
 
-const admin = {kind: "staff", userId: "staff-user", profileId: "staff-1"} as const;
-const member = {kind: "member", userId: "member-user", profileId: "member-1"} as const;
+const admin = {
+  kind: "staff",
+  userId: "staff-user",
+  profileId: "staff-1",
+} as const;
+const member = {
+  kind: "member",
+  userId: "member-user",
+  profileId: "member-1",
+} as const;
 
 const dialect = new PgDialect();
 
@@ -25,15 +39,18 @@ function fakeDatabase(results: Result[]) {
     queries.push(dialect.sqlToQuery(query));
     const next = results.shift() ?? [];
     if (next instanceof Error) throw next;
-    return {rows: next};
+    return { rows: next };
   };
-  const database: AutomationDatabase = {execute, transaction: async (work) => work(database)};
-  return {database, queries, loadDatabase: async () => database};
+  const database: AutomationDatabase = {
+    execute,
+    transaction: async (work) => work(database),
+  };
+  return { database, queries, loadDatabase: async () => database };
 }
 
 function repository(results: Result[]) {
   const fixture = fakeDatabase(results);
-  return {...fixture, inbox: createInboxRepository(fixture.loadDatabase)};
+  return { ...fixture, inbox: createInboxRepository(fixture.loadDatabase) };
 }
 
 function normalized(statement: string | undefined): string {
@@ -92,7 +109,12 @@ function draft(overrides: Record<string, unknown> = {}) {
 }
 
 function duplicateProviderId(): Error {
-  return Object.assign(new Error("duplicate key value violates unique constraint \"messages_provider_message_id_unique\""), {code: "23505"});
+  return Object.assign(
+    new Error(
+      'duplicate key value violates unique constraint "messages_provider_message_id_unique"',
+    ),
+    { code: "23505" },
+  );
 }
 
 describe("inboxRepository staff write path (C-2 Task 6)", () => {
@@ -111,7 +133,9 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const loadDatabase = vi.fn();
       const inbox = createInboxRepository(loadDatabase);
 
-      await expect(inbox.queueStaffMessage(member, draft())).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.queueStaffMessage(member, draft())).rejects.toThrow(
+        "FORBIDDEN",
+      );
       expect(loadDatabase).not.toHaveBeenCalled();
     });
 
@@ -119,10 +143,12 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const loadDatabase = vi.fn();
       const inbox = createInboxRepository(loadDatabase);
 
-      await expect(inbox.settleStaffMessage(member, {
-        outboundKey: OUTBOUND_KEY,
-        outcome: {status: "sent", providerId: "wamid.1"},
-      })).rejects.toThrow("FORBIDDEN");
+      await expect(
+        inbox.settleStaffMessage(member, {
+          outboundKey: OUTBOUND_KEY,
+          outcome: { status: "sent", providerId: "wamid.1" },
+        }),
+      ).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     });
 
@@ -130,10 +156,24 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const loadDatabase = vi.fn();
       const inbox = createInboxRepository(loadDatabase);
 
-      await expect(inbox.setHandling(member, {conversationId: CONVERSATION_ID, handling: "human"})).rejects.toThrow("FORBIDDEN");
-      await expect(inbox.assign(member, {conversationId: CONVERSATION_ID, assignedToProfileId: "staff-1"})).rejects.toThrow("FORBIDDEN");
-      await expect(inbox.markRead(member, CONVERSATION_ID)).rejects.toThrow("FORBIDDEN");
-      await expect(inbox.close(member, CONVERSATION_ID)).rejects.toThrow("FORBIDDEN");
+      await expect(
+        inbox.setHandling(member, {
+          conversationId: CONVERSATION_ID,
+          handling: "human",
+        }),
+      ).rejects.toThrow("FORBIDDEN");
+      await expect(
+        inbox.assign(member, {
+          conversationId: CONVERSATION_ID,
+          assignedToProfileId: "staff-1",
+        }),
+      ).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.markRead(member, CONVERSATION_ID)).rejects.toThrow(
+        "FORBIDDEN",
+      );
+      await expect(inbox.close(member, CONVERSATION_ID)).rejects.toThrow(
+        "FORBIDDEN",
+      );
       expect(loadDatabase).not.toHaveBeenCalled();
     });
 
@@ -143,21 +183,34 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
 
       // A ZodError here instead of FORBIDDEN would mean the parse ran first, and
       // a parse is a place to hide a crash that never reaches the gate.
-      await expect(inbox.queueStaffMessage(member, {} as never)).rejects.toThrow("FORBIDDEN");
+      await expect(
+        inbox.queueStaffMessage(member, {} as never),
+      ).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     });
   });
 
   describe("queueStaffMessage", () => {
     it("writes the outbound row and its audit row in one transaction (S-7)", async () => {
-      const fixture = repository([[conversationRow()], [{id: MESSAGE_ID}], []]);
+      const fixture = repository([
+        [conversationRow()],
+        [{ id: MESSAGE_ID }],
+        [],
+      ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toEqual({
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toEqual({
         messageId: MESSAGE_ID,
         conversationId: CONVERSATION_ID,
         outboundKey: OUTBOUND_KEY,
         disposition: "queued",
-        recipient: {phoneE164: "+85290000000", profileId: null, contactId: CONTACT_ID, whatsappOptIn: false},
+        recipient: {
+          phoneE164: "+85290000000",
+          profileId: null,
+          contactId: CONTACT_ID,
+          whatsappOptIn: false,
+        },
         lastInboundAt: LAST_INBOUND_AT,
       });
 
@@ -165,38 +218,51 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const insertSql = normalized(insert?.sql);
       expect(insertSql).toMatch(/^insert into "messages"/);
       expect(insertSql).toContain(`'queued'`);
-      expect(insertSql).toContain("on conflict (outbound_key) where outbound_key is not null do nothing");
+      expect(insertSql).toContain(
+        "on conflict (outbound_key) where outbound_key is not null do nothing",
+      );
       // `direction` is bound rather than inlined because it comes through the
       // shared twin `derivedMessageDirection`; `sent_by_profile_id` is the whole
       // point of the staff lane, since an outbound row with no sender is
       // indistinguishable from the concierge's own reply.
-      expect(insert?.params).toEqual(expect.arrayContaining(["staff", "outbound", "staff-1", OUTBOUND_KEY]));
+      expect(insert?.params).toEqual(
+        expect.arrayContaining(["staff", "outbound", "staff-1", OUTBOUND_KEY]),
+      );
 
       const audit = fixture.queries[2];
       expect(normalized(audit?.sql)).toMatch(/^insert into "audit_events"/);
-      expect(audit?.params).toEqual(expect.arrayContaining([
-        "staff-1",
-        "staff",
-        "conversation.reply.queued",
-        CONVERSATION_ID,
-        expect.stringContaining(`"messageId":"${MESSAGE_ID}"`),
-      ]));
+      expect(audit?.params).toEqual(
+        expect.arrayContaining([
+          "staff-1",
+          "staff",
+          "conversation.reply.queued",
+          CONVERSATION_ID,
+          expect.stringContaining(`"messageId":"${MESSAGE_ID}"`),
+        ]),
+      );
       // The commitment to send and the record of it commit together or neither
       // does, so both statements ran inside the one transaction the method opened.
       expect(fixture.queries).toHaveLength(3);
     });
 
     it("leases the send so a double-click cannot call the adapter twice (S-8)", async () => {
-      const fixture = repository([[conversationRow()], [{id: MESSAGE_ID}], []]);
+      const fixture = repository([
+        [conversationRow()],
+        [{ id: MESSAGE_ID }],
+        [],
+      ]);
 
       await fixture.inbox.queueStaffMessage(admin, draft());
 
       // The interval is built FROM the exported constant rather than spelled out
       // beside it, so the SQL and the number a test can reason about cannot
       // drift — the value below is derived here for the same reason.
-      expect(normalized(fixture.queries[1]?.sql)).toContain("send_claim_expires_at");
-      expect(normalized(fixture.queries[1]?.sql))
-        .toContain(`now() + interval '${SEND_CLAIM_LEASE_MS / 1_000} seconds'`);
+      expect(normalized(fixture.queries[1]?.sql)).toContain(
+        "send_claim_expires_at",
+      );
+      expect(normalized(fixture.queries[1]?.sql)).toContain(
+        `now() + interval '${SEND_CLAIM_LEASE_MS / 1_000} seconds'`,
+      );
     });
 
     /**
@@ -226,10 +292,12 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         [conversationRow()],
         [],
         [],
-        [{id: MESSAGE_ID, delivery_status: "queued"}],
+        [{ id: MESSAGE_ID, delivery_status: "queued",claim_live:true }],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
         disposition: "already_queued",
         messageId: MESSAGE_ID,
       });
@@ -237,30 +305,40 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const claim = fixture.queries[2];
       const claimSql = normalized(claim?.sql);
       expect(claimSql).toMatch(/^update "messages" set/);
-      expect(claimSql).toContain(`"messages"."delivery_status" = 'queued'`);
+      expect(claimSql).not.toContain(`"messages"."delivery_status" = 'queued'`);
       expect(claimSql).toContain("is null or");
       expect(claimSql).toContain("<= now()");
-      expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
+      expect(
+        fixture.queries.some((query) =>
+          /insert into "audit_events"/i.test(query.sql),
+        ),
+      ).toBe(false);
     });
 
     /**
-     * The same hole reopens after any crash between the adapter returning and
-     * the settle committing: the row stays `queued`, and `queued` is the
-     * re-send state. Inheriting an expired claim is how that send is retried —
-     * and the commitment was already recorded, so it must not be recorded twice.
+     * A crash between provider acceptance and settlement leaves a queued row.
+     * An expired lease is no evidence of refusal: reconciliation is required,
+     * and the original commitment remains the single audit entry.
      */
-    it("inherits an abandoned send when the claim has expired, still without a second audit row", async () => {
+    it("requires reconciliation after an expired claim without a second audit row", async () => {
       const fixture = repository([
         [conversationRow()],
         [],
-        [{id: MESSAGE_ID, delivery_status: "queued"}],
+        [],
+        [{ id: MESSAGE_ID, delivery_status: "queued",claim_live:false }],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
-        disposition: "queued",
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
+        disposition: "uncertain",
         messageId: MESSAGE_ID,
       });
-      expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
+      expect(
+        fixture.queries.some((query) =>
+          /insert into "audit_events"/i.test(query.sql),
+        ),
+      ).toBe(false);
     });
 
     /**
@@ -275,10 +353,12 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const fixture = repository([
         [conversationRow()],
         [],
-        [{id: MESSAGE_ID}],
+        [{ id: MESSAGE_ID }],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
         disposition: "queued",
         messageId: MESSAGE_ID,
       });
@@ -287,22 +367,35 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const claimSql = normalized(claim?.sql);
       // Back to the re-send state, and without the stale error code the thread
       // would otherwise render beside "Sending".
-      expect(claimSql).toContain("set delivery_status = 'queued', error_code = null");
+      expect(claimSql).toContain(
+        "set delivery_status = 'queued', error_code = null",
+      );
       expect(claimSql).toContain(`"messages"."delivery_status" = 'failed'`);
       expect(claimSql).toContain(`"messages"."provider_message_id" is null`);
       // The re-take is decided by the code the row carries, not by the absence
       // of a provider id — the adapter throws before it can return one however
       // it failed, so the id says nothing about acceptance.
       expect(claimSql).toContain(`"messages"."error_code" in (`);
-      expect(claim?.params).toEqual(expect.arrayContaining(["provider_client_error", "retryable_rate_limit"]));
+      expect(claim?.params).toEqual(
+        expect.arrayContaining([
+          "provider_client_error",
+          "retryable_rate_limit",
+        ]),
+      );
       // The column is cleared, so the code has to survive somewhere: this branch
       // writes no audit row, and without the fold a re-take would erase the only
       // record that the provider was ever handed this message.
       expect(claimSql).toContain("'sendretakes'");
-      expect(claimSql).toContain(`'previouserrorcode', "messages"."error_code"`);
+      expect(claimSql).toContain(
+        `'previouserrorcode', "messages"."error_code"`,
+      );
       // The commitment was recorded when the row was inserted; a retry is not a
       // second commitment.
-      expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
+      expect(
+        fixture.queries.some((query) =>
+          /insert into "audit_events"/i.test(query.sql),
+        ),
+      ).toBe(false);
     });
 
     /**
@@ -322,15 +415,25 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         [conversationRow()],
         [],
         [],
-        [{id: MESSAGE_ID, delivery_status: "failed", provider_message_id: "wamid.1"}],
+        [
+          {
+            id: MESSAGE_ID,
+            delivery_status: "failed",
+            provider_message_id: "wamid.1",
+          },
+        ],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
         disposition: "already_sent",
         messageId: MESSAGE_ID,
       });
 
-      expect(normalized(fixture.queries[2]?.sql)).toContain(`"messages"."provider_message_id" is null`);
+      expect(normalized(fixture.queries[2]?.sql)).toContain(
+        `"messages"."provider_message_id" is null`,
+      );
     });
 
     /**
@@ -353,11 +456,20 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         [conversationRow()],
         [],
         [],
-        [{id: MESSAGE_ID, delivery_status: "failed", provider_message_id: null, error_code: "provider_unclassified_failure"}],
+        [
+          {
+            id: MESSAGE_ID,
+            delivery_status: "failed",
+            provider_message_id: null,
+            error_code: "provider_unclassified_failure",
+          },
+        ],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
-        disposition: "already_sent",
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
+        disposition: "uncertain",
         messageId: MESSAGE_ID,
       });
 
@@ -377,10 +489,12 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         [conversationRow()],
         [],
         [],
-        [{id: MESSAGE_ID, delivery_status: "sent"}],
+        [{ id: MESSAGE_ID, delivery_status: "sent" }],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
         disposition: "already_sent",
         messageId: MESSAGE_ID,
       });
@@ -397,28 +511,41 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const inbox = createInboxRepository(loadDatabase);
       const otherConversation = "22222222-2222-4222-8222-222222222222";
 
-      await expect(inbox.queueStaffMessage(admin, draft({
-        outboundKey: `inbox:${otherConversation}:${"b".repeat(32)}`,
-      }))).rejects.toThrow("OUTBOUND_KEY_CONVERSATION_MISMATCH");
+      await expect(
+        inbox.queueStaffMessage(
+          admin,
+          draft({
+            outboundKey: `inbox:${otherConversation}:${"b".repeat(32)}`,
+          }),
+        ),
+      ).rejects.toThrow("OUTBOUND_KEY_CONVERSATION_MISMATCH");
       expect(loadDatabase).not.toHaveBeenCalled();
     });
 
     it("refuses a thread the concierge still owns, because taking it over is a separate audited act", async () => {
-      const fixture = repository([[conversationRow({handling: "bot"})]]);
+      const fixture = repository([[conversationRow({ handling: "bot" })]]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).rejects.toThrow("INVALID_INBOX_HANDLING");
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).rejects.toThrow("INVALID_INBOX_HANDLING");
       expect(fixture.queries).toHaveLength(1);
     });
 
     it("refuses a web thread, which has no number behind it and no window to reply inside", async () => {
-      const fixture = repository([[conversationRow({channel: "web"})]]);
+      const fixture = repository([[conversationRow({ channel: "web" })]]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).rejects.toThrow("INVALID_INBOX_CHANNEL");
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).rejects.toThrow("INVALID_INBOX_CHANNEL");
       expect(fixture.queries).toHaveLength(1);
     });
 
     it("locks only the conversation, because Postgres refuses to lock the nullable side of an outer join", async () => {
-      const fixture = repository([[conversationRow()], [{id: MESSAGE_ID}], []]);
+      const fixture = repository([
+        [conversationRow()],
+        [{ id: MESSAGE_ID }],
+        [],
+      ]);
 
       await fixture.inbox.queueStaffMessage(admin, draft());
 
@@ -429,47 +556,64 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
 
     it("returns the member's own number and consent flag when no contact is linked", async () => {
       const fixture = repository([
-        [conversationRow({
-          contact_id: null,
-          contact_phone_e164: null,
-          contact_whatsapp_opt_in: null,
-          profile_id: "member-9",
-          profile_whatsapp_number: "+85291111111",
-          profile_whatsapp_opt_in: true,
-        })],
-        [{id: MESSAGE_ID}],
+        [
+          conversationRow({
+            contact_id: null,
+            contact_phone_e164: null,
+            contact_whatsapp_opt_in: null,
+            profile_id: "member-9",
+            profile_whatsapp_number: "+85291111111",
+            profile_whatsapp_opt_in: true,
+          }),
+        ],
+        [{ id: MESSAGE_ID }],
         [],
       ]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
-        recipient: {phoneE164: "+85291111111", profileId: "member-9", contactId: null, whatsappOptIn: true},
+      await expect(
+        fixture.inbox.queueStaffMessage(admin, draft()),
+      ).resolves.toMatchObject({
+        recipient: {
+          phoneE164: "+85291111111",
+          profileId: "member-9",
+          contactId: null,
+          whatsappOptIn: true,
+        },
       });
     });
 
     it("refuses a template send with no template key before touching the database", async () => {
       const fixture = repository([]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft({kind: "template", templateKey: null})))
-        .rejects.toThrow();
+      await expect(
+        fixture.inbox.queueStaffMessage(
+          admin,
+          draft({ kind: "template", templateKey: null }),
+        ),
+      ).rejects.toThrow();
       expect(fixture.queries).toHaveLength(0);
     });
 
     it("refuses an outbound key that is not the deterministic inbox shape", async () => {
       const fixture = repository([]);
 
-      await expect(fixture.inbox.queueStaffMessage(admin, draft({outboundKey: "inbox:whatever"})))
-        .rejects.toThrow();
+      await expect(
+        fixture.inbox.queueStaffMessage(
+          admin,
+          draft({ outboundKey: "inbox:whatever" }),
+        ),
+      ).rejects.toThrow();
       expect(fixture.queries).toHaveLength(0);
     });
   });
 
   describe("settleStaffMessage", () => {
     it("flips queued to sent, stamps the provider id and clears the claim", async () => {
-      const fixture = repository([[{id: MESSAGE_ID}]]);
+      const fixture = repository([[{ id: MESSAGE_ID }]]);
 
       await fixture.inbox.settleStaffMessage(admin, {
         outboundKey: OUTBOUND_KEY,
-        outcome: {status: "sent", providerId: "wamid.settle.1"},
+        outcome: { status: "sent", providerId: "wamid.settle.1" },
       });
 
       const update = normalized(fixture.queries[0]?.sql);
@@ -478,7 +622,9 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       expect(update).toContain("send_claim_expires_at = null");
       // The guard is what makes this a no-op once the row has moved on.
       expect(update).toContain(`"messages"."delivery_status" = 'queued'`);
-      expect(fixture.queries[0]?.params).toEqual(expect.arrayContaining([OUTBOUND_KEY, "wamid.settle.1"]));
+      expect(fixture.queries[0]?.params).toEqual(
+        expect.arrayContaining([OUTBOUND_KEY, "wamid.settle.1"]),
+      );
     });
 
     /**
@@ -489,12 +635,14 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
      * state, and a throw here would make staff send it a second time.
      */
     it("survives the echo adopting the row first, leaving the provider id where the echo put it", async () => {
-      const fixture = repository([duplicateProviderId(), [{id: MESSAGE_ID}]]);
+      const fixture = repository([duplicateProviderId(), [{ id: MESSAGE_ID }]]);
 
-      await expect(fixture.inbox.settleStaffMessage(admin, {
-        outboundKey: OUTBOUND_KEY,
-        outcome: {status: "sent", providerId: "wamid.settle.1"},
-      })).resolves.toBeUndefined();
+      await expect(
+        fixture.inbox.settleStaffMessage(admin, {
+          outboundKey: OUTBOUND_KEY,
+          outcome: { status: "sent", providerId: "wamid.settle.1" },
+        }),
+      ).resolves.toBeUndefined();
 
       const fallback = normalized(fixture.queries[1]?.sql);
       expect(fallback).toMatch(/^update "messages" set/);
@@ -506,18 +654,20 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
     it("rethrows anything that is not a unique violation, because a silent settle is a lost message", async () => {
       const fixture = repository([new Error("connection terminated")]);
 
-      await expect(fixture.inbox.settleStaffMessage(admin, {
-        outboundKey: OUTBOUND_KEY,
-        outcome: {status: "sent", providerId: "wamid.settle.1"},
-      })).rejects.toThrow("connection terminated");
+      await expect(
+        fixture.inbox.settleStaffMessage(admin, {
+          outboundKey: OUTBOUND_KEY,
+          outcome: { status: "sent", providerId: "wamid.settle.1" },
+        }),
+      ).rejects.toThrow("connection terminated");
     });
 
     it("records a failure with its error code and clears the claim so the row is re-sendable", async () => {
-      const fixture = repository([[{id: MESSAGE_ID}]]);
+      const fixture = repository([[{ id: MESSAGE_ID }]]);
 
       await fixture.inbox.settleStaffMessage(admin, {
         outboundKey: OUTBOUND_KEY,
-        outcome: {status: "failed", errorCode: "131047"},
+        outcome: { status: "failed", errorCode: "131047" },
       });
 
       const update = normalized(fixture.queries[0]?.sql);
@@ -529,70 +679,120 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       // message — from a delivery failure reported against a provider id it did
       // take. Stamping one here would make the row permanently un-resendable.
       expect(update).not.toContain("provider_message_id");
-      expect(fixture.queries[0]?.params).toEqual(expect.arrayContaining(["131047"]));
+      expect(fixture.queries[0]?.params).toEqual(
+        expect.arrayContaining(["131047"]),
+      );
     });
 
     it("refuses an outcome the send path never produces", async () => {
       const fixture = repository([]);
 
-      await expect(fixture.inbox.settleStaffMessage(admin, {
-        outboundKey: OUTBOUND_KEY,
-        outcome: {status: "delivered", providerId: "wamid.1"},
-      })).rejects.toThrow();
+      await expect(
+        fixture.inbox.settleStaffMessage(admin, {
+          outboundKey: OUTBOUND_KEY,
+          outcome: { status: "delivered", providerId: "wamid.1" },
+        }),
+      ).rejects.toThrow();
       expect(fixture.queries).toHaveLength(0);
     });
   });
 
   describe("setHandling, assign, markRead and close", () => {
     it("refuses to hand a web thread to a person, because the composer could not send into it", async () => {
-      const fixture = repository([[{id: CONVERSATION_ID, channel: "web", handling: "bot"}]]);
+      const fixture = repository([
+        [{ id: CONVERSATION_ID, channel: "web", handling: "bot" }],
+      ]);
 
-      await expect(fixture.inbox.setHandling(admin, {conversationId: CONVERSATION_ID, handling: "human"}))
-        .rejects.toThrow("INVALID_INBOX_CHANNEL");
-      expect(fixture.queries.some((query) => /update "conversations"/i.test(query.sql))).toBe(false);
+      await expect(
+        fixture.inbox.setHandling(admin, {
+          conversationId: CONVERSATION_ID,
+          handling: "human",
+        }),
+      ).rejects.toThrow("INVALID_INBOX_CHANNEL");
+      expect(
+        fixture.queries.some((query) =>
+          /update "conversations"/i.test(query.sql),
+        ),
+      ).toBe(false);
     });
 
     it("writes the handling change and its audit row in one transaction", async () => {
       const fixture = repository([
-        [{id: CONVERSATION_ID, channel: "whatsapp", handling: "bot"}],
+        [{ id: CONVERSATION_ID, channel: "whatsapp", handling: "bot" }],
         [],
         [],
-        [headerRow({handling: "human"})],
+        [],
+        [headerRow({ handling: "human" })],
       ]);
 
-      await expect(fixture.inbox.setHandling(admin, {conversationId: CONVERSATION_ID, handling: "human"}))
-        .resolves.toMatchObject({id: CONVERSATION_ID, handling: "human"});
+      await expect(
+        fixture.inbox.setHandling(admin, {
+          conversationId: CONVERSATION_ID,
+          handling: "human",
+        }),
+      ).resolves.toMatchObject({ id: CONVERSATION_ID, handling: "human" });
 
-      expect(normalized(fixture.queries[1]?.sql)).toMatch(/^update "conversations" set/);
-      const audit = fixture.queries[2];
+      expect(normalized(fixture.queries[2]?.sql)).toMatch(
+        /^update "conversations" set/,
+      );
+      const audit = fixture.queries[3];
       expect(normalized(audit?.sql)).toMatch(/^insert into "audit_events"/);
-      expect(audit?.params).toEqual(expect.arrayContaining(["conversation.handling.changed", CONVERSATION_ID]));
+      expect(audit?.params).toEqual(
+        expect.arrayContaining([
+          "conversation.handling.changed",
+          CONVERSATION_ID,
+        ]),
+      );
     });
 
     it("audits an assignment", async () => {
       const fixture = repository([
-        [{id: CONVERSATION_ID, channel: "whatsapp", handling: "human"}],
+        [
+          {
+            id: CONVERSATION_ID,
+            channel: "whatsapp",
+            handling: "human",
+            assigned_to_profile_id: null,
+          },
+        ],
+        [],
+        [{ id: "staff-1" }],
         [],
         [],
         [headerRow()],
       ]);
 
-      await expect(fixture.inbox.assign(admin, {conversationId: CONVERSATION_ID, assignedToProfileId: "staff-1"}))
-        .resolves.toMatchObject({assignedToProfileId: "staff-1", assigneeLabel: "Staff One"});
+      await expect(
+        fixture.inbox.assign(admin, {
+          conversationId: CONVERSATION_ID,
+          assignedToProfileId: "staff-1",
+          expectedAssignedToProfileId: null,
+        }),
+      ).resolves.toMatchObject({
+        assignedToProfileId: "staff-1",
+        assigneeLabel: "Staff One",
+      });
 
-      expect(fixture.queries[2]?.params).toEqual(expect.arrayContaining(["conversation.assigned"]));
+      expect(fixture.queries[4]?.params).toEqual(
+        expect.arrayContaining(["conversation.assigned"]),
+      );
     });
 
     it("audits a close", async () => {
       const fixture = repository([
-        [{id: CONVERSATION_ID, channel: "whatsapp", handling: "human"}],
+        [{ id: CONVERSATION_ID, channel: "whatsapp", handling: "human" }],
         [],
         [],
-        [headerRow({handling: "closed"})],
+        [],
+        [headerRow({ handling: "closed" })],
       ]);
 
-      await expect(fixture.inbox.close(admin, CONVERSATION_ID)).resolves.toMatchObject({handling: "closed"});
-      expect(fixture.queries[2]?.params).toEqual(expect.arrayContaining(["conversation.closed"]));
+      await expect(
+        fixture.inbox.close(admin, CONVERSATION_ID),
+      ).resolves.toMatchObject({ handling: "closed" });
+      expect(fixture.queries[3]?.params).toEqual(
+        expect.arrayContaining(["conversation.closed"]),
+      );
     });
 
     /**
@@ -605,8 +805,14 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
 
       await fixture.inbox.markRead(admin, CONVERSATION_ID);
 
-      expect(normalized(fixture.queries[0]?.sql)).toContain("last_staff_read_at = now()");
-      expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
+      expect(normalized(fixture.queries[0]?.sql)).toContain(
+        "last_staff_read_at = now()",
+      );
+      expect(
+        fixture.queries.some((query) =>
+          /insert into "audit_events"/i.test(query.sql),
+        ),
+      ).toBe(false);
     });
   });
 
@@ -623,15 +829,44 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       const fixture = repository([
         [headerRow()],
         [
-          {id: "m1", role: "user", direction: "inbound", channel: "whatsapp", content: "Hi", delivery_status: null, template_key: null, error_code: null, created_at: new Date("2026-09-10T08:00:00.000Z")},
-          {id: "m2", role: "staff", direction: "outbound", channel: "whatsapp", content: "Hello", delivery_status: "delivered", template_key: null, error_code: null, created_at: new Date("2026-09-10T09:00:00.000Z")},
+          {
+            id: "m1",
+            role: "user",
+            direction: "inbound",
+            channel: "whatsapp",
+            content: "Hi",
+            delivery_status: null,
+            template_key: null,
+            error_code: null,
+            created_at: new Date("2026-09-10T08:00:00.000Z"),
+          },
+          {
+            id: "m2",
+            role: "staff",
+            direction: "outbound",
+            channel: "whatsapp",
+            content: "Hello",
+            delivery_status: "delivered",
+            template_key: null,
+            error_code: null,
+            created_at: new Date("2026-09-10T09:00:00.000Z"),
+          },
         ],
       ]);
 
-      const transcript = await fixture.inbox.getTranscript(admin, CONVERSATION_ID);
+      const transcript = await fixture.inbox.getTranscript(
+        admin,
+        CONVERSATION_ID,
+      );
 
-      expect(transcript?.messages.map((message) => message.role)).toEqual(["user", "staff"]);
-      expect(transcript?.messages[1]).toMatchObject({direction: "outbound", deliveryStatus: "delivered"});
+      expect(transcript?.messages.map((message) => message.role)).toEqual([
+        "user",
+        "staff",
+      ]);
+      expect(transcript?.messages[1]).toMatchObject({
+        direction: "outbound",
+        deliveryStatus: "delivered",
+      });
     });
 
     /**
@@ -643,21 +878,41 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
      */
     it("reads the conversation's own channel rather than the newest message's", async () => {
       const fixture = repository([
-        [headerRow({channel: "whatsapp"})],
-        [{id: "m1", role: "assistant", direction: "outbound", channel: "web", content: "Hello", delivery_status: null, template_key: null, error_code: null, created_at: new Date("2026-09-10T09:00:00.000Z")}],
+        [headerRow({ channel: "whatsapp" })],
+        [
+          {
+            id: "m1",
+            role: "assistant",
+            direction: "outbound",
+            channel: "web",
+            content: "Hello",
+            delivery_status: null,
+            template_key: null,
+            error_code: null,
+            created_at: new Date("2026-09-10T09:00:00.000Z"),
+          },
+        ],
       ]);
 
-      const transcript = await fixture.inbox.getTranscript(admin, CONVERSATION_ID);
+      const transcript = await fixture.inbox.getTranscript(
+        admin,
+        CONVERSATION_ID,
+      );
 
       expect(transcript?.conversation.channel).toBe("whatsapp");
       expect(normalized(fixture.queries[0]?.sql)).toContain("c.channel");
-      expect(normalized(fixture.queries[0]?.sql)).not.toContain("order by m.created_at desc limit 1) as channel");
+      expect(normalized(fixture.queries[0]?.sql)).not.toContain(
+        "order by m.created_at desc limit 1) as channel",
+      );
     });
 
     it("carries handling, assignment and the unread marker into the summary", async () => {
       const fixture = repository([[headerRow()]]);
 
-      const rows = await fixture.inbox.listConversations(admin, {channel: "whatsapp", limit: 50});
+      const rows = await fixture.inbox.listConversations(admin, {
+        channel: "whatsapp",
+        limit: 50,
+      });
 
       expect(rows[0]).toMatchObject({
         handling: "human",
@@ -673,12 +928,19 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
     });
 
     it("calls a thread read once a person has looked at it more recently than its last message", async () => {
-      const fixture = repository([[headerRow({
-        last_message_at: new Date("2026-09-10T09:00:00.000Z"),
-        last_staff_read_at: new Date("2026-09-10T09:30:00.000Z"),
-      })]]);
+      const fixture = repository([
+        [
+          headerRow({
+            last_message_at: new Date("2026-09-10T09:00:00.000Z"),
+            last_staff_read_at: new Date("2026-09-10T09:30:00.000Z"),
+          }),
+        ],
+      ]);
 
-      const rows = await fixture.inbox.listConversations(admin, {channel: "all", limit: 50});
+      const rows = await fixture.inbox.listConversations(admin, {
+        channel: "all",
+        limit: 50,
+      });
 
       expect(rows[0]?.unread).toBe(false);
     });

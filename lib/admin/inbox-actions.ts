@@ -1,6 +1,11 @@
 "use server";
 
-import {notFound} from "next/navigation";
+import { inboxRepository } from "@/lib/db/repos/inbox";
+import {
+  supportFollowUpPatchSchema,
+  type SupportFollowUpState,
+} from "@/lib/admin/support-followup-types";
+import { notFound } from "next/navigation";
 
 import {
   assignInboxConversation,
@@ -11,9 +16,9 @@ import {
   setInboxHandling,
   type InboxReplyState,
 } from "@/lib/admin/inbox-action-core";
-import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
-import {requireAdminActor} from "@/lib/auth/actor";
-import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
+import { revalidateAdminPath } from "@/lib/admin/revalidate-path";
+import { requireAdminActor } from "@/lib/auth/actor";
+import { isAuthorizationDenial } from "@/lib/auth/authorization-denial";
 
 // Every export here is an HTTP-callable endpoint, so each one resolves its own
 // actor from the session. The actor-taking cores live in
@@ -43,7 +48,8 @@ function text(formData: FormData, name: string): string | null {
 function templateVariables(formData: FormData): Record<string, string> {
   const variables: Record<string, string> = {};
   for (const [name, value] of formData.entries()) {
-    if (!name.startsWith(VARIABLE_PREFIX) || typeof value !== "string") continue;
+    if (!name.startsWith(VARIABLE_PREFIX) || typeof value !== "string")
+      continue;
     variables[name.slice(VARIABLE_PREFIX.length)] = value;
   }
   return variables;
@@ -81,19 +87,26 @@ export async function sendInboxReplyAction(
     // cleared the draft for a message the member never received — a dropped
     // reply that looked, to the only person who could have noticed, like a
     // success.
-    return {status: result.status, messageId: result.messageId};
+    return { status: result.status, messageId: result.messageId };
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
     const code = inboxReplyErrorCode(error);
-    if (code) return {status: "error", code};
+    if (code) return { status: "error", code };
     throw error;
   }
 }
 
-export async function setInboxHandlingAction(path: string, formData: FormData): Promise<void> {
+export async function setInboxHandlingAction(
+  path: string,
+  formData: FormData,
+): Promise<void> {
   try {
     const who = await requireAdminActor();
-    await setInboxHandling(who, text(formData, "conversationId"), text(formData, "handling"));
+    await setInboxHandling(
+      who,
+      text(formData, "conversationId"),
+      text(formData, "handling"),
+    );
     revalidateAdminPath(path);
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
@@ -101,10 +114,21 @@ export async function setInboxHandlingAction(path: string, formData: FormData): 
   }
 }
 
-export async function assignInboxConversationAction(path: string, formData: FormData): Promise<void> {
+export async function assignInboxConversationAction(
+  path: string,
+  formData: FormData,
+): Promise<void> {
   try {
     const who = await requireAdminActor();
-    await assignInboxConversation(who, text(formData, "conversationId"), text(formData, "assignedToProfileId"));
+    if (!formData.has("expectedAssignedToProfileId"))
+      throw new Error("INBOX_ASSIGNMENT_EXPECTATION_REQUIRED");
+    await assignInboxConversation(
+      who,
+      text(formData, "conversationId"),
+      text(formData, "assignedToProfileId"),
+      undefined,
+      text(formData, "expectedAssignedToProfileId") || null,
+    );
     revalidateAdminPath(path);
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
@@ -112,7 +136,10 @@ export async function assignInboxConversationAction(path: string, formData: Form
   }
 }
 
-export async function markInboxReadAction(path: string, formData: FormData): Promise<void> {
+export async function markInboxReadAction(
+  path: string,
+  formData: FormData,
+): Promise<void> {
   try {
     const who = await requireAdminActor();
     await markInboxRead(who, text(formData, "conversationId"));
@@ -123,7 +150,10 @@ export async function markInboxReadAction(path: string, formData: FormData): Pro
   }
 }
 
-export async function closeInboxConversationAction(path: string, formData: FormData): Promise<void> {
+export async function closeInboxConversationAction(
+  path: string,
+  formData: FormData,
+): Promise<void> {
   try {
     const who = await requireAdminActor();
     await closeInboxConversation(who, text(formData, "conversationId"));
@@ -131,5 +161,75 @@ export async function closeInboxConversationAction(path: string, formData: FormD
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
     throw error;
+  }
+}
+
+export async function updateSupportFollowUpAction(
+  path: string,
+  _previous: SupportFollowUpState,
+  formData: FormData,
+): Promise<SupportFollowUpState> {
+  const who = await requireAdminActor();
+  const due = text(formData, "dueAt");
+  if (
+    due === null ||
+    (due !== "" && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(due)) ||
+    !formData.has("expectedAssignedToProfileId")
+  )
+    return { status: "error", code: "invalid" };
+  const date = due ? new Date(due + ":00+08:00") : null;
+  if (
+    date &&
+    (!Number.isFinite(date.getTime()) ||
+      new Date(date.getTime() + 8 * 3600000).toISOString().slice(0, 16) !== due)
+  )
+    return { status: "error", code: "invalid" };
+  const parsed = supportFollowUpPatchSchema.safeParse({
+    conversationId: text(formData, "conversationId"),
+    expectedVersion: text(formData, "expectedVersion"),
+    expectedAssignedToProfileId:
+      text(formData, "expectedAssignedToProfileId") || null,
+    ownerProfileId: text(formData, "ownerProfileId") || null,
+    dueAt: date?.toISOString() ?? null,
+    nextActionCode: text(formData, "nextActionCode"),
+    handling: text(formData, "handling"),
+    closeReason: text(formData, "closeReason") || null,
+    applicationId: text(formData, "applicationId") || null,
+    billingAttemptId: text(formData, "billingAttemptId") || null,
+    supportReference: text(formData, "supportReference") || null,
+    handoffNote: text(formData, "handoffNote"),
+  });
+  if (!parsed.success) return { status: "error", code: "invalid" };
+  try {
+    const result = await inboxRepository.updateSupportFollowUp(
+      who,
+      parsed.data,
+    );
+    revalidateAdminPath(path);
+    revalidateAdminPath("/admin/inbox");
+    revalidateAdminPath("/admin/tasks");
+    revalidateAdminPath("/admin");
+    return {
+      status: "saved",
+      version: result.version,
+      ownerProfileId: parsed.data.ownerProfileId,
+    };
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    return {
+      status: "error",
+      code:
+        error instanceof Error && error.message === "SUPPORT_FOLLOWUP_CONFLICT"
+          ? "conflict"
+          : error instanceof Error &&
+              [
+                "SUPPORT_REFERENCE_INVALID",
+                "INBOX_ASSIGNEE_INVALID",
+                "SUPPORT_HANDOFF_NOTE_REQUIRED",
+                "INVALID_INBOX_CHANNEL",
+              ].includes(error.message)
+            ? "invalid"
+            : "unavailable",
+    };
   }
 }
