@@ -2,7 +2,7 @@
   "task": "T07",
   "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
   "verifiedRuntimeCommit": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
-  "codeState": "SOURCE_FULL_LOCAL_CI_PG31_NATIVE29_VERIFIED_PROVIDER_POLICY_GATES",
+  "codeState": "URL_REVIEW_FIX_FOCUSED53_PG31_PASS_CI_PREVIEW_REFRESH_PENDING",
   "production": false,
   "providerAcceptance": false,
   "externalProviderRequests": 0,
@@ -161,6 +161,21 @@
       "name": "full-serial-final",
       "localLog": ".playwright/full-fix-t07-full-serial.log",
       "sha256": "5a1ecd5a2f0ae170d40695606efde75d56208d9dfcb9fa7df90c2f461e4a3703"
+    },
+    {
+      "name": "source-url-red",
+      "localLog": ".playwright/full-fix-t07-source-url-red.log",
+      "sha256": "63b9a99e08a34c997441c93ea28146bcd4149c149d5ceb18af2e2bbf39b848f9"
+    },
+    {
+      "name": "source-url-green",
+      "localLog": ".playwright/full-fix-t07-source-url-green.log",
+      "sha256": "e8847c7dd2dad7eae9fbac8fb2df1aec3ea1f11e0dd6b79f5612507189913429"
+    },
+    {
+      "name": "source-url-pg-green",
+      "localLog": ".playwright/full-fix-t07-source-url-pg-green.log",
+      "sha256": "aaf4a465ce32afc00e925a2a6b034895ea39e9f5bb7aa71a9e18fcd566d2dbd6"
     }
   ],
   "firstFullRun": {
@@ -343,5 +358,31 @@
     "filesSkipped": 90,
     "durationSeconds": 3440.48,
     "skipReason": "guarded DB/provider acceptance not opted in for npm test; PG31 separately executed and recorded, not inferred from skipped tests"
+  },
+  "sourceUrlReview": {
+    "behaviourRed": {
+      "failed": 5,
+      "passed": 8,
+      "skipped": 0,
+      "durationSeconds": 21.6
+    },
+    "focused": {
+      "passed": 53,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 22.56,
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit/ai-knowledge-policy.test.ts tests/unit/https-url.test.ts tests/unit/ai-knowledge-actions.test.ts --maxWorkers=1"
+    },
+    "actualDatabase": {
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 30.81,
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/ai-knowledge-retrieval.test.ts --maxWorkers=1",
+      "provider": "explicit deterministic test adapter, not real provider receipt"
+    },
+    "change": "Reuse lib/security/https-url canonicalHttpsUrl for source validation; preserve canonical public query URLs, reject fragments and localhost/IP/trailing-dot hosts",
+    "ci": "PENDING_CURRENT_CORRECTION",
+    "nativePreview": "PENDING_CURRENT_CORRECTION"
   }
 }

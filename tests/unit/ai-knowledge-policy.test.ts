@@ -32,3 +32,10 @@ describe("relevance through runtime citation boundary",()=>{
  it("retains known retrieval relevance without converting it to confidence",()=>{expect(normalizeAgentCitations([{sourceId:"kb:verified",title:"Source",retrievalScore:0.9}])).toEqual([{sourceId:"kb:verified",title:"Source",retrievalScore:0.9}]);});
  it("rejects invalid retrieval relevance",()=>{expect(normalizeAgentCitations([{sourceId:"kb:verified",title:"Source",retrievalScore:2}])).toEqual([]);});
 });
+
+import {knowledgeVersionSchema} from "@/lib/db/repos/knowledge-governance";
+const sourceInput={sourceId:ref.sourceId,expectedVersion:0,namespace:"t07-url-contract",locale:"en",title:"Synthetic policy",content:"Manual review policy.",audience:"public",effectiveFrom:"2039-01-01T00:00:00Z",effectiveTo:null,reviewDue:"2041-01-01T00:00:00Z",structuredFacts:{}};
+describe("knowledge source uses the shared public HTTPS policy",()=>{
+ it.each(["https://localhost/policy","https://source.localhost/policy","https://127.0.0.1/policy","https://[::1]/policy","https://example.test./policy"])("rejects forbidden source %s",url=>{expect(knowledgeVersionSchema.safeParse({...sourceInput,url}).success).toBe(false);});
+ it("preserves a canonical public source query without allowing a fragment",()=>{expect(knowledgeVersionSchema.safeParse({...sourceInput,url:"https://example.test/policy?version=1"}).success).toBe(true);expect(knowledgeVersionSchema.safeParse({...sourceInput,url:"https://example.test/policy#draft"}).success).toBe(false);});
+});
