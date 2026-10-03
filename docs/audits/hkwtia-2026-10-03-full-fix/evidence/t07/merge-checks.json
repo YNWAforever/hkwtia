@@ -1,0 +1,35 @@
+{
+  "headSha": "645ac02380c6333072dad608bac4a39503ef72a0",
+  "base": "main",
+  "checks": [
+    {
+      "name": "checks",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "tests (1)",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "tests (2)",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "worker",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "quality",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "Vercel",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "Vercel Preview Comments",
+      "result": "SUCCESS"
+    }
+  ],
+  "production": false
+}

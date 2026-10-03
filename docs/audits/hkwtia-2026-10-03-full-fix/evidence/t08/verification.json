@@ -1,0 +1,141 @@
+{
+  "task": "T08",
+  "observedAt": "2026-10-03T20:13:00.409522+00:00",
+  "sourceBase": "4904e287e0702df7d642643c159d1af768b30bf3",
+  "sourceState": "Final89 inclPG30 and build ran on byte-identical42 source files in source-hashes.json; broad510 precedes formatting/schema-check synchronization; earlier typecheck/lint/strings are not exact-head CI.",
+  "production": false,
+  "providerAcceptance": false,
+  "realProviderRequests": 0,
+  "behaviourRed": [
+    {
+      "case": "public final body90 despite claim100/relevance.99",
+      "failed": 4,
+      "log": "full-fix-t08-public-body-repository-red.log",
+      "logSha256": "fce659efe634206d9b091c1fe207757e7e21499f957d307a69000ece8d009175"
+    },
+    {
+      "case": "actual PG missing proposed draft behavior",
+      "failed": 1,
+      "log": "full-fix-t08-pg-contract-red.log",
+      "logSha256": "409116482c6ba30b8315fa4d5312bb1657ac2b31923747261491975fa28efc8e"
+    },
+    {
+      "case": "actual PG duplicate durable work owner",
+      "failed": 1,
+      "log": "full-fix-t08-pg-work-red.log",
+      "logSha256": "d0fc29e1cb6dc4789f9abef5bcaff3e7165bfa1e47295c076bc0d093261bbdb2"
+    },
+    {
+      "case": "append-only SQL history can be rewritten",
+      "failed": 2,
+      "log": "full-fix-t08-immutable-red.log",
+      "logSha256": "c6e78006352b330cd05949461c827db195e2e52f670c7c210b253a202913989f"
+    },
+    {
+      "case": "invalid SQL work result invents claim",
+      "failed": 1,
+      "log": "full-fix-t08-work-read-red.log",
+      "logSha256": "5080f3f9da7e9a803e85c44eb696e5698725c035df4b7111871dfd6016de1df0"
+    },
+    {
+      "case": "known unknown-provider receipt changed to different request",
+      "failed": 1,
+      "log": "full-fix-t08-receipt-bind-red.log",
+      "logSha256": "fdb51107788d0dc5eb75a485ff3c3878a66ed66baca185854e510044109c3fa2"
+    },
+    {
+      "case": "unknown usage displays misleading zero cost",
+      "failed": 1,
+      "log": "full-fix-t08-cost-display-red.log",
+      "logSha256": "ebe54a485faa10495ab79f2cd14bddecce2c7b11b37418f16bb40daf293c5334"
+    },
+    {
+      "case": "monetary rendering silently changes exact input",
+      "failed": 2,
+      "log": "full-fix-t08-money-rendering-red.log",
+      "logSha256": "aa1ff157173aa33cbc4df8f87a301b7af569c06479b9153154b2384fde15c930"
+    },
+    {
+      "case": "percent silently rounds authoritative input",
+      "failed": 1,
+      "log": "full-fix-t08-percent-red.log",
+      "logSha256": "9e494b619cf4ff28aa06f5cafac9dfd41d6b116f4ee020391d51fe2c213153bc"
+    },
+    {
+      "case": "comparison unavailable but placeholder field asserts growth",
+      "failed": 1,
+      "log": "full-fix-t08-comparison-red.log",
+      "logSha256": "fe6a905ad8f274027268a519281d89ae29ec6edf72aef0fb6a50ddaab197badd"
+    },
+    {
+      "case": "zh-HK event URL uses noncanonical locale",
+      "failed": 1,
+      "log": "full-fix-t08-zh-event-route-red.log",
+      "logSha256": "424d7d3c2d28082d25d9f8fbbbcb3f1f128b2118a3afd0d324ab0c5baa424b18"
+    },
+    {
+      "case": "own-action actor bypass deliberately reintroduced and restored",
+      "failed": 2,
+      "log": "full-fix-t08-action-boundary-red.log",
+      "logSha256": "663e591498955b8de0a7990f16cae35f5bc24ebdfc33ea6d93234efc1a3c3e24"
+    }
+  ],
+  "focused": {
+    "command": "node node_modules/vitest/vitest.mjs run (46 discovered ai/concierge/actor/url unit files) --maxWorkers=1",
+    "passed": 510,
+    "skipped": 0,
+    "failed": 0,
+    "durationSeconds": 106.85,
+    "log": "full-fix-t08-broad-focused.log"
+  },
+  "finalFocused": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/ai-draft-review.test.ts tests/unit/ai-draft-validation.test.ts tests/unit/ai-draft-actions.test.ts tests/unit/ai-draft-work-boundary.test.ts tests/unit/ai-concierge-grounding.test.ts tests/unit/ai-review-panel.test.tsx tests/unit/schema-contract.test.ts --maxWorkers=1",
+    "passed": 89,
+    "skipped": 0,
+    "failed": 0,
+    "actualPgCases": 30,
+    "durationSeconds": 23.38
+  },
+  "gates": {
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 84,
+      "taskSourceWarnings": 0
+    },
+    "typecheck": {
+      "exitCode": 0
+    },
+    "strings": {
+      "exitCode": 0,
+      "tsxFiles": 314
+    },
+    "build": {
+      "exitCode": 0
+    },
+    "fullSuite": {
+      "state": "PENDING_EXACT_SOURCE_CI"
+    }
+  },
+  "nativeBrowser": {
+    "state": "PENDING_EXACT_SOURCE_PREVIEW"
+  },
+  "migration": {
+    "name": "0059_ai_review_drafts",
+    "isolatedNeonBefore": 58,
+    "isolatedNeonAfter": 59,
+    "profilesUnchanged": true,
+    "productionApplied": false
+  },
+  "limits": [
+    "Unit provider/lifecycle/budget doubles are explicit; no real AI/provider receipt.",
+    "Actual PG uses only own disposable loopback fixtures; actual Neon migration guarded by exact nonprimary DB/Auth hosts, sentinel and reserved-domain profile check.",
+    "Only support staff-task case fact reader is registered at T08; application/renewal/board/content readers and generation belong to subsequent tasks.",
+    "Whole critical fact placeholders rendered by application, exact pinned sources/current DB revalidation; deterministic guards do not establish full semantic accuracy of arbitrary prose.",
+    "No generation, payment, entitlement change, send or publish follows review; adoption only calls the existing transactional business writer.",
+    "Approval/history retention/redaction require separately approved data policy; immutable history is an engineering evidence default, not association policy.",
+    "Original25-case golden JSONL unchanged; declared exact synthetic fixture source-detail wire projection retains original facts/tools/effects and strict grading.",
+    "Google/magic-link, cloud worker windows, approved real providers and Production rollout remain task-scoped gates."
+  ],
+  "verifiedRuntimeCommit": "b5e93ce985d529560847b340b873d2eaf404a454"
+}

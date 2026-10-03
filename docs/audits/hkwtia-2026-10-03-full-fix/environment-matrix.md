@@ -38,3 +38,11 @@ Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real
 - This supersedes earlier pending reviewer/native/local-gate notes. Source/approver policy, real embedding credential/spend/caps/invoice, Google/magic-link and worker windows remain unresolved task-specific gates. Production0057/0058 remains unapplied by this work.
 
 - T07 refreshed02:21HKT: sourcea49e6629/dpl_3roUp1uVnxwpNQehBSvqCHVhxToW has29native and fresh fullCI6520pass386skip0fail/worker57, all repository gates successful. Shared public HTTPS policy now guards source inputs; public query URLs retained. Source/approver/provider/Production gates unchanged.
+
+## T08 isolated review candidate
+
+- Source `b5e93ce985d529560847b340b873d2eaf404a454` in three focused commits; main base4904e287 (PR128 merged).
+- Fresh nonprimary/default/protected isolated branch proof; expires2026-10-04T12:00Z. Exact DB/Auth hosts, synthetic sentinel1/outside reserved-domain profiles0; additive0059 ledger58→59, profiles5932 unchanged, provider0.
+- `ADMIN_AI_DRAFTS_ENABLED` defaultfalse; only confirmed isolated Preview may settrue. AI caps0/agentsfalse/live sendingclosed. Source review and approve do not send.
+- Final focused89 inclactual PG30 passed0skip; exact-source full CI/native pending. Actual model/Google/magic-link/cloud-worker/provider receipts remain blocked individually.
+- No Production0057/58/59 or new capabilities released. Production revision must be reread before any specific release approval.
