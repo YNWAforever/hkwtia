@@ -270,7 +270,6 @@ export default async function ApplicationCasePage({
         </p>
       ) : null}
       <ApplicationCaseForm
-        key={record.version}
         draftRequest={draftRequest}
         triageProposal={triageProposal}
         record={record}

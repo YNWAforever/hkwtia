@@ -198,6 +198,9 @@ try {
       production: false,
     }),
   );
+} catch {
+  console.error("T09_ISOLATED_FIXTURE_FAILED");
+  process.exitCode = 1;
 } finally {
   await pool.end();
   process.exit(process.exitCode ?? 0);

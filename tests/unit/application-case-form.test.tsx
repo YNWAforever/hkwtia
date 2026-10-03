@@ -302,3 +302,33 @@ it("keeps AI review inside the case with its filtered queue return path", async 
     await screen.findByRole("link", { name: "Review local draft" }),
   ).toHaveAttribute("href", localReviewPath + "&draft=" + draftId);
 });
+
+it("a refreshed case cannot save old fields and offers explicit reload without clearing them", () => {
+  const { rerender } = render(
+    <ApplicationCaseForm
+      record={original}
+      owners={[]}
+      labels={labels}
+      action={action}
+      refreshHref="/admin/members/queue/current"
+    />,
+  );
+  fireEvent.change(screen.getByLabelText("Note"), {
+    target: { value: "Keep this unsaved note" },
+  });
+  rerender(
+    <ApplicationCaseForm
+      record={{ ...original, version: "10000000-0000-4000-8000-000000000099" }}
+      owners={[]}
+      labels={labels}
+      action={action}
+      refreshHref="/admin/members/queue/current"
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  expect(screen.getByRole("link", { name: "Reload" })).toHaveAttribute(
+    "href",
+    "/admin/members/queue/current",
+  );
+  expect(screen.getByLabelText("Note")).toHaveValue("Keep this unsaved note");
+});

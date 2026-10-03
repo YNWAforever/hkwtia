@@ -116,6 +116,8 @@ export function ApplicationCaseForm({
   }
   // Keep unsaved fields attached to the version loaded when editing began.
   const [loadedVersion] = useState(record.version);
+  const staleCase =
+    record.version !== loadedVersion && record.version !== state.version;
   const [selectedMissing, setSelectedMissing] = useState<readonly string[]>(
     record.missingFields,
   );
@@ -219,7 +221,7 @@ export function ApplicationCaseForm({
               ) : null}
               <button
                 type="button"
-                disabled={pending || staleProposal}
+                disabled={pending || staleProposal || staleCase}
                 onClick={applyProposal}
                 className="min-h-11 rounded-md border px-4 py-2 disabled:opacity-50"
               >
@@ -348,6 +350,17 @@ export function ApplicationCaseForm({
           className="rounded-md border bg-background p-3"
         />
       </label>
+      {staleCase && state.status !== "conflict" ? (
+        <p role="alert">
+          {labels.conflict}
+          <a
+            className="ml-3 inline-flex min-h-11 items-center text-primary underline"
+            href={refreshHref}
+          >
+            {labels.refresh}
+          </a>
+        </p>
+      ) : null}
       {state.status !== "idle" ? (
         <p role={state.status === "saved" ? "status" : "alert"}>
           {labels[state.status]}
@@ -363,7 +376,7 @@ export function ApplicationCaseForm({
       ) : null}
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || staleCase}
         className="min-h-11 rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
       >
         {pending ? labels.saving : labels.save}
