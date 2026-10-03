@@ -16,3 +16,5 @@ Every row also requires `ADMIN_BATCH_ENABLED=true`. Runtime repository commit/re
 |export_event_attendees|admin; EVENT_ATTENDEE_EXPORT_ENABLED|existing bounded cached artifact handler retained;8-operation role/flag contract|T15 actual private artifact download/TTL/retention tests pending|
 
 No operation is enabled in Production by this evidence. Provider acceptance, delivery, unknown outcome and DB/outbox success must not be conflated. No live member recipient, payment, refund, historical grant deletion or batch audience expansion was performed.
+
+T15 update: import_commit actual2 effects/2audits/repeat0 per en/zh built browser; private member/export_event_attendees actual allowlist/30minTTL/retention and500row cached artifact tests passed; no provider send. See evidence/t15/receipts.json. Whole50/500/5000 execution remains T21/T22.
