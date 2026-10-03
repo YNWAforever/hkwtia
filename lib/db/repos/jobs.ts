@@ -150,6 +150,11 @@ export function createScheduledJobsRepository(
   loadDatabase: ScheduledJobsDatabaseLoader = defaultScheduledJobsDatabaseLoader,
 ) {
   return {
+    async inspectRun(actor:AutomationRepositoryActor,runKey:string):Promise<"processing"|"completed"|"failed"|null>{
+      requireAutomationCron(actor);if(!/^[A-Za-z0-9:-]{1,160}$/.test(runKey))throw Error("INVALID_JOB_RUN_KEY");
+      const db=await loadDatabase(),row=resultRow(await db.execute(sql`SELECT state FROM ${jobsTable} WHERE run_key=${runKey} LIMIT 1`));
+      if(!row)return null;if(row.state!=="processing"&&row.state!=="completed"&&row.state!=="failed")throw Error("INVALID_JOB_STATE");return row.state;
+    },
     async claim(
       actor: AutomationRepositoryActor,
       runKey: string,

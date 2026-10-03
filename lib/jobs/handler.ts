@@ -10,6 +10,10 @@ import {
   jobsRepository,
   type JobClaimResult as RepositoryJobClaimResult,
 } from "@/lib/db/repos/jobs";
+import {jobHealthRepository} from "@/lib/db/repos/job-health";
+import {verifyWorkerHealthRequest,type VerifiedWorkerPoll} from "@/lib/jobs/worker-health-request";
+import {jobHealthEnabled,isHealthJobKey} from "@/lib/jobs/health-registry";
+import type {JobPollOutcome} from "@/lib/db/repos/job-health";
 import {verifyCronBearer} from "@/lib/jobs/auth";
 
 /**
@@ -24,6 +28,7 @@ export type JobBucket = "hourly" | "daily" | "ten-minute" | "minute";
 export type JobClaimResult = RepositoryJobClaimResult;
 
 export type JobHandlerRepository = Readonly<{
+  inspectRun?(actor: AutomationCronActor, runKey: string): Promise<"processing" | "completed" | "failed" | null>;
   claim(
     actor: AutomationCronActor,
     runKey: string,
@@ -60,6 +65,7 @@ type CreateJobPostOptions<T> = Readonly<{
   run(context: JobRunContext<T>): Promise<unknown>;
   prepare?(request: Request, now: Date): Promise<PreparedJob<T>>;
   jobs?: JobHandlerRepository;
+  health?: Pick<typeof jobHealthRepository,"start"|"finish">;
   now?: () => Date;
   secret?: () => string | null | undefined;
 }>;
@@ -145,10 +151,10 @@ function sanitizedRecord(
   return output;
 }
 
-function json(body: Readonly<Record<string, unknown>>, status = 200): Response {
+function json(body: Readonly<Record<string, unknown>>, status = 200, outcome = status >= 400 ? "failed" : "processing"): Response {
   return Response.json(body, {
     status,
-    headers: {"cache-control": "no-store"},
+    headers: {"cache-control": "no-store", "x-hkwtia-job-outcome": outcome},
   });
 }
 
@@ -215,13 +221,25 @@ export function createJobPost<T = undefined>(
       return failed();
     }
 
+    let poll: VerifiedWorkerPoll | null = verifyWorkerHealthRequest(request,options.kind,configuredSecret,now);
+    const health=options.health??jobHealthRepository;
+    if(poll){try{await health.start(actor,poll);}catch{poll=null;}}
+    async function finish(body:Readonly<Record<string,unknown>>,status:number,outcome:JobPollOutcome,summary:Readonly<Record<string,unknown>>={}){
+      if(poll){try{await health.finish(actor,poll,outcome,clock(),summary);}catch{/* Missing observation stays unknown/degraded; it never changes delivery ownership. */}}
+      return json(body,status,outcome);
+    }
     let claim: JobClaimResult;
     try {
       claim = await jobs.claim(actor, runKey, options.kind);
     } catch {
-      return failed();
+      return finish({error:"JOB_RUN_FAILED"},500,"failed");
     }
-    if (claim.status === "duplicate") return json({duplicate: true});
+    if (claim.status === "duplicate") {
+      let state:"processing"|"completed"|"failed"|null=null;
+      try{state=await jobs.inspectRun?.(actor,runKey)??null;}catch{/* A duplicate is not proof of completion. */}
+      const outcome=state==="completed"?(isHealthJobKey(options.kind)&&!jobHealthEnabled(options.kind)?"disabled":"completed"):"uncertain";
+      return finish({duplicate:true},200,outcome);
+    }
     const attemptCount = claim.attemptCount;
 
     let result: unknown;
@@ -235,16 +253,16 @@ export function createJobPost<T = undefined>(
           attemptCount,
           "JOB_RUN_FAILED",
         );
-        return settled ? failed() : json({stale: true});
+        return settled ? finish({error:"JOB_RUN_FAILED"},500,"failed") : finish({stale:true},200,"uncertain");
       } catch {
-        return failed();
+        return finish({error:"JOB_RUN_FAILED"},500,"failed");
       }
     }
 
     const summary = sanitizedRecord(result);
     try {
       const settled = await jobs.complete(actor, runKey, attemptCount);
-      if (!settled) return json({stale: true});
+      if (!settled) return finish({stale:true},200,"uncertain");
     } catch {
       try {
         const failedSettlement = await jobs.fail(
@@ -253,12 +271,12 @@ export function createJobPost<T = undefined>(
           attemptCount,
           "JOB_RUN_FAILED",
         );
-        return failedSettlement ? failed() : json({stale: true});
+        return failedSettlement ? finish({error:"JOB_RUN_FAILED"},500,"failed") : finish({stale:true},200,"uncertain");
       } catch {
-        return failed();
+        return finish({error:"JOB_RUN_FAILED"},500,"failed");
       }
     }
-    return json({duplicate: false, summary});
+    return finish({duplicate:false,summary},200,summary.disabled===true?"disabled":"completed",summary);
   };
   return request => observeAuditResponse("job_result", () => run(request), () => ({kind: options.kind}));
 }

@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, release]
+    branches: [main, release, "codex/full-remediation-*"]
   push:
     branches: [main, release]
 
@@ -46,15 +46,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx vitest run --shard=${{ matrix.shard }}/2
+  # Worker package and real workerd boot are separate from the root unit shards.
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/package-lock.json
+      - run: npm ci --prefix workers
+      - run: npm --prefix workers run typecheck
+      - run: npm --prefix workers test
   # Keeping a job named `quality` that depends on the others preserves the branch-protection
   # check name that PRs #47-#49 were gated on.
   # `if: always()` is load-bearing: without it a red shard skips this job, and GitHub's required
   # status check treats a skipped job as passing, so the step must read both results itself.
   quality:
-    needs: [checks, tests]
+    needs: [checks, tests, worker]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - run: |
-          test "${{ needs.checks.result }}" = "success" && test "${{ needs.tests.result }}" = "success" || exit 1
+          test "${{ needs.checks.result }}" = "success" && test "${{ needs.tests.result }}" = "success" && test "${{ needs.worker.result }}" = "success" || exit 1
           echo "quality gate passed"

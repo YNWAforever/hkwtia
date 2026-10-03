@@ -1,0 +1,10 @@
+{
+  "environment": "confirmed isolated DB/Auth; Chromium",
+  "locale": "en",
+  "viewport": 390,
+  "http": 200,
+  "keyboardScrollableRegion": true,
+  "rateLimitHealth": "unknown",
+  "cloudWorkerDeploymentVerified": false,
+  "production": false
+}

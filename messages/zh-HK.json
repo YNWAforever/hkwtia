@@ -2549,6 +2549,45 @@
     "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
   },
   "Admin": {
+    "jobHealth": {
+      "heading": "背景工作健康狀態",
+      "description": "只有已核實完成的輪詢才確認健康。外部結果不明時，必須先對帳才可重試。未有核實輪詢前，數量仍屬未觀測。",
+      "job": "背景工作",
+      "state": "健康狀態",
+      "lastStarted": "最近啟動",
+      "lastSuccess": "最近成功",
+      "nextExpected": "下次預期",
+      "oldestPending": "最早待處理",
+      "failed": "失敗",
+      "uncertain": "結果不明",
+      "deployment": "Worker 版本",
+      "unobserved": "未觀測",
+      "states": {
+        "healthy": "健康",
+        "degraded": "需要跟進",
+        "disabled": "已停用",
+        "unknown": "未知"
+      },
+      "jobs": {
+        "aiops-metrics": "AI 營運指標",
+        "journey-runner": "會員旅程發送",
+        "approvals-expirer": "審批期限檢查",
+        "renewal-runner": "續會旅程登記",
+        "engagement-score": "互動評分",
+        "chat-retention": "對話保留處理",
+        "retention-analyst": "留存分析",
+        "board-reporter": "董事會報告草稿",
+        "whatsapp-send-queue": "推廣訊息發送",
+        "event-cancellation-refunds": "活動退款佇列",
+        "event-notifications": "活動通知",
+        "showcase-lead-emails": "展示查詢電郵",
+        "ticket-emails": "門票電郵",
+        "admin-batches": "後台批次處理",
+        "membership-grant-expiry": "有限期權益到期",
+        "rate-limit-cleanup": "流量限制清理",
+        "member-import-retention": "匯入資料保留"
+      }
+    },
     "applicationCase": {
       "title": "入會申請個案",
       "followUp": "跟進此申請",
