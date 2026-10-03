@@ -1,5 +1,6 @@
+import {publicFactValues} from "@/lib/ai/drafts/public-facts";
 import {z} from "zod";
-import {knowledgeRefSchema} from "@/lib/ai/knowledge/policy";
+import {knowledgeRefSchema,type KnowledgeRef} from "@/lib/ai/knowledge/policy";
 
 import type {AgentTool} from "@/lib/ai/provider";
 import {
@@ -41,6 +42,7 @@ export function createKbSearchTool(context: ConciergeToolContext): AgentTool {
           title: string;
           url: string;
           retrievalScore: number;
+          knowledgeRef: KnowledgeRef;
         }> = [];
         for (const row of rows.slice(0, parsed.k)) {
           const url = canonicalHttpsUrl(row.url);
@@ -52,6 +54,7 @@ export function createKbSearchTool(context: ConciergeToolContext): AgentTool {
             title: row.title.slice(0, 200),
             url,
             retrievalScore: confidence,
+            knowledgeRef: approved.data,
           };
           citations.push(citation);
           records.push(Object.freeze({
@@ -60,6 +63,7 @@ export function createKbSearchTool(context: ConciergeToolContext): AgentTool {
             excerpt: row.excerpt,
             retrievalScore: confidence,
             knowledgeRef: approved.data,
+            factBlocks: Object.entries(publicFactValues(approved.data.sourceId,context.locale,row.structuredFacts??{})).map(([field,fact])=>({field,label:fact.label,token:`{{facts.${field}}}`})),
             offsetStart: row.offsetStart,
             offsetEnd: row.offsetEnd,
             citation,

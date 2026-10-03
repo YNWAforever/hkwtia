@@ -31,6 +31,7 @@ describe("Concierge runtime evaluation harness", () => {
       sourceId,
       title: "WTIA Membership",
       url: sourceUrl,
+      knowledgeRef:ref,
     }]);
   });
 });

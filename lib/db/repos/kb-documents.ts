@@ -46,6 +46,7 @@ export type KbSearchResult = Readonly<{
   ref: KnowledgeRef;
   offsetStart: number;
   offsetEnd: number;
+  structuredFacts?: Readonly<Record<string,string|number|boolean|null>>;
 }>;
 
 type KbExecutor = Readonly<{
@@ -66,6 +67,7 @@ const searchRowSchema = z.object({
   ref: knowledgeRefSchema,
   offsetStart: z.number().int().nonnegative(),
   offsetEnd: z.number().int().positive(),
+  structuredFacts: z.record(z.union([z.string(),z.number().finite(),z.boolean(),z.null()])).default({}),
 }).strict();
 
 function resultRows(result: unknown): unknown[] {
@@ -244,6 +246,7 @@ export function createKbDocumentsRepository(
           "content" AS "excerpt",
           jsonb_build_object('sourceId',"source_id"::text,'version',"version"::text,'locale',"locale",'audience',"audience",'effectiveFrom',to_char("effective_from" AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'effectiveTo',CASE WHEN "effective_to" IS NULL THEN NULL ELSE to_char("effective_to" AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,'contentHash',"content_hash") AS "ref",
           "chunk_start" AS "offsetStart", "chunk_end" AS "offsetEnd",
+          "structured_facts" AS "structuredFacts",
           greatest(
             0,
             least(1, 1 - ("embedding" <=> ${encodedVector}::vector))

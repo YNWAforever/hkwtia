@@ -1,3 +1,4 @@
+import {publicConciergeFactsReader} from "@/lib/db/repos/ai-public-facts";
 import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
@@ -339,6 +340,7 @@ async function productionHandler(request: Request): Promise<Response> {
     },
     appOrigin: expectedOrigin,
     conversations: conversationsRepository,
+    getApprovedFacts: publicConciergeFactsReader,
     agentTools: agentToolsRepository,
     getRuntime: (runId) => createAgentRuntime({
       agentRuns: agentRunsRepository,

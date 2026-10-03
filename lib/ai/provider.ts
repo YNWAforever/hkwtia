@@ -1,3 +1,4 @@
+import {knowledgeRefSchema,type KnowledgeRef} from "@/lib/ai/knowledge/contracts";
 import type {ModelRoute} from "@/lib/ai/providers/registry";
 import type {ZodTypeAny} from "zod";
 
@@ -24,6 +25,7 @@ export type AgentCitationInput = Readonly<{
   confidence?: number;
   /** Retrieval relevance, never a probability of factual accuracy. */
   retrievalScore?: number;
+  knowledgeRef?: KnowledgeRef;
 }>;
 
 export type AgentCitation = Readonly<{
@@ -33,6 +35,7 @@ export type AgentCitation = Readonly<{
   confidence?: number;
   /** Retrieval relevance, never a probability of factual accuracy. */
   retrievalScore?: number;
+  knowledgeRef?: KnowledgeRef;
 }>;
 
 export type AgentToolResult = Readonly<{
@@ -141,6 +144,7 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
     let urlValue: unknown;
     let confidenceValue: unknown;
     let relevanceValue: unknown;
+    let knowledgeRefValue: unknown;
     try {
       const record = input as Record<string, unknown>;
       sourceIdValue = record.sourceId;
@@ -148,6 +152,7 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
       urlValue = record.url;
       confidenceValue = record.confidence;
       relevanceValue = record.retrievalScore;
+      knowledgeRefValue = record.knowledgeRef;
     } catch {
       continue;
     }
@@ -177,6 +182,15 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
     const retrievalScore = relevanceValue === undefined ? undefined : typeof relevanceValue === "number" && Number.isFinite(relevanceValue) && relevanceValue >= 0 && relevanceValue <= 1 ? relevanceValue : undefined;
     if (relevanceValue !== undefined && retrievalScore === undefined) continue;
 
+    let knowledgeRef: KnowledgeRef | undefined;
+    if (knowledgeRefValue !== undefined) {
+      try {
+        const parsed = knowledgeRefSchema.safeParse(knowledgeRefValue);
+        if (!parsed.success) continue;
+        knowledgeRef = parsed.data;
+      } catch { continue; }
+    }
+
     seen.add(sourceId);
     citations.push({
       sourceId,
@@ -184,6 +198,7 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
       ...(url === undefined ? {} : {url}),
       ...(confidence === undefined ? {} : {confidence}),
       ...(retrievalScore === undefined ? {} : {retrievalScore}),
+      ...(knowledgeRef === undefined ? {} : {knowledgeRef}),
     });
   }
 

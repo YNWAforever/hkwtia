@@ -1,3 +1,6 @@
+import {approvedFactPackSchema,type ApprovedFactPack} from "@/lib/ai/drafts/contracts";
+import {approvedFactsHash,validateGroundedContent,renderGroundedBody} from "@/lib/ai/drafts/validation";
+import {draftFactLabels} from "@/lib/ai/drafts/fact-labels";
 import {randomUUID} from "node:crypto";
 
 import {
@@ -81,6 +84,7 @@ export type ConciergeServiceDependencies = Readonly<{
   getEmbedding: () => EmbeddingAdapter;
   createTools: (context: ConciergeToolContext) => AgentToolSet;
   audit: (event: ConciergeToolAuditEvent) => Promise<void>;
+  getApprovedFacts?: (input: Readonly<{actor: ConciergeAgentActor; locale: ConciergeLocale; conversationId: string; citations: readonly AgentCitation[]; asOf: Date}>) => Promise<ApprovedFactPack>;
   createRunId?: () => string;
   now?: () => Date;
 }>;
@@ -206,6 +210,7 @@ function assistantCitations(
     sourceId: citation.sourceId,
     title: citation.title,
     ...(citation.url === undefined ? {} : {url: citation.url}),
+    ...(citation.knowledgeRef === undefined ? {} : {knowledgeRef: citation.knowledgeRef}),
   }));
 }
 
@@ -398,10 +403,34 @@ export function createConciergeService(
             requireActiveTurn();
             const finish = await runtimeTurn.finish;
             requireActiveTurn();
-            const lowConfidence =
-              finish.status === "completed"
-              && groundingRequired
-              && !hasGroundedCitation(finish);
+            // Buffer first: neither raw model tokens nor self-reported claims are public authority.
+            let checkedText = assistantText;
+            let bodyInvalid = false;
+            if (finish.status === "completed") {
+              try {
+                const at = now();
+                const fallback = {
+                  caseId: conversation.id, locale, versionHash: "0".repeat(64),
+                  asOf: at.toISOString(), values: {}, sourceRefs: [], recordSources: {},
+                  sourceUrls: {}, comparisonAvailable: null, displayLabels: draftFactLabels(locale).displayLabels,
+                } satisfies ApprovedFactPack;
+                const facts = approvedFactPackSchema.parse(dependencies.getApprovedFacts
+                  ? await dependencies.getApprovedFacts({actor, locale, conversationId: conversation.id, citations: finish.citations, asOf: at})
+                  : {...fallback, versionHash: approvedFactsHash(fallback)});
+                if (facts.caseId !== conversation.id || facts.locale !== locale || facts.asOf !== at.toISOString()) throw Error("CONCIERGE_FACT_SCOPE_INVALID");
+                const claims = [...new Set([...assistantText.matchAll(/\{\{facts\.([a-z][a-zA-Z0-9_.-]{0,63})\}\}/gu)].map(match => match[1]!))]
+                  .flatMap(field => facts.values[field] ? [{field, value: facts.values[field]!.value, sourceId: facts.values[field]!.sourceId}] : []);
+                const content = {body: assistantText, claims, sourceRefs: finish.citations.flatMap(citation => citation.knowledgeRef ? [citation.knowledgeRef] : [])};
+                const validated = validateGroundedContent(content, facts);
+                bodyInvalid = !validated.valid;
+                if (!bodyInvalid) checkedText = renderGroundedBody(assistantText, facts);
+              } catch {
+                bodyInvalid = true;
+              }
+              requireActiveTurn();
+            }
+            const lowConfidence = finish.status === "completed"
+              && (bodyInvalid || (groundingRequired && !hasGroundedCitation(finish)));
             const refused = finish.status === "refused";
             const effectiveFinish = lowConfidence
               ? {
@@ -414,7 +443,7 @@ export function createConciergeService(
               ? SAFETY_REFUSAL[locale]
               : lowConfidence
                 ? LOW_CONFIDENCE_HANDOFF[locale]
-                : assistantText;
+                : checkedText;
             const citations = lowConfidence || refused
               ? []
               : assistantCitations(effectiveFinish);
@@ -436,7 +465,7 @@ export function createConciergeService(
               escalationId = `WTIA-${task.id}`;
             }
 
-            if (lowConfidence || refused) {
+            if (lowConfidence || refused || responseText !== assistantText) {
               yield {event: "delta", data: {text: responseText}};
               requireActiveTurn();
             } else {

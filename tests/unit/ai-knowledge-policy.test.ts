@@ -39,3 +39,8 @@ describe("knowledge source uses the shared public HTTPS policy",()=>{
  it.each(["https://localhost/policy","https://source.localhost/policy","https://127.0.0.1/policy","https://[::1]/policy","https://example.test./policy"])("rejects forbidden source %s",url=>{expect(knowledgeVersionSchema.safeParse({...sourceInput,url}).success).toBe(false);});
  it("preserves a canonical public source query without allowing a fragment",()=>{expect(knowledgeVersionSchema.safeParse({...sourceInput,url:"https://example.test/policy?version=1"}).success).toBe(true);expect(knowledgeVersionSchema.safeParse({...sourceInput,url:"https://example.test/policy#draft"}).success).toBe(false);});
 });
+
+describe("pinned source identity at provider citation boundary",()=>{
+ it("retains the exact approved source reference through normalization",()=>{expect(normalizeAgentCitations([{sourceId:"kb:pinned",title:"Approved source",knowledgeRef:ref,retrievalScore:0.99}])).toEqual([{sourceId:"kb:pinned",title:"Approved source",knowledgeRef:ref,retrievalScore:0.99}]);});
+ it("rejects a citation with a malformed source reference instead of dropping only its provenance",()=>{expect(normalizeAgentCitations([{sourceId:"kb:forged",title:"Forged source",knowledgeRef:{...ref,contentHash:"unverified"},retrievalScore:0.99}])).toEqual([]);});
+});

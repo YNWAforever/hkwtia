@@ -1,4 +1,7 @@
-import {randomUUID} from "node:crypto";
+import {approvedFactsHash} from "@/lib/ai/drafts/validation";
+import {draftFactLabels} from "@/lib/ai/drafts/fact-labels";
+import type {ApprovedFactPack} from "@/lib/ai/drafts/contracts";
+import {randomUUID,createHash} from "node:crypto";
 import {offlineKnowledgeRef} from "./knowledge-fixture";
 import type {AiBudgetPort} from "@/lib/ai/budget";
 import {
@@ -222,6 +225,7 @@ function responseFromTool(
 ): Readonly<{text: string; rejected: boolean}> {
   const values = resultValues(result);
   const first = firstRecord(result);
+  if (typeof first?.fixtureGroundingToken === "string") return {text:first.fixtureGroundingToken,rejected:false};
   if (action === "kb_search") {
     return first && typeof first.excerpt === "string"
       ? {text: first.excerpt, rejected: false}
@@ -549,6 +553,10 @@ export async function executeOfflineCase(
     // use today's clock rather than an expired fixture timestamp.
     now: dependencies.providerFactories ? () => new Date() : () => new Date("2026-07-27T10:00:00.000Z"),
   });
+  // Explicit fixture facts for offline/model evaluations only. This adapter never proves
+  // a production DB read, source approval, provider delivery or association policy.
+  const fixtureValues:ApprovedFactPack["values"]={};
+  const fixtureRecordSources:ApprovedFactPack["recordSources"]={};
   const service = createConciergeService({
     agentsEnabled: input.request.agentsEnabled,
     model: dependencies.model ?? "openai:gpt-4.1-mini",
@@ -595,7 +603,22 @@ export async function executeOfflineCase(
     }),
     createTools(context) {
       registryInvoked = true;
-      return createConciergeTools(context);
+      const tools=createConciergeTools(context);
+      return Object.fromEntries(Object.entries(tools).map(([name,tool])=>[name,{...tool,async execute(value,options){
+        const result=await tool.execute(value,options);
+        const response=responseFromTool(name as ProviderAction,result,input.locale);
+        if(response.rejected||!Array.isArray(result.value)||!result.value.length)return result;
+        const ref=result.citations?.find(c=>c.knowledgeRef)?.knowledgeRef;
+        const id=ref?.sourceId??`db:content:synthetic-fixture-${name}`;
+        if(!ref)fixtureRecordSources[id]=createHash("sha256").update(response.text).digest("hex");
+        const chunks=Array.from(response.text).reduce<string[]>((items,char,index)=>{const part=Math.floor(index/450);items[part]=(items[part]??"")+char;return items;},[]);
+        const tokens=chunks.map((text,index)=>{const field=`fixtureDetails_${name}_${index}`;fixtureValues[field]={value:text,sourceId:id,label:draftFactLabels(input.locale).sourceDetails,format:"text"};return `{{facts.${field}}}`;}).join("\n");
+        return {...result,value:result.value.map(item=>isRecord(item)?{...item,fixtureGroundingToken:tokens}:item)};
+      }}]));
+    },
+    async getApprovedFacts({conversationId,locale,citations,asOf}){
+      const facts:ApprovedFactPack={caseId:conversationId,locale,versionHash:"0".repeat(64),asOf:asOf.toISOString(),values:fixtureValues,sourceRefs:citations.flatMap(c=>c.knowledgeRef?[c.knowledgeRef]:[]),recordSources:fixtureRecordSources,sourceUrls:Object.fromEntries(citations.filter(c=>c.url).map(c=>[c.knowledgeRef?.sourceId??c.sourceId,c.url!])),comparisonAvailable:null,displayLabels:draftFactLabels(locale).displayLabels};
+      return {...facts,versionHash:approvedFactsHash(facts)};
     },
     async audit(event) {
       audits.push(event);
