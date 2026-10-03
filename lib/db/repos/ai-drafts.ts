@@ -1,4 +1,5 @@
 import "server-only";
+import { markDraftRequestStartedInTransaction } from "@/lib/db/repos/ai-draft-work";
 import { randomUUID } from "node:crypto";
 import { sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
@@ -68,6 +69,10 @@ const proposedSchema = groundedContentSchema
     modelRoute: z.string().min(1).max(120),
     promptVersion: z.string().min(1).max(80),
     runId: z.string().uuid(),
+    expectedFactsHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
   })
   .strict();
 export type AiDraftDetails = Readonly<{
@@ -255,6 +260,57 @@ export function createAiDraftsRepository(
     }
   }
   return {
+    async fenceGeneration(actor: Actor, input: unknown): Promise<void> {
+      const value = z
+        .object({
+          kind: z.enum(draftKinds),
+          caseId: z.string().min(1).max(255),
+          factsHash: z.string().regex(/^[a-f0-9]{64}$/),
+          runId: z.string().uuid(),
+          claimToken: z.string().uuid(),
+          modelRoute: z.string().min(1).max(120),
+          promptVersion: z.string().min(1).max(80),
+        })
+        .strict()
+        .parse(input);
+      await locked(actor, async (tx, admin) => {
+        const facts = await factsFor(tx, admin, value);
+        if (
+          facts.versionHash !== value.factsHash ||
+          !(await sourcesCurrent(tx, admin, facts))
+        )
+          throw Error("DRAFT_GENERATION_STALE");
+        const bound = rows(
+          await tx.execute(
+            sql`SELECT run_id FROM ai_draft_work WHERE run_id=${value.runId} AND claim_token=${value.claimToken} AND kind=${value.kind} AND case_id=${value.caseId} AND facts_hash=${value.factsHash}`,
+          ),
+        );
+        if (bound.length !== 1) throw Error("DRAFT_WORK_CLAIM_CONFLICT");
+        await markDraftRequestStartedInTransaction(
+          tx,
+          { runId: value.runId, claimToken: value.claimToken },
+          now(),
+        );
+        await tx.execute(
+          sql`INSERT INTO audit_events(actor_type,actor_user_id,action,target_type,target_id,metadata) VALUES(${admin.kind},${admin.profileId},'ai_draft_generation_requested','ai_draft_work',${value.runId},${JSON.stringify({ kind: value.kind, caseId: value.caseId, factsHash: value.factsHash, modelRoute: value.modelRoute, promptVersion: value.promptVersion })}::jsonb)`,
+        );
+      });
+    },
+    async getFacts(actor: Actor, input: unknown): Promise<ApprovedFactPack> {
+      const value = z
+        .object({
+          kind: z.enum(draftKinds),
+          caseId: z.string().min(1).max(255),
+        })
+        .strict()
+        .parse(input);
+      return locked(actor, async (tx, admin) => {
+        const facts = await factsFor(tx, admin, value);
+        if (!(await sourcesCurrent(tx, admin, facts)))
+          throw Error("AI_DRAFT_SOURCE_NOT_CURRENT");
+        return facts;
+      });
+    },
     async saveProposedDraft(
       actor: Actor,
       input: unknown,
@@ -271,11 +327,12 @@ export function createAiDraftsRepository(
         )
           throw Error("AI_DRAFT_OWNER_INVALID");
         const facts = await factsFor(tx, admin, value);
+        const { expectedFactsHash, ...content } = value;
         const draft: AdminAiDraft = {
-          ...value,
+          ...content,
           id: randomUUID(),
           version: 1,
-          factsHash: facts.versionHash,
+          factsHash: expectedFactsHash ?? facts.versionHash,
           state: "proposed",
         };
         let result = validateDraft(draft, facts);
@@ -289,9 +346,12 @@ export function createAiDraftsRepository(
           };
         const saved = {
           ...draft,
-          state: result.valid
-            ? ("needs_review" as const)
-            : ("proposed" as const),
+          state:
+            expectedFactsHash && expectedFactsHash !== facts.versionHash
+              ? ("stale" as const)
+              : result.valid
+                ? ("needs_review" as const)
+                : ("proposed" as const),
         };
         const at = now();
         await tx.execute(
@@ -479,27 +539,25 @@ export function createAiDraftsRepository(
           ),
         );
         return {
-          items: items
-            .slice(0, limit)
-            .map((row) => ({
-              id: String(row.id),
-              kind: z.enum(draftKinds).parse(row.kind),
-              state: z
-                .enum([
-                  "proposed",
-                  "needs_review",
-                  "approved",
-                  "rejected",
-                  "stale",
-                ])
-                .parse(row.state),
-              version: Number(row.version),
-              ownerId:
-                row.owner_profile_id === null
-                  ? null
-                  : String(row.owner_profile_id),
-              dueAt: row.due_at === null ? null : iso(row.due_at),
-            })),
+          items: items.slice(0, limit).map((row) => ({
+            id: String(row.id),
+            kind: z.enum(draftKinds).parse(row.kind),
+            state: z
+              .enum([
+                "proposed",
+                "needs_review",
+                "approved",
+                "rejected",
+                "stale",
+              ])
+              .parse(row.state),
+            version: Number(row.version),
+            ownerId:
+              row.owner_profile_id === null
+                ? null
+                : String(row.owner_profile_id),
+            dueAt: row.due_at === null ? null : iso(row.due_at),
+          })),
           nextCursor:
             items.length > limit ? String(items[limit - 1]!.id) : null,
         };
