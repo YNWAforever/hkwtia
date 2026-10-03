@@ -15,6 +15,8 @@
   "allChecksState": "PASS",
   "productionBranch": "release",
   "productionRelease": false,
-  "previewRuntimeAcceptance": "BLOCKED_VERCEL_DEPLOYMENT_PROTECTION",
-  "unrelatedDirtyFilesPreserved": true
+  "previewRuntimeAcceptance": "17_NATIVE_CHECKS_PASS_AT_REVIEWED_HEAD_A601",
+  "unrelatedDirtyFilesPreserved": true,
+  "previewRuntimeReceipt": "first-slice-preview-verified.json",
+  "previewInitialProtectionGatePreserved": "first-slice-preview-blocked.json"
 }
