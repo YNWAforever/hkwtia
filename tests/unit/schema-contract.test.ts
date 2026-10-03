@@ -108,6 +108,12 @@ describe("M4A AI concierge schema contract", () => {
     expect(serverSchema.staffTasks.context).toBeDefined();
     expectTypeOf<typeof staffTasks.$inferInsert.profileId>().toEqualTypeOf<string | null | undefined>();
     expectTypeOf<typeof staffTasks.$inferSelect.context>().toEqualTypeOf<{
+      applicationId?: string;
+      caseVersion?: string;
+      ownerProfileId?: string | null;
+      dueAt?: string | null;
+      missingFields?: readonly string[];
+      nextActionCode?: string;
       contactEmail?: string;
       orderId?: string;
       noticeKind?: "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";

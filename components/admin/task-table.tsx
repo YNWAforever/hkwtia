@@ -12,9 +12,11 @@ type Labels = Readonly<{
   ticketEmail: string; ticketEmailBlocked: string; ticketEmailUncertain: string;
   ticketRefundPending: string; ticketConfirmation: string; ticketPass: string;
   ticketRefund: string; ticketRefundFailed: string; ticketOrder: string;
+  applicationCase?: string; openApplicationCase?: string; caseNextActions?: Readonly<Record<string,string>>;
 }>;
 
 function taskSummary(task: OpenStaffTask, labels: Labels): string {
+  if(task.kind === "membership_application")return labels.caseNextActions?.[task.summaryCode]??labels.applicationCase??labels.summary;
   if (task.kind === "showcase_lead_email") {
     return task.summaryCode === "showcase_lead_email_uncertain"
       ? labels.leadEmailUncertain : labels.leadEmailBlocked;
@@ -62,7 +64,7 @@ export function TaskTable({locale, tasks, labels, action}: Readonly<{
             return (
               <tr className="border-t border-border" key={task.id}>
                 <td className="p-3">{task.kind === "showcase_lead_email" ? labels.leadEmail
-                  : task.kind === "ticket_email" ? labels.ticketEmail : task.kind}</td>
+                  : task.kind === "ticket_email" ? labels.ticketEmail : task.kind === "membership_application" ? labels.applicationCase??labels.kind : task.kind}</td>
                 <td className="p-3">
                   <div>{taskSummary(task, labels)}</div>
                   {notice ? <div className="text-muted-foreground">{notice}</div> : null}
@@ -72,7 +74,7 @@ export function TaskTable({locale, tasks, labels, action}: Readonly<{
                 <td className="p-3">{task.profileId ?? ""}</td>
                 <td className="p-3">{task.context.conversationId ? <Link className="text-primary underline" href={localizedPath(locale, "/admin/inbox/" + task.context.conversationId)}>{labels.openConversation}</Link> : ""}</td>
                 <td className="p-3"><time dateTime={task.createdAt.toISOString()}>{formatter.format(task.createdAt)}</time></td>
-                <td className="p-3"><form action={action}><input name="taskId" type="hidden" value={task.id} /><button className="rounded-md border border-border px-3 py-1" type="submit">{labels.resolve}</button></form></td>
+                <td className="p-3">{task.kind === "membership_application" ? (task.context.applicationId ? <Link className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale,"/admin/members/queue/"+task.context.applicationId)}>{labels.openApplicationCase??labels.applicationCase??labels.actions}</Link> : null) : <form action={action}><input name="taskId" type="hidden" value={task.id} /><button className="rounded-md border border-border px-3 py-1" type="submit">{labels.resolve}</button></form>}</td>
               </tr>
             );
           })}

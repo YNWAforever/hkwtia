@@ -1,0 +1,84 @@
+import fs from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { Pool } from 'pg';
+import { expect, test } from '@playwright/test';
+import { signInRemediationIdentity } from '../fixtures/full-remediation-browser';
+import { assertIsolatedSeedEnvironment, assertSeedSentinel } from '../../scripts/lib/acceptance-guard';
+const company = randomUUID(), application = randomUUID(), foreignApp = randomUUID(), foreignProfile = randomUUID();
+let profile: string, pool: Pool;
+let savedProfile: {
+    display_name: string;
+    phone: string | null;
+    job_title: string | null;
+    whatsapp_number: string | null;
+    whatsapp_opt_in: boolean;
+};
+const evidence = 'docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/';
+test.use({ trace: 'off', video: 'off', actionTimeout: 30000 });
+test.describe('actual isolated applicant-owned resume and saved company data', () => {
+    test.skip(process.env.AUDIT_ISOLATED_ACCEPTANCE !== '1', 'Confirmed isolated DB/Auth required');
+    test.beforeAll(async ({ request, baseURL }) => {
+        const url = assertIsolatedSeedEnvironment(process.env, { prefix: 'FULL_REMEDIATION', flag: 'FULL_REMEDIATION_ACCEPTANCE_SEED', hostAllowlistVar: 'FULL_REMEDIATION_DATABASE_HOST_ALLOWLIST' });
+        expect(new URL(url).hostname).toBe('ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech');
+        expect(process.env.NEON_PROJECT_ID).toBe('solitary-wave-52860119');
+        expect(new URL(baseURL!).hostname).toBe('localhost');
+        pool = new Pool({ connectionString: url });
+        await assertSeedSentinel('FULL_REMEDIATION', async () => Number((await pool.query('SELECT count(*) AS count FROM acceptance_sentinel')).rows[0].count));
+        const response = await request.post('/api/auth/sign-in/email', { headers: { Origin: baseURL! }, data: { email: process.env.M2_TEST_MEMBER_EMAIL, password: process.env.M2_TEST_MEMBER_PASSWORD, callbackURL: '/join' } });
+        expect(response.status()).toBe(200);
+        const owners = (await pool.query("SELECT id,display_name,phone,job_title,whatsapp_number,whatsapp_opt_in FROM profiles WHERE auth_user_id=$1 AND role='member'", [(await response.json()).user.id])).rows;
+        expect(owners).toHaveLength(1);
+        profile = owners[0].id;
+        savedProfile = owners[0];
+        await pool.query("INSERT INTO companies(id,legal_name,display_name,website,industry,size_band,description) VALUES($1,'Synthetic resume legal name','Synthetic resume display','https://resume.example.test','Synthetic industry','Synthetic size','Synthetic company description')", [company]);
+        await pool.query("INSERT INTO company_members(company_id,user_id,role) VALUES($1,$2,'owner')", [company, profile]);
+        await pool.query("INSERT INTO membership_applications(id,applicant_user_id,company_id,plan_code,current_step,status) VALUES($1,$2,$3,'corporate','company','draft')", [application, profile, company]);
+        await pool.query("INSERT INTO profiles(id,auth_user_id,email,display_name,role) VALUES($1,$1,$2,'Synthetic foreign applicant','member')", [foreignProfile, 'fr-foreign-' + foreignProfile + '@example.test']);
+        await pool.query("INSERT INTO membership_applications(id,applicant_user_id,company_id,plan_code,current_step,status) VALUES($1,$2,$3,'corporate','company','draft')", [foreignApp, foreignProfile, company]);
+        fs.mkdirSync(evidence, { recursive: true });
+    });
+    test.afterAll(async () => { if (pool) {
+        await pool.query('DELETE FROM memberships WHERE application_id=$1', [application]);
+        await pool.query('DELETE FROM membership_applications WHERE id=ANY($1::uuid[])', [[application, foreignApp]]);
+        await pool.query('DELETE FROM company_members WHERE company_id=$1', [company]);
+        await pool.query('DELETE FROM companies WHERE id=$1', [company]);
+        await pool.query('DELETE FROM profiles WHERE id=$1', [foreignProfile]);
+        await pool.end();
+    } });
+    test('fresh login resumes the same company application with valid saved fields', async ({ page, context, baseURL }) => {
+        await signInRemediationIdentity(context, baseURL!, 'MEMBER');
+        await context.addCookies([{ name: 'NEXT_LOCALE', value: 'zh-HK', url: baseURL! }]);
+        const copy = JSON.parse(fs.readFileSync('messages/zh-HK.json', 'utf8')).Join;
+        await page.goto('/zh/join/profile?plan=corporate&application=' + application);
+        await expect(page.locator('input[name="displayName"]')).toHaveValue(savedProfile.display_name);
+        await expect(page.locator('input[name="phone"]')).toHaveValue(savedProfile.phone ?? '');
+        await expect(page.locator('input[name="jobTitle"]')).toHaveValue(savedProfile.job_title ?? '');
+        await expect(page.locator('input[name="whatsappNumber"]')).toHaveValue(savedProfile.whatsapp_number ?? '');
+        await expect(page.locator('input[name="whatsappOptIn"]')).toBeChecked({ checked: savedProfile.whatsapp_opt_in });
+        await page.goto('/zh/join?plan=corporate&application=' + application);
+        const form = page.locator('form').filter({ has: page.locator('input[name="applicationId"][value="' + application + '"]') });
+        await form.getByRole('button', { name: copy.resume.continue, exact: true }).click();
+        await expect(page.getByRole('heading', { name: copy.companyTitle })).toBeVisible();
+        await expect(page.locator('input[name="legalName"]')).toHaveValue('Synthetic resume legal name');
+        await expect(page.locator('input[name="companyDisplayName"]')).toHaveValue('Synthetic resume display');
+        await expect(page.locator('input[name="website"]')).toHaveValue('https://resume.example.test');
+        await expect(page.locator('textarea[name="description"]')).toHaveValue('Synthetic company description');
+        expect((await pool.query('SELECT count(*)::int AS count FROM membership_applications WHERE applicant_user_id=$1 AND company_id=$2', [profile, company])).rows).toEqual([{ count: 1 }]);
+        await page.screenshot({ path: evidence + 'zh-HK-resume-company.png' });
+        await page.locator('input[name="website"]').fill('https://resume-updated.example.test');
+        await page.getByRole('button',{name:copy.submitApplication,exact:true}).click();
+        await expect(page.getByRole('heading',{name:copy.checkoutSummary.title,exact:true})).toBeVisible();
+        expect((await pool.query("SELECT id,status FROM membership_applications WHERE id=$1",[application])).rows).toEqual([{id:application,status:'pending_payment'}]);
+        expect((await pool.query("SELECT legal_name,display_name,website FROM companies WHERE id=$1",[company])).rows).toEqual([{legal_name:'Synthetic resume legal name',display_name:'Synthetic resume display',website:'https://resume-updated.example.test'}]);
+        expect((await pool.query("SELECT status FROM memberships WHERE application_id=$1",[application])).rows).toEqual([{status:'pending_payment'}]);
+        expect((await pool.query("SELECT user_id,role FROM company_members WHERE company_id=$1",[company])).rows).toEqual([{user_id:profile,role:'owner'}]);
+
+        fs.writeFileSync(evidence + 'resume.json', JSON.stringify({ environment: 'confirmed isolated DB/Auth; Chromium', sameApplication: true, savedProfileFields: true, existingConsentCheckboxPreserved: true, savedCompanyFields: true, applicationCount: 1, applicantUpdate:'same application; only submitted website changed', membership:'pending_payment; not activated', companyOwner:'unchanged', fixtureMessages: false, production: false }, null, 2));
+    });
+    test('another applicant cannot read company draft even with a legitimate seat in that company', async ({ page, context, baseURL }) => {
+        await signInRemediationIdentity(context, baseURL!, 'MEMBER');
+        const response = await page.goto('/zh/join/company?plan=corporate&application=' + foreignApp);
+        expect(response?.status()).toBe(404);
+        await expect(page.locator('input[name="legalName"]')).toHaveCount(0);
+    });
+});

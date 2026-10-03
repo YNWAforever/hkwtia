@@ -10,7 +10,7 @@ export function ApplicationQueueTable({locale, items, labels}: Readonly<{locale:
     <thead className="bg-muted/40"><tr>{[labels.applicant, labels.application, labels.company, labels.plan, labels.step, labels.membership, labels.billing, labels.updated].map((label) => <th className="px-4 py-3" key={label} scope="col">{label}</th>)}</tr></thead>
     <tbody>{items.map((item) => <tr className="border-t" key={item.applicationId}>
       <th className="px-4 py-3" scope="row"><Link className="text-primary underline" href={localizedPath(locale, `/admin/members/${encodeURIComponent(item.profileId)}`)}>{item.name}</Link><p className="font-normal text-muted-foreground">{item.email ?? labels.none}</p></th>
-      <td className="px-4 py-3"><p>{labels.states[item.applicationState] ?? item.applicationState}</p><code className="text-xs">{item.applicationId}</code></td>
+      <td className="px-4 py-3"><Link className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, `/admin/members/queue/${item.applicationId}`)}>{labels.states[item.applicationState] ?? item.applicationState}</Link><code className="text-xs">{item.applicationId}</code></td>
       <td className="px-4 py-3">{item.companyName ?? labels.none}</td>
       <td className="px-4 py-3">{labels.plans[item.planCode] ?? item.planCode}</td>
       <td className="px-4 py-3">{labels.steps[item.step] ?? item.step}</td>

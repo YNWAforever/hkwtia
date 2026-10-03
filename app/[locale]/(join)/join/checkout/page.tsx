@@ -85,7 +85,7 @@ export default async function CheckoutPage({params, searchParams}: Props) {
       </form>
       <div className="mt-5 flex flex-wrap gap-5 text-sm">
         <Link className="text-primary underline" href={resume}>{t("checkoutSummary.later")}</Link>
-        <Link className="text-primary underline" href={details}>{t("checkoutSummary.changeDetails")}</Link>
+        {state.application.applicantUserId===state.actor.profileId?<Link className="text-primary underline" href={details}>{t("checkoutSummary.changeDetails")}</Link>:null}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">{t("checkoutSummary.sameAttempt")}</p>
     </section>

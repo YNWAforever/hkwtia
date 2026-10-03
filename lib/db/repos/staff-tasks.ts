@@ -18,6 +18,12 @@ import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor
 import {getDb} from "@/lib/db/repos/common";
 
 export type StaffTaskContext = Readonly<{
+  applicationId?: string;
+  caseVersion?: string;
+  ownerProfileId?: string | null;
+  dueAt?: string | null;
+  missingFields?: readonly string[];
+  nextActionCode?: string;
   contactEmail?: string;
   noticeKind?: "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";
   orderId?: string;
@@ -309,10 +315,12 @@ export function createStaffTasksRepository(
     requireAdmin(actor);
     const id = z.string().uuid().parse(taskId);
     const database = await loadDatabase();
+    const current = rowsFrom(await database.execute(sql`SELECT kind FROM ${staffTasks} WHERE id=${id} LIMIT 1`))[0];
+    if(current?.kind === "membership_application")throw new Error("APPLICATION_CASE_RESOLVE_REQUIRES_VERSION");
     const row = rowsFrom(await database.execute(sql`
       UPDATE ${staffTasks}
       SET status = 'resolved', resolved_at = now(), resolved_by_profile_id = ${actor.profileId}, updated_at = now()
-      WHERE id = ${id} AND status = 'open'
+      WHERE id = ${id} AND status = 'open' AND kind <> 'membership_application'
       RETURNING id
     `))[0];
     return {id, disposition: row ? "resolved" : "already_resolved"};
