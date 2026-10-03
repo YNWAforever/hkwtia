@@ -42,7 +42,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={{Error: messages.Error}}>
           {children}
         </NextIntlClientProvider>
       </body>

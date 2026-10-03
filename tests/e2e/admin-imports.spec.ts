@@ -39,6 +39,10 @@ for (const [locale, prefix, messages] of [["en", "", en], ["zh-HK", "/zh", zh]] 
     expect((await driver("prepare", run, batchId)).prepared).toBe(true); await page.reload();
     await count(page, batch.total, 2); await count(page, batch.eligible, 2);
     await page.getByRole("button", {name: batch.commit, exact: true}).click();
+    // Native confirmation must block submission before the acknowledged commit.
+    await expect(page.getByRole("status")).toHaveText(batch.states.ready);
+    await page.getByRole("checkbox", {name: batch.confirm, exact: true}).check();
+    await page.getByRole("button", {name: batch.commit, exact: true}).click();
     await expect(page.getByRole("status")).toHaveText(batch.states.queued);
     expect((await driver("execute", run, batchId)).claimed).toBe(2); await page.reload();
     await expect(page.getByRole("status")).toHaveText(batch.states.completed);

@@ -87,11 +87,11 @@
 
 **介面／契約：** 消費原始 ZIP 與當前 git/deployment；產生 baseline（repo、branch、SHA、dirty files、lockfile、app/worker SHA、migration ledger、flags 狀態、provider mode）及 O/U 狀態台帳。只列設定名稱和狀態，不能保存值。fixture 擬新增 seedFullRemediationFixtures(options: {confirmedIsolated: true; runId: string}): Promise<{runId: string; counts: Record<string, number>}>，沿用現有 seed safety guards，不接受 production host。
 
-- [ ] **建立行為證據：** fixture 拒絕未確認或 production；同 runId 重跑不重複。提供四角色、公司三角色、新舊 identity、付款／會籍各狀態、51/101 分群、50/500/5000 batch；固定 clock 測日期邊界。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 先 git status、核對 remote/最新 main，保留現有工作並用獨立 worktree。逐項標 reproducible/source-confirmed/already-fixed/unverified。讀完整 AGENTS、現有 fixtures、migration 及 release 文件；建立隔離 DB/Auth/provider allowlist。優先重用 M2、audit-batch、audit-import、audit-grant fixtures；新 fixture 只補缺口，不 fork 一套系統。記錄已知 6097 pass/171 skip 是舊基線，不當本次新結果。
-- [ ] **驗證：** git status --short；git rev-parse HEAD；git remote -v（報告遮罩 credentials）；npm ci；npm run typecheck。依 DB 指向說明在隔離目標執行 migration/seed，保存 ledger 及重跑 count。
-- [ ] **結案與提交：** 每項有當前狀態；環境指向已確認；不需 credentials 的缺陷可立即開始。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`docs: establish full remediation baseline`。
+- [x] **建立行為證據：** fixture 拒絕未確認或 production；同 runId 重跑不重複。提供四角色、公司三角色、新舊 identity、付款／會籍各狀態、51/101 分群、50/500/5000 batch；固定 clock 測日期邊界。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 先 git status、核對 remote/最新 main，保留現有工作並用獨立 worktree。逐項標 reproducible/source-confirmed/already-fixed/unverified。讀完整 AGENTS、現有 fixtures、migration 及 release 文件；建立隔離 DB/Auth/provider allowlist。優先重用 M2、audit-batch、audit-import、audit-grant fixtures；新 fixture 只補缺口，不 fork 一套系統。記錄已知 6097 pass/171 skip 是舊基線，不當本次新結果。
+- [x] **驗證：** git status --short；git rev-parse HEAD；git remote -v（報告遮罩 credentials）；npm ci；npm run typecheck。依 DB 指向說明在隔離目標執行 migration/seed，保存 ledger 及重跑 count。
+- [x] **結案與提交：** 每項有當前狀態；環境指向已確認；不需 credentials 的缺陷可立即開始。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`docs: establish full remediation baseline`。
 
 ### T01 · 修復繁中分群及翻譯品質 gate
 
@@ -215,9 +215,9 @@
 
 - [x] **建立行為證據：** legacyCompCannotBypassGrantPolicy；staff/exco/server actor 偽造被拒；相同 idempotency 並發只一份 grant；expiredAt 邊界正確；既有 indefinite rows 保留原權益。
 - [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 前台改「特別會籍」與「付款核對」兩操作；舊程式 caller 全部盤點替換，tests/seed 的既有用途明確區分。legacy inventory 只讀，列來源缺失不虛構原因/到期日。付款已扣但未啟用連到 T08 對帳，不新建 comp。擴大角色或撤回舊權益另需已批准政策。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts；隔離三角色及並發 DB 驗收。
-- [ ] **結案與提交：** 任何入口均不能繞過同一 grant guard；新授予有原因期限與 audit；無既有權益被默默改動。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: unify membership grants and retire legacy comp writes`。
+- [x] **實施：** 前台改「特別會籍」與「付款核對」兩操作；舊程式 caller 全部盤點替換，tests/seed 的既有用途明確區分。legacy inventory 只讀，列來源缺失不虛構原因/到期日。付款已扣但未啟用連到 T08 對帳，不新建 comp。擴大角色或撤回舊權益另需已批准政策。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts；隔離三角色及並發 DB 驗收。
+- [x] **結案與提交：** 任何入口均不能繞過同一 grant guard；新授予有原因期限與 audit；無既有權益被默默改動。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: unify membership grants and retire legacy comp writes`。
 
 ### T07 · 舊分群 Queue 納入同一 campaign 審批
 
@@ -237,8 +237,8 @@
 
 - [x] **建立行為證據：** legacyQueueCannotSend；GET 不造 campaign row；作者不能自審；批准後內容/受眾變更使審批失效；入列後 STOP 仍在 send-time blocked；contacts/both filters 不擴大到全會員。
 - [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 按鈕改「建立通訊草稿」；呈現預覽、可送/排除原因、內容及受眾版本；只批准所看版本。不要創造「小規模免批」例外。掃所有 callers，讓必需 transactional notices 使用原有獨立業務 outbox，而非誤導入 marketing review。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-campaign-entry.test.ts tests/unit/campaign-review-boundary.test.ts tests/unit/campaign-eligibility.test.ts；npm run test:e2e -- tests/e2e/full-campaign-review.spec.ts。
+- [x] **實施：** 按鈕改「建立通訊草稿」；呈現預覽、可送/排除原因、內容及受眾版本；只批准所看版本。不要創造「小規模免批」例外。掃所有 callers，讓必需 transactional notices 使用原有獨立業務 outbox，而非誤導入 marketing review。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-campaign-entry.test.ts tests/unit/campaign-review-boundary.test.ts tests/unit/campaign-eligibility.test.ts；npm run test:e2e -- tests/e2e/full-campaign-review.spec.ts。
 - [ ] **結案與提交：** 新舊人工推廣入口同一流程，實際 provider send 只在批准及同意都有效時發生。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: route segment campaigns through draft review`。
 
 ### T08 · 到期會員 billing 復原與付款對帳
@@ -260,8 +260,8 @@
 
 - [x] **建立行為證據：** expired/cancelled billing 不500；seat member 不可代付/看不應見資料；pending/paid 重複 checkout 不造第二訂閱；亂序 webhook 不倒退；付款修復只對帳已存在訂單。
 - [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 到期仍能查看本人合法帳單及下一步；依 provider 真狀態決定 resume、新 checkout 或 support，不以一個 button 盲建訂閱。管理端提供 payment→subscription→membership correlation 及具權限的既有 reconciliation 路徑，保留 idempotency/CAS；不得接受 client 自報 paid。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-billing-recovery.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/billing-checkout-locking.test.ts；npm run test:e2e -- tests/e2e/full-member-renewal.spec.ts。
+- [x] **實施：** 到期仍能查看本人合法帳單及下一步；依 provider 真狀態決定 resume、新 checkout 或 support，不以一個 button 盲建訂閱。管理端提供 payment→subscription→membership correlation 及具權限的既有 reconciliation 路徑，保留 idempotency/CAS；不得接受 client 自報 paid。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-billing-recovery.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/billing-checkout-locking.test.ts；npm run test:e2e -- tests/e2e/full-member-renewal.spec.ts。
 - [ ] **結案與提交：** 四類取消/過期/欠費/已付未啟用可恢復且不重複收款；取消/權益按 T09 批准政策驗收。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: recover billing access without granting membership access`。
 
 ### T09 · 版本化會籍政策與付款前確認
@@ -382,7 +382,7 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 - [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
 - [x] **實施：** 在既有 repeatable-read preparation transaction 內一次集合式取得 ID，或 bounded keyset 只計一次 total；不得改掉快照 isolation 省時間。UI 明示本頁/所有符合及排除。保留目前「符合條件總數超 max 即拒絕」語意，若想扣 exclusions 才限額需獨立變更與測試。
 - [x] **驗證：** npm exec -- vitest run tests/integration/audit-full-batch-snapshot.test.ts；50/500/5000 性能對照，保存 SQL round trips、query plan、p95。
-- [ ] **結案與提交：** 不再以 100 次含 aggregate 的 search 完成 5000選取；結果及權限與舊契約一致。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`perf: resolve bulk member selections without repeated counts`。
+- [x] **結案與提交：** 不再以 100 次含 aggregate 的 search 完成 5000選取；結果及權限與舊契約一致。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`perf: resolve bulk member selections without repeated counts`。
 
 ### T14 · 批次預覽、執行、取消及安全重試
 
@@ -574,11 +574,14 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 產生 route/query/worker performance evidence（環境、SHA、資料量、樣本數、cold/warm、median/p95、TLS、錯誤率）；logger 只存 safe route、duration、correlation ID，不把 search term/PII/token 放標籤。
 
-- [ ] **建立行為證據：** 兩身份讀取不洩漏 cache；私人頁 no-store；發布使公開 copy cache 失效；50/500/5000 有界查詢；loading/empty/error 不互相混淆。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **建立行為證據：** 兩身份讀取不洩漏 cache；私人頁 no-store；發布使公開 copy cache 失效；50/500/5000 有界查詢；loading/empty/error 不互相混淆。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
 - [ ] **實施：** 測香港/新加坡網絡與真環境位置，先分 TLS/network/app/DB；有證據才調 query/index、public cache、bundle/images 或 function region。不能把 iad1 改為亞洲就宣稱修好。reuse next 現有 docs/api；不要給整個 auth layout 公用 cache。移除CMS巨量render與重複查詢後再測。
 - [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-cache-boundary.test.ts；npm run test:lighthouse（記錄環境限制）；新增 performance script 用至少30次warm樣本/規模及獨立cold樣本；RUM mobile/desktop p75另列。
 - [ ] **結案與提交：** 目標而非既有實績：list/preview p95≤2秒；公開LCP≤2.5秒、INP≤200ms、CLS≤0.1。未有RUM樣本標 pending，不以Lighthouse代替。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`perf: verify and improve membership workspace performance`。
+
+
+**有限實績：** 2888c483/b0f3d30a/55c2d036；完整ledger56 local/Neon50/500/5000，每op30warm及獨立新連線；2cache+5paintbuiltChromium；68Home回歸。修正有目標RED的loading/read-failure/hero。原index/cache復用。Lighthouse實際failure與環境重測另記；HK/SG雙vantage、RUM、全HTTP與release未過門檻，不簽fullSLO。T22/T23繼續。
 
 ### T22 · 整合生命週期、UAT、migration 及回復演練
 
@@ -633,12 +636,12 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 每個 schema 任務必須完成：
 
-- [ ] 查看當前 `drizzle` journal，使用下一個真實 migration 編號；不要預設下一號，也不改已套用 SQL。
-- [ ] 在乾淨隔離 DB migration→seed，及審核基準 schema→新 migration 兩條路執行。
-- [ ] 審核產生的 SQL，避免意外 DROP/CREATE 丟失 raw index、view、constraint；必要的非 transaction 建索引遵循 repository runner 能力並另列操作步驟。
-- [ ] 用合成 legacy rows 驗證 NULL/缺欄/重複/中斷補跑；backfill 有 checkpoint、count、驗後讀取及恢復點。
-- [ ] 新舊 app 都能讀相容 schema；先 expand→部署 dual-compatible code→驗收→獨立後續 contract。禁止把刪欄/刪資料當即時 rollback。
-- [ ] 將 DB ledger 與 app/worker 相依記入發布矩陣；migration 完成不代表 worker 或旗標已推出。
+- [x] 查看當前 `drizzle` journal，使用下一個真實 migration 編號；不要預設下一號，也不改已套用 SQL。
+- [x] 在乾淨隔離 DB migration→seed，及審核基準 schema→新 migration 兩條路執行。
+- [x] 審核產生的 SQL，避免意外 DROP/CREATE 丟失 raw index、view、constraint；必要的非 transaction 建索引遵循 repository runner 能力並另列操作步驟。
+- [x] 用合成 legacy rows 驗證 NULL/缺欄/重複/中斷補跑；backfill 有 checkpoint、count、驗後讀取及恢復點。
+- [x] 新舊 app 都能讀相容 schema；先 expand→部署 dual-compatible code→驗收→獨立後續 contract。禁止把刪欄/刪資料當即時 rollback。
+- [x] 將 DB ledger 與 app/worker 相依記入發布矩陣；migration 完成不代表 worker 或旗標已推出。
 
 ## 6. 必須鎖定的狀態與權限規則
 
@@ -741,3 +744,33 @@ expect(expiredMember.canReadOwnBilling).toBe(true);
 | O14 | T18、T20 |
 
 60 項 UAT 均在 `HKWTIA_Codex_Remediation_UAT_Traceability_2026-10-01.csv` 指定主責任務；原始狀態保留，新實施/執行結果另欄，初始均為未執行。新增 interface 只在相應任務定義；後續任務重用，不以同名不同語意重新建立模型。
+
+
+## 12. 最新工程追蹤（2026-10-02；原綜合門檻仍保留）
+
+Checkbox 只簽其明示範圍；外部 provider、協會政策、獨立 operator 或 Production 要求未完成的原綜合項仍不打勾。
+
+- [x] T00：最新 main／正式版本／dirty root 保留、native worktree、原附件 hash、隔離 G0 DB/Auth/TEST provider 和 synthetic fixture 重跑已核對。
+- [x] T01–T04：繁中33值、停用選取 server guard、51/101分頁、CMS真Back/Forward/denied storage/identity隔離已實際驗證；T22 legacy19補測。
+- [x] T05 工程：identity collision/provision/session/direct-next boundaries；隔離真 Auth 密碼三角色及 protected server 驗證；沒有重寫未證實的 Google app bug。
+- [ ] T05 provider：Google/device、人手 magic-link送達/到期/重用/fresh no-profile callback仍待指定測試身份及收件人。
+- [x] T06–T08 工程：grant統一弱入口、server campaign獨立審批與雙consent、billing本人歷史/原付款核對；真SQL及中英角色瀏覽器已跑。
+- [ ] T06–T10 業務：D01–D04/D06批准版本、實際收件人通知及完整入會/續會生命周期未簽；test registry不等於WTIA批准。
+- [x] T09–T10 工程：版本化政策收據、申請owner/CAS/補件/下一步；沿用audit_events和既有application metadata，無平行權益事實。
+- [x] T11–T12 本機：verified health/source拒絕、lease/unknown、bounded renewal/checkpoint、四個真local scheduled episodes、worker57/unit/type及dry-run。
+- [ ] T11–T12 雲端：專用Protected Preview服務憑證、scoped worker秘密transport/readback、兩個真正排程窗口。
+- [x] T13–T15 工程：真repository八操作×50/500/5000共24通過、跨頁scope、preview/CAS/claim/取消/部分失敗、private TTL export/import與已知unknown拒絕盲重試。
+- [ ] T14–T16 外部效果：approved mail/WhatsApp sender/recipient/template、provider accepted-timeout對帳/STOP及完整業務退款政策。
+- [x] T16 TEST：真Stripe TEST付款及asynchronous refund/reconciliation收據；owner/CAS/replay和簽到序列化；無live付款退款。
+- [x] T17–T19 工程：私人CMS draft/revision/CAS/explicit publication/revert、每日workspace/Member360/公司keyboard、inboxowner/lease/refusal-only retry；native media Home→ArrowDown→Tab現已真Chromium中英通過。
+- [ ] T18–T19 營運：職員獨立依繁中daily SOP走一次、approved provider delivery；source/stored states不能替代。
+- [x] T20：公開published-only、登入入口、79已批准真logo/R2只讀資產；79 URL全部NULL如實記錄，沒有編造destination。
+- [x] T21 工程：同filter/資料規模30warm query before/after、onequery snapshot、真cache隔離/失敗≠空資料、SQL pending firstpaint/hero priority；TLS/DB/HTTP/RUM分開。
+- [ ] T21 發布性能：原10路由Lighthouse門檻已實際通過（min .91/.96/1），HK/SG獨立觀測、RUM p75及已批准SLO仍待證據。
+- [x] T22 資料庫：52existing suites全部137通過/0失敗/0跳過；installed native Drizzle兩空DB；baseline51→fault rollback51→rerun56、財務/NULL-NULL權益指紋、compatible oldapp11讀取演練。
+- [x] T22 regression：手機keyboard hydration及/zh根路徑各有目標RED，31focused GREEN；lint/typecheck/strings/webpack build0。
+- [x] T22 當前單元/瀏覽器實際結果和逐case skip已記錄：exact99 CI6346pass/329skip；native browser332pass/4fail或timeout/162skip，G1完整瀏覽器仍未綠。新隔離Auth容量gate及定向重跑分開記錄，不將skip或較早結果當pass。
+- [x] T23 可審核文件範圍：current source/Preview17/flags/ledger/provider矩陣、逐findings/UAT、migration/preflight/rollback、繁中daily SOP、含SHA256 manifest證據ZIP及draft PR；正式發布/啟用/驗證仍未完成，G1完整browser與G3/G4/G5保持未通過。
+
+
+**最新原完整結果：** exact99 source CI6346pass/0fail/329skip、Workerd57pass；完整browser332pass/4fail或timeout/162skip，Auth597×200/3×429。四個原case定向4pass/0skip，90×200/0×429；不合併宣稱完整綠燈。隔離Auth quota/window/reset或專用驗收容量由provider owner解除，其餘精確gate見release-readiness.md。

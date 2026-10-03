@@ -1,0 +1,1259 @@
+{
+  "sourceSha": "55c2d036ea2bfdfd904722ecf5237ca221adc6f6",
+  "environment": "http://localhost:3450",
+  "scope": "owned built candidate loopback",
+  "clientVantage": "Windows workstation; geographic location not established",
+  "coldDefinition": "new curl process/connection; CDN/DB/server coldness not controlled",
+  "productionWrites": 0,
+  "cookiesSent": 0,
+  "rows": [
+    {
+      "path": "/",
+      "coldClient": {
+        "dnsMs": 0.06499999999999999,
+        "tcpAfterDnsMs": 0.6050000000000001,
+        "tlsAfterConnectMs": 0,
+        "ttfbMs": 47.085,
+        "bodyMs": 758.3519999999999,
+        "totalMs": 805.437,
+        "status": 200
+      },
+      "warmSamples": 30,
+      "medianP95": {
+        "dnsMs": {
+          "medianMs": 0.0625,
+          "p95Ms": 0.17
+        },
+        "tcpAfterDnsMs": {
+          "medianMs": 1.4775,
+          "p95Ms": 11.295
+        },
+        "tlsAfterConnectMs": {
+          "medianMs": 0,
+          "p95Ms": 0
+        },
+        "ttfbMs": {
+          "medianMs": 37.298,
+          "p95Ms": 49.024
+        },
+        "bodyMs": {
+          "medianMs": 163.452,
+          "p95Ms": 649.5999999999999
+        },
+        "totalMs": {
+          "medianMs": 201.5325,
+          "p95Ms": 684.26
+        }
+      },
+      "samples": [
+        {
+          "dnsMs": 0.068,
+          "tcpAfterDnsMs": 0.73,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 34.660000000000004,
+          "bodyMs": 649.5999999999999,
+          "totalMs": 684.26,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 1.9269999999999998,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 36.336,
+          "bodyMs": 126.469,
+          "totalMs": 162.805,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.17,
+          "tcpAfterDnsMs": 0.8400000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 36.102000000000004,
+          "bodyMs": 263.30899999999997,
+          "totalMs": 299.411,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.053,
+          "tcpAfterDnsMs": 0.666,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 46.874,
+          "bodyMs": 117.38799999999999,
+          "totalMs": 164.262,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.07200000000000001,
+          "tcpAfterDnsMs": 0.6439999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 41.028,
+          "bodyMs": 174.053,
+          "totalMs": 215.081,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.064,
+          "tcpAfterDnsMs": 0.939,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 34.656,
+          "bodyMs": 304.653,
+          "totalMs": 339.309,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06999999999999999,
+          "tcpAfterDnsMs": 1.1900000000000002,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 37.259,
+          "bodyMs": 83.797,
+          "totalMs": 121.056,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06499999999999999,
+          "tcpAfterDnsMs": 0.5880000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 32.638,
+          "bodyMs": 128.821,
+          "totalMs": 161.459,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.063,
+          "tcpAfterDnsMs": 1.113,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 33.855999999999995,
+          "bodyMs": 81.883,
+          "totalMs": 115.73899999999999,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 0.8899999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 39.97,
+          "bodyMs": 527.062,
+          "totalMs": 567.0319999999999,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 2.2990000000000004,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 35.926,
+          "bodyMs": 200.66299999999998,
+          "totalMs": 236.589,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.055,
+          "tcpAfterDnsMs": 7.391,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 38.157000000000004,
+          "bodyMs": 83.818,
+          "totalMs": 121.975,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.056,
+          "tcpAfterDnsMs": 1.8599999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 37.258,
+          "bodyMs": 156.412,
+          "totalMs": 193.67000000000002,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.054,
+          "tcpAfterDnsMs": 0.846,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 35.531,
+          "bodyMs": 280.867,
+          "totalMs": 316.398,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 1.9269999999999998,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 41.013,
+          "bodyMs": 142.983,
+          "totalMs": 183.99599999999998,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 3.7100000000000004,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 37.337,
+          "bodyMs": 198.339,
+          "totalMs": 235.676,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.055,
+          "tcpAfterDnsMs": 2.689,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 39.079,
+          "bodyMs": 400,
+          "totalMs": 439.079,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06499999999999999,
+          "tcpAfterDnsMs": 3.498,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 36.922000000000004,
+          "bodyMs": 168.147,
+          "totalMs": 205.069,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.078,
+          "tcpAfterDnsMs": 15.343,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 49.024,
+          "bodyMs": 216.64600000000002,
+          "totalMs": 265.67,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06499999999999999,
+          "tcpAfterDnsMs": 11.295,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 50.92,
+          "bodyMs": 139.471,
+          "totalMs": 190.391,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.187,
+          "tcpAfterDnsMs": 1.7650000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 33.76,
+          "bodyMs": 126.31500000000001,
+          "totalMs": 160.075,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.064,
+          "tcpAfterDnsMs": 5.321000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 45.553000000000004,
+          "bodyMs": 114.368,
+          "totalMs": 159.92100000000002,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.08,
+          "tcpAfterDnsMs": 0.915,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 37.385000000000005,
+          "bodyMs": 117.863,
+          "totalMs": 155.248,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.10900000000000001,
+          "tcpAfterDnsMs": 7.703,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 39.239000000000004,
+          "bodyMs": 158.757,
+          "totalMs": 197.996,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 4.68,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 37.506,
+          "bodyMs": 1389.416,
+          "totalMs": 1426.922,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 5.582999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 42.147999999999996,
+          "bodyMs": 178.541,
+          "totalMs": 220.689,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 1.0179999999999998,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 29.584,
+          "bodyMs": 317.72299999999996,
+          "totalMs": 347.30699999999996,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.057,
+          "tcpAfterDnsMs": 0.506,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 27.758000000000003,
+          "bodyMs": 147.367,
+          "totalMs": 175.125,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.081,
+          "tcpAfterDnsMs": 1.07,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 38.053999999999995,
+          "bodyMs": 394.55,
+          "totalMs": 432.604,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.055,
+          "tcpAfterDnsMs": 0.5289999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 32.042,
+          "bodyMs": 129.70900000000003,
+          "totalMs": 161.751,
+          "status": 200
+        }
+      ],
+      "errorRate": 0
+    },
+    {
+      "path": "/membership",
+      "coldClient": {
+        "dnsMs": 0.044,
+        "tcpAfterDnsMs": 0.455,
+        "tlsAfterConnectMs": 0,
+        "ttfbMs": 69.417,
+        "bodyMs": 0.5849999999999883,
+        "totalMs": 70.002,
+        "status": 200
+      },
+      "warmSamples": 30,
+      "medianP95": {
+        "dnsMs": {
+          "medianMs": 0.0605,
+          "p95Ms": 0.095
+        },
+        "tcpAfterDnsMs": {
+          "medianMs": 0.581,
+          "p95Ms": 0.9059999999999999
+        },
+        "tlsAfterConnectMs": {
+          "medianMs": 0,
+          "p95Ms": 0
+        },
+        "ttfbMs": {
+          "medianMs": 67.0675,
+          "p95Ms": 80.111
+        },
+        "bodyMs": {
+          "medianMs": 0.5744999999999987,
+          "p95Ms": 88.286
+        },
+        "totalMs": {
+          "medianMs": 72.66,
+          "p95Ms": 155.705
+        }
+      },
+      "samples": [
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 0.7160000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.04,
+          "bodyMs": 72.45,
+          "totalMs": 140.49,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 0.829,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 75.404,
+          "bodyMs": 0.5280000000000007,
+          "totalMs": 75.932,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.063,
+          "tcpAfterDnsMs": 0.601,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 80.111,
+          "bodyMs": 0.3969999999999946,
+          "totalMs": 80.508,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.067,
+          "tcpAfterDnsMs": 0.71,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 66.091,
+          "bodyMs": 76.251,
+          "totalMs": 142.34199999999998,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.067,
+          "tcpAfterDnsMs": 0.664,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.682,
+          "bodyMs": 0.49399999999999444,
+          "totalMs": 68.176,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.054,
+          "tcpAfterDnsMs": 0.5419999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.401,
+          "bodyMs": 0.5730000000000041,
+          "totalMs": 64.974,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 0.503,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 69.352,
+          "bodyMs": 0.5760000000000071,
+          "totalMs": 69.928,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.063,
+          "tcpAfterDnsMs": 0.5479999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.41900000000001,
+          "bodyMs": 88.286,
+          "totalMs": 155.705,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.066,
+          "tcpAfterDnsMs": 0.749,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 69.77600000000001,
+          "bodyMs": 90.133,
+          "totalMs": 159.909,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 0.5539999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 71.931,
+          "bodyMs": 0.4940000000000083,
+          "totalMs": 72.425,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.059,
+          "tcpAfterDnsMs": 0.59,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 65.461,
+          "bodyMs": 81.75,
+          "totalMs": 147.211,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 0.8270000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.788,
+          "bodyMs": 80.37100000000001,
+          "totalMs": 145.15900000000002,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06999999999999999,
+          "tcpAfterDnsMs": 0.624,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 66.723,
+          "bodyMs": 0.5909999999999943,
+          "totalMs": 67.314,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.078,
+          "tcpAfterDnsMs": 0.556,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.808,
+          "bodyMs": 84.98400000000001,
+          "totalMs": 149.792,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 0.5670000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 69.17,
+          "bodyMs": 0.5040000000000044,
+          "totalMs": 69.674,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.057,
+          "tcpAfterDnsMs": 17.465999999999998,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 85.81400000000001,
+          "bodyMs": 0.4549999999999971,
+          "totalMs": 86.269,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.074,
+          "tcpAfterDnsMs": 0.874,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 70.622,
+          "bodyMs": 0.8289999999999964,
+          "totalMs": 71.45100000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.038,
+          "tcpAfterDnsMs": 0.495,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 59.507,
+          "bodyMs": 78.66399999999999,
+          "totalMs": 138.171,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.061,
+          "tcpAfterDnsMs": 0.6920000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 72.338,
+          "bodyMs": 0.36999999999999533,
+          "totalMs": 72.708,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.621,
+          "tcpAfterDnsMs": 0.9059999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 72.036,
+          "bodyMs": 0.5759999999999932,
+          "totalMs": 72.612,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 0.558,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 63.319,
+          "bodyMs": 0.27099999999999347,
+          "totalMs": 63.589999999999996,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.055,
+          "tcpAfterDnsMs": 0.5569999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 59.309,
+          "bodyMs": 0.42400000000000077,
+          "totalMs": 59.733000000000004,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.046,
+          "tcpAfterDnsMs": 0.41100000000000003,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 62.1,
+          "bodyMs": 0.4849999999999993,
+          "totalMs": 62.585,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.059,
+          "tcpAfterDnsMs": 0.526,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.047,
+          "bodyMs": 80.462,
+          "totalMs": 148.50900000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.057,
+          "tcpAfterDnsMs": 0.556,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 63.138,
+          "bodyMs": 87.619,
+          "totalMs": 150.757,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.095,
+          "tcpAfterDnsMs": 0.7639999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.192,
+          "bodyMs": 0.3500000000000031,
+          "totalMs": 64.542,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.08600000000000001,
+          "tcpAfterDnsMs": 0.693,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.412,
+          "bodyMs": 83.293,
+          "totalMs": 150.705,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 0.5720000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 60.532999999999994,
+          "bodyMs": 0.5500000000000018,
+          "totalMs": 61.083,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.043000000000000003,
+          "tcpAfterDnsMs": 0.463,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 61.931,
+          "bodyMs": 0.3850000000000034,
+          "totalMs": 62.316,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.05,
+          "tcpAfterDnsMs": 0.564,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 60.565,
+          "bodyMs": 0.32899999999999596,
+          "totalMs": 60.894,
+          "status": 200
+        }
+      ],
+      "errorRate": 0
+    },
+    {
+      "path": "/partners",
+      "coldClient": {
+        "dnsMs": 0.064,
+        "tcpAfterDnsMs": 0.5359999999999999,
+        "tlsAfterConnectMs": 0,
+        "ttfbMs": 1128.8780000000002,
+        "bodyMs": 0.5739999999998524,
+        "totalMs": 1129.452,
+        "status": 200
+      },
+      "warmSamples": 30,
+      "medianP95": {
+        "dnsMs": {
+          "medianMs": 0.067,
+          "p95Ms": 0.135
+        },
+        "tcpAfterDnsMs": {
+          "medianMs": 0.711,
+          "p95Ms": 3.873999999999999
+        },
+        "tlsAfterConnectMs": {
+          "medianMs": 0,
+          "p95Ms": 0
+        },
+        "ttfbMs": {
+          "medianMs": 151.6925,
+          "p95Ms": 522.848
+        },
+        "bodyMs": {
+          "medianMs": 0.626500000000002,
+          "p95Ms": 3.4170000000000034
+        },
+        "totalMs": {
+          "medianMs": 155.40949999999998,
+          "p95Ms": 523.515
+        }
+      },
+      "samples": [
+        {
+          "dnsMs": 0.067,
+          "tcpAfterDnsMs": 0.644,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 412.832,
+          "bodyMs": 0.5980000000000429,
+          "totalMs": 413.43,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.077,
+          "tcpAfterDnsMs": 0.795,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 243.174,
+          "bodyMs": 0.5249999999999977,
+          "totalMs": 243.699,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.135,
+          "tcpAfterDnsMs": 0.714,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 195.114,
+          "bodyMs": 0.5039999999999767,
+          "totalMs": 195.618,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 0.6629999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 184.26000000000002,
+          "bodyMs": 0.5809999999999982,
+          "totalMs": 184.841,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06899999999999999,
+          "tcpAfterDnsMs": 0.907,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 155.994,
+          "bodyMs": 0.8210000000000162,
+          "totalMs": 156.815,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.225,
+          "tcpAfterDnsMs": 1.7599999999999998,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 155.375,
+          "bodyMs": 0.7269999999999777,
+          "totalMs": 156.102,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 6.4190000000000005,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 147.346,
+          "bodyMs": 0.7089999999999874,
+          "totalMs": 148.05499999999998,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.076,
+          "tcpAfterDnsMs": 1.683,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 141.234,
+          "bodyMs": 0.6430000000000047,
+          "totalMs": 141.877,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.07100000000000001,
+          "tcpAfterDnsMs": 0.708,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 128.28300000000002,
+          "bodyMs": 0.6400000000000017,
+          "totalMs": 128.923,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06899999999999999,
+          "tcpAfterDnsMs": 0.581,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 153.234,
+          "bodyMs": 1.4829999999999843,
+          "totalMs": 154.71699999999998,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.067,
+          "tcpAfterDnsMs": 0.49799999999999994,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 1351.9699999999998,
+          "bodyMs": 0.8900000000000574,
+          "totalMs": 1352.86,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.076,
+          "tcpAfterDnsMs": 0.707,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 522.848,
+          "bodyMs": 0.6669999999999732,
+          "totalMs": 523.515,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.078,
+          "tcpAfterDnsMs": 0.884,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 279.783,
+          "bodyMs": 0.5780000000000229,
+          "totalMs": 280.36100000000005,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.089,
+          "tcpAfterDnsMs": 0.6920000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 194.902,
+          "bodyMs": 0.4870000000000152,
+          "totalMs": 195.389,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.068,
+          "tcpAfterDnsMs": 0.736,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 178.79700000000003,
+          "bodyMs": 0.49199999999999244,
+          "totalMs": 179.28900000000002,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.07100000000000001,
+          "tcpAfterDnsMs": 0.48300000000000004,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 201.03199999999998,
+          "bodyMs": 0.6220000000000114,
+          "totalMs": 201.654,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.061,
+          "tcpAfterDnsMs": 0.5920000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 164.656,
+          "bodyMs": 0.5920000000000092,
+          "totalMs": 165.24800000000002,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.058,
+          "tcpAfterDnsMs": 0.526,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 150.151,
+          "bodyMs": 0.6309999999999927,
+          "totalMs": 150.782,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.064,
+          "tcpAfterDnsMs": 0.698,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 121.99799999999999,
+          "bodyMs": 0.4770000000000052,
+          "totalMs": 122.475,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.064,
+          "tcpAfterDnsMs": 0.614,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 119.745,
+          "bodyMs": 0.5469999999999919,
+          "totalMs": 120.292,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.048,
+          "tcpAfterDnsMs": 0.544,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 118.09100000000001,
+          "bodyMs": 0.5300000000000027,
+          "totalMs": 118.62100000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.043000000000000003,
+          "tcpAfterDnsMs": 0.622,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 134.83100000000002,
+          "bodyMs": 0.5349999999999799,
+          "totalMs": 135.36599999999999,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.061,
+          "tcpAfterDnsMs": 0.769,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 128.554,
+          "bodyMs": 0.5600000000000049,
+          "totalMs": 129.114,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.126,
+          "tcpAfterDnsMs": 0.73,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 127.93199999999999,
+          "bodyMs": 37.97800000000001,
+          "totalMs": 165.91,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.064,
+          "tcpAfterDnsMs": 3.706,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 148.571,
+          "bodyMs": 0.6410000000000027,
+          "totalMs": 149.21200000000002,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.059,
+          "tcpAfterDnsMs": 0.57,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 140.888,
+          "bodyMs": 0.7099999999999884,
+          "totalMs": 141.598,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.057,
+          "tcpAfterDnsMs": 1.805,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 140.97199999999998,
+          "bodyMs": 0.7650000000000157,
+          "totalMs": 141.737,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.064,
+          "tcpAfterDnsMs": 1.228,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 162.167,
+          "bodyMs": 3.4170000000000034,
+          "totalMs": 165.584,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06999999999999999,
+          "tcpAfterDnsMs": 3.873999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 123.375,
+          "bodyMs": 0.8960000000000079,
+          "totalMs": 124.271,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 1.957,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 121.586,
+          "bodyMs": 0.5850000000000022,
+          "totalMs": 122.171,
+          "status": 200
+        }
+      ],
+      "errorRate": 0
+    },
+    {
+      "path": "/admin-login",
+      "coldClient": {
+        "dnsMs": 0.087,
+        "tcpAfterDnsMs": 0.77,
+        "tlsAfterConnectMs": 0,
+        "ttfbMs": 411.57,
+        "bodyMs": 0.4669999999999952,
+        "totalMs": 412.037,
+        "status": 200
+      },
+      "warmSamples": 30,
+      "medianP95": {
+        "dnsMs": {
+          "medianMs": 0.0655,
+          "p95Ms": 0.08
+        },
+        "tcpAfterDnsMs": {
+          "medianMs": 0.736,
+          "p95Ms": 1.738
+        },
+        "tlsAfterConnectMs": {
+          "medianMs": 0,
+          "p95Ms": 0
+        },
+        "ttfbMs": {
+          "medianMs": 68.516,
+          "p95Ms": 112.636
+        },
+        "bodyMs": {
+          "medianMs": 0.4165000000000002,
+          "p95Ms": 0.8439999999999975
+        },
+        "totalMs": {
+          "medianMs": 69.05749999999999,
+          "p95Ms": 113.18
+        }
+      },
+      "samples": [
+        {
+          "dnsMs": 0.057,
+          "tcpAfterDnsMs": 1.4929999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 112.636,
+          "bodyMs": 0.5440000000000028,
+          "totalMs": 113.18,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.059,
+          "tcpAfterDnsMs": 0.704,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 141.05200000000002,
+          "bodyMs": 0.37899999999999046,
+          "totalMs": 141.431,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06899999999999999,
+          "tcpAfterDnsMs": 0.8320000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.733,
+          "bodyMs": 0.36699999999999233,
+          "totalMs": 68.1,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.061,
+          "tcpAfterDnsMs": 0.781,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 70.024,
+          "bodyMs": 0.48999999999999044,
+          "totalMs": 70.514,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06499999999999999,
+          "tcpAfterDnsMs": 0.668,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 81.035,
+          "bodyMs": 0.4050000000000026,
+          "totalMs": 81.44,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.068,
+          "tcpAfterDnsMs": 0.629,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.012,
+          "bodyMs": 0.4210000000000047,
+          "totalMs": 67.433,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06999999999999999,
+          "tcpAfterDnsMs": 0.6010000000000001,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.18,
+          "bodyMs": 0.5479999999999929,
+          "totalMs": 67.728,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.068,
+          "tcpAfterDnsMs": 0.8019999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 69.206,
+          "bodyMs": 0.38799999999999946,
+          "totalMs": 69.59400000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.066,
+          "tcpAfterDnsMs": 1.1829999999999998,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 70.17,
+          "bodyMs": 0.37299999999999833,
+          "totalMs": 70.54299999999999,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.076,
+          "tcpAfterDnsMs": 0.99,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.387,
+          "bodyMs": 0.4030000000000006,
+          "totalMs": 67.79,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.068,
+          "tcpAfterDnsMs": 0.651,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 79.494,
+          "bodyMs": 0.4140000000000116,
+          "totalMs": 79.908,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.12000000000000001,
+          "tcpAfterDnsMs": 1.1779999999999997,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.94699999999999,
+          "bodyMs": 0.4340000000000038,
+          "totalMs": 69.381,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.056,
+          "tcpAfterDnsMs": 0.589,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.45400000000001,
+          "bodyMs": 0.3959999999999936,
+          "totalMs": 68.85,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.079,
+          "tcpAfterDnsMs": 0.783,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 72.91499999999999,
+          "bodyMs": 0.26600000000000235,
+          "totalMs": 73.181,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.078,
+          "tcpAfterDnsMs": 1.12,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.79899999999999,
+          "bodyMs": 0.23000000000000798,
+          "totalMs": 68.02900000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.078,
+          "tcpAfterDnsMs": 0.691,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 66.833,
+          "bodyMs": 0.8439999999999975,
+          "totalMs": 67.677,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.075,
+          "tcpAfterDnsMs": 0.58,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.753,
+          "bodyMs": 0.44200000000001183,
+          "totalMs": 68.19500000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 0.5499999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.02900000000001,
+          "bodyMs": 0.4189999999999888,
+          "totalMs": 67.448,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.063,
+          "tcpAfterDnsMs": 0.712,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.846,
+          "bodyMs": 0.4189999999999888,
+          "totalMs": 69.26499999999999,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 0.603,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.578,
+          "bodyMs": 0.7670000000000038,
+          "totalMs": 69.345,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.059,
+          "tcpAfterDnsMs": 0.7599999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.165,
+          "bodyMs": 0.6099999999999994,
+          "totalMs": 64.775,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06899999999999999,
+          "tcpAfterDnsMs": 1.024,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 67.511,
+          "bodyMs": 0.31299999999999384,
+          "totalMs": 67.824,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.063,
+          "tcpAfterDnsMs": 0.46299999999999997,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.056,
+          "bodyMs": 0.38699999999999846,
+          "totalMs": 64.443,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.049,
+          "tcpAfterDnsMs": 0.597,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 64.775,
+          "bodyMs": 0.2889999999999976,
+          "totalMs": 65.064,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 0.5889999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 72.13799999999999,
+          "bodyMs": 0.4970000000000113,
+          "totalMs": 72.635,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.055,
+          "tcpAfterDnsMs": 0.5469999999999999,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 65.949,
+          "bodyMs": 0.6010000000000043,
+          "totalMs": 66.55,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.060000000000000005,
+          "tcpAfterDnsMs": 0.851,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 71.301,
+          "bodyMs": 0.3999999999999976,
+          "totalMs": 71.70100000000001,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.08,
+          "tcpAfterDnsMs": 1.13,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 68.06700000000001,
+          "bodyMs": 0.3539999999999932,
+          "totalMs": 68.42099999999999,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.06899999999999999,
+          "tcpAfterDnsMs": 1.738,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 71.661,
+          "bodyMs": 13.461,
+          "totalMs": 85.122,
+          "status": 200
+        },
+        {
+          "dnsMs": 0.062,
+          "tcpAfterDnsMs": 2.1,
+          "tlsAfterConnectMs": 0,
+          "ttfbMs": 70.676,
+          "bodyMs": 0.670999999999991,
+          "totalMs": 71.347,
+          "status": 200
+        }
+      ],
+      "errorRate": 0
+    }
+  ]
+}

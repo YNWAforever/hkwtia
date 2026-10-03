@@ -14,7 +14,7 @@ const view = {
     {id: "membership-expired", companyId: "company-b", planCode: "corporate", status: "expired", renewalAt: "2035-01-01T00:00:00.000Z", stripeCustomerId: null, stripeSubscriptionId: null},
   ],
   engagement: {score: 9, trend: 0, events: []}, emails: [], events: [], notes: [], journeys: [], whatsapp: [], suppressions: [],
-  purchases: [{id: "order-a", eventId: "event-a", titleEn: "AI Forum", titleZh: "AI ½×¾Â", status: "refunded", amountHkdCents: 25000, paidAt: "2026-08-01T00:00:00.000Z", refundedAt: "2026-08-02T00:00:00.000Z", refundReason: "cancelled", createdAt: "2026-08-01T00:00:00.000Z", seats: [{id: "seat-a", attendeeName: "Guest One", checkedInAt: null}]}],
+  purchases: [{id: "order-a", eventId: "event-a", titleEn: "AI Forum", titleZh: "AI è«–å£‡", status: "refunded", amountHkdCents: 25000, paidAt: "2026-08-01T00:00:00.000Z", refundedAt: "2026-08-02T00:00:00.000Z", refundReason: "cancelled", createdAt: "2026-08-01T00:00:00.000Z", seats: [{id: "seat-a", attendeeName: "Guest One", checkedInAt: null}]}],
 } satisfies Member360;
 
 describe("Member 360 display", () => {
@@ -28,4 +28,9 @@ describe("Member 360 display", () => {
     expect(markup).toContain("Guest One");
     expect(markup).toContain("Refunded");
   });
+});
+
+it("renders the actual Chinese ticket title from the Member360 fixture", () => {
+  const markup = renderToStaticMarkup(<Member360View view={view} locale="zh-HK" labels={{...en.Admin.member360, planCodes: en.Admin.members.planCodes, membershipStatuses: en.Admin.members.statusCodes} as never} stripeCustomerHref={null} stripeSubscriptionHref={null}/>);
+  expect(markup).toContain("AI \u8ad6\u58c7");
 });

@@ -131,7 +131,7 @@ for (const {locale, prefix} of locales) {
  * fresh context. The locale is read back off the landed URL rather than assumed, so a change to
  * that redirect fails on the URL assertion rather than on mismatched copy.
  */
-for (const token of ["not-a-token", "0123456789abcdef0123456789abcdef"]) {
+for (const token of ["not-a-token", "0".repeat(64) + "." + "1".repeat(64)]) {
   test(`the guest cancel link lands on /events for token "${token.slice(0, 12)}"`, async ({page}) => {
     await page.goto(`/api/events/guest/cancel?token=${token}`);
     await expect(page).toHaveURL(/\/events\?guest=(invalid|unknown)$/);
@@ -217,7 +217,7 @@ test.describe("member publishing, staff approval and the public event", () => {
       const form = guestPage.locator("form.guest-rsvp-form");
       await expect(form).toBeVisible();
       await form.locator("input[name=name]").fill("Playwright Guest");
-      await form.locator("input[name=email]").fill(`${slug}@example.com`);
+      await form.locator("input[name=email]").fill(`${slug}@example.test`);
       await form.getByRole("button", {name: copy.Events.guest.submit}).click();
       // `registered`, never `waitlist` (the event carries no capacity) and never `already` (the
       // address carries this run's timestamp). A `rateLimited` message here means the walk ran

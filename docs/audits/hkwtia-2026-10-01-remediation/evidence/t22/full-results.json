@@ -1,0 +1,12 @@
+{
+  "numPassedTests": 6304,
+  "numFailedTests": 0,
+  "numPendingTests": 329,
+  "numTotalTests": 6633,
+  "numPassedTestSuites": 1902,
+  "startTime": 1790939665714,
+  "sourceSha": "e9fa6d026be5cdbc2875b566fbd35a4bc37d6b7a",
+  "command": "npm.cmd test -- --maxWorkers=2 --reporter=json --outputFile=.playwright/t22-full-green.json",
+  "environment": "Windows PowerShell, Node24.18.0; no DB URLs; integration/load/matrix flags 0",
+  "production": false
+}

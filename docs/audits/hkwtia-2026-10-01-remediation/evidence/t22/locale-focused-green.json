@@ -1,0 +1,133 @@
+{
+  "scope": "Actual focused local execution; synthetic input; skipped is not passed",
+  "pass": 25,
+  "fail": 0,
+  "skip": 0,
+  "cases": [
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "cannot consume a click in the pending search-state fallback",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "retains every parsed Showcase filter and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "retains the selected Event status and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves the current fragment after path and query when switching locale",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves serialized query values when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "does not append a bare query separator when switching from English to Chinese without search state",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves an empty-valued query parameter when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves serialized query values when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "does not append a bare query separator when switching from Chinese to English without search state",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves an empty-valued query parameter when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "keeps the current locale when an unsaved editor rejects the switch",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "renders a 44px locale target in each Suspense state",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "uses the requested locale for the index reader and normalized card title",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "shows an unavailable state when both en feeds fail",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "shows an unavailable state when both zh-HK feeds fail",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "shows available build logs alongside a partial news outage notice",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "uses the localized News body for detail and metadata",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "returns a Chinese 404 when the News row has no eligible Chinese body",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "keeps the single-body Build Log renderer in the shared slug namespace",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "fails the sitemap if en News cannot be read",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "fails the sitemap if zh-HK News cannot be read",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "omits untranslated Chinese News and suppresses its alternate",
+      "status": "passed"
+    },
+    {
+      "file": "news-page-locale.test.tsx",
+      "title": "keeps Build Logs in both locales with mutual alternates",
+      "status": "passed"
+    },
+    {
+      "file": "public-news-locale.test.ts",
+      "title": "omits null and ECMAScript-blank Chinese bodies without English fallback",
+      "status": "passed"
+    },
+    {
+      "file": "public-news-locale.test.ts",
+      "title": "returns one localized News body while Build Log readers retain bodyMdx",
+      "status": "passed"
+    }
+  ]
+}

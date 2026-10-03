@@ -1,0 +1,12 @@
+{
+  "files": 1779,
+  "invalidUtf8": [],
+  "scope": [
+    "app",
+    "components",
+    "lib",
+    "tests",
+    "messages"
+  ],
+  "readOnly": true
+}

@@ -1,3 +1,4 @@
+import {renderToStaticMarkup} from "react-dom/server";
 import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -48,6 +49,14 @@ const brand = {
 
 describe("MobileNavigation", () => {
   beforeEach(() => { route.pathname = "/events"; });
+
+  it("does not offer a keyboard trigger before its client event handlers are installed", () => {
+    const container = document.createElement("div");
+    container.innerHTML = renderToStaticMarkup(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand}/>);
+    expect(container.querySelector("button.mobile-trigger")).toBeDisabled();
+    render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand}/>);
+    expect(screen.getByRole("button", {name: labels.open})).toBeEnabled();
+  });
 
   it("puts event and join actions first, then utilities, the eyebrow and the four groups", () => {
     render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />);

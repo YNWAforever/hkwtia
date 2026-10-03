@@ -42,3 +42,37 @@ The repository's existing fixture safety guard is `scripts/lib/acceptance-guard.
 - `wrangler versions view` readback: APP_URL and CRON_SECRET are secret bindings; no source SHA is embedded. Its target and current scheduler effects cannot be established from secret names. No job was invoked and no worker deployment changed. T11 must establish a dedicated confirmed-isolated worker and tagged source evidence before effectful acceptance.
 
 `AUDIT_BATCH_WORKER_PAUSED` in the isolated env describes the local acceptance driver gate. It is not evidence that the existing deployed Cloudflare worker is paused. Original masked readback contains only names/modes and synthetic row counts.
+
+
+## T22/T23 final reconciliation (2026-10-02)
+
+Main remains 60a272b68c334d256d578ade36d8e24ca3be5485; Production remains e7fa4add/dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV. Current review stack PR107–122 is OPEN/DRAFT, not merged. Active acceptance branch codex/full-remediation-acceptance-20261001 contains the existing fixes and task commits; root dirty work remains preserved. Candidate e9fa6d02 has an actual READY Preview dpl_4rQ5GHNGnbqRbFXqmZT5tdL9FEVz and 15 runtime passes with positive isolated DB marker, ledger56, real synthetic Auth, protected-role denial and both locale AI-Ops axe.
+
+All 0052–0056 execution and synthetic writes were isolated, not Production. Branch br-lingering-unit-azxl75s5 is non-primary/default/protected, exact G0 DB/Auth target; expiry Oct4 12UTC must be reconfirmed for later acceptance. The historical July worker is not invoked or relabeled as verified. Dedicated worker config is fail-closed/dry-run only. Credentials/session/raw reports stay ignored; only fixed safe projections, public/synthetic screenshots and hashes enter evidence.
+
+Full current unit 6304 pass/0 fail/329 guarded skips; each skip is retained. New complete-browser collection and its remaining gate dispositions are recorded independently, never inferred from the original6097/171 baseline. No Oct1 Production release, migration, policy default or blanket flag approval is inferred from older session approvals.
+
+2026-10-03 HKT：current code candidate 5b4ac2f4f1bd875047037dcaf4f9cfae79ce4e25，main／Production unchanged；本輪四個focused commits為CMS測試identity、terminal會員billing探針、private sidebar預載、dashboard私人預載。app/test source git diff對HEAD空；generated historical screenshots／reports另移至新T22 scope，保留舊receipt。最新Preview READY dpl_5FARFWMo9etUrx675vtNX4EADDkS；current runtime尚待probe。
+
+2026-10-03 香港時間：新8119b7f3（42930d9a私人Link＋8119b7f3logo sizes）已build0、35focused pass；完整gates尚待本輪结果。新程式只改私人導覽預載與public圖片尺寸；所有原身份、會員、付款、grant、consent、worker/outbox及政策保留。Production readback2026-10-02 18:20UTC仍e7fa4add／READY，沒有本輪發布或新migration。
+
+
+## T22 continuation: native Auth absence, stable keyboard focus and client catalog (Oct3 HKT)
+
+Application commits f7599e89 / 189c075e / 999e6b78 preserve the strict Auth provider query (cookie cache and refresh disabled), all server actor/role boundaries and association/provider policy. Anonymous built route: actual upstream session read 1 -> 0, no provider substitution; credentialed/forged cookies and Authorization still reach provider validation. Focused Auth/actor/session tests: 123 pass, 0 fail, 0 skip. Strict missing Production configuration still fails closed.
+
+A real isolated `site_announcements` ACCESS EXCLUSIVE lock reproduced both locales accepting focus in the temporary header (2 intended RED). Temporary controls now inert and aria-hidden; after rollback the stable localized login focuses and Enter navigates: 2 native pass. The ordinary seven-width/two-locale login cases passed 14/14. Initial wrong table-name and shell-encoded label failures were corrected in the test, excluded from behavioural RED/GREEN, and the test now reads the actual UTF-8 message catalog.
+
+Root client messages now contain usable Error recovery only; authorized Admin/Portal layouts retain the full catalog after their own actor boundary. Both locale real Error consumers and private catalog/redirect tests: 11 pass. Native public payload 2 pass; private five-case built Auth navigation 5 pass, 0 skip with its required legacy `1` guard (a preceding wrong-flag collection skipped five and is not acceptance).
+
+Actual raw HTML transfer bytes: en 331361 -> 151231; zh-HK 320477 -> 149494. Native normalized serialized Admin namespace present -> absent, Error remains present. Body/provider payload/credential values were not recorded. These are controlled loopback before/after payload measurements, not HK/SG/RUM or a causal claim about Lighthouse scores.
+
+Exact 8119 historical full unit: 6330 pass / 1 Auth-lockfile subprocess timeout / 329 guarded skips; unchanged idle security target rerun 13/13 pass. Exact 8119 full browser: 324 pass / 6 fail / 162 guarded skips; legacy 13 pass / 6 fail / 0 skip. Those failures remain recorded. Lighthouse historical collector accidentally mixed 10 prior reports; corrected current-only fetchTime filter retains exactly 10 8119 reports and its actual three under-budget routes. Current collector now enforces that filter and route count without threshold changes.
+
+999e full-gate attempt was stopped after lint rejected two raw local-anchor test mocks. Native Next Link replaced those mock links; no lint rule, timeout or assertion was weakened. Stopped/not-executed cases are not skips or passes. Fresh full/static/browser/original Lighthouse gates will be recorded separately after completion. Production e7fa4add remains unchanged; current Preview metadata is distinct from its runtime acceptance.
+
+## 最新候選與歷史結果界線（99d5，Oct3香港時間）
+
+以上各較早章節的pending／結果只描述當時版本；最新候選99d5、app/worker equivalent3bc。Native exact CI run37068469209：6346 pass／0 fail／329 genuine guarded skip；Workerd57 pass；六named checks及Vercel成功。Preview dpl_EHC8iFrft1EZr3u2efP3ffEVhdzP實際runtime17 pass／ledger56／providerSends0／paymentWrites0。正式21:39UTC只讀仍e7fa4add；無Oct1正式發布或新migration。
+
+3bc完整browser331 pass／5 fail／162 guarded skips及actualAuth200557/4298保留；targeted6 pass和credential-free8 pass是另外的run。99d5僅修test準備條件，exact99單次full browser5000ms pacing仍執行中。3bc legacy19、Concierge5、originalLab10 routes pass；current lab最低.91/.96/1。Google/mail/provider/cloud/SOP/policy/RUM門檻未簽。各source、命令、skip與scope以最新receipt為準，不把舊full local6345或targeted pass冒充exact99單次full結果。

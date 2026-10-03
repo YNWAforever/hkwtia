@@ -82,11 +82,14 @@ for (const {locale, prefix} of locales) {
   const copy = bundle(locale);
 
   test(`${locale}: /admin/inbox is hidden from anyone who is not staff`, async ({page}) => {
-    // 404 rather than a redirect, and asserted rather than assumed: it is the
+    // Anonymous users must enter the localized login; no admin data is rendered.
+    // Authenticated non-staff denial remains covered by the role matrix. It is the
     // reason the rendering cases below need a session at all, and the whole
     // admin family depends on this staying true.
     const response = await page.goto(`${prefix}/admin/inbox`);
-    expect(response?.status()).toBe(404);
+    expect(response?.status()).toBe(200);
+    expect(new URL(page.url()).pathname).toBe(`${prefix}/admin-login`);
+    await expect(page.locator('form:has(input[type="email"])')).toBeVisible();
   });
 
   test(`${locale}: the inbox description no longer promises a read-only inbox`, () => {

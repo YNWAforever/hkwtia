@@ -1,0 +1,350 @@
+{
+  "scope": "Current native capture, original older evidence restored to preserve historical provenance; parent run reports bind actual built source. Legacy source stamps are not silently rewritten.",
+  "files": [
+    {
+      "original": "docs/audits/hkwtia-2026-09-26/evidence/attendee-export-load.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-09-26/evidence/attendee-export-load.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-09-29/evidence/join-zh-desktop.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-09-29/evidence/join-zh-desktop.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-09-29/evidence/member-login-en-desktop.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-09-29/evidence/member-login-en-desktop.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-09-29/evidence/member-login-zh-mobile.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-09-29/evidence/member-login-zh-mobile.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/en-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/en-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/en-pagination.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/en-pagination.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/zh-HK-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/zh-HK-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/zh-HK-pagination.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t03/zh-HK-pagination.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/en-history.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/en-history.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/en-recovered-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/en-recovered-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/identity-isolation.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/identity-isolation.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/storage-denied.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/storage-denied.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/zh-HK-history.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/zh-HK-history.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/zh-HK-recovered-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/zh-HK-recovered-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/zh-storage-unavailable.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t04/zh-storage-unavailable.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/exco.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/exco.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/exco.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/exco.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/staff.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/staff.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/staff.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/staff.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/superadmin.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/superadmin.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/superadmin.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t06/superadmin.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/en-review.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/en-review.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/en.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/en.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/zh-HK-review.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/zh-HK-review.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/zh-HK.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t07/zh-HK.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t08/en-cancelled.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t08/en-cancelled.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t08/zh-HK-expired.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t08/zh-HK-expired.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/en-case.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/en-case.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/zh-HK-case.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/zh-HK-case.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/zh-HK-resume-company.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t10/zh-HK-resume-company.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t11/en-health-unknown.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t11/en-health-unknown.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t11/zh-HK-health-unknown.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t11/zh-HK-health-unknown.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/media-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/media-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-company-keyboard-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-company-keyboard-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-768.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-768.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-member360-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-member360-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-company-keyboard-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-company-keyboard-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-768.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-768.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-member360-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-member360-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+      "verifiedParentReceipt": "browser-targeted-after-quota.json; both public-content cases passed on application3bc4c136 after readiness correction"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "verifiedParentReceipt": "browser-targeted-after-quota.json; both public-content cases passed on application3bc4c136 after readiness correction"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "verifiedParentReceipt": "browser-targeted-after-quota.json; both public-content cases passed on application3bc4c136 after readiness correction"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+      "verifiedParentReceipt": "browser-targeted-after-quota.json; both public-content cases passed on application3bc4c136 after readiness correction"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-1440.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-1440.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "verifiedParentReceipt": "browser-targeted-after-quota.json; both public-content cases passed on application3bc4c136 after readiness correction"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "verifiedParentReceipt": "browser-targeted-after-quota.json; both public-content cases passed on application3bc4c136 after readiness correction"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/cache-browser.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/cache-browser.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK-390.png",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK-390.png",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK.json",
+      "captured": "evidence/t22/observed-run-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK.json",
+      "generatedBy": "Owned isolated acceptance attempts; original reported source retained; parent native receipt is required for source binding",
+      "reportedSourceSha": null
+    }
+  ],
+  "captureScope": "Owned generated snapshots across continued acceptance attempts; older paths restored. Do not count every capture as a new current-source pass. Source is established by exact parent receipts or retained reportedSourceSha, never inferred from file modification time."
+}

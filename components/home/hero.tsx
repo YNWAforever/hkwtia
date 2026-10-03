@@ -20,7 +20,7 @@ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
 
   return (
     <section className="hero defer-following-sections" aria-labelledby="hero-title">
-      <Image alt={t('imageAlt')} className="hero-image" fill priority sizes="100vw" src={image} />
+      <Image alt={t('imageAlt')} className="hero-image" fill loading="eager" fetchPriority="high" sizes="100vw" src={image} />
       <div className="hero-scrim" aria-hidden="true" />
       <div className="network-field" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
       <div className="hero-content shell">

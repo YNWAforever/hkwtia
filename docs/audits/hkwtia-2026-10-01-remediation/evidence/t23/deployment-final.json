@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-10-02T21:53:45.207Z",
+  "id": "dpl_EHC8iFrft1EZr3u2efP3ffEVhdzP",
+  "url": "hkwtia-8wx0k2ywb-ynwaforevers-projects.vercel.app",
+  "state": "READY",
+  "target": null,
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "regions": [
+    "iad1"
+  ]
+}

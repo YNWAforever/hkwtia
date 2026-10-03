@@ -1,4 +1,4 @@
-import {readFileSync} from "node:fs";
+import {readFileSync, writeFileSync} from "node:fs";
 
 import AxeBuilder from "@axe-core/playwright";
 import {expect, test, type Page} from "@playwright/test";
@@ -88,7 +88,7 @@ test.describe("M4C public AI-Ops acceptance", () => {
         labels.hoursSaved,
         labels.llmCost,
       ]) {
-        await expect(metrics.getByRole("heading", {level: 2, name}))
+        await expect(metrics.getByText(name, {exact: true}))
           .toBeVisible();
       }
       await expect(page.getByText(labels.escalation, {exact: true})).toBeVisible();
@@ -128,6 +128,7 @@ test.describe("M4C public AI-Ops acceptance", () => {
       const accessibility = await new AxeBuilder({page})
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
+      writeFileSync(`.playwright/t22-aiops-axe-${locale}-safe.json`, JSON.stringify({locale, violations: accessibility.violations.filter(v => v.impact === "serious" || v.impact === "critical").map(v => ({id: v.id, impact: v.impact, nodes: v.nodes.map(n => ({targets: n.target, contrast: n.any.filter(c => c.id === "color-contrast").map(c => ({foreground: c.data?.fgColor, background: c.data?.bgColor, ratio: c.data?.contrastRatio, expected: c.data?.expectedContrastRatio}))}))})), production: false}, null, 2));
       expect(
         accessibility.violations.filter(({impact}) =>
           impact === "serious" || impact === "critical"

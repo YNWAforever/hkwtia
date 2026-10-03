@@ -1,0 +1,120 @@
+{
+  "sourceSha": "55c2d036",
+  "profile": "actual default simulated; owned browser launch; fresh profile; enAccept-Language; targetpublicURL3450; original thresholds unchanged",
+  "actualEnglishVerified": true,
+  "production": false,
+  "assertionExitCode": 1,
+  "laterSourceDelta": "27832bdc shared page hero priority/CMSscope; final recheck separate",
+  "reports": [
+    {
+      "requested": "http://localhost:3450/",
+      "final": "http://localhost:3450/",
+      "performance": 0.89,
+      "accessibility": 0.97,
+      "seo": 1,
+      "lcpMs": 3420.0599999999995,
+      "tbtMs": 169.00000000000023,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/events",
+      "final": "http://localhost:3450/events",
+      "performance": 0.92,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 3241.1404999999995,
+      "tbtMs": 95.78649999999993,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/membership",
+      "final": "http://localhost:3450/membership",
+      "performance": 0.94,
+      "accessibility": 0.97,
+      "seo": 1,
+      "lcpMs": 2979.9049999999997,
+      "tbtMs": 53,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/partners",
+      "final": "http://localhost:3450/partners",
+      "performance": 0.93,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 3073.109,
+      "tbtMs": 104,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/programmes",
+      "final": "http://localhost:3450/programmes",
+      "performance": 0.94,
+      "accessibility": 0.96,
+      "seo": 1,
+      "lcpMs": 2994.71,
+      "tbtMs": 81.71600000000012,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/zh",
+      "final": "http://localhost:3450/zh",
+      "performance": 0.84,
+      "accessibility": 0.96,
+      "seo": 1,
+      "lcpMs": 2807.28325,
+      "tbtMs": 462.1867,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/zh/events",
+      "final": "http://localhost:3450/zh/events",
+      "performance": 0.81,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 3400.3325,
+      "tbtMs": 426.7669999999998,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/zh/membership",
+      "final": "http://localhost:3450/zh/membership",
+      "performance": 0.94,
+      "accessibility": 0.97,
+      "seo": 1,
+      "lcpMs": 2769.5517,
+      "tbtMs": 143.22415,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/zh/partners",
+      "final": "http://localhost:3450/zh/partners",
+      "performance": 0.91,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 2649.175,
+      "tbtMs": 260.4124999999999,
+      "cls": 0,
+      "canonicalScore": 1
+    },
+    {
+      "requested": "http://localhost:3450/zh/programmes",
+      "final": "http://localhost:3450/zh/programmes",
+      "performance": 0.95,
+      "accessibility": 0.96,
+      "seo": 1,
+      "lcpMs": 2550.498,
+      "tbtMs": 175.25099999999998,
+      "cls": 0,
+      "canonicalScore": 1
+    }
+  ]
+}

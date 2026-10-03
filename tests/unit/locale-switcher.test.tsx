@@ -1,3 +1,4 @@
+import {renderToStaticMarkup} from "react-dom/server";
 import {fireEvent, render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -6,7 +7,7 @@ import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 const {pathState, routerReplace, searchState} = vi.hoisted(() => ({
   pathState: {current: "/events"},
   routerReplace: vi.fn(),
-  searchState: {current: new URLSearchParams()},
+  searchState: {current: new URLSearchParams(), suspended: false},
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -15,7 +16,10 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  useSearchParams: () => searchState.current,
+  useSearchParams: () => {
+    if (searchState.suspended) throw new Promise(() => {});
+    return searchState.current;
+  },
 }));
 
 const labels = {
@@ -30,7 +34,25 @@ describe("LocaleSwitcher", () => {
     pathState.current = "/events";
     routerReplace.mockReset();
     searchState.current = new URLSearchParams();
+    searchState.suspended = false;
     window.history.replaceState(null, "", "/");
+  });
+
+  it("keeps the ready server-rendered control disabled until client handlers are installed", () => {
+    const markup = renderToStaticMarkup(<LocaleSwitcher locale="en" {...labels}/>);
+    const container = document.createElement("div");
+    container.innerHTML = markup;
+    expect(container.querySelector("button")).toBeDisabled();
+    expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  it("cannot consume a click in the pending search-state fallback", () => {
+    searchState.suspended = true;
+    render(<LocaleSwitcher locale="en" {...labels}/>);
+    const button = screen.getByRole("button", {name: labels.switchToChineseLabel});
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(routerReplace).not.toHaveBeenCalled();
   });
 
   it("retains every parsed Showcase filter and fragment through the real switcher", () => {

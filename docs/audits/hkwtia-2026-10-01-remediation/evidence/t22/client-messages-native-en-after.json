@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-02T19:39:17.001Z",
+  "locale": "en",
+  "htmlBytes": 151231,
+  "adminNamespaceSerialized": false,
+  "errorNamespaceSerialized": true,
+  "production": false,
+  "bodyLogged": false,
+  "sourceBaseSha": "189c075e",
+  "phase": "GREEN",
+  "sourceRelation": "owned native rebuilt root recovery and private catalog working tree",
+  "command": "node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs --config=.playwright/t22-public-message-payload.config.ts --workers=1"
+}

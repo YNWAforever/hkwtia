@@ -7,14 +7,17 @@ import {M2_UUIDS} from "../../scripts/seed-m2";
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
 import {buildM2RuntimeEnvironment} from "../fixtures/m2-runtime-env";
 import {readM2ApprovalFact, resetM2AuthenticatedFixtures} from "../fixtures/m2-reset";
+import {readBrowserReportFlow, readBrowserReportStock} from "../fixtures/report-browser-ledger";
 
 type AcceptanceMessages = Readonly<{
+  AdminLogin: {accessDenied: string};
   About: {title: string};
   Membership: {title: string};
   NotFound: {title: string};
   Admin: {
     members: {title: string; search: string; filters: {apply: string}};
     member360: {notes: string; engagement: string; noteBody: string; addNote: string; noteSuccess: string};
+    campaigns: {actions: {next: string; approveEmail: string}};
     segments: {total: string; queue: string; queued: string; existing: string; recipients: string; save: string; saveValidation: string};
     atRisk: {title: string};
     reports: {title: string; numerator: string; denominator: string};
@@ -60,10 +63,11 @@ async function enterProtectedPreview(page: Page): Promise<void> {
 test.beforeEach(async ({page}) => enterProtectedPreview(page));
 
 test.describe("M2 credential-free browser evidence", () => {
-  test("anonymous admin requests receive a real 404", async ({page}) => {
+  test("anonymous admin requests require the discoverable staff login", async ({page}) => {
     const response = await page.goto("/admin");
-    expect(response?.status()).toBe(404);
-    await expect(page.getByRole("heading", {level: 1, name: en.NotFound.title})).toBeVisible();
+    expect(response?.status()).toBe(200);
+    expect(new URL(page.url()).pathname).toMatch(/^\/(?:zh\/)?admin-login$/);
+    await expect(page.locator('form:has(input[type="email"])')).toBeVisible();
   });
 
   test("public presentation and protected portal routes remain available without credentials", async ({page}) => {
@@ -108,7 +112,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await expect(page.getByText("M2 acceptance follow-up", {exact: true})).toBeVisible();
   });
 
-  test("the canonical segment has exact rows and CSV headers while queueing is idempotent", async ({page}) => {
+  test("the canonical segment has exact rows and CSV headers and its draft entry cannot queue on GET", async ({page}) => {
     await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env), undefined, new Date());
     await signInForM2(page, "staff");
     const query = new URLSearchParams([
@@ -132,37 +136,54 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     expect(csv.split("\r\n").slice(1, 4).map((row) => row.split(",").slice(0, 2))).toEqual([["member", "m2-risk-01"], ["member", "m2-risk-02"], ["member", "m2-risk-03"]]);
 
     const segment = page.getByRole("listitem").filter({hasText: "M2 engineered at-risk"});
-    await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
-    await expect(segment.getByText(`${en.Admin.segments.queued}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible({timeout: 20_000});
-    await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
-    await expect(segment.getByText(`${en.Admin.segments.existing}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible({timeout: 20_000});
+    const entry = segment.getByRole("link", {name: en.Admin.segments.queue, exact: true});
+    await expect(entry).toBeVisible();
+    await entry.click();
+    await expect(page).toHaveURL(/\/admin\/campaigns\?/);
+    expect(new URL(page.url()).searchParams.get("segmentId")).toBe(M2_UUIDS.segments[0]);
+    await expect(page.getByRole("button", {name: en.Admin.campaigns.actions.next, exact: true})).toBeVisible();
+    await expect(page.getByRole("button", {name: en.Admin.campaigns.actions.approveEmail, exact: true})).toHaveCount(0);
+    // Actual draft/duplicate/CAS/two-person review SQL and browser effects are
+    // exercised by full-campaign-review.spec.ts and audit-full-campaign-entrypoints.
+
   });
 
   test("the operational at-risk queue contains exactly the three engineered members in order", async ({page}) => {
-    await signInForM2(page, "staff");
-    await page.goto("/admin/at-risk");
-    await expect(page.getByRole("heading", {level: 1, name: en.Admin.atRisk.title})).toBeVisible();
-    await expect(page.locator("table tbody th")).toHaveText(["M2 Risk 01", "M2 Risk 02", "M2 Risk 03"]);
+    // The historical July fixture is shifted only for today's operational queue.
+    await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env), undefined, new Date());
+    try {
+      await signInForM2(page, "staff");
+      await page.goto("/admin/at-risk");
+      await expect(page.getByRole("heading", {level: 1, name: en.Admin.atRisk.title})).toBeVisible();
+      // Other isolated suites own additional synthetic candidates. Assert the
+      // complete M2 fixture partition without deleting their history or rights.
+      await expect(page.locator('table tbody tr:has(a[href*="/admin/members/m2-"]) th')).toHaveText(["M2 Risk 01", "M2 Risk 02", "M2 Risk 03"]);
+    } finally {await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env));}
   });
 
-  test("the report reconciles committed July fixture values before browser mutations", async ({page}) => {
+  test("the report reconciles current ledger stock and committed July flow before browser mutations", async ({page}) => {
     await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env));
+    const stock = await readBrowserReportStock(new Date("2026-07-31T16:00:00Z"));
+    const from = new Date("2026-06-30T16:00:00Z"), to = new Date("2026-07-31T16:00:00Z");
+    const flow = await readBrowserReportFlow(from, to);
+    // Keep the golden fixture assertions while also accounting for other suites' history.
+    expect(await readBrowserReportFlow(from, to, true)).toEqual({paid: 2, due: 4, firstPaid: 1, firstDue: 2, attended: 3, eligible: 8});
+    const percentage = (n: number, d: number) => `${(Math.round(n / d * 1000) / 10).toFixed(1)}%`;
+    const currency = (amount: number) => new Intl.NumberFormat("en-HK", {style: "currency", currency: "HKD", maximumFractionDigits: 0}).format(amount);
     await signInForM2(page, "staff");
     await page.goto("/admin/reports?from=2026-07-01&to=2026-07-31");
     await expect(page.getByRole("heading", {level: 1, name: en.Admin.reports.title})).toBeVisible();
     await expect(page.locator('section[aria-labelledby="report-arr"]')).toContainText(ARR);
-    await expect(page.locator('section[aria-labelledby="report-arr"]')).toContainText("HK$87,600");
-    await expect(page.locator('section[aria-labelledby="report-mrr"]')).toContainText("HK$7,300");
-    await expect(page.locator('section[aria-labelledby="report-renewal"]')).toContainText("50.0%");
-    await expect(page.locator('section[aria-labelledby="report-renewal"]')).toContainText(`${en.Admin.reports.numerator}2`);
-    await expect(page.locator('section[aria-labelledby="report-renewal"]')).toContainText(`${en.Admin.reports.denominator}4`);
-    await expect(page.locator('section[aria-labelledby="report-first-year-renewal"]')).toContainText(`${en.Admin.reports.numerator}1`);
-    await expect(page.locator('section[aria-labelledby="report-first-year-renewal"]')).toContainText(`${en.Admin.reports.denominator}2`);
+    await expect(page.locator('section[aria-labelledby="report-arr"]')).toContainText(currency(stock.arrHkd));
+    await expect(page.locator('section[aria-labelledby="report-mrr"]')).toContainText(currency(stock.mrrHkd));
+    await expect(page.locator('section[aria-labelledby="report-renewal"]')).toContainText(percentage(flow.paid, flow.due));
+    await expect(page.locator('section[aria-labelledby="report-renewal"] dt')).toHaveText([en.Admin.reports.numerator, en.Admin.reports.denominator]);
+    await expect(page.locator('section[aria-labelledby="report-renewal"] dd')).toHaveText([String(flow.paid), String(flow.due)]);
+    await expect(page.locator('section[aria-labelledby="report-first-year-renewal"] dd')).toHaveText([String(flow.firstPaid), String(flow.firstDue)]);
     // July 31 includes the July 25 fixture event; the July 20 unit reference excludes it.
-    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText("37.5%");
-    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText(`${en.Admin.reports.numerator}3`);
-    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText(`${en.Admin.reports.denominator}8`);
-    await expect(page.locator('section[aria-labelledby="report-at-risk"]')).toContainText("3");
+    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText(percentage(flow.attended, flow.eligible));
+    await expect(page.locator('section[aria-labelledby="report-attendance"] dd')).toHaveText([String(flow.attended), String(flow.eligible)]);
+    await expect(page.locator('section[aria-labelledby="report-at-risk"] p.tabular-nums')).toHaveText(String(stock.atRiskCount));
   });
 
   test("event check-in appends exactly one event_attended engagement", async ({page}) => {
@@ -213,7 +234,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await expect(page.locator('p[role="alert"]')).toHaveText(zh.Admin.segments.saveValidation);
   });
 
-  test("anonymous, member, and company-admin identities receive 404 for every admin route", async ({browser}) => {
+  test("anonymous, member, and company-admin identities require login or receive access denied on every admin route", async ({browser}) => {
     for (const role of [null, "member", "company-admin"] as const) {
       const context = await browser.newContext();
       const rolePage = await context.newPage();
@@ -221,8 +242,10 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
       if (role) await signInForM2(rolePage, role);
       for (const route of ADMIN_ROUTES) {
         const response = await rolePage.goto(route);
-        expect(response?.status(), (role ?? "anonymous") + " " + route).toBe(404);
-        await expect(rolePage.getByRole("heading", {level: 1, name: en.NotFound.title})).toBeVisible();
+        expect(response?.status(), (role ?? "anonymous") + " " + route).toBe(200);
+        expect(new URL(rolePage.url()).pathname).toMatch(/^\/(?:zh\/)?admin-login$/);
+        if (role) await expect(rolePage.getByRole("heading", {level: 1, name: en.AdminLogin.accessDenied, exact: true})).toBeVisible();
+        else await expect(rolePage.locator('form:has(input[type="email"])')).toBeVisible();
       }
       const exportResponse = await rolePage.request.get(`/api/admin/segments/${M2_UUIDS.segments[0]}/export`);
       expect(exportResponse.status(), (role ?? "anonymous") + " segment export API").toBe(404);

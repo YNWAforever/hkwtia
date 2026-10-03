@@ -85,10 +85,13 @@ const WIZARD = "form:has(button[name=step])";
 for (const {locale, prefix} of locales) {
   for (const route of NEW_ADMIN_ROUTES) {
     test(`${locale}: ${route} is hidden from anyone who is not staff`, async ({page}) => {
-      // 404 rather than a redirect, and asserted rather than assumed: it is the
+      // Anonymous users must enter the localized login; no admin data is rendered.
+      // Authenticated non-staff denial remains covered by the role matrix. It is the
       // reason every rendering case below needs a session at all.
       const response = await page.goto(`${prefix}${route}`);
-      expect(response?.status()).toBe(404);
+      expect(response?.status()).toBe(200);
+      expect(new URL(page.url()).pathname).toBe(`${prefix}/admin-login`);
+      await expect(page.locator('form:has(input[type="email"])')).toBeVisible();
     });
   }
 }

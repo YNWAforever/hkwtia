@@ -21,7 +21,7 @@ function docker(args: string[]): string {
 
 async function ready(): Promise<void> {
   for (let attempt = 0; attempt < 60; attempt += 1) {
-    try { docker(["exec", container, "pg_isready", "-U", "postgres"]); return; }
+    try { docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]); return; }
     catch { await delay(100); }
   }
   throw new Error("disposable PostgreSQL did not become ready");
@@ -80,8 +80,10 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
       repository.claimDue(actor, now, 1),
     ]);
     expect(first).toHaveLength(1);
-    expect(first[0]?.kind).toBe("ack");
     expect(second).toHaveLength(1);
+    // Concurrent claims may acquire either due notice first. Both kinds must
+    // be claimed exactly once regardless of scheduler order.
+    expect([...first, ...second].map((row) => row.kind).sort()).toEqual(["ack", "staff"]);
     expect(first[0]?.id).not.toBe(second[0]?.id);
     expect(await repository.claimDue(actor, now, 1)).toEqual([]);
 

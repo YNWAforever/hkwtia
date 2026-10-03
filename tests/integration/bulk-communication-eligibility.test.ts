@@ -19,7 +19,7 @@ let database: BatchDatabase;
 
 describe.skipIf(!enabled)("bulk communication eligibility on the complete schema", () => {
   beforeAll(async () => {
-    vi.stubEnv("MEMBER_COMMUNICATION_BATCH_ENABLED", "true");
+    vi.stubEnv("ADMIN_BATCH_ENABLED", "true"); vi.stubEnv("MEMBER_COMMUNICATION_BATCH_ENABLED", "true");
     vi.stubEnv("APP_URL", "https://isolated.example.test");
     fixture = await isolatedAuditDatabase(); database = fixture.database as unknown as BatchDatabase;
     await fixture.pool.query(`INSERT INTO profiles (id,auth_user_id,display_name,email,locale,role,consent_marketing,whatsapp_opt_in,whatsapp_number)
@@ -71,7 +71,7 @@ describe.skipIf(!enabled)("communication draft and delivery controls", () => {
   const segment = randomUUID();
   const membership = randomUUID();
   beforeAll(async () => {
-    vi.stubEnv("MEMBER_COMMUNICATION_BATCH_ENABLED", "true"); vi.stubEnv("APP_URL", "https://isolated.example.test");
+    vi.stubEnv("ADMIN_BATCH_ENABLED", "true"); vi.stubEnv("MEMBER_COMMUNICATION_BATCH_ENABLED", "true"); vi.stubEnv("APP_URL", "https://isolated.example.test");
     db = await isolatedAuditDatabase();
     await db.pool.query(`INSERT INTO profiles (id,auth_user_id,display_name,email,locale,role,consent_marketing,whatsapp_opt_in,whatsapp_number) VALUES
       ('staff','staff','Staff','staff@example.test','en','staff',false,false,null),

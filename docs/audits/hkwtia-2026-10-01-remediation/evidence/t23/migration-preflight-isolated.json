@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-02T22:18:55.873Z",
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "environment": "confirmed isolated G0 Neon ledger56; exact target guard",
+  "command": "node .playwright/t22-run-isolated.mjs .playwright/t23-preflight-readonly.mjs",
+  "transactionReadOnly": true,
+  "conflictingRenewalEpisodeGroups": 0,
+  "pendingRefundOrders": 0,
+  "financialWrites": 0,
+  "providerCalls": 0,
+  "production": false,
+  "productionPreflightVerified": false
+}

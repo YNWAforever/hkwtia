@@ -1,10 +1,10 @@
 'use client';
 
 import {useSearchParams} from 'next/navigation';
-import {Suspense} from 'react';
+import {Suspense, useSyncExternalStore} from 'react';
 
-import type {AppLocale} from '@/i18n/routing';
-import {usePathname, useRouter} from '@/i18n/navigation';
+import {routing, type AppLocale} from '@/i18n/routing';
+import {getPathname, usePathname, useRouter} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
 
 type LocaleSwitcherProps = {
@@ -66,6 +66,13 @@ function LocaleSwitcherContent({
     if (beforeSwitch && !beforeSwitch()) return;
     const query = search ? `?${search}` : '';
     const fragment = window.location.hash;
+    // next-intl forces the default-locale prefix to update its cookie. Next's
+    // client redirect from that prefix loses the fragment. A document redirect
+    // preserves it and lets the same middleware update the locale cookie.
+    if (fragment && targetLocale === routing.defaultLocale) {
+      window.location.replace(getPathname({href: `${pathname}${query}${fragment}`, locale: targetLocale, forcePrefix: true}));
+      return;
+    }
     router.replace(`${pathname}${query}${fragment}`, {locale: targetLocale});
   }
 
@@ -76,6 +83,10 @@ function LocaleSwitcherContent({
     className={className}
   />;
 }
+
+const subscribeToHydration = () => () => {};
+const clientHydrationSnapshot = () => true;
+const serverHydrationSnapshot = () => false;
 
 function LocaleSwitcherButton({
   accessibleLabel,
@@ -88,6 +99,8 @@ function LocaleSwitcherButton({
   onClick?: () => void;
   className?: string;
 }) {
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
+
   return (
     <button
       type="button"
@@ -100,6 +113,7 @@ function LocaleSwitcherButton({
         className,
       )}
       aria-label={accessibleLabel}
+      disabled={!hydrated || !onClick}
       onClick={onClick}
     >
       {label}

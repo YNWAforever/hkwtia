@@ -1,5 +1,5 @@
 import {renderToStaticMarkup} from "react-dom/server";
-import {cloneElement,isValidElement,type ReactElement,type ReactNode} from "react";
+import {cloneElement,isValidElement,Suspense,type ReactElement,type ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {ScheduledAnnouncementProjection} from "@/lib/public-shell/announcement";
@@ -103,4 +103,12 @@ it("returns the main shell while the announcement database read is pending",asyn
   const ready=await Promise.race([response.then(()=>true),new Promise<boolean>(resolve=>setTimeout(()=>resolve(false),100))]);
   release();await response;
   expect(ready).toBe(true);
+});
+
+it("keeps the temporary header navigation disabled until the stable header replaces it",async()=>{
+  const {default:PublicLayout}=await import("@/app/[locale]/(public)/layout");
+  const tree=await PublicLayout({children:<p>Immediate hero</p>,params:Promise.resolve({locale:"en"})});
+  const boundary=tree.props.children.find((node:ReactNode)=>isValidElement(node)&&node.type===Suspense) as ReactElement<{fallback:ReactElement<{navigationPending?:boolean}>}>;
+  expect(boundary).toBeDefined();
+  expect(boundary.props.fallback.props.navigationPending).toBe(true);
 });

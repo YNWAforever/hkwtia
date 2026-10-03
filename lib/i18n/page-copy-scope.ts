@@ -66,3 +66,8 @@ export function isPageCopyNamespace(value: unknown): value is PageCopyNamespace 
 export function isPublicRoute(value: unknown): value is PublicRoute {
   return typeof value === "string" && routeSet.has(value);
 }
+
+/** Runtime loading/failure messages are product state, outside the agreed CMS copy surface. */
+export function isPageCopyKeyEditable(namespace: string, keyPath: string): boolean {
+  return namespace !== "Home" || (keyPath !== "openNow.loading" && !keyPath.startsWith("openNow.unavailable."));
+}

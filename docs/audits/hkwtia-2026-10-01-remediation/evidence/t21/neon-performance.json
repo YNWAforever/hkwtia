@@ -1,0 +1,2057 @@
+{
+  "sourceSha": "2888c483b0f23ac3c18094be57a27f88c7418a06",
+  "environment": "confirmed isolated Neon ap-southeast-1; complete schema",
+  "production": false,
+  "providerEffects": 0,
+  "clientVantage": "Windows workstation; geographic location not established",
+  "node": "v24.18.0",
+  "startedAt": "2026-10-02T02:12:51.381Z",
+  "completed": true,
+  "measurements": [
+    {
+      "size": 50,
+      "operation": "snapshot",
+      "completed": true,
+      "clientCold": {
+        "connectMs": 364.2366000000002,
+        "queryMs": 160.3435999999997,
+        "roundTrips": 1,
+        "definition": "new pool client; seeded DB buffers are warm; connect includes DNS/TCP/TLS/auth when remote, not pure TLS"
+      },
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Actual Startup Time": 30.709,
+            "Actual Total Time": 30.73,
+            "Actual Rows": 50,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 40091,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Unique",
+                "Actual Startup Time": 30.707,
+                "Actual Total Time": 30.724,
+                "Actual Rows": 50,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40091,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Sort",
+                    "Actual Startup Time": 30.705,
+                    "Actual Total Time": 30.711,
+                    "Actual Rows": 50,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40091,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Hash Join",
+                        "Join Type": "Left",
+                        "Actual Startup Time": 0.854,
+                        "Actual Total Time": 30.692,
+                        "Actual Rows": 50,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 40091,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Nested Loop",
+                            "Join Type": "Inner",
+                            "Actual Startup Time": 0.094,
+                            "Actual Total Time": 30.036,
+                            "Actual Rows": 920,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 40089,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Hash Join",
+                                "Join Type": "Left",
+                                "Actual Startup Time": 0.076,
+                                "Actual Total Time": 4.266,
+                                "Actual Rows": 10273,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 416,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Actual Startup Time": 0.012,
+                                    "Actual Total Time": 2.309,
+                                    "Actual Rows": 10220,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 411,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0
+                                  },
+                                  {
+                                    "Node Type": "Hash",
+                                    "Actual Startup Time": 0.059,
+                                    "Actual Total Time": 0.06,
+                                    "Actual Rows": 173,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 5,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Actual Startup Time": 0.006,
+                                        "Actual Total Time": 0.031,
+                                        "Actual Rows": 173,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 5,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "Node Type": "Bitmap Heap Scan",
+                                "Actual Startup Time": 0.002,
+                                "Actual Total Time": 0.002,
+                                "Actual Rows": 0,
+                                "Actual Loops": 10273,
+                                "Shared Hit Blocks": 39673,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "BitmapOr",
+                                    "Actual Startup Time": 0.002,
+                                    "Actual Total Time": 0.002,
+                                    "Actual Rows": 0,
+                                    "Actual Loops": 10273,
+                                    "Shared Hit Blocks": 30992,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Bitmap Index Scan",
+                                        "Actual Startup Time": 0.001,
+                                        "Actual Total Time": 0.001,
+                                        "Actual Rows": 1,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 30819,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      },
+                                      {
+                                        "Node Type": "Bitmap Index Scan",
+                                        "Actual Startup Time": 0,
+                                        "Actual Total Time": 0,
+                                        "Actual Rows": 0,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 173,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Actual Startup Time": 0.009,
+                            "Actual Total Time": 0.009,
+                            "Actual Rows": 17,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 2,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Actual Startup Time": 0.003,
+                                "Actual Total Time": 0.006,
+                                "Actual Rows": 17,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 2,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning Time": 0.831,
+          "Execution Time": 30.817
+        }
+      ],
+      "sampleCount": 30,
+      "medianMs": 86.86220000000003,
+      "p95Ms": 104.67540000000008,
+      "sampleMs": [
+        67.24539999999979,
+        68.76670000000013,
+        71.58290000000034,
+        104.4384,
+        102.54690000000028,
+        71.92000000000007,
+        70.10410000000047,
+        105.53759999999966,
+        104.67540000000008,
+        92.11250000000018,
+        86.86120000000028,
+        86.60909999999967,
+        86.89789999999994,
+        91.22060000000056,
+        86.49109999999928,
+        85.84299999999985,
+        87.16799999999967,
+        86.19720000000052,
+        85.68299999999999,
+        86.3073000000004,
+        86.23239999999987,
+        87.27980000000025,
+        87.4991,
+        88.99060000000009,
+        88.6235999999999,
+        86.86319999999978,
+        85.97609999999986,
+        85.54089999999997,
+        99.80130000000008,
+        93.65620000000035
+      ],
+      "roundTrips": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "errorRate": 0
+    },
+    {
+      "size": 50,
+      "operation": "list",
+      "completed": true,
+      "clientCold": {
+        "connectMs": 366.5099,
+        "queryMs": 87.45629999999983,
+        "roundTrips": 1,
+        "definition": "new pool client; seeded DB buffers are warm; connect includes DNS/TCP/TLS/auth when remote, not pure TLS"
+      },
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Actual Startup Time": 33.118,
+            "Actual Total Time": 33.127,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 40092,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "WindowAgg",
+                "Actual Startup Time": 32.86,
+                "Actual Total Time": 32.907,
+                "Actual Rows": 50,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Incremental Sort",
+                    "Actual Startup Time": 32.855,
+                    "Actual Total Time": 32.871,
+                    "Actual Rows": 50,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Merge Join",
+                        "Join Type": "Left",
+                        "Actual Startup Time": 32.833,
+                        "Actual Total Time": 32.849,
+                        "Actual Rows": 50,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 40092,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Sort",
+                            "Actual Startup Time": 32.791,
+                            "Actual Total Time": 32.797,
+                            "Actual Rows": 50,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 40091,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Hash Join",
+                                "Join Type": "Left",
+                                "Actual Startup Time": 0.873,
+                                "Actual Total Time": 32.769,
+                                "Actual Rows": 50,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 40091,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Nested Loop",
+                                    "Join Type": "Inner",
+                                    "Actual Startup Time": 0.104,
+                                    "Actual Total Time": 32.112,
+                                    "Actual Rows": 920,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 40089,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Hash Join",
+                                        "Join Type": "Left",
+                                        "Actual Startup Time": 0.083,
+                                        "Actual Total Time": 4.479,
+                                        "Actual Rows": 10273,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 416,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "Seq Scan",
+                                            "Actual Startup Time": 0.013,
+                                            "Actual Total Time": 2.313,
+                                            "Actual Rows": 10220,
+                                            "Actual Loops": 1,
+                                            "Shared Hit Blocks": 411,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0
+                                          },
+                                          {
+                                            "Node Type": "Hash",
+                                            "Actual Startup Time": 0.065,
+                                            "Actual Total Time": 0.065,
+                                            "Actual Rows": 173,
+                                            "Actual Loops": 1,
+                                            "Shared Hit Blocks": 5,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0,
+                                            "Plans": [
+                                              {
+                                                "Node Type": "Seq Scan",
+                                                "Actual Startup Time": 0.008,
+                                                "Actual Total Time": 0.036,
+                                                "Actual Rows": 173,
+                                                "Actual Loops": 1,
+                                                "Shared Hit Blocks": 5,
+                                                "Shared Read Blocks": 0,
+                                                "Temp Read Blocks": 0,
+                                                "Temp Written Blocks": 0
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "Node Type": "Bitmap Heap Scan",
+                                        "Actual Startup Time": 0.002,
+                                        "Actual Total Time": 0.002,
+                                        "Actual Rows": 0,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 39673,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "BitmapOr",
+                                            "Actual Startup Time": 0.002,
+                                            "Actual Total Time": 0.002,
+                                            "Actual Rows": 0,
+                                            "Actual Loops": 10273,
+                                            "Shared Hit Blocks": 30992,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0,
+                                            "Plans": [
+                                              {
+                                                "Node Type": "Bitmap Index Scan",
+                                                "Actual Startup Time": 0.001,
+                                                "Actual Total Time": 0.001,
+                                                "Actual Rows": 1,
+                                                "Actual Loops": 10273,
+                                                "Shared Hit Blocks": 30819,
+                                                "Shared Read Blocks": 0,
+                                                "Temp Read Blocks": 0,
+                                                "Temp Written Blocks": 0
+                                              },
+                                              {
+                                                "Node Type": "Bitmap Index Scan",
+                                                "Actual Startup Time": 0,
+                                                "Actual Total Time": 0,
+                                                "Actual Rows": 0,
+                                                "Actual Loops": 10273,
+                                                "Shared Hit Blocks": 173,
+                                                "Shared Read Blocks": 0,
+                                                "Temp Read Blocks": 0,
+                                                "Temp Written Blocks": 0
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "Node Type": "Hash",
+                                    "Actual Startup Time": 0.01,
+                                    "Actual Total Time": 0.011,
+                                    "Actual Rows": 17,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 2,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Actual Startup Time": 0.005,
+                                        "Actual Total Time": 0.007,
+                                        "Actual Rows": 17,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 2,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Sort",
+                            "Actual Startup Time": 0.032,
+                            "Actual Total Time": 0.034,
+                            "Actual Rows": 30,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 1,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Actual Startup Time": 0.007,
+                                "Actual Total Time": 0.01,
+                                "Actual Rows": 30,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 1,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Merge Join",
+                "Join Type": "Inner",
+                "Actual Startup Time": 32.883,
+                "Actual Total Time": 33.046,
+                "Actual Rows": 50,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 32.863,
+                    "Actual Total Time": 32.872,
+                    "Actual Rows": 50,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  },
+                  {
+                    "Node Type": "Aggregate",
+                    "Strategy": "Sorted",
+                    "Actual Startup Time": 0.018,
+                    "Actual Total Time": 0.153,
+                    "Actual Rows": 50,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 0,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "CTE Scan",
+                        "Actual Startup Time": 0.001,
+                        "Actual Total Time": 0.068,
+                        "Actual Rows": 50,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 0,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Actual Startup Time": 0.19,
+                "Actual Total Time": 0.191,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 0.001,
+                    "Actual Total Time": 0.184,
+                    "Actual Rows": 50,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 0,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              },
+              {
+                "Node Type": "Sort",
+                "Actual Startup Time": 33.117,
+                "Actual Total Time": 33.118,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 33.078,
+                    "Actual Total Time": 33.094,
+                    "Actual Rows": 50,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning Time": 1.129,
+          "Execution Time": 33.277
+        }
+      ],
+      "sampleCount": 30,
+      "medianMs": 133.447799999999,
+      "p95Ms": 140.83969999999954,
+      "sampleMs": [
+        139.14580000000024,
+        140.83969999999954,
+        139.78830000000016,
+        137.84349999999995,
+        138.29430000000048,
+        138.7531000000008,
+        137.6219999999994,
+        135.5641999999989,
+        132.57510000000002,
+        132.05429999999978,
+        132.89149999999972,
+        133.88810000000012,
+        132.99209999999948,
+        177.5077999999994,
+        133.39889999999832,
+        133.85540000000037,
+        133.19590000000062,
+        133.4966999999997,
+        133.6273999999994,
+        130.2543999999998,
+        135.09650000000147,
+        133.10900000000038,
+        132.49599999999919,
+        131.96110000000044,
+        131.04570000000058,
+        132.99099999999999,
+        129.5632999999998,
+        131.23339999999916,
+        130.27469999999994,
+        135.10599999999977
+      ],
+      "roundTrips": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "errorRate": 0
+    },
+    {
+      "size": 500,
+      "operation": "snapshot",
+      "completed": true,
+      "clientCold": {
+        "connectMs": 398.16719999999987,
+        "queryMs": 106.90700000000106,
+        "roundTrips": 1,
+        "definition": "new pool client; seeded DB buffers are warm; connect includes DNS/TCP/TLS/auth when remote, not pure TLS"
+      },
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Actual Startup Time": 30.604,
+            "Actual Total Time": 30.758,
+            "Actual Rows": 500,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 40091,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Unique",
+                "Actual Startup Time": 30.602,
+                "Actual Total Time": 30.717,
+                "Actual Rows": 500,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40091,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Sort",
+                    "Actual Startup Time": 30.6,
+                    "Actual Total Time": 30.628,
+                    "Actual Rows": 500,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40091,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Hash Join",
+                        "Join Type": "Left",
+                        "Actual Startup Time": 0.847,
+                        "Actual Total Time": 30.524,
+                        "Actual Rows": 500,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 40091,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Nested Loop",
+                            "Join Type": "Inner",
+                            "Actual Startup Time": 0.093,
+                            "Actual Total Time": 29.699,
+                            "Actual Rows": 1370,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 40089,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Hash Join",
+                                "Join Type": "Left",
+                                "Actual Startup Time": 0.077,
+                                "Actual Total Time": 4.247,
+                                "Actual Rows": 10273,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 416,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Actual Startup Time": 0.014,
+                                    "Actual Total Time": 2.36,
+                                    "Actual Rows": 10220,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 411,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0
+                                  },
+                                  {
+                                    "Node Type": "Hash",
+                                    "Actual Startup Time": 0.058,
+                                    "Actual Total Time": 0.059,
+                                    "Actual Rows": 173,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 5,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Actual Startup Time": 0.006,
+                                        "Actual Total Time": 0.03,
+                                        "Actual Rows": 173,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 5,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "Node Type": "Bitmap Heap Scan",
+                                "Actual Startup Time": 0.002,
+                                "Actual Total Time": 0.002,
+                                "Actual Rows": 0,
+                                "Actual Loops": 10273,
+                                "Shared Hit Blocks": 39673,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "BitmapOr",
+                                    "Actual Startup Time": 0.002,
+                                    "Actual Total Time": 0.002,
+                                    "Actual Rows": 0,
+                                    "Actual Loops": 10273,
+                                    "Shared Hit Blocks": 30992,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Bitmap Index Scan",
+                                        "Actual Startup Time": 0.001,
+                                        "Actual Total Time": 0.001,
+                                        "Actual Rows": 1,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 30819,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      },
+                                      {
+                                        "Node Type": "Bitmap Index Scan",
+                                        "Actual Startup Time": 0,
+                                        "Actual Total Time": 0,
+                                        "Actual Rows": 0,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 173,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Actual Startup Time": 0.009,
+                            "Actual Total Time": 0.01,
+                            "Actual Rows": 17,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 2,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Actual Startup Time": 0.004,
+                                "Actual Total Time": 0.006,
+                                "Actual Rows": 17,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 2,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning Time": 0.882,
+          "Execution Time": 30.88
+        }
+      ],
+      "sampleCount": 30,
+      "medianMs": 115.49174999999923,
+      "p95Ms": 244.0702000000001,
+      "sampleMs": [
+        244.0702000000001,
+        189.30379999999968,
+        167.5565000000006,
+        149.36309999999867,
+        141.89830000000075,
+        129.21540000000095,
+        125.20079999999871,
+        121.66179999999986,
+        118.98389999999927,
+        115.37799999999879,
+        115.60549999999967,
+        115.22650000000067,
+        114.06709999999839,
+        111.73060000000078,
+        114.67770000000019,
+        116.97279999999955,
+        117.53629999999976,
+        111.1947999999993,
+        110.97350000000006,
+        111.88130000000092,
+        110.51879999999983,
+        110.57220000000052,
+        111.1839,
+        113.18059999999969,
+        115.88559999999961,
+        462.6414999999997,
+        107.96200000000135,
+        116.83749999999964,
+        108.61199999999917,
+        110.1201000000001
+      ],
+      "roundTrips": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "errorRate": 0
+    },
+    {
+      "size": 500,
+      "operation": "list",
+      "completed": true,
+      "clientCold": {
+        "connectMs": 379.2601999999988,
+        "queryMs": 113.39370000000054,
+        "roundTrips": 1,
+        "definition": "new pool client; seeded DB buffers are warm; connect includes DNS/TCP/TLS/auth when remote, not pure TLS"
+      },
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Actual Startup Time": 35.913,
+            "Actual Total Time": 35.923,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 40092,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "WindowAgg",
+                "Actual Startup Time": 33.812,
+                "Actual Total Time": 34.296,
+                "Actual Rows": 500,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Incremental Sort",
+                    "Actual Startup Time": 33.807,
+                    "Actual Total Time": 34.056,
+                    "Actual Rows": 500,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Merge Join",
+                        "Join Type": "Left",
+                        "Actual Startup Time": 33.786,
+                        "Actual Total Time": 33.903,
+                        "Actual Rows": 500,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 40092,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Sort",
+                            "Actual Startup Time": 33.745,
+                            "Actual Total Time": 33.774,
+                            "Actual Rows": 500,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 40091,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Hash Join",
+                                "Join Type": "Left",
+                                "Actual Startup Time": 0.829,
+                                "Actual Total Time": 33.609,
+                                "Actual Rows": 500,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 40091,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Nested Loop",
+                                    "Join Type": "Inner",
+                                    "Actual Startup Time": 0.09,
+                                    "Actual Total Time": 30.699,
+                                    "Actual Rows": 1370,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 40089,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Hash Join",
+                                        "Join Type": "Left",
+                                        "Actual Startup Time": 0.073,
+                                        "Actual Total Time": 4.155,
+                                        "Actual Rows": 10273,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 416,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "Seq Scan",
+                                            "Actual Startup Time": 0.011,
+                                            "Actual Total Time": 2.217,
+                                            "Actual Rows": 10220,
+                                            "Actual Loops": 1,
+                                            "Shared Hit Blocks": 411,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0
+                                          },
+                                          {
+                                            "Node Type": "Hash",
+                                            "Actual Startup Time": 0.058,
+                                            "Actual Total Time": 0.059,
+                                            "Actual Rows": 173,
+                                            "Actual Loops": 1,
+                                            "Shared Hit Blocks": 5,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0,
+                                            "Plans": [
+                                              {
+                                                "Node Type": "Seq Scan",
+                                                "Actual Startup Time": 0.005,
+                                                "Actual Total Time": 0.029,
+                                                "Actual Rows": 173,
+                                                "Actual Loops": 1,
+                                                "Shared Hit Blocks": 5,
+                                                "Shared Read Blocks": 0,
+                                                "Temp Read Blocks": 0,
+                                                "Temp Written Blocks": 0
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "Node Type": "Bitmap Heap Scan",
+                                        "Actual Startup Time": 0.002,
+                                        "Actual Total Time": 0.002,
+                                        "Actual Rows": 0,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 39673,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "BitmapOr",
+                                            "Actual Startup Time": 0.002,
+                                            "Actual Total Time": 0.002,
+                                            "Actual Rows": 0,
+                                            "Actual Loops": 10273,
+                                            "Shared Hit Blocks": 30992,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0,
+                                            "Plans": [
+                                              {
+                                                "Node Type": "Bitmap Index Scan",
+                                                "Actual Startup Time": 0.001,
+                                                "Actual Total Time": 0.001,
+                                                "Actual Rows": 1,
+                                                "Actual Loops": 10273,
+                                                "Shared Hit Blocks": 30819,
+                                                "Shared Read Blocks": 0,
+                                                "Temp Read Blocks": 0,
+                                                "Temp Written Blocks": 0
+                                              },
+                                              {
+                                                "Node Type": "Bitmap Index Scan",
+                                                "Actual Startup Time": 0,
+                                                "Actual Total Time": 0,
+                                                "Actual Rows": 0,
+                                                "Actual Loops": 10273,
+                                                "Shared Hit Blocks": 173,
+                                                "Shared Read Blocks": 0,
+                                                "Temp Read Blocks": 0,
+                                                "Temp Written Blocks": 0
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "Node Type": "Hash",
+                                    "Actual Startup Time": 0.009,
+                                    "Actual Total Time": 0.009,
+                                    "Actual Rows": 17,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 2,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Actual Startup Time": 0.004,
+                                        "Actual Total Time": 0.006,
+                                        "Actual Rows": 17,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 2,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Sort",
+                            "Actual Startup Time": 0.032,
+                            "Actual Total Time": 0.034,
+                            "Actual Rows": 30,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 1,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Actual Startup Time": 0.006,
+                                "Actual Total Time": 0.01,
+                                "Actual Rows": 30,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 1,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Merge Join",
+                "Join Type": "Inner",
+                "Actual Startup Time": 33.833,
+                "Actual Total Time": 35.402,
+                "Actual Rows": 500,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 33.814,
+                    "Actual Total Time": 33.9,
+                    "Actual Rows": 500,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  },
+                  {
+                    "Node Type": "Aggregate",
+                    "Strategy": "Sorted",
+                    "Actual Startup Time": 0.017,
+                    "Actual Total Time": 1.347,
+                    "Actual Rows": 500,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 0,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "CTE Scan",
+                        "Actual Startup Time": 0.001,
+                        "Actual Total Time": 0.72,
+                        "Actual Rows": 500,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 0,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Actual Startup Time": 1.783,
+                "Actual Total Time": 1.783,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 0,
+                    "Actual Total Time": 1.749,
+                    "Actual Rows": 500,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 0,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              },
+              {
+                "Node Type": "Sort",
+                "Actual Startup Time": 35.912,
+                "Actual Total Time": 35.913,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 35.621,
+                    "Actual Total Time": 35.775,
+                    "Actual Rows": 500,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning Time": 0.96,
+          "Execution Time": 36.043
+        }
+      ],
+      "sampleCount": 30,
+      "medianMs": 108.66415000000052,
+      "p95Ms": 118.84790000000066,
+      "sampleMs": [
+        109.59519999999975,
+        81.07050000000163,
+        114.97899999999936,
+        104.09330000000045,
+        84.2657999999974,
+        80.85719999999856,
+        109.81670000000304,
+        106.28970000000118,
+        106.32670000000144,
+        113.33120000000054,
+        108.16690000000017,
+        120.32809999999881,
+        118.84790000000066,
+        109.97049999999945,
+        108.10909999999785,
+        105.36130000000048,
+        103.28719999999885,
+        114.80169999999998,
+        103.0131999999976,
+        105.02759999999762,
+        109.16140000000087,
+        106.57170000000042,
+        107.431700000001,
+        109.91849999999977,
+        109.78609999999753,
+        112.88030000000072,
+        110.09990000000107,
+        112.0653999999995,
+        114.03939999999784,
+        101.43829999999798
+      ],
+      "roundTrips": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "errorRate": 0
+    },
+    {
+      "size": 5000,
+      "operation": "snapshot",
+      "completed": true,
+      "clientCold": {
+        "connectMs": 364.1752000000015,
+        "queryMs": 271.52930000000197,
+        "roundTrips": 1,
+        "definition": "new pool client; seeded DB buffers are warm; connect includes DNS/TCP/TLS/auth when remote, not pure TLS"
+      },
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Actual Startup Time": 16.167,
+            "Actual Total Time": 41.606,
+            "Actual Rows": 5000,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 40370,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Unique",
+                "Actual Startup Time": 16.166,
+                "Actual Total Time": 41.083,
+                "Actual Rows": 5000,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40370,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Join Type": "Left",
+                    "Actual Startup Time": 16.164,
+                    "Actual Total Time": 40.065,
+                    "Actual Rows": 5000,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40370,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Join Type": "Inner",
+                        "Actual Startup Time": 0.511,
+                        "Actual Total Time": 36.077,
+                        "Actual Rows": 5870,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 40346,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Merge Join",
+                            "Join Type": "Left",
+                            "Actual Startup Time": 0.019,
+                            "Actual Total Time": 5.224,
+                            "Actual Rows": 10273,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 673,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Index Scan",
+                                "Actual Startup Time": 0.013,
+                                "Actual Total Time": 3.617,
+                                "Actual Rows": 10220,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 565,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              },
+                              {
+                                "Node Type": "Index Scan",
+                                "Actual Startup Time": 0.004,
+                                "Actual Total Time": 0.082,
+                                "Actual Rows": 173,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 108,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Bitmap Heap Scan",
+                            "Actual Startup Time": 0.003,
+                            "Actual Total Time": 0.003,
+                            "Actual Rows": 1,
+                            "Actual Loops": 10273,
+                            "Shared Hit Blocks": 39673,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "BitmapOr",
+                                "Actual Startup Time": 0.002,
+                                "Actual Total Time": 0.002,
+                                "Actual Rows": 0,
+                                "Actual Loops": 10273,
+                                "Shared Hit Blocks": 30992,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Bitmap Index Scan",
+                                    "Actual Startup Time": 0.002,
+                                    "Actual Total Time": 0.002,
+                                    "Actual Rows": 1,
+                                    "Actual Loops": 10273,
+                                    "Shared Hit Blocks": 30819,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0
+                                  },
+                                  {
+                                    "Node Type": "Bitmap Index Scan",
+                                    "Actual Startup Time": 0,
+                                    "Actual Total Time": 0,
+                                    "Actual Rows": 0,
+                                    "Actual Loops": 10273,
+                                    "Shared Hit Blocks": 173,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Index Scan",
+                        "Actual Startup Time": 0,
+                        "Actual Total Time": 0,
+                        "Actual Rows": 0,
+                        "Actual Loops": 5870,
+                        "Shared Hit Blocks": 24,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning Time": 0.772,
+          "Execution Time": 41.965
+        }
+      ],
+      "sampleCount": 30,
+      "medianMs": 114.10924999999952,
+      "p95Ms": 262.52400000000125,
+      "sampleMs": [
+        572.920100000003,
+        262.52400000000125,
+        193.04899999999907,
+        182.66100000000006,
+        164.37959999999657,
+        152.6980999999978,
+        141.90729999999894,
+        136.67329999999856,
+        134.6267000000007,
+        124.08629999999903,
+        126.56289999999717,
+        126.89310000000114,
+        119.17549999999756,
+        118.15380000000005,
+        116.8080000000009,
+        109.36409999999887,
+        109.97959999999875,
+        107.75789999999688,
+        106.41480000000229,
+        111.41049999999814,
+        107.23730000000069,
+        111.23009999999704,
+        105.13940000000002,
+        106.92569999999978,
+        105.82800000000134,
+        104.11739999999918,
+        105.17199999999866,
+        104.5612000000001,
+        106.79950000000099,
+        101.1215000000011
+      ],
+      "roundTrips": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "errorRate": 0
+    },
+    {
+      "size": 5000,
+      "operation": "list",
+      "completed": true,
+      "clientCold": {
+        "connectMs": 397.9439999999995,
+        "queryMs": 128.09330000000045,
+        "roundTrips": 1,
+        "definition": "new pool client; seeded DB buffers are warm; connect includes DNS/TCP/TLS/auth when remote, not pure TLS"
+      },
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Actual Startup Time": 65.876,
+            "Actual Total Time": 65.889,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 40092,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "WindowAgg",
+                "Actual Startup Time": 44.722,
+                "Actual Total Time": 48.07,
+                "Actual Rows": 5000,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Sort",
+                    "Actual Startup Time": 44.713,
+                    "Actual Total Time": 45.033,
+                    "Actual Rows": 5000,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Hash Join",
+                        "Join Type": "Left",
+                        "Actual Startup Time": 0.288,
+                        "Actual Total Time": 42.243,
+                        "Actual Rows": 5000,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 40092,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Hash Join",
+                            "Join Type": "Left",
+                            "Actual Startup Time": 0.272,
+                            "Actual Total Time": 41.103,
+                            "Actual Rows": 5000,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 40091,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Nested Loop",
+                                "Join Type": "Inner",
+                                "Actual Startup Time": 0.097,
+                                "Actual Total Time": 37.767,
+                                "Actual Rows": 5870,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 40089,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Hash Join",
+                                    "Join Type": "Left",
+                                    "Actual Startup Time": 0.077,
+                                    "Actual Total Time": 4.398,
+                                    "Actual Rows": 10273,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 416,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Actual Startup Time": 0.013,
+                                        "Actual Total Time": 2.382,
+                                        "Actual Rows": 10220,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 411,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0
+                                      },
+                                      {
+                                        "Node Type": "Hash",
+                                        "Actual Startup Time": 0.059,
+                                        "Actual Total Time": 0.06,
+                                        "Actual Rows": 173,
+                                        "Actual Loops": 1,
+                                        "Shared Hit Blocks": 5,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "Seq Scan",
+                                            "Actual Startup Time": 0.006,
+                                            "Actual Total Time": 0.031,
+                                            "Actual Rows": 173,
+                                            "Actual Loops": 1,
+                                            "Shared Hit Blocks": 5,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "Node Type": "Bitmap Heap Scan",
+                                    "Actual Startup Time": 0.003,
+                                    "Actual Total Time": 0.003,
+                                    "Actual Rows": 1,
+                                    "Actual Loops": 10273,
+                                    "Shared Hit Blocks": 39673,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "BitmapOr",
+                                        "Actual Startup Time": 0.002,
+                                        "Actual Total Time": 0.002,
+                                        "Actual Rows": 0,
+                                        "Actual Loops": 10273,
+                                        "Shared Hit Blocks": 30992,
+                                        "Shared Read Blocks": 0,
+                                        "Temp Read Blocks": 0,
+                                        "Temp Written Blocks": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "Bitmap Index Scan",
+                                            "Actual Startup Time": 0.001,
+                                            "Actual Total Time": 0.001,
+                                            "Actual Rows": 1,
+                                            "Actual Loops": 10273,
+                                            "Shared Hit Blocks": 30819,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0
+                                          },
+                                          {
+                                            "Node Type": "Bitmap Index Scan",
+                                            "Actual Startup Time": 0,
+                                            "Actual Total Time": 0,
+                                            "Actual Rows": 0,
+                                            "Actual Loops": 10273,
+                                            "Shared Hit Blocks": 173,
+                                            "Shared Read Blocks": 0,
+                                            "Temp Read Blocks": 0,
+                                            "Temp Written Blocks": 0
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "Node Type": "Hash",
+                                "Actual Startup Time": 0.009,
+                                "Actual Total Time": 0.01,
+                                "Actual Rows": 17,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 2,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Actual Startup Time": 0.004,
+                                    "Actual Total Time": 0.007,
+                                    "Actual Rows": 17,
+                                    "Actual Loops": 1,
+                                    "Shared Hit Blocks": 2,
+                                    "Shared Read Blocks": 0,
+                                    "Temp Read Blocks": 0,
+                                    "Temp Written Blocks": 0
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Actual Startup Time": 0.012,
+                            "Actual Total Time": 0.013,
+                            "Actual Rows": 30,
+                            "Actual Loops": 1,
+                            "Shared Hit Blocks": 1,
+                            "Shared Read Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Actual Startup Time": 0.003,
+                                "Actual Total Time": 0.008,
+                                "Actual Rows": 30,
+                                "Actual Loops": 1,
+                                "Shared Hit Blocks": 1,
+                                "Shared Read Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Merge Join",
+                "Join Type": "Inner",
+                "Actual Startup Time": 44.753,
+                "Actual Total Time": 60.627,
+                "Actual Rows": 5000,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 44.725,
+                    "Actual Total Time": 45.654,
+                    "Actual Rows": 5000,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  },
+                  {
+                    "Node Type": "Aggregate",
+                    "Strategy": "Sorted",
+                    "Actual Startup Time": 0.025,
+                    "Actual Total Time": 13.288,
+                    "Actual Rows": 5000,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 0,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "CTE Scan",
+                        "Actual Startup Time": 0.001,
+                        "Actual Total Time": 5.838,
+                        "Actual Rows": 5000,
+                        "Actual Loops": 1,
+                        "Shared Hit Blocks": 0,
+                        "Shared Read Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Actual Startup Time": 18.258,
+                "Actual Total Time": 18.259,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 0,
+                    "Actual Total Time": 17.896,
+                    "Actual Rows": 5000,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 0,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              },
+              {
+                "Node Type": "Sort",
+                "Actual Startup Time": 65.875,
+                "Actual Total Time": 65.876,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 40092,
+                "Shared Read Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "CTE Scan",
+                    "Actual Startup Time": 63.017,
+                    "Actual Total Time": 64.587,
+                    "Actual Rows": 5000,
+                    "Actual Loops": 1,
+                    "Shared Hit Blocks": 40092,
+                    "Shared Read Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning Time": 1.043,
+          "Execution Time": 66.11
+        }
+      ],
+      "sampleCount": 30,
+      "medianMs": 133.99935000000005,
+      "p95Ms": 145.30969999999797,
+      "sampleMs": [
+        145.30969999999797,
+        129.08789999999863,
+        137.53319999999803,
+        134.38869999999952,
+        133.5883999999969,
+        126.45240000000194,
+        138.55589999999938,
+        133.61000000000058,
+        135.4878000000026,
+        130.59309999999823,
+        130.4928,
+        135.96320000000196,
+        136.85769999999684,
+        135.27040000000125,
+        134.58020000000033,
+        137.5540000000001,
+        139.52289999999994,
+        146.02750000000015,
+        133.59089999999924,
+        137.30279999999766,
+        135.7710999999981,
+        137.01870000000054,
+        129.16949999999997,
+        121.52270000000135,
+        127.54820000000109,
+        130.3722999999991,
+        128.6398999999983,
+        125.44870000000083,
+        130.5655000000006,
+        128.09059999999954
+      ],
+      "roundTrips": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "errorRate": 0
+    }
+  ],
+  "ledger": 56,
+  "postgres": "17.11 (fcae950)",
+  "sourceFileHashes": {
+    "scripts/audit-remediation-performance.ts": "1434f70658fb479b5de4c8ce8a9a0a5c90b8fbf0fe43cf1f46a9eeb4f0d02e18",
+    "lib/db/repos/admin-members.ts": "c95ed79575b10554510f03839bd989531b8a43e56acd96193c588cc51efc640c",
+    "lib/admin/batches/selection.ts": "88fdd0f8d9888254982c5e695e5d53b2ea0a6987a820db2d380f1880ca179207"
+  },
+  "finishedAt": "2026-10-02T02:13:20.588Z",
+  "ownedFixtureCleanup": true
+}

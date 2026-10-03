@@ -59,11 +59,12 @@ describe("OpenNow", () => {
     );
   });
 
-  it("degrades to the honest-empty state when the read rejects", async () => {
+  it("shows recovery instead of a zero-event claim when the read rejects", async () => {
     listPublic.mockRejectedValueOnce(new Error("db down"));
     const {OpenNow} = await import("@/components/home/open-now");
     render(await OpenNow({locale: "en"}));
 
-    expect(screen.getByRole("heading", {level: 3, name: bundles.en.Home.openNow.empty.title})).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 3, name: bundles.en.Home.openNow.unavailable.title})).toBeInTheDocument();
+    expect(screen.queryByRole("heading", {name: bundles.en.Home.openNow.empty.title})).not.toBeInTheDocument();
   });
 });

@@ -1,3 +1,4 @@
+import {writeFileSync} from "node:fs";
 import {AxeBuilder} from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 
@@ -9,12 +10,34 @@ const pages = [
   `/zh/about/history/${featuredHistorySlug}`, "/zh/programs/asa",
 ];
 
-async function expectNoSeriousOrCritical(page: import("@playwright/test").Page) {
+async function expectNoSeriousOrCritical(page: import("@playwright/test").Page, surface?: string) {
   await expect(page.locator("main#main-content")).toBeVisible();
   await expect(page.locator("[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-server-client-overlay")).toHaveCount(0);
-  const results = await new AxeBuilder({page}).analyze();
+  // The full page is scanned separately below. Scan the open navigation surface
+  // here: axe can sample an obscured background node against an opaque popup.
+  const builder = new AxeBuilder({page});
+  const results = await (surface ? builder.include(surface) : builder).analyze();
   const violations = results.violations.filter(({impact}) => impact === "serious" || impact === "critical");
-  expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+  if (violations.length) writeFileSync(".playwright/t22-accessibility-safe-" + new URL(page.url()).pathname.replaceAll("/", "_") + ".json", JSON.stringify(violations.map(v => ({id:v.id,impact:v.impact,nodes:v.nodes.map(n => ({target:n.target,checks:n.any.map(c => ({id:c.id,contrastRatio:c.data?.contrastRatio,foregroundColor:c.data?.fgColor,backgroundColor:c.data?.bgColor}))}))})), null, 2));
+  expect(violations.map(v => ({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
+}
+
+async function expectFullscreenModal(page: import("@playwright/test").Page) {
+  const menu = page.getByRole("dialog");
+  await expect(menu).toBeVisible();
+  const box = await menu.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeLessThanOrEqual(0);
+  expect(box!.y).toBeLessThanOrEqual(0);
+  expect(box!.width).toBeGreaterThanOrEqual(viewport.width);
+  expect(box!.height).toBeGreaterThanOrEqual(viewport.height);
+  // Radix deliberately preserves aria-live ancestors on Home. Verify actual
+  // modal focus containment rather than requiring every main to be aria-hidden.
+  for (let index = 0; index < 5; index += 1) {
+    await page.keyboard.press("Tab");
+    await expect.poll(() => menu.evaluate(node => node.contains(document.activeElement))).toBe(true);
+  }
 }
 
 for (const path of pages) {
@@ -29,14 +52,18 @@ test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
   // at 1120 the trigger is `display: none` and the click would assert nothing.
   await page.setViewportSize({width: 1360, height: 900});
   await page.goto("/");
-  await page.getByRole("navigation", {name: "Primary navigation"}).getByRole("button").first().click();
-  await expectNoSeriousOrCritical(page);
+  const desktopTrigger = page.getByRole("navigation", {name: "Primary navigation"}).getByRole("button").first();
+  await desktopTrigger.click();
+  await expect(desktopTrigger).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator(".mega-menu-v2").first()).toBeVisible();
+  await expectNoSeriousOrCritical(page, ".site-header");
 
   await page.setViewportSize({width: 375, height: 800});
   await page.goto("/zh");
   await page.getByRole("button", {name: "開啟導覽選單"}).click();
   await page.getByRole("button", {name: "活動及計劃"}).click();
-  await expectNoSeriousOrCritical(page);
+  await expectFullscreenModal(page);
+  await expectNoSeriousOrCritical(page, ".mobile-menu");
 });
 
 /**
@@ -135,7 +162,8 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
   expect(reading.worst, JSON.stringify(reading)).toBeGreaterThanOrEqual(4.5);
 
   await group.click();
-  await expectNoSeriousOrCritical(page);
+  await expectFullscreenModal(page);
+  await expectNoSeriousOrCritical(page, ".mobile-menu");
 });
 
 test("skip link targets the sole main content landmark", async ({page}) => {

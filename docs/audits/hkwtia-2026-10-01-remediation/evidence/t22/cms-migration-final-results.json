@@ -1,0 +1,65 @@
+{
+  "applicationSha": "27832bdcd58dfde1f512697277960df6958fc02d",
+  "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-cms-workspace.test.ts tests/integration/audit-full-migration-recovery.test.ts --maxWorkers=1 --reporter=json",
+  "passed": 11,
+  "failed": 0,
+  "skipped": 0,
+  "production": false,
+  "tests": [
+    {
+      "test": "private CMS lifecycle actual PostgreSQL saves privately across reads without changing either public locale; denies foreign/member reads",
+      "status": "passed",
+      "durationMs": 59.3109000000004
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL publishes both locales once and rejects a concurrent second editor without losing their private draft",
+      "status": "passed",
+      "durationMs": 77.3157000000001
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL fences two tabs saving the same owner's draft and treats an unchanged save as a no-op",
+      "status": "passed",
+      "durationMs": 62.500600000000304
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL explicitly rebases only this editor's changed fields and adopts concurrent unchanged fields",
+      "status": "passed",
+      "durationMs": 94.88869999999952
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL rejects unknown cleared paths, hostile locales and lost ICU placeholders before persistence",
+      "status": "passed",
+      "durationMs": 34.48199999999997
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL rolls back publication, both public locales and history when its transactional audit fails",
+      "status": "passed",
+      "durationMs": 46.702400000000125
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL restores the first publication's previous copy as a private draft, then creates a new public revision without an ABA conflict bypass",
+      "status": "passed",
+      "durationMs": 104.1228000000001
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL serializes duplicate publication attempts to one commit and retains the immutable published snapshot",
+      "status": "passed",
+      "durationMs": 48.621399999999994
+    },
+    {
+      "test": "private CMS lifecycle actual PostgreSQL fails closed when draft flag is off without changing public copy or private history",
+      "status": "passed",
+      "durationMs": 30.359599999999773
+    },
+    {
+      "test": "full clean and baseline migration recovery migrates a clean database and repeats without losing additive schema or ledger",
+      "status": "passed",
+      "durationMs": 3680.1895999999997
+    },
+    {
+      "test": "full clean and baseline migration recovery rolls back an interrupted baseline upgrade, then preserves historical rights, paid transactions and CMS history across compatible rollback",
+      "status": "passed",
+      "durationMs": 3861.2344000000003
+    }
+  ]
+}

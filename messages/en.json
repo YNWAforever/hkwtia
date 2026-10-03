@@ -429,10 +429,15 @@
       "discover": "Discover WiseTech"
     },
     "openNow": {
+      "loading": "Loading community opportunities…",
       "eyebrow": "Open now",
       "title": "What can you join today?",
       "intro": "Only activities with confirmed dates, eligibility and registration details appear here.",
       "statusLabel": "Current availability",
+      "unavailable": {
+        "title": "Events temporarily unavailable",
+        "copy": "We could not load the public calendar. Please try again or contact the team."
+      },
       "empty": {
         "title": "No activities are currently open.",
         "copy": "Register for activity updates, or bring the team a defined business challenge to help shape a useful future session."

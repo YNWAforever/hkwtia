@@ -1,5 +1,5 @@
 import {expect, test, type Page} from "@playwright/test";
-import {createElement} from "react";
+import {createElement, type ComponentProps} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {require as tsxRequire} from "tsx/cjs/api";
 
@@ -62,6 +62,7 @@ async function expectExactPrivateMedia(
 }
 
 test("preserves Event status and Showcase filters across locale switches", async ({page}) => {
+  test.skip(Boolean(process.env.DATABASE_URL), "This case proves unavailable states with repository credentials absent; run the credential-free profile.");
   const eventsResponse = await page.goto("/events?status=past#results");
   expect(eventsResponse?.status()).toBe(200);
   await expect(page.getByRole("heading", {name: "Events are temporarily unavailable"})).toBeVisible();
@@ -73,13 +74,14 @@ test("preserves Event status and Showcase filters across locale switches", async
 
   const showcaseResponse = await page.goto("/showcase?q=ai&category=software#results");
   expect(showcaseResponse?.status()).toBe(200);
-  await expect(page.getByRole("heading", {name: "No published listings match"})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Showcase listings are temporarily unavailable"})).toBeVisible();
   await page.getByRole("button", {name: "Switch to Chinese"}).first().click();
   await expect(page).toHaveURL(/\/zh\/showcase\?q=ai&category=software#results$/);
-  await expect(page.getByRole("heading", {name: "沒有符合的已發布展示頁"})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "展示名錄暫時無法顯示"})).toBeVisible();
 });
 
 test("keeps the bilingual Membership catalog honest without repository credentials", async ({page}) => {
+  test.skip(Boolean(process.env.DATABASE_URL), "This case proves catalog recovery with repository credentials absent; run the credential-free profile.");
   for (const membershipCase of [
     {
       path: "/membership",
@@ -146,11 +148,11 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
 
 test("renders exact own-origin private Event and partner media without optimization", async ({page}) => {
   const {EventDetail, LegacyNetwork, NextIntlClientProvider} = presentationComponents();
-  const eventHtml = renderToStaticMarkup(createElement(EventDetail, {
+  const eventHtml = renderToStaticMarkup(createElement(NextIntlClientProvider, {locale: "en"}, createElement(EventDetail, {
     event: eventFixtureWithPrivateHero,
     locale: "en",
-    labels: {date: "Date", venue: "Venue", capacity: "Capacity"},
-  }));
+    labels: {date: "Date", venue: "Venue", capacity: "Capacity", format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Online event link"} satisfies ComponentProps<typeof import("@/components/marketing/event-detail").EventDetail>["labels"],
+  })));
   await expectExactPrivateMedia(page, eventHtml, EVENT_MEDIA_URL);
 
   const legacyNetworkHtml = renderToStaticMarkup(createElement(NextIntlClientProvider, {locale: "en"}, createElement(LegacyNetwork, {

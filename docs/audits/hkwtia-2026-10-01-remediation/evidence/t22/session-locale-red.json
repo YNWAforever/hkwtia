@@ -1,0 +1,36 @@
+{
+  "environment": "local jsdom; no provider calls",
+  "pass": 4,
+  "fail": 1,
+  "skip": 0,
+  "failedFiles": [
+    "m2-session-reuse.test.ts"
+  ],
+  "cases": [
+    {
+      "file": "m2-session-reuse.test.ts",
+      "test": "does not overwrite the current test locale with a cached identity's UI preference",
+      "status": "failed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "test": "rejects a cached session when identity API succeeds but the protected server page redirects",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "test": "requires the server to confirm the same synthetic identity before reuse",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "test": "rejects a different identity even when a cookie exists",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "test": "rejects expired or unavailable sessions without trusting the local artifact",
+      "status": "passed"
+    }
+  ]
+}

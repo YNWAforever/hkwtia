@@ -1,0 +1,223 @@
+{
+  "sourceSha": "8119b7f3477c48d1b375c8d352b5b0f5bfb47109",
+  "startTime": 1790964796634,
+  "passed": 35,
+  "failed": 0,
+  "skipped": 0,
+  "total": 35,
+  "failedFiles": [],
+  "success": true,
+  "cases": [
+    {
+      "file": "tests/unit/admin-member-navigation.test.tsx",
+      "test": "admin member navigation opens Member 360 from the name and a view link while preserving only local list filters",
+      "status": "passed",
+      "durationMs": 18.046299999999974
+    },
+    {
+      "file": "tests/unit/admin-member-navigation.test.tsx",
+      "test": "admin member navigation renders keyboard-usable previous and next links while preserving a validated search trail",
+      "status": "passed",
+      "durationMs": 8.778600000000097
+    },
+    {
+      "file": "tests/unit/admin-member-navigation.test.tsx",
+      "test": "admin member navigation renders operational filter controls from the same shareable query",
+      "status": "passed",
+      "durationMs": 5.016299999999774
+    },
+    {
+      "file": "tests/unit/admin-member-navigation.test.tsx",
+      "test": "admin member navigation keeps the full member filter in a shareable local list and detail return URL",
+      "status": "passed",
+      "durationMs": 0.9110000000000582
+    },
+    {
+      "file": "tests/unit/admin-member-navigation.test.tsx",
+      "test": "admin member navigation rejects an external return hint and constructs only a local list URL",
+      "status": "passed",
+      "durationMs": 1.3854999999998654
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private admin navigation waits for navigation even when caller prefetch is undefined",
+      "status": "passed",
+      "durationMs": 43.34949999999981
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private admin navigation waits for navigation even when caller prefetch is true",
+      "status": "passed",
+      "durationMs": 6.0009000000000015
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private dashboard entry points waits for intentional navigation in en",
+      "status": "passed",
+      "durationMs": 41.81000000000017
+    },
+    {
+      "file": "tests/unit/admin-private-prefetch.test.tsx",
+      "test": "private dashboard entry points waits for intentional navigation in zh-HK",
+      "status": "passed",
+      "durationMs": 16.388999999999896
+    },
+    {
+      "file": "tests/unit/admin-unsaved-changes-guard.test.tsx",
+      "test": "admin unsaved form navigation keeps the draft when a sidebar navigation is cancelled and warns on reload",
+      "status": "passed",
+      "durationMs": 53.678499999999985
+    },
+    {
+      "file": "tests/unit/admin-unsaved-changes-guard.test.tsx",
+      "test": "admin unsaved form navigation also protects direct links inside an editor page",
+      "status": "passed",
+      "durationMs": 8.183899999999994
+    },
+    {
+      "file": "tests/unit/dual-brand-lockup.test.tsx",
+      "test": "DualBrandLockup renders the donor tile with the WTIA logo and the D-10 descriptor",
+      "status": "passed",
+      "durationMs": 48.915500000000065
+    },
+    {
+      "file": "tests/unit/dual-brand-lockup.test.tsx",
+      "test": "DualBrandLockup requests a logo sized for the mobile and desktop tile",
+      "status": "passed",
+      "durationMs": 4.229199999999992
+    },
+    {
+      "file": "tests/unit/dual-brand-lockup.test.tsx",
+      "test": "DualBrandLockup keeps the tap-floor classes and the 44px height with long localized labels",
+      "status": "passed",
+      "durationMs": 9.515699999999924
+    },
+    {
+      "file": "tests/unit/internal-shell-navigation.test.tsx",
+      "test": "InternalNavigation marks the exact current path as aria-current and renders every link",
+      "status": "passed",
+      "durationMs": 113.93730000000005
+    },
+    {
+      "file": "tests/unit/internal-shell-navigation.test.tsx",
+      "test": "InternalNavigation gives every link a 44px-minimum tap target",
+      "status": "passed",
+      "durationMs": 17.983100000000377
+    },
+    {
+      "file": "tests/unit/internal-shell-navigation.test.tsx",
+      "test": "InternalNavigation opens the mobile drawer, closes on Escape, and returns focus to the trigger",
+      "status": "passed",
+      "durationMs": 75.97310000000016
+    },
+    {
+      "file": "tests/unit/internal-shell-navigation.test.tsx",
+      "test": "InternalNavigation renders an optional children slot (e.g. for a sign-out control)",
+      "status": "passed",
+      "durationMs": 12.674399999999878
+    },
+    {
+      "file": "tests/unit/internal-shell-navigation.test.tsx",
+      "test": "InternalNavigation marks only the most-specific link current when routes have ancestor/descendant relationships",
+      "status": "passed",
+      "durationMs": 36.83359999999993
+    },
+    {
+      "file": "tests/unit/internal-shell-navigation.test.tsx",
+      "test": "InternalNavigation renders a visible close button with accessible name in the mobile drawer",
+      "status": "passed",
+      "durationMs": 41.35689999999977
+    },
+    {
+      "file": "tests/unit/member-bulk-table.test.tsx",
+      "test": "member page selection retains a page selection across pagination and clears it when filters change",
+      "status": "passed",
+      "durationMs": 115.22690000000011
+    },
+    {
+      "file": "tests/unit/member-bulk-table.test.tsx",
+      "test": "member page selection selects this page before an explicit all-matching choice and permits exclusions",
+      "status": "passed",
+      "durationMs": 70.3880999999999
+    },
+    {
+      "file": "tests/unit/member-bulk-table.test.tsx",
+      "test": "member selection to batch preview submits only the explicit page IDs and navigates to the durable preview",
+      "status": "passed",
+      "durationMs": 64.60039999999981
+    },
+    {
+      "file": "tests/unit/member-bulk-table.test.tsx",
+      "test": "member selection to batch preview previews only the chosen tags correction, with no accidental locale change",
+      "status": "passed",
+      "durationMs": 69.90560000000005
+    },
+    {
+      "file": "tests/unit/member-bulk-table.test.tsx",
+      "test": "member selection to batch preview previews an explicitly selected responsible staff member without changing tags or locale",
+      "status": "passed",
+      "durationMs": 62.2050999999999
+    },
+    {
+      "file": "tests/unit/private-link-boundary.test.tsx",
+      "test": "private link boundary disables preload while preserving anchor props and ref (undefined)",
+      "status": "passed",
+      "durationMs": 42.91070000000013
+    },
+    {
+      "file": "tests/unit/private-link-boundary.test.tsx",
+      "test": "private link boundary disables preload while preserving anchor props and ref (true)",
+      "status": "passed",
+      "durationMs": 5.873900000000049
+    },
+    {
+      "file": "tests/unit/private-link-boundary.test.tsx",
+      "test": "private link boundary disables preload while preserving anchor props and ref (auto)",
+      "status": "passed",
+      "durationMs": 5.336900000000014
+    },
+    {
+      "file": "tests/unit/private-link-boundary.test.tsx",
+      "test": "private link boundary detects the imports it is meant to catch",
+      "status": "passed",
+      "durationMs": 7.668399999999792
+    },
+    {
+      "file": "tests/unit/private-link-boundary.test.tsx",
+      "test": "private link boundary keeps every discovered private caller behind the same boundary",
+      "status": "passed",
+      "durationMs": 339.03739999999993
+    },
+    {
+      "file": "tests/unit/private-record-prefetch.test.tsx",
+      "test": "private inbox filters waits for navigation before fetching filtered records in en",
+      "status": "passed",
+      "durationMs": 67.3329
+    },
+    {
+      "file": "tests/unit/private-record-prefetch.test.tsx",
+      "test": "private inbox filters waits for navigation before fetching filtered records in zh-HK",
+      "status": "passed",
+      "durationMs": 13.357900000000086
+    },
+    {
+      "file": "tests/unit/segment-event-navigation.test.tsx",
+      "test": "selected event and draft survive the preview form retains the 21st selected upcoming event outside the first 20 options",
+      "status": "passed",
+      "durationMs": 158.47289999999975
+    },
+    {
+      "file": "tests/unit/wisetech-asset-provenance.test.ts",
+      "test": "WiseTech donor asset provenance tracks the exact pinned logo bytes at the own-origin destination",
+      "status": "passed",
+      "durationMs": 2.2708000000000084
+    },
+    {
+      "file": "tests/unit/wisetech-asset-provenance.test.ts",
+      "test": "WiseTech donor asset provenance tracks the exact pinned bytes of every ported donor photograph",
+      "status": "passed",
+      "durationMs": 5.806100000000015
+    }
+  ],
+  "sourceRelation": "Run before commits; app/test contents identical to the subsequently committed candidate"
+}

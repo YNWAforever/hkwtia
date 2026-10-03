@@ -1,0 +1,68 @@
+{
+  "observedAt": "2026-10-02T17:01:36.089Z",
+  "role": "synthetic staff",
+  "visibleNavigationLinks": 25,
+  "observationWindowMs": 8000,
+  "prefetches": [
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/page-copy/Home",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/profiles-review",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/page-copy/Home",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/profiles-review",
+      "prefetch": true
+    }
+  ],
+  "credentialsLogged": false,
+  "production": false,
+  "sourceSha": "af4b86564270d8dda51f67b512f96542af7380f8",
+  "result": "still failed: sidebar/topbar fixed, remaining initial dashboard links"
+}

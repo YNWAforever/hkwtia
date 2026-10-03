@@ -17,10 +17,12 @@ describe("Concierge layout translation loading", () => {
     // second scoped fetch -- Common's skipToContent, for the shell's skip link -- so this layout
     // is back to two namespaces loaded via Promise.all, alongside Concierge.
     {file: "app/[locale]/(member)/portal/layout.tsx", fetchesInParallel: true},
-  ])("loads scoped translations without the full catalog: $file", ({file, fetchesInParallel}) => {
+  ])("loads scoped server translations: $file", ({file, fetchesInParallel}) => {
     const layout = source(file);
 
-    expect(layout).not.toContain("getMessages");
+    // The authenticated Portal now owns its client catalog after its actor
+    // guard; the public shell still loads only server-side namespaces here.
+    if (file.includes("(public)")) expect(layout).not.toContain("getMessages");
     if (fetchesInParallel) {
       expect(layout).toContain("Promise.all");
     } else {

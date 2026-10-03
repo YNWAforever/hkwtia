@@ -15,12 +15,14 @@ type SiteHeaderProps = {
   locale: AppLocale;
   /** Drives the donor's `.no-announcement` modifier, which lifts the header to `top: 0`. */
   hasAnnouncement?: boolean;
+  /** Suspense replaces this header; opening a temporary menu would lose its state. */
+  navigationPending?: boolean;
 };
 
 // Donor commit f91ecc5 :382-422 — one row: brand, primary navigation, actions. hkwtia's
 // second row ("Find an event") is gone; the donor carries that call to action on the
 // event-first navigation trigger and in the mobile priority actions (errata E-15).
-export async function SiteHeader({locale, hasAnnouncement = false}: SiteHeaderProps) {
+export async function SiteHeader({locale, hasAnnouncement = false, navigationPending = false}: SiteHeaderProps) {
   const [t, tWhatsApp] = await Promise.all([
     getTranslations({locale, namespace: "Navigation"}),
     getTranslations({locale, namespace: "WhatsApp"}),
@@ -50,15 +52,15 @@ export async function SiteHeader({locale, hasAnnouncement = false}: SiteHeaderPr
 
   return (
     <HeaderShell hasAnnouncement={hasAnnouncement}>
-      <div className="header-inner">
+      <div className="header-inner" inert={navigationPending} aria-hidden={navigationPending || undefined}>
         <DualBrandLockup labels={brand} priority />
         <Suspense fallback={<div aria-hidden="true" className="desktop-nav" />}>
-          <DesktopMegaNavigation
+          {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DesktopMegaNavigation
             groups={navigation.groups}
             primaryLabel={t("primaryLabel")}
             exploreLabel={t("explore")}
             viewOverviewLabel={t("viewOverview")}
-          />
+          />}
         </Suspense>
         <div className="header-actions">
           {/* No search surface exists yet (spec §4.4 SearchPage row); the icon opens the
@@ -83,7 +85,7 @@ export async function SiteHeader({locale, hasAnnouncement = false}: SiteHeaderPr
             {navigation.actions.join.label}
           </Link>
           <Suspense fallback={<div aria-hidden="true" className="mobile-trigger" />}>
-            <MobileNavigation locale={locale} navigation={navigation} labels={mobileLabels} brand={brand} />
+            {navigationPending ? <button aria-label={mobileLabels.open} className="mobile-trigger" disabled type="button"><span aria-hidden="true"/><span aria-hidden="true"/></button> : <MobileNavigation locale={locale} navigation={navigation} labels={mobileLabels} brand={brand} />}
           </Suspense>
         </div>
       </div>

@@ -1,0 +1,14 @@
+{
+  "observedAt": "2026-10-02T17:10:27.004Z",
+  "role": "synthetic staff",
+  "visibleNavigationLinks": 25,
+  "observationWindowMs": 8000,
+  "prefetches": [],
+  "credentialsLogged": false,
+  "production": false,
+  "sourceSha": "5b4ac2f4f1bd875047037dcaf4f9cfae79ce4e25",
+  "beforeRequests": 29,
+  "intermediateRequests": 14,
+  "afterRequests": 0,
+  "result": "Native idle/hover target passed; intentional click reached /admin/members"
+}

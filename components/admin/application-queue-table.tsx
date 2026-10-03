@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {localizedPath} from "@/lib/urls";
 import type {AppLocale} from "@/i18n/routing";
 import type {ApplicationQueueItem} from "@/lib/db/repos/admin-members";

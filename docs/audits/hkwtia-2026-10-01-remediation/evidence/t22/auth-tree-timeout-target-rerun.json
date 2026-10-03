@@ -1,0 +1,63 @@
+{
+  "sourceSha": "8119b7f3477c48d1b375c8d352b5b0f5bfb47109",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/ci-security-contract.test.ts",
+  "pass": 13,
+  "fail": 0,
+  "skip": 0,
+  "assertions": [
+    {
+      "title": "CI and production dependency security contract declares scoped patched production dependency constraints",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract resolves a coherent Neon Auth tree and patched Picomatch versions",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract retains the exact npm 10 optional-peer closure required by npm ci",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract rejects every missing or metadata-drifted npm 10 optional-peer closure record",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract detects a vulnerable fast-uri version in the optional-peer closure",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract scopes Better Auth lock assertions to Neon Auth ancestry",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract fails hard when a hostile dependency-tree child exceeds a short deadline",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract requires a valid full lockfile-only Auth tree and detects a hostile peer-invalid fixture",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract keeps lockfile root metadata aligned with the five direct dependency declarations",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract defines the required least-privilege quality workflow with exact ordered run steps",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract bounds the exact Auth dependency-tree CI step to one minute",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract rejects reordered, missing, or extra CI run commands",
+      "status": "passed"
+    },
+    {
+      "title": "CI and production dependency security contract rejects a quality gate that skips on a red shard or ignores any of the three results",
+      "status": "passed"
+    }
+  ],
+  "gateUnchanged": true,
+  "production": false
+}

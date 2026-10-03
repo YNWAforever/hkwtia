@@ -8,7 +8,7 @@ import {
 } from "@/lib/admin/support-followup-types";
 import { inboxRepository } from "@/lib/db/repos/inbox";
 import { adminMembersRepository } from "@/lib/db/repos/admin-members";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -200,7 +200,7 @@ export default async function AdminInboxThreadPage({ params }: Props) {
             {t("followUp.openBilling")}
           </Link>
         ) : null}
-        {followUp.nextActionCode==="delivery_reconciliation"?<Link className="min-h-11 text-primary underline" href={localizedPath(locale,"/admin/system/job-health")}>{t("followUp.openDelivery")}</Link>:null}
+        {followUp.nextActionCode==="delivery_reconciliation"?<Link className="min-h-11 text-primary underline" href={localizedPath(locale,"/admin/automations#verified-worker-health")}>{t("followUp.openDelivery")}</Link>:null}
       </nav>
       <section className="space-y-4 rounded-lg border p-4">
         <h2 className="font-serif text-2xl">{t("followUp.timeline")}</h2>

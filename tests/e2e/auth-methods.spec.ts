@@ -48,7 +48,7 @@ for (const locale of ["en", "zh-HK"] as const) {
       await expect(page.getByRole("status")).toContainText(labels.sent);
       await expect(form.getByRole("button", {name: labels.resend, exact: true})).toBeDisabled();
       await expect(page.getByText(labels.waitSeconds, {exact: false})).toBeVisible();
-      await page.getByRole("button", {name: labels.changeEmail, exact: true}).click();
+      await page.getByRole("link", {name: labels.changeEmail, exact: true}).click();
       await expect(page.getByRole("status")).toHaveCount(0);
       await expect(form.getByLabel(labels.emailLabel, {exact: true})).toBeEmpty();
     });

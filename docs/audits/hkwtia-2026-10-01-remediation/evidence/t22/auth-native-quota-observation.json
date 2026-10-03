@@ -1,0 +1,4640 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "partialObservation": true,
+  "providerStubbed": false,
+  "production": false,
+  "calls": [
+    {
+      "observedAt": "2026-10-02T20:13:31.837Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:32.026Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:32.441Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:35.893Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:36.840Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:39.794Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:40.252Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:40.752Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:46.203Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:46.959Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:49.180Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:49.790Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:50.341Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:51.047Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:54.341Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:13:55.115Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:00.541Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:00.885Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:04.052Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:05.175Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:08.153Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:08.670Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:09.096Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:14.590Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:15.011Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:17.050Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:17.543Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:17.933Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:18.455Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:21.810Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:22.259Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:25.196Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:25.537Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:26.218Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:26.544Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:27.196Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:28.061Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:28.357Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:30.308Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:30.689Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:31.315Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:32.168Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:32.381Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:33.492Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:34.417Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:35.049Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:35.909Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:36.092Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:38.379Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:38.738Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:39.368Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:40.247Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:41.232Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:41.584Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:44.335Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:44.658Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:45.296Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:46.187Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:46.475Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:47.589Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:47.990Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:48.582Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:49.453Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:49.648Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:50.635Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:50.944Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:51.643Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:52.515Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:52.705Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:53.293Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:53.702Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:54.298Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:55.145Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:58.666Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:58.786Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:59.514Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:14:59.665Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:01.041Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:01.329Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:04.323Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:04.411Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:04.849Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:07.407Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:07.492Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:07.783Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:10.033Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:10.827Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:11.953Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:16.524Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:17.111Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:17.247Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:19.175Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:19.481Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:22.121Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:22.549Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:24.619Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:24.949Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:27.480Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:28.078Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:29.383Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:33.219Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:33.637Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:34.097Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:34.950Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:36.180Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:36.924Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:37.784Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:38.212Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:41.287Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:41.935Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:42.484Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:46.166Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:51.350Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:51.698Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:52.184Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:52.555Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:54.285Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:55.127Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:56.013Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:15:56.458Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:00.135Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:00.650Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:01.073Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:04.766Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:08.068Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:08.396Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:09.294Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:09.820Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:10.725Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:11.514Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:13.174Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:13.485Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:14.407Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:15.116Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:16.043Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:16.865Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:18.530Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:18.913Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:21.064Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:21.596Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:21.677Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:22.016Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:23.046Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:23.407Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:24.021Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:25.658Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:26.514Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:26.730Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:37.702Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:37.981Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:38.350Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:38.749Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:40.466Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:41.187Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:41.713Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:43.189Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:43.658Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:44.059Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:44.457Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:44.783Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:45.256Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:46.102Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:46.468Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:49.134Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:49.668Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:50.148Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:16:53.571Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:01.750Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:02.105Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:02.528Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:02.909Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:04.434Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:04.847Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:05.401Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:06.529Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:07.102Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:07.561Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:07.852Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:08.159Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:08.541Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:09.372Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:09.892Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:12.631Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:13.201Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:13.645Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:17.344Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:29.018Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:29.628Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:29.988Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:30.618Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:30.907Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:31.607Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:32.088Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:32.469Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:32.979Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:33.326Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:55.642Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:55.977Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:56.624Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:57.061Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:17:57.791Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:00.303Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:00.649Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:10.509Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:10.957Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:11.542Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:12.218Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:21.463Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:21.792Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:40.569Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:40.985Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:41.945Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:42.212Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:42.718Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:43.368Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:44.097Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:45.103Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:45.431Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:45.770Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:46.170Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:47.440Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:48.069Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:49.899Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:50.164Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:52.076Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:53.268Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:53.585Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:54.304Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:54.567Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:54.819Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:55.288Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:56.503Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:57.324Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:57.486Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:57.692Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:57.815Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:58.060Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:58.195Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:58.360Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:58.478Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:58.713Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:58.847Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:59.005Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:59.213Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:59.467Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:59.672Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:18:59.909Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:00.033Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:00.276Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:00.398Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:00.573Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:00.693Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:00.844Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:01.690Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:01.765Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.040Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.160Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.359Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.486Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.633Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.756Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:02.922Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.047Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.195Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.315Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.477Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.595Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.742Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:03.944Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:04.095Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:04.294Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:04.447Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:04.576Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:04.737Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:04.946Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:05.095Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:12.151Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:12.560Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:12.965Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:13.233Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:14.243Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:14.665Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:15.113Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:15.381Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:24.816Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:25.048Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:27.631Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:28.794Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:31.000Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:32.240Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:33.377Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:34.186Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:34.512Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:35.044Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:35.531Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:36.830Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:39.404Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:39.677Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:42.054Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:43.466Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:19:45.871Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:10.935Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:11.452Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:11.533Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:13.425Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:13.779Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:13.835Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:14.900Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:15.256Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:15.324Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:16.909Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:20.234Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:20.752Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:20.809Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:21.832Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:22.201Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:22.259Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:23.543Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:23.963Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:24.032Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:25.246Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:26.606Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:26.995Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:27.099Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:28.202Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:28.544Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:28.606Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:29.855Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:30.204Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:30.267Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:32.317Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:33.626Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:33.978Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:34.046Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:35.624Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:36.110Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:36.181Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:37.553Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:37.890Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:20:37.954Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:21:56.318Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:21:56.442Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:21:56.624Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:21:56.946Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:00.269Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:00.596Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:01.717Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:01.786Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:01.854Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:02.562Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:04.093Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:06.461Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:07.074Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:07.290Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:07.650Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:07.868Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:08.076Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:08.985Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:09.056Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:09.132Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:09.414Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:11.916Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:12.343Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:13.189Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:13.263Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:13.344Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:13.957Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:14.913Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:16.982Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:17.611Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:17.819Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:18.080Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:18.428Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:18.627Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:51.406Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:52.058Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:52.972Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:54.126Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:54.774Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:57.396Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:57.518Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:22:59.015Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:00.197Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:01.624Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:01.833Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:02.524Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:03.970Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:06.290Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:08.364Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:10.069Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:11.245Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:12.484Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:14.063Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:14.959Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:16.530Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:18.223Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:19.962Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:22.880Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:23.991Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:24.936Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:26.496Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:28.606Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:28.677Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:28.759Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:29.072Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:31.280Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:34.629Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:34.702Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:34.781Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:35.700Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:35.777Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:35.856Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:36.125Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:37.275Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:38.810Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:40.332Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:40.710Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:41.621Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:41.786Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:42.646Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:44.322Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:44.880Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:49.419Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:49.486Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:49.598Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:49.894Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:50.906Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:52.493Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:54.017Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:54.896Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:55.321Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:55.455Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:56.278Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:57.982Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:23:58.435Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:16.385Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:16.523Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:16.675Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:17.018Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:17.175Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:32.202Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:32.330Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:32.462Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:32.678Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:32.821Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:34.449Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:34.557Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:34.632Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:36.287Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:36.365Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:36.442Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:37.812Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:37.896Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:37.976Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:38.493Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:38.564Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:38.644Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:39.052Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:39.205Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:39.946Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:40.788Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:42.798Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:43.705Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:44.202Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:44.791Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:45.575Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:45.814Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:46.196Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:50.031Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:50.591Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:53.534Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:53.611Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:53.690Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:54.552Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:54.629Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:54.707Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:54.991Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:55.144Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:55.966Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:56.601Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:58.363Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:59.258Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:24:59.843Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:00.496Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:01.223Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:01.536Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:01.772Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:05.730Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:06.477Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:09.066Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:09.146Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:09.224Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:10.698Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:10.770Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:10.847Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:13.204Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:13.280Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:13.356Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:13.896Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:13.976Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:14.054Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:15.190Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:16.155Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:17.156Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:18.179Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:18.550Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:19.371Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:20.370Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:21.950Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:23.074Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:23.839Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:25.247Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:26.143Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    },
+    {
+      "observedAt": "2026-10-02T20:25:28.407Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 200,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false
+    }
+  ],
+  "statusCounts": {
+    "200": 474,
+    "429": 40
+  },
+  "anonymousCalls": 0,
+  "scope": "unpaced native full browser; exact G0 Auth; no body/cookie values"
+}

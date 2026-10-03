@@ -1,0 +1,53 @@
+{
+  "sourceSha": "5b4ac2f4",
+  "route": "/admin/members",
+  "observationWindowMs": 8000,
+  "requests": [
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    }
+  ],
+  "production": false,
+  "credentialsLogged": false
+}

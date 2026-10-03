@@ -1,6 +1,6 @@
 import {revalidatePath} from "next/cache";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import {EventRegistrationForm} from "@/components/portal/event-registration-form";
 import type {AppLocale} from "@/i18n/routing";

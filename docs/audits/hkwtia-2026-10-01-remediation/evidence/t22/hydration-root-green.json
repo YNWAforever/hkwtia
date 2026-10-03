@@ -1,0 +1,166 @@
+{
+  "environment": "source with ready keyboard trigger and exact Chinese root locale; 31 focused cases",
+  "startTime": 1790954073420,
+  "passed": 31,
+  "failedCases": 0,
+  "notExecutedCases": 0,
+  "total": 31,
+  "failedFiles": [],
+  "cases": [
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "keeps the ready server-rendered control disabled until client handlers are installed",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "cannot consume a click in the pending search-state fallback",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "retains every parsed Showcase filter and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "retains the selected Event status and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves the current fragment after path and query when switching locale",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves serialized query values when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "does not append a bare query separator when switching from English to Chinese without search state",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves an empty-valued query parameter when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves serialized query values when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "does not append a bare query separator when switching from Chinese to English without search state",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "preserves an empty-valued query parameter when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "keeps the current locale when an unsaved editor rejects the switch",
+      "status": "passed"
+    },
+    {
+      "file": "locale-switcher.test.tsx",
+      "title": "renders a 44px locale target in each Suspense state",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "does not overwrite the current test locale with a cached identity's UI preference",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "rejects a cached session when identity API succeeds but the protected server page redirects",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "requires the server to confirm the same synthetic identity before reuse",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "rejects a different identity even when a cookie exists",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "rejects expired or unavailable sessions without trusting the local artifact",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps the current Chinese locale after /zh",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps the current Chinese locale after /zh/",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps the current Chinese locale after /zh/events",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps unprefixed paths after /",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps unprefixed paths after /events",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps unprefixed paths after /zh-other",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "does not offer a keyboard trigger before its client event handlers are installed",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "puts event and join actions first, then utilities, the eyebrow and the four groups",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "shows at most five leaves per group and closes each panel with a view-all link",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "opens a group, marks the exact current leaf, closes on navigation, and returns focus",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "closes the dialog when the route changes underneath it",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "resets stale accordion state after Escape and reopen",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "closes and resets after the locale action while preserving locale navigation",
+      "status": "passed"
+    }
+  ]
+}

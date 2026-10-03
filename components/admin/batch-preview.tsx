@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {commitAdminBatchAction, retryAdminBatchAction, retryAdminBatchItemAction, cancelAdminBatchAction} from "@/lib/admin/batches/actions";
 import {BatchProgressPoller} from "@/components/admin/batch-progress";
 import {batchFailureIsSafeToRetry, batchFailureRequiresReconciliation, batchRuntimeConfig, type BatchItemFilter, type BatchPreview, type BatchProgressItem} from "@/lib/admin/batches/types";

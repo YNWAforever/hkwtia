@@ -1,0 +1,13 @@
+{
+  "id": "dpl_Fh4goizm1xfBCauAaucL739s3gFq",
+  "url": "hkwtia-44rc82xtx-ynwaforevers-projects.vercel.app",
+  "state": "READY",
+  "target": null,
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "regions": [
+    "iad1"
+  ],
+  "observedAt": "2026-10-02 19:51:47 UTC",
+  "production": false,
+  "runtimeVerified": false
+}

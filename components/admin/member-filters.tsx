@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {CompanyPicker,type CompanyOption,type CompanySearch} from "@/components/admin/company-picker";
 
 import type {AppLocale} from "@/i18n/routing";

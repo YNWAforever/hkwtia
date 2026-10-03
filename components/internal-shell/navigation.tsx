@@ -1,7 +1,7 @@
 "use client";
 
 import {useState, type ReactNode} from "react";
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet";
 

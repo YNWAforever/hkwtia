@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-02T21:29:25.367Z",
+  "environment": "confirmed isolated DB/Auth",
+  "role": "SUPERADMIN",
+  "legacyWriteVisible": false,
+  "finiteWriteVisible": true,
+  "finiteGrantSubmitted": true,
+  "provider": "synthetic password",
+  "production": false,
+  "cleanup": "exact generated synthetic profile and its grant audit only"
+}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import {MemberSavedViewForm} from "@/components/admin/member-saved-view-form";
 import type {AppLocale} from "@/i18n/routing";

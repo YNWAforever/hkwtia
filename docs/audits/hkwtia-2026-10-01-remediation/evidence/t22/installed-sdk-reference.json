@@ -1,0 +1,15 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "installedAuthVersion": "0.5.0-beta",
+  "authSource": "node_modules/@neondatabase/auth/dist/server-b0OzGjXl.mjs",
+  "readBehaviours": [
+    "extractNeonAuthCookies forwards only __Secure-neon-auth-prefixed cookies",
+    "strict getSession query disables cookie cache and refresh",
+    "global observer calls original fetch and records only pathname/time/status/credential-presence booleans"
+  ],
+  "nextHeadersReference": "node_modules/next/dist/docs/01-app/03-api-reference/04-functions/headers.md",
+  "nextCookiesReference": "node_modules/next/dist/docs/01-app/03-api-reference/04-functions/cookies.md",
+  "nextServerClientReference": "node_modules/next/dist/docs/01-app/01-getting-started/05-server-and-client-components.md",
+  "nextIntlProviderReference": "node_modules/next-intl/dist/esm/production/react-server/NextIntlClientProviderServer.js",
+  "dependencyChanged": false
+}

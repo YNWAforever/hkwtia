@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
@@ -45,6 +45,7 @@ export function DashboardTiles({
         {tiles.map((tile) => (
           <li key={tile.id}>
             <Link
+              prefetch={false}
               className="flex h-full flex-col justify-between gap-3 rounded-2xl border border-border bg-card p-5 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               href={localizedPath(locale, tile.href)}
             >
@@ -60,6 +61,7 @@ export function DashboardTiles({
         ))}
       </ul>
       <Link
+        prefetch={false}
         className="inline-flex min-h-11 items-center rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         href={localizedPath(locale, "/admin/members/queue")}
       >

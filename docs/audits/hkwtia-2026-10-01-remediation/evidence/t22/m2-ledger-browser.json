@@ -1,0 +1,82 @@
+{
+  "observedAt": "2026-10-02T11:04:07.953Z",
+  "environment": "built Chromium, confirmed isolated Neon/Auth; synthetic M2 plus other synthetic stock",
+  "stats": {
+    "startTime": "2026-10-02T11:04:07.953Z",
+    "duration": 88043.814,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "anonymous admin requests require the discoverable staff login",
+      "status": "expected",
+      "durationMs": 632
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "public presentation and protected portal routes remain available without credentials",
+      "status": "expected",
+      "durationMs": 1202
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "staff searches Member 360 and appends a note through the real auth and database seams",
+      "status": "expected",
+      "durationMs": 8148
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "the canonical segment has exact rows and CSV headers and its draft entry cannot queue on GET",
+      "status": "expected",
+      "durationMs": 11625
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "the operational at-risk queue contains exactly the three engineered members in order",
+      "status": "expected",
+      "durationMs": 17546
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "the report reconciles current ledger stock and committed July flow before browser mutations",
+      "status": "expected",
+      "durationMs": 11086
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "event check-in appends exactly one event_attended engagement",
+      "status": "expected",
+      "durationMs": 3229
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "staff records one supported approval decision and persists its audit fact",
+      "status": "expected",
+      "durationMs": 2161
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "representative authenticated admin routes have no serious or critical axe violations",
+      "status": "expected",
+      "durationMs": 7595
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "Traditional Chinese admin routes render localized headings and segment recovery state",
+      "status": "expected",
+      "durationMs": 2878
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "anonymous, member, and company-admin identities require login or receive access denied on every admin route",
+      "status": "expected",
+      "durationMs": 12674
+    }
+  ],
+  "production": false,
+  "providerSends": 0
+}

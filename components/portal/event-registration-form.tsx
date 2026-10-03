@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {useActionState} from "react";
 
 import type {RegistrationActionMessages, RegistrationActionState} from "@/lib/events/registration-state";

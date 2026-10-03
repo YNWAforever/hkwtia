@@ -1,5 +1,5 @@
 import {randomUUID} from "node:crypto";
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
 import {isolatedBatchDatabase} from "./admin-batch-fixture";
 import {profilePatchBatchHandler} from "@/lib/admin/batches/handlers/profile-patch";
 import {batchPreviewDigest, batchRequestSchema} from "@/lib/admin/batches/types";
@@ -10,8 +10,8 @@ const staff = {kind: "staff", userId: "staff", profileId: "staff"} as const;
 let fixture: Awaited<ReturnType<typeof isolatedBatchDatabase>>;
 
 describe.skipIf(!enabled)("profile operations cleanup on disposable PostgreSQL", () => {
-  beforeAll(async () => {fixture = await isolatedBatchDatabase();}, 60_000);
-  afterAll(async () => {if (fixture) await fixture.close();});
+  beforeAll(async () => {vi.stubEnv("ADMIN_BATCH_ENABLED", "true"); fixture = await isolatedBatchDatabase();}, 60_000);
+  afterAll(async () => {vi.unstubAllEnvs(); if (fixture) await fixture.close();});
   it("previews tags and staff owner and writes metadata, profile version and audit atomically", async () => {
     const now = new Date();
     const request = batchRequestSchema.parse({operation: "profile_patch", idempotencyKey: randomUUID(), selection: {mode: "ids", profileIds: ["a"]}, payload: {patch: {tags: ["outreach"], ownerProfileId: "staff"}, reason: "Operations ownership correction"}});

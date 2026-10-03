@@ -1,0 +1,1205 @@
+{
+  "scope": "First complete isolated browser collection; skipped is not passed",
+  "rows": [
+    {
+      "file": "admin-members-bulk.spec.ts",
+      "line": 12,
+      "title": "staff can find, reopen and safely interpret synthetic batch jobs",
+      "reasons": [
+        "Batch fixture requires the exact isolated acceptance database and opt-in"
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 56,
+      "title": "removing a synthetic staff role denies the next server request",
+      "reasons": [
+        "Role mutation requires the exact isolated acceptance database and opt-in"
+      ]
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "title": "en: staff finds and checks in a confirmed guest at 390px",
+      "reasons": [
+        "Requires isolated staff, DB, fresh guest and Preview: HKWTIA_TEST_GUEST_CHECKIN_EVENT_ID, HKWTIA_TEST_GUEST_CHECKIN_EMAIL"
+      ]
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "title": "zh-HK: staff finds and checks in a confirmed guest at 390px",
+      "reasons": [
+        "Requires isolated staff, DB, fresh guest and Preview: HKWTIA_TEST_GUEST_CHECKIN_EVENT_ID, HKWTIA_TEST_GUEST_CHECKIN_EMAIL"
+      ]
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "zh-HK staff assigns, follows up and rejects a stale tab without changing rights",
+      "reasons": [
+        "Confirmed isolated DB/Auth required"
+      ]
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "en staff assigns, follows up and rejects a stale tab without changing rights",
+      "reasons": [
+        "Confirmed isolated DB/Auth required"
+      ]
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 48,
+      "title": "fresh login resumes the same company application with valid saved fields",
+      "reasons": [
+        "Confirmed isolated DB/Auth required"
+      ]
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 78,
+      "title": "another applicant cannot read company draft even with a legitimate seat in that company",
+      "reasons": [
+        "Confirmed isolated DB/Auth required"
+      ]
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "zh-HK GET is read-only; final draft and stale/current two-person approval",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "en GET is read-only; final draft and stale/current two-person approval",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 10,
+      "title": "zh-HK recovers bilingual edits after real browser history",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 10,
+      "title": "en recovers bilingual edits after real browser history",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 27,
+      "title": "denied storage warns truthfully and keeps edits in the form",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 34,
+      "title": "another authorized synthetic identity cannot see the prior identity draft",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "STAFF has no indefinite grant entry",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "EXCO has no indefinite grant entry",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "SUPERADMIN has no indefinite grant entry",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic identities"
+      ]
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "zh-HK presents unknown/disabled/verified polling separately",
+      "reasons": [
+        "Confirmed isolated target required"
+      ]
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "en presents unknown/disabled/verified polling separately",
+      "reasons": [
+        "Confirmed isolated target required"
+      ]
+    },
+    {
+      "file": "full-member-payment-reconciliation.spec.ts",
+      "line": 38,
+      "title": "provider paid invoice → root replays original event → one activation and visible receipt",
+      "reasons": [
+        "Explicit Stripe test-mode opt-in required"
+      ]
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "expired history remains accessible without entitlements",
+      "reasons": [
+        "Confirmed isolated DB/Auth required"
+      ]
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "cancelled history remains accessible without entitlements",
+      "reasons": [
+        "Confirmed isolated DB/Auth required"
+      ]
+    },
+    {
+      "file": "full-membership-policy.spec.ts",
+      "line": 58,
+      "title": "unchecked server submission writes no payment; keyboard confirmation records one receipt and reaches real TEST checkout",
+      "reasons": [
+        "Explicit isolated synthetic-policy and Stripe TEST opt-in required"
+      ]
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "zh-HK traverses 101 rows and retains context on previous and filter reset",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic test identities"
+      ]
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "en traverses 51 rows and retains context on previous and filter reset",
+      "reasons": [
+        "Requires confirmed isolated DB/Auth and synthetic test identities"
+      ]
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "line": 11,
+      "title": "en: empty RSVP and a lost action response stay on the form",
+      "reasons": [
+        "No open RSVP form in the first six events; set HKWTIA_TEST_GUEST_RSVP_SLUG to an isolated fixture"
+      ]
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "line": 11,
+      "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+      "reasons": [
+        "No open RSVP form in the first six events; set HKWTIA_TEST_GUEST_RSVP_SLUG to an isolated fixture"
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 55,
+      "title": "live Neon/Stripe acceptance is explicitly unimplemented when isolated credentials are absent",
+      "reasons": [
+        "Live Neon/Stripe fixture is not configured in this environment; run it separately with isolated credentials and test-clock evidence."
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 93,
+      "title": "staff sees the English and Traditional Chinese automation consoles",
+      "reasons": [
+        "M3 authenticated Preview credentials are missing: M3_TEST_STAFF_EMAIL, M3_TEST_STAFF_PASSWORD, M3_TEST_MEMBER_EMAIL, M3_TEST_MEMBER_PASSWORD"
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 113,
+      "title": "staff sees seeded automation history in Member 360",
+      "reasons": [
+        "M3 authenticated Preview credentials are missing: M3_TEST_STAFF_EMAIL, M3_TEST_STAFF_PASSWORD, M3_TEST_MEMBER_EMAIL, M3_TEST_MEMBER_PASSWORD"
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 141,
+      "title": "a member receives a real 404 for both automation console locales",
+      "reasons": [
+        "M3 authenticated Preview credentials are missing: M3_TEST_STAFF_EMAIL, M3_TEST_STAFF_PASSWORD, M3_TEST_MEMBER_EMAIL, M3_TEST_MEMBER_PASSWORD"
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 177,
+      "title": "confirms marketing unsubscribe in en",
+      "reasons": [
+        "M3_TEST_UNSUBSCRIBE_TOKEN_EN is required for unsubscribe confirmation."
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 177,
+      "title": "confirms marketing unsubscribe in zh-HK",
+      "reasons": [
+        "M3_TEST_UNSUBSCRIBE_TOKEN_ZH_HK is required for unsubscribe confirmation."
+      ]
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "line": 86,
+      "title": "staff sees three approval-only drafts and one inert board preview",
+      "reasons": [
+        "M4B browser acceptance credentials are missing: M4B_TEST_STAFF_EMAIL, M4B_TEST_STAFF_PASSWORD, M4B_TEST_MEMBER_EMAIL, M4B_TEST_MEMBER_PASSWORD"
+      ]
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "line": 139,
+      "title": "member identities receive real 404s for both staff queues",
+      "reasons": [
+        "M4B browser acceptance credentials are missing: M4B_TEST_STAFF_EMAIL, M4B_TEST_STAFF_PASSWORD, M4B_TEST_MEMBER_EMAIL, M4B_TEST_MEMBER_PASSWORD"
+      ]
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 39,
+      "title": "live Preview browser scenarios are explicitly gated",
+      "reasons": [
+        "Live M5 scenarios require explicit isolated Preview credentials and a non-Production PLAYWRIGHT_BASE_URL."
+      ]
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 104,
+      "title": "member submits through the real route and the application survives a reload",
+      "reasons": [
+        "M6 mutating real-route acceptance is restricted to Playwright's managed loopback server; an external PLAYWRIGHT_BASE_URL target is read-only for this spec."
+      ]
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 129,
+      "title": "staff performs legal stage moves, proves audit persistence, and sees the real Showcase projection",
+      "reasons": [
+        "M6 mutating real-route acceptance is restricted to Playwright's managed loopback server; an external PLAYWRIGHT_BASE_URL target is read-only for this spec."
+      ]
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "line": 27,
+      "title": "en: company billing manager can reach billing without starting payment",
+      "reasons": [
+        "Billing entry requires the exact isolated acceptance database and opt-in"
+      ]
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "line": 27,
+      "title": "zh-HK: company billing manager can reach billing without starting payment",
+      "reasons": [
+        "Billing entry requires the exact isolated acceptance database and opt-in"
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 16,
+      "title": "en: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "reasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 16,
+      "title": "zh-HK: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "reasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 51,
+      "title": "en: native membership form reaches Stripe before hydration",
+      "reasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 51,
+      "title": "zh-HK: native membership form reaches Stripe before hydration",
+      "reasons": [
+        "Requires isolated member, DB and Stripe test mode: HKWTIA_TEST_PENDING_MEMBERSHIP_ID"
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 97,
+      "title": "en: guest RSVP form rejects a malformed address before writing",
+      "reasons": [
+        "environment not provisioned: none of the 6 soonest open events on /events offers the anonymous RSVP form (each is external, ticketed, or already under way)"
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 97,
+      "title": "zh-HK: guest RSVP form rejects a malformed address before writing",
+      "reasons": [
+        "environment not provisioned: none of the 6 soonest open events on /zh/events offers the anonymous RSVP form (each is external, ticketed, or already under way)"
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 75,
+      "title": "en: a member page carries Organization and BreadcrumbList JSON-LD",
+      "reasons": [
+        "no published member pages on this target"
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 75,
+      "title": "zh-HK: a member page carries Organization and BreadcrumbList JSON-LD",
+      "reasons": [
+        "no published member pages on this target"
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 135,
+      "title": "staff take a WhatsApp thread over, reply inside the window and hand it back",
+      "reasons": [
+        "no concierge-handled WhatsApp thread on this target"
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 176,
+      "title": "en: /admin/segments can address the contacts audience",
+      "reasons": [
+        "no WhatsApp contacts on this target"
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 176,
+      "title": "zh-HK: /admin/segments can address the contacts audience",
+      "reasons": [
+        "no WhatsApp contacts on this target"
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 226,
+      "title": "a contact with a thread links to the inbox conversation it wrote from",
+      "reasons": [
+        "no WhatsApp contact with a conversation on this target"
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 347,
+      "title": "a second POST inside the same ten minutes is a duplicate",
+      "reasons": [
+        "Requires CRON_SECRET"
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 39,
+      "title": "en: the member tools list renders",
+      "reasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 46,
+      "title": "en: an entitled member's tools page embeds the configured tool with its token",
+      "reasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 39,
+      "title": "zh-HK: the member tools list renders",
+      "reasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 46,
+      "title": "zh-HK: an entitled member's tools page embeds the configured tool with its token",
+      "reasons": [
+        "Requires MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"
+      ]
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "line": 50,
+      "title": "en: a pass renders, admits once, reports the second scan, and is undone",
+      "reasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4B_PASS_URL_ONE, D4B_CHECK_IN_URL_ONE, D4B_PASS_URL_TWO_ZH, D4B_CHECK_IN_URL_TWO_ZH"
+      ]
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "line": 50,
+      "title": "zh-HK: a pass renders, admits once, reports the second scan, and is undone",
+      "reasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4B_PASS_URL_ONE, D4B_CHECK_IN_URL_ONE, D4B_PASS_URL_TWO_ZH, D4B_CHECK_IN_URL_TWO_ZH"
+      ]
+    },
+    {
+      "file": "phase-d4c-refunds.spec.ts",
+      "line": 117,
+      "title": "staff refund the seeded order, and both locales lose the seats",
+      "reasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4B_PASS_URL_ONE, D4B_PASS_URL_TWO_ZH, D4B_ORDER_REFUNDABLE=true (a d4b order backed by a retrievable Stripe test payment; db:seed:d4b is provider-free)"
+      ]
+    },
+    {
+      "file": "phase-d4d-event-cancellation.spec.ts",
+      "line": 102,
+      "title": "staff cancel the seeded event, and every public surface explains it",
+      "reasons": [
+        "Requires D4B_ACCEPTANCE_SEED=true, D4D_PUBLIC_URL, D4D_PASS_URL, D4D_PUBLIC_URL_ZH, D4D_PASS_URL_ZH"
+      ]
+    },
+    {
+      "file": "portal-membership-recovery.spec.ts",
+      "line": 12,
+      "title": "a signed-in member with no current membership sees bilingual recovery and can sign out",
+      "reasons": [
+        "Membership mutation requires the exact isolated acceptance database and opt-in"
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "reasons": [
+        "Visual baselines are captured against the managed dev server with an empty database; a PLAYWRIGHT_BASE_URL target has nothing valid to compare against."
+      ]
+    }
+  ]
+}

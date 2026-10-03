@@ -1,4 +1,5 @@
 import {readFileSync} from "node:fs";
+import {randomUUID} from "node:crypto";
 
 import {expect, test} from "@playwright/test";
 
@@ -8,7 +9,7 @@ type Bundle = Readonly<{
   Admin: Readonly<{eventsMgmt: Readonly<{
     slug: string; titleEn: string; descriptionEn: string; startsAt: string; capacity: string; published: string;
     registrationMode: string; registrationModes: Readonly<{ticketed: string}>;
-    ticketPriceHkdCents: string; create: string;
+    ticketPriceHkdCents: string; create: string; savePublish: string;
   }>}>;
   Ticket: Readonly<{
     heading: string; buyerName: string; buyerEmail: string; seatCount: string;
@@ -36,7 +37,7 @@ const locales = [
  * and a unique slug per run keeps a re-run from colliding with the prior row.
  */
 for (const {locale, prefix} of locales) {
-  test(`staff price a ticketed event and a buyer reaches Stripe Checkout (${locale})`, async ({browser}) => {
+  test(`staff price a ticketed event and a buyer reaches Stripe Checkout (${locale})`, async ({browser,baseURL}) => {
     test.skip(missing.length > 0, `Requires ${missing.join(", ")}`);
     const copy = bundle(locale);
     const slug = `d4a-ticket-walk-${locale === "zh-HK" ? "zh" : "en"}-${Date.now().toString(36)}`;
@@ -60,13 +61,20 @@ for (const {locale, prefix} of locales) {
     // (`lib/admin/event-form-input.ts`), so "250" is HK$250 and 25 000 cents.
     await form.locator('input[name="ticketPriceHkdCents"]').fill("250");
     await form.locator('input[name="published"]').check();
-    await form.getByRole("button", {name: copy.Admin.eventsMgmt.create}).click();
+    await form.getByRole("button", {name: copy.Admin.eventsMgmt.savePublish}).click();
     await expect(staffPage.getByRole("link", {name: title})).toBeVisible();
 
     // The buyer, signed out, buys two named seats. The public page rendering at
     // all is the assertion that staff authoring left the event published and public.
     const buyerContext = await browser.newContext();
     const buyerPage = await buyerContext.newPage();
+    if(new URL(baseURL!).hostname==="localhost"){
+      expect(process.env.AUDIT_ISOLATED_ACCEPTANCE).toBe("true");
+      // Model one distinct synthetic buyer through the trusted proxy header.
+      // Keep the shared limiter active across suites and server restarts.
+      const proxyIp=`2001:db8:${randomUUID().replaceAll("-","").match(/.{4}/g)!.slice(0,6).join(":")}`;
+      await buyerPage.route(`${new URL(baseURL!).origin}/**`,route=>route.continue({headers:{...route.request().headers(),"x-real-ip":proxyIp}}));
+    }
     await buyerPage.goto(`${prefix}/events/${slug}`);
     await expect(buyerPage.getByText(copy.Ticket.heading)).toBeVisible();
     await buyerPage.locator('input[name="buyerName"]').fill("Ada Lovelace");
@@ -79,7 +87,7 @@ for (const {locale, prefix} of locales) {
     await buyerPage.locator('input[name="seatName-1"]').fill("Grace Hopper");
     await buyerPage.locator('input[name="seatEmail-1"]').fill("grace@example.test");
     await Promise.all([
-      buyerPage.waitForURL(/checkout\.stripe\.com/),
+      buyerPage.waitForURL(/checkout\.stripe\.com/, {waitUntil: "commit"}),
       buyerPage.getByRole("button", {name: copy.Ticket.submit}).click(),
     ]);
     expect(buyerPage.url()).toContain("checkout.stripe.com");

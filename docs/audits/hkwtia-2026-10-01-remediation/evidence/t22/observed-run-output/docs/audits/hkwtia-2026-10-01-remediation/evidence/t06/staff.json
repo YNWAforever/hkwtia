@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-02T21:29:06.728Z",
+  "environment": "confirmed isolated DB/Auth",
+  "role": "STAFF",
+  "legacyWriteVisible": false,
+  "finiteWriteVisible": false,
+  "finiteGrantSubmitted": false,
+  "provider": "synthetic password",
+  "production": false,
+  "cleanup": "exact generated synthetic profile and its grant audit only"
+}

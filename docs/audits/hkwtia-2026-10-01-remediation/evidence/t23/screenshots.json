@@ -1,0 +1,40 @@
+{
+  "sourceSha": "e9fa6d026be5cdbc2875b566fbd35a4bc37d6b7a",
+  "deploymentId": "dpl_4rQ5GHNGnbqRbFXqmZT5tdL9FEVz",
+  "production": false,
+  "observedAt": "2026-10-02T11:34:56.080Z",
+  "checks": [
+    {
+      "locale": "en",
+      "width": 1440,
+      "metrics": 8,
+      "overflow": 0,
+      "memberLinkKeyboardFocus": true,
+      "filename": "aiops-en-1440-keyboard.png"
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "metrics": 8,
+      "overflow": 0,
+      "memberLinkKeyboardFocus": true,
+      "filename": "aiops-en-390-keyboard.png"
+    },
+    {
+      "locale": "zh-HK",
+      "width": 1440,
+      "metrics": 8,
+      "overflow": 0,
+      "memberLinkKeyboardFocus": true,
+      "filename": "aiops-zh-HK-1440-keyboard.png"
+    },
+    {
+      "locale": "zh-HK",
+      "width": 390,
+      "metrics": 8,
+      "overflow": 0,
+      "memberLinkKeyboardFocus": true,
+      "filename": "aiops-zh-HK-390-keyboard.png"
+    }
+  ]
+}

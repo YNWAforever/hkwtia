@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {expect, test} from "@playwright/test";
 
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
+import {withSyntheticCompanyProfile} from "../fixtures/directory-browser-fixture";
 
 type Bundle = Readonly<{
   Members: Readonly<{
@@ -99,12 +100,16 @@ test.describe("member publishes a page and staff reviews it", () => {
    * covered where they differ — the published page is fetched under both prefixes at the end.
    */
   test("a company admin submits their public page and staff publishes it", async ({page, browser}) => {
+    const slug = `e2e-member-${Date.now()}`;
     await signInForM2(page, "company-admin");
+    const sessionResponse = await page.request.get("/api/auth/get-session");
+    expect(sessionResponse.ok()).toBe(true);
+    const session = await sessionResponse.json() as {user: {id: string}};
+    await withSyntheticCompanyProfile(session.user.id, slug, async () => {
     await page.goto("/portal/company");
     // The company-details form above owns `displayName`; the member page's h1 is that same column,
     // so reading it here is what lets the last assertion name the company without a fixture constant.
     const name = await page.inputValue("input[name=displayName]");
-    const slug = `e2e-member-${Date.now()}`;
     const profile = page.locator("form:has(input[name=slug])");
     await profile.locator("input[name=slug]").fill(slug);
     await profile.locator("input[name=taglineEn]").fill(`Playwright acceptance ${slug}`);
@@ -135,5 +140,6 @@ test.describe("member publishes a page and staff reviews it", () => {
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", {level: 1, name})).toBeVisible();
     }
+    });
   });
 });

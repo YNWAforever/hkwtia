@@ -1,0 +1,82 @@
+{
+  "environment": "confirmed isolated Neon/Auth; actual built Chromium",
+  "locale": "en",
+  "viewports": [
+    1440,
+    768,
+    390
+  ],
+  "axe": [
+    {
+      "surface": "dashboard-1440",
+      "passedRules": 27,
+      "violations": 0,
+      "incompleteRules": []
+    },
+    {
+      "surface": "drawer-768",
+      "passedRules": 22,
+      "violations": 0,
+      "incompleteRules": [
+        "aria-hidden-focus",
+        "aria-valid-attr-value",
+        "color-contrast"
+      ]
+    },
+    {
+      "surface": "dashboard-768",
+      "passedRules": 26,
+      "violations": 0,
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "surface": "drawer-390",
+      "passedRules": 22,
+      "violations": 0,
+      "incompleteRules": [
+        "aria-hidden-focus",
+        "aria-valid-attr-value",
+        "color-contrast"
+      ]
+    },
+    {
+      "surface": "dashboard-390",
+      "passedRules": 26,
+      "violations": 0,
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "surface": "member360-390",
+      "passedRules": 29,
+      "violations": 0,
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "surface": "company-filter-390",
+      "passedRules": 29,
+      "violations": 0,
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "scope": "mine/unassigned and actual case deep link",
+  "navigation": {
+    "groups": 6,
+    "links": 25,
+    "svgIcons": 25,
+    "drawerTabTrap": true,
+    "escapeFocusReturn": true
+  },
+  "company": "private registered name, ArrowDown/Enter selection, GET UUID retained, Browser Back",
+  "member360": "stored subject link, membership pending_payment, completed attempt independently displayed",
+  "effects": "synthetic fixture insertion and exact fixture cleanup only; no rights/provider mutation",
+  "fixtureReference": "a4d6d5daf3384f56",
+  "production": false
+}

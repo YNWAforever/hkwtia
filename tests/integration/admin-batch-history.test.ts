@@ -1,6 +1,6 @@
 import {randomUUID} from "node:crypto";
 
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
 
 import {isolatedBatchDatabase} from "./admin-batch-fixture";
 import {createAdminBatchHistoryRepository} from "@/lib/db/repos/admin-batch-history";
@@ -22,13 +22,14 @@ async function insertBatch(actor: "staff" | "root", operation: "profile_patch" |
 
 describe.skipIf(!enabled)("admin batch history on disposable PostgreSQL", () => {
   beforeAll(async () => {
+    vi.stubEnv("ADMIN_BATCH_ENABLED", "false");
     fixture = await isolatedBatchDatabase();
     for (let i = 0; i < 27; i += 1) {
-      ids.push(await insertBatch("staff", i % 2 ? "export_members" : "profile_patch", i === 0 ? "completed_with_errors" : "ready", "2026-09-27T12:00:00Z", i === 0 ? {succeeded: 8, failed: 2} : {pending: 3}));
+      ids.push(await insertBatch("staff", i % 2 ? "export_members" : "profile_patch", i === 0 ? "completed_with_errors" : "ready", i === 0 ? "2026-09-27T12:01:00Z" : "2026-09-27T12:00:00Z", i === 0 ? {succeeded: 8, failed: 2} : {pending: 3}));
     }
     await insertBatch("root", "profile_patch", "ready", "2026-09-28T12:00:00Z", {pending: 1});
   }, 60_000);
-  afterAll(async () => {if (fixture) await fixture.close();});
+  afterAll(async () => {vi.unstubAllEnvs(); if (fixture) await fixture.close();});
 
   it("returns only batches the actor can open, including a resumable preview and partial progress", async () => {
     const history = createAdminBatchHistoryRepository(async () => fixture.database);
@@ -39,7 +40,9 @@ describe.skipIf(!enabled)("admin batch history on disposable PostgreSQL", () => 
     expect(page.items.find(item => item.state === "completed_with_errors")).toMatchObject({total: 10, succeeded: 8, failed: 2});
     const detail = createAdminBatchesRepository(async () => fixture.database);
     await expect(detail.preview(root, page.items[0]!.id)).rejects.toThrow("BATCH_NOT_FOUND");
-    expect((await detail.preview(staff, page.items[0]!.id)).state).toBe("ready");
+    expect((await detail.preview(staff, page.items[0]!.id)).state).toBe("completed_with_errors");
+    const ready = page.items.find(item => item.state === "ready")!;
+    expect((await detail.preview(staff, ready.id)).state).toBe("ready");
     const rootPage = await history.list(root);
     expect(rootPage.items).toHaveLength(1);
     expect(rootPage.items[0]?.actorLabel).toBe("Root");
@@ -65,6 +68,9 @@ describe.skipIf(!enabled)("admin batch history on disposable PostgreSQL", () => 
     await fixture.pool.query(`INSERT INTO admin_batch_items (batch_id, target_type, target_id, expected_version, preview_status, state, attempt_count, effect_key, error_code)
       VALUES ($1, 'profile', 'synthetic-bad-prefix', 'version', 'eligible', 'failed', 1, $2, 'TRANSIENTX')`, [id, randomUUID()]);
     const detail = createAdminBatchesRepository(async () => fixture.database);
-    await expect(detail.retryFailed(staff, id)).rejects.toThrow("BATCH_NOTHING_RETRYABLE");
+    vi.stubEnv("ADMIN_BATCH_ENABLED", "true");
+    try {
+      await expect(detail.retryFailed(staff, id)).rejects.toThrow("BATCH_NOTHING_RETRYABLE");
+    } finally {vi.stubEnv("ADMIN_BATCH_ENABLED", "false");}
   });
 });

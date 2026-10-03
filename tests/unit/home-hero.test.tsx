@@ -54,7 +54,8 @@ describe("Hero", () => {
     const image = screen.getByRole("img", {name: bundles[locale].Home.hero.imageAlt});
     expect(image).toHaveAttribute("src", "/archive/tech-connect-ai-leaders.webp");
     expect(image).toHaveClass("hero-image");
-    expect(image).toHaveAttribute("data-priority", "true");
+    expect(image).toHaveAttribute("fetchpriority", "high");
+    expect(image).toHaveAttribute("loading", "eager");
     expect(image).toHaveAttribute("sizes", "100vw");
 
     const actions = section.querySelectorAll(".hero-actions a");
