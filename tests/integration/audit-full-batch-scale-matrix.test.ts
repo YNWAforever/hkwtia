@@ -43,7 +43,9 @@ const root = {
   userId: "matrix-root-auth",
 } as const;
 let f: Awaited<ReturnType<typeof isolatedAuditDatabase>>;
-const dir = "docs/audits/hkwtia-2026-10-01-remediation/evidence/t22";
+// New runs must never overwrite a committed historical acceptance receipt.
+const dir = ".playwright/full-fix-batch-matrix-" + randomUUID();
+console.log("BATCH_MATRIX_RECEIPT_DIRECTORY", dir);
 const receipt: Record<string, unknown> = {
   environment:
     "owned disposable PostgreSQL16; complete ledger56; actual repositories and all eight real handlers",
