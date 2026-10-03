@@ -23,6 +23,7 @@ beforeEach(() => sessionStorage.clear());
 afterEach(() => vi.unstubAllEnvs());
 describe("member page selection labels with the real ICU translator", () => {
   it.each([["en", en], ["zh-HK", zh]] as const)("%s carries dynamic templates to the client without a missing-value error", async (locale, messages) => {
+    vi.stubEnv("ADMIN_BATCH_ENABLED", "true");
     render(await AdminMembersPage({params: Promise.resolve({locale}), searchParams: Promise.resolve({q: "Ada"})}));
     const labels = messages.Admin.members.selection;
     fireEvent.click(screen.getByRole("checkbox", {name: labels.row.replace("{name}", "Ada")}));

@@ -105,7 +105,7 @@ export type SegmentPagination = z.infer<typeof segmentPaginationSchema>;
 export const segmentPreviewSchema = z.object({
   filter: segmentFilterSchema,
   limit: z.coerce.number().int().min(1).max(500).default(50),
-  cursor: z.string().max(500).nullable().default(null),
+  cursor: z.string().max(1200).nullable().default(null),
 }).strict();
 
 export type SegmentPreviewInput = z.infer<typeof segmentPreviewSchema>;
@@ -174,7 +174,7 @@ export const segmentRouteQuerySchema = z.object({
     contactSource,
   }),
   limit: segmentPaginationSchema.shape.limit.parse(limit),
-  cursor: segmentPaginationSchema.shape.cursor.parse(cursor),
+  cursor: segmentPreviewSchema.shape.cursor.parse(cursor),
 }));
 
 export function parseSegmentRouteQuery(input: unknown): SegmentPreviewInput {

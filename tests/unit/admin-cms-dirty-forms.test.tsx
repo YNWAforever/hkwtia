@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 import {AdminUnsavedChangesProvider} from "@/components/admin/unsaved-changes-guard";
@@ -58,7 +58,7 @@ describe("admin CMS draft changes", () => {
     fireEvent.click(screen.getByRole("button", {name: "Preview draft"}));
     expect(screen.getByText("Draft preview")).toBeInTheDocument();
     expect(screen.getAllByText("Current")).toHaveLength(2);
-    expect(screen.getByText("<script>alert(1)</script>")).toBeInTheDocument();
+    expect(within(screen.getByRole("region", {name: "Draft preview"})).getByText("<script>alert(1)</script>")).toBeInTheDocument();
     expect(container.querySelector("script")).toBeNull();
   });
 

@@ -11,7 +11,7 @@ const member = {profileId: "member-a", membershipId: "membership-a", companyId: 
 
 describe("admin member navigation", () => {
   it("opens Member 360 from the name and a view link while preserving only local list filters", () => {
-    const markup = renderToStaticMarkup(<MemberTable locale="en" labels={en.Admin.members} page={{items: [member], nextCursor: null, totalMatching: 1}} query="acme"/>);
+    const markup = renderToStaticMarkup(<MemberTable availableOperations={["profile_patch"]} locale="en" labels={en.Admin.members} page={{items: [member], nextCursor: null, totalMatching: 1}} query="acme"/>);
     expect(markup).toContain('/admin/members/member-a?q=acme');
     expect(markup).toContain('>Ada Wong</a>');
     expect(markup).toContain('>View</a>');
@@ -23,17 +23,17 @@ describe("admin member navigation", () => {
 
   it("renders keyboard-usable previous and next links while preserving a validated search trail", () => {
     const cursor = encodeAdminMemberCursor({displayName: "Ada Wong", profileId: "member-a"});
-    const first = renderToStaticMarkup(<MemberTable locale="en" labels={en.Admin.members} page={{items: [member], nextCursor: cursor, totalMatching: 2}} query="acme"/>);
+    const first = renderToStaticMarkup(<MemberTable availableOperations={["profile_patch"]} locale="en" labels={en.Admin.members} page={{items: [member], nextCursor: cursor, totalMatching: 2}} query="acme"/>);
     expect(first).toContain('>Next page</a>');
     expect(first).toContain('history=');
-    const second = renderToStaticMarkup(<MemberTable locale="en" labels={en.Admin.members} page={{items: [], nextCursor: null, totalMatching: 2}} query="acme" cursor={cursor} history={[null]}/>);
+    const second = renderToStaticMarkup(<MemberTable availableOperations={["profile_patch"]} locale="en" labels={en.Admin.members} page={{items: [], nextCursor: null, totalMatching: 2}} query="acme" cursor={cursor} history={[null]}/>);
     expect(second).toContain('href="/admin/members?q=acme"');
     expect(second).toContain('>Previous page</a>');
   });
 
   it("renders operational filter controls from the same shareable query", () => {
     const filters = parseAdminMemberRouteQuery({q: "acme", status: "active", planCode: "corporate", renewalFrom: "2026-10-01", sort: "renewal_asc"});
-    const markup = renderToStaticMarkup(<MemberTable locale="en" labels={en.Admin.members} page={{items: [member], nextCursor: null, totalMatching: 1}} query="acme" filters={filters}/>);
+    const markup = renderToStaticMarkup(<MemberTable availableOperations={["profile_patch"]} locale="en" labels={en.Admin.members} page={{items: [member], nextCursor: null, totalMatching: 1}} query="acme" filters={filters}/>);
     expect(markup).toContain('name="status"');
     expect(markup).toContain('name="planCode"');
     expect(markup).toContain('name="renewalFrom"');

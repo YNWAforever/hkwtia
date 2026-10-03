@@ -4,6 +4,7 @@ import {useEffect, useState, useSyncExternalStore} from "react";
 import {useRouter} from "next/navigation";
 
 import {prepareAdminBatchAction} from "@/lib/admin/batches/actions";
+import type {BatchOperation} from "@/lib/admin/batches/types";
 import type {AdminMemberQuery} from "@/lib/admin/member-query";
 import {localizedPath} from "@/lib/urls";
 import Link from "next/link";
@@ -11,11 +12,11 @@ import Link from "next/link";
 import type {AdminMemberListItem} from "@/lib/admin/member-types";
 import type {AppLocale} from "@/i18n/routing";
 
-export type MemberSelectionLabels = Readonly<{page: string; all: string; clear: string; selected: string; row: string; explicitScope: string; allMatchingScope: string}>;
+export type MemberSelectionLabels = Readonly<{page: string; all: string; clear: string; selected: string; row: string; explicitScope: string; allMatchingScope: string; unavailable?: string; exportUnavailable?: string}>;
 type TableLabels = Readonly<{name: string; email: string; company: string; plan: string; status: string; renewal: string; score: string; view: string; caption: string; empty: string; unavailable: string; previous: string; next: string; planCodes?: Readonly<Record<string, string>>; statusCodes?: Readonly<Record<string, string>>}>;
 export type MemberBatchLabels = Readonly<{preview: string; reason: string; language: string; english: string; chinese: string; error: string; patch?: Readonly<{field: string; tags: string; tagsHelp: string; owner: string; unassigned: string}>; export?: Readonly<{preview: string; fields: string; error: string}>}>;
 type ExportField = "displayName" | "email" | "companyName" | "planCode" | "membershipStatus" | "renewalAt" | "locale";
-type Props = Readonly<{ownerOptions?: readonly Readonly<{id: string; name: string}>[]; batchLabels?: MemberBatchLabels; selectionQuery?: AdminMemberQuery; locale: AppLocale; items: readonly AdminMemberListItem[]; totalMatching: number; labels: TableLabels; selectionLabels: MemberSelectionLabels; selectionKey: string; rowHrefs: Readonly<Record<string, string>>; previousHref: string | null; nextHref: string | null}>;
+type Props = Readonly<{availableOperations?: readonly BatchOperation[]; ownerOptions?: readonly Readonly<{id: string; name: string}>[]; batchLabels?: MemberBatchLabels; selectionQuery?: AdminMemberQuery; locale: AppLocale; items: readonly AdminMemberListItem[]; totalMatching: number; labels: TableLabels; selectionLabels: MemberSelectionLabels; selectionKey: string; rowHrefs: Readonly<Record<string, string>>; previousHref: string | null; nextHref: string | null}>;
 
 const storageKey = "adminMemberDraftSelection";
 const draftChangedEvent = "admin-member-draft-selection-changed";
@@ -40,8 +41,11 @@ function validDraft(value: unknown): value is Draft {
   return typeof draft.key === "string" && (draft.mode === "ids" || draft.mode === "query") && validIds(draft.selectedIds) && validIds(draft.excludedIds);
 }
 
-export function MemberBulkTable({locale, items, totalMatching, labels, selectionLabels, selectionKey, rowHrefs, previousHref, nextHref, batchLabels, selectionQuery, ownerOptions = []}: Props) {
+export function MemberBulkTable({locale, items, totalMatching, labels, selectionLabels, selectionKey, rowHrefs, previousHref, nextHref, batchLabels, selectionQuery, ownerOptions = [], availableOperations = []}: Props) {
   const router = useRouter();
+  const canPatch = availableOperations.includes("profile_patch") && Boolean(batchLabels);
+  const canExport = availableOperations.includes("export_members") && Boolean(batchLabels?.export);
+  const canSelect = canPatch || canExport;
   const [batchLocale, setBatchLocale] = useState<"en" | "zh-HK">("en");
   const [patchField, setPatchField] = useState<"locale" | "tags" | "ownerProfileId">("locale");
   const [batchTags, setBatchTags] = useState("");
@@ -79,7 +83,7 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
   };
   const clear = () => writeDraft({...draft, mode: "ids", selectedIds: [], excludedIds: []});
   const preparePreview = async () => {
-    if (selectedCount < 1 || batchPending || (mode === "query" && !selectionQuery)) return;
+    if (!canPatch || selectedCount < 1 || batchPending || (mode === "query" && !selectionQuery)) return;
     setBatchPending(true);
     setBatchError(false);
     try {
@@ -94,7 +98,7 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
 
   const fieldLabels: Readonly<Record<ExportField, string>> = {displayName: labels.name, email: labels.email, companyName: labels.company, planCode: labels.plan, membershipStatus: labels.status, renewalAt: labels.renewal, locale: batchLabels?.language ?? ""};
   const prepareExport = async () => {
-    if (selectedCount < 1 || selectedCount > 5000 || exportFields.length === 0 || batchPending || (mode === "query" && !selectionQuery)) return;
+    if (!canExport || selectedCount < 1 || selectedCount > 5000 || exportFields.length === 0 || batchPending || (mode === "query" && !selectionQuery)) return;
     setBatchPending(true);
     setExportError(false);
     try {
@@ -107,13 +111,14 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
     finally {setBatchPending(false);}
   };
   return <div className="space-y-4">
-    <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 p-3">
+    {canSelect ? <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 p-3">
       <p aria-live="polite" className="text-sm font-medium" role="status">{format(selectionLabels.selected, selectedCount, "count")}</p>
       <p className="text-xs text-muted-foreground">{mode === "query" ? selectionLabels.allMatchingScope : selectionLabels.explicitScope}</p>
       {totalMatching > items.length && mode === "ids" ? <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={() => writeDraft({...draft, mode: "query", excludedIds: []})} type="button">{format(selectionLabels.all, totalMatching, "count")}</button> : null}
       <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={clear} type="button">{selectionLabels.clear}</button>
-    </div>
-    {batchLabels ? <div className="flex flex-wrap items-end gap-3 rounded-md border border-border p-3">
+    </div> : selectionLabels.unavailable ? <p className="rounded-md border border-border p-3 text-sm text-muted-foreground" role="status">{selectionLabels.unavailable}</p> : null}
+    {canSelect && !canExport && selectionLabels.exportUnavailable ? <p className="text-sm text-muted-foreground">{selectionLabels.exportUnavailable}</p> : null}
+    {canPatch && batchLabels ? <div className="flex flex-wrap items-end gap-3 rounded-md border border-border p-3">
       {batchLabels.patch ? <label className="grid gap-1 text-sm">{batchLabels.patch.field}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={patchField} onChange={(event) => setPatchField(event.target.value as typeof patchField)}><option value="locale">{batchLabels.language}</option><option value="tags">{batchLabels.patch.tags}</option><option value="ownerProfileId">{batchLabels.patch.owner}</option></select></label> : null}
       {patchField === "locale" ? <label className="grid gap-1 text-sm">{batchLabels.language}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={batchLocale} onChange={(event) => setBatchLocale(event.target.value as "en" | "zh-HK")}><option value="en">{batchLabels.english}</option><option value="zh-HK">{batchLabels.chinese}</option></select></label> : null}
       {patchField === "tags" && batchLabels.patch ? <div className="grid gap-1"><label className="grid gap-1 text-sm">{batchLabels.patch.tags}<input aria-describedby="batch-tags-help" className="min-h-11 rounded-md border border-input bg-background px-3" maxLength={309} onChange={(event) => setBatchTags(event.target.value)} value={batchTags}/></label><p className="text-xs text-muted-foreground" id="batch-tags-help">{batchLabels.patch.tagsHelp}</p></div> : null}
@@ -122,16 +127,16 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
       <button className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled={selectedCount === 0 || selectedCount > 5000 || batchPending || batchReason.trim().length < 3} onClick={preparePreview} type="button">{batchLabels.preview}</button>
       {batchError ? <p className="w-full text-sm text-destructive" role="alert">{batchLabels.error}</p> : null}
     </div> : null}
-    {batchLabels?.export ? <div className="space-y-3 rounded-md border border-border p-3">
+    {canExport && batchLabels?.export ? <div className="space-y-3 rounded-md border border-border p-3">
       <fieldset><legend className="text-sm font-medium">{batchLabels.export.fields}</legend><div className="mt-2 flex flex-wrap gap-3">{(Object.keys(fieldLabels) as ExportField[]).map((field) => <label className="inline-flex min-h-11 items-center gap-2 text-sm" key={field}><input checked={exportFields.includes(field)} onChange={() => setExportFields((current) => current.includes(field) ? current.filter((item) => item !== field) : [...current, field])} type="checkbox"/>{fieldLabels[field]}</label>)}</div></fieldset>
       <button className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled={selectedCount === 0 || selectedCount > 5000 || exportFields.length === 0 || batchPending} onClick={prepareExport} type="button">{batchLabels.export.preview}</button>
       {exportError ? <p className="text-sm text-destructive" role="alert">{batchLabels.export.error}</p> : null}
     </div> : null}
     <div className="overflow-x-auto rounded-md border border-border"><table className="min-w-full text-left text-sm">
       <caption className="caption-top px-4 py-3 text-left font-medium text-foreground">{labels.caption}</caption>
-      <thead className="border-y border-border bg-muted/40 text-muted-foreground"><tr><th className="px-4 py-3" scope="col"><input aria-label={selectionLabels.page} checked={pageSelected} onChange={togglePage} type="checkbox"/></th>{columns.map((label) => <th className="px-4 py-3 font-medium" key={label} scope="col">{label}</th>)}</tr></thead>
+      <thead className="border-y border-border bg-muted/40 text-muted-foreground"><tr>{canSelect ? <th className="px-4 py-3" scope="col"><input aria-label={selectionLabels.page} checked={pageSelected} onChange={togglePage} type="checkbox"/></th> : null}{columns.map((label) => <th className="px-4 py-3 font-medium" key={label} scope="col">{label}</th>)}</tr></thead>
       <tbody>{items.map((member) => <tr className="border-b border-border last:border-0" key={member.profileId}>
-        <td className="px-4 py-3"><input aria-label={format(selectionLabels.row, member.displayName, "name")} checked={selected(member.profileId)} onChange={() => toggleRow(member.profileId)} type="checkbox"/></td>
+        {canSelect ? <td className="px-4 py-3"><input aria-label={format(selectionLabels.row, member.displayName, "name")} checked={selected(member.profileId)} onChange={() => toggleRow(member.profileId)} type="checkbox"/></td> : null}
         <th className="px-4 py-3 font-medium text-foreground" scope="row"><Link className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2" href={rowHrefs[member.profileId]}>{member.displayName}</Link></th>
         <td className="px-4 py-3">{member.email ?? labels.unavailable}</td>
         <td className="px-4 py-3">{member.companyName ?? labels.unavailable}</td>

@@ -11,7 +11,7 @@ import {queueCampaignAction} from "@/lib/admin/campaign-actions";
 import {campaignDraftHref, resolveCampaignDraft} from "@/lib/admin/campaigns";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {saveSegmentAction} from "@/lib/admin/segment-actions";
-import {parseSegmentRouteQuery} from "@/lib/admin/segment-schema";
+import {parseSegmentPageQuery, segmentPageHref} from "@/lib/admin/segment-pagination";
 import {previewSegment} from "@/lib/admin/segments";
 import {eventsRepository, localizeEvent} from "@/lib/db/repos/events";
 import {segmentsRepository} from "@/lib/db/repos/segments";
@@ -33,9 +33,7 @@ export default async function SegmentsPage({params, searchParams}: Props) {
   if (draft.created) {
     redirect(campaignDraftHref(localizedPath(locale, "/admin/segments"), rawSearchParams, draft.draftId));
   }
-  const segmentSearchParams = {...rawSearchParams};
-  delete segmentSearchParams.campaignDraft;
-  const query = parseSegmentRouteQuery(segmentSearchParams);
+  const {query, history, offset} = parseSegmentPageQuery(rawSearchParams);
   // The event control and its presets are a convenience, not the page: a
   // failing events read must not take the segment builder down with it, so it
   // degrades to "no event filter offered" the way the public pages degrade.
@@ -82,6 +80,9 @@ export default async function SegmentsPage({params, searchParams}: Props) {
     contactStages: {new: tContacts("stage.new"), contacted: tContacts("stage.contacted"), qualified: tContacts("stage.qualified"), applied: tContacts("stage.applied"), member: tContacts("stage.member"), closed: tContacts("stage.closed")},
     contactSource: t("contactSource"), anySource: tContacts("filters.anySource"),
     contactSources: {whatsapp: tContacts("source.whatsapp"), event_guest: tContacts("source.event_guest"), showcase_intro: tContacts("source.showcase_intro"), join_abandoned: tContacts("source.join_abandoned"), interest_form: tContacts("source.interest_form"), import: tContacts("source.import")}};
-  const resultsLabels = {caption: t("caption"), total: t("total"), empty: t("empty"), kind: t("kind"), kindMember: t("kindMember"), kindContact: t("kindContact"), name: t("name"), email: t("email"), company: t("company"), plan: t("plan"), status: t("status"), renewal: t("renewal"), score: t("score"), unavailable: t("unavailable"), saved: t("saved"), export: t("export"), queue: t("queue"), template: t("template"), templateRenewal: t("templateRenewal"), templateUpdate: t("templateUpdate"), queued: t("queued"), existing: t("existing"), recipients: t("recipients"), newDraft: t("newDraft"), error: t("error")};
-  return <div className="space-y-8"><header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1><p className="text-lg text-muted-foreground">{t("description")}</p></header><SegmentBuilder events={eventOptions} filter={query.filter} labels={builderLabels} locale={locale} presets={presets} saveAction={saveAction}/><SegmentResults labels={resultsLabels} preview={preview} queueAction={queueAction} newDraftHref={campaignDraftHref(localizedPath(locale, "/admin/segments"), rawSearchParams, randomUUID())} saved={saved}/></div>;
+  const previousHref = history.length ? segmentPageHref(locale, query, draft.draftId, history.slice(0, -1), history[history.length - 1]) : null;
+  const nextHref = preview.nextCursor ? segmentPageHref(locale, query, draft.draftId, [...history, query.cursor], preview.nextCursor) : null;
+  const firstHref = segmentPageHref(locale, query, draft.draftId, [], null);
+  const resultsLabels = {previous: t("previous"), next: t("next"), first: t("first"), range: String(t.raw("range")), caption: t("caption"), total: t("total"), empty: t("empty"), kind: t("kind"), kindMember: t("kindMember"), kindContact: t("kindContact"), name: t("name"), email: t("email"), company: t("company"), plan: t("plan"), status: t("status"), renewal: t("renewal"), score: t("score"), unavailable: t("unavailable"), saved: t("saved"), export: t("export"), queue: t("queue"), template: t("template"), templateRenewal: t("templateRenewal"), templateUpdate: t("templateUpdate"), queued: t("queued"), existing: t("existing"), recipients: t("recipients"), newDraft: t("newDraft"), error: t("error")};
+  return <div className="space-y-8"><header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1><p className="text-lg text-muted-foreground">{t("description")}</p></header><SegmentBuilder campaignDraft={draft.draftId} paginationLimit={query.limit} events={eventOptions} filter={query.filter} labels={builderLabels} locale={locale} presets={presets} saveAction={saveAction}/><SegmentResults pagination={{previousHref, nextHref, firstHref, offset}} labels={resultsLabels} preview={preview} queueAction={queueAction} newDraftHref={campaignDraftHref(localizedPath(locale, "/admin/segments"), rawSearchParams, randomUUID())} saved={saved}/></div>;
 }

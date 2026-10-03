@@ -1,5 +1,6 @@
 import "server-only";
 
+import {bindSegmentCursor, segmentCursorPosition} from "@/lib/admin/segment-pagination";
 import {segmentPreviewSchema, segmentSaveSchema, type SegmentFilterSet, type SegmentPagination, type SegmentPreviewInput, type SegmentSaveInput} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {segmentsRepository, type SavedSegmentRecord} from "@/lib/db/repos/segments";
@@ -50,7 +51,9 @@ export type SegmentWriter = Readonly<{save: (actor: AdminActor, input: SegmentSa
 export async function previewSegment(actor: Actor, input: unknown, repository: SegmentReader = segmentsRepository, now?: Date): Promise<SegmentPreview> {
   requireAdmin(actor);
   const parsed: SegmentPreviewInput = segmentPreviewSchema.parse(input);
-  return repository.preview(actor, parsed.filter, {limit: parsed.limit, cursor: parsed.cursor}, now);
+  const position = segmentCursorPosition(parsed.filter, parsed.limit, parsed.cursor);
+  const preview = await repository.preview(actor, parsed.filter, {limit: parsed.limit, cursor: position.cursor}, now);
+  return {...preview, nextCursor: preview.nextCursor ? bindSegmentCursor(parsed.filter, parsed.limit, preview.nextCursor, position.offset + preview.items.length) : null};
 }
 
 export async function saveSegment(actor: Actor, input: unknown, repository: SegmentWriter = segmentsRepository): Promise<SavedSegmentRecord> {

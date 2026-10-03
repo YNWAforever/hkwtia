@@ -55,6 +55,7 @@ export type SegmentEventOption = Readonly<{id: string; title: string}>;
 export type SegmentPreset = Readonly<{eventId: string; label: string}>;
 
 type Props = Readonly<{
+  campaignDraft?: string; paginationLimit?: number;
   locale: AppLocale;
   labels: SegmentBuilderLabels;
   filter: SegmentFilterSet;
@@ -69,7 +70,7 @@ function value(value: number | null): string {
 
 const selectClass = "min-h-11 w-full rounded-md border border-input bg-background px-3";
 
-export function SegmentBuilder({locale, labels, filter, events, presets, saveAction}: Props) {
+export function SegmentBuilder({locale, labels, filter, events, presets, saveAction, campaignDraft, paginationLimit = 50}: Props) {
   const memberships = [["community", labels.community], ["startup", labels.startup], ["corporate", labels.corporate], ["patron", labels.patron]] as const;
   const statuses = [["active", labels.active], ["past_due", labels.pastDue], ["pending_review", labels.pendingReview]] as const;
   // `localizedPath` is the only place that knows `zh-HK` is served at `/zh`;
@@ -77,6 +78,9 @@ export function SegmentBuilder({locale, labels, filter, events, presets, saveAct
   const segmentPath = localizedPath(locale, "/admin/segments");
   return <div className="space-y-6 rounded-md border border-border p-4 sm:p-6">
     <form action={segmentPath} className="grid gap-4 sm:grid-cols-2" method="get">
+      {campaignDraft ? <input name="campaignDraft" type="hidden" value={campaignDraft}/> : null}
+      <input name="limit" type="hidden" value={paginationLimit}/>
+      {filter.profileIds.map(id => <input key={id} name="profileId" type="hidden" value={id}/>)}
       <fieldset className="space-y-2"><legend className="font-medium">{labels.filters}</legend><label className="block text-sm" htmlFor="segment-tier">{labels.tier}</label><select className={selectClass} defaultValue={filter.tier} id="segment-tier" multiple name="tier">{memberships.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></fieldset>
       <fieldset className="space-y-2"><legend className="sr-only">{labels.status}</legend><label className="block text-sm" htmlFor="segment-status">{labels.status}</label><select className={selectClass} defaultValue={filter.status} id="segment-status" multiple name="status">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></fieldset>
       <label className="space-y-2 text-sm" htmlFor="segment-score-min"><span>{labels.scoreMin}</span><input className={selectClass} defaultValue={value(filter.scoreMin)} id="segment-score-min" max="100" min="0" name="scoreMin" type="number" /></label>
@@ -101,7 +105,7 @@ export function SegmentBuilder({locale, labels, filter, events, presets, saveAct
       <label className="space-y-2 text-sm" htmlFor="segment-contact-source"><span>{labels.contactSource}</span><select className={selectClass} defaultValue={filter.contactSource} id="segment-contact-source" multiple name="contactSource"><option value="">{labels.anySource}</option>{Object.entries(labels.contactSources).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
       <div className="flex items-end"><button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">{labels.preview}</button></div>
     </form>
-    {presets.length === 0 ? null : <ul className="flex flex-wrap gap-2">{presets.map((preset) => <li key={preset.eventId}><a className="inline-block min-h-11 rounded-md border border-input px-3 py-2 text-sm hover:bg-muted" href={`${segmentPath}?eventId=${encodeURIComponent(preset.eventId)}&eventState=not_registered&audience=members`}>{preset.label}</a></li>)}</ul>}
+    {presets.length === 0 ? null : <ul className="flex flex-wrap gap-2">{presets.map((preset) => <li key={preset.eventId}><a className="inline-block min-h-11 rounded-md border border-input px-3 py-2 text-sm hover:bg-muted" href={`${segmentPath}?eventId=${encodeURIComponent(preset.eventId)}&eventState=not_registered&audience=members${campaignDraft ? `&campaignDraft=${encodeURIComponent(campaignDraft)}` : ""}`}>{preset.label}</a></li>)}</ul>}
     <SegmentSaveForm action={saveAction} filter={filter} labels={{save: labels.save, saving: labels.saving, nameEn: labels.nameEn, nameZh: labels.nameZh}}/>
   </div>;
 }

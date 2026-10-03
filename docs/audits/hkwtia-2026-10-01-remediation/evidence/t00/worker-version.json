@@ -1,0 +1,26 @@
+{
+  "id": "67abdfce-e2f3-4964-ad19-3468bf00fd89",
+  "metadata": {
+    "created_on": "2026-07-26T18:42:05.409883Z",
+    "source": "wrangler"
+  },
+  "annotations": {
+    "workers/triggered_by": "secret"
+  },
+  "bindingNames": [
+    {
+      "name": "APP_URL",
+      "type": "secret_text"
+    },
+    {
+      "name": "CRON_SECRET",
+      "type": "secret_text"
+    }
+  ],
+  "scriptMetadataKeys": [
+    "etag",
+    "handlers",
+    "named_handlers",
+    "last_deployed_from"
+  ]
+}
