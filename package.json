@@ -101,7 +101,6 @@
     "sonner": "^1.7.4",
     "stripe": "^22.3.1",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -127,6 +126,7 @@
     "jsdom": "^20.0.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.23.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
