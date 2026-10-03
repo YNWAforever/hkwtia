@@ -1,0 +1,294 @@
+{
+  "task": "T06",
+  "sourceBase": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+  "verifiedRuntimeCommit": "a8c0266800bd09ac4456ec485862c96248cf8c94",
+  "codeState": "FULL_GATES_PASS_REAL_PROVIDER_AND_POLICY_GATED",
+  "migration": "0057_ai_budget",
+  "production": false,
+  "providerAcceptance": false,
+  "externalProviderRequests": 0,
+  "budgetPolicyApproved": false,
+  "behaviourRed": [
+    {
+      "case": "cache/detail/unsafe usage contract",
+      "failed": 7,
+      "log": "usage-red"
+    },
+    {
+      "case": "20 concurrent admissions expected five within daily cap",
+      "failed": 1,
+      "log": "budget-red",
+      "otherCasesDeselected": 7
+    },
+    {
+      "case": "mandatory admission / unknown liability / proven-unsent release",
+      "failed": 5,
+      "log": "runtime-red"
+    },
+    {
+      "case": "actual SQL unreported failure previously cost_usd=0 rather than NULL",
+      "failed": 1,
+      "log": "unknown-cost-red"
+    },
+    {
+      "case": "independent twenty-second deadline",
+      "failed": 1,
+      "log": "deadline-red"
+    },
+    {
+      "case": "stable failure on known settlement error",
+      "failed": 1,
+      "log": "settlement-public-red"
+    },
+    {
+      "case": "public NULL cost previously rendered as US$0",
+      "failed": 1,
+      "log": "cost-card-red"
+    },
+    {
+      "case": "three actual installed SDK aggregate detail contracts catch stripping regression",
+      "failed": 3,
+      "log": "sdk-detail-red",
+      "deliberateViolationRestored": true
+    },
+    {
+      "case": "embedding expenditure omitted",
+      "failed": 1,
+      "log": "embedding-red"
+    },
+    {
+      "case": "missing caps reach ready factory instead of safe 503",
+      "failed": 1,
+      "log": "readiness-red"
+    },
+    {
+      "case": "HTTP accepted-timeout request ID lost before body",
+      "failed": 1,
+      "log": "accepted-timeout-red"
+    },
+    {
+      "case": "judge expenditure omitted",
+      "failed": 1,
+      "log": "judge-red"
+    },
+    {
+      "case": "judge route constructor binding wrong argument",
+      "failed": 1,
+      "log": "judge-route-red"
+    }
+  ],
+  "finalFocused": {
+    "command": "npx vitest run tests/unit/aiops-dashboard.test.ts tests/unit/aiops-cost-unknown.test.tsx tests/unit/aiops-public-repository.test.ts tests/unit/ai-runtime.test.ts tests/unit/ai-runtime-review.test.ts tests/unit/aiops-components.test.tsx tests/unit/concierge-cancellation-lifecycle.test.ts tests/unit/aiops-page.test.tsx tests/unit/concierge-runtime-harness-core.test.ts tests/unit/concierge-evals-review.test.ts tests/unit/concierge-runtime-harness-safety-channel.test.ts tests/unit/concierge-runtime-harness.test.ts tests/unit/ai-runtime-rereview.test.ts tests/unit/ai-runtime-prepared-single-use.test.ts tests/unit/writer-agent-actor.test.ts tests/unit/ai-runtime-source-cleanup.test.ts tests/unit/ai-runtime-adopt-prestarted.test.ts tests/unit/ai-pricing.test.ts tests/unit/aiops-metrics-repository.test.ts tests/unit/aiops-evidence.test.ts tests/unit/ai-provider-registry.test.ts tests/unit/ai-provider-content-filter.test.ts tests/unit/ai-usage-contract.test.ts tests/unit/ai-embedding-budget.test.ts tests/unit/ai-runtime-budget.test.ts tests/unit/ai-provider-endpoint-contract.test.ts tests/unit/concierge-readiness.test.ts tests/unit/aiops-metrics-route.test.ts tests/unit/ai-judge-budget.test.ts tests/unit/concierge-live-evals.test.ts tests/integration/concierge-route.test.ts tests/integration/m4a-acceptance.test.ts tests/integration/m4c-acceptance.test.ts",
+    "files": 33,
+    "exitCode": 0,
+    "passed": 267,
+    "skipped": 1,
+    "failed": 0,
+    "skipReason": "existing externally guarded M4A acceptance; not provider acceptance"
+  },
+  "actualDatabase": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/ai-budget-concurrency.test.ts",
+    "passed": 16,
+    "skipped": 0,
+    "failed": 0,
+    "engine": "owned disposable loopback pgvector/PostgreSQL16",
+    "effects": "synthetic fixtures, actual Drizzle repositories/transactions; four actual SDK mock HTTP actors; containers removed by owned fixture close",
+    "latestStartedAtHK": "2026-10-03 22:06:32"
+  },
+  "contracts": {
+    "sdk": "locked 7.0.37; aggregate result.usage retained",
+    "protocols": [
+      "OpenAI Responses",
+      "OpenAI Chat Completions",
+      "Anthropic Messages"
+    ],
+    "transport": "actual installed SDK with synthetic mock HTTP/SSE; no real provider invoice",
+    "acceptedReceipt": "synthetic accepted header before streaming body; persisted ID/accepted_at",
+    "integerMicrousd": "BigInt pricing; safe JSON integer and complete overspend storage",
+    "rollback": "actual forward 0057 preserves populated 0056 history; compatible app stops new AI and retains ledger",
+    "periods": "UTC budget / Asia Hong Kong operating reports"
+  },
+  "logs": [
+    {
+      "name": "usage-red",
+      "localLog": ".playwright/full-fix-t06-usage-red.log",
+      "sha256": "6b1f2284418bb14c210ca094d8c493cdaa38a50ff02be69f39d42091b170a8cd"
+    },
+    {
+      "name": "budget-red",
+      "localLog": ".playwright/full-fix-t06-budget-red.log",
+      "sha256": "4c0d0e123f0c632f58e0470270da59b968d3e34c0d5af8b54573e8a366997522"
+    },
+    {
+      "name": "runtime-red",
+      "localLog": ".playwright/full-fix-t06-runtime-red.log",
+      "sha256": "5f5668e144bfe1d71d2c44f0605d4456c069432cc9c097342abc6cb557e4c9f4"
+    },
+    {
+      "name": "unknown-cost-red",
+      "localLog": ".playwright/full-fix-t06-unknown-cost-red.log",
+      "sha256": "52440eb2c3c16d8399341e62682602b6059fb2a996178043d9a395b36e9d9622"
+    },
+    {
+      "name": "deadline-red",
+      "localLog": ".playwright/full-fix-t06-deadline-red.log",
+      "sha256": "c6eaabe7dfef2b06a8db62cd435e957a74c7527b6b9c7eaa5695a9a01818728b"
+    },
+    {
+      "name": "settlement-public-red",
+      "localLog": ".playwright/full-fix-t06-settlement-public-red.log",
+      "sha256": "dc950a864f961365f42d625800e26153d2fc660a764535b1881852a4d0045403"
+    },
+    {
+      "name": "cost-card-red",
+      "localLog": ".playwright/full-fix-t06-cost-card-red.log",
+      "sha256": "b3165db71fad611895926a8fbbd2e0094ccc5e0982118083b76c81bb36bbeee4"
+    },
+    {
+      "name": "sdk-detail-red",
+      "localLog": ".playwright/full-fix-t06-sdk-detail-red.log",
+      "sha256": "2c8650fefa69d3e7411baee70f4a9272f4a19931f2305c46748ba714527f3a7c"
+    },
+    {
+      "name": "embedding-red",
+      "localLog": ".playwright/full-fix-t06-embedding-red.log",
+      "sha256": "ab90fb3747e0e8ed20c8fc769d927b1e759028b75d1b8e4a184d9f4ec468ed87"
+    },
+    {
+      "name": "readiness-red",
+      "localLog": ".playwright/full-fix-t06-readiness-red.log",
+      "sha256": "a12460b8aa94eaf9e152ab29d904de38d269385b1c549af532d677158cf69ae5"
+    },
+    {
+      "name": "accepted-timeout-red",
+      "localLog": ".playwright/full-fix-t06-accepted-timeout-red.log",
+      "sha256": "8fb1cc1cd673a9ca60324a2c6b1fd7d3eb4059f61899e0e6902c96f87c2a66ac"
+    },
+    {
+      "name": "judge-red",
+      "localLog": ".playwright/full-fix-t06-judge-red.log",
+      "sha256": "20ab6fb326bbf6d8c7bfcbf3e39199235ecfadcf8c68430e94bd08d37f19a672"
+    },
+    {
+      "name": "judge-route-red",
+      "localLog": ".playwright/full-fix-t06-judge-route-red.log",
+      "sha256": "dacb99e7f611582f150e201f88646a38259ef319f380c181ffe758fec3fc4fb3"
+    },
+    {
+      "name": "focused-final",
+      "localLog": ".playwright/full-fix-t06-focused-final.log",
+      "sha256": "a7f0d2a46f6b8c7032983fc6f1eefa4574a19a3a9f584f49df2d43ad2c457749"
+    },
+    {
+      "name": "budget-final",
+      "localLog": ".playwright/full-fix-t06-budget-final.log",
+      "sha256": "d0b951218530882a69a0490783e26dbc3f1c7661fda499571b6df5dc39c0a996"
+    },
+    {
+      "name": "full-regression-green",
+      "localLog": ".playwright/full-fix-t06-full-regression-green.log",
+      "sha256": "3793c463ef61a887e34c44387d92f2a7a965ae8f0fc290f720505105497f5f09"
+    }
+  ],
+  "firstFullRun": {
+    "passed": 6479,
+    "failed": 10,
+    "skipped": 355,
+    "setupFailuresCountedAsBehaviour": false,
+    "resolution": "explicit offline ledger dependencies, readiness caps fixture, live judge budgeting and actual clock"
+  },
+  "secondFullRun": {
+    "passed": 6490,
+    "failed": 0,
+    "skipped": 355,
+    "typecheck": "constructor contract and mock typing errors found; subsequently target RED/GREEN and typecheck exit0",
+    "finalGate": "fresh full suite running after route binding correction"
+  },
+  "originalEvidenceRetained": {
+    "tasks": 22,
+    "findings": 28,
+    "cases": 64,
+    "originalBaselineResultsAndCaseJsonUnchanged": true
+  },
+  "unresolved": [
+    {
+      "gate": "real provider receipt",
+      "owner": "AI service/data owner",
+      "minimumEvidence": "approved test credential path, synthetic-only purpose and allowed test spend; receipt usage/reconciled bill"
+    },
+    {
+      "gate": "activation limits",
+      "owner": "finance/service owner",
+      "minimumEvidence": "approved integer run/day/month caps"
+    },
+    {
+      "gate": "Production",
+      "owner": "release owner",
+      "minimumEvidence": "specific candidate / 0057 migration / capability rollout authorization after linked acceptance gates"
+    },
+    {
+      "gate": "T13 linked evaluation",
+      "owner": "QA/operations",
+      "minimumEvidence": "at least 60 cases x3/model, critical facts 100 percent / safety zero errors / grounded >=95 percent"
+    }
+  ],
+  "fullGates": {
+    "sourceBase": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "uncommittedTask": "T06",
+    "productionDeployment": false,
+    "results": [
+      {
+        "name": "full-unit",
+        "command": "npm test -- --maxWorkers=2",
+        "startedAt": "2026-10-03T14:10:21.020Z",
+        "finishedAt": "2026-10-03T14:24:07.531Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t06-full-unit.log"
+      },
+      {
+        "name": "lint",
+        "command": "npm run lint",
+        "startedAt": "2026-10-03T14:10:21.032Z",
+        "finishedAt": "2026-10-03T14:12:02.894Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t06-lint.log"
+      },
+      {
+        "name": "strings",
+        "command": "npm run audit:strings",
+        "startedAt": "2026-10-03T14:10:21.042Z",
+        "finishedAt": "2026-10-03T14:10:22.613Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t06-strings.log"
+      },
+      {
+        "name": "types",
+        "command": "npm run typecheck",
+        "startedAt": "2026-10-03T14:10:21.053Z",
+        "finishedAt": "2026-10-03T14:10:36.036Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t06-types.log"
+      },
+      {
+        "name": "build",
+        "command": "npm run build",
+        "startedAt": "2026-10-03T14:10:36.037Z",
+        "finishedAt": "2026-10-03T14:12:14.854Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t06-build.log"
+      }
+    ],
+    "passed": 6490,
+    "skipped": 355,
+    "failed": 0,
+    "filesPassed": 772,
+    "filesSkipped": 89,
+    "durationSeconds": 824.99,
+    "lintErrors": 0,
+    "lintWarnings": 82,
+    "stringsScanned": 311,
+    "skipReason": "environment/provider and opt-in DB integrations remain guarded; actual PostgreSQL budget suite separately run with 16 pass/0 skip"
+  },
+  "sourceHashManifest": "source-hashes.json",
+  "uc34": "uc34-safe.json"
+}

@@ -13,3 +13,10 @@
 | Policy | D01-D06 original owners/wording preserved | No newly approved policy version; blocks only corresponding activation | Association owners |
 
 Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real sender pause. Browser protection credentials never serve as worker identity. No complete Production env export.
+
+## T06 新run（2026-10-03）
+
+- T05 PR126已合併main c7257ed1；其Preview c4ed／dpl_D9eXE5esoTCf7ncQZ8ZBNCDXWjMn有17native checks pass，Google／magic-link／provider未驗。
+- T06完整gate6490 pass355skip；隔離PG16 pass0skip；新Neon ledger57是13:59UTC套用0057的run，原ledger56 receipts仍有效於其歷史時間。
+- T06分支Preview37個test配置及APP_URL、獨立service/cookie secret、exactAuth origin已配置；AI及effects closed，budget cap=0屬故意無效／停用配置，並非協會財務預設。候選部署／native receipt仍待寫入。
+- 正式13:57UTC仍36eb／dpl9j，沒有0057 migration／新flags／provider請求。
