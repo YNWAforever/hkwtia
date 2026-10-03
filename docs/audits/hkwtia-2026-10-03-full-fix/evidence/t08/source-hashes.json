@@ -1,7 +1,7 @@
 {
   ".env.example": "a0996684a722a7fe7fcf25c14cb32ee401020d90cb3570776ad5c698c3ef940e",
   "app/[locale]/(admin)/admin/tasks/page.tsx": "a0a74914fb81386912557e5366215eeab6e502cf10a1a66cfd3979ac48b10405",
-  "components/admin/ai-review-panel.tsx": "5b14d79bea75158e8e727deb36bbe6895b8cca77381f3543733520cda2a21a74",
+  "components/admin/ai-review-panel.tsx": "d30d61cab775925c52096a247a6c42e2213f52ce5bd90c5741440af4eddcfcef",
   "config/agents/concierge.ts": "da547a7fe501971f070dbfbcd754428bee4742c639be69ae664cafb5926fca60",
   "drizzle/0059_ai_review_drafts.sql": "ac2178f155e883bd8c64074ea2159512e8dfa28c131523f564cfc138205e2bff",
   "drizzle/meta/_journal.json": "6d5eeaedc2c3741a578ff6e21f26c9e38b073f107505b8ffa8468f5b1d7cf1bd",
