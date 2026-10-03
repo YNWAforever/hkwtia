@@ -129,12 +129,12 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `source-map.json` 每項 `{taskId,symbol,path,headSha,evidenceBasis:'snapshot'|'current-checkout'}`；`status.csv` 每 finding 至少含 task/case/owner/blocker/五種完成狀態/evidence_path/verified_sha。新作業狀態不得覆寫原 audit result。
 
-- [ ] 驗 ZIP hash 及原 manifest；記 current branch/status/HEAD/main SHA，對比 `36ebae1…`。dirty tree 不重置，按 repo 規則建立隔離 worktree。先讀適用 AGENTS；只有需要 Next API 時讀所安裝版本 `node_modules/next/dist/docs/`。
-- [ ] 解析 auth login/callback、membership lifecycle/grants、billing/webhook/refund、event registration/tickets、worker health、CMS drafts/publish 的實際 file + symbol；以 `rg`/repo 提供的 discovery 工具及測試交叉核對，記 source-map。找不到即記精確 discovery gap，不創造重複路由。
-- [ ] 從原政策台帳抄錄 D01–D06 的文字／owner／批准狀態；從原 status 匯入 O01–O14 作歷史 index。已 fixed 的部分以 regression 驗收，不重做。
-- [ ] 建環境矩陣：local/unit、確認隔離 DB/Auth、Stripe TEST、sender sink、approved provider、preview app/worker SHA、ledger、flags。只記非秘密摘要；正向 marker 限 owned isolated fixture。
-- [ ] Run `npm ci`，按本計劃「測試命令」跑基線；保留 command/exit code/原始失敗/skip 理由。若缺外部設定，不替換真流程為 mock 來製造 PASS。
-- [ ] Commit `docs: establish full remediation execution baseline`。完成後每個未知既有路徑已有 source-map，後續才可改該子系統。
+- [x] 驗 ZIP hash 及原 manifest；記 current branch/status/HEAD/main SHA，對比 `36ebae1…`。dirty tree 不重置，按 repo 規則建立隔離 worktree。先讀適用 AGENTS；只有需要 Next API 時讀所安裝版本 `node_modules/next/dist/docs/`。
+- [x] 解析 auth login/callback、membership lifecycle/grants、billing/webhook/refund、event registration/tickets、worker health、CMS drafts/publish 的實際 file + symbol；以 `rg`/repo 提供的 discovery 工具及測試交叉核對，記 source-map。找不到即記精確 discovery gap，不創造重複路由。
+- [x] 從原政策台帳抄錄 D01–D06 的文字／owner／批准狀態；從原 status 匯入 O01–O14 作歷史 index。已 fixed 的部分以 regression 驗收，不重做。
+- [x] 建環境矩陣：local/unit、確認隔離 DB/Auth、Stripe TEST、sender sink、approved provider、preview app/worker SHA、ledger、flags。只記非秘密摘要；正向 marker 限 owned isolated fixture。
+- [x] Run `npm ci`，按本計劃「測試命令」跑基線；保留 command/exit code/原始失敗/skip 理由。若缺外部設定，不替換真流程為 mock 來製造 PASS。
+- [x] Commit `docs: establish full remediation execution baseline`。完成後每個未知既有路徑已有 source-map，後續才可改該子系統。
 
 
 ## T01 — 恢復 Concierge 配置檢查和錯誤 UX
