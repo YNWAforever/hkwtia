@@ -111,6 +111,14 @@ describe("PartnersPage", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
+  it.each([["en","Meet our partners"],["zh-HK","認識合作夥伴"]] as const)("uses public-facing %s partner introduction without internal audit language",async(locale,title)=>{
+    listPublished.mockResolvedValue([row("synthetic","supporting")]);
+    const {default:PartnersPage}=await import("@/app/[locale]/(public)/partners/page");
+    render(await PartnersPage({params:Promise.resolve({locale})}));
+    expect(screen.getByRole("heading",{name:title})).toBeVisible();
+    expect(document.querySelector("main")?.textContent??document.body.textContent).not.toMatch(/scraped logo wall|抓取而來的標誌牆|VERIFIED WTIA ARCHIVE|price_[a-z0-9]+/i);
+  });
+
   it("builds indexable bilingual metadata", async () => {
     const {generateMetadata} = await import("@/app/[locale]/(public)/partners/page");
     const metadata = await generateMetadata({params: Promise.resolve({locale: "zh-HK"})});

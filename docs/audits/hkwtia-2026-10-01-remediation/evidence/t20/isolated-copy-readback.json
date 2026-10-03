@@ -1,0 +1,21 @@
+{
+  "environment": "confirmed isolated Neon; read-only published copy and aggregate partner categories",
+  "copy": [],
+  "partners": [
+    {
+      "published": true,
+      "category": "supporting",
+      "count": 58
+    },
+    {
+      "published": true,
+      "category": "media",
+      "count": 6
+    },
+    {
+      "published": true,
+      "category": "regional",
+      "count": 15
+    }
+  ]
+}

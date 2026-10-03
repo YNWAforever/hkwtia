@@ -1,0 +1,27 @@
+{
+  "sourceSha": "f327fd334e7766b22102154bf1959310b658ab78",
+  "environment": "confirmed isolated Neon/Auth; owned built loopback",
+  "production": false,
+  "providerWrites": 0,
+  "locale": "en",
+  "memberHeaderKeyboard": true,
+  "mobileMemberLink": true,
+  "footerStaffKeyboard": true,
+  "partners": 79,
+  "categories": {
+    "supporting": 58,
+    "regional": 15,
+    "media": 6
+  },
+  "actualLoadedLazyImages": 79,
+  "partnerWebsiteUrls": "all rendered destinations structurally HTTPS; external destination HTTP not tested",
+  "publicEventVisible": true,
+  "membersOnlyExcluded": true,
+  "demoExcluded": true,
+  "demoBaseline": {
+    "published": true,
+    "status": "published",
+    "visibility": "public"
+  },
+  "policySignoff": "D01-D06 pending; current policy/pricing preserved"
+}
