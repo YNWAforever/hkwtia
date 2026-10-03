@@ -1,0 +1,468 @@
+[
+  {
+    "taskId": "T01",
+    "symbol": "POST",
+    "path": "lib/api/concierge-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.concierge-route.POST",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "createConciergePostHandler",
+    "path": "lib/api/concierge-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.concierge-route.createConciergePostHandler",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "productionHandler",
+    "path": "lib/api/concierge-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.concierge-route.productionHandler",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createGuestRegistrationService",
+    "path": "lib/events/guest-registration-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.guest-registration-core.createGuestRegistrationService",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createTicketCheckout",
+    "path": "lib/tickets/checkout-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.tickets.checkout-core.createTicketCheckout",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createTicketProcessor",
+    "path": "lib/billing/ticket-webhook-processor.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.billing.ticket-webhook-processor.createTicketProcessor",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createWebhookPost",
+    "path": "lib/api/stripe-webhook-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.stripe-webhook-route.createWebhookPost",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "ensureProfile",
+    "path": "lib/membership/onboarding.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.ensureProfile",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "ensureProfile",
+    "path": "lib/db/repos/seats.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.seats.ensureProfile",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "parseAiEnvironment",
+    "path": "lib/config/env.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.config.env.parseAiEnvironment",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "parseLoginDestination",
+    "path": "lib/auth/login-destination.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.login-destination.parseLoginDestination",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T17",
+    "symbol": "publishCopyDraft",
+    "path": "lib/db/repos/page-copy.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.page-copy.publishCopyDraft",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "refundOrder",
+    "path": "lib/tickets/refund-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.tickets.refund-core.refundOrder",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "refundOrder",
+    "path": "lib/jobs/event-cancellation-refunds.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.event-cancellation-refunds.refundOrder",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "resolveCurrentLogin",
+    "path": "lib/auth/login-resolution-server.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.login-resolution-server.resolveCurrentLogin",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "runPublicEventRegistrationAction",
+    "path": "lib/events/registration-action.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.registration-action.runPublicEventRegistrationAction",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "verifyWorkerHealthRequest",
+    "path": "lib/jobs/worker-health-request.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.worker-health-request.verifyWorkerHealthRequest",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "canTransitionMembership",
+    "path": "lib/membership/lifecycle.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.lifecycle.canTransitionMembership",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "completeApplication",
+    "path": "lib/membership/onboarding.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.completeApplication",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "isMembershipGrantEffectiveAt",
+    "path": "lib/membership/grants.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.grants.isMembershipGrantEffectiveAt",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "loadOrCreateApplication",
+    "path": "lib/membership/onboarding.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.loadOrCreateApplication",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "resolveMembershipPolicy",
+    "path": "lib/membership/policy.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.policy.resolveMembershipPolicy",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "resumeOrStartJoin",
+    "path": "lib/membership/join-service.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.join-service.resumeOrStartJoin",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "createJobPost",
+    "path": "lib/jobs/handler.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.handler.createJobPost",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "createJobRunners",
+    "path": "lib/jobs/runners.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.runners.createJobRunners",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "projectJobHealth",
+    "path": "lib/jobs/health.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.health.projectJobHealth",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "readJobHealth",
+    "path": "lib/jobs/health.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.health.readJobHealth",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "runAdminBatchJob",
+    "path": "lib/jobs/admin-batch-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.admin-batch-runner.runAdminBatchJob",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "getActor",
+    "path": "lib/auth/actor.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.actor.getActor",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "provisionVerifiedMember",
+    "path": "lib/auth/login-provision.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.login-provision.provisionVerifiedMember",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "bindSegmentCursor",
+    "path": "lib/admin/segment-pagination.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.segment-pagination.bindSegmentCursor",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "parseSegmentPageQuery",
+    "path": "lib/admin/segment-pagination.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.segment-pagination.parseSegmentPageQuery",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "updateApplicationCase",
+    "path": "lib/admin/application-case-service.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.application-case-service.updateApplicationCase",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createGuestRegistrationService",
+    "path": "lib/events/guest-registration-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.guest-registration-core.createGuestRegistrationService",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "runPublicEventRegistrationAction",
+    "path": "lib/events/registration-action.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.registration-action.runPublicEventRegistrationAction",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "saveMemberEvent",
+    "path": "lib/events/member-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.member-core.saveMemberEvent",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "sendLive",
+    "path": "lib/channels/woztell.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.channels.woztell.sendLive",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "sendSessionMessage",
+    "path": "lib/channels/woztell.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.channels.woztell.sendSessionMessage",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "getApplicationCase",
+    "path": "lib/db/repos/applications.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.applications.getApplicationCase",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "updateApplicationCase",
+    "path": "lib/db/repos/applications.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.applications.updateApplicationCase",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "grantMembership",
+    "path": "lib/db/repos/membership-grants.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.membership-grants.grantMembership",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "expireFiniteGrants",
+    "path": "lib/db/repos/membership-grant-expiry.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.membership-grant-expiry.expireFiniteGrants",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T04",
+    "symbol": "buildAiOpsDashboardState",
+    "path": "lib/aiops/dashboard.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.aiops.dashboard.buildAiOpsDashboardState",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createAiOpsMetricsRepository",
+    "path": "lib/db/repos/aiops-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.aiops-metrics.createAiOpsMetricsRepository",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createAdminDashboardRepository",
+    "path": "lib/db/repos/admin-dashboard.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.admin-dashboard.createAdminDashboardRepository",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "createAgentRuntime",
+    "path": "lib/ai/runtime.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.runtime.createAgentRuntime",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T17",
+    "symbol": "runNewsFormAction",
+    "path": "lib/admin/news-action-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.news-action-core.runNewsFormAction",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "getAiReadiness",
+    "path": "lib/ai/readiness.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.readiness.getAiReadiness",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "calculateAdminImpact",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.calculateAdminImpact",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "summarizeObservedWork",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.summarizeObservedWork",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "buildOperationBaseline",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.buildOperationBaseline",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "compareObservedWork",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.compareObservedWork",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createOperationsMetricsRepository",
+    "path": "lib/db/repos/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.operations-metrics.createOperationsMetricsRepository",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "recordOperationObservationAction",
+    "path": "lib/admin/operations-metrics-actions.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.operations-metrics-actions.recordOperationObservationAction",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "freezeOperationBaselineAction",
+    "path": "lib/admin/operations-metrics-actions.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.operations-metrics-actions.freezeOperationBaselineAction",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "OperationsTimingForm",
+    "path": "components/admin/operations-timing-form.tsx",
+    "qualifiedName": "hkwtia-full-fix-20261003.components.admin.operations-timing-form.OperationsTimingForm",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "OperationsBaselineForm",
+    "path": "components/admin/operations-baseline-form.tsx",
+    "qualifiedName": "hkwtia-full-fix-20261003.components.admin.operations-baseline-form.OperationsBaselineForm",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  }
+]

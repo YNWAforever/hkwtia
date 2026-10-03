@@ -1,0 +1,36 @@
+{
+  "verifiedRuntimeCommit": "2c992618c5c737b98d911c086195db312a21de6f",
+  "fullTest": {
+    "exitCode": 0,
+    "filesPassed": 765,
+    "filesSkipped": 87,
+    "testsPassed": 6421,
+    "testsSkipped": 338,
+    "testsFailed": 0,
+    "durationSeconds": 638.99,
+    "command": "npm test -- --maxWorkers=2",
+    "limits": "Skipped isolated/provider suites remain unverified by this gate; T04 DB/native and T03 SQL are separately run."
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "npm run typecheck"
+  },
+  "strings": {
+    "exitCode": 0,
+    "command": "npm run audit:strings",
+    "files": 311
+  },
+  "lint": {
+    "exitCode": 0,
+    "command": "npm run lint",
+    "warnings": 82
+  },
+  "build": {
+    "exitCode": 0,
+    "command": "AGENTS_ENABLED=false npm run build",
+    "runtimeManifest": "t04/build-inputs-final.json"
+  },
+  "productionReleased": false,
+  "realProviderAcceptance": false,
+  "migrationRequired": false
+}

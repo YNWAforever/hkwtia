@@ -1,0 +1,162 @@
+{
+  "sourceSha": null,
+  "runtime": "next start / NODE_ENV=production",
+  "observedAt": "2026-10-03T08:57:21.742Z",
+  "productionDeployment": false,
+  "realProviderAcceptance": false,
+  "checks": [
+    {
+      "mode": "missing",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Keys removed and request rejected before runtime construction"
+    },
+    {
+      "mode": "disabled",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Keys removed and request rejected before runtime construction"
+    }
+  ],
+  "gitBaseSha": "1554959da0917e973eeacbd5138dd71af98a8b7f",
+  "sourceInputsVerified": true,
+  "sourceInputManifest": "build-inputs.json",
+  "cases": [
+    {
+      "title": "en 1440px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 2198,
+      "screenshots": [
+        {
+          "path": "en-1440-missing.png",
+          "sha256": "353b955cb9d9cdf434c3d9cfbfebdd9f75793462ffbcc1e1185614d24bbf0e22"
+        }
+      ]
+    },
+    {
+      "title": "en 390px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1087,
+      "screenshots": [
+        {
+          "path": "en-390-missing.png",
+          "sha256": "97f3977d4dfda5de2af6a869187e0de2a532079607310cfbbafb4be0007c7e37"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 1440px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1440,
+      "screenshots": [
+        {
+          "path": "zh-HK-1440-missing.png",
+          "sha256": "f5284417c4a418cc97678feeb0d32d1e9b74d55c9b675fc0451a28cb02c7d03d"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 390px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1227,
+      "screenshots": [
+        {
+          "path": "zh-HK-390-missing.png",
+          "sha256": "4ff4fe86a036257cd420c44a13b0165e5621259cd898d450dc1e715147953f10"
+        }
+      ]
+    },
+    {
+      "title": "en 1440px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1409,
+      "screenshots": [
+        {
+          "path": "en-1440-disabled.png",
+          "sha256": "1c77a972331efa038fe2eab5e14b9bd9cf6307cef7bb89e81c37db8e89fe2805"
+        }
+      ]
+    },
+    {
+      "title": "en 390px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1261,
+      "screenshots": [
+        {
+          "path": "en-390-disabled.png",
+          "sha256": "429c89f082a4ddbcb67fc7f7f2b554ff48132f0104b508ecfb846c799fe0e0ce"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 1440px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1342,
+      "screenshots": [
+        {
+          "path": "zh-HK-1440-disabled.png",
+          "sha256": "63c1530c0a8f1a8ec350c6b2a30167a9e60b7bbfd97c0afe701fba9812573d8d"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 390px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1265,
+      "screenshots": [
+        {
+          "path": "zh-HK-390-disabled.png",
+          "sha256": "9c8b27e637555c024a9e7f4f03ce9a795f589573ccec46f2cb1a1a0fbac8a1da"
+        }
+      ]
+    }
+  ],
+  "contrast": {
+    "before": 3.49,
+    "required": 4.5,
+    "afterSeriousCriticalViolations": 0
+  },
+  "stacking": {
+    "redDialogZIndex": 50,
+    "redBackgroundMaxZIndex": 180,
+    "greenOverlayZIndex": 600,
+    "greenDialogZIndex": 610,
+    "assertion": "dialog above visible header, announcement, launcher and mobile-menu surfaces; minimum discovered surface count > 0",
+    "targetedRedFailed": 1,
+    "finalGreenPassed": 8
+  },
+  "earlierFailures": [
+    {
+      "kind": "harness isolation flag spelling",
+      "businessWrites": 0
+    },
+    {
+      "kind": "harness IP alias self-redirect /about",
+      "resolvedBy": "existing localhost convention; app routing unchanged"
+    },
+    {
+      "kind": "real browser color-contrast",
+      "casesFailed": 4,
+      "target": "recovery message",
+      "fixedBy": "foreground text on existing alert background"
+    },
+    {
+      "kind": "real browser stacking",
+      "casesFailed": 1,
+      "behavior": "header/launcher overlaid mobile modal",
+      "fixedBy": "concierge-specific overlay/content above existing background stack"
+    }
+  ]
+}

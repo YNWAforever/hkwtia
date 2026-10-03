@@ -1,0 +1,26 @@
+{
+  "production": false,
+  "syntheticOnly": true,
+  "providerCalls": 0,
+  "environment": "owned disposable PostgreSQL16 with all ledger56 migrations; actual batch repositories and communication handler",
+  "sourceSha": "df5ad101aadea6617f0c933bb1d82e777ff8cdde",
+  "passed": true,
+  "snapshot": 100,
+  "drafted": 80,
+  "skipped": {
+    "consent": 10,
+    "alreadyRenewedFacts": 5,
+    "changedLocaleVersion": 5
+  },
+  "counters": {
+    "pending": 0,
+    "running": 0,
+    "succeeded": 80,
+    "skipped": 20,
+    "failed": 0
+  },
+  "doubleCommitFulfilled": 1,
+  "targetAndEffectKeysPreserved": true,
+  "filterDriftDidNotRetarget": true,
+  "providerBoundary": "review-required campaign drafts only; no queue or send; no real payment provider acceptance"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceSha": "2c992618c5c737b98d911c086195db312a21de6f",
+  "runtime": "next start / NODE_ENV=production",
+  "observedAt": "2026-10-03T10:49:45.533Z",
+  "productionDeployment": false,
+  "realProviderAcceptance": false,
+  "checks": [
+    {
+      "mode": "missing",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Keys removed and request rejected before runtime construction"
+    },
+    {
+      "mode": "disabled",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Keys removed and request rejected before runtime construction"
+    }
+  ]
+}

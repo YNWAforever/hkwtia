@@ -34,8 +34,6 @@ export default async function AdminInboxPage({ params, searchParams }: Props) {
   const { locale: localeValue } = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireAdminPageActor();
-  const t = await getTranslations({ locale, namespace: "Admin.inbox" });
   const query = await searchParams;
   const channel = channelFrom(query.channel);
   const handling = handlingFrom(query.handling);
@@ -45,6 +43,9 @@ export default async function AdminInboxPage({ params, searchParams }: Props) {
     query.scope === "overdue"
       ? query.scope
       : "all";
+  const destination = `/admin/inbox?${new URLSearchParams({channel, handling, scope})}`;
+  const actor = await requireAdminPageActor(destination);
+  const t = await getTranslations({ locale, namespace: "Admin.inbox" });
   const header = (
     <header className="space-y-3">
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">

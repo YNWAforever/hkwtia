@@ -10,6 +10,8 @@ import {
   type HealthJobKey,
 } from "@/lib/jobs/health-registry";
 import {expectedWorkerRevision} from "@/lib/jobs/worker-health-request";
+export const JOB_HEALTH_REASON_CODES = ["DISABLED", "WORKER_REVISION_UNCONFIGURED", "NO_RECEIPT", "INVALID_RECEIPT", "REVISION_MISMATCH", "POLL_IN_PROGRESS", "POLL_OVERDUE", "VERIFIED_SUCCESS", "STALE_RECEIPT", "FAILED_ITEMS", "RECONCILIATION_REQUIRED", "CAPABILITY_MISMATCH"] as const;
+export type JobHealthReasonCode = typeof JOB_HEALTH_REASON_CODES[number];
 export type JobHealth = Readonly<{
   jobKey: HealthJobKey;
   enabled: boolean | null;
@@ -18,8 +20,10 @@ export type JobHealth = Readonly<{
   lastSucceededAt: string | null;
   nextExpectedAt: string | null;
   oldestPendingAt: string | null;
-  failedCount: number;
-  uncertainCount: number;
+  failedCount: number | null;
+  uncertainCount: number | null;
+  reasonCode: JobHealthReasonCode;
+  lastVerifiedAt: string | null;
   state: "healthy" | "degraded" | "disabled" | "unknown";
 }>;
 export type JobHealthSnapshot = Readonly<{
@@ -52,6 +56,7 @@ export function projectJobHealth(
     row.failedCount >= 0 &&
     Number.isSafeInteger(row.uncertainCount) &&
     row.uncertainCount >= 0 &&
+    (!row.oldestPendingAt || Number.isFinite(row.oldestPendingAt.getTime())) &&
     ["processing", "completed", "disabled", "failed", "uncertain"].includes(
       row.outcome,
     );
@@ -62,32 +67,29 @@ export function projectJobHealth(
   const next = trusted ? nextJobExpectedAt(key, trusted.lastStartedAt) : null;
   const success = trusted?.lastSucceededAt ?? null;
   let state: JobHealth["state"] = "unknown";
-  if (!enabled) state = "disabled";
-  else if (trusted) {
-    if (
-      trusted.outcome === "failed" ||
-      trusted.outcome === "uncertain" ||
-      trusted.failedCount > 0 ||
-      trusted.uncertainCount > 0
-    )
-      state = "degraded";
-    else if (success && next) {
-      const stale =
-        now.getTime() > next.getTime() + JOB_HEALTH_SCHEDULE[key].graceMs;
-      const unfinished =
-        trusted.lastStartedAt > success &&
-        now.getTime() - trusted.lastStartedAt.getTime() >
-          JOB_HEALTH_SCHEDULE[key].graceMs;
-      state =
-        stale || unfinished || trusted.outcome === "disabled"
-          ? "degraded"
-          : "healthy";
-    } else if (
-      next &&
-      now.getTime() >
-        trusted.lastStartedAt.getTime() + JOB_HEALTH_SCHEDULE[key].graceMs
-    )
-      state = "degraded";
+  let reasonCode: JobHealthReasonCode = "NO_RECEIPT";
+  if (!enabled) {state = "disabled"; reasonCode = "DISABLED";}
+  else if (!expected) reasonCode = "WORKER_REVISION_UNCONFIGURED";
+  else if (row && (!valid || row.jobKey !== key)) {
+    state = "degraded"; reasonCode = "INVALID_RECEIPT";
+  } else if (row && row.workerRevision !== expected) {
+    state = "degraded"; reasonCode = "REVISION_MISMATCH";
+  } else if (trusted) {
+    if (trusted.outcome === "uncertain" || trusted.uncertainCount > 0) {
+      state = "degraded"; reasonCode = "RECONCILIATION_REQUIRED";
+    } else if (trusted.outcome === "failed" || trusted.failedCount > 0) {
+      state = "degraded"; reasonCode = "FAILED_ITEMS";
+    } else if (trusted.outcome === "disabled") {
+      state = "degraded"; reasonCode = "CAPABILITY_MISMATCH";
+    } else if (success && next) {
+      const stale = now.getTime() > next.getTime() + JOB_HEALTH_SCHEDULE[key].graceMs;
+      const unfinished = trusted.lastStartedAt > success
+        && now.getTime() - trusted.lastStartedAt.getTime() > JOB_HEALTH_SCHEDULE[key].graceMs;
+      state = stale || unfinished ? "degraded" : "healthy";
+      reasonCode = stale ? "STALE_RECEIPT" : unfinished ? "POLL_OVERDUE" : "VERIFIED_SUCCESS";
+    } else if (now.getTime() > trusted.lastStartedAt.getTime() + JOB_HEALTH_SCHEDULE[key].graceMs) {
+      state = "degraded"; reasonCode = "POLL_OVERDUE";
+    } else reasonCode = "POLL_IN_PROGRESS";
   }
   return {
     jobKey: key,
@@ -97,8 +99,10 @@ export function projectJobHealth(
     lastSucceededAt: success?.toISOString() ?? null,
     nextExpectedAt: next?.toISOString() ?? null,
     oldestPendingAt: trusted?.oldestPendingAt?.toISOString() ?? null,
-    failedCount: trusted?.failedCount ?? 0,
-    uncertainCount: trusted?.uncertainCount ?? 0,
+    failedCount: trusted?.failedCount ?? null,
+    uncertainCount: trusted?.uncertainCount ?? null,
+    lastVerifiedAt: success?.toISOString() ?? null,
+    reasonCode,
     state,
   };
 }

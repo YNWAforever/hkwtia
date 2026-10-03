@@ -10,6 +10,8 @@ const healthLabels = {
   description: "Completed polling only",
   job: "Job",
   state: "Health",
+  reason: "Observation",
+  reasons: {DISABLED: "Disabled by configuration", WORKER_REVISION_UNCONFIGURED: "Worker version not configured", NO_RECEIPT: "No verified polling receipt", INVALID_RECEIPT: "Invalid polling receipt", REVISION_MISMATCH: "Worker version mismatch", POLL_IN_PROGRESS: "Polling not completed", POLL_OVERDUE: "Polling completion overdue", VERIFIED_SUCCESS: "Verified completion", STALE_RECEIPT: "Polling window overdue", FAILED_ITEMS: "Failed items need attention", RECONCILIATION_REQUIRED: "Reconciliation required", CAPABILITY_MISMATCH: "Worker capability mismatch"},
   lastStarted: "Started",
   lastSuccess: "Succeeded",
   nextExpected: "Expected",
@@ -27,6 +29,14 @@ const healthLabels = {
   jobs: Object.fromEntries(HEALTH_JOB_KEYS.map((key) => [key, key])),
 };
 describe("automation health section", () => {
+  it("shows the observation reason and unobserved counters for a missing receipt", () => {
+    render(<AutomationDashboardView action={async () => ({status: "success", code: "scheduled"})} locale="en" labels={en.Admin.automations}
+      dashboard={{asOf:now.toISOString(),counts:{due:0,upcoming:0,failed:0,processing:0},jobs:[],rows:[],nextCursor:null}}
+      health={[projectJobHealth("rate-limit-cleanup", null, now, {WORKER_HEALTH_REVISION:"a".repeat(40)})]} healthLabels={healthLabels} />);
+    expect(screen.getByRole("columnheader", {name:"Observation"})).toBeVisible();
+    expect(screen.getByText("No verified polling receipt")).toBeVisible();
+  });
+
   it("keeps unknown, disabled and confirmed idle distinct with no raw empty-queue health claim", () => {
     render(
       <AutomationDashboardView

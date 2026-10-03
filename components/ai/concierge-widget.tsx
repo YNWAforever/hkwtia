@@ -30,7 +30,34 @@ type TranscriptMessage = Readonly<{
   escalationId?: string | null;
 }>;
 
-type ErrorState = Readonly<{message: string; retryMessage?: string}>;
+type ErrorState = Readonly<{
+  message: string;
+  retryMessage?: string;
+  requestId?: string;
+  manualFallback?: boolean;
+}>;
+class ConciergeHttpError extends Error {
+  constructor(readonly recovery: ErrorState) {
+    super("CONCIERGE_HTTP_ERROR");
+  }
+}
+
+async function httpRecovery(response: Response, labels: ConciergeLabels): Promise<ErrorState> {
+  let input: Record<string, unknown> = {};
+  try { input = record(await response.json()); } catch { /* An empty or non-JSON error has no public details. */ }
+  const code = input.error;
+  const requestId = typeof input.requestId === "string"
+    && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.requestId)
+    ? input.requestId : undefined;
+  const stopped = response.status === 503
+    && (code === "AI_CONFIGURATION_UNAVAILABLE" || code === "AI_DISABLED");
+  const message = response.status === 429 ? labels.rateLimited
+    : response.status === 504 ? labels.timeout
+    : stopped ? code === "AI_DISABLED" ? labels.disabled : labels.configurationUnavailable
+    : response.status >= 500 ? labels.temporarilyUnavailable : labels.requestFailed;
+  return {message, manualFallback: true, ...(requestId ? {requestId} : {}),
+    ...(stopped ? {} : {retryMessage: ""})};
+}
 type DisabledState = Readonly<{taskId: string}>;
 type Props = Readonly<{
   locale: "en" | "zh-HK";
@@ -38,7 +65,7 @@ type Props = Readonly<{
   /** Absent when Turnstile is not configured; the challenge is then skipped. */
   turnstileSiteKey?: string;
   /**
-   * Optional so the label contract (`ConciergeLabels`) stays a closed 31-key tuple and the
+   * Optional so the label contract (`ConciergeLabels`) stays a closed localization contract and the
    * widget's own suite keeps compiling. Absent means no prompt list and no transparency link.
    */
   prompts?: ConciergePrompts;
@@ -397,7 +424,12 @@ export function ConciergeWidget({
         }),
         signal: controller.signal,
       });
-      if (!response.ok || !response.body) throw new Error("REQUEST_FAILED");
+      if (!response.ok) {
+        const recovery = await httpRecovery(response, labels);
+        throw new ConciergeHttpError({...recovery,
+          ...(recovery.retryMessage === undefined ? {} : {retryMessage: normalized})});
+      }
+      if (!response.body) throw new Error("REQUEST_FAILED");
 
       await readSse(response.body, ({event, data}) => {
         if (!mountedRef.current || controller.signal.aborted) return;
@@ -462,7 +494,7 @@ export function ConciergeWidget({
             current.filter((item) => item.id !== assistantId),
           );
         }
-        setError({
+        setError(caught instanceof ConciergeHttpError ? caught.recovery : {
           message: labels.error,
           ...(errorEscalationId ? {} : {retryMessage: normalized}),
         });
@@ -581,7 +613,7 @@ export function ConciergeWidget({
         </Dialog.Trigger>
       </div>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
+        <Dialog.Overlay className="fixed inset-0 z-[600] bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
         <Dialog.Content
           id={dialogId}
           onOpenAutoFocus={(event) => {
@@ -595,7 +627,7 @@ export function ConciergeWidget({
             externalInvokerRef.current = null;
             externalInvoker.focus();
           }}
-          className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
+          className="fixed left-1/2 top-1/2 z-[610] flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
         >
           <header className="relative border-b border-border px-5 py-4 pr-16">
             <Dialog.Title className="editorial-serif text-xl font-semibold">
@@ -775,9 +807,16 @@ export function ConciergeWidget({
             <div aria-live="assertive" className="px-4">
               {error ? (
                 <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
-                  <p role="alert" className="text-sm text-destructive">
+                  <p role="alert" className="text-sm text-foreground">
                     {error.message}
                   </p>
+                  {error.requestId ? <p className="mt-2 break-all text-sm">
+                    {interpolate(labels.reference, {id: error.requestId})}
+                  </p> : null}
+                  {error.manualFallback ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                    <a href={localizedPath(locale, "/join")} className="inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{labels.applicationGuide}</a>
+                    <a href={localizedPath(locale, "/contact")} className="inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{labels.contactSupport}</a>
+                  </div> : null}
                   {error.retryMessage ? (
                     <Button
                       type="button"

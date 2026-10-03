@@ -1,0 +1,17 @@
+{
+  "sourceSha": "711db049fff48c064d0122338378c07a200a2aec",
+  "runtime": "next start / NODE_ENV=production",
+  "observedAt": "2026-10-03T09:55:16.944Z",
+  "productionDeployment": false,
+  "realProviderAcceptance": false,
+  "checks": [
+    {
+      "mode": "timing",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Agents disabled; test provider keys absent; no AI request made"
+    }
+  ]
+}

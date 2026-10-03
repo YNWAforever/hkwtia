@@ -4,7 +4,7 @@ import {
   AutomationRetryForm,
   type RetryAutomationAction,
 } from "@/components/admin/automation-retry-form";
-import type {JobHealth} from "@/lib/jobs/health";
+import type {JobHealth, JobHealthReasonCode} from "@/lib/jobs/health";
 import type {AutomationDashboard} from "@/lib/admin/automations";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
@@ -44,7 +44,7 @@ export type AutomationDashboardLabels = Readonly<{
   next: string;
 }>;
 
-export type JobHealthLabels=Readonly<{heading:string;description:string;job:string;state:string;lastStarted:string;lastSuccess:string;nextExpected:string;oldestPending:string;failed:string;uncertain:string;deployment:string;unobserved:string;states:Readonly<Record<JobHealth["state"],string>>;jobs:Readonly<Record<string,string>>}>;
+export type JobHealthLabels=Readonly<{heading:string;description:string;job:string;state:string;reason:string;reasons:Readonly<Record<JobHealthReasonCode,string>>;lastStarted:string;lastSuccess:string;nextExpected:string;oldestPending:string;failed:string;uncertain:string;deployment:string;unobserved:string;states:Readonly<Record<JobHealth["state"],string>>;jobs:Readonly<Record<string,string>>}>;
 
 type AutomationDashboardViewProps = Readonly<{
   action: RetryAutomationAction;
@@ -103,12 +103,13 @@ export function AutomationDashboardView({
         <h2 id="verified-worker-health" className="font-serif text-2xl font-semibold">{healthLabels.heading}</h2>
         <div className="overflow-x-auto rounded-md border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" role="group" aria-label={healthLabels.heading} tabIndex={0}>
           <table className="min-w-full text-left text-sm"><caption className="p-3 text-left text-muted-foreground">{healthLabels.description}</caption>
-           <thead><tr>{[healthLabels.job,healthLabels.state,healthLabels.lastStarted,healthLabels.lastSuccess,healthLabels.nextExpected,healthLabels.oldestPending,healthLabels.failed,healthLabels.uncertain,healthLabels.deployment].map(label=><th scope="col" key={label} className="whitespace-nowrap border-y bg-muted/40 px-3 py-3">{label}</th>)}</tr></thead>
+           <thead><tr>{[healthLabels.job,healthLabels.state,healthLabels.reason,healthLabels.lastStarted,healthLabels.lastSuccess,healthLabels.nextExpected,healthLabels.oldestPending,healthLabels.failed,healthLabels.uncertain,healthLabels.deployment].map(label=><th scope="col" key={label} className="whitespace-nowrap border-y bg-muted/40 px-3 py-3">{label}</th>)}</tr></thead>
            <tbody>{health.map(job=><tr key={job.jobKey} className="border-b last:border-0">
             <th scope="row" className="px-3 py-3 font-medium">{healthLabels.jobs[job.jobKey]}</th>
             <td className="px-3 py-3"><span className="whitespace-nowrap rounded-md bg-muted px-2 py-1">{healthLabels.states[job.state]}</span></td>
-            {[job.lastStartedAt,job.lastSucceededAt,job.nextExpectedAt,job.oldestPendingAt].map((date,index)=><td key={index} className="whitespace-nowrap px-3 py-3">{date?<time dateTime={date}>{displayDate(date)}</time>:healthLabels.unobserved}</td>)}
-            <td className="px-3 py-3 tabular-nums">{job.deploymentSha?job.failedCount:healthLabels.unobserved}</td><td className="px-3 py-3 tabular-nums">{job.deploymentSha?job.uncertainCount:healthLabels.unobserved}</td>
+            <td className="px-3 py-3">{healthLabels.reasons[job.reasonCode]}</td>
+            {[job.lastStartedAt,job.lastVerifiedAt,job.nextExpectedAt,job.oldestPendingAt].map((date,index)=><td key={index} className="whitespace-nowrap px-3 py-3">{date?<time dateTime={date}>{displayDate(date)}</time>:healthLabels.unobserved}</td>)}
+            <td className="px-3 py-3 tabular-nums">{job.failedCount===null?healthLabels.unobserved:job.failedCount}</td><td className="px-3 py-3 tabular-nums">{job.uncertainCount===null?healthLabels.unobserved:job.uncertainCount}</td>
             <td className="px-3 py-3">{job.deploymentSha?<code title={job.deploymentSha}>{job.deploymentSha.slice(0,12)}</code>:healthLabels.unobserved}</td>
            </tr>)}</tbody>
           </table>

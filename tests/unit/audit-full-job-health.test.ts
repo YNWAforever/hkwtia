@@ -29,7 +29,7 @@ const row: JobHealthSnapshot = {
 };
 afterEach(() => vi.unstubAllEnvs());
 describe("verified poll health and scheduling", () => {
-  it("missing heartbeat or different deployed revision is unknown, never healthy", () => {
+  it("missing heartbeat is unknown; a different deployed revision needs attention", () => {
     expect(projectJobHealth(row.jobKey, null, now, env).state).toBe("unknown");
     expect(
       projectJobHealth(
@@ -38,7 +38,7 @@ describe("verified poll health and scheduling", () => {
         now,
         env,
       ).state,
-    ).toBe("unknown");
+    ).toBe("degraded");
   });
   it("successful empty polling is healthy but start alone is not success", () => {
     expect(projectJobHealth(row.jobKey, row, now, env).state).toBe("healthy");
@@ -104,10 +104,10 @@ describe("verified poll health and scheduling", () => {
         now,
         env,
       ).state,
-    ).toBe("unknown");
+    ).toBe("degraded");
     expect(
       projectJobHealth(row.jobKey, {...row, failedCount: NaN}, now, env).state,
-    ).toBe("unknown");
+    ).toBe("degraded");
   });
   it("monthly and UTC/HKT day edges use actual registered cron times", () => {
     expect(

@@ -1,0 +1,39 @@
+{
+  "sourceCommit": "0f7e48e2",
+  "red": {
+    "command": "npx vitest run tests/unit/worker-readiness-reasons.test.ts tests/unit/login-case-continuation.test.ts",
+    "workerAssertionsFailed": 7,
+    "combinedFailures": 12,
+    "combinedPassed": 6,
+    "uiCommand": "npx vitest run tests/unit/job-health-dashboard.test.tsx",
+    "uiFailed": 1,
+    "uiPassed": 1
+  },
+  "green": {
+    "command": "npx vitest run tests/unit/worker-readiness-reasons.test.ts tests/unit/audit-full-job-health.test.ts tests/unit/job-health-dashboard.test.tsx",
+    "passed": 21,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "isolatedRepository": {
+    "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-job-health.test.ts",
+    "passed": 7,
+    "skipped": 0,
+    "exitCode": 0,
+    "projectId": "solitary-wave-52860119",
+    "branchId": "br-lingering-unit-azxl75s5",
+    "databaseHost": "ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech",
+    "sentinelCount": 1,
+    "migrationCount": 56,
+    "outsideReservedTestProfiles": 0,
+    "syntheticFixturesOnly": true,
+    "ownedCleanupOnly": true
+  },
+  "twoCloudWindows": "NOT_TESTED",
+  "liveMessages": 0,
+  "productionDeployment": false,
+  "flagsEnabled": [],
+  "migrationRequired": false,
+  "sourceCommitPending": false,
+  "verifiedCodeCommit": "2c992618c5c737b98d911c086195db312a21de6f"
+}

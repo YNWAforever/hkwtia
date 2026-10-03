@@ -1,0 +1,59 @@
+{
+  "codeCommit": "beba47e7",
+  "sourceShaPendingFinalCommit": true,
+  "routeRed": {
+    "failed": 5,
+    "passed": 1,
+    "behavior": "Missing/invalid/reused cookie secret and disabled mode threw rather than returning a safe response",
+    "command": "npx vitest run tests/unit/concierge-readiness.test.ts"
+  },
+  "uiRed": {
+    "failed": 6,
+    "passed": 1,
+    "behavior": "HTTP configuration/provider/rate/timeout errors were all rendered as network failure",
+    "command": "npx vitest run tests/unit/concierge-unavailable-ui.test.tsx"
+  },
+  "focusedGreen": {
+    "command": "npx vitest run tests/unit/concierge-readiness.test.ts tests/unit/concierge-unavailable-ui.test.tsx tests/unit/concierge-widget.test.tsx tests/unit/concierge-security.test.ts tests/unit/concierge-service.test.ts tests/unit/env-contract.test.ts",
+    "passed": 91,
+    "files": 6,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "nativeBrowser": {
+    "passed": 8,
+    "skipped": 0,
+    "providerCalls": 0,
+    "agentRunDelta": 0,
+    "staffTaskDelta": 0,
+    "runtime": "next start; NODE_ENV=production",
+    "profiles": "missing cookie secret; explicitly disabled",
+    "host": "localhost",
+    "browsers": "Playwright Chromium",
+    "viewports": [
+      1440,
+      390
+    ],
+    "locales": [
+      "en",
+      "zh-HK"
+    ],
+    "seriousCriticalAxe": 0,
+    "command": "node --env-file=.env.local .playwright/full-fix-t01-browser.mjs",
+    "harness": "ignored credential-free test orchestration; permanent cases tests/e2e/concierge-readiness.spec.ts",
+    "stackingRegression": "PASS across all 8 cases",
+    "observedAt": "2026-10-03T08:57:21.742Z"
+  },
+  "configurationSuccess": "NOT_TESTED_WITH_REAL_PROVIDER",
+  "productionDeployment": false,
+  "migrationRequired": false,
+  "visualRed": {
+    "contrastCasesFailed": 4,
+    "stackingCasesFailed": 1
+  },
+  "sourceCommitPending": false,
+  "verifiedRuntimeCommit": "2c992618c5c737b98d911c086195db312a21de6f",
+  "finalNativeReceipt": "browser-receipt-final.json",
+  "finalNativePassed": 8,
+  "finalNativeSkipped": 0
+}

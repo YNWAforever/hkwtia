@@ -1,4 +1,4 @@
-import {aiOpsMonthlyMetricSchema, type AiOpsMonthlyMetric} from "@/lib/aiops/contracts";
+import {aiOpsMonthlyMetricSchema, unmeasuredOperationsImpact, type UnmeasuredOperationsImpact, type AiOpsMonthlyMetric} from "@/lib/aiops/contracts";
 
 const FRESHNESS_MS = 120 * 60 * 1000;
 
@@ -10,6 +10,7 @@ export type AiOpsDashboardState =
       current: AiOpsMonthlyMetric;
       months: readonly AiOpsMonthlyMetric[];
       ageMs: number;
+      operationsImpact: UnmeasuredOperationsImpact;
     }>
   | Readonly<{
       status: "empty";
@@ -86,6 +87,7 @@ export function buildAiOpsDashboardState(
     current,
     months,
     ageMs,
+    operationsImpact: unmeasuredOperationsImpact,
   });
 }
 
