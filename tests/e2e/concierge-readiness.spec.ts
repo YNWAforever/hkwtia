@@ -12,9 +12,19 @@ for (const locale of ["en", "zh-HK"] as const) for (const width of [1440, 390]) 
     await page.setViewportSize({width, height: 900});
     const prefix = locale === "zh-HK" ? "/zh" : "";
     await page.goto(prefix + "/about");
+    expect(new URL(page.url()).origin).toBe(new URL(test.info().project.use.baseURL!).origin);
     const launcher = page.getByRole("button", {name: labels.launcher});
     await launcher.click();
     const dialog = page.getByRole("dialog", {name: labels.title});
+    const layers = await page.evaluate(() => {
+      const dialog = document.querySelector('[role="dialog"]')!;
+      const background = [...document.querySelectorAll(".site-header, .announcement, .concierge, .mobile-menu")]
+        .filter((element) => element.getClientRects().length > 0)
+        .map((element) => Number(getComputedStyle(element).zIndex) || 0);
+      return {dialog: Number(getComputedStyle(dialog).zIndex), background};
+    });
+    expect(layers.background.length).toBeGreaterThan(0);
+    expect(layers.dialog).toBeGreaterThan(Math.max(...layers.background));
     const composer = dialog.getByRole("textbox", {name: labels.messageLabel});
     await expect(composer).toBeFocused();
     const question = locale === "zh-HK" ? "合成驗收：如何申請入會？" : "Synthetic acceptance: how do I apply?";

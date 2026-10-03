@@ -613,7 +613,7 @@ export function ConciergeWidget({
         </Dialog.Trigger>
       </div>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
+        <Dialog.Overlay className="fixed inset-0 z-[600] bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
         <Dialog.Content
           id={dialogId}
           onOpenAutoFocus={(event) => {
@@ -627,7 +627,7 @@ export function ConciergeWidget({
             externalInvokerRef.current = null;
             externalInvoker.focus();
           }}
-          className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
+          className="fixed left-1/2 top-1/2 z-[610] flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
         >
           <header className="relative border-b border-border px-5 py-4 pr-16">
             <Dialog.Title className="editorial-serif text-xl font-semibold">
@@ -807,7 +807,7 @@ export function ConciergeWidget({
             <div aria-live="assertive" className="px-4">
               {error ? (
                 <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
-                  <p role="alert" className="text-sm text-destructive">
+                  <p role="alert" className="text-sm text-foreground">
                     {error.message}
                   </p>
                   {error.requestId ? <p className="mt-2 break-all text-sm">
