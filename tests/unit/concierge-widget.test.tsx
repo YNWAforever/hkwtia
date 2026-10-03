@@ -46,6 +46,13 @@ const labels: ConciergeLabels = {
   verificationLabel: "Human verification",
   verificationPending: "Complete the verification check to send your message.",
   verificationError: "Verification is unavailable. Reload the page and try again.",
+  configurationUnavailable: "AI support is temporarily unavailable. You can still apply for membership or contact WTIA.",
+  temporarilyUnavailable: "WTIA Concierge is temporarily unavailable. Please try again later or contact WTIA.",
+  rateLimited: "Too many requests. Please wait before trying again.",
+  timeout: "WTIA Concierge took too long to respond. Please try again later.",
+  requestFailed: "Your question could not be sent. Please try again later or contact WTIA.",
+  applicationGuide: "Apply for membership",
+  contactSupport: "Contact WTIA",
 };
 
 function widget(): ReactElement {

@@ -2551,7 +2551,14 @@
     "characterCount": "{count} / 2000",
     "verificationLabel": "真人驗證",
     "verificationPending": "請完成驗證檢查以傳送訊息。",
-    "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
+    "verificationError": "目前無法進行驗證。請重新載入頁面再試。",
+    "configurationUnavailable": "AI 客服暫時無法使用。你仍可申請入會或聯絡 WTIA。",
+    "temporarilyUnavailable": "WTIA 客服暫時無法回覆，請稍後重試或聯絡 WTIA。",
+    "rateLimited": "查詢次數過多，請稍候再試。",
+    "timeout": "WTIA 客服回覆逾時，請稍後重試。",
+    "requestFailed": "暫時未能送出查詢，請稍後重試或聯絡 WTIA。",
+    "applicationGuide": "申請入會",
+    "contactSupport": "聯絡 WTIA"
   },
   "Admin": {
     "jobHealth": {

@@ -1,3 +1,4 @@
+import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
 import {
@@ -11,6 +12,7 @@ import {
   type AnonymousOwnership,
 } from "@/lib/ai/conversation-cookie";
 import {createOpenAIEmbeddingAdapter} from "@/lib/ai/embeddings";
+import {getAiReadiness} from "@/lib/ai/readiness";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {
   createM4AAcceptanceBoundary,
@@ -304,8 +306,26 @@ async function productionHandler(request: Request): Promise<Response> {
       service: m4aAcceptanceBoundary.service,
     })(acceptanceRequest);
   }
-  const env = aiEnv();
-  const expectedOrigin = appEnv().appUrl || new URL(request.url).origin;
+  const readiness = getAiReadiness();
+  const unavailable = (error: "AI_DISABLED" | "AI_CONFIGURATION_UNAVAILABLE", diagnostic = readiness) => {
+    const requestId = randomUUID();
+    console.warn("CONCIERGE_READINESS", {requestId, code: diagnostic.code, missingKeys: diagnostic.missingKeys});
+    return Response.json({error, requestId}, {
+      status: 503,
+      headers: {"cache-control": "no-store", "x-request-id": requestId},
+    });
+  };
+  if (readiness.state !== "ready") {
+    return unavailable(readiness.state === "disabled" ? "AI_DISABLED" : "AI_CONFIGURATION_UNAVAILABLE");
+  }
+  let env: ReturnType<typeof aiEnv>;
+  let expectedOrigin: string;
+  try {
+    env = aiEnv();
+    expectedOrigin = appEnv().appUrl || new URL(request.url).origin;
+  } catch {
+    return unavailable("AI_CONFIGURATION_UNAVAILABLE", {state: "misconfigured", code: "CONFIG_INVALID", missingKeys: []});
+  }
   const service = createConciergeService({
     agentsEnabled: env.agentsEnabled,
     model: env.agentModelConcierge,
