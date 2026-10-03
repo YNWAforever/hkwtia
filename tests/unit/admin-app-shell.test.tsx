@@ -15,7 +15,8 @@ describe("admin workspace shell", () => {
   it("retains every existing destination and marks the longest matching link", () => {
     render(<AdminAppShell {...props}><h1>Member detail</h1></AdminAppShell>);
     const nav = screen.getByRole("navigation", {name: "navigation.label"});
-    expect(within(nav).getAllByRole("link")).toHaveLength(25);
+    expect(within(nav).getAllByRole("link")).toHaveLength(26);
+    expect(within(nav).getByRole("link", {name: "navigation.knowledge"})).toHaveAttribute("href", "/zh/admin/knowledge");
     expect(within(nav).getByRole("link", {name: "navigation.members"})).toHaveAttribute("aria-current", "page");
     expect(within(nav).getByRole("link", {name: "navigation.members"})).toHaveAttribute("href", "/zh/admin/members");
   });
