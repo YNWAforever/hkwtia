@@ -362,6 +362,8 @@ export const memberships = pgTable(
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
     index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),
+    index("memberships_renewal_window_idx").on(table.billingPeriodEnd,table.id)
+      .where(sql`${table.billingPeriodEnd} IS NOT NULL AND ${table.status} IN ('active','past_due') AND ${table.cancelAtPeriodEnd}=false AND ${table.billingInterval}<>'none' AND ${table.grantEffectiveAt} IS NULL AND ${table.grantExpiresAt} IS NULL`),
     index("memberships_grant_expires_at_idx").on(table.grantExpiresAt),
   ],
 );
@@ -481,6 +483,10 @@ export const journeyState = pgTable("journey_state", {
 }, (table) => [
   unique("journey_state_profile_instance_step_unique").on(table.profileId, table.journey, table.instanceKey, table.step),
   unique("journey_state_delivery_key_unique").on(table.deliveryKey),
+  // Normalize old/new period keys without changing retained delivery receipts or retry clocks.
+  uniqueIndex("journey_state_renewal_episode_unique").on(table.membershipId,table.step,
+    sql`regexp_replace(${table.instanceKey},'^period:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:','period:')`)
+    .where(sql`${table.journey}='renewal' AND ${table.membershipId} IS NOT NULL`),
   index("journey_state_due_idx").on(table.status, table.scheduledAt),
   index("journey_state_profile_idx").on(table.profileId, table.createdAt),
   index("journey_state_admin_recent_idx")

@@ -1,5 +1,7 @@
 import {describe, expect, it} from "vitest";
 
+import {automationCronActor} from "@/lib/auth/automation-actor";
+import {JOURNEYS} from "@/config/journeys";
 import {systemActor} from "@/lib/auth/authorize";
 import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
 import {
@@ -14,7 +16,7 @@ import type {JourneyEnrollment} from "@/lib/db/repos/journeys";
 import type {Actor, MembershipStatus} from "@/lib/membership/lifecycle";
 
 const now = new Date("2026-07-26T04:00:00.000Z");
-const periodEnd = new Date("2027-07-26T04:00:00.000Z");
+const periodEnd = new Date("2026-08-25T04:00:00.000Z");
 const paymentFailedAt = 1_774_502_400;
 const cancellationAt = 1_777_094_400;
 
@@ -105,15 +107,14 @@ function harness(
   };
   const renewalDependencies: RenewalEnrollmentDependencies = {
     renewals: {
-      async listDue() {
-        return seed
-          .filter((value) => value.billingPeriodEnd !== null)
-          .map((value) => ({
-            membershipId: value.id,
-            profileId: value.ownerUserId
-              ?? (value.applicationId ? `applicant-${value.id}` : null),
-            billingPeriodEnd: value.billingPeriodEnd!,
-          }));
+      async listDue(_actor,input) {
+        const candidates=seed.filter(value=>value.billingPeriodEnd!==null&&input.statuses.includes(value.status)&&value.billingPeriodEnd>=input.from&&value.billingPeriodEnd<input.to)
+          .map(value=>({membershipId:value.id,profileId:value.ownerUserId??(value.applicationId?`applicant-${value.id}`:null),billingPeriodEnd:value.billingPeriodEnd!}))
+          .filter(value=>!JOURNEYS.renewal.every(step=>[...rows.values()].some(row=>row.membershipId===value.membershipId&&row.journey==="renewal"&&row.instanceKey===`period:${value.membershipId}:${value.billingPeriodEnd.toISOString()}`&&row.step===step.key)))
+          .filter(value=>!input.after||value.billingPeriodEnd>input.after.billingPeriodEnd||value.billingPeriodEnd.getTime()===input.after.billingPeriodEnd.getTime()&&value.membershipId>input.after.membershipId)
+          .sort((a,b)=>a.billingPeriodEnd.getTime()-b.billingPeriodEnd.getTime()||a.membershipId.localeCompare(b.membershipId));
+        const items=candidates.slice(0,input.limit),last=items.at(-1);
+        return {items,nextCursor:candidates.length>input.limit&&last?{membershipId:last.membershipId,billingPeriodEnd:last.billingPeriodEnd}:null};
       },
     },
     journeys: dependencies.journeys,
@@ -280,18 +281,18 @@ describe("membership lifecycle journey enrollment", () => {
     const active = membership("renewal", "active", {billingPeriodEnd: periodEnd});
     const free = membership("free", "active", {planCode: "community", billingPeriodEnd: null});
     const test = harness([active, free]);
-    const actor = systemActor("stripe-webhook");
+    const actor = automationCronActor();
 
     const first = await runRenewalReconciliation(actor, now, test.renewalDependencies);
     const second = await runRenewalReconciliation(actor, now, test.renewalDependencies);
 
     const renewal = test.enrollments().filter((value) => value.journey === "renewal");
     expect(renewal).toHaveLength(4);
-    expect(renewal.every((value) => value.instanceKey === `period:${periodEnd.toISOString()}`)).toBe(true);
+    expect(renewal.every((value) => value.instanceKey === `period:${active.id}:${periodEnd.toISOString()}`)).toBe(true);
     expect(renewal.find((value) => value.step === "renewal_90")?.scheduledAt)
       .toEqual(new Date(periodEnd.getTime() - 90 * 86_400_000));
     expect(first).toMatchObject({scanned: 1, createdSteps: 4, existingSteps: 0, skipped: 0, errors: {}});
-    expect(second).toMatchObject({scanned: 1, createdSteps: 0, existingSteps: 4, skipped: 0, errors: {}});
+    expect(second).toMatchObject({scanned: 0, createdSteps: 0, existingSteps: 0, skipped: 0, errors: {}});
   });
 
   it("rejects non-system reconciliation before repository reads", async () => {

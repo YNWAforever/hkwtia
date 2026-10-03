@@ -359,10 +359,10 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** listDue 改為有界參數 {from:Date;to:Date;statuses:readonly Membership["status"][];after:{billingPeriodEnd:Date;membershipId:string}|null;limit:number}，回 {items:RenewalEnrollmentCandidate[];nextCursor:同 after 型別}。window 由 server 根據既有 90/60/30/14 及批准 dunning/winback 規則產生，不能 client 任意注入。
 
-- [ ] **建立行為證據：** 窗口邊界、HKT 跨日、取消/已續會排除、winback 不被錯誤濾走；同 timestamp keyset；checkpoint crash 後補跑；episode 重複 enrol 不多信。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 避免讀全部 billingPeriodEnd 非空 rows；以 (billingPeriodEnd,id) 排序及 checkpoint 分塊，分旅程狀態/窗口處理，不一刀切只 active。transaction 內提交 enrol 與進度或以獨立冪等鍵確保重跑安全；以 EXPLAIN 決定複合/部分索引，保留 granted/免費會籍邊界。
-- [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-renewal-window.test.ts；固定 clock 多窗口 5000+ 合成資料，保存 EXPLAIN 與候選數／漏重比對。
+- [x] **建立行為證據：** 窗口邊界、HKT 跨日、取消/已續會排除、winback 不被錯誤濾走；同 timestamp keyset；checkpoint crash 後補跑；episode 重複 enrol 不多信。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 避免讀全部 billingPeriodEnd 非空 rows；以 (billingPeriodEnd,id) 排序及 checkpoint 分塊，分旅程狀態/窗口處理，不一刀切只 active。transaction 內提交 enrol 與進度或以獨立冪等鍵確保重跑安全；以 EXPLAIN 決定複合/部分索引，保留 granted/免費會籍邊界。
+- [x] **驗證：** npm exec -- vitest run tests/integration/audit-full-renewal-window.test.ts；固定 clock 多窗口 5000+ 合成資料，保存 EXPLAIN 與候選數／漏重比對。
 - [ ] **結案與提交：** 不掃描無關全量會籍；補跑不遺漏/重發；批准政策對應每一旅程。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`perf: bound renewal enrollment and checkpoint progress`。
 
 ### T13 · 批次 all-matching 快照查詢

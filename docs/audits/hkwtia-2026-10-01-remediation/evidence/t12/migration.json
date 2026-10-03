@@ -1,0 +1,11 @@
+{
+  "environment": "confirmed isolated Neon; sentinel verified",
+  "migration": "0053_bounded_renewal_window",
+  "sqlSha256": "9d7f81891d093aae146d08a6d6f011a6b295671fdfad13bf2bb157d772518dd7",
+  "ledgerBefore": 52,
+  "ledgerAfter": 53,
+  "indexDefinition": "CREATE INDEX memberships_renewal_window_idx ON public.memberships USING btree (billing_period_end, id) WHERE ((billing_period_end IS NOT NULL) AND (status = ANY (ARRAY['active'::membership_status, 'past_due'::membership_status])) AND (cancel_at_period_end = false) AND (billing_interval <> 'none'::billing_interval) AND (grant_effective_at IS NULL) AND (grant_expires_at IS NULL))",
+  "membershipFingerprintUnchanged": true,
+  "production": false,
+  "command": "node --env-file=.env.local --import tsx .playwright/migrate-renewal-isolated.mts (guard then actual scripts/db-migrate.ts)"
+}

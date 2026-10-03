@@ -17,10 +17,11 @@ import {automationCronActor} from "@/lib/auth/automation-actor";
 import {
   createRenewalEnrollmentsRepository,
 } from "@/lib/db/repos/renewal-enrollments";
+import {renewalWindow} from "@/lib/automation/renewal-window";
 import {runProductionRenewal} from "@/lib/jobs/runners";
 
 const fixedNow = new Date("2027-01-01T00:00:00.000Z");
-const billingPeriodEnd = new Date("2027-12-31T00:00:00.000Z");
+const billingPeriodEnd = new Date("2027-01-31T00:00:00.000Z");
 const dialect = new PgDialect();
 
 describe("production renewal dependency wiring", () => {
@@ -36,14 +37,14 @@ describe("production renewal dependency wiring", () => {
       if (/SELECT[\s\S]+FROM "memberships"/i.test(command.sql)) {
         return {
           rows: [{
-            membership_id: "membership-1",
+            membership_id: "11111111-1111-4111-8111-111111111111",
             profile_id: "profile-1",
             billing_period_end: billingPeriodEnd,
           }],
         };
       }
       if (/INSERT INTO "journey_state"/i.test(command.sql)) {
-        return {rows: [{id: "journey-state-1"}]};
+        return {rows: [{created:4,existing:0,skipped:0}]};
       }
       throw new Error("UNEXPECTED_RENEWAL_QUERY");
     });
@@ -63,7 +64,7 @@ describe("production renewal dependency wiring", () => {
     expect(sql).toMatch(
       /SELECT .*membership_id.*COALESCE\(.*owner_user_id.*applicant_user_id.*\).*profile_id.*billing_period_end.*FROM "memberships"/i,
     );
-    expect(sql).not.toMatch(
+    expect(sql.slice(0,sql.indexOf('FROM "memberships"'))).not.toMatch(
       /display_name|email|phone|company_id|plan_code|status|stripe_|billing_period_start|created_at|updated_at/i,
     );
   });
@@ -76,10 +77,10 @@ describe("production renewal dependency wiring", () => {
       kind: "system",
       userId: null,
       source: "stripe-webhook",
-    })).rejects.toMatchObject({code: "FORBIDDEN"});
+    },renewalWindow(fixedNow,250))).rejects.toMatchObject({code: "FORBIDDEN"});
     expect(loadDatabase).not.toHaveBeenCalled();
 
     database.execute.mockResolvedValueOnce({rows: []});
-    await expect(repository.listDue(automationCronActor())).resolves.toEqual([]);
+    await expect(repository.listDue(automationCronActor(),renewalWindow(fixedNow,250))).resolves.toEqual({items:[],nextCursor:null});
   });
 });

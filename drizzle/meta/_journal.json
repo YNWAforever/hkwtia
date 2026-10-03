@@ -365,6 +365,20 @@
       "when": 1790864487647,
       "tag": "0052_verified_worker_health",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1790871903634,
+      "tag": "0053_bounded_renewal_window",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1790872472168,
+      "tag": "0054_renewal_episode_compatibility",
+      "breakpoints": true
     }
   ]
 }
