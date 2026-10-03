@@ -46,3 +46,16 @@ Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real
 - `ADMIN_AI_DRAFTS_ENABLED` defaultfalse; only confirmed isolated Preview may settrue. AI caps0/agentsfalse/live sendingclosed. Source review and approve do not send.
 - Final focused89 inclactual PG30 passed0skip; exact-source full CI/native pending. Actual model/Google/magic-link/cloud-worker/provider receipts remain blocked individually.
 - No Production0057/58/59 or new capabilities released. Production revision must be reread before any specific release approval.
+
+
+## T09 application case candidate — 2026-10-04
+
+- PR129 merged main `abad08d4`; source/tree equivalence and final T08 CI/native receipts in evidence/t08/merge.json. Old pending notes above are historical runs, superseded by their final receipts.
+- T09 PR130 has source commits70649149/7c4adaaf and browser-discovered save-feedback fixcdd7872a. Initial7c exact CI6617pass429skip/worker57/all7checks passed, entry/native17 passed; first case run11pass2fail on EN/HK Saved feedback. These are retained as RED/partial receipts, not successful acceptance.
+- Dedicated branch `codex/application-triage-20261003` and `hkwtia-application-triage-20261003.vercel.app`; existing authorized isolated/test credentials only. Fresh same-origin CLI protection access, positive owned DB marker and actual trusted Auth user mapping precede fixtures; no email-based identity merge. Nonprimary/default/protected branch `br-lingering-unit-azxl75s5`, expires2026-10-04T12:00Z, ledger59/sentinel1/outside-reserved-domain0.
+- Review=true only in confirmed isolated Preview. New application generation=false, agents=false and budget caps0 intentionally close dispatch; the application registry remains administratively unapproved. Configuring a key/flag alone does not establish approved data use.
+- No new migration. Production0057/0058/0059 and new capabilities remain unapproved/unreleased in this round. Production read at22:19UTC still36eb/dpl9j READY. main merge is separate from Production release.
+- Sender operational pause is not inferred from RUN_LIVE_WOZTELL=0 (test adapter selection). This case acceptance does not call sender/provider, and verifies unchanged message/membership/billing/budget counts; real cloud-worker/sender readiness still has its own credential/allowlist/window/recipient gates.
+- Platform/data/AI/finance owner must approve the versioned application route/data purpose, controlled administrative test credential and run/day/month caps; T13 real model/usage/invoice receipts follow. Controlled Google/test mailbox and cloud service binding/two real windows remain independently unresolved.
+
+- T09 finalcdd: deploymentdpl_HKFD3MBFZDveZhEbhRv3qoLheMSZ, exactCI6618pass429skip/worker57/all7, actualNative17入口＋13cases all-green full run. 原7c儲存提示消失是真productRED；cdd導航立即URLassert是test timing，改等待目標URL後两項通過，不增加timeout。所有cases消息／會籍／付款／budget delta0；Google/magic-link/realmodel/worker窗口未由此驗證。

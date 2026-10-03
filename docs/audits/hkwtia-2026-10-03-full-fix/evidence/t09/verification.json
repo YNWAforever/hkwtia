@@ -1,0 +1,229 @@
+{
+  "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+  "baseSha": "abad08d4578f9d813d85a4ac44646fb1db7e148f",
+  "commits": [
+    "70649149",
+    "7c4adaaf",
+    "cdd7872a"
+  ],
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/130",
+  "state": "SOURCE_CI_ALL7_ACTUAL_PG43_NATIVE_ENTRY17_AND_DISTINCT_CASE13_PASS_REAL_MODEL_GATES",
+  "redReceipts": [
+    {
+      "name": "triage-red",
+      "sha256": "b2eef69955055f8b37eaeb66b64f9295304e02a5195df90d55e2f3e3ae4d328b",
+      "summary": [
+        "Tests 11 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  1 failed (1)",
+        "Tests  11 failed | 1 passed (12)"
+      ]
+    },
+    {
+      "name": "pg-red",
+      "sha256": "dac135515c8cfbf83aaab491cd16d1925ac9fb7b89178b696976b13301ddb7c5",
+      "summary": [
+        "Tests 3 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  1 failed (1)",
+        "Tests  3 failed | 1 passed (4)"
+      ]
+    },
+    {
+      "name": "facts-red",
+      "sha256": "b8b3868fae35902876992f10af4b6cf608fc516cfab77e7eb9483c2ccaa89592",
+      "summary": [
+        "Tests 1 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 4 passed (5)"
+      ]
+    },
+    {
+      "name": "generation-behavior-red",
+      "sha256": "bde0d716d921f3bee3c711bb9fb3c8e2e60c0943ae540a226dfd006f53a4ab83",
+      "summary": [
+        "Tests 6 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  2 failed (2)",
+        "Tests  6 failed | 5 passed (11)"
+      ]
+    },
+    {
+      "name": "recovery-red",
+      "sha256": "e85e7d3d599903ae3293d698b2ea545a725c91f2bdd07005a2bb8ae567b41db5",
+      "summary": [
+        "Tests 1 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 10 passed (11)"
+      ]
+    },
+    {
+      "name": "action-red",
+      "sha256": "a28b46cffb1d9578fd54c22e4b03d94aa7dea6c05783246668e218f219673681",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  no tests"
+      ]
+    },
+    {
+      "name": "ui-request-red",
+      "sha256": "d6db4bc160a9cd97f8e235f30771a78d5524d682a467c57b0902de26d22e8057",
+      "summary": [
+        "Tests 3 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  2 failed | 1 passed (3)",
+        "Tests  3 failed | 19 passed (22)"
+      ]
+    },
+    {
+      "name": "adoption-red",
+      "sha256": "f6db74e3bfa3a248c251a949f6eeb8c6cc5a8134b0249bd7124be30cab529e4d",
+      "summary": [
+        "Tests 1 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 11 passed (12)"
+      ]
+    },
+    {
+      "name": "action-adoption-red",
+      "sha256": "bae20fd6af9c7918c047dddd2ea103a1b99672cbfa739743c8936abe7db3b804",
+      "summary": [
+        "Tests 6 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  2 failed (2)",
+        "Tests  6 failed | 10 passed (16)"
+      ]
+    },
+    {
+      "name": "adopt-ui-red",
+      "sha256": "a59da52445cec2190fc1c41a644ada245e09434d15ae72425758c9488d3ca7ae",
+      "summary": [
+        "Tests 3 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  2 failed (2)",
+        "Tests  3 failed | 6 passed (9)"
+      ]
+    },
+    {
+      "name": "Actual native EN/HK Saved feedback loss",
+      "sourceSha": "7c4adaaf",
+      "receipt": "native-refresh-red.json",
+      "productFail": 2,
+      "fixedIn": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516"
+    }
+  ],
+  "focused": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/ai-application-triage.test.ts tests/integration/ai-draft-review.test.ts tests/unit/ai-application-runtime.test.ts tests/unit/ai-application-triage.test.ts tests/unit/application-draft-actions.test.ts tests/unit/application-draft-adopt.test.tsx tests/unit/application-case-form.test.tsx tests/unit/application-case-actions.test.ts tests/unit/application-return.test.ts tests/unit/ai-draft-work-boundary.test.ts tests/unit/ai-draft-runtime.test.ts tests/unit/ai-runtime.test.ts tests/unit/server-action-actor-boundary.test.ts tests/unit/admin-unsaved-changes-guard.test.tsx --maxWorkers=1",
+    "files": 13,
+    "pass": 213,
+    "skip": 0,
+    "actualPg": 43,
+    "actualPgKinds": {
+      "T09": 13,
+      "T08regression": 30
+    },
+    "provider": "explicit simulation; not a real model receipt",
+    "verifiedSourceSha": "7c4adaafdf984a7259cb30a1d07cc1f588ad2846"
+  },
+  "full": {
+    "command": "npm test -- --maxWorkers=2",
+    "filesPass": 785,
+    "filesSkipped": 92,
+    "pass": 6616,
+    "skip": 429,
+    "fail": 0,
+    "durationSeconds": 845.26,
+    "verifiedSourceSha": "7c4adaafdf984a7259cb30a1d07cc1f588ad2846"
+  },
+  "gates": {
+    "lint": {
+      "command": "npm run lint",
+      "errors": 0,
+      "warnings": 91
+    },
+    "typecheck": {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    "build": {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    "strings": {
+      "command": "npm run audit:strings",
+      "tsxScanned": 315,
+      "exitCode": 0
+    }
+  },
+  "correctionsNotProductReds": [
+    "initial test collection syntax/type errors",
+    "uuid=text fixture SQL cast",
+    "SELECT FOR UPDATE falsely matched a source regex",
+    "stored due date retains original ISO formatting",
+    "synchronous page.url assertion before navigation; corrected to await target URL, then actual full13 PASS",
+    "Playwright afterAll fixture signature must destructure; collection error corrected before final run",
+    "Per-worker receipt files retain history after test failure/worker restart"
+  ],
+  "migration": {
+    "required": false,
+    "ledger": 59,
+    "productionMigrations": false
+  },
+  "productionReleased": false,
+  "gatesRemaining": [
+    "Approved administrative application model route/data purpose, controlled test key and run/day/month caps",
+    "T13 real-model wording/usage/invoice receipts",
+    "Google/magic-link controlled identity/inbox, cloud-worker windows and remaining business tasks"
+  ],
+  "ci": {
+    "runId": 37159746981,
+    "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "allChecksSuccess": 7,
+    "pass": 6618,
+    "skip": 429,
+    "workerPass": 57,
+    "lintErrors": 0,
+    "lintWarnings": 75,
+    "stringsTsx": 315,
+    "logSha256": "50ddffc51869cde269a0ecc2472e0c508b0ba48ec5abd439632dd4f99bcda817"
+  },
+  "entryNative": {
+    "pass": 17,
+    "providerRequests": 0,
+    "actualNeonPasswordAuth": true,
+    "isolatedRuntimePositivelyProven": true,
+    "ledger": 59,
+    "production": false
+  },
+  "priorCi": {
+    "runId": 37158909371,
+    "sourceSha": "7c4adaafdf984a7259cb30a1d07cc1f588ad2846",
+    "allChecksSuccess": 7,
+    "pass": 6617,
+    "skip": 429,
+    "workerPass": 57,
+    "lintErrors": 0,
+    "lintWarnings": 75,
+    "stringsTsx": 315,
+    "logSha256": "03bdf113489644d2114b494ebb98a64a31686b70b560ee22dacef7cd244cdf8f",
+    "localVsCi": "Windows local command6616 vs Ubuntu CI6617; recorded separately without combining totals"
+  },
+  "realProviderRequests": 0,
+  "finalFocused": {
+    "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "pass": 13,
+    "skip": 0,
+    "files": 3,
+    "purpose": "Refreshed case retains fields and disables stale writes; independent editor guards/adoption preserved",
+    "command": "node node_modules/vitest/vitest.mjs run tests/unit/application-case-form.test.tsx tests/unit/application-draft-adopt.test.tsx tests/unit/admin-unsaved-changes-guard.test.tsx --maxWorkers=1"
+  },
+  "nativeCases": {
+    "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "verifiedDistinctCases": 13,
+    "runs": [
+      {
+        "pass": 13,
+        "fail": 0
+      }
+    ],
+    "singleAllGreenFullRun": true,
+    "evidence": "native-combined-receipt.json",
+    "modelProvider": "none; synthetic fixtures",
+    "businessDelta": 0,
+    "command": "node --env-file=.env.local .playwright/full-fix-t09-run-native.mjs (Playwright current tracked ai-application-triage.spec.ts; trace/video off)"
+  }
+}

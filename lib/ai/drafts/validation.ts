@@ -270,3 +270,20 @@ export function validateDraft(
     violations.push({ field: "factsHash", code: "FACTS_CHANGED" });
   return { valid: violations.length === 0, violations };
 }
+
+/** Claims are derived from the whole fact tokens and trusted reader, never from model-reported assertions. Unknown tokens remain validation violations. */
+export function claimsForGroundedTemplate(
+  body: string,
+  facts: ApprovedFactPack,
+): GroundedContent["claims"] {
+  const fields = [
+    ...new Set([...body.matchAll(factToken)].map((match) => match[1])),
+  ];
+  return fields
+    .filter((field) => Object.hasOwn(facts.values, field))
+    .map((field) => ({
+      field,
+      value: facts.values[field].value,
+      sourceId: facts.values[field].sourceId,
+    }));
+}

@@ -1,0 +1,142 @@
+{
+  "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+  "baseSha": "abad08d4578f9d813d85a4ac44646fb1db7e148f",
+  "files": [
+    {
+      "path": ".env.example",
+      "gitBlobSha256": "40fb2b36f47bc3e0111dc7ca522b5622ef734155924c5178104816e7452dcfb5"
+    },
+    {
+      "path": "app/[locale]/(admin)/admin/members/queue/[id]/page.tsx",
+      "gitBlobSha256": "844e9be32d2602306065b05d74f0df0bb99139063c40136acf57f9d91834e670"
+    },
+    {
+      "path": "app/[locale]/(admin)/admin/members/queue/page.tsx",
+      "gitBlobSha256": "2bd5d0c38771a60022a10a63f11b6eeb3d92e96960c4594badb2adbb6a555be3"
+    },
+    {
+      "path": "components/admin/application-case-form.tsx",
+      "gitBlobSha256": "cb72f6caa1b3bc3a1974b7359a8cf04a016fc4f3e9c9c65177b1e05285fe6b3b"
+    },
+    {
+      "path": "components/admin/application-draft-adopt.tsx",
+      "gitBlobSha256": "6f57d1f0849bfd85146a60619f2327cf676c5b11760e7bc28dfb5a822f82d916"
+    },
+    {
+      "path": "components/admin/application-queue-table.tsx",
+      "gitBlobSha256": "a4e684c4c8d6509dc533326cde9f9463e0392498863f3784f7e971545a7f5241"
+    },
+    {
+      "path": "components/admin/unsaved-changes-guard.tsx",
+      "gitBlobSha256": "9e4fe901d9646cb25d4c624eabab5afb167ca72fdfabc28cdbe2d95ceea67987"
+    },
+    {
+      "path": "lib/admin/application-case-service.ts",
+      "gitBlobSha256": "9eae09ebb250fd36c6e22db83e4440279d180c60f4d30122d6701926e1644243"
+    },
+    {
+      "path": "lib/admin/application-draft-actions.ts",
+      "gitBlobSha256": "4cbef73f5e74eacdfbecc59d87b93c25b2e202c30f417ebb90ae9d3082112e41"
+    },
+    {
+      "path": "lib/admin/application-return.ts",
+      "gitBlobSha256": "c7c02e3c69c6cff04d3b109e139ef53b8731b708d61d392f3dded72d637b0cdf"
+    },
+    {
+      "path": "lib/admin/application-triage-types.ts",
+      "gitBlobSha256": "68a772c7403664f1d4b31c07451e62c64167f21ea67246196c7ea3761d4880f0"
+    },
+    {
+      "path": "lib/ai/application-draft-service.ts",
+      "gitBlobSha256": "fea2ed9dd815370b395367169f41f58e1e6d6e21e8c98dc4b632d0c60c63a86a"
+    },
+    {
+      "path": "lib/ai/application-triage.ts",
+      "gitBlobSha256": "47664faf205ad4cf2b1372383e20c32c1b0be173e9a9a85009aca3e650673484"
+    },
+    {
+      "path": "lib/ai/drafts/application-facts.ts",
+      "gitBlobSha256": "310e8c041637259d362fb5dd0e3d5c7fa701dda597154fa5d35537621a91f283"
+    },
+    {
+      "path": "lib/ai/drafts/case-facts.ts",
+      "gitBlobSha256": "e0e57a8aad58eff9a3f60cd290283da07200f3cc141f6521a04298baf568aa0b"
+    },
+    {
+      "path": "lib/ai/drafts/generation.ts",
+      "gitBlobSha256": "7a7b63ee3144f1ae3f8b9b10dd1aa20442a2171caea23786b2f589ee0cd282dc"
+    },
+    {
+      "path": "lib/ai/drafts/validation.ts",
+      "gitBlobSha256": "43d75bd499772577e94b60a866540f0dd0d6a4f4da6628b2337f340975446454"
+    },
+    {
+      "path": "lib/ai/runtime.ts",
+      "gitBlobSha256": "12b8d74e2d0e2af266b6ddb093e7e7910de8768fb5859fd16d76879df2c38d32"
+    },
+    {
+      "path": "lib/db/repos/ai-draft-work.ts",
+      "gitBlobSha256": "cb5b44f2bdaccd744db73b84c15f78b0179b483ac4999eca56e191ed7e869255"
+    },
+    {
+      "path": "lib/db/repos/ai-drafts.ts",
+      "gitBlobSha256": "e8c3c9ed01e4c59dd2f887e6e40fd7c2e049272ac837e7fedc61d45d81b9cdb3"
+    },
+    {
+      "path": "lib/db/repos/applications.ts",
+      "gitBlobSha256": "d75e116d6a0ab6b360b3d0a2a2e781123beb977380cd0c3933f575f5738d0b4f"
+    },
+    {
+      "path": "messages/en.json",
+      "gitBlobSha256": "6b36be36fc17b857ac014814abd5b317d6bac86d101f683de702cf6b61f08bb1"
+    },
+    {
+      "path": "messages/zh-HK.json",
+      "gitBlobSha256": "febcdce4b982e7098be74ceca9d44cb9c3dfb7b40e83f8e00a75c85ca1f93135"
+    },
+    {
+      "path": "scripts/seed-application-draft-acceptance.ts",
+      "gitBlobSha256": "4c9aecaaa050d4b82f59954b3865e827a5aed9e592451bdc4a9dc9610e39309f"
+    },
+    {
+      "path": "tests/e2e/ai-application-triage.spec.ts",
+      "gitBlobSha256": "f1b101a2541e2bb3f710b9463583128fce03193becc0c7eb732f03d9f7b8177f"
+    },
+    {
+      "path": "tests/integration/ai-application-triage.test.ts",
+      "gitBlobSha256": "1eb067a7c090c111b68bda2f1e1aaff82821a1eb6539ead7c611d502f1b671c8"
+    },
+    {
+      "path": "tests/unit/admin-unsaved-changes-guard.test.tsx",
+      "gitBlobSha256": "ea2558c992c855fad00579da1ad5e8e13d5fdf0a7b0e7a03f69589458dd4cdc8"
+    },
+    {
+      "path": "tests/unit/ai-application-runtime.test.ts",
+      "gitBlobSha256": "47815f2ca217bc429abc34401bec7ff1d0c6b3db252a8c430f859879b6a08505"
+    },
+    {
+      "path": "tests/unit/ai-application-triage.test.ts",
+      "gitBlobSha256": "95c3abee2d3bc157b33226e3c021120fb47899ff08133a61ee5c8f647fbc0707"
+    },
+    {
+      "path": "tests/unit/ai-draft-work-boundary.test.ts",
+      "gitBlobSha256": "9ce57070a4c704da338ddf7edb65b81e78c14933ca49f8a35d875e3eb5788c5f"
+    },
+    {
+      "path": "tests/unit/application-case-form.test.tsx",
+      "gitBlobSha256": "db718945e65e0f30b0910225fe729056502d7fc22be5f610b806655b4de77784"
+    },
+    {
+      "path": "tests/unit/application-draft-actions.test.ts",
+      "gitBlobSha256": "b85990b73b7ae493b6fbb85cdf829e83f77bee653eb0bbe32ff2674dc39504f7"
+    },
+    {
+      "path": "tests/unit/application-draft-adopt.test.tsx",
+      "gitBlobSha256": "e210b2337f0dc18ac8e3808e7574d256550acf1d53ad3ffbfae001c71c8d0ab9"
+    },
+    {
+      "path": "tests/unit/application-return.test.ts",
+      "gitBlobSha256": "baafe70c34699882f909c6676ba1f715fdb563c45da9c28423839eb5a635c688"
+    }
+  ]
+}

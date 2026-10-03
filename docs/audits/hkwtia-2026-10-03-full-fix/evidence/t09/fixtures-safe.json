@@ -1,0 +1,13 @@
+{
+  "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+  "origin": "https://hkwtia-application-triage-20261003.vercel.app",
+  "observedAt": "2026-10-03T23:07:27.755Z",
+  "cases": 12,
+  "drafts": 6,
+  "ledger": 59,
+  "currentRoleFromTrustedAuthUserId": true,
+  "isolatedRuntimePositivelyProven": true,
+  "modelProvider": "none-synthetic-fixture",
+  "realProviderRequests": 0,
+  "production": false
+}

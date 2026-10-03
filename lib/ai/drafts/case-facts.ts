@@ -1,4 +1,6 @@
 import "server-only";
+import { readApplicationTriageSource } from "@/lib/db/repos/applications";
+import { applicationDraftFacts } from "./application-facts";
 import { createHash } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -14,6 +16,11 @@ export const readApprovedDraftFacts: ApprovedDraftFactReader = async (
   tx,
 ) => {
   requireAdmin(actor);
+  if (input.kind === "application") {
+    const source = await readApplicationTriageSource(actor, input.caseId, tx);
+    if (!source) throw Error("AI_DRAFT_CASE_UNAVAILABLE");
+    return applicationDraftFacts(source, input.asOf);
+  }
   if (input.kind !== "support") throw Error("AI_DRAFT_FACT_READER_UNAVAILABLE");
   const id = z.string().uuid().parse(input.caseId);
   const result = await tx.execute(

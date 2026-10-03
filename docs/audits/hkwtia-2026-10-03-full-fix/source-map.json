@@ -665,7 +665,7 @@
     "path": "lib/ai/drafts/validation.ts",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -674,7 +674,7 @@
     "path": "lib/db/repos/ai-drafts.ts",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -683,7 +683,7 @@
     "path": "lib/db/repos/ai-draft-work.ts",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -692,7 +692,7 @@
     "path": "lib/db/repos/ai-public-facts.ts",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -701,7 +701,7 @@
     "path": "lib/ai/drafts/case-facts.ts",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -710,7 +710,7 @@
     "path": "lib/admin/ai-draft-actions.ts",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -719,7 +719,7 @@
     "path": "components/admin/ai-review-panel.tsx",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
   },
   {
@@ -728,7 +728,88 @@
     "path": "app/[locale]/(admin)/admin/tasks/page.tsx",
     "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
     "evidenceBasis": "current-checkout",
-    "state": "source committed; final focused89+PG30; exact CI/native pending",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
     "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "deriveApplicationTriage",
+    "path": "lib/ai/application-triage.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "prepareApplicationDraft",
+    "path": "lib/ai/application-draft-service.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "createDraftGenerationService",
+    "path": "lib/ai/drafts/generation.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "readApplicationTriageSource",
+    "path": "lib/db/repos/applications.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "updateApplicationCaseInTransaction",
+    "path": "lib/db/repos/applications.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "adoptApplicationDraft",
+    "path": "lib/admin/application-case-service.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "ApplicationCaseForm",
+    "path": "components/admin/application-case-form.tsx",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "ApplicationDraftAdopt",
+    "path": "components/admin/application-draft-adopt.tsx",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "applicationQueueReturnHref",
+    "path": "lib/admin/application-return.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
   }
 ]

@@ -299,11 +299,11 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `prepareApplicationDraft(actor:AdminActor,applicationId:string):Promise<AdminAiDraft>`；facts 使用現有 case reader，missingFields 由已核准表單規則決定。AI 只起草說明及建議下一步。
 
-- [ ] 寫 draft／pending_payment／pending_review 三個情境；已填欄位不可列缺件；付款處理中不可要求再次付款；不更新 membership status。
-- [ ] Run focused unit 先失敗，再接 T08。
-- [ ] case頁加「整理案件／起草補件通知」，顯示原資料與缺件 checkbox 建議；職員採用時只存跟進decision或建立既有approval。
-- [ ] E2E 驗修改、拒絕、facts更新使草稿stale、雙語及回頁不丟篩選；providerCalls 可stub，另以 T13真模型驗字句。
-- [ ] 保存前後證據，提交 `feat: assist membership application follow-up`。
+- [x] 寫 draft／pending_payment／pending_review 三個情境；已填欄位不可列缺件；付款處理中不可要求再次付款；不更新 membership status。
+- [x] Run focused unit 先失敗，再接 T08。
+- [x] case頁加「整理案件／起草補件通知」，顯示原資料與缺件 checkbox 建議；職員採用時只存跟進decision或建立既有approval。
+- [x] E2E 驗修改、拒絕、facts更新使草稿stale、雙語及回頁不丟篩選；providerCalls 可stub，另以 T13真模型驗字句。
+- [x] 保存前後證據，提交 `feat: assist membership application follow-up`。
 
 
 **AC-05/AC-15：** 欠文件、付款 pending、審批 pending 以現有狀態規則區分，未核准政策時不能 AI 補完規則。負責人與期限變更有 audit、版本衝突；催補只建立草稿。no-profile 登入者必須能建立/恢復自己的申請而不成為 staff；已有申請重進不產生第二份（完整身份驗收由 T14A/B）。
@@ -311,6 +311,9 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Focused verification:** 分別執行 `npx vitest run tests/unit/ai-application-triage.test.ts` 及 `npx playwright test tests/e2e/ai-application-triage.spec.ts`；預期所有適用assertions PASS，外部guard缺失列BLOCKED。
 
+
+
+**本輪證據：** PR130 sourcecdd7872a；實際PG43（UI修正前，核心blobs不變）、exactCI6618pass429skip/worker57/all7、Native17入口＋13不同案件assertions（全輪13通過，原product/timing failures保留）。真模型T13／配置與其他journey gates仍未結案。
 
 ## T10 — 收件匣摘要及來源回覆
 
