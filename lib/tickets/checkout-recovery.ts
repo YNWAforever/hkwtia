@@ -4,7 +4,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
 
 export type TicketRecoveryRecord = Readonly<{
   orderId: string; eventId: string; buyerProfileId: string | null;
-  status: "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed";
+  status: "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed" | "refund_pending";
   seatCount: number; amountHkdCents: number; expiresAt: Date; recoveryExpiresAt: Date;
   stripeCheckoutSessionId: string | null; stripeCheckoutUrl: string | null;
 }>;

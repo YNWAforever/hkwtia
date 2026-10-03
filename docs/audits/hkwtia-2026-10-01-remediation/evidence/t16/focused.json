@@ -1,0 +1,82 @@
+{
+  "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run [18 files listed below] --maxWorkers=1 --reporter=json --outputFile=.playwright/t16-focus-final.json",
+  "environment": "disposable loopback PostgreSQL16; full actual migrations; synthetic only",
+  "passed": 206,
+  "skipped": 0,
+  "failed": 0,
+  "actualSqlCases": 22,
+  "files": [
+    {
+      "path": "tests\\integration\\admin-batch-ticket-resend.test.ts",
+      "cases": 1
+    },
+    {
+      "path": "tests\\integration\\audit-full-ticket-lifecycle.test.ts",
+      "cases": 7
+    },
+    {
+      "path": "tests\\integration\\refund-actor-postgres.test.ts",
+      "cases": 2
+    },
+    {
+      "path": "tests\\integration\\ticket-checkout-recovery-postgres.test.ts",
+      "cases": 2
+    },
+    {
+      "path": "tests\\integration\\ticket-eligibility-postgres.test.ts",
+      "cases": 5
+    },
+    {
+      "path": "tests\\integration\\ticket-email-outbox-postgres.test.ts",
+      "cases": 5
+    },
+    {
+      "path": "tests\\unit\\audit-full-ticket-state.test.tsx",
+      "cases": 2
+    },
+    {
+      "path": "tests\\unit\\event-orders-repository.test.ts",
+      "cases": 33
+    },
+    {
+      "path": "tests\\unit\\orders-table.test.tsx",
+      "cases": 11
+    },
+    {
+      "path": "tests\\unit\\refund-core.test.ts",
+      "cases": 18
+    },
+    {
+      "path": "tests\\unit\\refund-failure.test.ts",
+      "cases": 6
+    },
+    {
+      "path": "tests\\unit\\refund-success.test.ts",
+      "cases": 5
+    },
+    {
+      "path": "tests\\unit\\stripe-ticket-adapter.test.ts",
+      "cases": 18
+    },
+    {
+      "path": "tests\\unit\\ticket-check-in-repository.test.ts",
+      "cases": 23
+    },
+    {
+      "path": "tests\\unit\\ticket-checkout-core.test.ts",
+      "cases": 28
+    },
+    {
+      "path": "tests\\unit\\ticket-email-runner.test.ts",
+      "cases": 11
+    },
+    {
+      "path": "tests\\unit\\ticket-schema-contract.test.ts",
+      "cases": 7
+    },
+    {
+      "path": "tests\\unit\\ticket-webhook.test.ts",
+      "cases": 22
+    }
+  ]
+}

@@ -43,7 +43,7 @@ export async function processRefundSuccess(
   const paymentIntentId = await dependencies.stripe.paymentIntentForSession(order.stripeCheckoutSessionId);
   if (paymentIntentId !== command.paymentIntentId) throw new RefundFailureCorrelationError();
   if (order.status === "refunded") return "duplicate";
-  if (order.status !== "paid" && order.status !== "refund_failed") throw new Error("REFUND_ORDER_NOT_SETTLED");
+  if (order.status !== "paid" && order.status !== "refund_failed" && order.status !== "refund_pending") throw new Error("REFUND_ORDER_NOT_SETTLED");
   if (!await dependencies.stripe.fullyRefundedPaymentIntent(paymentIntentId, order.amountHkdCents)) {
     throw new Error("STRIPE_REFUND_NOT_SUCCEEDED");
   }

@@ -7,7 +7,7 @@ import type {RefundOrderState} from "@/lib/tickets/refund-actions";
 import type {EventOrderRow} from "@/lib/db/repos/event-orders";
 
 export type OrdersLabels = Readonly<{
-  caption: string; empty: string; buyer: string; seats: string; amount: string; status: string; refundedOn: string;
+  caption: string; reference: string; empty: string; buyer: string; seats: string; amount: string; status: string; refundedOn: string;
   refund: string; recheckRefund: string; confirm: string; cancel: string; note: string; statuses: Readonly<Record<string, string>>;
 }>;
 
@@ -38,7 +38,7 @@ export function OrdersTable({action, rows, labels, locale}: Readonly<{action: (s
       <table className="w-full text-left">
         <caption className="sr-only">{labels.caption}</caption>
         <thead><tr>
-          <th scope="col">{labels.buyer}</th><th scope="col">{labels.seats}</th>
+          <th scope="col">{labels.reference}</th><th scope="col">{labels.buyer}</th><th scope="col">{labels.seats}</th>
           <th scope="col">{labels.amount}</th><th scope="col">{labels.status}</th><th scope="col"/>
         </tr></thead>
         <tbody>
@@ -48,6 +48,7 @@ export function OrdersTable({action, rows, labels, locale}: Readonly<{action: (s
             const seatsText = seatNames.join(", ") + (seatCount > seatNames.length ? ` +${seatCount - seatNames.length}` : "");
             return (
             <tr key={order.id}>
+              <td className="font-mono text-xs">{order.id}</td>
               <td>{order.buyerName}</td>
               <td>{seatsText}</td>
               <td>{amountLabel(order.amountHkdCents, locale)}</td>

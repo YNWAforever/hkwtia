@@ -258,17 +258,17 @@ describe("eventOrdersRepository.settlePaid", () => {
   it("refunds a pending payment when the event was cancelled before settlement", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), lockEvent: vi.fn(async () => ({...event, published: false}))});
     await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
-      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason: "cancelled"})});
-    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refunded", expect.objectContaining({refundReason: "cancelled"}));
-    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refunded", metadata: {reason: "event_closed"}}));
-    expect(tx.enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "refund", eventKey: "ticket-refund:order-1:2026-09-14T04:00:00.000Z"});
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refund_pending", refundReason: "cancelled"})});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "cancelled"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", metadata: {reason: "event_closed"}}));
+    expect(tx.enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "refund", eventKey: "ticket-refund:order-1:pending"});
   });
   it("refunds a payment that arrives after the order expired locally", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
     await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
-      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason: "cancelled"})});
-    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refunded", expect.objectContaining({refundReason: "cancelled"}));
-    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refunded", targetId: "order-1", metadata: {reason: "late_payment"}}));
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refund_pending", refundReason: "cancelled"})});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "cancelled"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", targetId: "order-1", metadata: {reason: "late_payment"}}));
   });
 
   it("is a no-op for an order already paid", async () => {
@@ -293,8 +293,8 @@ describe("eventOrdersRepository.settlePaid", () => {
   it("refunds an order that lost the race for the last seat", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 2)});
     await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now)).resolves.toMatchObject({status: "oversold"});
-    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refunded", expect.objectContaining({refundReason: "oversold"}));
-    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refunded", targetId: "order-1", metadata: {reason: "oversold"}}));
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "oversold"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", targetId: "order-1", metadata: {reason: "oversold"}}));
   });
 
   it("does not count the order's own seats against it", async () => {

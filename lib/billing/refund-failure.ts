@@ -41,7 +41,7 @@ export async function processRefundFailure(
   if (order.status === "refund_failed") return "duplicate";
   // A refund can fail while the order is still paid. Record that attempt
   // without revoking a ticket whose charge was never returned.
-  if (order.status !== "refunded" && order.status !== "paid") return "processed";
+  if (order.status !== "refunded" && order.status !== "paid" && order.status !== "refund_pending") return "processed";
   if (await dependencies.stripe.fullyRefundedPaymentIntent(paymentIntentId, order.amountHkdCents)) return "processed";
   if (!await dependencies.orders.markRefundFailed(order.id, command)) return "duplicate";
   try { await dependencies.sendFailureEmail(order, command.eventId); }

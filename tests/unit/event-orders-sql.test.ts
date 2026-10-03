@@ -20,6 +20,7 @@ function proxyDatabase(
   const proxy = drizzle(async (query: string) => {
     statements.push(query);
     if (handlers.updated && /UPDATE "event_orders"/i.test(query) && /RETURNING id/i.test(query)) return {rows: [{id: "order-1"}]};
+    if (handlers.order && /SELECT event_id AS "eventId" FROM "event_orders"/.test(query)) return {rows: [{eventId: handlers.order.event_id}]};
     if (handlers.order && /SELECT \* FROM "event_orders"/.test(query)) return {rows: [handlers.order]};
     if (handlers.event && /FROM "events"/.test(query)) return {rows: [handlers.event]};
     return {rows: []};
@@ -74,7 +75,7 @@ describe("event order status patches", () => {
     const statements: string[] = [];
     database.current = proxyDatabase(statements, {order: orderRow, event: eventRow});
 
-    await createEventOrdersRepository().settlePaid("cs_1", now);
+    expect((await createEventOrdersRepository().settlePaid("cs_1", now)).status).toBe("paid");
 
     const update = statusUpdate(statements);
     expect(update).toMatch(/paid_at/);
@@ -82,16 +83,16 @@ describe("event order status patches", () => {
     expect(update).not.toMatch(/refund_reason/);
   });
 
-  it("writes the refund columns for a refund and leaves paid_at alone", async () => {
+  it("records a late payment as pending refund without a refunded timestamp", async () => {
     const statements: string[] = [];
     database.current = proxyDatabase(statements, {order: {...orderRow, status: "expired"}});
 
-    await createEventOrdersRepository().settlePaid("cs_1", now);
+    expect((await createEventOrdersRepository().settlePaid("cs_1", now)).status).toBe("refund_due");
 
     const update = statusUpdate(statements);
-    expect(update).toMatch(/refunded_at/);
+    expect(update).not.toMatch(/refunded_at/);
     expect(update).toMatch(/refund_reason/);
-    expect(update).not.toMatch(/paid_at/);
+    expect(update).toMatch(/paid_at/);
   });
 
   it("writes no timestamp columns when a transition supplies none", async () => {

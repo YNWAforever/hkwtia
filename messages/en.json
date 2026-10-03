@@ -3452,6 +3452,7 @@
         }
       },
       "orders": {
+        "reference": "Order reference",
         "heading": "Orders",
         "unavailable": "Orders could not be loaded right now.",
         "caption": "Orders",
@@ -3472,7 +3473,7 @@
           "expired": "Expired",
           "failed": "Failed",
           "refunded": "Refunded",
-          "refund_failed": "Refund failed — staff follow-up needed"
+          "refund_failed": "Refund failed — staff follow-up needed", "refund_pending": "Refund awaiting provider confirmation"
         },
         "refundOutcomes": {
           "refunded": "Refunded.",
@@ -3811,7 +3812,7 @@
       "purchaseAmount": "Amount",
       "refundReason": "Refund reason",
       "refundedAt": "Refunded at",
-      "purchaseStatuses": {"pending": "Pending", "paid": "Paid", "expired": "Expired", "failed": "Failed", "refunded": "Refunded", "refund_failed": "Refund failed"},
+      "purchaseStatuses": {"pending": "Pending", "paid": "Paid", "expired": "Expired", "failed": "Failed", "refunded": "Refunded", "refund_failed": "Refund failed", "refund_pending": "Refund awaiting provider confirmation"},
       "refundReasons": {"oversold": "Oversold", "staff": "Staff decision", "cancelled": "Event cancelled"},
       "backToMembers": "Back to member list",
       "historyNav": "Member history",

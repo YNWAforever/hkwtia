@@ -1,6 +1,7 @@
 import "server-only";
 
 import {eq} from "drizzle-orm";
+import {requireAdmin} from "@/lib/auth/authorize";
 
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, eventOrderSeats, eventOrders, events} from "@/lib/db/server-schema";
@@ -125,6 +126,9 @@ export function createTicketCheckInRepository(
         },
         lockEvent: async (eventId) => (await tx.select({status: events.status}).from(events).where(eq(events.id, eventId)).for("update"))[0]?.status ?? null,
         lockSeat: async (seatId) => {
+          await tx.select({id: eventOrders.id}).from(eventOrders)
+            .innerJoin(eventOrderSeats, eq(eventOrderSeats.orderId, eventOrders.id))
+            .where(eq(eventOrderSeats.id, seatId)).for("update", {of: eventOrders});
           const row = (await selectSeat(seatId).for("update", {of: eventOrderSeats}))[0];
           return row ? narrow(row) : null;
         },
@@ -163,6 +167,7 @@ export function createTicketCheckInRepository(
     },
 
     async checkInSeat(actor, input) {
+      requireAdmin(actor);
       const occurredAt = dependencies.now();
       return dependencies.transaction(async (tx) => {
         // Resolve the seat's event, then take the same event-row lock as
@@ -179,18 +184,19 @@ export function createTicketCheckInRepository(
         if (row.checkedInAt) return {disposition: "already_checked_in" as const};
         await tx.update(row.seatId, {checkedInAt: occurredAt});
         const audit = auditFor(row, "event.seat.checked_in");
-        await tx.insertAudit({...audit, actorUserId: actor.userId, actorType: actor.kind});
+        await tx.insertAudit({...audit, actorUserId: actor.profileId, actorType: actor.kind});
         return {disposition: "checked_in" as const};
       });
     },
 
     async undoSeatCheckIn(actor, input) {
+      requireAdmin(actor);
       return dependencies.transaction(async (tx) => {
         const row = await tx.lockSeat(input.seatId);
         if (!row || row.checkedInAt === null) return {disposition: "not_checked_in" as const};
         await tx.update(row.seatId, {checkedInAt: null});
         const audit = auditFor(row, "event.seat.check_in_reversed");
-        await tx.insertAudit({...audit, actorUserId: actor.userId, actorType: actor.kind});
+        await tx.insertAudit({...audit, actorUserId: actor.profileId, actorType: actor.kind});
         return {disposition: "undone" as const};
       });
     },

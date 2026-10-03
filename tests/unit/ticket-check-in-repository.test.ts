@@ -130,7 +130,7 @@ describe("ticket check-in repository", () => {
     expect(update).toHaveBeenCalledWith(seatId, {checkedInAt: occurredAt});
     expect(insertAudit).toHaveBeenCalledTimes(1);
     expect(insertAudit).toHaveBeenCalledWith({
-      actorUserId: "auth-1",
+      actorUserId: "p-1",
       actorType: "staff",
       action: "event.seat.checked_in",
       targetType: "event_order_seat",
@@ -213,7 +213,7 @@ describe("ticket check-in repository", () => {
     expect(update).toHaveBeenCalledWith(seatId, {checkedInAt: null});
     expect(insertAudit).toHaveBeenCalledTimes(1);
     expect(insertAudit).toHaveBeenCalledWith({
-      actorUserId: "auth-1",
+      actorUserId: "p-1",
       actorType: "staff",
       action: "event.seat.check_in_reversed",
       targetType: "event_order_seat",

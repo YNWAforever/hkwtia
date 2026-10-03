@@ -14,6 +14,7 @@ const ORDER_ID = "b1a2c3d4-1111-4222-8333-944455566677";
 
 const labels = {
   caption: "Orders",
+  reference: "Order reference",
   empty: "No orders yet.",
   buyer: "Buyer",
   seats: "Seats",
@@ -25,7 +26,7 @@ const labels = {
   cancel: "Cancel",
   note: "Note",
   confirm: "Refund {buyer}'s seats ({seats}) for {amount}?",
-  statuses: {pending: "Pending", paid: "Paid", expired: "Expired", failed: "Failed", refunded: "Refunded", refund_failed: "Refund failed"},
+  statuses: {pending: "Pending", paid: "Paid", expired: "Expired", failed: "Failed", refunded: "Refunded", refund_failed: "Refund failed", refund_pending: "Refund awaiting provider confirmation"},
 } as const;
 
 function amountLabel(cents: number): string {
