@@ -1,0 +1,17 @@
+{
+  "sourceSha": "bb3369b166dd7f23d1ac09ac5ba9e84e0e954511",
+  "buildId": "YCQ4cFptCbBG63Hk4rtmv",
+  "observedAt": "2026-10-04T12:04:14.595Z",
+  "nativeExit": 1,
+  "ledger": 61,
+  "dbSourcePositivelyProven": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderSends": 0,
+  "realDeliveryReceipt": false,
+  "production": false,
+  "passed": 0,
+  "failed": 2,
+  "target": "Existing event cancellation control contrast4.29:1 at390px; minimum4.5:1; no thresholds relaxed",
+  "repair": "Scoped text-red-800, same cancellation authorization/confirm action"
+}

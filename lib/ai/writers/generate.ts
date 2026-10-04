@@ -172,3 +172,6 @@ export async function generateWriterCopy(input: {
       return runWriterJson({actor, agentConfig, prompt: input.brief, outputSchema: writerOutputSchema.event});
   }
 }
+
+// Staff content drafting has independent authorization and budget governance; member quota path above is unchanged.
+export {prepareContentDraft} from "@/lib/ai/content-drafts";

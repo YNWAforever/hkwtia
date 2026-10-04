@@ -1,0 +1,3840 @@
+{
+  "facts-red": {
+    "success": false,
+    "numPassedTests": 1,
+    "numFailedTests": 5,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": [
+          "T12 authoritative administrative content facts requires unavailable rather than zero for a zero denominator",
+          "T12 authoritative administrative content facts rejects a percentage that disagrees with its actual numerator and denominator",
+          "T12 authoritative administrative content facts validates the final narrative before saving: MRR was HKD 90.",
+          "T12 authoritative administrative content facts validates the final narrative before saving: Revenue increased over the previous month.",
+          "T12 authoritative administrative content facts persists an independently validated Chinese narrative and an application-owned Chinese title"
+        ]
+      }
+    ]
+  },
+  "facts-green": {
+    "success": true,
+    "numPassedTests": 6,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": []
+      }
+    ]
+  },
+  "reuse-red": {
+    "success": false,
+    "numPassedTests": 6,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": [
+          "reuses the existing monthly source result before creating a runtime or calling a provider"
+        ]
+      }
+    ]
+  },
+  "reuse-green": {
+    "success": true,
+    "numPassedTests": 7,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": []
+      }
+    ]
+  },
+  "board-work-red": {
+    "success": false,
+    "numPassedTests": 0,
+    "numFailedTests": 3,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/integration/ai-board-draft-work.test.ts",
+        "failed": [
+          "T12 real PostgreSQL board work/runtime/budget; synthetic provider only claims before the provider and reuses one actual post across concurrent workers and days",
+          "T12 real PostgreSQL board work/runtime/budget; synthetic provider only holds accepted-timeout work and its budget across lease expiry and a new day",
+          "T12 real PostgreSQL board work/runtime/budget; synthetic provider only rejects a changed authoritative fact pack after provider acceptance without creating a post"
+        ]
+      }
+    ]
+  },
+  "pg-current": {
+    "success": true,
+    "numPassedTests": 7,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/integration/ai-admin-content-facts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-board-draft-work.test.ts",
+        "failed": []
+      }
+    ]
+  },
+  "content-red": {
+    "success": false,
+    "numPassedTests": 0,
+    "numFailedTests": 2,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/integration/ai-admin-content-facts.test.ts",
+        "failed": [
+          "T12 authoritative staff content facts in actual isolated PostgreSQL reads typed persisted price, capacity, Hong Kong time and venue separately for both locales",
+          "T12 authoritative staff content facts in actual isolated PostgreSQL changes the authoritative version when persisted business facts change and denies a demoted actor"
+        ]
+      }
+    ]
+  },
+  "content-coverage-red": {
+    "success": false,
+    "numPassedTests": 2,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/integration/ai-admin-content-facts.test.ts",
+        "failed": [
+          "T12 authoritative staff content facts in actual isolated PostgreSQL requires all persisted event details in a copy draft and rejects fabricated benefits"
+        ]
+      }
+    ]
+  },
+  "board-flag-red": {
+    "success": false,
+    "numPassedTests": 0,
+    "numFailedTests": 2,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/board-capability-gate.test.ts",
+        "failed": [
+          "keeps board drafting off before reading provider credentials",
+          "reports an explicitly off board capability as disabled"
+        ]
+      }
+    ]
+  },
+  "editor-race-behavior-red": {
+    "success": false,
+    "numPassedTests": 0,
+    "numFailedTests": 1,
+    "numPendingTests": 4,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-editor.test.tsx",
+        "failed": [
+          "does not overwrite an edit made while approved text is loading"
+        ]
+      }
+    ]
+  },
+  "editor-race-final": {
+    "success": true,
+    "numPassedTests": 5,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-editor.test.tsx",
+        "failed": []
+      }
+    ]
+  },
+  "board-incomplete-red": {
+    "success": false,
+    "numPassedTests": 0,
+    "numFailedTests": 1,
+    "numPendingTests": 7,
+    "files": [
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": [
+          "blocks a historical monthly post with an incomplete run before calling a provider"
+        ]
+      }
+    ]
+  },
+  "repaired-focused": {
+    "success": true,
+    "numPassedTests": 132,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/integration/m4c-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-admin-content-editor.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/news-localized-bodies.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/server-action-actor-boundary.test.ts",
+        "failed": []
+      }
+    ]
+  },
+  "security-repeat": {
+    "success": true,
+    "numPassedTests": 13,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/unit/ci-security-contract.test.ts",
+        "failed": []
+      }
+    ]
+  },
+  "pg-regressions": {
+    "success": true,
+    "numPassedTests": 68,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "files": [
+      {
+        "file": "tests/integration/ai-admin-content-facts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-board-draft-work.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-budget-concurrency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-draft-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-retention-batch.test.ts",
+        "failed": []
+      }
+    ]
+  },
+  "full": {
+    "success": false,
+    "numPassedTests": 6714,
+    "numFailedTests": 3,
+    "numPendingTests": 562,
+    "files": [
+      {
+        "file": "tests/integration/admin-audit-load.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-browser-fixture.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-concurrency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-export.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-history.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-profile-cleanup.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-snapshot.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-batch-ticket-resend.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-dashboard-counts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/admin-pagination.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/agent-runs-provenance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-admin-content-facts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-application-triage.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-board-draft-work.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-budget-concurrency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-draft-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-knowledge-retrieval.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-operations-metrics.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-repositories.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ai-retention-batch.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/aiops-materialized-view.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-application-case.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-auth-identity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-batch-failures.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-batch-scale-matrix.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-batch-snapshot.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-billing-scope.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-campaign-entry.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-cms-workspace.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-company-search.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-grant-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-import-export.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-job-health.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-migration-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-policy-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-renewal-window.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-segment-pagination.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-support-handoff.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-ticket-lifecycle.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-full-workspace.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/audit-migration-upgrade.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/auth-last-login.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/auth-shared-rate-limit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/automation-runners-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/board-reporter-facts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/board-reporter-idempotency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/board-reporter-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/bulk-communication-eligibility.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/chat-retention-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/cohort-role-revocation-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/communication-audit-load.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/company-profile-review-version-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/company-profile-role-revocation-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/company-review-demotion-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/concierge-atomic-start.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/concierge-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/event-attendee-batch-export.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/event-cancellation-notices.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/event-edit-version-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-batch-snapshot-100.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-cms-visibility.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-delivery-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-event-payment.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-membership-lifecycle.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-support-drafts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-fix-workspace-search.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/full-remediation-fixture.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/guest-check-in.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/join-resume.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/journey-claim-concurrency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/journey-delivery-idempotency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/login-profile-provision-neon.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/login-profile-provision-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/m2-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/m3-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/m4a-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/m4b-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/m4b-cross-window-cleanup.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/m4c-acceptance.test.ts",
+        "failed": [
+          "complete M4 deterministic acceptance proves the cross-slice acceptance contract without private output"
+        ]
+      },
+      {
+        "file": "tests/integration/m4c-seed-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-360-purchases.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-application-queues.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-event-review-version-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-event-role-revocation-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-filter-selection.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-import-audit-load.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-import-commit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/member-import-retention.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/membership-grant-batch.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/membership-grant-benefits.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/membership-grant.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/migration.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/news-edit-version-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/operations-baseline.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/page-copy-edit-concurrency-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/phase-c1-human-lane.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/phase-c2-blast.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/public-directory-availability-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/public-directory-pagination.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/refund-actor-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/retention-analyst-candidates.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/retention-analyst-idempotency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/retention-analyst-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/seat-capacity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/shared-rate-limit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/showcase-lead-contact-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/showcase-manager-revocation-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/showcase-review-transition-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/task8-automations-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ticket-eligibility-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ticket-email-capacity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/ticket-email-outbox-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/wisetech-partner-import-neon.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-delivery-outbox.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-hostile-provider-field.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-live.acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-network-uncertain.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-run-recovery-composition.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-server-uncertain.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/woztell-webhook.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/integration/writer-quota-postgres.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/about-page.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/about-related-routes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/acceptance-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/actor-authorization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-announcement-pages-rendered.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-announcements.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-app-shell.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-archive-toggle-labels.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-archive.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-detail-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-history-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-lease.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-preview-recovery.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-profile-patch.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-progress.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-runner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-batch-status-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-cms-dirty-forms.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-cohort-management.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-dashboard-queue-counts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-dashboard-recent.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-dashboard-tiles.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-event-attendee-page.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-event-by-id.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-event-order-page.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-event-tabs.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-event-ticket-price.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-events.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-listings-review-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-login-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-login-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-login-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-media.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-detail-lazy.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-history-view.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-list.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-navigation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-page-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-page-lazy.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-profile.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-selection-i18n.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-summary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-timeline-page.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-view.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-views-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-member-workspace-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-members-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-membership.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-nav.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-navigation-routes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-news.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-page-auth-source.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-page-auth.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-page-header-alignment.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-pagination.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-partner-pages-rendered.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-partners.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-presentational.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-private-prefetch.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-repository-authorization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-revalidate-path.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-server-action-boundaries.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/admin-unsaved-changes-guard.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-admin-content-editor.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-admin-content-facts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-application-runtime.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-application-triage.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-concierge-grounding.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-draft-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-draft-validation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-draft-work-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-embedding-budget.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-judge-budget.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-knowledge-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-knowledge-policy.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-knowledge-workspace.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-model.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-operations-metrics.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-pricing.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-provider-content-filter.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-provider-endpoint-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-provider-registry.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-redaction.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-review-panel.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-review-readiness.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime-adopt-prestarted.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime-budget.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime-prepared-single-use.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime-rereview.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime-source-cleanup.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-runtime.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-tools.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ai-usage-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-components.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-cost-unknown.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-dashboard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-evidence.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-metrics-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-metrics-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/aiops-public-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/announcement-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/announcement-form-rendered.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/announcement-whitespace-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/announcement.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/application-case-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/application-case-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/application-draft-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/application-draft-adopt.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/application-queue-table.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/application-return.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/apply-page-copy.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-authorization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-expiry-orphan-ordering.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-expiry-orphan.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-list.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-server-action-auth.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approval-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approvals-expirer.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/approved-templates.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/at-risk-message-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/at-risk-repository-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/at-risk.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/attendee-table-seat-check-in.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-acceptance-artifacts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-alerts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-event-profile-identity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-admin-labels.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-application-case.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-batch-capabilities.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-billing-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-cms-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-cms-draft.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-cms-preview.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-cms-workspace.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-company-picker.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-grant-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-grant-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-job-health.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-media-picker.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-payment-reconciliation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-performance-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-policy-acceptance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-renewal-window.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-segment-pagination.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-support-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-support-status.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-ticket-state.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-translations.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-full-workspace.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-observability.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/audit-synthetic-content.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/auth-route-rate-limit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/auth-server-runtime.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-admin-indexes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-admin-parallel.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-admin-planner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-admin-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-admin.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-dashboard-review.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-dashboard.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-job-id.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-repository-authorization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/automation-retry.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/billing-checkout-locking.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/billing-recovery-cas.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/billing-repository-security.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/board-capability-gate.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/board-draft-admin.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/board-reporter-contracts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/board-reporter-render.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/board-reporter-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/board-reporting-window.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/breadcrumb-coverage.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/build-log-pages.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-delivery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-draft-url.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-eligibility.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-no-delivery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-queue-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-queue.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-recipient-lease-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-repository-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-review-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-server-action-auth.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-server-action-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/campaign-wizard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/cancel-event-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/cancel-event-panel.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/cancelled-event-admission.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/cancelled-event-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/capture-legacy-site.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/chat-retention-handling.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/chat-retention.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/check-in-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/checkout-recovery-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/checkout-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ci-security-contract.test.ts",
+        "failed": [
+          "CI and production dependency security contract requires a valid full lockfile-only Auth tree and detects a hostile peer-invalid fixture"
+        ]
+      },
+      {
+        "file": "tests/unit/click-to-chat.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/company-portal-role-race.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/company-profile-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/company-profiles-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-atomic-start.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-cancellation-lifecycle.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-evals-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-evals.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-layouts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-live-evals.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-prompts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-readiness.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-runtime-harness-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-runtime-harness-safety-channel.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-runtime-harness.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-security.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-shell.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-unavailable-ui.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/concierge-widget.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/contact-concierge-launcher.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/contact-profile-merge.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/contacts-admin-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/contacts-consent-audit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/contacts-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/content-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/conversation-cookie.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/csv-export.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/cutover-sitemap-preflight.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/d4b-resend-pass.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/d4b-seed-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/db-script-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/db-seed-split.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/delivery-retry-idempotency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/demo-archive-options.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/desktop-mega-navigation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/detail-pages.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/download-milestone-images.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/download-program-images.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/dual-brand-lockup.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/dunning-lapse-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/email-catalog.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/email-render-snapshots.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/endpoint-hardening.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/engagement-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/engagement-score-runner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/engagement-scoring.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/engagement-trend-precision.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/env-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-attendee-export-button.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-attendees-csv.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-attendees-ticket-rows.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-calendar-view.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-cancellation-notifications.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-cancellation-refunds-job.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-cancellation-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-card.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-check-in.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-detail-seo.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-display-status.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-entitlement.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-filters.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-form-contract.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-guests-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-hero-admin-and-media.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-hong-kong-datetime.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-member-guest-capacity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-orders-cancellation-refund-query.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-orders-list.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-orders-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-orders-sql.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-private-media-render.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-public-detail-review.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-public-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-public-projection-and-registration-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-public-status.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-registration-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-registration-public-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-reminder-enrollment.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-review-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-review-version-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-server-action-serialization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-status.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/event-view-switch.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/events-repository-cancelled.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/extract-milestones.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/featured-public-event-query.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/full-fix-delivery-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/full-fix-support-runtime.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/full-fix-workspace-search.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/full-remediation-fixture.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/gsc-cross-reference.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/guest-cancel-retry-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/guest-cancel-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/guest-registration-email.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/guest-registration-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/guest-rsvp-form-recovery.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/guest-rsvp-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/hero-variant.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/history-detail.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/history-milestones.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/history-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-archive-stories.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-conversion-paths.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-ecosystem.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-events-journey.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-gba-gateway.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-hero.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-highlights-bounded-event.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-highlights.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-impact-evidence.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-legacy-network.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-market-products.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-open-now-recovery.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-open-now.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-outcomes.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-pathways.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/home-programme-showcase.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/homepage.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/hong-kong-time.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/https-url.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/i18n-routing.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/image-render-policy.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/impact-metrics.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-action-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-composer.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-draft-protection.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-repeat-reply.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-reply-action-outcome.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-thread-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-thread.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-window.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/inbox-write-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/index-program-pages.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/industry-tags.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/institutional-components.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/interest-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/internal-navigation-config.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/internal-shell-app-shell.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/internal-shell-landmark-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/internal-shell-navigation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/internal-shell-primitives.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-auth.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-handler.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-health-dashboard.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-kind-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-routes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-run-key.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/job-runner-context-event-reminder.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-actions-profile-identity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-billing-pages.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-draft.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-navigation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-plan-chooser.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-service-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/join-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-conditions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-enrollment.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-runner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-scheduling.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-whatsapp-stop.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/journey-whatsapp-template-variables.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/launchpad-partner-cutover.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/layout-client-messages.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/legacy-drift-preflight.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/legacy-network-groups.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/legacy-urls.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/locale-href-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/locale-switcher.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-case-continuation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-destination.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-entry-routing.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-pages-resolution.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-profile-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-profile-provision.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-resolution-server.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/login-resolution.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m1-acceptance-services.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m1-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-acceptance-docs-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-auth-reset.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-browser-acceptance-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-preview-env-docs-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-runtime-environment.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-session-billing-probe.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m2-session-reuse.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m3-acceptance-isolation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m3-acceptance-safety.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m3-e2e-safety.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m3-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m3-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4a-knowledge-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4a-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4b-e2e-safety.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4b-runtime-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4b-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4b-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4c-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m4c-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-admin-review.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-contracts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-leads.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-member-listing.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-public-showcase.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-request-intro-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m5-views.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-admin-cohorts.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-contracts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-e2e-safety-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-funding.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-graduate-badge.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-launchpad-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-member-application.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m6-seed.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m7-media-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/m7-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-bounded-body.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-image-upload.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-r2-storage.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-review-contracts.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-revocation-render.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-upload-delivery-routes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-upload-form-rendered.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-upload-registry-invariants.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-upload-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/media-url.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-360.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-bulk-table.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-communication-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-detail-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-event-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-event-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-event-edit-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-event-form-disabled.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-event-new-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-event-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-filters.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-import-match.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-import-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-import-upload-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-import-validation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-import-wizard.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-login-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-login-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-media-ownership.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-media-upload.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-note-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-note-server-action-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-notes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-query-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-saved-views.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-selection.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-tools-config.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-tools-csp.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-view-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-view-presets.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/member-views.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-catalog.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-checkout-navigation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-checkout-polling.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-checkout-status-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-comp-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-comp-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-entitlements.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-grant-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-grant-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-grant.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-lifecycle.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-links.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-page-catalog.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-public-catalog.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-tier-content.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/membership-uniqueness-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/message-direction-writers.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/message-eligibility.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/messages.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/metadata.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/migration-journal-order.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/milestone-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/mobile-navigation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/navigation-feature.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/navigation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/news-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/news-actions-auth-order.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/news-draft-preview.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/news-localized-bodies.test.tsx",
+        "failed": [
+          "PR5 public-cutover boundary keeps the public repository, routes, renderer, buildlog, and page owners on body_mdx"
+        ]
+      },
+      {
+        "file": "tests/unit/news-page-locale.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/next-route-exports.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/notification-dispatch.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/og-metadata.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/og-resolve-renderer.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/og-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/operations-baseline.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/operations-metrics-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/operations-timing-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/orders-table.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-copy-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-copy-local-draft-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-copy-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-copy-request-config.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-copy-scope.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-indexability.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/page-titles.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-action-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-confirmation-provenance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-forms-rendered.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-media-locking.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-migration-evidence.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-public-url-projection.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partner-rereview-regressions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/partners-public-groups.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/pass-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/pass-token.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/phase-c-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/policy-confirmation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/policy-pages.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-admin-redirect.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-authorization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-billing-actions.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-content-runtime-authorization.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-content-scope.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-continuation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-events-registration-mode.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-layout-admin-redirect.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-member-tools.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-nav.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-presentational.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-profile-whatsapp.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-sign-out-button.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-tool-detail-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-tools-list-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/portal-writer-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/posts-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/prepared-email-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/preview-session-harness.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/private-link-boundary.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/private-record-prefetch.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/production-lhci-target.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/profile-consent-audit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/profile-identity-billing.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/profile-identity-boundaries.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/profile-identity-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/profile-review-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/profile-review-preview.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/program-content.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/program-contradicted-claims.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/program-presentation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/program-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/programme-grid.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/programme-header.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/programme-summaries.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/proxy.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-data-cache.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-directory-availability.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-environment-isolation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-event-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-landmark-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-layout-announcement.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-news-locale.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-news-title-eligibility.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-posts-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-shell-tokens.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/public-shell.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/redirects.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-confirm-message.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-email.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-failure.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-policy-links.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-policy-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-refund-commit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/refund-success.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/renewal-production-dependencies.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/report-formulas.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/report-reconciliation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/repository-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/repository-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/repository-exists-scope-sql.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/repository-mutation-scope.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/repository-production-security.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/repository-scope.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/resend-transport.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/retention-analyst-candidates.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/retention-analyst-contracts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/retention-analyst-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/retention-capability-gate.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/revalidate-public-path.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/rich-compass.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/rich-related-routes.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/route-breadcrumbs.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/route-ownership.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/safe-generated-content.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/scheduled-agent-runtime.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/scheduled-jobs-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/seat-invitation-errors.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/seat-invitation-route.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/seat-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/seed-guard-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-event-navigation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-export-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-filter-version.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-pagination-context.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-query.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-save-action.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-save-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/segment-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/seo-routes.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/server-action-actor-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/shared-rate-limit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-lead-actor.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-lead-email-runner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-lead-task-table.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-logo-render.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-page-degrades.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-review-action-version.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-review-filter.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/showcase-review-preview.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/sign-in-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/signed-ticket-route-matcher.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/site-footer.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/site-header-streaming.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/sitemap-host.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/sitemap-milestones.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/sitemap.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/staff-tasks-admin.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/stripe-adapter-production.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/stripe-adapter.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/stripe-ticket-adapter.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/structured-data-article.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/structured-data-event-series.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/structured-data.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/support-draft-privacy.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/suppressions-whatsapp.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task-action-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task10-postgres-integration.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task7-lazy-admin-retry.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task7-per-channel-retry-crash.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task7-postgres-integration.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task7-repository-crash-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task7-review-failures.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task7-second-rereview.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task8-postgres-integration.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/task9-postgres-integration.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-check-in-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-check-in-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-checkout-action-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-checkout-actions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-checkout-core.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-checkout-form.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-checkout-recovery-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-checkout-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-email-outbox.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-email-runner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-format.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-pass-email.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-qr.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-recovery-cookie.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-seat-input.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/ticket-webhook.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/tsconfig-package-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/unsubscribe-one-click.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/unsubscribe-secret-rotation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/unsubscribe.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/webhook-postgres-concurrency.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/webhook-repository-sequential.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/webhook-route.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/webhook-service.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-campaign-runner.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-consent.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-delivery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-number.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-opt-out.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-template-body.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-template-registry.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/whatsapp-templates-config.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-announcement-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-asset-provenance.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-authoritative-source-reconciliation.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-css-port.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-delivery-gates.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-localized-news-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-media-upload-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-partner-import-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-partner-import-input.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-partner-import.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-partner-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-pr3-scope-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-pr5-event-hero-schema.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-pr5-showcase-presentation.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-protected-route-extensions.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-protected-route-interception.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-protected-route-ownership.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-protected-route-review.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-redirects.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-route-parity.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-shell-boundary.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wisetech-tokens.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/worker-alert-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/worker-cron-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/worker-readiness-reasons.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/worktree-webpack-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-adapter-live-flag.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-adapter.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-backfill.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-claim-v2.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-concierge.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-consent-audit.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-contact-capture.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-delivery-outbox-state.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-delivery-stamp.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-inbound-events.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-live-acceptance-guard.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-normalizer-captured.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-normalizer-v2.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-numeric-timestamp.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-opted-out-profile.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-production-wiring.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-profile-resolver.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-recovery-repository.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-review-gaps.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-run-recovery.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-terminal-outcome.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/woztell-webhook-v2.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writer-agent-actor.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writer-agent-runs.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writer-contracts.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writer-paid-membership.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writer-prompt.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writer-schema-contract.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/writers-generate.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-primitives.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/zh-walk-regex.test.ts",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/about-chairman-committees.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/about-history.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/about.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/ai-ops-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/campaigns-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/contact-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/event-detail-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/events-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/launchpad-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/members-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/membership-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/news-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/partners-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/policy-pages.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/programmes-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/programs-cpai.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/programs-editions.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/public-not-found.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/showcase-detail-page.test.tsx",
+        "failed": []
+      },
+      {
+        "file": "tests/unit/wt-pages/showcase-page.test.tsx",
+        "failed": []
+      }
+    ]
+  }
+}

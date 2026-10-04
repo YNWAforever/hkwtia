@@ -1,0 +1,70 @@
+{
+  "observedAt": "2026-10-04T12:29:45.721Z",
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "actualPasswordAuth": true,
+  "syntheticOfflineProposals": true,
+  "externalModelCalls": 0,
+  "realProviderSends": 0,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "production": false,
+  "checks": [
+    {
+      "locale": "en",
+      "kind": "event",
+      "copyOnly": true,
+      "unchangedBusinessAndPublicationFields": true,
+      "staleFactsBlocked": true,
+      "mobile390": true,
+      "axeViolations": 0,
+      "staffReviewActionVerified": true
+    },
+    {
+      "locale": "en",
+      "kind": "news",
+      "copyOnly": true,
+      "unchangedBusinessAndPublicationFields": true,
+      "staleFactsBlocked": true,
+      "mobile390": true,
+      "axeViolations": 0,
+      "staffReviewActionVerified": true
+    },
+    {
+      "locale": "en",
+      "kind": "board",
+      "independentLocalizedBody": true,
+      "literalRenderer": true,
+      "mobile390": true,
+      "axeViolations": 0
+    },
+    {
+      "locale": "zh-HK",
+      "kind": "event",
+      "copyOnly": true,
+      "unchangedBusinessAndPublicationFields": true,
+      "staleFactsBlocked": true,
+      "mobile390": true,
+      "axeViolations": 0,
+      "staffReviewActionVerified": true
+    },
+    {
+      "locale": "zh-HK",
+      "kind": "news",
+      "copyOnly": true,
+      "unchangedBusinessAndPublicationFields": true,
+      "staleFactsBlocked": true,
+      "mobile390": true,
+      "axeViolations": 0,
+      "staffReviewActionVerified": true
+    },
+    {
+      "locale": "zh-HK",
+      "kind": "board",
+      "independentLocalizedBody": true,
+      "literalRenderer": true,
+      "mobile390": true,
+      "axeViolations": 0
+    }
+  ],
+  "humanPilotVerified": false
+}

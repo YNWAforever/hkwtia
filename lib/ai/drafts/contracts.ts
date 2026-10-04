@@ -35,6 +35,7 @@ export const approvedFactPackSchema = z
               "text",
               "money",
               "date",
+              "datetime",
               "count",
               "percent",
               "boolean",

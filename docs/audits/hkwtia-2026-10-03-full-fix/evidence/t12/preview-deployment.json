@@ -1,0 +1,13 @@
+{
+  "id": "dpl_KanJ2mYufTN1FYUHFvVkbHjcfa2G",
+  "state": "READY",
+  "origin": "https://hkwtia-content-drafts-20261003.vercel.app",
+  "deploymentOrigin": "https://hkwtia-nfyb83y8z-ynwaforevers-projects.vercel.app",
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "gitRef": "codex/bilingual-admin-content-20261003",
+  "target": null,
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "projectFilterVerified": true,
+  "production": false,
+  "observedAt": "2026-10-04T12:28:56.896Z"
+}

@@ -1,0 +1,54 @@
+{
+  "observedAt": "2026-10-04T11:58:10.594493+00:00",
+  "branch": "codex/bilingual-admin-content-20261003",
+  "code": "PASS",
+  "actualPostgresDistinct": 68,
+  "focusedRepaired": 132,
+  "localFirstFull": {
+    "passed": 6714,
+    "skipped": 562,
+    "failed": 3,
+    "success": false
+  },
+  "repairs": "Valid bilingual deterministic fixture; public-cutover guard scoped to actual public owners with non-vacuous reader anchors. Private board authorization is independently covered. Auth tree repeat13pass, timeout unchanged.",
+  "lint": {
+    "errors": 0,
+    "warnings": 95
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "strings": {
+    "tsxFiles": 321,
+    "pass": true
+  },
+  "native": "PASS_ACTUAL_ISOLATED_PASSWORD_AUTH_OFFLINE_PROPOSALS",
+  "preview": "PASS_PINNED_SOURCE_POSITIVE_DB_MARKER",
+  "provider": "BLOCKED_APPROVED_ADMIN_PROVIDER_DATA_CREDENTIAL_CAPS_AND_REAL_RECEIPTS",
+  "productionReleased": false,
+  "productionMigrationApplied": false,
+  "noAutomaticPublicationOrBusinessFieldMutation": true,
+  "preservedMemberWriterQuota": true,
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "nativePassed": 2,
+  "nativeJourneys": 6,
+  "previewChecks": 23,
+  "humanPilotVerified": false,
+  "currentFull": {
+    "unitPassed": 6719,
+    "skipped": 562,
+    "failed": 0,
+    "workerPassed": 57,
+    "all7Checks": "SUCCESS",
+    "runId": 37201908791
+  },
+  "compiledRuntimeSource": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/138",
+  "limits": [
+    "Simulated provider/zero actual model calls; no real model/provider/Google/magic-link/human pilot pass.",
+    "Partial/failed local runs preserved; current full CI is one actual complete run, not summed reruns.",
+    "Standalone assertions use repository20s; measured Preview event navigation7.6s is not a3s performance pass nor DB-only timing.",
+    "Source/effect/work/migration safeguards preserved; 0061 isolated only; AGENTS false before downgrading an app without new flags.",
+    "Author sequential self-review; explicit user no-subagents instruction."
+  ]
+}

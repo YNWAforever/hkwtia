@@ -6,11 +6,13 @@ import {
   BOARD_REPORTER_AGENT_CONFIG,
 } from "@/config/agents/board-reporter";
 import {
-  boardNarrativeSchema,
-  buildBoardNarrativePrompt,
+  bilingualBoardNarrativeSchema,
+
   type BoardFactPack,
-  type BoardNarrative,
+  type BilingualBoardNarrative,
 } from "@/lib/ai/board-reporter/contracts";
+import {groundedBoardPrompt, validateBoardNarratives, boardApprovedFacts} from "./grounding";
+import {boardReportLabels} from "./render";
 import {buildBoardFactPack} from "@/lib/ai/board-reporter/facts";
 import {renderBoardReportMdx} from "@/lib/ai/board-reporter/render";
 import {
@@ -22,6 +24,8 @@ import {
   requireAutomationCron,
   type AutomationCronActor,
 } from "@/lib/auth/automation-actor";
+import {AI_PRICING_VERSION} from "@/config/ai-pricing";
+import {draftWorkRepository, type DraftWorkClaim} from "@/lib/db/repos/ai-draft-work";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {
   postsRepository,
@@ -32,8 +36,10 @@ type BoardNarrativeRunInput = Readonly<{
   actor: ScheduledAgentActor;
   agentConfig: AgentConfig;
   prompt: string;
-  outputSchema: typeof boardNarrativeSchema;
-  commit?: (output: BoardNarrative) => Promise<void>;
+  outputSchema: typeof bilingualBoardNarrativeSchema;
+  beforeDispatch?: () => Promise<void>;
+  onProviderReceipt?: (requestId: string) => Promise<void>;
+  commit?: (output: BilingualBoardNarrative) => Promise<void>;
 }>;
 
 export type BoardReporterResult = Readonly<{
@@ -59,8 +65,10 @@ export type BoardReporterServiceDependencies = Readonly<{
       }>,
     ) => Promise<unknown>;
   }>;
-  runJson: (input: BoardNarrativeRunInput) => Promise<BoardNarrative>;
+  runJson: (input: BoardNarrativeRunInput) => Promise<BilingualBoardNarrative>;
+  work?: Pick<typeof draftWorkRepository, "claimDraftWork" | "markDraftRequestStarted" | "recordDraftProviderReceipt" | "finishDraftWork">;
   posts: Readonly<{
+    getBoardDraftBySourceKey?: typeof postsRepository.getBoardDraftBySourceKey;
     createBoardDraftOnce: (
       actor: ScheduledAgentActor,
       input: BoardDraftInput,
@@ -74,6 +82,7 @@ const defaultDependencies: BoardReporterServiceDependencies = {
   agentRuns: agentRunsRepository,
   runJson: (input) => runScheduledJson(input),
   posts: postsRepository,
+  work: draftWorkRepository,
   createRunId: randomUUID,
 };
 
@@ -108,44 +117,46 @@ export async function runBoardReporter(
   requireAutomationCron(actor);
   if (!input.agentConfig.enabled) return null;
 
-  const agentActor = scheduledActor(dependencies.createRunId());
-  const factPack = await dependencies.buildFactPack(agentActor, input.asOf);
-  await dependencies.agentRuns.start(agentActor, {
-    provider: null,
-    model: null,
-    startedAt: input.asOf,
-    ...(input.acceptanceOwnershipKey
-      ? {acceptanceOwnershipKey: input.acceptanceOwnershipKey}
-      : {}),
-  });
-  const reportMonth = factPack.reportMonth;
-  let post: {postId: string; created: boolean} | undefined;
-  await dependencies.runJson({
-    actor: agentActor,
-    agentConfig: input.agentConfig,
-    prompt: buildBoardNarrativePrompt(factPack),
-    outputSchema: boardNarrativeSchema,
-    commit: async (narrative) => {
-      const bodyMdx = renderBoardReportMdx({
-        factPack,
-        narrative,
-        agentRunId: agentActor.runId,
-      });
-      post = await dependencies.posts.createBoardDraftOnce(agentActor, {
-        sourceKey: sourceKey(reportMonth),
-        slug: `board-report-${reportMonth}`,
-        titleEn: `Board report: ${reportMonth}`,
-        titleZh: `Board report: ${reportMonth}`,
-        bodyMdx,
-      });
-    },
-  });
-  if (!post) throw new Error("BOARD_REPORTER_COMMIT_NOT_RUN");
-
-  return {
-    reportMonth,
-    postId: post.postId,
-    created: post.created,
-    metricCount: factPack.metrics.length,
+  const readActor = scheduledActor(dependencies.createRunId());
+  const factPack = await dependencies.buildFactPack(readActor, input.asOf);
+  const reportMonth = factPack.reportMonth, key = sourceKey(reportMonth);
+  const factsHash = boardApprovedFacts(factPack, "en", input.asOf).versionHash;
+  const existing = await dependencies.posts.getBoardDraftBySourceKey?.(readActor, key);
+  if(existing?.completed === false) throw Error("BOARD_PROVIDER_EFFECT_UNKNOWN");
+  if (existing) return {reportMonth, postId:existing.postId, created:false, metricCount:factPack.metrics.length};
+  const work = dependencies.work;
+  let claim: DraftWorkClaim | undefined, started=false, receipt:string|null=null;
+  if(work) {
+    claim = await work.claimDraftWork({kind:"board",caseId:reportMonth,factsHash,agentVersion:["board-grounded-v2",input.agentConfig.model,AI_PRICING_VERSION].join(":"),idempotencyKey:key});
+    if(claim.disposition === "reuse" && claim.postId) return {reportMonth,postId:claim.postId,created:false,metricCount:factPack.metrics.length};
+    if(claim.disposition === "busy") return null;
+    if(claim.disposition !== "claimed" || !claim.claimToken) throw Error("BOARD_PROVIDER_EFFECT_UNKNOWN");
+  }
+  const agentActor=scheduledActor(claim?.runId ?? readActor.runId);
+  const assertCurrent=async()=>{
+    if(!work) return;
+    const saved=await dependencies.posts.getBoardDraftBySourceKey?.(agentActor,key);
+    if(saved)throw Error("BOARD_RESULT_RECONCILIATION_REQUIRED");
+    const current=await dependencies.buildFactPack(agentActor,input.asOf);
+    if(boardApprovedFacts(current,"en",input.asOf).versionHash!==factsHash)throw Error("BOARD_FACTS_STALE");
   };
+  let post:{postId:string;created:boolean}|undefined;
+  try {
+    await dependencies.agentRuns.start(agentActor, {provider:null,model:null,startedAt:input.asOf,...(input.acceptanceOwnershipKey ? {acceptanceOwnershipKey:input.acceptanceOwnershipKey} : {})});
+    await dependencies.runJson({actor:agentActor,agentConfig:input.agentConfig,prompt:groundedBoardPrompt(factPack,input.asOf),outputSchema:bilingualBoardNarrativeSchema,
+      ...(work ? {beforeDispatch:async()=>{await assertCurrent();await work.markDraftRequestStarted({runId:claim!.runId,claimToken:claim!.claimToken});started=true;},onProviderReceipt:async(requestId:string)=>{receipt=requestId;await work.recordDraftProviderReceipt({runId:claim!.runId,claimToken:claim!.claimToken,providerRequestId:requestId});}} : {}),
+      commit:async(narrative)=>{
+        if(work && (!started || !receipt))throw Error("BOARD_PROVIDER_RECEIPT_REQUIRED");
+        await assertCurrent();
+        const validated=validateBoardNarratives(narrative,factPack,input.asOf);
+        post=await dependencies.posts.createBoardDraftOnce(agentActor,{sourceKey:key,slug:`board-report-${reportMonth}`,titleEn:`${boardReportLabels("en").title}: ${reportMonth}`,titleZh:`${boardReportLabels("zh-HK").title}: ${reportMonth}`,bodyMdx:renderBoardReportMdx({factPack,narrative:validated.en,agentRunId:agentActor.runId}),bodyMdxZhHk:renderBoardReportMdx({factPack,narrative:validated.zhHK,agentRunId:agentActor.runId,locale:"zh-HK"})});
+      },
+    });
+    if(!post)throw Error("BOARD_REPORTER_COMMIT_NOT_RUN");
+    if(work)await work.finishDraftWork({runId:claim!.runId,claimToken:claim!.claimToken,state:"succeeded",draftId:null,postId:post.postId,providerRequestId:receipt});
+    return {reportMonth,postId:post.postId,created:post.created,metricCount:factPack.metrics.length};
+  } catch(error) {
+    if(work && claim?.disposition === "claimed" && claim.claimToken)try{await work.finishDraftWork({runId:claim.runId,claimToken:claim.claimToken,state:started?"unknown":"failed_before_request",draftId:null,providerRequestId:started?receipt:null});}catch{/* Keep the conservative claim when acknowledgement is uncertain. */}
+    throw error;
+  }
 }

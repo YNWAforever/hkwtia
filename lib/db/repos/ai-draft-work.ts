@@ -25,6 +25,7 @@ const finishSchema = tokenSchema
     state: z.enum(["succeeded", "unknown", "failed_before_request"]),
     draftId: z.string().uuid().nullable(),
     approvalId: z.string().uuid().nullable().optional(),
+    postId: z.string().uuid().nullable().optional(),
     providerRequestId: z.string().min(1).max(255).nullable(),
   })
   .strict();
@@ -34,6 +35,7 @@ export type DraftWorkClaim = Readonly<{
   claimToken: string | null;
   draftId: string | null;
   approvalId?: string;
+  postId?: string;
 }>;
 function rows(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result;
@@ -108,6 +110,7 @@ export function createDraftWorkRepository(
               claimToken: null,
               draftId: previous.draft_id === null ? null : String(previous.draft_id),
               ...(previous.approval_id ? {approvalId: String(previous.approval_id)} : {}),
+              ...(previous.post_id ? {postId: String(previous.post_id)} : {}),
             };
           if (state === "unknown")
             return {
@@ -235,11 +238,11 @@ export function createDraftWorkRepository(
       const result = finishSchema.parse(input);
       if (
         result.state === "succeeded" &&
-        ((!result.draftId && !result.approvalId) || !result.providerRequestId)
+        ((!result.draftId && !result.approvalId && !result.postId) || !result.providerRequestId)
       )
         throw Error("DRAFT_WORK_RECEIPT_REQUIRED");
-      if (result.draftId && result.approvalId) throw Error("DRAFT_WORK_RESULT_INVALID");
-      if (result.state !== "succeeded" && (result.draftId !== null || result.approvalId))
+      if ([result.draftId, result.approvalId, result.postId].filter(Boolean).length > 1) throw Error("DRAFT_WORK_RESULT_INVALID");
+      if (result.state !== "succeeded" && (result.draftId !== null || result.approvalId || result.postId))
         throw Error("DRAFT_WORK_RESULT_INVALID");
       if (
         result.state === "failed_before_request" &&
@@ -262,6 +265,7 @@ export function createDraftWorkRepository(
           previous.state === result.state &&
           previous.draft_id === result.draftId &&
           (previous.approval_id ?? null) === (result.approvalId ?? null) &&
+          (previous.post_id ?? null) === (result.postId ?? null) &&
           previous.provider_request_id === result.providerRequestId
         )
           return;
@@ -285,8 +289,13 @@ export function createDraftWorkRepository(
           const approval = rows(await tx.execute(sql`SELECT id FROM approvals WHERE id=${result.approvalId} AND action_type='agent.retention_outreach' AND request_key=${String(previous.idempotency_key)} AND payload->>'agentRunId'=${result.runId} AND payload->>'profileId'=${String(previous.case_id)} AND payload->>'factsHash'=${String(previous.facts_hash)}`));
           if (approval.length !== 1) throw Error("DRAFT_WORK_RESULT_INVALID");
         }
+        if (result.state === "succeeded" && result.postId) {
+          if (previous.kind !== "board") throw Error("DRAFT_WORK_RESULT_INVALID");
+          const post = rows(await tx.execute(sql`SELECT id FROM posts WHERE id=${result.postId} AND agent_run_id=${result.runId} AND source_key=${String(previous.idempotency_key)} AND author='Board Reporter' AND kind='page'`));
+          if(post.length !== 1)throw Error("DRAFT_WORK_RESULT_INVALID");
+        }
         await tx.execute(
-          sql`UPDATE ai_draft_work SET state=${result.state},draft_id=${result.draftId},approval_id=${result.approvalId ?? null},provider_request_id=${result.providerRequestId},updated_at=${now()} WHERE run_id=${result.runId} AND claim_token=${result.claimToken}`,
+          sql`UPDATE ai_draft_work SET state=${result.state},draft_id=${result.draftId},approval_id=${result.approvalId ?? null},post_id=${result.postId ?? null},provider_request_id=${result.providerRequestId},updated_at=${now()} WHERE run_id=${result.runId} AND claim_token=${result.claimToken}`,
         );
       });
     },

@@ -68,6 +68,10 @@ function factDisplay(field: string, facts: ApprovedFactPack): string {
         maximumFractionDigits: 2,
       }).format(fact.value);
       break;
+    case "datetime":
+      if(typeof fact.value!=="string" || !/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(fact.value) || !Number.isFinite(new Date(fact.value).getTime()))throw Error("DRAFT_FACT_FORMAT");
+      value = new Intl.DateTimeFormat(facts.locale, {dateStyle:"long",timeStyle:"short",timeZone:"Asia/Hong_Kong"}).format(new Date(fact.value));
+      break;
     case "date":
       if (typeof fact.value !== "string") throw Error("DRAFT_FACT_FORMAT");
       hongKongEffectiveDate(fact.value);
@@ -197,6 +201,12 @@ export function validateGroundedContent(
       reject(field, "SOURCE_MISSING");
     return "";
   });
+  if (/^(?:event|news):[a-f0-9-]{36}:(?:en|zh-HK)$/.test(facts.caseId)) {
+    const required = facts.caseId.startsWith("event:") ? ["title","startsAt","endsAt","venue","capacity","registrationMode","ticketPrice"] : ["title"];
+    for(const field of required) if(!body.includes("{{facts."+field+"}}")) reject(field,"CONTENT_FACT_MISSING");
+    if(/\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifty|hundred|thousand|million|guaranteed|award|entitlement|benefits?|WTIA|HKWTIA)\b|獲獎|獲得獎|權益|保證|香港無線科技商會/iu.test(raw))reject("body","CONTENT_UNAPPROVED_CLAIM");
+    if(facts.locale==="zh-HK" && !/\p{Script=Han}/u.test(raw))reject("body","CONTENT_LOCALE_MISMATCH");
+  }
   if (/[{}]/u.test(raw)) reject("body", "UNRESOLVED_OR_EXECUTABLE_TOKEN");
   if (unsafeSyntax.test(body) || effectPromise.test(raw))
     reject("body", "UNSAFE_CONTENT");

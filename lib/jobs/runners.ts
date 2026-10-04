@@ -628,6 +628,7 @@ export async function runProductionRetentionAnalyst(
 export async function runProductionBoardReporter(
   now: Date,
 ): Promise<unknown> {
+  if(process.env.ADMIN_AI_BOARD_DRAFTS_ENABLED!=="true")return null;
   const acceptanceOwnershipKey =
     resolveM4BAcceptanceOwnershipKey(process.env);
   const ai = aiEnv();
