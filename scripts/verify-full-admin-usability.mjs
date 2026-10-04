@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:net";
 import { spawn, execFileSync } from "node:child_process";
 import { randomUUID, randomBytes, createHash } from "node:crypto";
 import {
@@ -52,7 +53,8 @@ const pool = new Pool({ connectionString: db, query_timeout: 15000 });
 const id = randomUUID(),
   slug = "t15-runtime-" + id,
   marker = "Synthetic Reply Review Runtime " + id;
-let server,
+let lighthouseBrowser,
+  server,
   logFd,
   inserted = false,
   stage = "isolation";
@@ -175,6 +177,60 @@ try {
   };
   delete env.PLAYWRIGHT_STORAGE_STATE;
   const lighthouse = process.argv.includes("--lighthouse");
+  if (lighthouse) {
+    assert(
+      !process.env.LHCI_COOKIE_FILE,
+      "LOCAL_LIGHTHOUSE_MUST_NOT_USE_AUTH_COOKIES",
+    );
+    const repositoryConfig = (await import("../lighthouserc.js")).default;
+    assert(!repositoryConfig.ci.collect.settings.extraHeaders);
+    // LHCI treats .mjs as JSON. Serialize the installed repository config for
+    // this owned server, retaining route order, run count and every threshold.
+    const allocation = createServer();
+    await new Promise((resolve, reject) => {
+      allocation.once("error", reject);
+      allocation.listen(0, "127.0.0.1", resolve);
+    });
+    const port = allocation.address().port;
+    await new Promise((resolve, reject) =>
+      allocation.close((error) => (error ? reject(error) : resolve())),
+    );
+    // Attach LHCI to this newly owned browser. Its launcher otherwise races
+    // Windows temporary-directory cleanup after killing its Chrome children.
+    lighthouseBrowser = await chromium.launch({
+      args: [
+        ...repositoryConfig.ci.collect.settings.chromeFlags.split(" "),
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=" + port,
+      ],
+    });
+    assert((await fetch("http://127.0.0.1:" + port + "/json/version")).ok);
+    const configuration = {
+      ci: {
+        ...repositoryConfig.ci,
+        collect: {
+          ...repositoryConfig.ci.collect,
+          settings: {
+            ...repositoryConfig.ci.collect.settings,
+            port,
+            extraHeaders: { "Accept-Language": "en" },
+          },
+          url: repositoryConfig.ci.collect.url.map(
+            (url) => origin + new URL(url).pathname,
+          ),
+          startServerCommand: undefined,
+        },
+        upload: {
+          target: "filesystem",
+          outputDir: ".playwright/full-fix-t15-lighthouse",
+        },
+      },
+    };
+    writeFileSync(
+      ".playwright/full-fix-t15-lighthouse-config.json",
+      JSON.stringify(configuration, null, 2),
+    );
+  }
   const native = lighthouse
     ? spawn(
         "npm.cmd",
@@ -182,7 +238,7 @@ try {
           "run",
           "test:lighthouse",
           "--",
-          "--config=.playwright/full-fix-t15-lighthouse-config.mjs",
+          "--config=.playwright/full-fix-t15-lighthouse-config.json",
         ],
         {
           env: {
@@ -241,6 +297,7 @@ try {
   );
   process.exitCode = 1;
 } finally {
+  await lighthouseBrowser?.close();
   if (server?.pid) {
     if (process.platform === "win32") {
       try {
