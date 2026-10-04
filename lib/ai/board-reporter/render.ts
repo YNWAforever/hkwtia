@@ -1,10 +1,12 @@
 import {z} from "zod";
+import en from "@/messages/en.json";
+import zh from "@/messages/zh-HK.json";
+export function boardReportLabels(locale: "en" | "zh-HK") {return (locale === "zh-HK" ? zh : en).Admin.reports.generatedReport;}
 
 import {
   boardFactPackSchema,
   boardNarrativeSchema,
   type BoardMetric,
-  type BoardMetricId,
 } from "@/lib/ai/board-reporter/contracts";
 
 const appLinkSchema = z.object({
@@ -17,22 +19,10 @@ const renderInputSchema = z.object({
   narrative: boardNarrativeSchema,
   agentRunId: z.string().uuid(),
   links: z.array(appLinkSchema).max(20).optional(),
+  locale: z.enum(["en", "zh-HK"]).default("en"),
 }).strict();
 
 export type BoardReportLink = z.infer<typeof appLinkSchema>;
-
-const METRIC_LABELS: Readonly<Record<BoardMetricId, string>> = Object.freeze({
-  arr_hkd: "ARR",
-  mrr_hkd: "MRR",
-  renewal_rate: "Renewal rate",
-  first_year_renewal_rate: "First-year renewal rate",
-  funnel_started: "Funnel: started",
-  funnel_profile_completed: "Funnel: profile completed",
-  funnel_checkout_or_review: "Funnel: checkout or review",
-  funnel_activated: "Funnel: activated",
-  attendance_rate: "Attendance rate",
-  at_risk_count: "At-risk members",
-});
 
 const MARKDOWN_CONTROL_CHARACTERS = "\\`*_[]{}()#!|~>+-=.";
 const BALANCED_EMPHASIS = /(?<!\*)\*\*([^*]+)\*\*(?!\*)/g;
@@ -85,7 +75,7 @@ function formatNumber(value: number): string {
   }).format(value);
 }
 
-function formatMetric(metric: BoardMetric): string {
+function formatMetric(metric: BoardMetric, unavailable: string): string {
   if (metric.unit === "HKD") {
     return `HKD ${formatNumber(metric.value)}`;
   }
@@ -93,27 +83,27 @@ function formatMetric(metric: BoardMetric): string {
     return formatNumber(metric.value);
   }
   const percentage = metric.value === null
-    ? "N/A"
+    ? unavailable
     : `${formatNumber(metric.value)}%`;
   return `${percentage} (${metric.numerator}/${metric.denominator})`;
 }
 
-function metricTable(metrics: readonly BoardMetric[]): string[] {
+function metricTable(metrics: readonly BoardMetric[], labels: ReturnType<typeof boardReportLabels>): string[] {
   return [
-    "| KPI | Value |",
+    `| ${labels.kpi} | ${labels.value} |`,
     "| --- | ---: |",
     ...metrics.map((metric) => (
-      `| ${METRIC_LABELS[metric.id]} | ${formatMetric(metric)} |`
+      `| ${labels.metrics[metric.id]} | ${formatMetric(metric, labels.unavailable)} |`
     )),
   ];
 }
 
-function bulletSection(title: string, values: readonly string[]): string[] {
+function bulletSection(title: string, values: readonly string[], empty: string): string[] {
   return [
     `## ${title}`,
     "",
     ...(values.length === 0
-      ? ["None provided."]
+      ? [empty]
       : values.map((value) => `- ${serializeNarrativeInline(value)}`)),
   ];
 }
@@ -123,35 +113,37 @@ export function renderBoardReportMdx(input: Readonly<{
   narrative: unknown;
   agentRunId: string;
   links?: readonly BoardReportLink[];
+  locale?: "en" | "zh-HK";
 }>): string {
   const parsed = renderInputSchema.parse(input);
   const {factPack, narrative} = parsed;
+  const labels = boardReportLabels(parsed.locale);
   const sections = [
-    `# Board report: ${factPack.reportMonth}`,
+    `# ${labels.title}: ${factPack.reportMonth}`,
     "",
-    `Reporting window: **${factPack.window.from} to ${factPack.window.to}** (${factPack.window.timezone})`,
+    `${labels.window}: **${factPack.window.from} ${labels.to} ${factPack.window.to}** (${factPack.window.timezone})`,
     "",
-    `Agent run: **${parsed.agentRunId}**`,
+    `${labels.run}: **${parsed.agentRunId}**`,
     "",
-    "## Key performance indicators",
+    `## ${labels.kpis}`,
     "",
-    ...metricTable(factPack.metrics),
+    ...metricTable(factPack.metrics, labels),
     "",
-    "## Executive summary",
+    `## ${labels.summary}`,
     "",
-    `Narrative: ${serializeNarrativeInline(narrative.executiveSummary)}`,
+    `${labels.narrative}: ${serializeNarrativeInline(narrative.executiveSummary)}`,
     "",
-    ...bulletSection("Highlights", narrative.highlights),
+    ...bulletSection(labels.highlights, narrative.highlights, labels.empty),
     "",
-    ...bulletSection("Risks", narrative.risks),
+    ...bulletSection(labels.risks, narrative.risks, labels.empty),
     "",
-    ...bulletSection("Recommended actions", narrative.recommendedActions),
+    ...bulletSection(labels.actions, narrative.recommendedActions, labels.empty),
   ];
 
   if (parsed.links && parsed.links.length > 0) {
     sections.push(
       "",
-      "## App links",
+      `## ${labels.links}`,
       "",
       ...parsed.links.map((link) => (
         `- [${serializeLiteralInline(link.label)}](${link.href})`

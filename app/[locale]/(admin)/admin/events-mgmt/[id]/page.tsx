@@ -1,3 +1,4 @@
+import {contentDraftAssistance} from "@/lib/admin/content-draft-assistance";
 import {EventAttendeeExportButton} from "@/components/admin/event-attendee-export-button";
 
 import {notFound} from "next/navigation";
@@ -42,6 +43,7 @@ export default async function AdminEventDetailPage({params, searchParams}: Props
     : null;
   const event = await eventsRepository.getForAdmin(actor, parsedId.data);
   if (!event) notFound();
+  const contentAssistance = tab.data === "content" ? await contentDraftAssistance(actor, "event", parsedId.data, locale) : undefined;
   const mediaRows = tab.data === "content" ? await mediaRepository.listActiveForAdmin(actor) : [];
   // Fail closed on unavailable previews; never turn an unreadable cost into zero.
   const cancellation = tab.data === "content" && event.status !== "cancelled"
@@ -131,7 +133,7 @@ export default async function AdminEventDetailPage({params, searchParams}: Props
         .map((item) => <a aria-current={tab.data === item ? "page" : undefined} className="min-h-11 rounded-md border px-4 py-2 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground" href={tabHref(item)} key={item}>{t(`tabs.${item}`)}</a>)}
     </nav>
     {tab.data === "content" ? <>
-      {event.status === "cancelled" ? null : <EventForm action={updateAction} labels={labels} mediaRows={mediaRows} values={event}/>}
+      {event.status === "cancelled" ? null : <EventForm action={updateAction} labels={labels} mediaRows={mediaRows} values={event} assistance={contentAssistance}/>}
       <section className="glass-card p-6">{event.status === "cancelled" ? <>
         <h2 className="font-serif text-2xl font-semibold">{t("cancel.heading")}</h2>
         <p className="text-sm text-muted-foreground" role="status">{t("cancel.cancelledNotice")}</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import {ContentDraftPanel, type ContentAssistance} from "@/components/admin/content-draft-panel";
 import {useActionState, useRef, useState} from "react";
 
 import {SafeStructuredContent} from "@/components/content/safe-structured-content";
@@ -43,9 +44,11 @@ export function NewsForm({
   action,
   labels,
   values = {},
+  assistance,
 }: Readonly<{
   action: (state: NewsActionState, formData: FormData) => Promise<NewsActionState>;
   labels: Labels;
+  assistance?: ContentAssistance;
   values?: Values;
 }>) {
   const {setDirty} = useAdminUnsavedChanges();
@@ -54,7 +57,17 @@ export function NewsForm({
   const [draftPreview, setDraftPreview] = useState<Readonly<{
     titleEn: string; titleZh: string; bodyEn: string; bodyZh: string;
   }> | null>(null);
-  const markEdited = () => {setDirty(true); setDraftPreview(null);};
+  const copyDirtyRef = useRef(false);
+  const [copyDirty, setCopyDirty] = useState(false);
+  const markEdited = () => {copyDirtyRef.current = true;setCopyDirty(true); setDirty(true); setDraftPreview(null);};
+  const adoptCopy = (locale: "en" | "zh-HK", body: string) => {
+    if(copyDirtyRef.current) return false;
+    const element = formRef.current?.elements.namedItem(locale === "en" ? "bodyMdx" : "bodyMdxZhHk");
+    if (!(element instanceof HTMLTextAreaElement)) return false;
+    element.value = body;
+    markEdited();
+    return true;
+  };
   const captureDraft = () => {
     if (!formRef.current) return;
     const fields = new FormData(formRef.current);
@@ -66,7 +79,7 @@ export function NewsForm({
   };
   const [state, formAction, pending] = useActionState(async (previous: NewsActionState, formData: FormData) => {
     const result = await action(previous, formData);
-    if (result.status === "success") setDirty(false);
+    if (result.status === "success") {setDirty(false);setCopyDirty(false);copyDirtyRef.current=false;}
     return result;
   }, initialState);
 
@@ -130,6 +143,7 @@ export function NewsForm({
         <input defaultChecked={published} id="news-published" key={`published-${published}`} onChange={(event) => setPublishOnSave(event.currentTarget.checked)} name="published" type="checkbox"/>
         {labels.published}
       </label>
+    {assistance ? <ContentDraftPanel value={assistance} dirty={copyDirty} onAdopt={adoptCopy}/> : null}
       <div className="flex items-center justify-end gap-4 md:col-span-2">
         {state.message
           ? <p aria-live="polite" className={state.status === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p>

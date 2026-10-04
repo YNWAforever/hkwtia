@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-10-04T11:40:45.525Z",
+  "migration": "0061_board_work_result",
+  "migrationSha256": "626289ca3b45c8b999f2cde409352b6fc84b0acb66e121db66b104cd2512cd03",
+  "ledgerBefore": 60,
+  "ledgerAfter": 61,
+  "isolatedBranchId": "br-lingering-unit-azxl75s5",
+  "sentinel": 1,
+  "reservedTestDomainsOnly": true,
+  "production": false
+}

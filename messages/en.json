@@ -3970,7 +3970,39 @@
       "boardDraftPreviewDescription": "Review this staff-only draft through an inert generated-content preview.",
       "boardDraftKpi": "KPI",
       "boardDraftValue": "Value",
-      "boardDraftBack": "Back to reports"
+      "boardDraftBack": "Back to reports",
+      "generatedReport": {
+        "title": "Board report",
+        "window": "Reporting window",
+        "run": "Agent run",
+        "kpis": "Key performance indicators",
+        "kpi": "KPI",
+        "value": "Value",
+        "summary": "Executive summary",
+        "narrative": "Narrative",
+        "highlights": "Highlights",
+        "risks": "Risks",
+        "actions": "Recommended actions",
+        "links": "App links",
+        "empty": "None provided.",
+        "unavailable": "N/A",
+        "yes": "Yes",
+        "no": "No",
+        "to": "to",
+        "metrics": {
+          "arr_hkd": "ARR",
+          "mrr_hkd": "MRR",
+          "renewal_rate": "Renewal rate",
+          "first_year_renewal_rate": "First-year renewal rate",
+          "funnel_started": "Funnel: started",
+          "funnel_profile_completed": "Funnel: profile completed",
+          "funnel_checkout_or_review": "Funnel: checkout or review",
+          "funnel_activated": "Funnel: activated",
+          "attendance_rate": "Attendance rate",
+          "at_risk_count": "At-risk members"
+        }
+      },
+      "boardDraftLegacyLanguage": "This historical report has an English body only."
     },
     "automations": {
       "eyebrow": "Automation operations",
@@ -4415,6 +4447,7 @@
     "analysisSummary": "Suggested summary",
     "analysisTasks": "Suggested follow-up",
     "openConversation": "Return to conversation and adopt the approved draft",
+    "openContent": "Return to content editor",
     "applyFilters": "Apply filters",
     "applicationKind": "Applications",
     "supportKind": "Support",
@@ -4549,5 +4582,30 @@
       "privacy": "Privacy or identity request",
       "other": "Manual classification needed"
     }
+  },
+  "ContentAssistance": {
+    "title": "Content drafting",
+    "description": "Draft or translate descriptions from saved facts. Review before copying; preview and save remain separate.",
+    "locale": "Draft language",
+    "en": "English",
+    "zhHK": "Traditional Chinese (Hong Kong)",
+    "prepare": "Draft or translate saved copy",
+    "preparing": "Preparing draft…",
+    "review": "Open draft review",
+    "adopt": "Copy approved text to draft",
+    "adopting": "Checking approved draft…",
+    "manual": "Review the current facts and approved draft before copying.",
+    "disabled": "Content assistance is disabled. Continue editing, previewing and saving manually.",
+    "configuration": "Administrative provider approval, credentials or budget are unavailable. Continue manually.",
+    "created": "Draft prepared. Review and approve it before copying.",
+    "adopted": "Approved text copied to this unsaved draft. Preview it before saving.",
+    "stale": "The source or review version changed. Reload and review the current facts.",
+    "busy": "This draft is already being prepared.",
+    "unknown": "The provider effect is unknown. Reconcile the existing attempt before retrying.",
+    "forbidden": "You are not authorized to use this draft.",
+    "unavailable": "The draft is unavailable. Continue manually or retry later.",
+    "invalid": "The request is invalid.",
+    "dirty": "Unsaved edits are present. Save or retain them before copying an approved draft.",
+    "noHistory": "No saved draft for this language."
   }
 }

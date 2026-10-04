@@ -1200,5 +1200,40 @@
     "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
     "evidenceBasis": "current-checkout-and-actual-acceptance",
     "mapping": "Human review, GuardedAdminLink to separate batch, accessible stale recovery"
+  },
+  {
+    "taskId": "T12",
+    "symbol": "prepareContentDraft",
+    "path": "lib/ai/content-drafts.ts",
+    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "readContentFacts",
+    "path": "lib/ai/drafts/content-facts.ts",
+    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "runBoardReporter",
+    "path": "lib/ai/board-reporter/service.ts",
+    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "getBoardDraftBySourceKey",
+    "path": "lib/db/repos/posts.ts",
+    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "ContentDraftPanel",
+    "path": "components/admin/content-draft-panel.tsx",
+    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
   }
 ]

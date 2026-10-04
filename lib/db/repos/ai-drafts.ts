@@ -1,3 +1,4 @@
+import {readContentCopyContext,parseContentCaseId} from "@/lib/ai/drafts/content-facts";
 import {readSupportDraftSource} from "@/lib/ai/drafts/support-facts";
 import "server-only";
 import {createHash} from "node:crypto";
@@ -313,6 +314,15 @@ export function createAiDraftsRepository(
         if(source.facts.versionHash!==expectedFactsHash)throw Error('DRAFT_GENERATION_STALE');
         return source.context;
       });
+    },
+    async latestContentDraft(actor:Actor,caseId:string):Promise<AiDraftDetails|null>{
+      parseContentCaseId(caseId);
+      const id=await locked(actor,async tx=>rows(await tx.execute(sql`SELECT id FROM ai_review_drafts WHERE kind='content' AND case_id=${caseId} ORDER BY created_at DESC,id DESC LIMIT 1`))[0]?.id);
+      return id ? this.getDraft(actor,z.string().uuid().parse(id)) : null;
+    },
+    async getContentContext(actor:Actor,caseId:string,expectedHash:string){
+      parseContentCaseId(caseId);
+      return locked(actor,(tx,admin)=>readContentCopyContext(admin,caseId,tx,now(),z.string().regex(/^[a-f0-9]{64}$/).parse(expectedHash)));
     },
     async getFacts(actor: Actor, input: unknown): Promise<ApprovedFactPack> {
       const value = z

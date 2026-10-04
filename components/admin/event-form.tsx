@@ -1,5 +1,6 @@
 "use client";
 
+import {ContentDraftPanel, type ContentAssistance} from "@/components/admin/content-draft-panel";
 import {useActionState, useRef, useState} from "react";
 
 import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
@@ -30,15 +31,26 @@ type Values = Partial<Readonly<{
 const initialState: EventActionState = {};
 const inputClass = "mt-1 w-full rounded-md border p-2";
 
-export function EventForm({action, labels, values = {}, mediaRows = []}: Readonly<{
+export function EventForm({action, labels, values = {}, mediaRows = [], assistance}: Readonly<{
   action: (state: EventActionState, formData: FormData) => Promise<EventActionState>;
+  assistance?: ContentAssistance;
   labels: Labels; values?: Values; mediaRows?: readonly RegisteredMediaOption[];
 }>) {
   const {setDirty} = useAdminUnsavedChanges();
   const formRef = useRef<HTMLFormElement>(null);
   const [publishOnSave, setPublishOnSave] = useState(Boolean(values.published));
   const [draftPreview, setDraftPreview] = useState<Readonly<{titleEn: string; titleZh: string; descriptionEn: string; descriptionZh: string}> | null>(null);
-  const markEdited = () => {setDirty(true); setDraftPreview(null);};
+  const copyDirtyRef = useRef(false);
+  const [copyDirty, setCopyDirty] = useState(false);
+  const markEdited = () => {copyDirtyRef.current = true;setCopyDirty(true); setDirty(true); setDraftPreview(null);};
+  const adoptCopy = (locale: "en" | "zh-HK", body: string) => {
+    if(copyDirtyRef.current) return false;
+    const element = formRef.current?.elements.namedItem(locale === "en" ? "descriptionEn" : "descriptionZh");
+    if (!(element instanceof HTMLTextAreaElement)) return false;
+    element.value = body;
+    markEdited();
+    return true;
+  };
   const captureDraft = () => {
     if (!formRef.current) return;
     const data = new FormData(formRef.current);
@@ -47,7 +59,7 @@ export function EventForm({action, labels, values = {}, mediaRows = []}: Readonl
   };
   const [state, formAction, pending] = useActionState(async (previous: EventActionState, formData: FormData) => {
     const result = await action(previous, formData);
-    if (result.status === "success") setDirty(false);
+    if (result.status === "success") {setDirty(false);setCopyDirty(false);copyDirtyRef.current=false;}
     return result;
   }, initialState);
   const value = (name: string, fallback: string | number | null | undefined) => state.values?.[name] ?? fallback ?? "";
@@ -84,6 +96,7 @@ export function EventForm({action, labels, values = {}, mediaRows = []}: Readonl
     <label className="flex items-center gap-2"><input defaultChecked={published} key={`published-${published}`} onChange={(event) => setPublishOnSave(event.currentTarget.checked)} name="published" type="checkbox"/>{labels.published}</label>
     <label className="md:col-span-2">{labels.descriptionEn}<textarea {...fieldProps("descriptionEn")} className="mt-1 min-h-24 w-full rounded-md border p-2" defaultValue={value("descriptionEn", values.descriptionEn)} name="descriptionEn" required/>{error("descriptionEn")}</label>
     <label className="md:col-span-2">{labels.descriptionZh}<textarea {...fieldProps("descriptionZh")} className="mt-1 min-h-24 w-full rounded-md border p-2" defaultValue={value("descriptionZh", values.descriptionZh)} name="descriptionZh"/>{error("descriptionZh")}</label>
+    {assistance ? <ContentDraftPanel value={assistance} dirty={copyDirty} onAdopt={adoptCopy}/> : null}
     <div className="flex flex-wrap items-center justify-end gap-3 md:col-span-2">
       <button className="min-h-11 rounded-md border px-4 py-2" onClick={captureDraft} type="button">{labels.previewDraft}</button>
       <button className="min-h-11 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">{pending ? labels.saving : publishOnSave ? (values.published ? labels.save : labels.savePublish) : labels.saveDraft}</button>

@@ -152,10 +152,18 @@ async function exerciseM4B(): Promise<void> {
       commit: (value: unknown) => Promise<unknown>;
     }) => {
       const output = {
-        executiveSummary: "Acceptance report.",
-        highlights: ["Deterministic"],
-        risks: ["Review"],
-        recommendedActions: ["Approve"],
+        en: {
+          executiveSummary: "Review the reporting window.",
+          highlights: ["Review the recorded metrics."],
+          risks: ["Human review is required."],
+          recommendedActions: ["Review before publication."],
+        },
+        zhHK: {
+          executiveSummary: "請檢視報告期間。",
+          highlights: ["請檢視記錄指標。"],
+          risks: ["須由職員檢視。"],
+          recommendedActions: ["發布前請先檢視。"],
+        },
       };
       await inputValue.commit(output);
       return output;

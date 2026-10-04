@@ -1,4 +1,5 @@
 import "server-only";
+import {readContentDraftFacts} from "./content-facts";
 import {readSupportDraftSource} from "./support-facts";
 import { readApplicationTriageSource } from "@/lib/db/repos/applications";
 import { applicationDraftFacts } from "./application-facts";
@@ -17,6 +18,7 @@ export const readApprovedDraftFacts: ApprovedDraftFactReader = async (
   tx,
 ) => {
   requireAdmin(actor);
+  if (input.kind === "content") return readContentDraftFacts(actor, input.caseId, tx, input.asOf);
   if (input.kind === "application") {
     const source = await readApplicationTriageSource(actor, input.caseId, tx);
     if (!source) throw Error("AI_DRAFT_CASE_UNAVAILABLE");

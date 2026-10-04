@@ -196,8 +196,6 @@ describe("news page authorization ordering", () => {
 describe("PR5 public-cutover boundary", () => {
   it("keeps the public repository, routes, renderer, buildlog, and page owners on body_mdx", () => {
     const protectedPaths = [
-      "lib/db/repos/posts.ts",
-      "lib/db/repos/board-drafts.ts",
       "app/[locale]/(public)/news/page.tsx",
       "app/[locale]/(public)/news/[slug]/page.tsx",
       "components/marketing/build-log-detail.tsx",
@@ -211,10 +209,11 @@ describe("PR5 public-cutover boundary", () => {
       resolve(process.cwd(), "lib/db/repos/public-posts.ts"),
       "utf8",
     );
-    const buildLogReaders = publicRepository.slice(
-      publicRepository.indexOf("async listPublishedBuildLogs"),
-      publicRepository.indexOf("async listPublishedNews"),
-    );
+    const buildLogsStart = publicRepository.indexOf("async listPublishedBuildLogs");
+    const newsStart = publicRepository.indexOf("async listPublishedNews");
+    expect(buildLogsStart).toBeGreaterThanOrEqual(0);
+    expect(newsStart).toBeGreaterThan(buildLogsStart);
+    const buildLogReaders = publicRepository.slice(buildLogsStart, newsStart);
     expect(buildLogReaders).toContain("bodyMdx: posts.bodyMdx");
     expect(buildLogReaders).not.toMatch(/bodyMdxZhHk|body_mdx_zh_hk/);
     const renderer = readFileSync(

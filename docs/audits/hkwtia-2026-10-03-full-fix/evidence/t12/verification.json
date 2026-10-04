@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-04T11:58:10.594493+00:00",
+  "branch": "codex/bilingual-admin-content-20261003",
+  "code": "FOCUSED_PG_PASS_FULL_CURRENT_PENDING",
+  "actualPostgresDistinct": 68,
+  "focusedRepaired": 132,
+  "localFirstFull": {
+    "passed": 6714,
+    "skipped": 562,
+    "failed": 3,
+    "success": false
+  },
+  "repairs": "Valid bilingual deterministic fixture; public-cutover guard scoped to actual public owners with non-vacuous reader anchors. Private board authorization is independently covered. Auth tree repeat13pass, timeout unchanged.",
+  "lint": {
+    "errors": 0,
+    "warnings": 95
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "strings": {
+    "tsxFiles": 321,
+    "pass": true
+  },
+  "native": "PENDING",
+  "preview": "PENDING",
+  "provider": "BLOCKED_APPROVED_ADMIN_PROVIDER_DATA_CREDENTIAL_CAPS_AND_REAL_RECEIPTS",
+  "productionReleased": false,
+  "productionMigrationApplied": false,
+  "noAutomaticPublicationOrBusinessFieldMutation": true,
+  "preservedMemberWriterQuota": true
+}

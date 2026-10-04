@@ -3999,7 +3999,39 @@
       "boardDraftPreviewDescription": "透過不執行內容的產生式內容預覽，檢視此僅供職員查看的草稿。",
       "boardDraftKpi": "關鍵績效指標",
       "boardDraftValue": "數值",
-      "boardDraftBack": "返回報告"
+      "boardDraftBack": "返回報告",
+      "generatedReport": {
+        "title": "理事會報告",
+        "window": "報告期間",
+        "run": "起草紀錄",
+        "kpis": "主要績效指標",
+        "kpi": "指標",
+        "value": "數值",
+        "summary": "摘要",
+        "narrative": "正文",
+        "highlights": "重點",
+        "risks": "風險",
+        "actions": "建議行動",
+        "links": "系統連結",
+        "empty": "未有提供。",
+        "unavailable": "未有資料",
+        "yes": "是",
+        "no": "否",
+        "to": "至",
+        "metrics": {
+          "arr_hkd": "年度經常性收入",
+          "mrr_hkd": "每月經常性收入",
+          "renewal_rate": "續會率",
+          "first_year_renewal_rate": "首年續會率",
+          "funnel_started": "入會流程：開始",
+          "funnel_profile_completed": "入會流程：建立檔案",
+          "funnel_checkout_or_review": "入會流程：付款或審批",
+          "funnel_activated": "入會流程：啟用",
+          "attendance_rate": "出席率",
+          "at_risk_count": "需跟進會員"
+        }
+      },
+      "boardDraftLegacyLanguage": "這份歷史報告只有英文正文。"
     },
     "automations": {
       "eyebrow": "自動化營運",
@@ -4444,6 +4476,7 @@
     "analysisSummary": "建議摘要",
     "analysisTasks": "建議跟進事項",
     "openConversation": "回到對話並採用已核准草稿",
+    "openContent": "返回內容編輯器",
     "applyFilters": "套用篩選",
     "applicationKind": "入會申請",
     "supportKind": "客服對話",
@@ -4578,5 +4611,30 @@
       "privacy": "私隱或身份查詢",
       "other": "須人工分類"
     }
+  },
+  "ContentAssistance": {
+    "title": "內容起草",
+    "description": "根據已儲存資料起草或翻譯正文。審閱後才可複製；預覽和儲存仍是獨立步驟。",
+    "locale": "草稿語言",
+    "en": "英文",
+    "zhHK": "繁體中文（香港）",
+    "prepare": "起草或翻譯已儲存正文",
+    "preparing": "正在準備草稿…",
+    "review": "開啟草稿審閱",
+    "adopt": "複製已批准文字至草稿",
+    "adopting": "正在核對已批准草稿…",
+    "manual": "複製前，請核對目前資料和已批准草稿。",
+    "disabled": "內容輔助未啟用。你仍可手動編輯、預覽及儲存。",
+    "configuration": "行政用途的供應商批准、憑證或預算未就緒。請繼續手動處理。",
+    "created": "草稿已準備。複製前，請先審閱及批准。",
+    "adopted": "已批准文字已複製到未儲存草稿。請先預覽，再儲存。",
+    "stale": "來源資料或審閱版本已改變。請重新載入並核對目前資料。",
+    "busy": "這份草稿正在準備中。",
+    "unknown": "供應商效果尚未確認。重試前，請先對帳現有紀錄。",
+    "forbidden": "你未獲授權使用這份草稿。",
+    "unavailable": "暫時無法使用草稿。請繼續手動處理或稍後重試。",
+    "invalid": "請求無效。",
+    "dirty": "目前有未儲存修改。複製已批准草稿前，請先儲存或保留修改。",
+    "noHistory": "這個語言未有已儲存草稿。"
   }
 }

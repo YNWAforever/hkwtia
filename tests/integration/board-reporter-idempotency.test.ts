@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import type {
   BoardFactPack,
-  BoardNarrative,
+  BilingualBoardNarrative,
 } from "@/lib/ai/board-reporter/contracts";
 import {runBoardReporter} from "@/lib/ai/board-reporter/service";
 import type {AgentConfig} from "@/lib/ai/scheduled-runtime";
@@ -58,18 +58,20 @@ describe("Board Reporter idempotency", () => {
         }],
       };
     });
-    const posts = createPostsRepository(async () => database as never);
+    const repository = createPostsRepository(async () => database as never);
+    // This legacy pg-proxy test verifies the post SQL conflict invariant only; real provider-before-work coverage uses disposable PostgreSQL.
+    const posts = {createBoardDraftOnce: repository.createBoardDraftOnce};
     const runIds = [
       "11111111-1111-4111-8111-111111111111",
       "11111111-1111-4111-8111-111111111112",
     ];
-    const runJson = vi.fn(async ({actor, commit}): Promise<BoardNarrative> => {
-      const output: BoardNarrative = {
-      executiveSummary: `Narrative from ${actor.runId}`,
+    const runJson = vi.fn(async ({commit}): Promise<BilingualBoardNarrative> => {
+      const output: BilingualBoardNarrative = {en:{
+      executiveSummary: "Review source records.",
       highlights: [],
       risks: [],
       recommendedActions: [],
-      };
+      },zhHK:{executiveSummary:"請檢視來源紀錄。",highlights:[],risks:[],recommendedActions:[]}};
       await commit?.(output);
       return output;
     });

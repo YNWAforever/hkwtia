@@ -1,3 +1,4 @@
+import {contentDraftAssistance} from "@/lib/admin/content-draft-assistance";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
@@ -24,6 +25,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
   if (!parsedId.success) notFound();
   const post = await adminPostsRepository.getForAdmin(actor, parsedId.data);
   if (!post) notFound();
+  const contentAssistance = await contentDraftAssistance(actor, "news", parsedId.data, locale);
   const t = await getTranslations({locale, namespace: "Admin.news"});
   const updateActionMessages = {
     successMessage: t("updateSuccess"),
@@ -58,7 +60,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
             : post.publishedAt ? t("statusPublished") : t("statusDraft")}
         </p>
       </header>
-      <NewsForm action={updateAction} labels={labels} values={post}/>
+      <NewsForm action={updateAction} labels={labels} values={post} assistance={contentAssistance}/>
       <ArchiveToggle
         action={setNewsArchivedAction.bind(
           null,

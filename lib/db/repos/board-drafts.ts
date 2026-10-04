@@ -31,12 +31,14 @@ const boardDraftRowSchema = z.object({
 });
 const boardDraftPreviewRowSchema = boardDraftRowSchema.extend({
   bodyMdx: z.string(),
+  bodyMdxZhHk: z.string().nullable().optional(),
 });
 const boardDraftSchema = boardDraftRowSchema.omit({sourceKey: true}).extend({
   reportMonth: reportMonthSchema,
 });
 const boardDraftPreviewSchema = boardDraftSchema.extend({
   bodyMdx: z.string(),
+  bodyMdxZhHk: z.string().nullable().optional(),
 });
 
 export type BoardDraft = z.infer<typeof boardDraftSchema>;
@@ -129,6 +131,7 @@ export function createBoardDraftRepository(
           ${posts.titleEn} AS "titleEn",
           ${posts.titleZh} AS "titleZh",
           ${posts.bodyMdx} AS "bodyMdx",
+          ${posts.bodyMdxZhHk} AS "bodyMdxZhHk",
           ${posts.sourceKey} AS "sourceKey",
           ${posts.agentRunId} AS "agentRunId",
           ${agentRuns.status} AS "agentRunStatus",
