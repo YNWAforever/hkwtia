@@ -66,6 +66,6 @@ Fresh project metadata reports Production Git branch `release`。本 session 的
 | Expired recovery cookie | Provider-read-confirmed only; native same-browser verified | Existing Stripe TEST/isolated Auth | Same Preview; Production unchanged | Real Google/magic and full worker/G5 gates pending |
 | Ticket/refund notice | Existing durable outbox | Isolated test sink only | Actual local built app | Real recipient receipt not verified; no live-send authority |
 
-T14C没有migration，当前隔離ledger59。Production仍需独立审批0057–0059／新能力，不能因main合併推斷已發布。先核對ledger兼容與web/worker的APP_URL/service credential/version，再按具體批准發web；worker本增量无需改变，保持新AI／sender／bulk flags closed。Stripe webhook保持既有签名secret与idempotency，不改Production provider配置。
+T14C沒有migration，目前隔離ledger59。Production仍需獨立批准0057–0059／新能力，不能因main合併推斷已發布。先核對ledger相容性與web/worker的APP_URL/service credential/version，再按具體批准發布web；worker本增量無需改變，保持新AI／sender／bulk flags closed。Stripe webhook保持既有簽名secret與idempotency，不改Production provider配置。
 
-回退T14C相容web至base e12add4e或上一已验证版本，保留数据库订单、grant、provider退款及不可变audit/outbox；不逆删schema、不尝试撤回真实已发生退款。先停新增effect/dequeue，再按providerreceipt逐笔对账。T16仍需真实滚动与回复演练、批准candidate/rollback deployment和每个启用能力的cloud窗口。
+回退T14C相容web至base e12add4e或上一個已驗證版本，保留資料庫訂單、grant、provider退款及不可變audit/outbox；不逆刪schema、不嘗試撤回真實已發生退款。先停新增effect/dequeue，再按providerreceipt逐筆對帳。T16仍需真實發布與回復演練、批准candidate/rollback deployment和每個啟用能力的cloud窗口。
