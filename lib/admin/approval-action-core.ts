@@ -7,6 +7,7 @@ export type ApprovalActionMessages = Readonly<{
   alreadyDecided: string;
   notFound: string;
   error: string;
+  stale?: string;
 }>;
 
 type Options = Readonly<{
@@ -21,6 +22,7 @@ export async function runApprovalDecisionAction(_state: ApprovalActionState, for
     await options.mutate(parsed.data);
     return {status: "success", message: options.messages.success};
   } catch (error) {
+    if (error instanceof Error && error.message === "APPROVAL_FACTS_STALE") return {status:"error",message:options.messages.stale??options.messages.error};
     if (error instanceof Error && error.message === "APPROVAL_ALREADY_DECIDED") return {status: "error", message: options.messages.alreadyDecided};
     if (error instanceof Error && (error.message === "APPROVAL_NOT_FOUND" || error.message === "APPROVAL_UNSUPPORTED")) return {status: "error", message: options.messages.notFound};
     return {status: "error", message: options.messages.error};

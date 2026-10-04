@@ -59,6 +59,7 @@ export function jobHealthEnabled(
       throw Error("INVALID_WORKER_JOB_SCOPE");
     if (!keys.includes(key)) return false;
   }
+  if(key==="retention-analyst")return env.AGENTS_ENABLED==="true"&&env.ADMIN_AI_RETENTION_DRAFTS_ENABLED==="true";
   const config = JOB_HEALTH_SCHEDULE[key];
   return "flag" in config ? env[config.flag] === "true" : true;
 }

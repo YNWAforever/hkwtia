@@ -149,3 +149,10 @@ describe("Retention Analyst job route", () => {
     expect(listCandidates).not.toHaveBeenCalled();
   });
 });
+
+it('counts bounded pages in dry-run without legacy full reads, claims or a provider',async()=>{
+ const listCandidates=vi.fn(async()=>{throw Error('UNBOUNDED_LEGACY_READ');}),listCandidatePage=vi.fn().mockResolvedValueOnce({items:[{},{}],nextCursor:'synthetic-next'}).mockResolvedValueOnce({items:[{}],nextCursor:null}),runner=vi.fn();
+ const post=createRetentionAnalystPost({candidates:{listCandidates,listCandidatePage},runner,now:()=>new Date('2027-04-01'),secret:()=> 'synthetic-secret'});
+ const response=await post(new Request('https://example.test/api/jobs/retention-analyst?dryRun=1',{method:'POST',headers:{authorization:'Bearer synthetic-secret'}}));
+ expect(response.status).toBe(200);expect((await response.json()).summary.considered).toBe(3);expect(listCandidatePage).toHaveBeenCalledTimes(2);expect(listCandidates).not.toHaveBeenCalled();expect(runner).not.toHaveBeenCalled();
+});

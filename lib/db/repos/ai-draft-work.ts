@@ -24,6 +24,7 @@ const finishSchema = tokenSchema
   .extend({
     state: z.enum(["succeeded", "unknown", "failed_before_request"]),
     draftId: z.string().uuid().nullable(),
+    approvalId: z.string().uuid().nullable().optional(),
     providerRequestId: z.string().min(1).max(255).nullable(),
   })
   .strict();
@@ -32,6 +33,7 @@ export type DraftWorkClaim = Readonly<{
   disposition: "claimed" | "busy" | "reuse" | "unknown";
   claimToken: string | null;
   draftId: string | null;
+  approvalId?: string;
 }>;
 function rows(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result;
@@ -104,7 +106,8 @@ export function createDraftWorkRepository(
               runId,
               disposition: "reuse",
               claimToken: null,
-              draftId: String(previous.draft_id),
+              draftId: previous.draft_id === null ? null : String(previous.draft_id),
+              ...(previous.approval_id ? {approvalId: String(previous.approval_id)} : {}),
             };
           if (state === "unknown")
             return {
@@ -232,10 +235,11 @@ export function createDraftWorkRepository(
       const result = finishSchema.parse(input);
       if (
         result.state === "succeeded" &&
-        (!result.draftId || !result.providerRequestId)
+        ((!result.draftId && !result.approvalId) || !result.providerRequestId)
       )
         throw Error("DRAFT_WORK_RECEIPT_REQUIRED");
-      if (result.state !== "succeeded" && result.draftId !== null)
+      if (result.draftId && result.approvalId) throw Error("DRAFT_WORK_RESULT_INVALID");
+      if (result.state !== "succeeded" && (result.draftId !== null || result.approvalId))
         throw Error("DRAFT_WORK_RESULT_INVALID");
       if (
         result.state === "failed_before_request" &&
@@ -257,6 +261,7 @@ export function createDraftWorkRepository(
         if (
           previous.state === result.state &&
           previous.draft_id === result.draftId &&
+          (previous.approval_id ?? null) === (result.approvalId ?? null) &&
           previous.provider_request_id === result.providerRequestId
         )
           return;
@@ -267,7 +272,7 @@ export function createDraftWorkRepository(
             : !["requesting", "unknown"].includes(String(previous.state))
         )
           throw Error("DRAFT_WORK_CLAIM_CONFLICT");
-        if (result.state === "succeeded") {
+        if (result.state === "succeeded" && result.draftId) {
           const draft = rows(
             await tx.execute(
               sql`SELECT id FROM ai_review_drafts WHERE id=${result.draftId} AND run_id=${result.runId} AND kind=${String(previous.kind)} AND case_id=${String(previous.case_id)} AND facts_hash=${String(previous.facts_hash)}`,
@@ -275,8 +280,13 @@ export function createDraftWorkRepository(
           );
           if (draft.length !== 1) throw Error("DRAFT_WORK_RESULT_INVALID");
         }
+        if (result.state === "succeeded" && result.approvalId) {
+          if (previous.kind !== "renewal") throw Error("DRAFT_WORK_RESULT_INVALID");
+          const approval = rows(await tx.execute(sql`SELECT id FROM approvals WHERE id=${result.approvalId} AND action_type='agent.retention_outreach' AND request_key=${String(previous.idempotency_key)} AND payload->>'agentRunId'=${result.runId} AND payload->>'profileId'=${String(previous.case_id)} AND payload->>'factsHash'=${String(previous.facts_hash)}`));
+          if (approval.length !== 1) throw Error("DRAFT_WORK_RESULT_INVALID");
+        }
         await tx.execute(
-          sql`UPDATE ai_draft_work SET state=${result.state},draft_id=${result.draftId},provider_request_id=${result.providerRequestId},updated_at=${now()} WHERE run_id=${result.runId} AND claim_token=${result.claimToken}`,
+          sql`UPDATE ai_draft_work SET state=${result.state},draft_id=${result.draftId},approval_id=${result.approvalId ?? null},provider_request_id=${result.providerRequestId},updated_at=${now()} WHERE run_id=${result.runId} AND claim_token=${result.claimToken}`,
         );
       });
     },

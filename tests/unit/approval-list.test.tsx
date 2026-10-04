@@ -81,3 +81,9 @@ describe("approval list", () => {
     expect(html).toMatch(/name="decision"[^>]*value="rejected"|value="rejected"[^>]*name="decision"/);
   });
 });
+
+it('shows the retention snapshot facts and a separate renewal batch entry',()=>{
+ const html=renderToStaticMarkup(<ApprovalList action={vi.fn()} locale="zh-HK" labels={{caption:'Pending',empty:'None',actionType:'Action',requestedAt:'Requested',summary:'Summary',actions:'Actions',approve:'Approve',reject:'Reject',deciding:'Saving',unavailable:'Unavailable',memberReference:'Member',locale:'Language',agentRunReference:'Run',subject:'Subject',body:'Body',reasons:'Reasons',plan:'Membership plan',periodEnd:'Current period end',factsVersion:'Facts version',renewalBatch:'Review renewal batch',actionTypes:{},summaryFields:{},reasonCodes:{}}}
+ approvals={[{id:'33333333-3333-4333-8333-333333333333',actionType:'agent.retention_outreach',requestedAt:new Date('2027-06-01'),payloadSummary:[],actionable:true,retentionPreview:{locale:'en',reasonCodes:['inactive_before_renewal'],memberReference:'member-test',agentRunReference:'44444444-4444-4444-8444-444444444444',subject:'Stay in touch',body:'Please contact the team.',planCode:'startup',renewalDate:'2027-07-01',factsHash:'a'.repeat(64)}}]}/>);
+ expect(html).toContain('Current period end');expect(html).toContain('2027-07-01');expect(html).toContain('startup');expect(html).toContain('/zh/admin/members/communications');
+});

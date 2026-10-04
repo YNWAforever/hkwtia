@@ -598,6 +598,7 @@ async function runProductionApprovals(now: Date): Promise<unknown> {
 export async function runProductionRetentionAnalyst(
   now: Date,
 ): Promise<unknown> {
+  if(process.env.ADMIN_AI_RETENTION_DRAFTS_ENABLED!=="true")return {considered:0,drafted:0,skippedPending:0,deduplicated:0,failed:0};
   const acceptanceOwnershipKey =
     resolveM4BAcceptanceOwnershipKey(process.env);
   const ai = aiEnv();

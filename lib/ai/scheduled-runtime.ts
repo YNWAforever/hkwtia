@@ -42,6 +42,8 @@ export async function runScheduledJson<T>(input: {
   prompt: string;
   outputSchema: z.ZodType<T>;
   signal?: AbortSignal;
+  beforeDispatch?: () => Promise<void>;
+  onProviderReceipt?: (requestId: string) => Promise<void>;
   commit?: (output: T) => Promise<void>;
 }): Promise<T> {
   const runtimeActor = runtimeActorFor(input.actor);
@@ -59,6 +61,8 @@ export async function runScheduledJson<T>(input: {
     tools: {},
     preparedRun,
     finalization: "deferred",
+    ...(input.beforeDispatch ? {beforeDispatch: input.beforeDispatch} : {}),
+    ...(input.onProviderReceipt ? {onProviderReceipt: input.onProviderReceipt} : {}),
     ...(input.signal === undefined ? {} : {abortSignal: input.signal}),
   });
 

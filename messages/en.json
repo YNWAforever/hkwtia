@@ -3867,6 +3867,13 @@
       "error": "Something went wrong. Try again."
     },
     "approvals": {
+      "plan": "Membership plan",
+      "periodEnd": "Current period end",
+      "factsVersion": "Facts version",
+      "renewalBatch": "Review renewal batch",
+      "workflowHelp": "Review the outreach draft first. Approval records a human decision. Then prepare a renewal batch with current payment, membership and consent checks; campaign review and sending remain separate.",
+      "stale": "Membership or consent has changed. Reload the current facts before deciding.",
+
       "eyebrow": "Approval queue",
       "title": "Pending approvals",
       "description": "Review trusted application requests and record one decision without executing the payload.",
