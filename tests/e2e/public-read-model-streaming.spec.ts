@@ -28,6 +28,13 @@ for (const locale of ["en", "zh-HK"] as const) {
       width: locale === "en" ? 1440 : 390,
       height: 900,
     });
+    expect((await page.goto(prefix + "/"))?.status()).toBe(200);
+    const hero = page.locator("img.hero-image");
+    await expect(hero).toBeVisible();
+    await expect.poll(() => hero.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    const heroSource = await hero.evaluate((image: HTMLImageElement) => new URL(image.currentSrc).pathname);
+    expect(heroSource, "The same approved hero must avoid a cold request-time image transform").toMatch(/^\/archive\/tech-connect-ai-leaders-(480|960|1800)\.webp$/);
+    await page.screenshot({path: `docs/audits/hkwtia-2026-10-03-full-fix/evidence/t15/${locale}-static-hero.png`});
     expect((await page.goto(prefix + "/membership"))?.status()).toBe(200);
     await expect(page.locator("main h1")).toBeVisible();
     for (const code of ["community", "startup", "corporate", "patron"]) {

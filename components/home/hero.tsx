@@ -20,7 +20,11 @@ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
 
   return (
     <section className="hero defer-following-sections" aria-labelledby="hero-title">
-      <Image alt={t('imageAlt')} className="hero-image" fill loading="eager" fetchPriority="high" sizes="100vw" src={image} />
+      <picture>
+        {/* Same pinned photograph, resized offline. The first request needs no server transform. */}
+        <source type="image/webp" sizes="100vw" srcSet="/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w" />
+        <Image alt={t('imageAlt')} className="hero-image" fill loading="eager" fetchPriority="high" sizes="100vw" src={image} unoptimized />
+      </picture>
       <div className="hero-scrim" aria-hidden="true" />
       <div className="network-field" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
       <div className="hero-content shell">
