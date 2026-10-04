@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import {GuardedAdminLink} from "@/components/admin/unsaved-changes-guard";
 import {localizedPath} from "@/lib/urls";
 import type {AppLocale} from "@/i18n/routing";
 import {useActionState} from "react";
@@ -25,7 +25,7 @@ function DecisionForm({action, actionable, approvalId, decision, labels}: Readon
   return <form action={formAction} className="space-y-1">
     <input name="approvalId" type="hidden" value={approvalId}/>
     <button className="rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60" disabled={!actionable || pending} name="decision" type="submit" value={decision}>{pending ? labels.deciding : label}</button>
-    <span aria-live="polite" className={state.status === "error" ? "block text-xs text-destructive" : "block text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message ?? ""}</span>
+    <span aria-live="polite" className={state.status === "error" ? "block text-xs text-red-800 dark:text-red-300" : "block text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message ?? ""}</span>
   </form>;
 }
 
@@ -50,7 +50,7 @@ function ApprovalSummary({approval, labels}: Readonly<{approval: AdminPendingApp
 export function ApprovalList({approvals, labels, action, locale}: Readonly<{approvals: readonly AdminPendingApproval[]; labels: Labels; action: ApprovalAction; locale: string}>) {
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
   if (approvals.length === 0) return <p className="text-muted-foreground">{labels.empty}</p>;
-  return <section className="space-y-4">{labels.workflowHelp?<p>{labels.workflowHelp}</p>:null}{labels.renewalBatch&&approvals.some(row=>row.retentionPreview)?<Link className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale as AppLocale,"/admin/members/communications")}>{labels.renewalBatch}</Link>:null}<div className="overflow-x-auto rounded-md border border-border"><table className="min-w-full text-left text-sm">
+  return <section className="space-y-4">{labels.workflowHelp?<p>{labels.workflowHelp}</p>:null}{labels.renewalBatch&&approvals.some(row=>row.retentionPreview)?<GuardedAdminLink className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale as AppLocale,"/admin/members/communications")}>{labels.renewalBatch}</GuardedAdminLink>:null}<div className="overflow-x-auto rounded-md border border-border"><table className="min-w-full text-left text-sm">
     <caption className="caption-top px-4 py-3 text-left font-medium text-foreground">{labels.caption}</caption>
     <thead className="border-y border-border bg-muted/40 text-muted-foreground"><tr><th className="px-4 py-3" scope="col">{labels.actionType}</th><th className="px-4 py-3" scope="col">{labels.requestedAt}</th><th className="px-4 py-3" scope="col">{labels.summary}</th><th className="px-4 py-3" scope="col">{labels.actions}</th></tr></thead>
     <tbody>{approvals.map((approval) => <tr className="border-b border-border last:border-0" key={approval.id}>
