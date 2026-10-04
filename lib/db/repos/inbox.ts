@@ -121,7 +121,7 @@ const listOptionsSchema = z
     // grew. Defaulted so every existing caller keeps its meaning.
     handling: z.enum(["all", "bot", "human", "closed"]).default("all"),
     scope: z.enum(["all", "mine", "unassigned", "overdue"]).default("all"),
-    limit: z.number().int().min(1).max(200).default(50),
+    limit: z.number().int().min(1).max(100).default(50),
   })
   .strict();
 

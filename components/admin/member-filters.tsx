@@ -32,6 +32,6 @@ export function MemberFilters({locale, query,companyOptions,companySearch,compan
     </div>
     <div className="flex flex-wrap gap-4"><label className="space-y-1 text-sm font-medium"><span>{labels.completeness}</span><select className="block min-h-11 rounded-md border border-input bg-background px-3" defaultValue={query.completeness} name="completeness"><option value="any">{labels.any}</option><option value="complete">{labels.complete}</option><option value="incomplete">{labels.incomplete}</option></select></label><label className="space-y-1 text-sm font-medium"><span>{labels.sort}</span><select className="block min-h-11 rounded-md border border-input bg-background px-3" defaultValue={query.sort} name="sort"><option value="name_asc">{labels.nameAsc}</option><option value="name_desc">{labels.nameDesc}</option><option value="renewal_asc">{labels.renewalAsc}</option></select></label></div>
     </details>
-    {query.limit !== 20 ? <input name="limit" type="hidden" value={query.limit}/> : null}
+    {query.limit !== 50 ? <input name="limit" type="hidden" value={query.limit}/> : null}
   </form>;
 }

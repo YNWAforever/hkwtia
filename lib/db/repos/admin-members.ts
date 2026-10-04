@@ -96,9 +96,22 @@ function memberMatchingPredicate(query: AdminMemberQuery): SQL {
 }
 
 function memberMatchingFrom(): SQL {
+  // Build visibility once so list/count/snapshot share the same ownership rule.
+  // Owned memberships and active company seats overlap only when the same
+  // profile owns that membership; exclude that duplicate in the company arm.
+  // A set join avoids one BitmapOr membership lookup per profile on every page.
   return sql`FROM ${profiles}
-      LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
-      LEFT JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
+      LEFT JOIN (
+        SELECT m.id, m.owner_user_id, m.company_id, m.plan_code, m.status,
+          m.billing_period_end, m.owner_user_id AS visible_profile_id
+        FROM ${memberships} m WHERE m.owner_user_id IS NOT NULL
+        UNION ALL
+        SELECT m.id, m.owner_user_id, m.company_id, m.plan_code, m.status,
+          m.billing_period_end, seats.user_id AS visible_profile_id
+        FROM ${companyMembers} seats
+        INNER JOIN ${memberships} m ON m.company_id = seats.company_id
+        WHERE seats.revoked_at IS NULL AND m.owner_user_id IS DISTINCT FROM seats.user_id
+      ) AS memberships ON memberships.visible_profile_id = ${profiles.id}
       LEFT JOIN ${companies} AS membership_companies ON ${membershipCompanies.id} = ${memberships.companyId}`;
 }
 

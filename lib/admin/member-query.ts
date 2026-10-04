@@ -24,7 +24,7 @@ const queryObject = z.object({
   locale: z.enum(["en", "zh-HK"]).nullable().default(null),
   completeness: z.enum(["any", "incomplete", "complete"]).default("any"),
   sort: z.enum(["name_asc", "name_desc", "renewal_asc"]).default("name_asc"),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
+  limit: z.coerce.number().int().min(1).max(50).default(50),
   cursor: cursorTextSchema.nullable().default(null),
 }).strict();
 

@@ -554,7 +554,7 @@ export function createAiDraftsRepository(
     },
     async listReviewQueue(actor:Actor,input:Readonly<{after?:string;limit?:number;kind?:AdminAiDraft["kind"];state?:AdminAiDraft["state"];ownerId?:string;dueBefore?:string}>={}){
       requireAdmin(actor);
-      const value=z.object({after:z.string().max(1000).optional(),limit:z.number().int().min(1).max(100).default(20),kind:z.enum(draftKinds).optional(),state:adminAiDraftSchema.shape.state.optional(),ownerId:z.string().min(1).max(255).optional(),dueBefore:z.string().datetime({offset:true}).optional()}).strict().parse(input);
+      const value=z.object({after:z.string().max(1000).optional(),limit:z.number().int().min(1).max(100).default(50),kind:z.enum(draftKinds).optional(),state:adminAiDraftSchema.shape.state.optional(),ownerId:z.string().min(1).max(255).optional(),dueBefore:z.string().datetime({offset:true}).optional()}).strict().parse(input);
       const scope=createHash('sha256').update(JSON.stringify(['draft-queue-v1',actor.profileId,actor.userId,actor.kind,value.kind??null,value.state??null,value.ownerId??null,value.dueBefore??null])).digest('hex');
       // Preserve old UUID cursors only for the historic unfiltered task-list interface.
       const legacy=value.after&&z.string().uuid().safeParse(value.after).success&&!value.kind&&!value.state&&!value.ownerId&&!value.dueBefore;

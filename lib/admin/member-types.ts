@@ -43,7 +43,7 @@ export function adminMemberListHref(localePrefix: string, query: Readonly<{searc
   if (query.locale) params.set("locale", query.locale);
   if (query.completeness && query.completeness !== "any") params.set("completeness", query.completeness);
   if (query.sort && query.sort !== "name_asc") params.set("sort", query.sort);
-  if (query.limit !== 20) params.set("limit", String(query.limit));
+  if (query.limit !== 50) params.set("limit", String(query.limit));
   if (query.cursor) params.set("cursor", query.cursor);
   if (history.length) params.set("history", Buffer.from(JSON.stringify(history), "utf8").toString("base64url"));
   const encoded = params.toString();
