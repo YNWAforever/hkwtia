@@ -1,7 +1,7 @@
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Suspense, type ReactNode} from 'react';
 
-import {ConciergeWidget} from '@/components/ai/concierge-widget';
+import {DeferredConciergeWidget} from '@/components/ai/deferred-concierge-widget';
 import {PublicHeader} from '@/components/layout/public-header';
 import {SiteFooter} from '@/components/layout/site-footer';
 import {SiteHeader} from '@/components/layout/site-header';
@@ -53,7 +53,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
       </Suspense>
       <main id="main-content">{children}</main>
       <SiteFooter locale={appLocale} />
-      <ConciergeWidget
+      <DeferredConciergeWidget
         locale={appLocale}
         labels={conciergeLabels}
         prompts={conciergePrompts}

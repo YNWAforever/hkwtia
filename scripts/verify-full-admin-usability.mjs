@@ -90,6 +90,8 @@ try {
     NODE_ENV: "production",
     VERCEL_ENV: "preview",
     APP_URL: origin,
+    // Match HTML canonical with next-intl middleware alternate-link origin.
+    NEXT_PUBLIC_SITE_URL: origin,
     AGENTS_ENABLED: "false",
     ADMIN_AI_ENABLED: "false",
     ADMIN_AI_DRAFTS_ENABLED: "true",
@@ -174,6 +176,9 @@ try {
     PLAYWRIGHT_PORT: "3450",
     AUDIT_ISOLATED_ACCEPTANCE: "1",
     FULL_FIX_EXPECTED_SOURCE_SHA: sourceSha,
+    ...(process.argv.includes("--concierge-recovery")
+      ? { CONCIERGE_FAILURE_ACCEPTANCE: "disabled" }
+      : {}),
   };
   delete env.PLAYWRIGHT_STORAGE_STATE;
   const lighthouse = process.argv.includes("--lighthouse");
@@ -256,9 +261,18 @@ try {
         [
           "node_modules/@playwright/test/cli.js",
           "test",
-          "tests/e2e/ai-admin-usability.spec.ts",
+          process.argv.includes("--public-bundle")
+            ? "tests/e2e/concierge-lazy-loading.spec.ts"
+            : process.argv.includes("--concierge-recovery")
+              ? "tests/e2e/concierge-readiness.spec.ts"
+              : "tests/e2e/ai-admin-usability.spec.ts",
           "--project=chromium",
-          ...process.argv.slice(2),
+          ...process.argv
+            .slice(2)
+            .filter(
+              (arg) =>
+                !["--public-bundle", "--concierge-recovery"].includes(arg),
+            ),
         ],
         { env, stdio: "inherit", windowsHide: true },
       );
