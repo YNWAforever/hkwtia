@@ -3,7 +3,10 @@ import { isValidElement, type ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 const repositories = vi.hoisted(() => ({ events: vi.fn(), plans: vi.fn() }));
 vi.mock("@/lib/db/repos/events", () => ({
-  eventsRepository: { listPublic: repositories.events },
+  eventsRepository: {
+    listPublic: repositories.events,
+    countPublic: vi.fn().mockResolvedValue(0),
+  },
 }));
 vi.mock("@/lib/db/repos/membership-plans", () => ({
   membershipPlansRepository: { list: repositories.plans },

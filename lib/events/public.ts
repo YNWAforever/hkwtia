@@ -11,7 +11,7 @@ export type PublicEventProjection = Readonly<{
   endsAt: string | null;
   venue: string | null;
   capacity: number | null;
-  hero: Readonly<{url: string; alt: string}> | null;
+  hero: Readonly<{ url: string; alt: string }> | null;
   // Phase B1 (B-4, B-6): the detail page picks the registration path from these,
   // and /events filters on format and tags. `organiser.slug` is the address of the
   // company's /members page and is null unless that page is actually published
@@ -31,13 +31,27 @@ export type PublicEventProjection = Readonly<{
   // event's own status; `PublicEventStatus` above is a TIME status derived from the
   // dates and must not be overloaded with it.
   cancelled: boolean;
-  organiser: Readonly<{name: string; slug: string | null}> | null;
+  organiser: Readonly<{ name: string; slug: string | null }> | null;
 }>;
 
-export function parsePublicEventStatus(value: string | readonly string[] | undefined): PublicEventStatus {
+export function parsePublicEventStatus(
+  value: string | readonly string[] | undefined,
+): PublicEventStatus {
   return value === "past" ? "past" : "open";
 }
 
-export function eventBoundary(event: Readonly<{startsAt: Date; endsAt: Date | null}>): Date {
+export function eventBoundary(
+  event: Readonly<{ startsAt: Date; endsAt: Date | null }>,
+): Date {
   return event.endsAt ?? event.startsAt;
+}
+
+// Reuse the established 12-row public read bound; this changes presentation, not eligibility.
+export const PUBLIC_EVENT_PAGE_SIZE = 12;
+export function parsePublicEventPage(
+  value: string | readonly string[] | undefined,
+): number {
+  if (typeof value !== "string" || !/^[1-9]\d{0,8}$/.test(value)) return 1;
+  const page = Number(value);
+  return (page - 1) * PUBLIC_EVENT_PAGE_SIZE <= 2147483647 ? page : 1;
 }

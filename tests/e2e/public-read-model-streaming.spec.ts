@@ -53,6 +53,30 @@ for (const locale of ["en", "zh-HK"] as const) {
     await expect(
       page.getByText(messages.Common.eventsListLoading, { exact: true }),
     ).toHaveCount(0);
+    expect(
+      await page.locator(".event-library > article").count(),
+      "Public activity output must be bounded to 12 cards",
+    ).toBeLessThanOrEqual(12);
+    const nextPage = page.getByRole("link", {
+      name: messages.Common.nextPage,
+      exact: true,
+    });
+    await expect(nextPage).toBeVisible();
+    const firstLinks = await page
+      .locator(".event-library > article h3 a")
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")));
+    await nextPage.click();
+    await expect(page).toHaveURL(/page=2/);
+    await expect(page.locator(".event-results-head")).toBeVisible();
+    expect(
+      await page.locator(".event-library > article").count(),
+    ).toBeLessThanOrEqual(12);
+    const secondLinks = await page
+      .locator(".event-library > article h3 a")
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")));
+    expect(firstLinks.length).toBeGreaterThan(0);
+    expect(secondLinks.length).toBeGreaterThan(0);
+    expect(firstLinks.filter((link) => secondLinks.includes(link))).toEqual([]);
     const past = page.getByRole("button", {
       name: messages.Events.quickTabs.past,
       exact: true,

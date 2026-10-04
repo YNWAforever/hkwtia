@@ -14,7 +14,7 @@ import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventCancellationIntents, eventCancellationNotifications, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, type EventFilters} from "@/lib/events/filters";
-import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
+import {eventBoundary, PUBLIC_EVENT_PAGE_SIZE, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/events/reminder-enrollment";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
@@ -24,7 +24,7 @@ import {requireMember, type Actor, type AdminActor, type CompanyRole} from "@/li
 
 const eventIdSchema = z.string().uuid();
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-const publicReadLimitSchema = z.number().int().min(1).max(12);
+const publicReadLimitSchema = z.number().int().min(1).max(PUBLIC_EVENT_PAGE_SIZE);
 // Rendered as anchors on the public page: `z.url()` alone admits javascript: and data: schemes.
 const httpUrlSchema = z.string().trim().url().max(500).refine((value) => /^https?:\/\//i.test(value), {message: "must be an http(s) URL"});
 const eventInputObjectSchema = z.object({
@@ -142,7 +142,7 @@ function publicMemoryRow(row: PublicProjectionRow): PublicEventMemoryRow {
   };
 }
 export type PublicEventSource = readonly (Event | PublicEventMemoryRow)[] | Readonly<{list: () => Promise<readonly (Event | PublicEventMemoryRow)[]>}>;
-export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; limit?: number; filters?: EventFilters; source?: PublicEventSource}>;
+export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; limit?: number; offset?: number; filters?: EventFilters; source?: PublicEventSource}>;
 export type PublicEventSlugOptions = Readonly<{asOf: Date; source?: PublicEventSource}>;
 export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Extract<Actor, {kind: "member"}>) => Promise<boolean>}>;
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
@@ -282,12 +282,14 @@ function publicRowsByStatus(rows: readonly PublicEventMemoryRow[], status: Publi
 
 export async function listPublicEvents(_actor: Actor, options: PublicEventReadOptions): Promise<PublicEventProjection[]> {
   const limit = options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
+  const offset = z.number().int().min(0).max(2147483647).parse(options.offset ?? 0);
+  if (offset > 0 && limit === undefined) throw new Error("PUBLIC_EVENT_PAGINATION_REQUIRES_LIMIT");
   const asOf = z.coerce.date().parse(options.asOf);
   const locale = options.locale ?? "en";
   const filters = options.filters ?? EMPTY_EVENT_FILTERS;
   if (options.source) {
     const rows = publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf, filters);
-    return (limit === undefined ? rows : rows.slice(0, limit)).map((row) => projectPublicEvent(row, locale));
+    return (limit === undefined ? rows : rows.slice(offset, offset + limit)).map((row) => projectPublicEvent(row, locale));
   }
   const boundary = sql<Date>`coalesce(${events.endsAt}, ${events.startsAt})`;
   const predicate = options.status === "open" ? gte(boundary, asOf) : lt(boundary, asOf);
@@ -297,7 +299,7 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
     .leftJoin(media, eq(events.heroMediaId, media.id))
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
     .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS]), predicate, ...publicFilterPredicates(filters))).orderBy(...order);
-  const rows = await (limit === undefined ? query : query.limit(limit));
+  const rows = await (limit === undefined ? query : query.limit(limit).offset(offset));
   return rows.map((row) => projectPublicEvent(publicMemoryRow(row), locale));
 }
 

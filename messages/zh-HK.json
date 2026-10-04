@@ -1,6 +1,10 @@
 {
   "_review": true,
   "Common": {
+    "eventsPaginationLabel": "活動分頁",
+    "previousPage": "上一頁",
+    "nextPage": "下一頁",
+    "eventsPageSummary": "第 {page} 頁 · 共 {count} 項活動",
     "membershipPlansLoading": "正在載入會籍計劃…",
     "eventsListLoading": "正在載入活動…",
     "skipToContent": "跳至主要內容",

@@ -31,9 +31,12 @@ function messageAt(namespace: string | undefined, key: string): unknown {
 }
 
 const listPublic = vi.hoisted(() => vi.fn());
+const countPublic = vi.hoisted(() => vi.fn());
 const searchState = vi.hoisted(() => ({ current: new URLSearchParams() }));
 
-vi.mock("@/lib/db/repos/events", () => ({ eventsRepository: { listPublic } }));
+vi.mock("@/lib/db/repos/events", () => ({
+  eventsRepository: { listPublic, countPublic },
+}));
 vi.mock("@/lib/growth/interest-action", () => ({
   submitInterestAction: vi.fn(),
 }));
@@ -83,7 +86,66 @@ async function renderEventsPage(
 describe("Events page donor markup", () => {
   beforeEach(() => {
     searchState.current = new URLSearchParams();
+    countPublic.mockResolvedValue(0);
   });
+
+  it("bounds each page and preserves validated filters and calendar in both navigation links", async () => {
+    listPublic.mockResolvedValueOnce([]);
+    countPublic.mockResolvedValueOnce(25);
+    await renderEventsPage({
+      page: "2",
+      status: "past",
+      tag: "AI",
+      month: "2026-13",
+      view: "calendar",
+    });
+    expect(listPublic).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        limit: 12,
+        offset: 12,
+        status: "past",
+        filters: { format: null, month: null, organiser: null, tag: "ai" },
+      }),
+    );
+    const nav = screen.getByRole("navigation", {
+      name: bundles.en.Common.eventsPaginationLabel,
+    });
+    for (const [label, page] of [
+      [bundles.en.Common.previousPage, "1"],
+      [bundles.en.Common.nextPage, "3"],
+    ]) {
+      const url = new URL(
+        within(nav).getByRole("link", { name: label }).getAttribute("href")!,
+        "https://example.test",
+      );
+      expect(url.pathname).toBe("/events");
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        status: "past",
+        tag: "ai",
+        view: "calendar",
+        page,
+      });
+    }
+    expect(
+      document.querySelector("form.event-filter-panel input[name=page]"),
+    ).toBeNull();
+    expect(
+      document.querySelector("form.event-quick-tabs input[name=page]"),
+    ).toBeNull();
+  });
+
+  it.each(["0", "-1", "2.5", "999999999999999999", "<script>"])(
+    "uses the bounded first page for invalid page %s",
+    async (page) => {
+      listPublic.mockResolvedValueOnce([]);
+      await renderEventsPage({ page });
+      expect(listPublic).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ limit: 12, offset: 0 }),
+      );
+    },
+  );
 
   it("renders the hero, activity strip, an EventCard grid and the recommendations/interest/closing bands", async () => {
     listPublic.mockResolvedValueOnce([

@@ -3,7 +3,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const events = vi.hoisted(() => ({ listPublic: vi.fn() }));
+const events = vi.hoisted(() => ({
+  listPublic: vi.fn(),
+  countPublic: vi.fn().mockResolvedValue(0),
+}));
 
 vi.mock("@/lib/db/repos/events", () => ({ eventsRepository: events }));
 vi.mock("next-intl/server", () => ({

@@ -20,7 +20,11 @@ import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { eventsRepository } from "@/lib/db/repos/events";
 import { parseEventFilters } from "@/lib/events/filters";
-import { parsePublicEventStatus } from "@/lib/events/public";
+import {
+  parsePublicEventPage,
+  parsePublicEventStatus,
+  PUBLIC_EVENT_PAGE_SIZE,
+} from "@/lib/events/public";
 import { submitInterestAction } from "@/lib/growth/interest-action";
 import { buildPageMetadata } from "@/lib/metadata";
 import { routeBreadcrumbItems } from "@/lib/seo/route-breadcrumbs";
@@ -92,9 +96,29 @@ export default async function EventsPage({ params, searchParams }: Props) {
         ? t("guest.cancelInvalid")
         : null;
   const asOf = new Date();
-  const recordsPromise = eventsRepository
-    .listPublic(anonymous, { status, asOf, locale, filters })
+  const page = parsePublicEventPage(query.page);
+  const recordsPromise = Promise.all([
+    eventsRepository.listPublic(anonymous, {
+      status,
+      asOf,
+      locale,
+      filters,
+      limit: PUBLIC_EVENT_PAGE_SIZE,
+      offset: (page - 1) * PUBLIC_EVENT_PAGE_SIZE,
+    }),
+    eventsRepository.countPublic(anonymous, { status, asOf, filters }),
+  ])
+    .then(([records, total]) => ({ records, total }))
     .catch(() => null);
+  const pageHref = (target: number) => {
+    const params = new URLSearchParams({
+      status,
+      ...Object.fromEntries(carriedFilters),
+    });
+    if (view === "calendar") params.set("view", view);
+    params.set("page", String(target));
+    return `/events?${params.toString()}`;
+  };
   const filterLabels = {
     legend: t("filters.legend"),
     format: t("filters.format"),
@@ -200,8 +224,8 @@ export default async function EventsPage({ params, searchParams }: Props) {
         />
         <Suspense fallback={<p role="status">{common("eventsListLoading")}</p>}>
           <AwaitReadModel pending={recordsPromise}>
-            {(records) =>
-              records === null ? (
+            {(result) =>
+              result === null ? (
                 <HonestEmpty
                   copy={t("unavailableDescription")}
                   label={t("statusLabel")}
@@ -210,12 +234,53 @@ export default async function EventsPage({ params, searchParams }: Props) {
                 />
               ) : (
                 <>
+                  {result.total > PUBLIC_EVENT_PAGE_SIZE || page > 1 ? (
+                    <nav
+                      aria-label={common("eventsPaginationLabel")}
+                      className="directory-actions"
+                    >
+                      {page > 1 ? (
+                        <Link
+                          className="button button-quiet"
+                          prefetch={false}
+                          href={pageHref(
+                            Math.min(
+                              page - 1,
+                              Math.max(
+                                1,
+                                Math.ceil(
+                                  result.total / PUBLIC_EVENT_PAGE_SIZE,
+                                ),
+                              ),
+                            ),
+                          )}
+                        >
+                          {common("previousPage")}
+                        </Link>
+                      ) : null}
+                      <span>
+                        {common("eventsPageSummary", {
+                          page,
+                          count: result.total,
+                        })}
+                      </span>
+                      {page * PUBLIC_EVENT_PAGE_SIZE < result.total ? (
+                        <Link
+                          className="button"
+                          prefetch={false}
+                          href={pageHref(page + 1)}
+                        >
+                          {common("nextPage")}
+                        </Link>
+                      ) : null}
+                    </nav>
+                  ) : null}
                   <div className="event-results-head" role="status">
                     <p>
-                      <strong>{records.length}</strong>
-                      {t("resultsHead.label", { count: records.length })}
+                      <strong>{result.records.length}</strong>
+                      {t("resultsHead.label", { count: result.records.length })}
                     </p>
-                    {records.length > 0 ? (
+                    {result.records.length > 0 ? (
                       <EventViewSwitch
                         labels={{
                           label: t("viewSwitch.label"),
@@ -225,12 +290,15 @@ export default async function EventsPage({ params, searchParams }: Props) {
                       />
                     ) : null}
                   </div>
-                  {records.length > 0 ? (
+                  {result.records.length > 0 ? (
                     view === "calendar" ? (
-                      <EventCalendarView events={records} locale={appLocale} />
+                      <EventCalendarView
+                        events={result.records}
+                        locale={appLocale}
+                      />
                     ) : (
                       <div className="event-library">
-                        {records.map((event) => (
+                        {result.records.map((event) => (
                           <EventCard
                             event={event}
                             key={event.id}

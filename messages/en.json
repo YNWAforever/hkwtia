@@ -1,5 +1,9 @@
 {
   "Common": {
+    "eventsPaginationLabel": "Activity pages",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "eventsPageSummary": "Page {page} · {count} activities in total",
     "membershipPlansLoading": "Loading membership plans…",
     "eventsListLoading": "Loading events…",
     "skipToContent": "Skip to content",
