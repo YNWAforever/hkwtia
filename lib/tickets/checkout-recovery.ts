@@ -19,7 +19,7 @@ export type TicketRecoveryStore = Readonly<{
 export type TicketRecoveryReadDependencies = Readonly<{store: TicketRecoveryStore; now: () => Date}>;
 export type TicketRecoveryDependencies = TicketRecoveryReadDependencies & Readonly<{
   stripe: Readonly<{ticketSessionStatus: (sessionId: string) => Promise<"open" | "complete" | "expired">}>;
-  orders: Readonly<{expireBySession: (sessionId: string) => Promise<boolean>; expireUnattachedOrder: (orderId: string) => Promise<boolean>}>;
+  orders: Readonly<{expireBySession: (sessionId: string, expectedOrderId: string) => Promise<boolean>; expireUnattachedOrder: (orderId: string) => Promise<boolean>}>;
 }>;
 export type TicketRecoveryInput = Readonly<{token: string; eventId: string; actor: Actor}>;
 export type TicketRecoveryResumeResult =
@@ -67,7 +67,7 @@ export async function resumeTicketRecovery(input: TicketRecoveryInput, deps: Tic
     const providerStatus = await deps.stripe.ticketSessionStatus(record.stripeCheckoutSessionId);
     if (providerStatus === "open") return {status: "redirect", url: record.stripeCheckoutUrl};
     if (providerStatus === "complete") return {status: "error", code: "ALREADY_COMPLETED"};
-    const expired = await deps.orders.expireBySession(record.stripeCheckoutSessionId);
+    const expired = await deps.orders.expireBySession(record.stripeCheckoutSessionId, record.orderId);
     if (!expired) return {status: "error", code: "UNAVAILABLE"};
     await deps.store.invalidate(recoveryDigest(input.token));
     return {status: "error", code: "RETRY_EXPIRED"};

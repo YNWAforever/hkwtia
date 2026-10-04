@@ -78,9 +78,9 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     }
     it("keeps late-payment refund unverified until a succeeded provider reconciliation", async () => {
       const x = await purchase();
-      expect(await eventOrdersRepository.expireBySession(x.session)).toBe(true);
+      expect(await eventOrdersRepository.expireBySession(x.session, x.orderId)).toBe(true);
       expect(
-        (await eventOrdersRepository.settlePaid(x.session, now)).status,
+        (await eventOrdersRepository.settlePaid(x.session, now, {orderId: x.orderId, amountHkdCents: 1000, currency: "hkd"})).status,
       ).toBe("refund_due");
       const row = (
         await f.pool.query(
@@ -100,7 +100,7 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     });
     it("records check-in against application profile rather than external Auth identity", async () => {
       const x = await purchase();
-      await eventOrdersRepository.settlePaid(x.session, now);
+      await eventOrdersRepository.settlePaid(x.session, now, {orderId: x.orderId, amountHkdCents: 1000, currency: "hkd"});
       await expect(
         ticketCheckInRepository.checkInSeat(staff, { seatId: x.seatId }),
       ).resolves.toEqual({ disposition: "checked_in" });
@@ -115,7 +115,7 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     });
     it("serializes admission against an in-flight refund on the same order", async () => {
       const x = await purchase();
-      await eventOrdersRepository.settlePaid(x.session, now);
+      await eventOrdersRepository.settlePaid(x.session, now, {orderId: x.orderId, amountHkdCents: 1000, currency: "hkd"});
       const connection = await f.pool.connect();
       let finished = false;
       await connection.query("BEGIN");
@@ -214,7 +214,7 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     }
     it("admits exactly one concurrent last-seat purchase and materializes payment once on replay", async () => {
       const x = await purchase();
-      await eventOrdersRepository.expireBySession(x.session);
+      await eventOrdersRepository.expireBySession(x.session, x.orderId);
       const results = await Promise.all(
         [1, 2].map((i) =>
           eventOrdersRepository.createOrder({
@@ -237,8 +237,8 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
         "https://checkout.stripe.com/test",
       );
       const settlements = await Promise.all([
-        eventOrdersRepository.settlePaid(session, now),
-        eventOrdersRepository.settlePaid(session, now),
+        eventOrdersRepository.settlePaid(session, now, {orderId: winner.order.id, amountHkdCents: 1000, currency: "hkd"}),
+        eventOrdersRepository.settlePaid(session, now, {orderId: winner.order.id, amountHkdCents: 1000, currency: "hkd"}),
       ]);
       expect(settlements.map((s) => s.status).sort()).toEqual([
         "duplicate",
@@ -263,7 +263,7 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     });
     it("checks wrong-event pass scope, scan replay and undo against actual persisted seats", async () => {
       const x = await purchase();
-      await eventOrdersRepository.settlePaid(x.session, now);
+      await eventOrdersRepository.settlePaid(x.session, now, {orderId: x.orderId, amountHkdCents: 1000, currency: "hkd"});
       expect(
         await ticketCheckInRepository.passForSeat({
           seatId: x.seatId,
@@ -298,8 +298,8 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     });
     it("keeps unknown refund uncommitted, then correlates succeeded callback once and ignores stale failure", async () => {
       const x = await purchase();
-      await eventOrdersRepository.expireBySession(x.session);
-      await eventOrdersRepository.settlePaid(x.session, now);
+      await eventOrdersRepository.expireBySession(x.session, x.orderId);
+      await eventOrdersRepository.settlePaid(x.session, now, {orderId: x.orderId, amountHkdCents: 1000, currency: "hkd"});
       const command = refundCommand(x),
         sendRefundEmail = vi.fn(async () => undefined),
         deps = {
@@ -361,8 +361,8 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
     });
     it("recovers an unattempted suppressed refund intent once after a failed callback", async () => {
       const x = await purchase();
-      await eventOrdersRepository.expireBySession(x.session);
-      await eventOrdersRepository.settlePaid(x.session, now);
+      await eventOrdersRepository.expireBySession(x.session, x.orderId);
+      await eventOrdersRepository.settlePaid(x.session, now, {orderId: x.orderId, amountHkdCents: 1000, currency: "hkd"});
       const command = refundCommand(x),
         failure = {
           orders: eventOrdersRepository,

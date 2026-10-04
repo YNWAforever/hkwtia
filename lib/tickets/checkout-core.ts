@@ -139,7 +139,7 @@ export async function createTicketCheckout(
     if (status === "complete") return {status: "error", code: "ALREADY_COMPLETED"};
     if (status === "expired") {
       try {
-        const released = await dependencies.orders.expireBySession(created.order.stripeCheckoutSessionId);
+        const released = await dependencies.orders.expireBySession(created.order.stripeCheckoutSessionId, created.order.id);
         return {status: "error", code: released ? "RETRY_EXPIRED" : "UNAVAILABLE"};
       } catch {
         return {status: "error", code: "UNAVAILABLE"};

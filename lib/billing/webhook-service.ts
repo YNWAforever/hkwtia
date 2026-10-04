@@ -1,5 +1,6 @@
 import "server-only";
 import type Stripe from "stripe";
+import type {TicketSettlementReceipt} from "@/lib/db/repos/event-orders";
 import {z} from "zod";
 import {requireSystem} from "@/lib/membership/lifecycle";
 import {jobsRepository} from "@/lib/db/repos/jobs";
@@ -13,9 +14,11 @@ export type SupportedStripeEventType = typeof supportedEventTypes[number];
 export type WebhookLifecycleCommand = Readonly<{eventId: string; eventType: SupportedStripeEventType; eventCreated: number; membershipId: string; applicationId: string; planCode: MembershipPlanCode; stripeCustomerId: string; stripeSubscriptionId: string; stripeCheckoutSessionId: string | null; nextStatus: MembershipStatus; billingPeriodStart: Date | null; billingPeriodEnd: Date | null; cancelAtPeriodEnd: boolean; isRenewal: boolean}>;
 export interface WebhookProcessor { process(actor: Actor, command: WebhookLifecycleCommand): Promise<"processed" | "duplicate">; }
 export type TicketWebhookCommand = Readonly<{
-  eventId: string; eventType: "checkout.session.completed" | "checkout.session.expired";
-  orderId: string; checkoutSessionId: string; paymentIntentId: string | null;
-}>;
+  eventId: string; orderId: string; checkoutSessionId: string; paymentIntentId: string | null;
+} & (
+  | {eventType: "checkout.session.completed"; receipt: TicketSettlementReceipt}
+  | {eventType: "checkout.session.expired"}
+)>;
 export interface TicketProcessor { process(actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate">; }
 export interface RefundFailureProcessor { process(actor: Actor, command: RefundFailureCommand): Promise<"processed" | "duplicate">; }
 export interface RefundSuccessProcessor { process(actor: Actor, command: RefundSuccessCommand): Promise<"processed" | "duplicate">; }
@@ -90,10 +93,15 @@ function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
   // refunded rather than acknowledged without a provider refund.
   const paymentIntentId = object.payment_intent == null ? null : stringId(object.payment_intent);
   if (completed && !paymentIntentId) throw new Error("TICKET_PAYMENT_INTENT_MISSING");
-  return {
-    eventId: event.id, eventType: completed ? "checkout.session.completed" : "checkout.session.expired",
-    orderId: parsed.data.orderId, checkoutSessionId, paymentIntentId,
-  };
+  const correlation = {eventId: event.id, orderId: parsed.data.orderId, checkoutSessionId, paymentIntentId};
+  if (completed) {
+    const receipt = z.object({
+      orderId: z.string().uuid(), amountHkdCents: z.number().int().positive(), currency: z.literal("hkd"),
+    }).strict().safeParse({orderId: parsed.data.orderId, amountHkdCents: object.amount_total, currency: object.currency});
+    if (!receipt.success) throw new WebhookInputError();
+    return {...correlation, eventType: "checkout.session.completed", receipt: receipt.data};
+  }
+  return {...correlation, eventType: "checkout.session.expired"};
 }
 function normalizeRefundFailure(event: Stripe.Event): RefundFailureCommand | null {
   if (event.type !== "refund.failed") return null;

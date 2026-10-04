@@ -239,7 +239,7 @@ describe("eventOrdersRepository.settlePaid", () => {
       enqueueTicketNotice,
     } as Partial<EventOrdersTransaction>);
 
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
       .resolves.toMatchObject({status: "paid"});
     expect(enqueueTicketNotice).toHaveBeenCalledTimes(3);
     expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "confirmation", eventKey: "ticket-confirmation:order-1"});
@@ -249,7 +249,7 @@ describe("eventOrdersRepository.settlePaid", () => {
 
   it("marks a pending order paid", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order())});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
       .resolves.toMatchObject({status: "paid"});
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "paid", expect.objectContaining({paidAt: now}));
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.paid", targetId: "order-1"}));
@@ -257,7 +257,7 @@ describe("eventOrdersRepository.settlePaid", () => {
 
   it("refunds a pending payment when the event was cancelled before settlement", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), lockEvent: vi.fn(async () => ({...event, published: false}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
       .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refund_pending", refundReason: "cancelled"})});
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "cancelled"}));
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", metadata: {reason: "event_closed"}}));
@@ -265,7 +265,7 @@ describe("eventOrdersRepository.settlePaid", () => {
   });
   it("refunds a payment that arrives after the order expired locally", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
       .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refund_pending", refundReason: "cancelled"})});
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "cancelled"}));
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", targetId: "order-1", metadata: {reason: "late_payment"}}));
@@ -273,33 +273,33 @@ describe("eventOrdersRepository.settlePaid", () => {
 
   it("is a no-op for an order already paid", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "paid"}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now)).resolves.toMatchObject({status: "duplicate"});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).resolves.toMatchObject({status: "duplicate"});
     expect(tx.markStatus).not.toHaveBeenCalled();
   });
 
   it.each(["oversold", "cancelled"] as const)("re-issues a refund committed as %s but not finished", async (refundReason) => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "refunded", refundReason}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
       .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason})});
     expect(tx.markStatus).not.toHaveBeenCalled();
   });
 
   it("leaves a staff refund to the staff lane", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "refunded", refundReason: "staff"}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now)).resolves.toMatchObject({status: "ignored"});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).resolves.toMatchObject({status: "ignored"});
     expect(tx.markStatus).not.toHaveBeenCalled();
   });
 
   it("refunds an order that lost the race for the last seat", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 2)});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now)).resolves.toMatchObject({status: "oversold"});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).resolves.toMatchObject({status: "oversold"});
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "oversold"}));
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", targetId: "order-1", metadata: {reason: "oversold"}}));
   });
 
   it("does not count the order's own seats against it", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 0)});
-    await createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now);
+    await createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"});
     expect(tx.heldSeats).toHaveBeenCalledWith("ev-1", now, "order-1");
   });
 });
@@ -315,20 +315,20 @@ describe("eventOrdersRepository.paidSeats", () => {
 describe("eventOrdersRepository.expireBySession", () => {
   it("expires a pending order and writes the audit row", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order())});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1")).resolves.toBe(true);
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1", "order-1")).resolves.toBe(true);
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "expired", {});
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.expired", targetId: "order-1"}));
   });
 
   it("allows a new key after the expired webhook already released the hold", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1")).resolves.toBe(true);
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1", "order-1")).resolves.toBe(true);
     expect(tx.markStatus).not.toHaveBeenCalled();
     expect(tx.insertAudit).not.toHaveBeenCalled();
   });
   it("leaves an order that is no longer pending alone", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "paid"}))});
-    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1")).resolves.toBe(false);
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1", "order-1")).resolves.toBe(false);
     expect(tx.markStatus).not.toHaveBeenCalled();
     expect(tx.insertAudit).not.toHaveBeenCalled();
   });

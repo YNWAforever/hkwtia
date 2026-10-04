@@ -260,11 +260,11 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
   return {
     async process(_actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate"> {
       if (command.eventType === "checkout.session.expired") {
-        await dependencies.orders.expireBySession(command.checkoutSessionId);
+        await dependencies.orders.expireBySession(command.checkoutSessionId, command.orderId);
         return "processed";
       }
 
-      const settlement = await dependencies.orders.settlePaid(command.checkoutSessionId, dependencies.now());
+      const settlement = await dependencies.orders.settlePaid(command.checkoutSessionId, dependencies.now(), command.receipt);
       const order = settlement.order;
       if (!order) return "duplicate";
 

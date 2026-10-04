@@ -68,6 +68,7 @@ const seatPasses: Record<string, SeatPass> = {
 };
 
 const command = {
+  receipt: {orderId, amountHkdCents: paidOrder.amountHkdCents, currency: "hkd" as const},
   eventId: "evt_pass",
   eventType: "checkout.session.completed" as const,
   orderId,

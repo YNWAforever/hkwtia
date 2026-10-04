@@ -49,7 +49,7 @@ describe("ticket checkout recovery capability", () => {
     const services = deps();
     services.stripe.ticketSessionStatus.mockResolvedValue("expired");
     expect(await resumeTicketRecovery({token: TOKEN, eventId: "event-1", actor}, services)).toEqual({status: "error", code: "RETRY_EXPIRED"});
-    expect(services.orders.expireBySession).toHaveBeenCalledWith("cs_test_1");
+    expect(services.orders.expireBySession).toHaveBeenCalledWith("cs_test_1", ORDER.orderId);
     expect(services.store.invalidate).toHaveBeenCalledWith(recoveryDigest(TOKEN));
   });
   it("retains an uncertain provider attempt and denies a different owner", async () => {

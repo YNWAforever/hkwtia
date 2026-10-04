@@ -64,6 +64,8 @@ function ticketEvent(type: TicketEventType, id = "evt_ticket", overrides: Record
         // Stripe sends `paid` on a settled session; the ticket lane must refuse
         // `unpaid` with a delayed-notification payment method.
         payment_status: "paid",
+        amount_total: pendingOrder.amountHkdCents,
+        currency: "hkd",
         metadata: {kind: "event_ticket", orderId},
         ...overrides,
       },
@@ -141,7 +143,10 @@ function buildTicketProcessor(options: {
 }
 
 function command(eventType: TicketWebhookCommand["eventType"]): TicketWebhookCommand {
-  return {eventId: "evt_ticket", eventType, orderId, checkoutSessionId: sessionId, paymentIntentId};
+  const correlation = {eventId: "evt_ticket", orderId, checkoutSessionId: sessionId, paymentIntentId};
+  return eventType === "checkout.session.completed"
+    ? {...correlation, eventType, receipt: {orderId, amountHkdCents: pendingOrder.amountHkdCents, currency: "hkd"}}
+    : {...correlation, eventType};
 }
 
 describe("processStripeEvent ticket branch", () => {
@@ -157,6 +162,7 @@ describe("processStripeEvent ticket branch", () => {
     expect(ticket.commands).toEqual([{
       eventId: "evt_ticket",
       eventType: "checkout.session.completed",
+      receipt: {orderId, amountHkdCents: pendingOrder.amountHkdCents, currency: "hkd"},
       orderId,
       checkoutSessionId: sessionId,
       paymentIntentId,
@@ -243,7 +249,7 @@ describe("processStripeEvent ticket branch", () => {
     ).resolves.toBe("processed");
 
     expect(membership.commands).toEqual([]);
-    expect(orders.settlePaid).toHaveBeenCalledWith(sessionId, expect.any(Date));
+    expect(orders.settlePaid).toHaveBeenCalledWith(sessionId, expect.any(Date), {orderId, amountHkdCents: pendingOrder.amountHkdCents, currency: "hkd"});
     expect(transport.sends).toHaveLength(1);
   });
 
@@ -257,6 +263,7 @@ describe("processStripeEvent ticket branch", () => {
     expect(ticket.commands).toEqual([{
       eventId: "evt_ticket",
       eventType: "checkout.session.completed",
+      receipt: {orderId, amountHkdCents: pendingOrder.amountHkdCents, currency: "hkd"},
       orderId,
       checkoutSessionId: sessionId,
       paymentIntentId,
@@ -279,7 +286,7 @@ describe("createTicketProcessor", () => {
 
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.expired"))).resolves.toBe("processed");
 
-    expect(orders.expireBySession).toHaveBeenCalledWith(sessionId);
+    expect(orders.expireBySession).toHaveBeenCalledWith(sessionId, orderId);
     expect(orders.settlePaid).not.toHaveBeenCalled();
     expect(refundPaymentIntent).not.toHaveBeenCalled();
     expect(transport.sends).toEqual([]);
