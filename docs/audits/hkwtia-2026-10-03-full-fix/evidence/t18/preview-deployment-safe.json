@@ -1,0 +1,10 @@
+{
+  "id": "dpl_E9M78kznkuc8SWq5DccGNt7nZt6N",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+  "gitRef": "codex/administrative-workspace-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-admin-workspace-20261003.vercel.app",
+  "production": false
+}

@@ -2686,6 +2686,7 @@
       "collapseSidebar": "收起側欄",
       "expandSidebar": "展開側欄",
       "breadcrumbs": "工作平台位置",
+      "searchWorkspace": "搜尋工作台",
       "searchMembers": "尋找會員",
       "viewSite": "瀏覽網站",
       "account": "帳戶",
@@ -4165,6 +4166,7 @@
       "mine": "我的工作",
       "unassigned": "未指派",
       "all": "所有工作",
+      "emptyMine": "目前沒有指派給你的工作。請查看未指派個案，確認是否有需要負責人跟進的工作。",
       "empty": "此範圍暫無待辦。",
       "unavailable": "暫時無法讀取工作清單，請重試。",
       "summary": "工作",
@@ -4473,5 +4475,26 @@
     "saveFirst": "請先儲存或放棄其他編輯，再採用這段備註。",
     "adopted": "已審核備註已儲存到案件時間軸。",
     "adoptUnavailable": "備註未能儲存。請確認審核、案件版本及 1000 字備註限制。"
+  },
+  "WorkspaceSearch": {
+    "title": "搜尋工作台",
+    "description": "尋找你有權查看的會員檔案、公司、申請、活動及支援對話。會員搜尋另設會籍篩選。",
+    "query": "名稱或紀錄編號",
+    "submit": "搜尋",
+    "idle": "輸入名稱或紀錄編號開始搜尋。",
+    "empty": "找不到符合的紀錄，請試用其他名稱或紀錄編號。",
+    "invalid": "請檢查搜尋內容，或清除舊分頁位置重新搜尋。最多輸入 120 個字元。",
+    "denied": "你的權限已變更，請使用獲授權的職員帳戶重新登入。",
+    "unavailable": "暫時無法載入搜尋。請重試，或從側邊欄開啟相關工作隊列。",
+    "next": "下一頁結果",
+    "first": "第一頁結果",
+    "members": "使用會籍條件搜尋會員",
+    "kinds": {
+      "member": "會員檔案",
+      "company": "公司",
+      "application": "申請",
+      "event": "活動",
+      "conversation": "支援對話"
+    }
   }
 }

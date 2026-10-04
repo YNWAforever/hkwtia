@@ -50,6 +50,7 @@ function owner(
 }
 
 export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = Object.freeze([
+  owner({id: "admin-workspace-search", family: "admin", classification: "admin-page", routePath: "/admin/search", filePath: "app/[locale]/(admin)/admin/search/page.tsx", dataOwner: "Current authenticated staff role-scoped entity search; bounded keysets; existing concierge scope only; no private agent history, contact fields, message bodies or aggregate counts."}),
   owner({id: "admin-knowledge", family: "admin", classification: "admin-page", routePath: "/admin/knowledge", filePath: "app/[locale]/(admin)/admin/knowledge/page.tsx", dataOwner: "Own authenticated staff knowledge workspace; configured independent policy approval, version CAS, bounded private source reads and provider-gated indexing."}),
   owner({id: "admin-private-cms-preview", family: "admin", classification: "admin-page", routePath: "/admin/cms-preview/[draftId]", filePath: "app/[locale]/(public)/admin/cms-preview/[draftId]/page.tsx", dataOwner: "Own authenticated editor private Home draft; explicit overrides and private no-store; public layout reused."}),
   owner({id: "admin-announcement-detail", family: "admin", classification: "admin-page", routePath: "/admin/announcements/[id]", filePath: "app/[locale]/(admin)/admin/announcements/[id]/page.tsx", dataOwner: "Scheduled bilingual announcement selected by id."}),

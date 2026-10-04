@@ -811,5 +811,41 @@
     "evidenceBasis": "current-checkout",
     "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
     "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "searchWorkspace",
+    "path": "lib/admin/workspace-search.ts",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createWorkspaceSearchRepository",
+    "path": "lib/db/repos/workspace-search.ts",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "WorkspaceSearchView",
+    "path": "components/admin/workspace-search-view.tsx",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "AdminWorkspaceSearchPage",
+    "path": "app/[locale]/(admin)/admin/search/page.tsx",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
   }
 ]

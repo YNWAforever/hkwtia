@@ -2685,6 +2685,7 @@
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
       "breadcrumbs": "Workspace location",
+      "searchWorkspace": "Search workspace",
       "searchMembers": "Find a member",
       "viewSite": "View site",
       "account": "Account",
@@ -4136,6 +4137,7 @@
       "mine": "My work",
       "unassigned": "Unassigned",
       "all": "All work",
+      "emptyMine": "No work is assigned to you. Check unassigned cases for work that needs an owner.",
       "empty": "No outstanding work in this scope.",
       "unavailable": "Work could not be loaded. Please retry.",
       "summary": "Work",
@@ -4444,5 +4446,26 @@
     "saveFirst": "Save or discard other edits before adopting this note.",
     "adopted": "Reviewed note saved in the case timeline.",
     "adoptUnavailable": "The note was not saved. Check its approval, current case and 1000-character note limit."
+  },
+  "WorkspaceSearch": {
+    "title": "Search workspace",
+    "description": "Find member profiles, companies, applications, events and support conversations you can access. Member search has its own membership filters.",
+    "query": "Name or record ID",
+    "submit": "Search",
+    "idle": "Enter a name or record ID to search.",
+    "empty": "No matching records. Try another name or record ID.",
+    "invalid": "Check the search or start again without the old page cursor. Use at most 120 characters.",
+    "denied": "Your access has changed. Sign in with an authorized staff account.",
+    "unavailable": "Search could not load. Retry, or use the sidebar to open the relevant work queue.",
+    "next": "Next results",
+    "first": "First results",
+    "members": "Search members with membership filters",
+    "kinds": {
+      "member": "Member profiles",
+      "company": "Companies",
+      "application": "Applications",
+      "event": "Events",
+      "conversation": "Support conversations"
+    }
   }
 }

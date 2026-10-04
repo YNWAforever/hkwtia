@@ -13,6 +13,7 @@ export type WorkQueueLabels = Readonly<{
   unassigned: string;
   all: string;
   empty: string;
+  emptyMine?: string;
   unavailable: string;
   summary: string;
   owner: string;
@@ -87,9 +88,10 @@ export function WorkQueueTable({
           {labels.unavailable}
         </p>
       ) : page.items.length === 0 ? (
-        <p className="rounded-md border p-4 text-muted-foreground">
-          {labels.empty}
-        </p>
+        <div role="status" className="space-y-2 rounded-md border p-4 text-muted-foreground">
+          <p>{scope === "mine" ? labels.emptyMine ?? labels.empty : labels.empty}</p>
+          {scope === "mine" ? <Link className="inline-flex min-h-11 items-center text-primary underline" href={href("unassigned")}>{labels.unassigned}</Link> : null}
+        </div>
       ) : (
         <ul className="grid gap-3">
           {page.items.map((item) => (
