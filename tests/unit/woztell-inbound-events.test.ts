@@ -283,7 +283,10 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
       expect(sqlText).toContain(`direction = 'outbound'`);
       expect(sqlText).toContain(`delivery_status = 'queued'`);
       expect(sqlText).toContain("provider_message_id is null");
-      expect(sqlText).toContain("for update skip locked");
+      expect(sqlText).toContain("for update");
+      expect(sqlText).not.toContain("skip locked");
+      expect(sqlText).toContain("select count(*) from candidates");
+      expect(sqlText).toContain("= 1");
       // An adopted row is one WE queued, and Task 6 already wrote its
       // `conversation.reply.queued` audit row (S-7). A second row would be noise.
       expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);

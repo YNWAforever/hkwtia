@@ -3027,7 +3027,8 @@
         "delivered": "已送達",
         "read": "已讀",
         "failed": "未能送達",
-        "uncertain": "送達結果未確定；先核對服務商紀錄再重試"
+        "uncertain": "送達結果未確定；先核對服務商紀錄再重試",
+        "preflightBlocked": "尚未發送：送出前的條件已改變。"
       },
       "errors": {
         "INVALID": "請檢查訊息內容及範本。",

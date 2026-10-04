@@ -1,4 +1,4 @@
-import { providerRefusedSend } from "@/lib/db/repos/inbox";
+import { staffReplyWasNotSent } from "@/lib/db/repos/inbox";
 import type { AppLocale } from "@/i18n/routing";
 import type { InboxMessage, InboxTranscript } from "@/lib/db/repos/inbox";
 
@@ -30,6 +30,7 @@ type Labels = Readonly<{
     read: string;
     failed: string;
     uncertain: string;
+    preflightBlocked: string;
   }>;
 }>;
 
@@ -54,8 +55,9 @@ function DeliveryIndicator({
     (message.deliveryStatus==="queued"&&message.sendClaimLive===false)||
     (message.deliveryStatus === "failed" && !message.providerMessageId &&
     message.errorCode !== "outside_customer_service_window" &&
-    (message.errorCode === null || !providerRefusedSend(message.errorCode)));
-  const text = uncertain
+    (message.errorCode === null || !staffReplyWasNotSent(message.errorCode)));
+  const preflightBlocked = message.errorCode === "pre_send_blocked";
+  const text = preflightBlocked ? labels.delivery.preflightBlocked : uncertain
     ? labels.delivery.uncertain
     : labels.delivery[message.deliveryStatus];
   // Text, not a tick glyph: a ✓✓ alone is unreadable to a screen reader and
@@ -66,7 +68,7 @@ function DeliveryIndicator({
   return message.deliveryStatus === "failed" ? (
     <span className="text-red-700">
       {text}
-      {message.errorCode === null ? null : ` · ${message.errorCode}`}
+      {message.errorCode === null || preflightBlocked ? null : ` · ${message.errorCode}`}
     </span>
   ) : (
     <span>{text}</span>

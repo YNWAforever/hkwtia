@@ -3026,7 +3026,8 @@
         "delivered": "Delivered",
         "read": "Read",
         "failed": "Not delivered",
-        "uncertain": "Delivery uncertain; reconcile provider records before retrying"
+        "uncertain": "Delivery uncertain; reconcile provider records before retrying",
+        "preflightBlocked": "Not sent: requirements changed before dispatch."
       },
       "errors": {
         "INVALID": "Check the message and the template.",

@@ -337,13 +337,13 @@ describe("notification dispatcher — reservation dispositions", () => {
     expect(test.sendTemplateMessage).not.toHaveBeenCalled();
   });
 
-  it("retries a reservation the previous attempt left failed", async () => {
+  it("retries a reservation whose provider definitively refused it with a rate limit", async () => {
     const test = harness({
-      reservation: {disposition: "existing", record: {id: "delivery-1", status: "failed", providerId: null, errorCode: "retryable_network", attemptCount: 1}},
+      reservation: {disposition: "existing", record: {id: "delivery-1", status: "failed", providerId: null, errorCode: "retryable_rate_limit", attemptCount: 1}},
     });
     const result = await dispatchNotification(actor, whatsappRequest, test.dependencies);
 
-    expect(test.retryWhatsappFailure).toHaveBeenCalledWith(actor, "delivery-1", "retryable_network");
+    expect(test.retryWhatsappFailure).toHaveBeenCalledWith(actor, "delivery-1", "retryable_rate_limit");
     expect(test.sendTemplateMessage).toHaveBeenCalledTimes(1);
     expect(result).toEqual({status: "sent", providerId: "woztell-1", deliveryId: "delivery-1"});
   });
