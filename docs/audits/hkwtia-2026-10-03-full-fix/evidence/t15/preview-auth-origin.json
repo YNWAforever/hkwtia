@@ -1,0 +1,16 @@
+{
+  "project": "solitary-wave-52860119",
+  "branch": "br-lingering-unit-azxl75s5",
+  "addedOrigin": "https://hkwtia-usability-20261003.vercel.app",
+  "previousDomainsPreserved": true,
+  "production": false,
+  "observedAt": "2026-10-04T16:43:11.698636+00:00",
+  "commands": [
+    "neon neon-auth domain list --project-id solitary-wave-52860119 --branch br-lingering-unit-azxl75s5 --output json",
+    "neon neon-auth domain add https://hkwtia-usability-20261003.vercel.app --project-id solitary-wave-52860119 --branch br-lingering-unit-azxl75s5 --output json"
+  ],
+  "initialFailure": {
+    "status": 403,
+    "code": "INVALID_ORIGIN"
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "sourceSha": "ae6ce0facf8ad63bf64d4e2ac359ad1f2961a259",
+  "buildId": "EeeOj2FOC7SAumcFgCcBp",
+  "buildSourceSha": "ae6ce0facf8ad63bf64d4e2ac359ad1f2961a259",
+  "observedAt": "2026-10-04T19:11:07.041Z",
+  "nativeExit": 1,
+  "ledger": 61,
+  "dbSourcePositivelyProven": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderSends": 0,
+  "realDeliveryReceipt": false,
+  "production": false,
+  "originalThresholds": {
+    "performance": 0.9,
+    "accessibility": 0.95,
+    "seo": 0.95
+  },
+  "reports": [
+    {
+      "path": "/",
+      "fetchTime": "2026-10-04T19:06:52.341Z",
+      "performance": 0.94,
+      "accessibility": 0.97,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2849.2239999999993,
+      "TBTms": 116.50000000000023,
+      "TTFBms": 137.573
+    },
+    {
+      "path": "/membership",
+      "fetchTime": "2026-10-04T19:07:12.301Z",
+      "performance": 0.95,
+      "accessibility": 0.97,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2565.9069999999997,
+      "TBTms": 165,
+      "TTFBms": 26.919999999999998
+    },
+    {
+      "path": "/events",
+      "fetchTime": "2026-10-04T19:07:31.748Z",
+      "performance": 0.89,
+      "accessibility": 1,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 3189.3225,
+      "TBTms": 218,
+      "TTFBms": 105.149
+    },
+    {
+      "path": "/programmes",
+      "fetchTime": "2026-10-04T19:08:03.401Z",
+      "performance": 0.96,
+      "accessibility": 0.96,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2496.292,
+      "TBTms": 155,
+      "TTFBms": 29.567000000000004
+    },
+    {
+      "path": "/partners",
+      "fetchTime": "2026-10-04T19:08:22.776Z",
+      "performance": 0.96,
+      "accessibility": 1,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2743.572,
+      "TBTms": 89.5,
+      "TTFBms": 495.166
+    },
+    {
+      "path": "/zh",
+      "fetchTime": "2026-10-04T19:08:50.975Z",
+      "performance": 0.88,
+      "accessibility": 0.96,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2637.282,
+      "TBTms": 349.90599999999995,
+      "TTFBms": 285.137
+    },
+    {
+      "path": "/zh/membership",
+      "fetchTime": "2026-10-04T19:09:12.309Z",
+      "performance": 0.93,
+      "accessibility": 0.97,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2696.6800000000003,
+      "TBTms": 205.65999999999963,
+      "TTFBms": 15.667000000000002
+    },
+    {
+      "path": "/zh/events",
+      "fetchTime": "2026-10-04T19:09:32.447Z",
+      "performance": 0.85,
+      "accessibility": 1,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 3187.352499999999,
+      "TBTms": 342.5,
+      "TTFBms": 31.040000000000003
+    },
+    {
+      "path": "/zh/programmes",
+      "fetchTime": "2026-10-04T19:10:03.675Z",
+      "performance": 0.95,
+      "accessibility": 0.96,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2799.39525,
+      "TBTms": 119.5,
+      "TTFBms": 13.484
+    },
+    {
+      "path": "/zh/partners",
+      "fetchTime": "2026-10-04T19:10:19.168Z",
+      "performance": 0.97,
+      "accessibility": 1,
+      "seo": 1,
+      "CLS": 0,
+      "LCPms": 2565.0820000000003,
+      "TBTms": 86.5,
+      "TTFBms": 401.11899999999997
+    }
+  ],
+  "numberOfRunsPerRoute": 1,
+  "regionRUMOrHumanEvidence": false
+}

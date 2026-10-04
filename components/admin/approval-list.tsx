@@ -24,7 +24,7 @@ function DecisionForm({action, actionable, approvalId, decision, labels}: Readon
   const label = decision === "approved" ? labels.approve : labels.reject;
   return <form action={formAction} className="space-y-1">
     <input name="approvalId" type="hidden" value={approvalId}/>
-    <button className="rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60" disabled={!actionable || pending} name="decision" type="submit" value={decision}>{pending ? labels.deciding : label}</button>
+    <button className="min-h-11 rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60" disabled={!actionable || pending} name="decision" type="submit" value={decision}>{pending ? labels.deciding : label}</button>
     <span aria-live="polite" className={state.status === "error" ? "block text-xs text-red-800 dark:text-red-300" : "block text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message ?? ""}</span>
   </form>;
 }
@@ -50,13 +50,13 @@ function ApprovalSummary({approval, labels}: Readonly<{approval: AdminPendingApp
 export function ApprovalList({approvals, labels, action, locale}: Readonly<{approvals: readonly AdminPendingApproval[]; labels: Labels; action: ApprovalAction; locale: string}>) {
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
   if (approvals.length === 0) return <p className="text-muted-foreground">{labels.empty}</p>;
-  return <section className="space-y-4">{labels.workflowHelp?<p>{labels.workflowHelp}</p>:null}{labels.renewalBatch&&approvals.some(row=>row.retentionPreview)?<GuardedAdminLink className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale as AppLocale,"/admin/members/communications")}>{labels.renewalBatch}</GuardedAdminLink>:null}<div className="overflow-x-auto rounded-md border border-border"><table className="min-w-full text-left text-sm">
+  return <section className="space-y-4">{labels.workflowHelp?<p>{labels.workflowHelp}</p>:null}{labels.renewalBatch&&approvals.some(row=>row.retentionPreview)?<GuardedAdminLink className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale as AppLocale,"/admin/members/communications")}>{labels.renewalBatch}</GuardedAdminLink>:null}<div role="region" aria-label={labels.caption} tabIndex={0} className="max-w-full overflow-x-auto rounded-md border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><table className="min-w-[52rem] w-full text-left text-sm">
     <caption className="caption-top px-4 py-3 text-left font-medium text-foreground">{labels.caption}</caption>
     <thead className="border-y border-border bg-muted/40 text-muted-foreground"><tr><th className="px-4 py-3" scope="col">{labels.actionType}</th><th className="px-4 py-3" scope="col">{labels.requestedAt}</th><th className="px-4 py-3" scope="col">{labels.summary}</th><th className="px-4 py-3" scope="col">{labels.actions}</th></tr></thead>
     <tbody>{approvals.map((approval) => <tr className="border-b border-border last:border-0" key={approval.id}>
       <th className="px-4 py-3 font-medium" scope="row">{approval.actionType ? labels.actionTypes[approval.actionType] ?? labels.unavailable : labels.unavailable}</th>
       <td className="px-4 py-3">{formatter.format(approval.requestedAt)}</td>
-      <td className="px-4 py-3"><ApprovalSummary approval={approval} labels={labels}/></td>
+      <td className="min-w-72 px-4 py-3"><ApprovalSummary approval={approval} labels={labels}/></td>
       <td className="px-4 py-3"><div className="flex flex-wrap gap-2"><DecisionForm action={action} actionable={approval.actionable} approvalId={approval.id} decision="approved" labels={labels}/><DecisionForm action={action} actionable={approval.actionable} approvalId={approval.id} decision="rejected" labels={labels}/></div></td>
     </tr>)}</tbody>
   </table></div></section>;

@@ -20,7 +20,7 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
 }));
 vi.mock("@/lib/config/env", () => ({publicEnv: () => ({})}));
-vi.mock("@/components/ai/concierge-widget", () => ({ConciergeWidget: () => <div data-shell="concierge" />}));
+vi.mock("@/components/ai/deferred-concierge-widget", () => ({DeferredConciergeWidget: () => <div data-shell="concierge" />}));
 vi.mock("@/components/layout/site-footer", () => ({SiteFooter: () => <footer>Footer</footer>}));
 vi.mock("@/components/layout/site-header", () => ({
   SiteHeader: (props: {hasAnnouncement?: boolean}) => {

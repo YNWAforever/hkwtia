@@ -1,7 +1,7 @@
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Suspense, type ReactNode} from 'react';
 
-import {ConciergeWidget} from '@/components/ai/concierge-widget';
+import {DeferredConciergeWidget as ConciergeWidget} from '@/components/ai/deferred-concierge-widget';
 import {PublicHeader} from '@/components/layout/public-header';
 import {SiteFooter} from '@/components/layout/site-footer';
 import {SiteHeader} from '@/components/layout/site-header';

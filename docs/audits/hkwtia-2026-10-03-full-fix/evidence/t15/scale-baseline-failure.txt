@@ -1,0 +1,48 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/admin-workflow-performance.test.ts (22 tests | 2 failed) 327163ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 synthetic profiles: seed and measure search, keyset and aggregate report  1160ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-0 keyset has no omissions or duplicates  441ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-1 keyset has no omissions or duplicates 261ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-2 keyset has no omissions or duplicates 247ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-3 keyset has no omissions or duplicates 149ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-4 keyset has no omissions or duplicates 289ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-5 keyset has no omissions or duplicates 89ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-6 keyset has no omissions or duplicates  451ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: descending keyset has no omissions or duplicates  478ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: renewal keyset has no omissions or duplicates  380ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 synthetic drafts: bounded queue, filters, current actor and keyset coverage  1526ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 synthetic profiles: seed and measure search, keyset and aggregate report  13859ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-0 keyset has no omissions or duplicates  53128ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-1 keyset has no omissions or duplicates  6560ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-2 keyset has no omissions or duplicates  13061ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-3 keyset has no omissions or duplicates  12811ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-4 keyset has no omissions or duplicates  28500ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-5 keyset has no omissions or duplicates  6855ms
+   × T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates 60110ms
+     → Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   × T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates 60007ms
+     → Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: renewal keyset has no omissions or duplicates  38666ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 synthetic drafts: bounded queue, filters, current actor and keyset coverage  14119ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates
+Error: Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/admin-workflow-performance.test.ts:63:45
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 20 passed (22)
+   Start at  22:43:33
+   Duration  330.45s (transform 1.13s, setup 221ms, collect 2.31s, tests 327.16s, environment 0ms, prepare 150ms)
+

@@ -1,5 +1,5 @@
 {
-  "status": "ENGINEERING_VERIFIED_EXTERNAL_GATES_OPEN",
+  "status": "ENGINEERING_DONE_REAL_PROVIDER_HUMAN_GATES_OPEN",
   "task": "T13",
   "baseSha": "2be9bd0ae0bb2030d08e4739e04c9b4660eeaaff",
   "sourceSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
@@ -56,12 +56,23 @@
       "filesPass": 796,
       "filesSkip": 101,
       "seconds": 562.29,
-      "note": "Full run collected26 grader cases; subsequent review capture/task cap RED→GREEN29 focused. Exact source CI will include all29."
+      "note": "Full run collected26 grader cases; subsequent review capture/task cap RED\u2192GREEN29 focused. Exact source CI will include all29."
     },
-    "ci": "PENDING"
+    "ci": {
+      "run": 37207503898,
+      "headSha": "8f6349340c18283a77230cdb7cbfa5e68a3a9377",
+      "all7": "SUCCESS",
+      "rootPass": 6748,
+      "rootSkip": 562,
+      "rootFail": 0,
+      "workerPass": 57,
+      "checks": "lint/typecheck/strings/build/audit/quality pass"
+    }
   },
   "migrationRequired": false,
   "productionMutated": false,
   "liveProviderVerified": false,
-  "humanReviewVerified": false
+  "humanReviewVerified": false,
+  "pullRequest": 139,
+  "mergeSha": "899e74cfc034f3f223dec39c51ecf18c26de4fdb"
 }

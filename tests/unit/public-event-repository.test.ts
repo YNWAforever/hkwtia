@@ -102,6 +102,64 @@ describe("repository-backed Event visibility", () => {
     await expect(getEventBySlug(anonymous, "../private", rows)).resolves.toBeNull();
   });
 
+  it("pages the same filtered, published order without repeating the first 12 rows", async () => {
+    const matching = Array.from({ length: 25 }, (_, index) =>
+      event(`page-${String(index).padStart(2, "0")}`, { tags: ["ai"] }),
+    );
+    const source = [
+      ...matching,
+      event("hidden", { visibility: "members_only", tags: ["ai"] }),
+      event("draft", { status: "draft", tags: ["ai"] }),
+      event("other", { tags: ["health"] }),
+    ];
+    const filters = parseEventFilters({ tag: "ai" });
+    const page = (offset: number) =>
+      listPublicEvents(anonymous, {
+        status: "open",
+        asOf,
+        limit: 12,
+        offset,
+        filters,
+        source,
+      });
+    expect((await page(0)).map((row) => row.slug)).toEqual(
+      matching.slice(0, 12).map((row) => row.slug),
+    );
+    expect((await page(12)).map((row) => row.slug)).toEqual(
+      matching.slice(12, 24).map((row) => row.slug),
+    );
+    expect((await page(24)).map((row) => row.slug)).toEqual(["page-24"]);
+    expect(await page(36)).toEqual([]);
+    await expect(
+      countPublicEvents(anonymous, { status: "open", asOf, filters, source }),
+    ).resolves.toBe(25);
+  });
+
+  it.each([-1, 1.5, 2147483648])(
+    "rejects invalid public offset %s before reading",
+    async (offset) => {
+      const source = { list: vi.fn(async () => [event("never")]) };
+      await expect(
+        listPublicEvents(anonymous, {
+          status: "open",
+          asOf,
+          limit: 12,
+          offset,
+          source,
+        }),
+      ).rejects.toThrow();
+      expect(source.list).not.toHaveBeenCalled();
+    },
+  );
+
+  it("requires a bounded limit before accepting a nonzero offset", async () => {
+    const source = { list: vi.fn(async () => [event("never")]) };
+    await expect(
+      listPublicEvents(anonymous, { status: "open", asOf, offset: 12, source }),
+    ).rejects.toThrow();
+    expect(source.list).not.toHaveBeenCalled();
+  });
+
   it("counts past and open published public Events with no 12-item cap", async () => {
     const pastCount = 15;
     const manyPast = Array.from({length: pastCount}, (_unused, index) =>

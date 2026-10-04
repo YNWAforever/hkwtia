@@ -23,7 +23,7 @@ vi.mock("@/lib/config/env", () => ({publicEnv: () => ({})}));
 vi.mock("@/components/admin/admin-app-shell", () => ({AdminAppShell: ({children}: {children: ReactNode}) => <main>{children}</main>}));
 vi.mock("@/components/internal-shell/app-shell", () => ({InternalAppShell: ({children}: {children: ReactNode}) => <main>{children}</main>}));
 vi.mock("@/components/portal/portal-nav", () => ({PortalNav: () => null}));
-vi.mock("@/components/ai/concierge-widget", () => ({ConciergeWidget: () => null}));
+vi.mock("@/components/ai/deferred-concierge-widget", () => ({DeferredConciergeWidget: () => null}));
 
 import LocaleLayout from "@/app/[locale]/layout";
 import AdminLayout from "@/app/[locale]/(admin)/admin/layout";

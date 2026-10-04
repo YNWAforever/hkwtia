@@ -5,6 +5,7 @@ import {ExternalLink, Send, Star, X} from "lucide-react";
 import {usePathname} from "next/navigation";
 import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
+import {ConciergeLauncher} from "@/components/ai/concierge-launcher";
 import {Button} from "@/components/ui/button";
 import {Arrow} from "@/components/wt/arrow";
 import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
@@ -59,7 +60,10 @@ async function httpRecovery(response: Response, labels: ConciergeLabels): Promis
     ...(stopped ? {} : {retryMessage: ""})};
 }
 type DisabledState = Readonly<{taskId: string}>;
-type Props = Readonly<{
+export type ConciergeWidgetProps = Readonly<{
+  /** Client-only initial intent, supplied by the deferred public launcher. */
+  initialOpen?: boolean;
+  initialInvoker?: HTMLElement | null;
   locale: "en" | "zh-HK";
   labels: ConciergeLabels;
   /** Absent when Turnstile is not configured; the challenge is then skipped. */
@@ -224,13 +228,15 @@ export function ConciergeWidget({
   turnstileSiteKey,
   prompts,
   transparencyLabel,
-}: Props) {
+  initialOpen = false,
+  initialInvoker = null,
+}: ConciergeWidgetProps) {
   const dialogId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | undefined>(undefined);
   const contactEmailRef = useRef<HTMLInputElement>(null);
-  const externalInvokerRef = useRef<HTMLElement | null>(null);
+  const externalInvokerRef = useRef<HTMLElement | null>(initialInvoker);
   const terminalEscalationRef = useRef(false);
   const mountedRef = useRef(true);
   const conversationIdRef = useRef<string | undefined>(undefined);
@@ -238,7 +244,7 @@ export function ConciergeWidget({
   const requestActiveRef = useRef(false);
   const feedbackPendingRef = useRef(new Set<string>());
   const sequenceRef = useRef(0);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [draft, setDraft] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactEmailInvalid, setContactEmailInvalid] = useState(false);
@@ -570,48 +576,11 @@ export function ConciergeWidget({
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
-      <div className="concierge fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40">
-        {/* `.concierge` (wisetech.css:286) is the donor's fixed-position anchor: the three
-            `.site-root:has(.event-action-bar) .concierge` lifts (wisetech.css:419,445,449) and
-            the narrow-viewport hide (wisetech.css:860) all key off this exact class on the fixed
-            ancestor, not on `.concierge-trigger`. Until now nothing in the tree carried
-            `.concierge`, so those six donor rules were completely inert (spec Decision 5). The
-            `fixed`/offset/`z-40` Tailwind utilities move here from the button — they used to
-            position the button independently of any wrapper, which would have made the donor
-            lifts above no-ops even after adding the class, since a `fixed` button ignores an
-            ancestor's `bottom`/`right`. They stay as the fallback for the portal layout, which
-            never loads wisetech.css (errata E-11), so the launcher still positions itself
-            correctly there. */}
+      <ConciergeLauncher label={labels.launcher}>
         <Dialog.Trigger asChild>
-          <button
-            type="button"
-            aria-label={labels.launcher}
-            aria-controls={dialogId}
-            aria-expanded={open}
-            className="concierge-trigger touch-manipulation inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
-          >
-            {/* Both class families on purpose: `.concierge-trigger` and its `span` rule style this
-                inside the public route group, where the port is loaded, and the Tailwind
-                utilities are the fallback in the portal, where it is not (errata E-11). They only
-                back the port up, never override it: `hover:bg-primary/90` was dropped because at
-                specificity (0,2,0) it beat `.concierge-trigger` (0,1,0) and repainted the donor
-                ink on hover, and the port declares no `.concierge-trigger:hover` of its own — so
-                the donor pill keeps its colour. `hover:opacity-90` is the one hover effect that
-                does not repaint that ink: `.concierge-trigger` declares no `opacity`, so it
-                layers over both renderings rather than overriding either, and it matches the
-                `active:opacity-90` already here. Without it the portal launcher, which never
-                loads the port, would have no hover affordance at all. The label must stay a bare
-                text node — `.concierge-trigger span` turns any span into the 38px badge. */}
-            <span
-              aria-hidden="true"
-              className="inline-grid size-9 shrink-0 place-items-center rounded-full bg-white font-serif text-[15px] font-bold text-primary"
-            >
-              W+
-            </span>
-            {labels.launcher}
-          </button>
+          <ConciergeLauncher.Button label={labels.launcher} aria-controls={dialogId} aria-expanded={open} />
         </Dialog.Trigger>
-      </div>
+      </ConciergeLauncher>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[600] bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
         <Dialog.Content

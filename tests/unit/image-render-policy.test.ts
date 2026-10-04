@@ -45,9 +45,9 @@ describe("image render policy", () => {
     expect(sources).toContain("components/admin/media-form.tsx");
   });
 
-  // Raw images remain forbidden. The only optimizer bypass is the exact,
-  // conditional own-origin delivery path whose per-request database check makes
-  // archive revocation effective.
+  // Private images retain conditional revocation-aware delivery. The one static
+  // editorial exception is validated by home-hero behaviour/native tests and
+  // precompute-home-hero's pinned input/derivative hashes; no private URLs enter it.
   it.each(sources)("%s uses no raw img and only the authorized optimizer bypass", (path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
 
@@ -55,6 +55,11 @@ describe("image render policy", () => {
     if (revocationAwareConsumers.has(path)) {
       expect(source).toMatch(/from ['"]@\/lib\/media\/url['"]/);
       expect(source).toContain("unoptimized={isPrivateMediaDeliveryUrl(");
+    } else if (path === "components/home/hero.tsx") {
+      // Fixed, public, approved photograph only; responsive derivatives are
+      // independently cacheable. Do not extend this exception to uploaded media.
+      expect(source).toContain("assertOwnOriginEditorialImage(HERO_IMAGE)");
+      expect((source.match(/\bunoptimized\b/g) ?? []).length).toBe(1);
     } else {
       expect(source).not.toContain("unoptimized");
     }

@@ -498,12 +498,14 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `operationId`串request、DB、model、draft、batch回執；metric無PII。公開及私有快取界線不改。
 
-- [ ] 以1k／10k合成會員測搜尋、keyset分頁、報告、draftqueue；記queries、p95、payload和heap，測所有篩選結果不重不漏。
+- [x] 以1k／10k合成會員測搜尋、keyset分頁、報告、draftqueue；記queries、p95、payload和heap，測所有篩選結果不重不漏。
 - [ ] 香港及新加坡各三次冷／暖載入並記網絡設定；補RUM后才作region决定，不能用工具等候時間代替LCP或INP。
 - [ ] 1440px／390px、Tab／Shift-Tab／Esc、focus return、表格橫向及drawer；serious/critical axe0只是最低自動門檻，另真人完成案件任務。
 - [ ] 3–5位職員完成補件、回覆、50筆預览／失敗復原，記time-on-task及錯誤；預設scope、數字、draft來源必須可理解。
-- [ ] Run相關test及 `npm run test:lighthouse`，以實測瓶頸修query／payload，不盲目加全站cache；提交 `perf: improve measured administrative workflows`。
+- [x] Run相關test及 `npm run test:lighthouse`，以實測瓶頸修query／payload，不盲目加全站cache；提交 `perf: improve measured administrative workflows`。
 
+
+T15工程證據：SQL38、native12、CI6771pass590skip、Lighthouse10/10原門檻通過；見 `docs/audits/hkwtia-2026-10-03-full-fix/evidence/t15/verification.md`。HK/SG、RUM、真人screen-reader與3–5staff未驗，相關checkbox維持未完成。
 
 **AC-23 與效能 gate：** 表格預設50/最多100筆、keyset不漏不重；10k synthetic資料每個list/search request不載入全表。先記baseline，再設定同環境list/search server p95≤1秒、首個可操作畫面≤3秒的初始目標；不能以加 timeout/只減 fixture 通過。HK公開RUM p75 LCP≤2.5s、INP≤200ms、CLS≤0.1（觀察目標）；sample不足須標unknown，lab不可冒充RUM。保留原 Lighthouse thresholds，不調低；定位query count/EXPLAIN/TTFB/payload再優化，私人資料不進共享cache。不同使用者輪流登入同browser不見前一人資料。真 screen-reader驗 labels、error summary、live progress；自動axe0不能宣稱全部WCAG通過。
 

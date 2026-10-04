@@ -23,13 +23,15 @@ vi.mock("next-intl/server", () => ({
     (key: string) => String(messageAt(locale, namespace, key))),
 }));
 vi.mock("next/image", () => ({
-  default: ({alt, src, priority, fill, ...props}: {
+  default: ({alt, src, priority, fill, unoptimized, ...props}: {
     alt: string;
     src: string;
     priority?: boolean;
     fill?: boolean;
+    unoptimized?: boolean;
   }) => {
     void fill;
+    void unoptimized;
     // eslint-disable-next-line @next/next/no-img-element -- unit-test projection of next/image
     return <img alt={alt} data-priority={priority ? "true" : undefined} src={src} {...props} />;
   },
@@ -57,6 +59,17 @@ describe("Hero", () => {
     expect(image).toHaveAttribute("fetchpriority", "high");
     expect(image).toHaveAttribute("loading", "eager");
     expect(image).toHaveAttribute("sizes", "100vw");
+    const responsiveSource = image.closest("picture")?.querySelector("source") ?? null;
+    expect(responsiveSource, "The hero should use precomputed responsive files without a cold optimizer request").not.toBeNull();
+    expect(responsiveSource).toHaveAttribute("type", "image/webp");
+    expect(responsiveSource).toHaveAttribute("sizes", "100vw");
+    const entries = responsiveSource!.getAttribute("srcset")!.split(",").map(entry => entry.trim().split(" "));
+    expect(entries.map(entry => entry[1])).toEqual(["480w", "960w", "1800w"]);
+    for (const [path] of entries) {
+      expect(path).toMatch(/^\/archive\/tech-connect-ai-leaders-(480|960|1800)\.webp$/);
+      expect(readFileSync(resolve(process.cwd(), "public" + path)).byteLength).toBeLessThan(107830);
+    }
+
 
     const actions = section.querySelectorAll(".hero-actions a");
     expect(actions).toHaveLength(3);

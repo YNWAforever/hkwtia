@@ -1,0 +1,54 @@
+{
+  "sourceSha": "145443b69df74ad2f70af172c310d10e05803220",
+  "deploymentId": "dpl_7naz7ueCt1AXR6UeEPBwvX36TGEy",
+  "origin": "https://hkwtia-usability-20261003.vercel.app",
+  "ledger": 61,
+  "dbSourcePositivelyProven": true,
+  "production": false,
+  "providerSends": 0,
+  "externalModelCalls": 0,
+  "checks": [
+    {
+      "routeKind": "new unique synthetic news",
+      "status": 200,
+      "markerSha256": "998ca444e6dc36c8d132604acd6d82be9fccd231c9c7aef2b8f1712a466f8dde",
+      "dbSourcePositivelyProven": true
+    },
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/zh",
+      "status": 200
+    },
+    {
+      "route": "/membership",
+      "status": 200
+    },
+    {
+      "route": "/zh/membership",
+      "status": 200
+    },
+    {
+      "route": "/events",
+      "status": 200
+    },
+    {
+      "route": "/zh/events",
+      "status": 200
+    },
+    {
+      "route": "/partners",
+      "status": 200
+    },
+    {
+      "route": "/zh/partners",
+      "status": 200
+    },
+    {
+      "anonymousRequiresLogin": true
+    }
+  ],
+  "observedAt": "2026-10-04T20:02:31.669Z"
+}

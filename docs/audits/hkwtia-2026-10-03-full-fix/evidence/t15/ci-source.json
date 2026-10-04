@@ -1,0 +1,38 @@
+{
+  "runId": 37229996430,
+  "sourceSha": "145443b69df74ad2f70af172c310d10e05803220",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "checks",
+      "conclusion": "success",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37229996430/job/111517482712"
+    },
+    {
+      "name": "worker",
+      "conclusion": "success",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37229996430/job/111517482769"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "success",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37229996430/job/111517482798"
+    },
+    {
+      "name": "tests (2)",
+      "conclusion": "success",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37229996430/job/111517482807"
+    },
+    {
+      "name": "quality",
+      "conclusion": "success",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37229996430/job/111518382351"
+    }
+  ],
+  "actualSummaryLines": [
+    "worker\tRun npm --prefix workers test\t2026-10-04T19:53:59.1716068Z       Tests  57 passed (57)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T19:58:31.3944467Z       Tests  3173 passed | 265 skipped (3438)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T19:56:35.0612771Z       Tests  3598 passed | 325 skipped (3923)"
+  ],
+  "skipsArePass": false
+}

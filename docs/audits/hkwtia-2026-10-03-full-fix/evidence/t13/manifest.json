@@ -15,6 +15,10 @@
       "sha256": "68cb5b2a48e472663d2b572078b4021a03175b4756c113d8a681530a44f3ecdd"
     },
     {
+      "path": "ci-final.json",
+      "sha256": "7682e074318c2065f19d3fa3ae8fad8e896bca52f37ead978158658f564f2b3b"
+    },
+    {
       "path": "commands.json",
       "sha256": "865763f173d3a7a14db16e2ca6f26502417e6cec90c40a27a54df2c7d32768e2"
     },
@@ -64,7 +68,7 @@
     },
     {
       "path": "verification.json",
-      "sha256": "737288d9555acd02c14169d6397f975e53100f5119e82878fec0e686b831b8f1"
+      "sha256": "94ecf7207ce6eb8562caef051e8dc56f3e34cd4dbbc59ad68f20e5ace6c8206a"
     }
   ]
 }

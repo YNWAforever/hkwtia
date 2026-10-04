@@ -1,0 +1,35 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/public-hero-streaming.test.tsx (2 tests | 1 failed) 203ms
+   ✓ public hero streaming > events exposes its hero while the repository is still pending 75ms
+   × public hero streaming > membership exposes its hero while the repository is still pending 126ms
+     → Following content must not paint above the pending catalogue then jump below it: expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/public-hero-streaming.test.tsx > public hero streaming > membership exposes its hero while the repository is still pending
+AssertionError: Following content must not paint above the pending catalogue then jump below it: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/public-hero-streaming.test.tsx:73:11
+     71|           result!.props.children.some(child=>isValidElement<{labelledB…
+     72|           "Following content must not paint above the pending catalogu…
+     73|         ).toBe(false);
+       |           ^
+     74|       } finally {
+     75|         release([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  02:51:58
+   Duration  68.49s (transform 10.62s, setup 4.69s, collect 26.50s, tests 203ms, environment 19.42s, prepare 1.41s)
+

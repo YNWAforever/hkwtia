@@ -16,6 +16,7 @@ for (const locale of ["en", "zh-HK"] as const) for (const width of [1440, 390]) 
     const launcher = page.getByRole("button", {name: labels.launcher});
     await launcher.click();
     const dialog = page.getByRole("dialog", {name: labels.title});
+    await expect(dialog).toBeVisible();
     const layers = await page.evaluate(() => {
       const dialog = document.querySelector('[role="dialog"]')!;
       const background = [...document.querySelectorAll(".site-header, .announcement, .concierge, .mobile-menu")]

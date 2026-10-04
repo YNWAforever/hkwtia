@@ -29,14 +29,14 @@ export async function listInbox(
 ) {
   requireAdmin(actor);
   // Both filters go down to the statement, not to a `.filter()` over the result:
-  // this read is capped at 100 rows, and a filter applied after the cap answers
+  // this read is capped at 50 rows, and a filter applied after the cap answers
   // "handled by a person" with whichever of those threads happened to be among
-  // the hundred most recent.
+  // the fifty most recent.
   return inboxRepository.listConversations(actor, {
     channel,
     handling,
     scope,
-    limit: 100,
+    limit: 50,
   });
 }
 

@@ -1,6 +1,12 @@
 {
   "_review": true,
   "Common": {
+    "eventsPaginationLabel": "活動分頁",
+    "previousPage": "上一頁",
+    "nextPage": "下一頁",
+    "eventsPageSummary": "第 {page} 頁 · 共 {count} 項活動",
+    "membershipPlansLoading": "正在載入會籍計劃…",
+    "eventsListLoading": "正在載入活動…",
     "skipToContent": "跳至主要內容",
     "breadcrumbLabel": "位置導覽",
     "breadcrumbHome": "主頁",
@@ -4469,6 +4475,9 @@
     "results": "逐筆覆核結果",
     "mixedKinds": "一次只可覆核同一業務種類的草稿。",
     "dueBefore": "此時間前到期",
+    "stateFilter": "覆核狀態",
+    "dueBeforeHelp": "請輸入包含時區的 ISO 日期時間，例如 2026-10-31T17:00:00+08:00。不填即不限到期時間。",
+    "modelUnavailable": "尚未核准行政模型。請繼續人工案件流程。",
     "approvedModel": "核准行政模型",
     "budgetRemaining": "本日剩餘預算（微美元）",
     "workerReadiness": "工作程序就緒狀態",

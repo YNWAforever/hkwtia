@@ -1,0 +1,17 @@
+
+> hkwtia-platform@0.0.0 test
+> vitest run tests/unit/admin-member-navigation.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/member-query-contract.test.ts tests/unit/audit-full-workspace.test.tsx --maxWorkers=2
+
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/unit/audit-full-workspace.test.tsx (3 tests) 349ms
+ ✓ tests/unit/admin-member-navigation.test.tsx (8 tests) 365ms
+ ✓ tests/unit/member-query-contract.test.ts (4 tests) 14ms
+ ✓ tests/unit/admin-presentational.test.tsx (12 tests) 336ms
+
+ Test Files  4 passed (4)
+      Tests  27 passed (27)
+   Start at  00:05:30
+   Duration  11.72s (transform 1.62s, setup 463ms, collect 13.99s, tests 1.06s, environment 2.64s, prepare 537ms)
+
