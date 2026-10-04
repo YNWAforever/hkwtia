@@ -3568,6 +3568,8 @@
       "resendPass": "重發門票",
       "resending": "正在傳送門票……",
       "resendSuccess": "門票電郵已發送。",
+      "resendQueued": "門票已排隊處理。請保留本次操作，等候工作程序完成。",
+      "resendUncertain": "上次發送結果尚未確定。請先核對供應商紀錄，完成對帳後才補發。",
       "resendError": "未能發送門票電郵，請再試一次。",
       "exportCsv": "下載出席名單（CSV）",
       "exportPreview": "預覽出席者 CSV 匯出",
@@ -4024,6 +4026,7 @@
       "retryValidation": "此重試要求無效。",
       "retryUnavailable": "此失敗項目已不符合重試資格。",
       "retryError": "未能排程重試，請再試一次。",
+      "retryReconciliation": "發送結果尚未確定。請先由負責人核對供應商紀錄；完成對帳前不可重試。",
       "notAvailable": "未提供",
       "next": "下一頁"
     },

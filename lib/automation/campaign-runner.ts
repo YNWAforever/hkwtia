@@ -4,6 +4,7 @@ import {campaignTemplateMap, type CampaignSourceTemplate} from "@/lib/admin/camp
 
 import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
 import {classifyDeliveryFailure} from "@/lib/automation/retry";
+import { providerEffectIsUncertain, providerEffectFailureCode, type DeliveryEffectFailureCode } from "@/lib/automation/delivery-retry-authorization";
 import type {
   RunnerInput,
   RunnerSummary,
@@ -30,7 +31,7 @@ import type {
   NotificationRequest,
   NotificationResult,
 } from "@/lib/notifications/dispatch";
-import type {EmailSendInput, EmailTransport, DeliveryFailureCode} from "@/lib/email/transport";
+import type {EmailSendInput, EmailTransport} from "@/lib/email/transport";
 import {renderEmail, type RenderedEmail} from "@/lib/email/render";
 import type {AppLocale} from "@/i18n/routing";
 
@@ -50,12 +51,13 @@ const runnerActor = automationCronActor();
  * asks why they received something.
  */
 const campaignNotificationActor: NotificationActor = notificationActor("campaign");
-const providerFailureCodes = new Set<DeliveryFailureCode>([
+const providerFailureCodes = new Set<DeliveryEffectFailureCode>([
   "retryable_network",
   "retryable_rate_limit",
   "retryable_server",
   "provider_client_error",
   "provider_unclassified_failure",
+  "provider_acceptance_uncertain",
 ]);
 
 
@@ -103,7 +105,7 @@ type DeliveryRecordLike = Readonly<{
 
 type DeliveryRetryResultLike = Readonly<{
   record: DeliveryRecordLike;
-  failureCode: DeliveryFailureCode;
+  failureCode: DeliveryEffectFailureCode;
 }>;
 
 type EmailDeliveries = Readonly<{
@@ -237,7 +239,7 @@ type MutableSummary = {
 };
 
 class CampaignRunnerFailure extends Error {
-  constructor(readonly code: DeliveryFailureCode) {
+  constructor(readonly code: DeliveryEffectFailureCode) {
     super(code);
     this.name = "CampaignRunnerFailure";
   }
@@ -247,15 +249,16 @@ function isValidDate(value: Date): boolean {
   return !Number.isNaN(value.getTime());
 }
 
-function failureCode(error: unknown): DeliveryFailureCode {
+function failureCode(error: unknown): DeliveryEffectFailureCode {
+  if (error && typeof error === "object" && "code" in error && error.code === "provider_acceptance_uncertain") return "provider_acceptance_uncertain";
   if (
     error
     && typeof error === "object"
     && "code" in error
     && typeof error.code === "string"
-    && providerFailureCodes.has(error.code as DeliveryFailureCode)
+    && providerFailureCodes.has(error.code as DeliveryEffectFailureCode)
   ) {
-    return error.code as DeliveryFailureCode;
+    return error.code as DeliveryEffectFailureCode;
   }
   return "provider_unclassified_failure";
 }
@@ -280,21 +283,23 @@ export function campaignTemplateSelection(
 
 function persistedFailureCode(
   delivery: DeliveryRecordLike,
-): DeliveryFailureCode {
+): DeliveryEffectFailureCode {
   const code = delivery.errorCode;
+  if (providerEffectIsUncertain(code)) return "provider_acceptance_uncertain";
   return code !== null
     && code !== undefined
-    && providerFailureCodes.has(code as DeliveryFailureCode)
-    ? code as DeliveryFailureCode
+    && providerFailureCodes.has(code as DeliveryEffectFailureCode)
+    ? code as DeliveryEffectFailureCode
     : "provider_unclassified_failure";
 }
 
 function shouldReplayPersistedFailure(
   claim: CampaignRecipientClaim,
   delivery: DeliveryRecordLike,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
 ): boolean {
-  return code === "provider_client_error"
+  return providerEffectIsUncertain(code)
+    || code === "provider_client_error"
     || code === "provider_unclassified_failure"
     || (
       claim.claimSource === "stale"
@@ -302,7 +307,7 @@ function shouldReplayPersistedFailure(
     );
 }
 
-function retryStatus(code: DeliveryFailureCode): number | null {
+function retryStatus(code: DeliveryEffectFailureCode): number | null {
   switch (code) {
     case "retryable_network":
       return null;
@@ -313,6 +318,7 @@ function retryStatus(code: DeliveryFailureCode): number | null {
     case "provider_client_error":
       return 400;
     case "provider_unclassified_failure":
+    case "provider_acceptance_uncertain":
       return 200;
   }
 }
@@ -346,7 +352,7 @@ export function createCampaignEmailRenderer(
 async function completeFailedDelivery(
   dependencies: CampaignRunnerDependencies,
   delivery: DeliveryRecordLike,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
 ): Promise<never> {
   try {
     await dependencies.deliveries.completeEmail(runnerActor, delivery.id, {
@@ -363,7 +369,7 @@ async function sendRecipient(
   dependencies: CampaignRunnerDependencies,
   claim: CampaignRecipientClaim,
   context: CampaignRecipientContext,
-): Promise<void> {
+): Promise<boolean> {
   const template = campaignTemplateSelection(claim.template);
   let rendered: RenderedEmail;
   try {
@@ -395,7 +401,8 @@ async function sendRecipient(
     throw new CampaignRunnerFailure("retryable_network");
   }
   let delivery = reservation.record;
-  if (delivery.status === "sent") return;
+  if (delivery.status === "sent") return true;
+  if (reservation.disposition === "existing" && delivery.status === "processing") throw new CampaignRunnerFailure("provider_acceptance_uncertain");
   if (delivery.status === "failed") {
     const code = persistedFailureCode(delivery);
     if (
@@ -419,6 +426,11 @@ async function sendRecipient(
     delivery = retryResult.record;
   }
 
+  const current = await dependencies.loadContext(runnerActor, claim.profileId);
+  if (!current.marketingConsent || current.emailSuppressed) {
+    await dependencies.deliveries.completeEmail(runnerActor, delivery.id, { status: "failed", errorCode: "pre_send_blocked" });
+    return false;
+  }
   let provider: Awaited<ReturnType<EmailTransport["send"]>>;
   const sendInput: EmailSendInput = {
     to: claim.email,
@@ -435,7 +447,7 @@ async function sendRecipient(
     return completeFailedDelivery(
       dependencies,
       delivery,
-      failureCode(error),
+      providerEffectFailureCode(failureCode(error)),
     );
   }
 
@@ -445,8 +457,9 @@ async function sendRecipient(
       providerId: provider.providerId,
     });
   } catch {
-    throw new CampaignRunnerFailure("retryable_network");
+    throw new CampaignRunnerFailure("provider_acceptance_uncertain");
   }
+  return true;
 }
 
 /**
@@ -465,11 +478,13 @@ async function settleFailure(
   mutations: CampaignFailureMutations,
   claim: SettleableClaim,
   deliveryKey: string,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
   now: Date,
   summary: MutableSummary,
 ): Promise<void> {
-  const decision = classifyDeliveryFailure(retryStatus(code), claim.attemptCount);
+  const decision = code === "provider_acceptance_uncertain"
+    ? { action: "permanent" as const, code }
+    : classifyDeliveryFailure(retryStatus(code), claim.attemptCount);
   if (decision.action === "retry") {
     await mutations.rescheduleRecipient(
       runnerActor,
@@ -540,7 +555,11 @@ async function processRecipient(
   }
 
   try {
-    await sendRecipient(dependencies, claim, context);
+    if (!await sendRecipient(dependencies, claim, context)) {
+      await dependencies.campaigns.markRecipientSuppressed(runnerActor, claim.id, claim.claimedAt, "marketing_suppressed");
+      summary.skipped += 1;
+      return;
+    }
     await dependencies.campaigns.markRecipientSent(
       runnerActor,
       claim.id,

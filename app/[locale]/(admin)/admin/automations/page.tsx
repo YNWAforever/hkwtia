@@ -61,6 +61,7 @@ export default async function AdminAutomationsPage({
     retryValidation: t("retryValidation"),
     retryUnavailable: t("retryUnavailable"),
     retryError: t("retryError"),
+    retryReconciliation: t("retryReconciliation"),
     notAvailable: t("notAvailable"),
     next: t("next"),
   };

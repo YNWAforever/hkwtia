@@ -12,6 +12,7 @@ import {
   providerFailureCode,
 } from "@/lib/automation/delivery-retry-authorization";
 import {classifyDeliveryFailure} from "@/lib/automation/retry";
+import { providerEffectIsUncertain, providerEffectFailureCode, type DeliveryEffectFailureCode } from "@/lib/automation/delivery-retry-authorization";
 import {scheduleJourney} from "@/lib/automation/schedule";
 import type {
   JourneyContext,
@@ -42,7 +43,6 @@ import {
 } from "@/lib/email/catalog";
 import type {
   EmailTransport,
-  DeliveryFailureCode,
 } from "@/lib/email/transport";
 import type {
   RenderEmailInput,
@@ -119,7 +119,7 @@ type RunnerDeliveryReservation = Readonly<{
 
 type RunnerDeliveryRetryResult = Readonly<{
   record: RunnerDeliveryRecord;
-  failureCode: DeliveryFailureCode;
+  failureCode: DeliveryEffectFailureCode;
 }>;
 
 type DeliveryMutations = Readonly<{
@@ -203,7 +203,7 @@ type MutableSummary = {
 };
 
 class RunnerFailure extends Error {
-  constructor(readonly code: DeliveryFailureCode) {
+  constructor(readonly code: DeliveryEffectFailureCode) {
     super(code);
     this.name = "RunnerFailure";
   }
@@ -223,7 +223,8 @@ function emailTemplate(template: string): EmailTemplateId {
   return template as EmailTemplateId;
 }
 
-function failureCode(error: unknown): DeliveryFailureCode {
+function failureCode(error: unknown): DeliveryEffectFailureCode {
+  if (error && typeof error === "object" && "code" in error && error.code === "provider_acceptance_uncertain") return "provider_acceptance_uncertain";
   const code = error
     && typeof error === "object"
     && "code" in error
@@ -233,7 +234,7 @@ function failureCode(error: unknown): DeliveryFailureCode {
   return code ?? "provider_unclassified_failure";
 }
 
-function retryStatus(code: DeliveryFailureCode): number | null {
+function retryStatus(code: DeliveryEffectFailureCode): number | null {
   switch (code) {
     case "retryable_network":
       return null;
@@ -244,12 +245,13 @@ function retryStatus(code: DeliveryFailureCode): number | null {
     case "provider_client_error":
       return 400;
     case "provider_unclassified_failure":
+    case "provider_acceptance_uncertain":
       return 200;
   }
 }
 
 type PersistedFailureDisposition = Readonly<{
-  failureCode: DeliveryFailureCode;
+  failureCode: DeliveryEffectFailureCode;
   expectedErrorCode: string;
   authorized: boolean;
 }>;
@@ -259,6 +261,7 @@ function persistedFailureDisposition(
 ): PersistedFailureDisposition {
   const expectedErrorCode = delivery.errorCode;
   const authorized = authorizedProviderFailureCode(expectedErrorCode);
+  if (providerEffectIsUncertain(authorized ?? expectedErrorCode)) return { failureCode: "provider_acceptance_uncertain", expectedErrorCode: expectedErrorCode ?? "provider_acceptance_uncertain", authorized: false };
   if (authorized && expectedErrorCode) {
     return {
       failureCode: authorized,
@@ -279,6 +282,7 @@ function shouldReplayPersistedFailure(
   claim: JourneyClaim,
   disposition: PersistedFailureDisposition,
 ): boolean {
+  if (providerEffectIsUncertain(disposition.failureCode)) return true;
   if (disposition.authorized) return false;
   const code = disposition.failureCode;
   return claim.claimSource === "stale"
@@ -311,12 +315,14 @@ async function createTask(
 async function settleFailure(
   dependencies: JourneyRunnerDependencies,
   claim: JourneyClaim,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
   now: Date,
   summary: MutableSummary,
 ): Promise<void> {
   const token = claimToken(claim);
-  const decision = classifyDeliveryFailure(retryStatus(code), claim.attemptCount);
+  const decision = code === "provider_acceptance_uncertain"
+    ? { action: "permanent" as const, code }
+    : classifyDeliveryFailure(retryStatus(code), claim.attemptCount);
   if (decision.action === "retry") {
     const retryAt = new Date(now.getTime() + decision.delayMinutes * 60_000);
     await dependencies.journeys.reschedule(
@@ -351,7 +357,7 @@ async function settleFailure(
 async function completeFailedEmail(
   dependencies: JourneyRunnerDependencies,
   delivery: RunnerDeliveryRecord,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
 ): Promise<never> {
   try {
     await dependencies.deliveries.completeEmail(runnerActor, delivery.id, {
@@ -359,9 +365,15 @@ async function completeFailedEmail(
       errorCode: code,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   throw new RunnerFailure(code);
+}
+
+function sameSendFacts(left: JourneyRunnerContext, right: JourneyRunnerContext): boolean {
+  const variables = (context: JourneyRunnerContext) => JSON.stringify(Object.entries(context.variables).sort(([a], [b]) => a.localeCompare(b)));
+  return left.recipientName === right.recipientName && variables(left) === variables(right)
+    && left.unsubscribeUrl === right.unsubscribeUrl && left.unsubscribeOneClickUrl === right.unsubscribeOneClickUrl;
 }
 
 async function sendEmail(
@@ -409,6 +421,7 @@ async function sendEmail(
   }
   let delivery = reservation.record;
   if (delivery.status === "sent") return true;
+  if (reservation.disposition === "existing" && delivery.status === "processing") throw new RunnerFailure("provider_acceptance_uncertain");
   if (delivery.status === "failed") {
     const disposition = persistedFailureDisposition(delivery);
     if (
@@ -432,6 +445,13 @@ async function sendEmail(
     delivery = retryResult.record;
   }
 
+  const current = await dependencies.loadContext(runnerActor, claim);
+  if (!sameSendFacts(context, current) || evaluateStep(step, current) !== "send" || current.email?.trim() !== email
+    || current.locale !== context.locale
+    || (step.classification === "marketing" && (!current.marketingConsent || current.emailSuppressed))) {
+    await dependencies.deliveries.completeEmail(runnerActor, delivery.id, { status: "failed", errorCode: "pre_send_blocked" });
+    return false;
+  }
   let provider;
   try {
     provider = await dependencies.emailTransport.send({
@@ -444,7 +464,7 @@ async function sendEmail(
       idempotencyKey: claim.deliveryKey,
     });
   } catch (error) {
-    return completeFailedEmail(dependencies, delivery, failureCode(error));
+    return completeFailedEmail(dependencies, delivery, providerEffectFailureCode(failureCode(error)));
   }
 
   try {
@@ -453,7 +473,7 @@ async function sendEmail(
       providerId: provider.providerId,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   return true;
 }
@@ -515,7 +535,7 @@ function whatsappTemplate(
 async function completeFailedWhatsapp(
   dependencies: JourneyRunnerDependencies,
   delivery: RunnerDeliveryRecord,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
 ): Promise<never> {
   try {
     await dependencies.deliveries.completeWhatsapp(runnerActor, delivery.id, {
@@ -523,7 +543,7 @@ async function completeFailedWhatsapp(
       errorCode: code,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   throw new RunnerFailure(code);
 }
@@ -602,6 +622,7 @@ async function sendWhatsapp(
   }
   let delivery = reservation.record;
   if (delivery.status === "sent") return true;
+  if (reservation.disposition === "existing" && delivery.status === "processing") throw new RunnerFailure("provider_acceptance_uncertain");
   if (delivery.status === "failed") {
     const disposition = persistedFailureDisposition(delivery);
     if (
@@ -625,6 +646,14 @@ async function sendWhatsapp(
     delivery = retryResult.record;
   }
 
+  const current = await dependencies.loadContext(runnerActor, claim);
+  if (!sameSendFacts(context, current) || evaluateStep(step, current) !== "send" || !current.whatsappOptIn
+    || current.whatsappOptedOutAt !== null || current.whatsappNumber?.trim() !== whatsappNumber
+    || current.locale !== context.locale
+    || whatsappTemplate(step, current.locale, dependencies.approvedTemplateKeys) !== template) {
+    await dependencies.deliveries.completeWhatsapp(runnerActor, delivery.id, { status: "failed", errorCode: "pre_send_blocked" });
+    return false;
+  }
   let provider;
   try {
     provider = await dependencies.whatsappTransport.sendTemplateMessage({
@@ -641,7 +670,7 @@ async function sendWhatsapp(
     return completeFailedWhatsapp(
       dependencies,
       delivery,
-      failureCode(error),
+      providerEffectFailureCode(failureCode(error)),
     );
   }
   if (provider.status === "skipped") {
@@ -658,7 +687,7 @@ async function sendWhatsapp(
       providerId: provider.providerId,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   return true;
 }
