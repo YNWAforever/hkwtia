@@ -389,17 +389,19 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `AdminEvalCase = {id:string;task:AdminAiTask;locale:'en'|'zh-HK';facts:ApprovedFactPack;input:string;expectedClaims:AdminAiDraft['claims'];forbiddenEffects:string[];expectedDisposition:'answer'|'draft'|'handoff'|'refuse'}`；`runAdminEval(input:{routes:ModelRoute[];repeats:3;cases:AdminEvalCase[];mode:'offline'|'live';maxCostMicrousd:number}):Promise<AdminEvalReport>`；`AdminEvalReport = {results:{caseId:string;routeKey:string;repeat:number;passed:boolean;violations:string[];latencyMs:number;costMicrousd:number|null}[];startedAt:string;sourceSha:string}`，分布統計由results計算。provider可mock；live另用既有guard與明确總budget。
 
-- [ ] 寫 grader 對錯誤金額、越權、虛構source、invalid JSON、過期政策、人工作用missing 六種必定fail；LLM judge不能覆蓋硬性fail。
-- [ ] 擴到至少60條，涵蓋港英、缺失、衝突、拒答、注入、handoff；保留25舊Concierge cases獨立報告。
+- [x] 寫 grader 對錯誤金額、越權、虛構source、invalid JSON、過期政策、人工作用missing 六種必定fail；LLM judge不能覆蓋硬性fail。
+- [x] 擴到至少60條，涵蓋港英、缺失、衝突、拒答、注入、handoff；保留25舊Concierge cases獨立報告。
 - [ ] 在核准模型與合成／最小化資料上，baseline＋最多2候選、每題3次；live key不存在時標blocked，不用mock成績冒充。
 - [ ] 人工盲評grounding與語言；输出sample count、agreement、95% interval、p50/p95、實際cost／completed case、重試率；依下述門檻決定各 task 的 model，分 task/locale 提供樣本，不能只以總平均掩盖差子群。
-- [ ] Run `npx vitest run tests/unit/admin-ai-grader.test.ts` 和新runner；保存原始去識別結果，提交 `test: evaluate administrative AI with grounded cases`。
+- [x] Run `npx vitest run tests/unit/admin-ai-grader.test.ts` 和新runner；保存原始去識別結果，提交 `test: evaluate administrative AI with grounded cases`。
 
 
 **AC-22 與放行門檻（設計目標，不是目前成績）：** 至少60個 gold cases，每個核准候選重複3次；舊25題另報。嚴重越權／外洩／未授權 effect=0，關鍵受控 facts 100%一致，grounded correctness 點估計≥95%、首次JSON≥99%；每項同報樣本與95%區間，低樣本不可宣稱真實母體準確率。LLM judge不能推翻 deterministic fail；至少兩位 reviewer 抽驗有分歧案例。互動草稿 p95≤12秒、20秒內timeout安全降級。候選若未通過則維持人工／已核准 baseline，不為了便宜放寬 guards。
 
 新增 scripts 由此任務在 `package.json` 定義：`eval:admin`（offline）與 `eval:admin:live`（顯式 live guard＋總成本上限）；執行前先 validate corpus 不含真會員資訊。缺 live key 時 exit/報告 BLOCKED，不能 skip→PASS。每 run 帶 source/model/provider/pricing/prompt/policy 版本與輸入hash，不存未去識別原文。
 
+
+**工程證據：** T13 六項硬失敗RED→GREEN，29 focused、70 synthetic EN/HK ×3 offline；既有25題另報。未知成本hold、缺子群／bare human flag不放行。實際live命令被auto-review在執行前拒絕，缺具體資料／provider／task／paid caps授權；沒有provider收據、真模型分數或盲評。完整current gates/CI在同task證據更新；不設定Production flags。
 
 ## T14A — 會員／職員登入入口、Google 與電郵登入連結
 

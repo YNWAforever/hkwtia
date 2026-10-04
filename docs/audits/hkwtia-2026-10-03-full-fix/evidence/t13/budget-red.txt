@@ -1,0 +1,165 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-ai-grader.test.ts (17 tests | 9 failed) 49ms
+   ✓ administrative AI deterministic hard gates > rejects wrong amount even when the judge approves 20ms
+   ✓ administrative AI deterministic hard gates > rejects authority claimed in the final body 2ms
+   ✓ administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value 1ms
+   ✓ administrative AI deterministic hard gates > rejects invalid first JSON without repairing it 0ms
+   ✓ administrative AI deterministic hard gates > rejects expired policy even when its values match 1ms
+   ✓ administrative AI deterministic hard gates > rejects a draft missing human review 1ms
+   ✓ administrative AI deterministic hard gates > accepts current server-labelled facts in a review-only draft 1ms
+   × administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks 5ms
+     → expected 0 to be greater than or equal to 60
+   × administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results 4ms
+     → expected 'COMPLETE' to be 'BLOCKED' // Object.is equality
+   × administrative AI runner evidence and admission > never reports an offline grader score as model acceptance 1ms
+     → expected true to be false // Object.is equality
+   × administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs 5ms
+     → expected [] to have a length of 3 but got +0
+   × administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution 3ms
+     → promise resolved "{ results: [], …(5) }" instead of rejecting
+   ✓ administrative AI runner evidence and admission > accepts equivalent claims independent of JSON property order 1ms
+   × evaluation total budget and independent review > holds unknown dispatched cost and refuses a second call over the total ceiling 1ms
+     → expected true to be false // Object.is equality
+   × evaluation total budget and independent review > will not refund a dispatched reservation through the undispatched release path 1ms
+     → promise resolved "undefined" instead of rejecting
+   × evaluation total budget and independent review > does not call a single reviewer an independent pair 1ms
+     → expected true to be false // Object.is equality
+   × evaluation total budget and independent review > retains disagreements between two independent reviewers 0ms
+     → expected +0 to be 1 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks
+AssertionError: expected 0 to be greater than or equal to 60
+ ❯ tests/unit/admin-ai-grader.test.ts:27:145
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results
+AssertionError: expected 'COMPLETE' to be 'BLOCKED' // Object.is equality
+
+Expected: "BLOCKED"
+Received: "COMPLETE"
+
+ ❯ tests/unit/admin-ai-grader.test.ts:28:207
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > never reports an offline grader score as model acceptance
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:29:268
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs
+AssertionError: expected [] to have a length of 3 but got +0
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ tests/unit/admin-ai-grader.test.ts:30:194
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution
+AssertionError: promise resolved "{ results: [], …(5) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "blockers": [],
++   "mode": "offline",
++   "results": [],
++   "sourceSha": "0000000000000000000000000000000000000000",
++   "startedAt": "2026-10-04T13:15:53.909Z",
++   "status": "COMPLETE",
+  }
+
+ ❯ tests/unit/admin-ai-grader.test.ts:31:208
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > evaluation total budget and independent review > holds unknown dispatched cost and refuses a second call over the total ceiling
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:39:641
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > evaluation total budget and independent review > will not refund a dispatched reservation through the undispatched release path
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected: 
+Error {
+  "message": "rejected promise",
+}
+
++ Received: 
+undefined
+
+ ❯ tests/unit/admin-ai-grader.test.ts:40:417
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > evaluation total budget and independent review > does not call a single reviewer an independent pair
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:41:163
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > evaluation total budget and independent review > retains disagreements between two independent reviewers
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/unit/admin-ai-grader.test.ts:42:240
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 8 passed (17)
+   Start at  21:15:52
+   Duration  721ms (transform 108ms, setup 100ms, collect 269ms, tests 49ms, environment 0ms, prepare 96ms)
+

@@ -1,0 +1,12 @@
+{
+  "report": {
+    "total": 25,
+    "passed": 25,
+    "score": 100,
+    "piiRefusalsPassed": true,
+    "failures": []
+  },
+  "sourceSha": "8e42b1ddad42f0d5fdc0622834bdbac1b27ecb83",
+  "casesUnchangedSinceSource": true,
+  "mode": "offline separate25"
+}

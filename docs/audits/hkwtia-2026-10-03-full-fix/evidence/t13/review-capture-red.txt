@@ -1,0 +1,78 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-ai-grader.test.ts (28 tests | 2 failed) 302ms
+   ✓ administrative AI deterministic hard gates > rejects wrong amount even when the judge approves 21ms
+   ✓ administrative AI deterministic hard gates > rejects authority claimed in the final body 2ms
+   ✓ administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value 1ms
+   ✓ administrative AI deterministic hard gates > rejects invalid first JSON without repairing it 0ms
+   ✓ administrative AI deterministic hard gates > rejects expired policy even when its values match 1ms
+   ✓ administrative AI deterministic hard gates > rejects a draft missing human review 1ms
+   ✓ administrative AI deterministic hard gates > accepts current server-labelled facts in a review-only draft 1ms
+   ✓ administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks 11ms
+   ✓ administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results 37ms
+   ✓ administrative AI runner evidence and admission > never reports an offline grader score as model acceptance 1ms
+   ✓ administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs 39ms
+   ✓ administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution 2ms
+   ✓ administrative AI runner evidence and admission > accepts equivalent claims independent of JSON property order 1ms
+   ✓ evaluation total budget and independent review > holds unknown dispatched cost and refuses a second call over the total ceiling 1ms
+   ✓ evaluation total budget and independent review > will not refund a dispatched reservation through the undispatched release path 0ms
+   ✓ evaluation total budget and independent review > does not call a single reviewer an independent pair 0ms
+   ✓ evaluation total budget and independent review > retains disagreements between two independent reviewers 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > will not let an overall score hide missing task and locale subgroups 2ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects real contacts and non-fixture record identities before execution 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > reports empty uncertainty and a finite descriptive interval for small samples 0ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects an external effect even if the expected disposition is correct 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects invented plaintext figures despite correctly self-reported claims 0ms
+   ✓ corpus, subgroup and uncertainty safeguards > settles known cost once and releases only its difference from the hold 0ms
+   ✓ runtime mode and human evidence cannot be inferred > does not interpret an unknown mode as authorized live execution 0ms
+   ✓ runtime mode and human evidence cannot be inferred > does not accept a bare human-reviewed boolean as two independent blind reviews 85ms
+   ✓ reports the independent-review agreement uncertainty without inventing samples 1ms
+   × provides a private, model-blind review sample tied to the exact accepted output 59ms
+     → expected [] to have a length of 3 but got +0
+   × retains known completed results if private review capture fails, without regenerating 33ms
+     → expected 'COMPLETE' to be 'BLOCKED' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > provides a private, model-blind review sample tied to the exact accepted output
+AssertionError: expected [] to have a length of 3 but got +0
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ tests/unit/admin-ai-grader.test.ts:428:18
+    426|  const samples:unknown[]=[];
+    427|  const report=await runAdminEval({routes:[route],repeats:3,cases:[fixt…
+    428|  expect(samples).toHaveLength(3);
+       |                  ^
+    429|  expect(samples[0]).toMatchObject({sampleId:expect.stringMatching(/^[a…
+    430|  expect(samples[0]).not.toHaveProperty("routeKey");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > retains known completed results if private review capture fails, without regenerating
+AssertionError: expected 'COMPLETE' to be 'BLOCKED' // Object.is equality
+
+Expected: "BLOCKED"
+Received: "COMPLETE"
+
+ ❯ tests/unit/admin-ai-grader.test.ts:436:24
+    434| it("retains known completed results if private review capture fails, w…
+    435|  const report=await runAdminEval({routes:[route],repeats:3,cases:[fixt…
+    436|  expect(report.status).toBe("BLOCKED");expect(report.blockers).toConta…
+       |                        ^
+    437| });
+    438| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 passed (28)
+   Start at  21:47:35
+   Duration  2.09s (transform 292ms, setup 173ms, collect 922ms, tests 302ms, environment 0ms, prepare 139ms)
+
