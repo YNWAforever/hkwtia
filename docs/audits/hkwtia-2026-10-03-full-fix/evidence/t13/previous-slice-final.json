@@ -1,0 +1,59 @@
+{
+  "pr": 138,
+  "state": "MERGED",
+  "sourceSha": "dc5a9f7d47283346b867ded735fc07d04612c2bd",
+  "mergeSha": "2be9bd0ae0bb2030d08e4739e04c9b4660eeaaff",
+  "mergedAt": "2026-10-04T13:02:15Z",
+  "finalCiRun": 37203671088,
+  "checks": [
+    {
+      "name": "checks",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37203671088/job/111440309802"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37203671088/job/111440309736"
+    },
+    {
+      "name": "tests (2)",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37203671088/job/111440309797"
+    },
+    {
+      "name": "worker",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37203671088/job/111440309666"
+    },
+    {
+      "name": "quality",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37203671088/job/111441220629"
+    },
+    {
+      "context": "Vercel",
+      "state": "SUCCESS",
+      "targetUrl": "https://vercel.com/ynwaforevers-projects/hkwtia/ELvz3FNDJ1oHMiz9MrrNEARtt6QL"
+    },
+    {
+      "name": "Vercel Preview Comments",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://vercel.com/github"
+    }
+  ],
+  "productionReadOnly": {
+    "observedAt": "2026-10-04T13:02:06.365Z",
+    "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+    "productionGitBranch": "release",
+    "production": {
+      "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+      "state": "READY",
+      "target": "production",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "gitRef": "main"
+    },
+    "readOnly": true,
+    "productionChanged": false
+  }
+}

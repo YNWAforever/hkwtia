@@ -1,0 +1,67 @@
+{
+  "status": "ENGINEERING_VERIFIED_EXTERNAL_GATES_OPEN",
+  "task": "T13",
+  "baseSha": "2be9bd0ae0bb2030d08e4739e04c9b4660eeaaff",
+  "sourceSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+  "focused": {
+    "pass": 29,
+    "skip": 0,
+    "fail": 0,
+    "redRequiredHardFailures": 6,
+    "redBudgetAdmissionFailures": 9,
+    "redSubgroupFailure": 1,
+    "redModeHumanFailures": 2,
+    "redReviewCaptureFailures": 2,
+    "redTaskCapFailure": 1,
+    "redAgreementFailure": 1
+  },
+  "offline": {
+    "cases": 70,
+    "tasks": 5,
+    "locales": 2,
+    "repeats": 3,
+    "observations": 210,
+    "failed": 0,
+    "providerCalls": 0,
+    "costMicrousd": null,
+    "meaning": "Guard regression, not provider/model acceptance"
+  },
+  "legacyConcierge": {
+    "cases": 25,
+    "passed": 25,
+    "providerMode": "offline separate report"
+  },
+  "gates": {
+    "typecheck": 0,
+    "strings": {
+      "exit": 0,
+      "tsx": 321
+    },
+    "lint": {
+      "exit": 0,
+      "errors": 0,
+      "warnings": 95
+    },
+    "build": {
+      "exit": 0,
+      "nextVersion": "16.3.6",
+      "mode": "webpack",
+      "note": "Before review capture and task-cap CLI-only refinements; final exact CI build required."
+    },
+    "full": {
+      "command": "npm.cmd test -- --maxWorkers=4",
+      "pass": 6745,
+      "skip": 562,
+      "fail": 0,
+      "filesPass": 796,
+      "filesSkip": 101,
+      "seconds": 562.29,
+      "note": "Full run collected26 grader cases; subsequent review capture/task cap RED→GREEN29 focused. Exact source CI will include all29."
+    },
+    "ci": "PENDING"
+  },
+  "migrationRequired": false,
+  "productionMutated": false,
+  "liveProviderVerified": false,
+  "humanReviewVerified": false
+}

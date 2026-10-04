@@ -1,0 +1,19 @@
+{
+  "action": "npm run eval:admin:live",
+  "commandExecuted": false,
+  "status": "BLOCKED_AUTO_REVIEW",
+  "reason": "Potential external AI data export and spend from environment credentials are not specifically authorized. No workaround or indirect retry.",
+  "realProviderCalls": 0,
+  "providerReceipts": 0,
+  "unitGuardEvidence": "admin-ai-grader: missing live authorization returns BLOCKED with zero results; explicit env={} test only.",
+  "missingOwnerApproval": [
+    "administrative provider/data purpose and each task",
+    "explicit run/day/month cost ceilings",
+    "provider key through ignored local configuration",
+    "current official endpoint/protocol/pricing verification",
+    "isolated DB sentinel, ledger and synthetic-domain check",
+    "two independent blind reviewers with output hashes"
+  ],
+  "owner": "Association policy/data owner + platform/provider owner + two QA reviewers",
+  "releaseScope": "No model activation or Production flags."
+}

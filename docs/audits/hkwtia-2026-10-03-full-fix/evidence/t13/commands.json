@@ -1,0 +1,18 @@
+{
+  "sourceSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+  "commands": [
+    "node node_modules/vitest/vitest.mjs run tests/unit/admin-ai-grader.test.ts --maxWorkers=2",
+    "npm.cmd run eval:admin",
+    "npm.cmd run eval:concierge",
+    "npm.cmd test -- --maxWorkers=4",
+    "npm.cmd run lint",
+    "npm.cmd run typecheck",
+    "npm.cmd run audit:strings",
+    "npm.cmd run build"
+  ],
+  "notExecuted": [
+    "npm.cmd run eval:admin:live (auto-review denied before execution)"
+  ],
+  "testSource": "Focused final29/current CLI SHA; local full26 before final three targeted tests; exact29/full CI pending",
+  "realProviderCalls": 0
+}

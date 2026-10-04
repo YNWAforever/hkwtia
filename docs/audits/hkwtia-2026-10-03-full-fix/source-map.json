@@ -1235,5 +1235,61 @@
     "path": "components/admin/content-draft-panel.tsx",
     "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
     "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "gradeAdminResponse",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.gradeAdminResponse",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "loadAdminCases",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.loadAdminCases",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "validateAdminCorpus",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.validateAdminCorpus",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "runAdminEval",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.runAdminEval",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "createEvaluationBudget",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.createEvaluationBudget",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "summarizeAdminEval",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.summarizeAdminEval",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "summarizeBlindReviews",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.summarizeBlindReviews",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
   }
 ]

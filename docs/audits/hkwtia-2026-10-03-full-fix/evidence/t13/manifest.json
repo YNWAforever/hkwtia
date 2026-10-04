@@ -1,0 +1,70 @@
+{
+  "task": "T13",
+  "sourceSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+  "files": [
+    {
+      "path": "admin-offline.json",
+      "sha256": "6269145b01ded920de5eace02a6e63b1d691921a0eb994c5bdf16bb9cfca6130"
+    },
+    {
+      "path": "agreement-red.log",
+      "sha256": "b2cd80381cfed8722bdffc88bea898ec3f39dfdbb70b4a872bc66757581af2b6"
+    },
+    {
+      "path": "budget-red.log",
+      "sha256": "68cb5b2a48e472663d2b572078b4021a03175b4756c113d8a681530a44f3ecdd"
+    },
+    {
+      "path": "commands.json",
+      "sha256": "865763f173d3a7a14db16e2ca6f26502417e6cec90c40a27a54df2c7d32768e2"
+    },
+    {
+      "path": "concierge-offline.json",
+      "sha256": "82560a644301537e08aba479f1482fb2ac26e183b8dcc03057eed26645043e08"
+    },
+    {
+      "path": "focused-green.log",
+      "sha256": "4295924880c300df7034624b7668a63303d23e3689af4c6f4259f550d2ff0d30"
+    },
+    {
+      "path": "full-skips.json",
+      "sha256": "5ae40b6a46f74547bf76563c928174d36887be7baa82a8fee41759636d72798a"
+    },
+    {
+      "path": "hard-red.log",
+      "sha256": "31bee729e2507aca599800c62276133fe319958eaced771b2d8a2fe669d0aad0"
+    },
+    {
+      "path": "live-gate.json",
+      "sha256": "29062b3a7154c0d4b2f2c9e1981bea3b8ee44ad5e39045ef30772619df09a5be"
+    },
+    {
+      "path": "mode-human-red.log",
+      "sha256": "2b7d7e79174ae3565b361e4fa1fe09f0f6cbb2bab0dd2e78b57d22d9266a4c83"
+    },
+    {
+      "path": "previous-slice-final.json",
+      "sha256": "847bcab1e140268e39340419515cab71e6d31a82f2966ebd7fa9f7d5ea588481"
+    },
+    {
+      "path": "review-capture-red.log",
+      "sha256": "bbd8d631060fc7d32bc22773ed961a13c604d10e8e1fd771e25fbdcaa777d8ca"
+    },
+    {
+      "path": "runner-red.log",
+      "sha256": "2b5e07508b5a76ca414e6d2b1cfd91a85bbbb41f127c9c6a88e2c2f9a75b07dc"
+    },
+    {
+      "path": "subgroup-red.log",
+      "sha256": "d26794e353164ebfc898c7de7b0e49f623301e6978ec4019bb203f5f62c9cce0"
+    },
+    {
+      "path": "task-cap-red.log",
+      "sha256": "2550c22fe4de270aeca6f40a893539e7cd4219d4d2ea813b8bb252914205c95e"
+    },
+    {
+      "path": "verification.json",
+      "sha256": "737288d9555acd02c14169d6397f975e53100f5119e82878fec0e686b831b8f1"
+    }
+  ]
+}
