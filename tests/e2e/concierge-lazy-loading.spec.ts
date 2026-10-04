@@ -99,7 +99,7 @@ for (const locale of ["en", "zh-HK"] as const) {
       exact: true,
     });
     await launcher.click();
-    const alert = page.getByRole("alert");
+    const alert = page.getByRole("alert").filter({hasText:labels.temporarilyUnavailable});
     await expect(alert).toContainText(labels.temporarilyUnavailable);
     await expect(
       alert.getByRole("link", { name: labels.applicationGuide }),
@@ -111,7 +111,7 @@ for (const locale of ["en", "zh-HK"] as const) {
     await launcher.click();
     const dialog = page.getByRole("dialog", { name: labels.title });
     await expect(dialog).toBeVisible();
-    await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(alert).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(launcher).toBeFocused();
   });

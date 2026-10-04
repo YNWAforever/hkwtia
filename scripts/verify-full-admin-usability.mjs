@@ -41,7 +41,9 @@ const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], {
 const proof = JSON.parse(
   readFileSync(".playwright/full-fix-t15-build-proof.json", "utf8"),
 );
-assert.equal(proof.sourceSha, sourceSha);
+// Reuse a built artifact across documentation/test-only commits only when
+// every runtime directory and dependency/config file is Git-identical.
+if (proof.sourceSha !== sourceSha) execFileSync("git", ["diff", "--exit-code", proof.sourceSha, sourceSha, "--", "app", "components", "lib", "messages", "public", "i18n", "config", "package.json", "package-lock.json", "next.config.ts"]);
 assert.equal(proof.buildExit, 0);
 assert.equal(readFileSync(".next/BUILD_ID", "utf8").trim(), proof.buildId);
 for (const [path, hash] of Object.entries(proof.appFiles))
@@ -156,6 +158,7 @@ try {
       {
         sourceSha,
         buildId: proof.buildId,
+    buildSourceSha: proof.sourceSha,
         origin,
         ledger,
         observedAt: new Date().toISOString(),
@@ -282,6 +285,7 @@ try {
   const result = {
     sourceSha,
     buildId: proof.buildId,
+    buildSourceSha: proof.sourceSha,
     observedAt: new Date().toISOString(),
     nativeExit: exit,
     ledger,
