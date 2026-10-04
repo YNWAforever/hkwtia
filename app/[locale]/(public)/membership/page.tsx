@@ -185,7 +185,7 @@ export default async function MembershipPage({ params }: Props) {
         lead={t("summary")}
         title={t("title")}
       />
-      <Suspense fallback={<p role="status">{t("plansLoading")}</p>}>
+      <Suspense fallback={<p role="status">{tCommon("membershipPlansLoading")}</p>}>
         <AwaitReadModel pending={rowsPromise}>{renderPlans}</AwaitReadModel>
       </Suspense>
       <Section labelledBy="membership-dimensions-title">

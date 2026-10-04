@@ -198,7 +198,7 @@ export default async function EventsPage({ params, searchParams }: Props) {
           status={status}
           view={view}
         />
-        <Suspense fallback={<p role="status">{t("listLoading")}</p>}>
+        <Suspense fallback={<p role="status">{common("eventsListLoading")}</p>}>
           <AwaitReadModel pending={recordsPromise}>
             {(records) =>
               records === null ? (

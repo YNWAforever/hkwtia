@@ -43,7 +43,24 @@ const proof = JSON.parse(
 );
 // Reuse a built artifact across documentation/test-only commits only when
 // every runtime directory and dependency/config file is Git-identical.
-if (proof.sourceSha !== sourceSha) execFileSync("git", ["diff", "--exit-code", proof.sourceSha, sourceSha, "--", "app", "components", "lib", "messages", "public", "i18n", "config", "package.json", "package-lock.json", "next.config.ts"]);
+if (proof.sourceSha !== sourceSha)
+  execFileSync("git", [
+    "diff",
+    "--exit-code",
+    proof.sourceSha,
+    sourceSha,
+    "--",
+    "app",
+    "components",
+    "lib",
+    "messages",
+    "public",
+    "i18n",
+    "config",
+    "package.json",
+    "package-lock.json",
+    "next.config.ts",
+  ]);
 assert.equal(proof.buildExit, 0);
 assert.equal(readFileSync(".next/BUILD_ID", "utf8").trim(), proof.buildId);
 for (const [path, hash] of Object.entries(proof.appFiles))
@@ -158,7 +175,7 @@ try {
       {
         sourceSha,
         buildId: proof.buildId,
-    buildSourceSha: proof.sourceSha,
+        buildSourceSha: proof.sourceSha,
         origin,
         ledger,
         observedAt: new Date().toISOString(),
@@ -179,7 +196,8 @@ try {
     PLAYWRIGHT_PORT: "3450",
     AUDIT_ISOLATED_ACCEPTANCE: "1",
     FULL_FIX_EXPECTED_SOURCE_SHA: sourceSha,
-    ...(process.argv.includes("--concierge-recovery")
+    ...(process.argv.includes("--concierge-recovery") ||
+    process.argv.includes("--final-t15")
       ? { CONCIERGE_FAILURE_ACCEPTANCE: "disabled" }
       : {}),
   };
@@ -264,17 +282,30 @@ try {
         [
           "node_modules/@playwright/test/cli.js",
           "test",
-          process.argv.includes("--public-bundle")
-            ? "tests/e2e/concierge-lazy-loading.spec.ts"
-            : process.argv.includes("--concierge-recovery")
-              ? "tests/e2e/concierge-readiness.spec.ts"
-              : "tests/e2e/ai-admin-usability.spec.ts",
+          ...(process.argv.includes("--final-t15")
+            ? [
+                "tests/e2e/ai-admin-usability.spec.ts",
+                "tests/e2e/concierge-lazy-loading.spec.ts",
+                "tests/e2e/concierge-readiness.spec.ts",
+                "tests/e2e/public-read-model-streaming.spec.ts",
+              ]
+            : [
+                process.argv.includes("--public-bundle")
+                  ? "tests/e2e/concierge-lazy-loading.spec.ts"
+                  : process.argv.includes("--concierge-recovery")
+                    ? "tests/e2e/concierge-readiness.spec.ts"
+                    : "tests/e2e/ai-admin-usability.spec.ts",
+              ]),
           "--project=chromium",
           ...process.argv
             .slice(2)
             .filter(
               (arg) =>
-                !["--public-bundle", "--concierge-recovery"].includes(arg),
+                ![
+                  "--public-bundle",
+                  "--concierge-recovery",
+                  "--final-t15",
+                ].includes(arg),
             ),
         ],
         { env, stdio: "inherit", windowsHide: true },

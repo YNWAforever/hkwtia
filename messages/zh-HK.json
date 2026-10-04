@@ -1,6 +1,8 @@
 {
   "_review": true,
   "Common": {
+    "membershipPlansLoading": "正在載入會籍計劃…",
+    "eventsListLoading": "正在載入活動…",
     "skipToContent": "跳至主要內容",
     "breadcrumbLabel": "位置導覽",
     "breadcrumbHome": "主頁",
@@ -744,7 +746,6 @@
     }
   },
   "Membership": {
-    "plansLoading": "正在載入會籍計劃…",
     "metaTitle": "會員計劃｜WiseTech Hong Kong",
     "metaDescription": "比較 WTIA 會員級別及權益。",
     "eyebrow": "會員計劃",
@@ -1615,7 +1616,6 @@
     "operationsMethodology": "涵蓋智能助理結果、人工接手及重開案件。人手處理、覆核及返工分開計時；等候不計作職員工時。試點前須固定比較組。"
   },
   "Events": {
-    "listLoading": "正在載入活動…",
     "metaTitle": "活動｜WiseTech Hong Kong",
     "metaDescription": "探索 WTIA 活動及社群聚會。",
     "eyebrow": "活動",
