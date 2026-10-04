@@ -1,0 +1,9 @@
+{
+  "observedAt": "2026-10-04T20:45:59.541680+00:00",
+  "files": 445,
+  "bytesScanned": 5067192,
+  "sensitiveMatches": [],
+  "localValuesPrinted": false,
+  "scope": "UTF8 audit documents and text receipts; private env/cookie/header/raw dump excluded; screenshots synthetic acceptance identities only",
+  "productionEffects": false
+}

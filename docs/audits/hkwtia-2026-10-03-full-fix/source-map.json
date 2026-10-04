@@ -1371,5 +1371,29 @@
     "headSha": "145443b69df74ad2f70af172c310d10e05803220",
     "evidenceBasis": "Graph has no current home symbol; current caller/provenance/picture interfaces read; 2unit +2native REDs, static derivatives unchanged input hash, actual LH10 PASS",
     "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T16",
+    "symbol": "backupAndRestore",
+    "path": "tests/integration/audit-database-fixture.ts",
+    "headSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
+    "evidenceBasis": "Existing owned PG16 fixture extended; actual custom dump/restore, no environment URL",
+    "implementedInWorkingTree": true
+  },
+  {
+    "taskId": "T16",
+    "symbol": "verify historical web",
+    "path": "scripts/verify-full-rollback-web.mjs",
+    "headSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
+    "evidenceBasis": "Exact old archive/build/runtime byte proof; isolated unique marker/auth/current schema; 3 native passes",
+    "implementedInWorkingTree": true
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createOperationsMetricsRepository.read/record",
+    "path": "lib/db/repos/operations-metrics.ts",
+    "headSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
+    "implementedInWorkingTree": true,
+    "evidenceBasis": "actual PostgreSQL16 recorded population and strict CMS/AI source attribution regression"
   }
 ]

@@ -1,0 +1,55 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/audit-full-migration-recovery-current-red.test.ts (2 tests | 2 failed) 25281ms
+   × full clean and baseline migration recovery > migrates a clean database and repeats without losing additive schema or ledger 8222ms
+     → expected 61 to be 56 // Object.is equality
+   × full clean and baseline migration recovery > rolls back an interrupted baseline upgrade, then preserves historical rights, paid transactions and CMS history across compatible rollback 17057ms
+     → expected 61 to be 56 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/audit-full-migration-recovery-current-red.test.ts > full clean and baseline migration recovery > migrates a clean database and repeats without losing additive schema or ledger
+AssertionError: expected 61 to be 56 // Object.is equality
+
+- Expected
++ Received
+
+- 56
++ 61
+
+ ❯ tests/integration/audit-full-migration-recovery-current-red.test.ts:52:44
+     50|             "SELECT count(*)::int AS n FROM drizzle.__drizzle_migratio…
+     51|           );
+     52|         expect((await ledger()).rows[0].n).toBe(56);
+       |                                            ^
+     53|         await f.migrateRemaining();
+     54|         await f.migrateRemaining();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/integration/audit-full-migration-recovery-current-red.test.ts > full clean and baseline migration recovery > rolls back an interrupted baseline upgrade, then preserves historical rights, paid transactions and CMS history across compatible rollback
+AssertionError: expected 61 to be 56 // Object.is equality
+
+- Expected
++ Received
+
+- 56
++ 61
+
+ ❯ tests/integration/audit-full-migration-recovery-current-red.test.ts:188:11
+    186|             )
+    187|           ).rows[0].n,
+    188|         ).toBe(56);
+       |           ^
+    189|         expect(await fingerprint()).toBe(before);
+    190|         expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  01:15:04
+   Duration  30.66s (transform 549ms, setup 183ms, collect 4.25s, tests 25.28s, environment 0ms, prepare 493ms)
+

@@ -8,7 +8,7 @@ import {
   assertSeedSentinel,
 } from "../../scripts/lib/acceptance-guard";
 const origin = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3450",
-  root = "docs/audits/hkwtia-2026-10-03-full-fix/evidence/t15/";
+  root = process.env.FULL_FIX_EVIDENCE_ROOT ?? "docs/audits/hkwtia-2026-10-03-full-fix/evidence/t15/";
 const en = JSON.parse(
     readFileSync("messages/en.json", "utf8"),
   ) as typeof import("../../messages/en.json"),
@@ -24,6 +24,7 @@ test.describe("actual isolated administrative usability", () => {
     "BLOCKED: positively proven isolated DB/Auth and synthetic identities required; skipped is not acceptance.",
   );
   test.beforeAll(async () => {
+    expect(["docs/audits/hkwtia-2026-10-03-full-fix/evidence/t15/", "docs/audits/hkwtia-2026-10-03-full-fix/evidence/t16/"]).toContain(root);
     const db = assertIsolatedSeedEnvironment(process.env, {
       prefix: "FULL_REMEDIATION",
       flag: "FULL_REMEDIATION_ACCEPTANCE_SEED",
