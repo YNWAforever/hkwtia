@@ -108,3 +108,12 @@ T18 source/native 工程測試與 3–5 位真人職員 G5 試點分開。下面
 `content-signoff.csv` 列每個可編輯 CMS／typed programme field 的來源、owner、版本及待簽核狀態。工程測試、既有公開版與 archive transcription 不等於新政策批准；79家既有關係／標誌已有 session 授權，但外鏈只用批准且已儲存 URL，不自行猜公司網址。Profile records、active membership records及unrevoked company seats是不同分母；active 包括免費／特別 grant，不代表每筆已付款。
 
 證據：`evidence/t17/verification.json`、`browser.json`、`public-extra.json`；正式仍未部署此候選。
+
+
+## T14C 活動／付款復原（2026-10-04）
+
+入口 `/zh/admin/events-mgmt`、`/zh/admin/events`。先核對 external／RSVP／ticketed、HK日期場地及名額；價格輸入為HKD，server保存 cents。保存草稿→私人預覽→有權限職員鍵盤發布。RSVP duplicate不新增名額，候補不變成已付款。
+
+付款取消回跳可繼續原Checkout；回跳不當paid。若Stripe已確認過期，僅已授權的原 recovery cookie 可清除；本地TTL或讀取失敗保留並對帳。不要另建attempt避過未知外部效果。退款使用既有全額政策：pending不當成功，不盲重試；succeeded後票券失效，failed顯示待處理並查provider receipt。confirmation／pass／refund outbox各保留一次effect與audit。
+
+工程實證：focused171（actualPG23）、native4、realStripeTEST9、signed callback12、Preview17及full6652pass/471skip。sink通知不代表真收件人送達；Google／magic-link、automatic remote webhook、cloud worker windows及3–5職員G5仍未完成。詳見 `evidence/t14c/verification.json`。

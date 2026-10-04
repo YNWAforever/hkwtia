@@ -64,6 +64,15 @@ export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
   | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "NOT_ELIGIBLE" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED" | "ATTEMPT_EXPIRED" | "ATTEMPT_COMPLETED"}>;
 
+export type TicketSettlementReceipt = Readonly<{
+  orderId: string; amountHkdCents: number; currency: "hkd";
+}>;
+
+class TicketReceiptError extends Error {
+  readonly code = "INVALID_WEBHOOK_EVENT";
+  constructor() { super("INVALID_WEBHOOK_EVENT"); }
+}
+
 export type SettleResult =
   | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
 
@@ -559,10 +568,19 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       return runTransaction((tx) => tx.expireUnattachedOrder(orderId));
     },
 
-    async settlePaid(sessionId: string, now: Date): Promise<SettleResult> {
+    async settlePaid(sessionId: string, now: Date, receipt: TicketSettlementReceipt): Promise<SettleResult> {
+      if (!receipt || typeof receipt.orderId !== "string" || !receipt.orderId ||
+          !Number.isSafeInteger(receipt.amountHkdCents) || receipt.amountHkdCents <= 0 || receipt.currency !== "hkd") {
+        throw new TicketReceiptError();
+      }
       return runTransaction(async (tx) => {
         const order = await tx.orderBySessionId(sessionId);
         if (!order) return {status: "unknown", order: null};
+        // Verify the signed provider receipt against the immutable order while
+        // its row is locked, before allocation, compensation or duplicate paths.
+        if (order.id !== receipt.orderId || order.amountHkdCents !== receipt.amountHkdCents || order.currency !== receipt.currency) {
+          throw new TicketReceiptError();
+        }
         if (order.status === "paid") return {status: "duplicate", order};
         // A session can be paid in the moment it lapses locally, so an order we
         // already expired may still carry a real payment. Refund it rather than
@@ -610,10 +628,12 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       });
     },
 
-    async expireBySession(sessionId: string): Promise<boolean> {
+    async expireBySession(sessionId: string, expectedOrderId: string): Promise<boolean> {
+      if (typeof expectedOrderId !== "string" || !expectedOrderId) throw new TicketReceiptError();
       return runTransaction(async (tx) => {
         const order = await tx.orderBySessionId(sessionId);
         if (!order) return false;
+        if (order.id !== expectedOrderId) throw new TicketReceiptError();
         if (order.status === "expired") return true;
         if (order.status !== "pending") return false;
         await tx.markStatus(order.id, "expired", {});

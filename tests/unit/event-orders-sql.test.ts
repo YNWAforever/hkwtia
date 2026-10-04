@@ -75,7 +75,7 @@ describe("event order status patches", () => {
     const statements: string[] = [];
     database.current = proxyDatabase(statements, {order: orderRow, event: eventRow});
 
-    expect((await createEventOrdersRepository().settlePaid("cs_1", now)).status).toBe("paid");
+    expect((await createEventOrdersRepository().settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).status).toBe("paid");
 
     const update = statusUpdate(statements);
     expect(update).toMatch(/paid_at/);
@@ -87,7 +87,7 @@ describe("event order status patches", () => {
     const statements: string[] = [];
     database.current = proxyDatabase(statements, {order: {...orderRow, status: "expired"}});
 
-    expect((await createEventOrdersRepository().settlePaid("cs_1", now)).status).toBe("refund_due");
+    expect((await createEventOrdersRepository().settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).status).toBe("refund_due");
 
     const update = statusUpdate(statements);
     expect(update).not.toMatch(/refunded_at/);
@@ -99,7 +99,7 @@ describe("event order status patches", () => {
     const statements: string[] = [];
     database.current = proxyDatabase(statements, {order: orderRow});
 
-    await createEventOrdersRepository().expireBySession("cs_1");
+    await createEventOrdersRepository().expireBySession("cs_1", "order-1");
 
     const update = statusUpdate(statements);
     expect(update).toMatch(/status/);

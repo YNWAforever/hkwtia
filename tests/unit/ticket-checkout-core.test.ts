@@ -121,7 +121,7 @@ describe("createTicketCheckout", () => {
     await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code});
     expect(ticketSessionStatus).toHaveBeenCalledWith("cs_existing");
-    if (providerStatus === "expired") expect(deps.orders.expireBySession).toHaveBeenCalledWith("cs_existing");
+    if (providerStatus === "expired") expect(deps.orders.expireBySession).toHaveBeenCalledWith("cs_existing", pendingOrder.id);
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
   });
 

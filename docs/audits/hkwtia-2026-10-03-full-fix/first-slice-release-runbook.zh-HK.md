@@ -56,3 +56,16 @@ Fresh project metadata reports Production Git branch `release`。本 session 的
 | Public route/demo/metric semantics | Actual EN/HK paths, private/demo excluded and distinct counts | Current approved/stored data only | T17 Preview | 79logo authorization retained; URLs/translation/legal facts require their own signoff |
 
 本輪 main merge 不等於正式發版。發布邊界待T16具體版本、capability、現有migration0057–0059及service/provider差異單；Production branch仍release，以 `evidence/t17/production-readonly.json` 的新讀值為準。回退相容web/source，保留資料、audit、grant、published history和in-flight效果；不逆刪0057–0059。
+
+
+## T14C capability 發布／回復單
+
+| 能力 | Code | Configured | Deployed | Operational |
+|---|---|---|---|---|
+| Locked payment receipt/correlated expiry | RED/mutation→PG verified | Existing HKD/full-refund policy preserved | Isolated Preview fe92e533/dpl_H48GCDUfEmB8n97VsgBoNPQArbwN | Hosted Stripe TEST9, controlled signed CLI12; automatic remote delivery pending |
+| Expired recovery cookie | Provider-read-confirmed only; native same-browser verified | Existing Stripe TEST/isolated Auth | Same Preview; Production unchanged | Real Google/magic and full worker/G5 gates pending |
+| Ticket/refund notice | Existing durable outbox | Isolated test sink only | Actual local built app | Real recipient receipt not verified; no live-send authority |
+
+T14C沒有migration，目前隔離ledger59。Production仍需獨立批准0057–0059／新能力，不能因main合併推斷已發布。先核對ledger相容性與web/worker的APP_URL/service credential/version，再按具體批准發布web；worker本增量無需改變，保持新AI／sender／bulk flags closed。Stripe webhook保持既有簽名secret與idempotency，不改Production provider配置。
+
+回退T14C相容web至base e12add4e或上一個已驗證版本，保留資料庫訂單、grant、provider退款及不可變audit/outbox；不逆刪schema、不嘗試撤回真實已發生退款。先停新增effect/dequeue，再按providerreceipt逐筆對帳。T16仍需真實發布與回復演練、批准candidate/rollback deployment和每個啟用能力的cloud窗口。

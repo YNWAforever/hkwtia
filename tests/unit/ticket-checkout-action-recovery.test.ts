@@ -30,6 +30,7 @@ vi.mock("@/lib/billing/stripe", () => ({stripeBillingAdapter: () => ({ticketSess
 vi.mock("@/lib/db/repos/event-orders", () => ({eventOrdersRepository: {expireBySession: state.expireBySession, expireUnattachedOrder: vi.fn()}}));
 
 const EVENT_ID = "10000000-0000-4000-8000-000000000001";
+const ORDER_ID = "30000000-0000-4000-8000-000000000003";
 const KEY = "20000000-0000-4000-8000-000000000002";
 function form(): FormData {
   const data = new FormData();
@@ -68,21 +69,21 @@ describe("ticket checkout action recovery capability", () => {
   });
   it("shows an existing pending attempt without creating a second payable session", async () => {
     state.cookie = `v1.${EVENT_ID}.${KEY}.${"a".repeat(43)}`;
-    state.read.mockResolvedValue({eventId: EVENT_ID, buyerProfileId: "profile-1", status: "pending", seatCount: 1, amountHkdCents: 25000, expiresAt: new Date("2030-01-01T00:00:00Z"), recoveryExpiresAt: new Date("2030-01-01T01:00:00Z")});
+    state.read.mockResolvedValue({orderId: ORDER_ID, eventId: EVENT_ID, buyerProfileId: "profile-1", status: "pending", seatCount: 1, amountHkdCents: 25000, expiresAt: new Date("2030-01-01T00:00:00Z"), recoveryExpiresAt: new Date("2030-01-01T01:00:00Z")});
     const result = await (await action())({status: "idle"}, form());
     expect(result).toEqual(expect.objectContaining({status: "pending"}));
     expect(state.core).not.toHaveBeenCalled();
   });
   it("denies a cookie belonging to another member without creating checkout", async () => {
     state.cookie = `v1.${EVENT_ID}.${KEY}.${"a".repeat(43)}`;
-    state.read.mockResolvedValue({eventId: EVENT_ID, buyerProfileId: "another-profile", status: "pending", recoveryExpiresAt: new Date("2030-01-01T01:00:00Z")});
+    state.read.mockResolvedValue({orderId: ORDER_ID, eventId: EVENT_ID, buyerProfileId: "another-profile", status: "pending", recoveryExpiresAt: new Date("2030-01-01T01:00:00Z")});
     const result = await (await action())({status: "idle"}, form());
     expect(result).toEqual({status: "error", code: "UNAVAILABLE"});
     expect(state.core).not.toHaveBeenCalled();
   });
   it("resumes only the original provider session and clears a provider-expired attempt", async () => {
     state.cookie = `v1.${EVENT_ID}.${KEY}.${"a".repeat(43)}`;
-    state.read.mockResolvedValue({eventId: EVENT_ID, buyerProfileId: "profile-1", status: "pending", seatCount: 1, amountHkdCents: 25000,
+    state.read.mockResolvedValue({orderId: ORDER_ID, eventId: EVENT_ID, buyerProfileId: "profile-1", status: "pending", seatCount: 1, amountHkdCents: 25000,
       expiresAt: new Date("2030-01-01T00:00:00Z"), recoveryExpiresAt: new Date("2030-01-01T01:00:00Z"),
       stripeCheckoutSessionId: "cs_test_1", stripeCheckoutUrl: "https://checkout.stripe.com/c/pay/test"});
     const {resumeTicketCheckoutAction} = await import("@/lib/tickets/checkout-actions");
@@ -90,7 +91,7 @@ describe("ticket checkout action recovery capability", () => {
     expect(state.core).not.toHaveBeenCalled();
     state.providerStatus.mockResolvedValue("expired");
     expect(await resumeTicketCheckoutAction({status: "idle"}, form())).toEqual({status: "error", code: "RETRY_EXPIRED"});
-    expect(state.expireBySession).toHaveBeenCalledWith("cs_test_1");
+    expect(state.expireBySession).toHaveBeenCalledWith("cs_test_1", ORDER_ID);
     expect(state.cookieDelete).toHaveBeenCalled();
   });
 

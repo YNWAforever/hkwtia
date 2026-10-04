@@ -630,3 +630,12 @@ npm --prefix workers test
 - [x] Actual isolated CMS six browser flows and EN/HK public two; demo/private list/detail/sitemap boundaries and DB/UI count semantics. Final combined8 native cases PASS, zero skips; actual Preview73272cc6.
 - [x] 1443-field source/owner/version/signoff ledger and traditional Chinese daily CMS/restore/media/count SOP.
 - [ ] WTIA owner field-level translation/branding/policy signoff; T12 business draft integration and G5humanstaff pilot; Production rollout not authorized for this new slice.
+
+
+## T14C execution record — 2026-10-04
+
+- [x] Read existing order/webhook/recovery/provider interfaces; locked signed amount/currency/order and expiry correlation fixed after actual PG RED6. Mutation6 and restoredPG11 verified.
+- [x] Actual hosted test exposed stale expired-cookie bug; original route RED2/provider-guard RED5; only provider-confirmed authorized expiry clears cookie. Mutation2/route17 and same-browser realTEST recovery pass.
+- [x] Focused171/0skip including actualPG23/all59; native4 EN/HK/390/keyboard/event modes/HK dates/RSVP/private; actualStripeTEST9/signed12 including pending/success/failed full refunds and replay.
+- [x] Full6652pass471skip0fail; lint0errors93localwarnings (tracked75), type/build/strings317 exit0; source CI all7green/worker57. Actual isolated Preview17 checks, sourcefe92e533.
+- [ ] Automatic remote webhook, actual sender receipt, controlled Google/magic identities, pinned worker/two windows and real3–5staff G5 remain gates; no full-fix/Production claim. Continue T14D.
