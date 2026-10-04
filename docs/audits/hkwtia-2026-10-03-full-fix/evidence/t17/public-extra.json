@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-04T02:13:06.684Z",
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "production": false,
+  "scope": "confirmed isolated actual Preview DB/Auth",
+  "checks": [
+    {
+      "locale": "en",
+      "publishedVisible": true,
+      "membersOnlyExcluded": true,
+      "demoExcludedAndDetail404": true
+    },
+    {
+      "locale": "zh-HK",
+      "publishedVisible": true,
+      "membersOnlyExcluded": true,
+      "demoExcludedAndDetail404": true
+    }
+  ],
+  "demoDatabaseUnchanged": true,
+  "sitemapExcludesPrivateAndDemo": true,
+  "distinctCounts": {
+    "profiles": 6297,
+    "active": 848,
+    "seats": 177
+  },
+  "actualPasswordAuth": true,
+  "providerSends": 0,
+  "runRef": "0647ae4a4bf7e606"
+}

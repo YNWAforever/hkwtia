@@ -44,3 +44,15 @@ Fresh project metadata reports Production Git branch `release`。本 session 的
 ## 未完成工程及門檻
 
 其餘 T05–T18 仍按 dependency 繼續。T04 的非客服完整分母也是工程待辦，不冒充 provider／policy 阻礙。T16 正式批准與真實人手樣本為營運門檻；真 Google／magic-link、配置後 AI 成功、cloud worker windows、Stripe TEST 和 sender receipt 仍須各自驗證。
+
+## T17 內容維護候選（2026-10-04）
+
+此增量无 migration；T17源碼9f657c93／Preview73272cc6。DB/Auth已正向證明隔離，ledger59；CMS旗只在T17 Preview啟用，Production配置未變。真CMS儲存／私有預覽／另一裝置／CAS衝突／鍵盤發布／私有還原→再發布及history已驗，原始公開內容由 audited publication 還原。公司 media封存與更新兩修正一起發布／回退，防止其中一半失去競爭保護。
+
+| 能力 | Code | Configured | Deployed | Operational / gate |
+|---|---|---|---|---|
+| CMS private draft/publish/history | Existing architecture retained; actual PG/native regression | Only isolated Preview CMS flag true; ledger59 | T17 Preview, not Production | Source claims/branding/policy owner signoff and G5staff pilot pending |
+| Company logo archive/attachment race | Paired transactional fix; actual target RED/mutation/GREEN | No new env/flag/schema | T17 Preview, not Production | Existing review policy retained; no cleanup/publication of real company records |
+| Public route/demo/metric semantics | Actual EN/HK paths, private/demo excluded and distinct counts | Current approved/stored data only | T17 Preview | 79logo authorization retained; URLs/translation/legal facts require their own signoff |
+
+本輪 main merge 不等於正式發版。發布邊界待T16具體版本、capability、現有migration0057–0059及service/provider差異單；Production branch仍release，以 `evidence/t17/production-readonly.json` 的新讀值為準。回退相容web/source，保留資料、audit、grant、published history和in-flight效果；不逆刪0057–0059。

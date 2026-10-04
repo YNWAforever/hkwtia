@@ -1,0 +1,113 @@
+{
+  "observedAt": "2026-10-04T02:18:08.989975+00:00",
+  "baseSha": "1d6a019a8191f4ba16a77320d35a876e7aa803a2",
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "branch": "codex/content-maintenance-20261003",
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/133",
+  "sourceCommit": "9f657c93",
+  "testCommit": "73272cc6",
+  "red": [
+    {
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-cms-visibility.test.ts",
+      "result": "3 pass / 2 target failures: referenced company logo incorrectly archived; archive winning after preflight attached archived logo",
+      "log": ".playwright/full-fix-t17-cms-race-red.log"
+    },
+    {
+      "command": "actual bug reintroduction with byte restoration in finally; same five real PG cases",
+      "result": "3 pass / same2 target failures; restored source5pass",
+      "logs": [
+        ".playwright/full-fix-t17-cms-mutation-red.log",
+        ".playwright/full-fix-t17-cms-restored-pg-green.log"
+      ]
+    }
+  ],
+  "focused": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-cms-visibility.test.ts tests/integration/audit-full-cms-workspace.test.ts tests/unit/admin-media.test.ts tests/unit/admin-archive.test.ts tests/unit/company-profiles-repository.test.ts tests/unit/event-hero-admin-and-media.test.ts tests/unit/partner-media-locking.test.ts tests/unit/media-upload-registry-invariants.test.ts",
+    "passed": 73,
+    "skipped": 0,
+    "failed": 0,
+    "actualPostgreSQLCases": 14,
+    "migrations": 59,
+    "environment": "owned disposable loopback PostgreSQL16; real transactions, actor checks, row locks, SQL audits; connection loader mocked only"
+  },
+  "semanticRegression": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-workspace.test.ts tests/integration/admin-dashboard-counts.test.ts tests/unit/impact-metrics.test.ts tests/unit/home-impact-evidence.test.tsx",
+    "passed": 15,
+    "skipped": 1,
+    "failed": 0,
+    "limits": "one legacy optional external DB case skipped; actual seven disposable PG workspace/count cases ran. New actual Preview counts in public-extra.json."
+  },
+  "full": {
+    "command": "npm test",
+    "passed": 6637,
+    "skipped": 460,
+    "failed": 0,
+    "exitCode": 0
+  },
+  "lint": {
+    "command": "npm run lint",
+    "errors": 0,
+    "warnings": 91,
+    "exitCode": 0
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "finalCommand": "npm run typecheck",
+    "finalExitCode": 0
+  },
+  "strings": {
+    "command": "npm run audit:strings",
+    "tsxFiles": 317,
+    "exitCode": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0
+  },
+  "browser": {
+    "firstRun": {
+      "command": "node --env-file=.env.local .playwright/full-fix-t17-run-native.mjs",
+      "passed": 6,
+      "failed": 2,
+      "log": ".playwright/full-fix-t17-native-first.log",
+      "failureClassification": "test locator expected public-layout main ID on standalone /join; actual main+H1 present; not a product bug"
+    },
+    "publicCorrection": {
+      "command": "node --env-file=.env.local .playwright/full-fix-t17-run-native.mjs --grep 'actual discovered public routes'",
+      "passed": 2,
+      "failed": 0,
+      "log": ".playwright/full-fix-t17-native-public-green.log"
+    },
+    "finalAllEight": {
+      "command": "node --env-file=.env.local .playwright/full-fix-t17-run-native.mjs",
+      "passed": 8,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t17-native-final.log",
+      "appSourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+      "testHarnessCorrection": "Public and standalone /join layout both require exactly one main; main-content ID remains required for public layout. No product code changed for this test correction."
+    },
+    "limits": "Actual password Auth with isolated synthetic role fixture bindings. Google/magic link not verified. Offline case edits only without server-save attempt; no failed network save proof."
+  },
+  "configuration": {
+    "productionChanged": false,
+    "previewOnlyCmsEnabled": true,
+    "allAiProviderCallsDisabled": true,
+    "ledger": 59,
+    "newMigrations": 0,
+    "contentSignoffFields": 1443,
+    "newPolicyApprovals": 0
+  },
+  "rollback": {
+    "code": "revert source9f657c93 as one paired change; schema remains compatible",
+    "cmsFixture": "native explicit previous-copy private restore then audited publish; original published copy restored and history preserved",
+    "production": "not released; no production cleanup or flag enabled"
+  },
+  "blockers": [
+    "WTIA content/policy owner: field-level signoff for drafted translations, legal branding and policy; see content-signoff.csv. Existing published copy preserved.",
+    "T12 typed administrative AI draft generation and business facts remains separate engineering task.",
+    "G5 real3-5staff pilot, controlled Google/magic-link identities, approved administrative model/data/caps, provider sender receipts and actual scheduled worker windows."
+  ]
+}

@@ -94,3 +94,17 @@ T18 source/native 工程測試與 3–5 位真人職員 G5 試點分開。下面
 ### 已完成入會及待付款返回復原（T14B）
 
 會員可由原申請返回既有會籍結果；已完成申請讀取失敗時使用聯絡支援／會員專區，記申請參考，不另建權益。公司待付款從原Checkout繼續使用同一付款嘗試；瀏覽器顯示成功或帶session參數不是付款證據，必須核對Member360的provider事件及會籍狀態。過期／舊invoice保持對帳歷史，不能新增續會engagement或倒退已付款期間。不得以comp、手改paid或撤銷歷史grant修復付款。實際StripeTEST證據：evidence/t14b/stripe-test-provider.json；受控重播並非正式webhook自動送達驗收。
+
+### CMS 草稿、發布、還原及公司標誌（T17）
+
+職員由 `/zh/admin/page-copy` 選實際 namespace/block。中英欄位分開編輯；「此分頁暫存」只是本機分頁，不是伺服器保存。儲存私人草稿後，另一個登入裝置可取回；其他編輯者及匿名讀者不能查看。先開私人預覽，再以獨立「發布雙語文案」操作提交；發布與 audit/CAS 同一 transaction。另一分頁或編輯者版本衝突時保留內容，重新讀取／比較後按既有 rebase，不覆蓋他人版本。
+
+返回 list／Browser Back與Forward／刷新後使用明示恢復草稿。瀏覽器拒絕 storage 時警告是真實的，仍保留表單內容；離線編輯只有本機草稿，本輪未聲稱離線伺服器 Save 成功。切換帳戶／登出後不應看見前一身份草稿。
+
+回復舊發布：勾選前版內容、建立私人還原稿、預覽，再獨立發布；還原私人稿未改公開版。不要 SQL 刪 history 或直接修改 published 值。每次發布保留 version/audit。
+
+公司標誌仍被引用時封存會回 MEDIA_IN_USE；確認真正依存及核准替代，不能為清媒體把公司 logo 清空。公司提交時即使預檢成功，transaction 仍重驗媒體由該管理者擁有、未封存並鎖行；競爭結果應回可復原錯誤，不附上已封存媒體。
+
+`content-signoff.csv` 列每個可編輯 CMS／typed programme field 的來源、owner、版本及待簽核狀態。工程測試、既有公開版與 archive transcription 不等於新政策批准；79家既有關係／標誌已有 session 授權，但外鏈只用批准且已儲存 URL，不自行猜公司網址。Profile records、active membership records及unrevoked company seats是不同分母；active 包括免費／特別 grant，不代表每筆已付款。
+
+證據：`evidence/t17/verification.json`、`browser.json`、`public-extra.json`；正式仍未部署此候選。

@@ -1,0 +1,10 @@
+{
+  "id": "dpl_C3SX3zaRFYkNAjYxx4GPSjACeQh6",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "gitRef": "codex/content-maintenance-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-content-maintenance-20261003.vercel.app",
+  "production": false
+}

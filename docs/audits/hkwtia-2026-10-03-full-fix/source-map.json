@@ -874,5 +874,37 @@
     "interface": "explicit isolated opt-in; actual hosted Checkout/provider-retrieved events; controlled signed replay separate from automatic remote delivery",
     "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
     "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
+  },
+  {
+    "taskId": "T17",
+    "path": "lib/db/repos/media.ts",
+    "symbol": "setMediaArchived",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Required countCompanyReferences port shares existing archive transaction/media row lock; count all company logo references; existing MEDIA_IN_USE recovery, no parallel media system."
+  },
+  {
+    "taskId": "T17",
+    "path": "lib/db/repos/company-profiles.ts",
+    "symbol": "updateProfile",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Existing membership/company manager row locks retained; owned active media FOR UPDATE recheck serializes against archive; preflight is not authority."
+  },
+  {
+    "taskId": "T17",
+    "path": "lib/admin/page-copy-actions.ts",
+    "symbol": "workspacePageCopyAction",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Existing self-resolved actor, private draft/history/CAS, bilingual atomic publish, namespace-only public invalidation retained; native audited restore/publish verified."
+  },
+  {
+    "taskId": "T17",
+    "path": "tests/e2e/full-fix-content-maintenance.spec.ts",
+    "symbol": "nativeAcceptance",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Existing CMS publish and browser-history tests reused by path mapping; eight current exact Preview cases, no fake sessions/provider pass."
   }
 ]
