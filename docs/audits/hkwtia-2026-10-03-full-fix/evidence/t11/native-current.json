@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-10-04T10:35:57.802Z",
+  "sourceSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+  "actualPasswordAuth": true,
+  "syntheticOfflineDrafts": true,
+  "externalModelCalls": 0,
+  "realProviderSends": 0,
+  "production": false,
+  "checks": [
+    {
+      "locale": "en",
+      "case": "real staff password Auth; offline synthetic proposal approved, changed-consent proposal blocked and human rejection allowed; separate renewal batch navigation;390 keyboard axe0",
+      "outboundMessages": 0,
+      "externalModelCalls": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "real staff password Auth; offline synthetic proposal approved, changed-consent proposal blocked and human rejection allowed; separate renewal batch navigation;390 keyboard axe0",
+      "outboundMessages": 0,
+      "externalModelCalls": 0
+    }
+  ]
+}

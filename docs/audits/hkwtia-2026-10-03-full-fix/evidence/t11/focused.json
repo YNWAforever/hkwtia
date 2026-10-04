@@ -1,0 +1,47 @@
+{
+  "sourceSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+  "legacyAndNewFocused": {
+    "passed": 72,
+    "skipped": 0,
+    "files": 12,
+    "source": "92fa runtime unchanged except navigation/recovery"
+  },
+  "finalUiAndBoundary": {
+    "passed": 48,
+    "skipped": 0,
+    "files": 4,
+    "originalScannerDeadline": 30000,
+    "scannerDurationMs": 977
+  },
+  "actualPostgres": {
+    "environment": "owned disposable loopback PostgreSQL16; all60",
+    "retentionCases": 15,
+    "priorDraftWorkCases": 30,
+    "budgetDistinctCases": 16,
+    "totalDistinct": 61,
+    "skipped": 0,
+    "combinedFirst": {
+      "passed": 60,
+      "failed": 1,
+      "cause": "historical0057 fixture assumed no newer migrations"
+    },
+    "targetedRepair": {
+      "passed": 1,
+      "deselected": 15,
+      "meaning": "15 budget cases passed in combined run; deselection is not missing DB acceptance"
+    },
+    "provider": "explicit simulation; not real model"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 95
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "strings": {
+    "exitCode": 0,
+    "tsxFiles": 320
+  },
+  "overlapCountsNotSummed": true
+}

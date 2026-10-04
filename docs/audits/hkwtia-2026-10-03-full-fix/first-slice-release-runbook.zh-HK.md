@@ -88,3 +88,13 @@ PR136 无migration，沿用ledger59。当前CI/full/native已绿灯，Preview fi
 3. 保留目前人工流程與T14D unknown safeguards；browser key獨立於Auth／Concierge。Key輪替會失去舊 envelope 的恢復能力，需職員先人工保留未送文字。
 4. 回退先關新生成／新私有保留，保留draft/work/budget/audit/unknown與既有outbox，使用相容app／worker；不刪history，不以TTL解除budget/providerunknown。不回退至舊可盲重試sender。
 5. 精確Production版本／範圍／0057–59／flags與T16實際回復演練、provider receipts／worker兩窗口仍為最後發布單門檻；本PR合併不切Production。
+
+## T11 續會草稿能力發布順序
+
+1. 確認指定 DB/Auth 隔離與 app/worker SHA；核對 migration0057→0058→0059→0060 ledger，不以 Preview 名稱推定隔離。
+2. 0060 先於使用 approval result 的 app/worker 上線；它只增加 approval FK/result CHECK/pending index，不能重跑生成器的大範圍歷史差異 SQL。
+3. 保持 AGENTS_ENABLED/ADMIN_AI_RETENTION_DRAFTS_ENABLED/send flags 停用。核准 route/data/credential/run-day-month caps、獨立服務身份與 concurrency 上限，再驗 receipt/unknown/manual review。
+4. 真實兩個 worker 排程窗口及 T13/T15 gates 通過後，按具體能力授權作 T16 2staff/50cases/day/draft-only 試點。此次未執行正式發布。
+5. 回滾停新工作、相容 app/worker；保留0060與歷史結果/unknown/budget/audit/outbox，不 drop、不盲重試、不把 TTL 當退款。人工續會及 sender 保持獨立。
+
+操作詳見 [續會草稿 SOP](retention-draft-sop.zh-HK.md)。

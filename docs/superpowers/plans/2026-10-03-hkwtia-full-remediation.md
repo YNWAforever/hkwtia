@@ -655,3 +655,12 @@ npm --prefix workers test
 - [x] Actual all59-migration PG48; legacy+SQL119; behavioural mutation34RED→41GREEN with7 deliberately excluded cases, original bytes restored.
 - [x] Actual isolated Neon Password Auth native6 EN/HK390: unknown/no new key, STOP, owner/due/close/reopen, legitimate pass resends and refund revocation. Preview17; full6657pass519skip0fail; lint/typecheck/strings/build; sourceCIall7/worker57.
 - [ ] Real approved-recipient sender receipts and pinned worker/two scheduled windows remain owner gates; full fix and Production release not claimed.
+
+## T11 execution record — 2026-10-04
+
+- [x] Real SQL RED1000rows→GREENlimit101;1k/10k complete stable keyset, pending SQL and DB group/collation order.
+- [x] Two-worker/cross-day provider3→1 RED→GREEN with actual repositories/work/budget; unknown survives restart/lease/day/facts changes without TTL refund.
+- [x] Final body/facts validation, fresh paid/consent/source checks and human approve/CAS/reject; separate existing batch/sender. Capability off, readiness disabled.
+- [x] Actual all60 PG61 distinct, native2 EN/HK390/keyboard/axe0, exact Preview19/source894e; CI6698pass555skip0fail/worker57. Initial failures preserved and resolved in current receipts.
+- [x] 0060 only isolated Neon59→60; no historical cleanup. SOP/source-map and original22/28/64 tracking retained.
+- [ ] Approved real model/data/caps/receipts, pinned worker two actual windows, HK/SG/human G5 and Production capability gates remain; no full-fix claim. Continue T12.

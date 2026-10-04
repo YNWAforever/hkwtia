@@ -1152,5 +1152,53 @@
     "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
     "evidenceBasis": "current-checkout-and-actual-acceptance",
     "mapping": "Existing sender unchanged; only explicit adoption and optional opaque private recovery"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/db/repos/retention-analyst.ts",
+    "symbol": "createRetentionAnalystRepository",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing reader pages100; compatibility facade and DB group/collation order, pending SQL"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/ai/retention-analyst/service.ts",
+    "symbol": "runRetentionAnalyst",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing scheduled service + T08 work/budget, no new sender"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/ai/retention-analyst/grounding.ts",
+    "symbol": "validateRetentionDraft",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "T08 whole-body tokens/claims validator"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/db/repos/ai-draft-work.ts",
+    "symbol": "finishDraftWork",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "0060 restricted existing approval result, existing ai-review drafts preserved"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/db/repos/approvals.ts",
+    "symbol": "decide",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Current facts/consent before approve, stale rejection allowed"
+  },
+  {
+    "taskId": "T11",
+    "path": "components/admin/approval-list.tsx",
+    "symbol": "ApprovalList",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Human review, GuardedAdminLink to separate batch, accessible stale recovery"
   }
 ]

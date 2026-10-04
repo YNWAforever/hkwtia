@@ -126,3 +126,7 @@ Follow [繁中 sender recovery SOP](delivery-recovery-sop.zh-HK.md). Unknown net
 ## 收件匣回覆助手（T10）
 
 按 [回覆草稿 SOP](support-draft-sop.zh-HK.md) 操作。從對話的「覆核草稿」進入統一隊列，按負責人、期限、種類及狀態篩選。核准與採用到回覆框不會發送；另按發送才會重驗現有兩個同意來源、時窗、範本及職員身份。多選須逐筆讀取結果，unknown 先對帳。未獲模型、資料用途或預算批准時，直接人工跟進；加密保留缺配置或已過期時，不會顯示假成功。
+
+## 續會草稿日常維護
+
+依 [續會草稿與人工審批 SOP](retention-draft-sop.zh-HK.md) 核對資料版本。批准只記錄決定，續會批次與 sender 各自重新預覽／審批／確認最新同意。Unknown 先對帳，不用新 request key 或跨日重跑繞過保護。AI 預設停用；工程證據不代替 provider/worker/人員驗收。
