@@ -62,7 +62,7 @@ export function CancelEventPanel({action, labels, locale, preview, notificationP
           <button className="ml-2 min-h-11 rounded-md border px-4" disabled={pending} onClick={() => setConfirming(false)} type="button">{labels.keep}</button>
         </form>
       ) : (
-        <button className="min-h-11 rounded-md border border-destructive px-4 text-destructive" onClick={() => setConfirming(true)} type="button">{labels.button}</button>
+        <button className="min-h-11 rounded-md border border-destructive px-4 text-red-800" onClick={() => setConfirming(true)} type="button">{labels.button}</button>
       )}
       {state.message ? <p className="text-sm" role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}
     </div>
