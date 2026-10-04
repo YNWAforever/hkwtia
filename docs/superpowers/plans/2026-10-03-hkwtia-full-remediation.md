@@ -621,3 +621,12 @@ npm --prefix workers test
 - [x] Actual Stripe TEST hosted payment, unchanged Checkout on return, real provider-event signed replay/duplicate, owned test subscription cancellation and reconciliation; no Production/refund/send.
 - [x] Actual isolatedNeon billing/identity/policy/5000renewal regression28; existing finite/legacy grant and entitlement boundaries18; full6637pass455skip; checks/build/type/lint/strings and exactCI7 green.
 - [ ] Verified-email/no-profile/Google/magic, automatic remote webhook/recurring provider, G5worker/sender/3–5humanstaff and remaining review/scale acceptance remain separate gates; T14B and mixed64cases stayPARTIAL.
+
+### T17 execution record — 2026-10-04
+
+- [x] Read existing draft/CAS/history/media/company interfaces and corrected claims source; preserve existing architecture.
+- [x] Real PG company-logo reference and archive/preflight race RED2; minimal paired fix; actual bug mutation2 and restore5; focused73, PG14.
+- [x] Full6637pass/460skip, lint0errors91existingwarnings, type/build0, strings317; source73272cc6 CI all7/worker57.
+- [x] Actual isolated CMS six browser flows and EN/HK public two; demo/private list/detail/sitemap boundaries and DB/UI count semantics. Final combined8 native cases PASS, zero skips; actual Preview73272cc6.
+- [x] 1443-field source/owner/version/signoff ledger and traditional Chinese daily CMS/restore/media/count SOP.
+- [ ] WTIA owner field-level translation/branding/policy signoff; T12 business draft integration and G5humanstaff pilot; Production rollout not authorized for this new slice.

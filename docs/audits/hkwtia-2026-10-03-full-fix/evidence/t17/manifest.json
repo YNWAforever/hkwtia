@@ -1,0 +1,139 @@
+{
+  "observedAt": "2026-10-04T02:21:17.864146+00:00",
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "files": [
+    {
+      "file": "browser.json",
+      "sha256": "3395831bead15835802cd40fc80378b35a7b191c224a96a78fd75db0b4354d9e",
+      "bytes": 775
+    },
+    {
+      "file": "ci-source.json",
+      "sha256": "5af7697d35d4b022fbf433b218013a04acb2338400bea6f0d496fd8e6f73e957",
+      "bytes": 1436
+    },
+    {
+      "file": "en-admin-count-semantics.png",
+      "sha256": "d3d04fae166a0c235f4241dd78572f8c806fbbcb914c46db98adcc8d3f1cbfd9",
+      "bytes": 80333
+    },
+    {
+      "file": "en-cms-mobile.png",
+      "sha256": "3874e1188b325de3b1d73857ae67c9fcef86b8df4b6ca8c65a0bc91153de79b1",
+      "bytes": 37614
+    },
+    {
+      "file": "en-history.json",
+      "sha256": "7568dd404eebfe06263c4c82fa06e03271caaf8dde44d38fad067c2e72862160",
+      "bytes": 344
+    },
+    {
+      "file": "en-private-preview.png",
+      "sha256": "b152782f298a3ffcabfc900bb8a915da08e283110d16799c7f08f666c8a778c1",
+      "bytes": 1015156
+    },
+    {
+      "file": "en-public-partners-mobile.png",
+      "sha256": "aca107bc650dca8adf96f2edf023c1a929e6e49e0718d098f30a0ca110bbb38c",
+      "bytes": 66516
+    },
+    {
+      "file": "en-public-scope.json",
+      "sha256": "651a7834f11f0c5ee96db82a690a428aa4ad2b87f692a8c51ee8bfa28ec9dcb6",
+      "bytes": 2076
+    },
+    {
+      "file": "en-recovered-390.png",
+      "sha256": "7ad8990d6b97b49505ecdc009d025b0ae25b0ca80b9e926a1b0ceba909d193b3",
+      "bytes": 51763
+    },
+    {
+      "file": "identity-isolation.json",
+      "sha256": "f1d5934ffe1e996f7efd14eea7b7954fac417054a81ce3595532b2027f307886",
+      "bytes": 257
+    },
+    {
+      "file": "offline-local-recovery.json",
+      "sha256": "cf263a387e4a79a38c925ff9168056010dabfed68b9dd9e9ce49c776ba63afc6",
+      "bytes": 234
+    },
+    {
+      "file": "preview-access.json",
+      "sha256": "0b745cc48f2e1f88f30a0efb16d6ea5171b1fd86fffe5ea34755d95f223e3f16",
+      "bytes": 239
+    },
+    {
+      "file": "preview-env.json",
+      "sha256": "7cb69fab5caf87ad70e8880aa7a893f09827b961f0d6667bf282acae9317db60",
+      "bytes": 8144
+    },
+    {
+      "file": "preview.json",
+      "sha256": "bc716747758b6fb242f257c1767f6cf0ca0964fa1a692aa4927c92f43b12649e",
+      "bytes": 348
+    },
+    {
+      "file": "production-readonly.json",
+      "sha256": "3d3aabba0c365a0cbb9fa8c21eba395e802e94e2f1e906d96498eda6cecd6fe3",
+      "bytes": 394
+    },
+    {
+      "file": "public-extra.json",
+      "sha256": "c6f03ccb9611fe4c86a982c4271805d36deca8a0ae35145d648c7ac96d5d6157",
+      "bytes": 730
+    },
+    {
+      "file": "runtime.json",
+      "sha256": "4d6cb44dec2c46101bfe69b38bbca92c06b978d085fa3f178c8e9b03c3659cb0",
+      "bytes": 2153
+    },
+    {
+      "file": "skip-inventory.json",
+      "sha256": "9a01e15aa893ab84a08784b6673b8958e05470974d2c886698b53caea88dfbd9",
+      "bytes": 37777
+    },
+    {
+      "file": "storage-denied.json",
+      "sha256": "fc8815144793f439a5200a8cfa391e47be9d1b77166eff0a906b0009190c905b",
+      "bytes": 290
+    },
+    {
+      "file": "verification.json",
+      "sha256": "90fc34a88d200981f0e3cc310e4e37d43d733118fe31593356393d173dea3732",
+      "bytes": 5273
+    },
+    {
+      "file": "zh-HK-history.json",
+      "sha256": "3f38e61c952198a0a0b042bbbedc4e7277971927de5d62d9c22727694ca93ebb",
+      "bytes": 348
+    },
+    {
+      "file": "zh-HK-private-preview.png",
+      "sha256": "66578eec1d187b97dbdd39db7a3ddf01d74024aaed1ffa31f9fcacb9be25c769",
+      "bytes": 308965
+    },
+    {
+      "file": "zh-HK-public-partners-mobile.png",
+      "sha256": "0a6615ac2578fc1c8f9561e0dbde900f46b2fa0460e2a0c124af84912e00190c",
+      "bytes": 69852
+    },
+    {
+      "file": "zh-HK-public-scope.json",
+      "sha256": "851e913ed5b9bed3eb617ddace20e5f7797e06734388806ff912a46ccab4ae2b",
+      "bytes": 2118
+    },
+    {
+      "file": "zh-HK-recovered-1440.png",
+      "sha256": "4006a83fa8813a9d45101bc32613efe828bde06b92be95e9bcd66d72c05dcf10",
+      "bytes": 163880
+    },
+    {
+      "file": "zh-storage-unavailable.png",
+      "sha256": "728442ba39973dda61d7f3b5f776358335bde2548d659cff259af5327f08f913",
+      "bytes": 104419
+    }
+  ],
+  "secretsExported": false,
+  "PIIExported": false,
+  "originalAuditEvidenceModified": false
+}

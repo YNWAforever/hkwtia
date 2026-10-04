@@ -558,6 +558,18 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
       try {
         result = await database.transaction(async (transaction) => {
           await lockCompanyManager(transaction, manager, id);
+          if (parsed.logoMediaId !== null) {
+            // Serialize with media archive and recheck ownership/active status;
+            // an owned-media preflight can become stale before this transaction.
+            const owned = executedRows(await transaction.execute(sql`
+              SELECT ${media.id} AS owned_media_id FROM ${media}
+              WHERE ${media.id} = ${parsed.logoMediaId}
+                AND ${media.registeredByProfileId} = ${manager.profileId}
+                AND ${media.archivedAt} IS NULL
+              FOR UPDATE
+            `))[0]?.owned_media_id;
+            if (owned !== parsed.logoMediaId) throw new Error("COMPANY_LOGO_INVALID");
+          }
           return transaction.execute(sql`
           UPDATE ${companies} SET
             slug = ${parsed.slug},

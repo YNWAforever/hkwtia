@@ -18,6 +18,7 @@ function db(rows: (Record<string, unknown>[] | Error)[]) {
     const statement = literalText(query);
     if (statement.includes("AS company_id") && statement.includes("FOR UPDATE")) return [{company_id: COMPANY}];
     if (statement.includes("AS role") && statement.includes("FOR UPDATE")) return [{role: "owner"}];
+    if (statement.includes("AS owned_media_id") && statement.includes("FOR UPDATE")) return [{owned_media_id: LOGO}];
     const next = queue.shift() ?? [];
     if (next instanceof Error) throw next;
     return next;
