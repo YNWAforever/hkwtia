@@ -155,6 +155,9 @@ function retryDatabase(deliveries: Map<string, DeliveryState>) {
   const execute: AutomationSqlExecutor["execute"] = async (query) => {
     const command = normalizedSql(query);
     commands.push(command);
+    if (/SELECT id, delivery_key/i.test(command.sql)) return {rows: [{id: journeyId, delivery_key: deliveryKey}]};
+    if (/SELECT 1 FROM/i.test(command.sql)) return {rows: [...deliveries.values()].filter(x => x.status === "processing" || x.status === "failed" && ["retryable_network", "retryable_server", "provider_acceptance_uncertain"].includes(x.errorCode ?? "")).map(() => ({exists: 1}))};
+
     if (/UPDATE "journey_state".*status = 'scheduled'/i.test(command.sql)) {
       return {
         rows: [journeyRow({
@@ -374,16 +377,18 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
       status: "scheduled",
       errorCode: null,
     });
-    expect(fake.commands).toHaveLength(4);
-    expect(fake.commands[0]?.sql).toMatch(
+    expect(fake.commands).toHaveLength(6);
+    expect(fake.commands[0]?.sql).toMatch(/FOR UPDATE/);
+    expect(fake.commands[1]?.sql).toMatch(/SELECT 1 FROM/);
+    expect(fake.commands[2]?.sql).toMatch(
       /UPDATE "journey_state".*status = 'scheduled'.*error_code = NULL/i,
     );
-    expect(fake.commands[0]?.params).not.toContain(auditedRetryMarker);
-    expect(fake.commands[1]?.sql).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
-    expect(fake.commands[2]?.sql).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
-    expect(fake.commands[1]?.params).toContain(auditedRetryMarker);
-    expect(fake.commands[2]?.params).toContain(auditedRetryMarker);
-    expect(fake.commands[3]?.sql).toMatch(
+    expect(fake.commands[2]?.params).not.toContain(auditedRetryMarker);
+    expect(fake.commands[3]?.sql).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
+    expect(fake.commands[4]?.sql).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
+    expect(fake.commands[3]?.params).toContain(auditedRetryMarker);
+    expect(fake.commands[4]?.params).toContain(auditedRetryMarker);
+    expect(fake.commands[5]?.sql).toMatch(
       /INSERT INTO "audit_events".*journey\.failed_retry_requested/i,
     );
     expect(fake.auditWrites()).toBe(1);

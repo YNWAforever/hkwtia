@@ -450,6 +450,9 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
       const command = dialect.sqlToQuery(query);
       const text = normalizedSql(command);
       commands.push(command);
+      if (/SELECT id, delivery_key/i.test(text)) return {rows: [{id: journeyId, delivery_key: deliveryKey}]};
+      if (/SELECT 1 FROM/i.test(text)) return {rows: delivery.status === 'processing' ? [{exists: 1}] : []};
+
       if (/UPDATE "journey_state".*status = 'scheduled'/i.test(text)) {
         return {
           rows: [journeyRow({
@@ -603,13 +606,15 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
       providerId: "provider-after-admin-retry",
     });
     expect(auditWrites).toBe(1);
-    expect(commands).toHaveLength(4);
-    expect(normalizedSql(commands[0]!)).toMatch(/UPDATE "journey_state".*status = 'scheduled'/i);
-    expect(commands[0]!.params).not.toContain("admin_retry_authorized");
-    expect(normalizedSql(commands[1]!)).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
-    expect(commands[1]!.params).toContain("admin_retry_provider_client_error");
-    expect(normalizedSql(commands[2]!)).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
-    expect(normalizedSql(commands[3]!)).toMatch(
+    expect(commands).toHaveLength(6);
+    expect(normalizedSql(commands[0]!)).toMatch(/FOR UPDATE/);
+    expect(normalizedSql(commands[1]!)).toMatch(/SELECT 1 FROM/);
+    expect(normalizedSql(commands[2]!)).toMatch(/UPDATE "journey_state".*status = 'scheduled'/i);
+    expect(commands[2]!.params).not.toContain("admin_retry_authorized");
+    expect(normalizedSql(commands[3]!)).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
+    expect(commands[3]!.params).toContain("admin_retry_provider_client_error");
+    expect(normalizedSql(commands[4]!)).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
+    expect(normalizedSql(commands[5]!)).toMatch(
       /INSERT INTO "audit_events".*journey\.failed_retry_requested/i,
     );
   });

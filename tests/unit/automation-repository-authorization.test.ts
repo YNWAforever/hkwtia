@@ -1,3 +1,4 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {createDeliveriesRepository} from "@/lib/db/repos/deliveries";
@@ -26,7 +27,7 @@ const enrollment = {
 } as const;
 
 function database(rows: Record<string, unknown>[] = []): AutomationDatabase {
-  const execute: AutomationSqlExecutor["execute"] = vi.fn(async () => ({rows}));
+  const execute: AutomationSqlExecutor["execute"] = vi.fn(async query => ({rows: /SELECT 1 FROM/.test(new PgDialect().sqlToQuery(query).sql) ? [] : rows}));
   const database: AutomationDatabase = {
     execute,
     transaction: async <T>(work: (transaction: AutomationSqlExecutor) => Promise<T>) => work(database),
