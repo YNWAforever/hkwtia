@@ -1,8 +1,8 @@
 import {mkdirSync,writeFileSync,readFileSync} from "node:fs";
 import {execFileSync} from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
-import en from "@/messages/en.json";
-import zh from "@/messages/zh-HK.json";
+const en:typeof import("../../messages/en.json")=JSON.parse(readFileSync("messages/en.json","utf8"));
+const zh:typeof import("../../messages/zh-HK.json")=JSON.parse(readFileSync("messages/zh-HK.json","utf8"));
 import {randomUUID} from "node:crypto";
 import {Pool} from "pg";
 import {test,expect} from "@playwright/test";
@@ -25,7 +25,8 @@ test.describe("T10 isolated actual staff inbox assistance",()=>{
    await expect(page.getByRole('heading',{name:locale==='en'?'Reply assistance':'回覆草稿助手',exact:true})).toBeVisible({timeout:5000});
    const t=locale==='en'?en:zh,prefix=locale==='en'?'':'/zh',labels=t.SupportAssistance;
    await expect(page.getByRole('button',{name:labels.prepare,exact:true})).toBeDisabled();
-   const seeded=JSON.parse(execFileSync(process.execPath,['--conditions=react-server','--import','tsx','scripts/lib/full-support-draft-fixture.ts',id],{encoding:'utf8',env:{...process.env,NODE_ENV:'test'},timeout:60000,windowsHide:true}));
+   const response=await page.request.get('/api/auth/get-session');expect(response.ok()).toBe(true);const authenticated=await response.json(),authId=authenticated.user?.id??authenticated.data?.user?.id;expect(typeof authId).toBe('string');
+   const seeded=JSON.parse(execFileSync(process.execPath,['--conditions=react-server','--import','tsx','scripts/lib/full-support-draft-fixture.ts',id,authId],{encoding:'utf8',env:{...process.env,NODE_ENV:'test'},timeout:60000,windowsHide:true}));
    expect(seeded).toMatchObject({syntheticOfflineFixture:true,externalModelCalls:0,state:'needs_review'});
    await page.goto(origin+prefix+'/admin/ai-review?draft='+seeded.draftId);
    await expect(page.getByRole('heading',{name:t.AiDraftReview.heading,level:1,exact:true})).toBeVisible();

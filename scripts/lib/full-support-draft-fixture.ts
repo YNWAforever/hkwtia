@@ -17,7 +17,7 @@ try{
  assert.equal(Number((await pool.query("SELECT count(*) AS n FROM drizzle.__drizzle_migrations")).rows[0].n),59);
  assert.equal(Number((await pool.query("SELECT count(*) AS n FROM profiles WHERE email IS NOT NULL AND email NOT LIKE '%example.test'")).rows[0].n),0);
  assert.equal((await pool.query("SELECT id FROM conversations WHERE id=$1 AND profile_id LIKE 't10-native-%' AND agent_kind='concierge'",[id])).rows.length,1);
- const profile=(await pool.query("SELECT id,auth_user_id FROM profiles WHERE role='staff' AND email=$1",[process.env.M2_TEST_STAFF_EMAIL])).rows;
+ const profile=(await pool.query("SELECT id,auth_user_id FROM profiles WHERE role='staff' AND auth_user_id=$1",[z.string().min(1).max(255).parse(process.argv[3])])).rows;
  assert.equal(profile.length,1);const actor={kind:'staff' as const,profileId:profile[0].id,userId:profile[0].auth_user_id},repo=createAiDraftsRepository(async()=>drizzle(pool) as never);
  const facts=await repo.getFacts(actor,{kind:'support',caseId:supportCaseId(id)}),run=randomUUID();
  await pool.query("INSERT INTO agent_runs(id,agent,trigger,profile_id) VALUES($1,'board_reporter','scheduled',$2)",[run,actor.profileId]);
