@@ -1,0 +1,14 @@
+{
+  "originalRuns": [
+    {
+      "result": "2 reads pass / CMS not executed",
+      "gate": "existing own Home private draft; preserved"
+    },
+    {
+      "result": "2 reads pass / CMS not executed",
+      "gate": "test assumed root block option; actual catalogue uses title"
+    }
+  ],
+  "resolution": "Unused About namespace; actual catalogue title option; private save, publication, previous-copy restore and audit all pass",
+  "production": false
+}

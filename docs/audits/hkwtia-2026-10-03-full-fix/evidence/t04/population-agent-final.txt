@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/integration/operations-population.test.ts (5 tests) 14079ms
+   ✓ actual recorded operational population > deduplicates the actual board and renewal agent conversations against their observed business kind  489ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  04:55:53
+   Duration  16.40s (transform 341ms, setup 327ms, collect 1.46s, tests 14.08s, environment 0ms, prepare 163ms)
+

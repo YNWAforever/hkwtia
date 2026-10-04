@@ -1,0 +1,17 @@
+{
+  "appSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+  "harnessSha": "2deefd60982510ca27e93fbe00f0b80b98158291",
+  "origin": "http://localhost:3450",
+  "buildId": "Hp9Sm-LLlUErF_2yU2-p0",
+  "buildExit": 0,
+  "reusedExactVerifiedBuild": true,
+  "archiveSha256": "6d5cb46ae313802297a6867a4d3b40dd1ca1a5fbb38380ea5d1c2b02ab84251a",
+  "packageLockUnchanged": true,
+  "ledger": 61,
+  "positiveRuntimeDb": true,
+  "production": false,
+  "providerEffects": 0,
+  "externalModelCalls": 0,
+  "observedAt": "2026-10-04T18:33:37.813Z",
+  "nativeExit": 0
+}

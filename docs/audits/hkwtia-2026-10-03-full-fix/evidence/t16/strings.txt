@@ -1,0 +1,5 @@
+
+> hkwtia-platform@0.0.0 audit:strings
+> node scripts/audit-visible-strings.mjs
+
+Visible-string audit passed (324 TSX files scanned).

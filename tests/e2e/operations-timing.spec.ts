@@ -40,6 +40,7 @@ for (const [index, locale, prefix, width] of [[0, "en", "", 1440], [1, "zh-HK", 
     await page.setViewportSize({width, height: 900});
     await page.goto(prefix + "/admin/reports");
     await expect(page.getByRole("heading", {name: labels.heading, exact: true})).toBeVisible();
+    await expect(page.getByText(labels.scope, {exact: true})).toBeVisible();
     await expect(page.getByText(labels.status, {exact: true})).toBeVisible();
     await page.locator("summary").filter({hasText: labels.formLabel}).click();
     const form = page.getByRole("form", {name: labels.formLabel});

@@ -1,0 +1,22 @@
+{
+  "namespace": "About",
+  "options": [
+    "metaTitle",
+    "metaDescription",
+    "eyebrow",
+    "title",
+    "summary",
+    "imageAlt",
+    "historyTitle",
+    "historyIntro",
+    "connect",
+    "advance",
+    "represent",
+    "foundedTitle",
+    "foundedBody",
+    "missionTitle",
+    "missionBody",
+    "historyLink"
+  ],
+  "production": false
+}

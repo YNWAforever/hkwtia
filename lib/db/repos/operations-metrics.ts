@@ -12,7 +12,7 @@ const targets: Record<OperationObservation["caseKind"], readonly string[]> = {
   application: ["membership_application", "application"], support: ["conversation"],
   renewal: ["membership"], membership: ["membership", "profile"], event: ["event", "event_order", "event_registration"],
   board: ["board_draft", "post", "news_post"], content: ["post", "news_post", "event"],
-  cms: ["page_copy", "page", "post", "news_post", "media", "landing_partner"],
+  cms: ["page_copy", "page_copy_draft", "page", "post", "news_post", "media", "landing_partner"],
 };
 function rows(result: unknown): unknown[] {
   if (Array.isArray(result)) return result;
@@ -49,7 +49,17 @@ export function createOperationsMetricsRepository(loadDatabase: () => Promise<Da
         if (observation.auditId) {
           const source = (await tx.select({targetType: auditEvents.targetType, targetId: auditEvents.targetId}).from(auditEvents)
             .where(eq(auditEvents.id, observation.auditId)).limit(1))[0];
-          if (!source || source.targetId !== observation.caseId || !targets[observation.caseKind].includes(source.targetType)) throw Error("OPERATION_SOURCE_MISMATCH");
+          if (!source) throw Error("OPERATION_SOURCE_MISMATCH");
+          if (source.targetType === "ai_review_draft" || source.targetType === "ai_draft_work") {
+            // The business case comes from the stored work row, never supplied audit metadata or a client role.
+            const cases = rows(await tx.execute(sql`
+              SELECT kind, case_id AS "caseId" FROM ai_review_drafts WHERE id::text=${source.targetId} AND ${source.targetType}='ai_review_draft'
+              UNION ALL
+              SELECT kind, case_id AS "caseId" FROM ai_draft_work WHERE run_id::text=${source.targetId} AND ${source.targetType}='ai_draft_work'
+            `));
+            const resolved = z.object({kind: z.string(), caseId: z.string()}).optional().parse(cases[0]);
+            if (!resolved || resolved.kind !== observation.caseKind || resolved.caseId !== observation.caseId) throw Error("OPERATION_SOURCE_MISMATCH");
+          } else if (source.targetId !== observation.caseId || !targets[observation.caseKind].includes(source.targetType)) throw Error("OPERATION_SOURCE_MISMATCH");
         }
         if (observation.runId) {
           const source = (await tx.select({caseId: agentRuns.conversationId, profileId: agentRuns.profileId}).from(agentRuns)
@@ -108,8 +118,32 @@ export function createOperationsMetricsRepository(loadDatabase: () => Promise<Da
       const observations = records.map(record => operationObservationSchema.parse(record.metadata?.observation));
       const work = summarizeObservedWork(observations);
       const result = rows(await db.execute(sql`
-        WITH case_population AS (
-          SELECT 'support:' || id::text AS case_id FROM conversations WHERE created_at >= ${window.from} AND created_at < ${window.toExclusive}
+        WITH audited_cases AS (
+          SELECT CASE
+            WHEN target_type IN ('membership_application','application') THEN 'application'
+            WHEN target_type='conversation' THEN COALESCE((SELECT CASE c.agent_kind WHEN 'retention-analyst' THEN 'renewal' WHEN 'board-reporter' THEN 'board' ELSE 'support' END FROM conversations c WHERE c.id::text=audit_events.target_id), 'support')
+            WHEN target_type='membership' AND action ~* '(renew|invoice)' THEN 'renewal'
+            WHEN target_type IN ('membership','profile') THEN 'membership'
+            WHEN target_type IN ('event','event_order','event_registration') THEN 'event'
+            WHEN target_type='board_draft' THEN 'board'
+            WHEN target_type IN ('post','news_post') THEN 'content'
+            WHEN target_type IN ('page_copy','page_copy_draft','page','media','landing_partner') THEN 'cms'
+          END AS case_kind, target_id
+          FROM audit_events WHERE created_at >= ${window.from} AND created_at < ${window.toExclusive}
+        ), case_population AS (
+          SELECT (CASE agent_kind WHEN 'retention-analyst' THEN 'renewal' WHEN 'board-reporter' THEN 'board' ELSE 'support' END) || ':' || id::text AS case_id FROM conversations
+          WHERE (created_at >= ${window.from} AND created_at < ${window.toExclusive})
+             OR (last_message_at >= ${window.from} AND last_message_at < ${window.toExclusive})
+          UNION
+          SELECT case_kind || ':' || target_id FROM audited_cases WHERE case_kind IS NOT NULL
+          UNION
+          SELECT kind || ':' || case_id FROM ai_draft_work
+          WHERE (created_at >= ${window.from} AND created_at < ${window.toExclusive})
+             OR (updated_at >= ${window.from} AND updated_at < ${window.toExclusive})
+          UNION
+          SELECT kind || ':' || case_id FROM ai_review_drafts
+          WHERE (created_at >= ${window.from} AND created_at < ${window.toExclusive})
+             OR (updated_at >= ${window.from} AND updated_at < ${window.toExclusive})
           UNION
           SELECT metadata->'observation'->>'caseKind' || ':' || (metadata->'observation'->>'caseId') AS case_id
           FROM audit_events WHERE target_type='admin_operation' AND (metadata->'observation'->>'endedAt')::timestamptz >= ${window.from} AND (metadata->'observation'->>'endedAt')::timestamptz < ${window.toExclusive}

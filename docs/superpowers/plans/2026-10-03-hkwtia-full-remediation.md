@@ -677,3 +677,15 @@ npm --prefix workers test
 - [x] Source safe renderer now restores serialized punctuation as React text after token parsing and recognizes app-owned bilingual report structure. Actual RED2→GREEN27; HTML/MDX/escaped links inert, public buildlog unchanged.
 - [x] SOP, original22/28/64 and baseline case fields preserved; small reviewable commits and PR138. Original failures retained and source current gates proved.
 - [ ] Real approved administrative model/data/caps/receipts, human content signoff/pilot and specific Production capabilities remain blocked. Navigation7.6s measured only; regional/3s performance remains T15. Continue T13.
+
+
+## 2026-10-05 T04／T15／T16 最終工程核對
+
+- [x] T04：完整已記錄平台分母及canonical CMS/AI references；legacy agent去重；166focused、5真PG16、9隔離Neon、5真native。
+- [x] T15：PR140合併；SQL38/native12／原Lighthouse10條門檻；原失敗保留，真人／region/RUM gate分開。
+- [x] T16：22tasks／28findings／64cases台帳；原40UC payload hash guard；3真migration/dump-restore＋3歷史web；繁中SOP、能力rollout與不破壞歷史的rollback。
+- [x] 最終程式946bad06：完整6771pass／596guardedskip／0fail、worker57、CI全7green、最新isolatedPreview2native＋10smoke。
+- [ ] 正式schema／配置／web／worker／逐能力flags與批准：本輪未發布、未開啟。
+- [ ] 真Google／magic mailbox、remoteprovider／真送達、scopedcloudworker兩窗口、3–5真人／screenreader／HKSG-RUM、兩星期baseline／policy與一週pilot：精確owner及最小證據见release-manifest/rollout。
+
+以上是追加的最新核對；先前任務區的未勾項是歷史跑次／外部門檻，不能藉最新source PASS推定其全部operational成立。

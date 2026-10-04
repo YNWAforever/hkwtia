@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-04T21:13:04.889Z",
+  "tasks": 22,
+  "findings": 28,
+  "cases": 64,
+  "immutableHistoricalUc": 40,
+  "newAcceptanceCases": 24,
+  "validEvidenceReferences": 183,
+  "hashes": {
+    "tasks.csv": "a08b1c0b9900c0a3b7f554087db1579f4880b2d890f09b7c852c01ae1e8f088c",
+    "status.csv": "3e506121f97054e34a212ef226018336f1d75f7e41716055c53a33da30afb7ef",
+    "acceptance.csv": "4633398d99225cb00e2ecccea67812d26c3bff4888573e1f672779459c4b3254",
+    "source-map.json": "3adb9c6162aeb79291491f54a1827858f24a92c0025a75f329d5ce50c18078cb",
+    "release-manifest.json": "4d98a214f439021b27d9caf37a2fa285785aa096b7e16ce159198ee2274c01a7",
+    "rollout.md": "9fa598e186b794d6f6008129028dcf1d8c6edbb2b94269127941c0134958bd77",
+    "rollback.md": "d84418de680d7ca0bfab3d74a833f4a90672b4d361fdff5c81af54006dbafefd",
+    "runbook.md": "3a44e75edf3c4d1c9234da2f220deb93c0ebcece994c8cf358f2b38464965fc1"
+  },
+  "productionReleased": false,
+  "fullFixComplete": false,
+  "meaning": "Traceability and evidence-file integrity; not provider, human or deployment acceptance"
+}

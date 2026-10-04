@@ -4293,7 +4293,7 @@
     "net": "Measured net minutes",
     "unknown": "Not measured",
     "period": "Period (Hong Kong time)",
-    "scope": "The support denominator includes bot and human-handled conversations plus observed cases from other work categories. Reopening adds work to the original case. Other categories require complete case collection before a population-wide saving can be claimed.",
+    "scope": "The denominator includes bot and human-handled support cases active in the period, distinct audited application, renewal, membership, event, board, content and CMS cases, and requested or reviewed AI cases, whether or not timing was recorded. Reopening adds work to the same case. The scope covers recorded platform work; unrecorded work outside the platform requires separate collection before a population-wide saving can be claimed.",
     "application": "Applications",
     "support": "Support",
     "renewal": "Renewal",

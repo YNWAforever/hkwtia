@@ -1,0 +1,11 @@
+{
+  "id": "dpl_CaFyCEuC6pewkfG2Bg3Z6hr277FR",
+  "state": "READY",
+  "target": null,
+  "sourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "gitRef": "codex/full-fix-release-evidence-20261003",
+  "origin": "https://hkwtia-usability-20261003.vercel.app",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "production": false,
+  "observedAt": "2026-10-04T21:02:09.696Z"
+}

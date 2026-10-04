@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_CI_ISOLATED_PREVIEW_RECOVERY_VERIFIED_OPERATIONAL_RELEASE_GATED",
+  "generatedAt": "2026-10-04T21:11:56.310757+00:00",
+  "fullFixComplete": false,
+  "taskLedger": "tasks.csv",
+  "findingLedger": "status.csv",
+  "caseLedger": "acceptance.csv",
+  "counts": {
+    "tasks": 22,
+    "findings": 28,
+    "cases": 64
+  },
+  "baselineSourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+  "candidateSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "candidateProductionDeployment": null,
+  "production": {
+    "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+    "observedAt": "2026-10-04T20:39:34.417Z",
+    "releasedThisScope": false,
+    "flagsEnabledThisScope": false,
+    "migrationsAppliedThisScope": false,
+    "gitProductionBranch": "release",
+    "selectedConfigPresence": {
+      "CONCIERGE_COOKIE_SECRET": false,
+      "NEON_AUTH_COOKIE_SECRET": true,
+      "RATE_LIMIT_KEY_SECRET": true,
+      "ADMIN_BATCH_ENABLED": false,
+      "AGENTS_ENABLED": false,
+      "ADMIN_AI_ENABLED": false
+    },
+    "migrationLedger": "not freshly verified; owner gate"
+  },
+  "isolated": {
+    "ledger": 61,
+    "schemaApplied": [
+      "0057",
+      "0058",
+      "0059",
+      "0060",
+      "0061"
+    ],
+    "databaseAuthPositivelyProven": true,
+    "previewAlias": "https://hkwtia-usability-20261003.vercel.app",
+    "productionFixtures": 0,
+    "previewDeployment": "dpl_CaFyCEuC6pewkfG2Bg3Z6hr277FR",
+    "previewAppSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "previewReceipts": [
+      "evidence/t16/preview-runtime.json",
+      "evidence/t16/native-preview.json"
+    ],
+    "expiresAt": "2026-10-05T12:00:00Z"
+  },
+  "rollback": {
+    "migrationReceipt": "evidence/t16/migration-recovery.json",
+    "pg16DumpRestore": true,
+    "migrationCases": 3,
+    "historicalWebSourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "historicalWebReceipt": "evidence/t16/historical-web-runtime.json",
+    "historicalWebCases": 3,
+    "historicalWebScope": [
+      "en authenticated members read",
+      "zh authenticated members read",
+      "CMS private save / publish / restore / audit"
+    ],
+    "historicalWorkerOperationallyVerified": false,
+    "unknownEffectsRetained": true
+  },
+  "approvalBoundaries": {
+    "mainGreenReviewedMerge": "authorized",
+    "isolatedPreviewCredentials": "authorized",
+    "productionNewCapabilities": "not authorized for current candidate/scope",
+    "production0057Through0061": "not authorized",
+    "realMemberEffects": "not authorized",
+    "adminAiPaidProvider": "auto-review denied before execution; explicit data/tasks/spend approval absent"
+  },
+  "gates": [
+    {
+      "id": "IDENTITY",
+      "owner": "Auth owner",
+      "minimumEvidence": "controlled synthetic Google account/challenge and allowed mailbox; valid/expired/replay/cross-device real magic link receipts"
+    },
+    {
+      "id": "WORKER",
+      "owner": "Platform / worker operator",
+      "minimumEvidence": "pinned isolated cloud service identity, APP_URL/binding and two scheduled windows per enabled job"
+    },
+    {
+      "id": "PROVIDER",
+      "owner": "Finance / Messaging / AI-data",
+      "minimumEvidence": "remote signed Stripe webhook/recurring; allowed recipient provider accepted/delivery; administrative provider/data/task/run-day-month/total-spend approvals, pricing and real receipts"
+    },
+    {
+      "id": "HUMAN",
+      "owner": "WTIA operations / QA / content",
+      "minimumEvidence": "3-5 staff, real screen reader, two-week manual baseline, two independent blind AI reviewers, field-level content and D01-D06 policy approval"
+    },
+    {
+      "id": "PERFORMANCE",
+      "owner": "QA / operations",
+      "minimumEvidence": "all original Lighthouse thresholds plus controlled HK/SG three cold/warm runs and enough RUM"
+    },
+    {
+      "id": "RELEASE",
+      "owner": "Release / DB operator",
+      "minimumEvidence": "named source/capability production candidate configuration, schema/flags/worker deployment approval and one-week 2staff/50perday draft-only pilot"
+    }
+  ],
+  "releaseOrder": [
+    "closed-writer schema with separate migration approval",
+    "closed-flags Production-configured web",
+    "isolated then approved scoped service worker / two windows",
+    "approved read-only UI",
+    "export/profile patch",
+    "per-operation import/grant/communications/tickets",
+    "purpose-specific AI pilot after provider/policy evidence"
+  ],
+  "rollbackOrder": [
+    "AGENTS_ENABLED=false first",
+    "pause affected writer/dequeue",
+    "retain claims/audit/ledger/payments/budget/outbox",
+    "reconcile unknown/accepted provider",
+    "verified compatible named web/worker",
+    "forward schema repair",
+    "reopen only approved capability after evidence"
+  ],
+  "historicalCases": {
+    "seedCommit": "2c992618c5c737b98d911c086195db312a21de6f",
+    "originalUcSha256": "ad06aae9c447b25be80bed3fa3ae89a95d4622594e8f934af4c43de59e590ac3",
+    "fields": [
+      "case_id",
+      "source_case_json",
+      "baseline_result"
+    ]
+  },
+  "inputEvidence": {
+    "originalZipSha256": "e3ee89685af39ea46bc20550e4cb6c43ff90cdb4fd1a71e3649fb9a36680ae62",
+    "manifestVerified": "8 outer / 91 inner; T00 receipt retained",
+    "receipt": "evidence/t00/input-and-version.json"
+  },
+  "appSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "workerSha": null,
+  "workerBinding": {
+    "status": "BLOCKED_FRESH_SCOPED_CLOUD_BINDING",
+    "twoActualWindowsVerified": false,
+    "sourceReceipt": "evidence/t02/verification.json",
+    "browserCookieIsNotServiceCredential": true
+  },
+  "providerModes": {
+    "stripe": "TEST acceptance only; remote webhook/recurring gate",
+    "email": "explicit synthetic test sink; real delivery gate",
+    "woztell": "no live sends / accepted delivery gate",
+    "administrativeAI": "offline/simulated only; live auto-review rejected",
+    "opencode": "off"
+  },
+  "modelVersions": {
+    "defaultSourceRoute": "openai:gpt-4.1-mini",
+    "pricingVersion": "verified-2026-10-03",
+    "purposeRouteApproval": "source defaults do not replace owner/admin data approvals; runtime disabled",
+    "approvedProductionModel": null
+  },
+  "promptVersions": {
+    "application": "application-triage-v1",
+    "support": "support-reply-v1",
+    "renewal": "retention-grounded-v2",
+    "board": "board-grounded-v2",
+    "content": "content-copy-v1"
+  },
+  "policyVersions": {
+    "D01-D06": "no newly approved version; original decision-register.md preserved",
+    "existingBehaviour": "pricing/past_due/refund/consent/history unchanged",
+    "syntheticPolicyIsNotAssociationApproval": true
+  },
+  "currentMainSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
+  "migrationLedger": {
+    "isolatedCount": 61,
+    "isolatedApplied": [
+      "0057",
+      "0058",
+      "0059",
+      "0060",
+      "0061"
+    ],
+    "production": "not freshly verified; no migrations performed this scope",
+    "recoveryReceipt": "evidence/t16/migration-recovery.json"
+  },
+  "runtimeEquivalence": {
+    "deployedSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "meaning": "Final documentation checkpoint must retain Git-identical application runtime; exact-head CI tracked separately",
+    "productionDeployed": false
+  },
+  "capabilities": [
+    {
+      "id": "concierge",
+      "code": "safe503/manual recovery/native PASS",
+      "configured": "Production independent cookie secret missing",
+      "isolatedVerified": "failure modes; no configured provider success",
+      "deployed": "isolated Preview only",
+      "operational": "BLOCKED"
+    },
+    {
+      "id": "admin-workspace",
+      "code": "bounded SQL/mobile/keyboard/private actor/native PASS",
+      "configured": "Production RATE_LIMIT_KEY_SECRET present; value/function/readiness/migrations require release verification",
+      "isolatedVerified": true,
+      "deployed": "isolated Preview946bad06 only",
+      "operational": "human/screen-reader/regional gates"
+    },
+    {
+      "id": "worker",
+      "code": "reason classifications and actual repository PASS",
+      "configured": "fresh scoped cloud identity/binding missing",
+      "isolatedVerified": "SQL not scheduled windows",
+      "deployed": "not released this scope",
+      "operational": "two actual windows BLOCKED"
+    },
+    {
+      "id": "membership-payment",
+      "code": "actual SQL/native/StripeTEST held signed events PASS",
+      "configured": "existing policies retained; D01-D03 unapproved new version",
+      "isolatedVerified": "password only; real Google/magic/remote webhook/recurring pending",
+      "deployed": "not released this scope",
+      "operational": "identity/finance/worker gates"
+    },
+    {
+      "id": "batch-eight-operations",
+      "code": "50/500/5000 all24 real SQL scale cases PASS",
+      "configured": "per-operation approval/flag/scoped worker gates",
+      "isolatedVerified": "SQL snapshot/CAS/lease/unknown; no real send",
+      "deployed": "not released this scope",
+      "operational": "per-operation provider/worker gates"
+    },
+    {
+      "id": "communications",
+      "code": "SQL/native/consent/current facts/test sink PASS",
+      "configured": "allowed recipients/templates/provider receipt missing",
+      "isolatedVerified": "test sink is not actual delivery",
+      "deployed": "not released this scope",
+      "operational": "provider/cloud windows BLOCKED"
+    },
+    {
+      "id": "cms",
+      "code": "private draft/CAS/history/back-forward/native PASS",
+      "configured": "content field-level signoff gate",
+      "isolatedVerified": true,
+      "deployed": "isolated Preview946bad06 only",
+      "operational": "human/content owner gate"
+    },
+    {
+      "id": "administrative-ai",
+      "code": "offline70x3/final body/atomic budget/knowledge/drafts PASS",
+      "configured": "owner provider/data/tasks/caps approval absent; live auto-review denied",
+      "isolatedVerified": "no real provider/human blind reviews",
+      "deployed": "isolated Preview; generation and effectful flags remain off",
+      "operational": "BLOCKED"
+    },
+    {
+      "id": "opencode-go",
+      "code": "fail-closed optional adapter",
+      "configured": "OFF / NOT_ADOPTED",
+      "isolatedVerified": "mock protocol contracts only",
+      "deployed": "not activated",
+      "operational": "NOT_ADOPTED"
+    }
+  ],
+  "localAcceptance": {
+    "buildId": "bmjmd2lTxxPgXy-kO2uK1",
+    "buildExit": 0,
+    "typecheckExit": 0,
+    "stringsExit": 0,
+    "lintExit": 0,
+    "lintWarnings": 97,
+    "recordedPopulationPg16": 5,
+    "baselineNeonRegression": 9,
+    "nativeTiming": 5,
+    "migrationRecovery": 3,
+    "historicalWeb": 3,
+    "fullSourceCi": {
+      "sha": "946bad06a41f09939c779709d7e31951617ffce6",
+      "runId": 37234145326,
+      "passed": 6771,
+      "guardedSkipped": 596,
+      "failed": 0,
+      "workerPassed": 57
+    }
+  }
+}
