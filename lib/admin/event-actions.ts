@@ -10,11 +10,11 @@ import {checkInAttendee} from "@/lib/admin/events";
 import {checkInGuest} from "@/lib/admin/guest-check-in";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {requireAdminActor} from "@/lib/auth/actor";
-import {sendSeatPass, ticketProcessorDependencies} from "@/lib/billing/ticket-webhook-processor";
+import {resendStaffPass} from "@/lib/admin/ticket-resend";
 import {cancelEvent, cancellationPreview, createEvent, updateEvent} from "@/lib/db/repos/events";
 
 export type EventFormActionMessages = Readonly<{successMessage: string; validationMessage: string; errorMessage: string; conflictMessage: string}>;
-export type CheckInActionMessages = Readonly<{successMessage: string; errorMessage: string}>;
+export type CheckInActionMessages = Readonly<{successMessage: string; errorMessage: string; queuedMessage?: string; uncertainMessage?: string}>;
 
 export async function createEventAction(path: string, messages: EventFormActionMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
   try {
@@ -105,32 +105,19 @@ export async function checkInEventGuestAction(eventId: string, path: string, mes
   }
 }
 
-/**
- * Sends one seat's pass again. The webhook keys each pass on the settlement
- * instant, so a redelivery is a no-op — which also means re-using that key here
- * would let the transport swallow a deliberate resend and report it as sent. The
- * fresh attempt key is what makes the resend actually send.
- *
- * The attempt key is a random uuid rather than a clock reading: two presses in
- * one millisecond are two deliberate sends, and a wall-clock key would collapse
- * them at the provider into one — the same silent swallow the fresh key exists
- * to prevent.
- */
-export async function resendPassAction(seatId: string, path: string, messages: CheckInActionMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
+/** Staff authority and stable intent are checked before the existing outbox is drained. */
+export async function resendPassAction(seatId: string, path: string, messages: CheckInActionMessages, _state: EventActionState, formData: FormData): Promise<EventActionState> {
   try {
-    return await runCheckInAction(state, formData, {...messages, mutate: async (data) => {
-      await requireAdminActor();
-      const fromForm = data.get("seatId");
-      const parsed = z.object({seatId: z.string().uuid()}).strict().parse({seatId: typeof fromForm === "string" && fromForm.length > 0 ? fromForm : seatId});
-      const outcome = await sendSeatPass(ticketProcessorDependencies(), {seatId: parsed.seatId, attemptKey: `resend:${crypto.randomUUID()}`});
-      // A staff-initiated send is honest: a refunded seat and a refused
-      // transport both resolve to the failure message rather than to "sent".
-      if (outcome !== "sent") throw new Error(outcome === "not_admissible" ? "PASS_NOT_ADMISSIBLE" : "PASS_UNDELIVERABLE");
-      // Only a send that actually left revalidates the row it belongs to.
-      revalidatePath(path);
-    }});
+    const actor = await requireAdminActor();
+    const input = z.object({seatId: z.string().uuid(), attemptId: z.string().uuid()}).strict().parse({seatId, attemptId: formData.get("attemptId")});
+    const outcome = await resendStaffPass(actor, input.seatId, input.attemptId);
+    revalidatePath(path);
+    if (outcome?.status === "sent") return {status: "success", message: messages.successMessage, values: {attemptId: input.attemptId}};
+    if (outcome?.status === "uncertain") return {status: "error", message: messages.uncertainMessage ?? messages.errorMessage};
+    if (outcome?.status === "queued" || outcome?.status === "pending") return {status: "success", message: messages.queuedMessage ?? messages.errorMessage};
+    return {status: "error", message: messages.errorMessage};
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
-    throw error;
+    return {status: "error", message: messages.errorMessage};
   }
 }

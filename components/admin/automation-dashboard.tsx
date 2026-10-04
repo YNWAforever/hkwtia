@@ -39,6 +39,7 @@ export type AutomationDashboardLabels = Readonly<{
   retryScheduled: string;
   retryValidation: string;
   retryUnavailable: string;
+  retryReconciliation: string;
   retryError: string;
   notAvailable: string;
   next: string;

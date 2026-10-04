@@ -327,13 +327,13 @@ describe("Task 7 review: provider-failure crash recovery", () => {
     expect(test.createOnce).not.toHaveBeenCalled();
   });
 
-  it("replays a retryable journey failure at second-attempt 25 minute backoff without provider I/O", async () => {
+  it("replays a definite 429 journey failure at second-attempt 25 minute backoff without provider I/O", async () => {
     const claim = journeyClaim({
       attemptCount: 2,
       claimedAt: later,
       claimSource: "stale",
     });
-    const test = failedJourneyHarness(claim, "retryable_server");
+    const test = failedJourneyHarness(claim, "retryable_rate_limit");
 
     const summary = await runJourneyBatch(test.dependencies, {now: later, limit: 1});
 
@@ -345,7 +345,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       claim.id,
       later,
       new Date(later.getTime() + 25 * 60_000),
-      "retryable_server",
+      "retryable_rate_limit",
     );
   });
 
@@ -419,7 +419,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
     expect(terminalTasks.size).toBe(1);
   });
 
-  it("replays retryable campaign failure with 25 minute backoff and no second provider call", async () => {
+  it("replays definite 429 campaign failure with 25 minute backoff and no second provider call", async () => {
     const claim = campaignClaim({
       attemptCount: 2,
       claimedAt: later,
@@ -432,7 +432,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
         status: "failed" as const,
         idempotencyKey: `campaign:${claim.campaignId}:${claim.id}:email`,
         providerId: null,
-        errorCode: "retryable_server" as const,
+        errorCode: "retryable_rate_limit" as const,
         attemptCount: 1,
       },
       disposition: "existing" as const,
@@ -447,7 +447,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       claim.id,
       later,
       new Date(later.getTime() + 25 * 60_000),
-      "retryable_server",
+      "retryable_rate_limit",
     );
   });
 });

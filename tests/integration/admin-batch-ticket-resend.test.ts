@@ -48,6 +48,8 @@ describe.skipIf(!enabled)("ticket resend batch on disposable PostgreSQL", () => 
     const final = await batches.preview(staff, batchId);
     expect(final.counters.succeeded).toBe(1);
 
+    // Synthetic sink acceptance before a separate legitimate resend intent.
+    await fixture.pool.query("UPDATE ticket_email_outbox SET status='sent'");
     const second = batchRequestSchema.parse({operation: "ticket_resend", idempotencyKey: randomUUID(), targetSeatIds: [seatId], payload: {}});
     const secondId = (await batches.create(staff, second, batchPreviewDigest(second))).batchId;
     await worker.prepareNext(batchOperationHandlers, now);

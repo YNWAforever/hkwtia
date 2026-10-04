@@ -8,6 +8,11 @@
       "bytes": 1771
     },
     {
+      "path": "ci-final.json",
+      "sha256": "b77ce59dba093ad352df48c752049ed398aa66f7584876594b7d784ad3c2df61",
+      "bytes": 844
+    },
+    {
       "path": "ci-source.json",
       "sha256": "463813918328fd59dbba477c5f0a9533e7793ff36df3123bb0787a22993c2092",
       "bytes": 1344
@@ -36,6 +41,11 @@
       "path": "log-receipts.json",
       "sha256": "5ee177484cae40f0ff020e1a55d012d2eaba34ecaf5772726d3ebb3e1fcf5887",
       "bytes": 11043
+    },
+    {
+      "path": "merge.json",
+      "sha256": "d71be8ab156a74a4222eb10b8db6f4d9776c259228d693973113569c84f94d37",
+      "bytes": 118
     },
     {
       "path": "native-79606924-worker-0-f6a273cd.json",
@@ -122,5 +132,7 @@
       "sha256": "d9a43c33cd83bc3abb89c3238a958c4e0e002f47efd4bd8503ccde044342a584",
       "bytes": 69000
     }
-  ]
+  ],
+  "finalDocsHeadSha": "0d0651a59f07f36d6f72cc81413e0476d90cd7ef",
+  "mergedMainSha": "708e6276"
 }

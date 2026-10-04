@@ -76,3 +76,8 @@ Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real
 ## T14B membership candidate — 2026-10-04
 
 Source1e9709ce, Previewdpl_9m5BHcTshdDpN1jwcuzwLaWDwbDw / hkwtia-membership-lifecycle-20261003.vercel.app.43branch-only authorized test env values; positively proven isolated DB/Auth all59ledger;17entry +4native cases. StripeactualTESThostedCheckout/real event controlled signed replay passed; oneattempt/entitlement; ownedsubscription canceled and reconciled. No real sends/refunds/Production. Existing caps/flags stay separately gated. Approllback by focused commitrevert; no migration/data/history cleanup. SourceCI37167576351 all7 green/6637pass455skip/worker57; docs-only finalHEADCI pending. Google/magic/no-profile/recurring provider/automatic remote callback/G5 worker+human gates remain.
+
+
+## T14D verified candidate — 2026-10-04
+
+PR135 source9603519; Previewdpl_F7owZgh31gWmE2Ecr4kBQ2jtzacD / hkwtia-delivery-recovery-20261003.vercel.app. Existing approved isolated43branch env values only. Positive DB marker/all59ledger/actual staff Auth; Preview17/native6/SQL48. Full6657PASS519SKIP0FAIL; sourceCI37181949858 all7/worker57. No new migration. Neither test-sink acceptance nor synthetic callbacks proves Resend/Woztell delivery. Required external receipts and worker service binding/two cloud windows remain blocked; Production stays36ebae1/release. Final docs+harness CI is a separate gate.

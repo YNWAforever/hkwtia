@@ -69,7 +69,9 @@ export default async function AdminInboxThreadPage({ params }: Props) {
   const approved = await approvedTemplateKeys();
   const templates = Object.keys(WHATSAPP_TEMPLATES)
     .filter((key): key is keyof typeof WHATSAPP_TEMPLATES =>
-      approved.has(key as keyof typeof WHATSAPP_TEMPLATES),
+      approved.has(key as keyof typeof WHATSAPP_TEMPLATES) &&
+      WHATSAPP_TEMPLATES[key as keyof typeof WHATSAPP_TEMPLATES].languageCode ===
+        (conversation.locale === "zh-HK" ? "zh_HK" : "en_US"),
     )
     // The provider's own element name, not a translated label: it is the string
     // staff will read back in the WOZTELL console when a template is rejected.
@@ -249,6 +251,7 @@ export default async function AdminInboxThreadPage({ params }: Props) {
             read: t("delivery.read"),
             failed: t("delivery.failed"),
             uncertain: t("delivery.uncertain"),
+            preflightBlocked: t("delivery.preflightBlocked"),
           },
         }}
         locale={locale}

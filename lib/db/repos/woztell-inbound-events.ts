@@ -385,23 +385,28 @@ export function createWoztellInboundEventsRepository(
         // happened, and every later tick for A lands on B's thread. That is
         // delivery state leaking between two contacts.
         //
-        // Content equality is the join because the echo cannot carry our
-        // `outbound_key`; without adoption, an echo that beats our own send's
-        // HTTP response leaves two rows for one message.
+        // A failed timeout may already have been accepted. Its actual echo can
+        // reconcile the same row, but content equality cannot choose among two
+        // unresolved attempts. Lock every candidate (no SKIP LOCKED) and adopt
+        // only a unique match; ambiguity remains visible for manual review.
         const adopted = rowsFrom(await transaction.execute(sql`
-          UPDATE ${messages}
-          SET provider_message_id = ${parsed.providerMessageId}, delivery_status = 'sent'
-          WHERE ${messages.id} = (
+          WITH candidates AS (
             SELECT candidate.id FROM ${messages} AS candidate
             WHERE candidate.conversation_id = ${conversationId}
               AND candidate.direction = 'outbound'
-              AND candidate.delivery_status = 'queued'
               AND candidate.provider_message_id IS NULL
               AND candidate.content = ${parsed.text}
-            ORDER BY candidate.created_at DESC
-            LIMIT 1
-            FOR UPDATE SKIP LOCKED
+              AND (candidate.delivery_status = 'queued' OR
+                (candidate.delivery_status = 'failed' AND candidate.error_code IN
+                  ('retryable_network', 'provider_acceptance_uncertain', 'provider_unclassified_failure')))
+            ORDER BY candidate.id
+            FOR UPDATE
           )
+          UPDATE ${messages}
+          SET provider_message_id = ${parsed.providerMessageId}, delivery_status = 'sent',
+              error_code = NULL, send_claim_expires_at = NULL,
+              metadata = metadata || jsonb_build_object('providerEchoReconciled', true)
+          WHERE ${messages.id} = (SELECT id FROM candidates WHERE (SELECT count(*) FROM candidates) = 1)
           RETURNING ${messages.id} AS id
         `))[0];
         if (adopted) {

@@ -639,3 +639,17 @@ npm --prefix workers test
 - [x] Focused171/0skip including actualPG23/all59; native4 EN/HK/390/keyboard/event modes/HK dates/RSVP/private; actualStripeTEST9/signed12 including pending/success/failed full refunds and replay.
 - [x] Full6652pass471skip0fail; lint0errors93localwarnings (tracked75), type/build/strings317 exit0; source CI all7green/worker57. Actual isolated Preview17 checks, sourcefe92e533.
 - [ ] Automatic remote webhook, actual sender receipt, controlled Google/magic identities, pinned worker/two windows and real3–5staff G5 remain gates; no full-fix/Production claim. Continue T14D.
+
+## T14D execution record — 2026-10-04
+
+- [x] Real PostgreSQL RED for fresh consent/facts, new-key bypass, unique echo, legacy provider retry, expired claim, batch preview/execute and refunded-during-render; byte-exact mutation/restore in progress.
+- [x] Focused294 before final2 cases; latest119 includes48 actual all59-migration SQL cases. Preserve actor, approval, outbox, provider ID, legacy grants/payment policies; unknown needs reconciliation, definite429 retains original key.
+- [x] Existing manual pass resend mapped to existing ticket outbox with stable intent and shared paid-order lock; keep distinct existing manual/bulk eligibility. Paused delivery retains queued history.
+- [ ] Final native bilingual6, full suite, exact-source CI and isolated Preview still being completed; real provider receipt and two actual worker windows remain gates.
+
+
+### T14D final engineering receipt — 2026-10-04
+
+- [x] Actual all59-migration PG48; legacy+SQL119; behavioural mutation34RED→41GREEN with7 deliberately excluded cases, original bytes restored.
+- [x] Actual isolated Neon Password Auth native6 EN/HK390: unknown/no new key, STOP, owner/due/close/reopen, legitimate pass resends and refund revocation. Preview17; full6657pass519skip0fail; lint/typecheck/strings/build; sourceCIall7/worker57.
+- [ ] Real approved-recipient sender receipts and pinned worker/two scheduled windows remain owner gates; full fix and Production release not claimed.

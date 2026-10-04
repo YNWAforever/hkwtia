@@ -36,7 +36,7 @@ const cronActor = {
   source: "automation-cron",
 } as const;
 
-const retryableNetworkAuthorization = "admin_retry_retryable_network";
+const retryableRateLimitAuthorization = "admin_retry_retryable_rate_limit";
 const clientErrorAuthorization = "admin_retry_provider_client_error";
 const authorizationCodes = [
   "admin_retry_retryable_network",
@@ -378,6 +378,9 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
     const execute: AutomationSqlExecutor["execute"] = async (query) => {
       const command = normalizedSql(query);
       commands.push(command);
+      if (/SELECT id, delivery_key/i.test(command.sql)) return {rows: [{id: journeyId, delivery_key: deliveryKey}]};
+      if (/SELECT 1 FROM/i.test(command.sql)) return {rows: []};
+
       if (/UPDATE "journey_state"/i.test(command.sql)) {
         return {
           rows: [row({
@@ -402,16 +405,18 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       .retryFailed(admin, journeyId, now);
 
     expect(result).toMatchObject({status: "scheduled", errorCode: null});
-    expect(commands).toHaveLength(4);
+    expect(commands).toHaveLength(6);
+    expect(commands[0]?.sql).toMatch(/FOR UPDATE/);
+    expect(commands[1]?.sql).toMatch(/SELECT 1 FROM/);
     expect(commands[0]?.params).not.toContain("admin_retry_authorized");
-    for (const command of commands.slice(1, 3)) {
+    for (const command of commands.slice(3, 5)) {
       expect(command.sql).toMatch(
         /UPDATE "(email_log|whatsapp_log)".*SET error_code = CASE.*status = 'failed'.*error_code IN/i,
       );
       expect(command.sql).not.toMatch(/status = 'processing'|attempt_count =/i);
       expect(command.params).toEqual(expect.arrayContaining([...authorizationCodes]));
     }
-    expect(commands[3]?.sql).toMatch(
+    expect(commands[5]?.sql).toMatch(
       /INSERT INTO "audit_events".*journey\.failed_retry_requested/i,
     );
   });
@@ -428,7 +433,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
           completed_at: null,
           prior_status: "scheduled",
           email_error_code: clientErrorAuthorization,
-          whatsapp_error_code: retryableNetworkAuthorization,
+          whatsapp_error_code: retryableRateLimitAuthorization,
         })],
       };
     };
@@ -443,7 +448,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
     expect(claimed).toMatchObject({
       claimSource: "scheduled",
       emailErrorCode: clientErrorAuthorization,
-      whatsappErrorCode: retryableNetworkAuthorization,
+      whatsappErrorCode: retryableRateLimitAuthorization,
     });
     expect(commands[0]?.sql).toMatch(
       /LEFT JOIN "email_log".*LEFT JOIN "whatsapp_log".*email_error_code.*whatsapp_error_code/i,
@@ -460,13 +465,13 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       if (channel === "email") {
         deliveries.set(
           deliveryKey,
-          delivery("email", retryableNetworkAuthorization),
+          delivery("email", retryableRateLimitAuthorization),
         );
       } else {
         deliveries.set(deliveryKey, delivery("email", null, "sent"));
         deliveries.set(
           `${deliveryKey}:whatsapp`,
-          delivery("whatsapp", retryableNetworkAuthorization),
+          delivery("whatsapp", retryableRateLimitAuthorization),
         );
       }
       const scheduled = claim({
@@ -478,10 +483,10 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
         claimSource: "scheduled",
         attemptCount: 2,
         emailErrorCode: channel === "email"
-          ? retryableNetworkAuthorization
+          ? retryableRateLimitAuthorization
           : null,
         whatsappErrorCode: channel === "whatsapp"
-          ? retryableNetworkAuthorization
+          ? retryableRateLimitAuthorization
           : null,
       } as unknown as Partial<JourneyClaim>);
       const stale = claim({
@@ -502,7 +507,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
           whatsappProvider: channel === "whatsapp"
             ? "retryable_network"
             : "sent",
-          crashReschedules: 1,
+          crashMarkFailed: 1,
         },
       );
 
@@ -525,7 +530,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       expect(deliveries.get(key)).toMatchObject({
         status: "failed",
         attemptCount: 2,
-        errorCode: "retryable_network",
+        errorCode: "provider_acceptance_uncertain",
       });
 
       const replay = await runJourneyBatch(
@@ -540,7 +545,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
         expect.anything(),
         journeyId,
         later,
-        "attempts_exhausted",
+        "provider_acceptance_uncertain",
         later,
         expect.anything(),
       );
@@ -615,13 +620,13 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       if (channel === "email") {
         deliveries.set(
           deliveryKey,
-          delivery("email", retryableNetworkAuthorization),
+          delivery("email", retryableRateLimitAuthorization),
         );
       } else {
         deliveries.set(deliveryKey, delivery("email", null, "sent"));
         deliveries.set(
           `${deliveryKey}:whatsapp`,
-          delivery("whatsapp", retryableNetworkAuthorization),
+          delivery("whatsapp", retryableRateLimitAuthorization),
         );
       }
       const journeyFields = {
@@ -633,10 +638,10 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       } as const;
       const channelAuthorization = {
         emailErrorCode: channel === "email"
-          ? retryableNetworkAuthorization
+          ? retryableRateLimitAuthorization
           : null,
         whatsappErrorCode: channel === "whatsapp"
-          ? retryableNetworkAuthorization
+          ? retryableRateLimitAuthorization
           : null,
       };
       const preContext = runnerHarness(
@@ -660,7 +665,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       expect(preContext.whatsappProvider).not.toHaveBeenCalled();
       expect(deliveries.get(key)).toMatchObject({
         status: "failed",
-        errorCode: retryableNetworkAuthorization,
+        errorCode: retryableRateLimitAuthorization,
         attemptCount: 1,
       });
 
@@ -714,7 +719,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       expect(retry).toHaveBeenCalledTimes(1);
       expect(deliveries.get(key)).toMatchObject({
         status: "failed",
-        errorCode: "retryable_network",
+        errorCode: "provider_acceptance_uncertain",
         attemptCount: 2,
       });
 
@@ -730,7 +735,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
         expect.anything(),
         journeyId,
         staleAt,
-        "attempts_exhausted",
+        "provider_acceptance_uncertain",
         staleAt,
         expect.anything(),
       );
@@ -739,13 +744,13 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
 
   it("allows an ordinary retryable email to reopen on a scheduled due claim", async () => {
     const deliveries = new Map([
-      [deliveryKey, delivery("email", "retryable_network")],
+      [deliveryKey, delivery("email", "retryable_rate_limit")],
     ]);
     const test = runnerHarness(
       [claim({
         claimSource: "scheduled",
         attemptCount: 4,
-        emailErrorCode: "retryable_network",
+        emailErrorCode: "retryable_rate_limit",
       } as unknown as Partial<JourneyClaim>)],
       deliveries,
     );
@@ -759,7 +764,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
     expect(test.retryEmailFailure).toHaveBeenCalledWith(
       expect.anything(),
       "email-log-1",
-      "retryable_network",
+      "retryable_rate_limit",
     );
     expect(test.emailProvider).toHaveBeenCalledTimes(1);
     expect(deliveries.get(deliveryKey)).toMatchObject({
@@ -776,7 +781,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       ],
       [
         `${deliveryKey}:whatsapp`,
-        delivery("whatsapp", retryableNetworkAuthorization),
+        delivery("whatsapp", retryableRateLimitAuthorization),
       ],
     ]);
     const test = runnerHarness(
@@ -785,7 +790,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
         instanceKey: "renewal-cycle-2",
         step: "renewal_14",
         emailErrorCode: clientErrorAuthorization,
-        whatsappErrorCode: retryableNetworkAuthorization,
+        whatsappErrorCode: retryableRateLimitAuthorization,
       } as unknown as Partial<JourneyClaim>)],
       deliveries,
     );
@@ -804,7 +809,7 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
     expect(test.retryWhatsappFailure).toHaveBeenCalledWith(
       expect.anything(),
       "whatsapp-log-1",
-      retryableNetworkAuthorization,
+      retryableRateLimitAuthorization,
     );
     expect(test.emailProvider).toHaveBeenCalledTimes(1);
     expect(test.whatsappProvider).toHaveBeenCalledTimes(1);

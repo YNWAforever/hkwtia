@@ -34,7 +34,7 @@ function row(overrides: Record<string, unknown> = {}) {
     locale: "en",
     classification: "transactional",
     attempt_count: 1,
-    error_code: "retryable_network",
+    error_code: "retryable_rate_limit",
     created_at: now,
     ...overrides,
   };
@@ -56,15 +56,15 @@ describe("delivery retry and completion idempotency", () => {
       classification: "transactional",
     })).resolves.toMatchObject({
       disposition: "existing",
-      record: {status: "failed", attemptCount: 1, errorCode: "retryable_network"},
+      record: {status: "failed", attemptCount: 1, errorCode: "retryable_rate_limit"},
     });
 
     await expect(repo.retryEmailFailure(
       system,
       String(reopened.id),
-      "retryable_network",
+      "retryable_rate_limit",
     )).resolves.toMatchObject({
-      failureCode: "retryable_network",
+      failureCode: "retryable_rate_limit",
       record: {status: "processing", attemptCount: 2, errorCode: null},
     });
 

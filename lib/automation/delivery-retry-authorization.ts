@@ -40,3 +40,14 @@ export function authorizedProviderFailureCode(
     ? failureByAuthorization.get(value as AdminRetryAuthorizationCode) ?? null
     : null;
 }
+
+/** A timeout, 5xx, or malformed acceptance may have caused an external effect. */
+export function providerEffectIsUncertain(code: string | null | undefined): boolean {
+  return code === "provider_acceptance_uncertain" || code === "delivery_unknown" || code === "retryable_network"
+    || code === "retryable_server" || code === "provider_unclassified_failure";
+}
+
+export type DeliveryEffectFailureCode = DeliveryFailureCode | "provider_acceptance_uncertain";
+export function providerEffectFailureCode(code: DeliveryEffectFailureCode): DeliveryEffectFailureCode {
+  return providerEffectIsUncertain(code) ? "provider_acceptance_uncertain" : code;
+}

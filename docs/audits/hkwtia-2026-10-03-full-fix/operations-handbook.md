@@ -117,3 +117,8 @@ T18 source/native 工程測試與 3–5 位真人職員 G5 試點分開。下面
 付款取消回跳可繼續原Checkout；回跳不當paid。若Stripe已確認過期，僅已授權的原 recovery cookie 可清除；本地TTL或讀取失敗保留並對帳。不要另建attempt避過未知外部效果。退款使用既有全額政策：pending不當成功，不盲重試；succeeded後票券失效，failed顯示待處理並查provider receipt。confirmation／pass／refund outbox各保留一次effect與audit。
 
 工程實證：focused171（actualPG23）、native4、realStripeTEST9、signed callback12、Preview17及full6652pass/471skip。sink通知不代表真收件人送達；Google／magic-link、automatic remote webhook、cloud worker windows及3–5職員G5仍未完成。詳見 `evidence/t14c/verification.json`。
+
+
+## T14D sender recovery
+
+Follow [繁中 sender recovery SOP](delivery-recovery-sop.zh-HK.md). Unknown network/server/accepted-timeout effects are held for provider reconciliation; retry only proven refusals with the same intent. Staff pass resends use the existing durable ticket outbox. A queued response is not Sent; preserve the intent until settled. Recheck current recipient, both consent stores, window, locale, approval and order authority before dispatch.

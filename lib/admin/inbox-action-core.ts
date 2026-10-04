@@ -492,13 +492,11 @@ function deliveryFailureCode(errorCode: string): InboxReplyErrorCode {
  *
  *   requireAdmin → parse → read the thread → channel/handling → eligibility →
  *   window (session) → template approval → queueStaffMessage → short-circuit →
- *   adapter → settleStaffMessage
+ *   final thread/consent/template recheck → adapter → settleStaffMessage
  *
- * Everything that can refuse the send runs BEFORE `queueStaffMessage`, because
- * that call writes the `conversation.reply.queued` audit row — the durable
- * commitment to send — in the same transaction as the row. Filing that
- * commitment for a reply we then refuse would make the audit trail a record of
- * intentions rather than of sends.
+ * Obvious refusals precede the queue write. The final recheck accounts for
+ * changes during that transaction; a known non-send retains its queued audit
+ * and settles the durable row as pre_send_blocked, never as delivery uncertain.
  *
  * S-12: replies go into threads that already exist. Opening a new thread to a
  * contact who has never written in needs an owner hash, a template and a
@@ -563,6 +561,8 @@ export async function sendInboxReply(
     ) {
       throw new InboxReplyError("INVALID");
     }
+    if (WHATSAPP_TEMPLATES[templateKey as WhatsAppTemplateKey].languageCode !==
+      (conversation.locale === "zh-HK" ? "zh_HK" : "en_US")) throw new InboxReplyError("INVALID");
     // 2. Approval, from the same module the picker reads. Enforcing this in a
     //    `<select>` alone would let a hand-posted formData carrying any config
     //    key reach `sendTemplateMessage` — an unapproved elementName is a
@@ -626,7 +626,32 @@ export async function sendInboxReply(
   if (queued.disposition === "already_queued")
     throw new InboxReplyError("SEND_IN_PROGRESS");
 
-  const recipient = adapterRecipient(eligibility);
+  // A committed queue claim is not a consent snapshot. STOP, takeover and
+  // recipient changes may commit while the claim waits; re-read before effects.
+  let currentEligibility;
+  try {
+    const current = await throughRepository(() => deps.inbox.getTranscript(actor, reply.conversationId));
+    if (!current || current.conversation.profileId !== conversation.profileId ||
+      current.conversation.contactId !== conversation.contactId ||
+      current.conversation.locale !== conversation.locale) throw new InboxReplyError("INVALID");
+    if (current.conversation.channel !== "whatsapp") throw new InboxReplyError("INVALID_INBOX_CHANNEL");
+    if (current.conversation.handling !== "human") throw new InboxReplyError("INVALID_INBOX_HANDLING");
+    currentEligibility = await throughRepository(() => deps.eligibility.whatsAppEligibility(actor, {
+      profileId: current.conversation.profileId, contactId: current.conversation.contactId,
+      phoneE164: null, purpose: reply.kind === "session" ? "service" : "marketing",
+    }));
+    if (currentEligibility.status === "blocked") throw new InboxReplyError(ELIGIBILITY_CODES[currentEligibility.reason]);
+    if (currentEligibility.phoneE164 !== eligibility.phoneE164) throw new InboxReplyError("INVALID");
+    if (reply.kind === "session" && replyWindow(current.conversation.lastInboundAt, deps.now()).state !== "open")
+      throw new InboxReplyError("WINDOW_CLOSED");
+    if (reply.kind === "template" && !(await deps.approvedTemplateKeys()).has(templateKey as WhatsAppTemplateKey))
+      throw new InboxReplyError("TEMPLATE_NOT_APPROVED");
+  } catch (error) {
+    // No adapter request began: unlike a timeout, this is a known non-send.
+    await settle(actor, deps, outboundKey, {status: "failed", errorCode: "pre_send_blocked"});
+    throw error;
+  }
+  const recipient = adapterRecipient(currentEligibility);
   let outcome;
   try {
     outcome =

@@ -970,5 +970,131 @@
     "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
     "evidenceBasis": "current checkout and actual PG/native/provider receipts",
     "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "sendInboxReply",
+    "path": "lib/admin/inbox-action-core.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createInboxRepository",
+    "path": "lib/db/repos/inbox.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createWoztellInboundEventsRepository",
+    "path": "lib/db/repos/woztell-inbound-events.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "dispatchNotification",
+    "path": "lib/notifications/dispatch.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "runJourneyBatch",
+    "path": "lib/automation/journey-runner.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "runCampaignBatch",
+    "path": "lib/automation/campaign-runner.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createDeliveriesRepository",
+    "path": "lib/db/repos/deliveries.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createJourneysRepository",
+    "path": "lib/db/repos/journeys.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createTicketEmailOutboxRepository",
+    "path": "lib/db/repos/ticket-email-outbox.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createShowcaseLeadEmailOutboxRepository",
+    "path": "lib/db/repos/showcase-lead-email-outbox.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "ticketResendBatchHandler",
+    "path": "lib/db/repos/batch-handlers/ticket-resend.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "resendStaffPass",
+    "path": "lib/admin/ticket-resend.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "resendPassAction",
+    "path": "lib/admin/event-actions.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "deliverTicketEmailsForOrder",
+    "path": "lib/billing/ticket-email-runner.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
   }
 ]

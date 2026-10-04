@@ -462,9 +462,8 @@ const STAFF_ROLE = "staff" as const;
  * is a compile error here and someone has to decide which side it falls on. An
  * unrecognised or NULL `error_code` matches nothing below and is therefore not
  * re-takeable: the guard fails closed, towards "do not send it again". Staff
- * are not stuck — the key is deterministic in the content, so an edited draft
- * mints a new key and a new row, which is the same escape hatch a
- * provider-reported failure has always had.
+ * must reconcile unknown effects using the original row/provider receipt. A
+ * new attempt cannot bypass an unresolved identical send.
  */
 const PROVIDER_REFUSED_SEND = {
   // 4xx. The request was rejected outright; nothing was queued at WhatsApp.
@@ -506,6 +505,11 @@ export function providerRefusedSend(errorCode: string): boolean {
   return PROVIDER_REFUSED_ERROR_CODES.includes(errorCode);
 }
 
+/** A preflight refusal began no provider effect; a timeout still needs reconciliation. */
+export function staffReplyWasNotSent(errorCode: string): boolean {
+  return errorCode === "pre_send_blocked" || providerRefusedSend(errorCode);
+}
+
 /**
  * The re-take arm of the claim `UPDATE`, built from the map above so the two
  * cannot drift. `FALSE` when the map classifies nothing as refused, because
@@ -515,7 +519,7 @@ export function providerRefusedSend(errorCode: string): boolean {
 function refusedSendPredicate(): SQL {
   if (PROVIDER_REFUSED_ERROR_CODES.length === 0) return sql`FALSE`;
   const codes = sql.join(
-    PROVIDER_REFUSED_ERROR_CODES.map((code) => sql`${code}`),
+    ["pre_send_blocked", ...PROVIDER_REFUSED_ERROR_CODES].map((code) => sql`${code}`),
     sql`, `,
   );
   return sql`(
@@ -799,7 +803,16 @@ export function createInboxRepository(
                  p.whatsapp_number AS profile_whatsapp_number,
                  p.whatsapp_opt_in AS profile_whatsapp_opt_in,
                  ct.phone_e164 AS contact_phone_e164,
-                 ct.whatsapp_opt_in AS contact_whatsapp_opt_in
+                 ct.whatsapp_opt_in AS contact_whatsapp_opt_in,
+                 (SELECT unresolved.id FROM ${messages} AS unresolved
+                  WHERE unresolved.conversation_id = c.id AND unresolved.direction = 'outbound'
+                    AND unresolved.outbound_key IS NOT NULL AND unresolved.outbound_key <> ${parsed.outboundKey}
+                    AND unresolved.content = ${parsed.content} AND unresolved.provider_message_id IS NULL
+                    AND (unresolved.delivery_status = 'queued' OR
+                      (unresolved.delivery_status = 'failed' AND
+                        (unresolved.error_code IS NULL OR unresolved.error_code NOT IN
+                          ('provider_client_error','retryable_rate_limit','pre_send_blocked','outside_customer_service_window'))))
+                  ORDER BY unresolved.id LIMIT 1) AS unresolved_message_id
           FROM ${conversations} c
           LEFT JOIN ${profiles} p ON p.id = c.profile_id
           LEFT JOIN ${contacts} ct ON ct.id = c.contact_id
@@ -834,6 +847,12 @@ export function createInboxRepository(
           ),
         } as const;
         const lastInboundAt = dateFrom(conversation.last_inbound_at);
+        // Changing a client attempt cannot turn the same unknown external
+        // effect into permission to send again. Confirmed prior sends do not
+        // block a later legitimate identical reply.
+        const unresolvedId = stringFrom(conversation.unresolved_message_id);
+        if (unresolvedId) return {messageId: unresolvedId, conversationId: parsed.conversationId,
+          outboundKey: parsed.outboundKey, disposition: "uncertain", recipient, lastInboundAt};
 
         // `direction` goes through the shared twin rather than a hand-written
         // literal: `messages.direction` defaults to 'inbound' (S-4), so a
@@ -957,7 +976,7 @@ export function createInboxRepository(
         `),
         )[0];
         if (claimed) {
-          // Only a recorded definite refusal can be re-queued. An expired
+          // Only a recorded provider refusal or known preflight non-send can be re-queued. An expired
           // queued lease carries no evidence of provider refusal and is never inherited.
           return {
             messageId: String(claimed.id),
@@ -989,7 +1008,7 @@ export function createInboxRepository(
           disposition:
             existing.delivery_status === "queued"
               ? existing.claim_live===true?"already_queued":"uncertain"
-              : existing.delivery_status==="failed"&&!stringFrom(existing.provider_message_id)&&!providerRefusedSend(stringFrom(existing.error_code)??"")?"uncertain":"already_sent",
+              : existing.delivery_status==="failed"&&!stringFrom(existing.provider_message_id)&&!staffReplyWasNotSent(stringFrom(existing.error_code)??"")?"uncertain":"already_sent",
           recipient,
           lastInboundAt,
         };

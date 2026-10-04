@@ -402,6 +402,8 @@ describe("audited failed-only retry", () => {
       const command = dialect.sqlToQuery(query);
       commands.push(command);
       const normalized = command.sql.replace(/\s+/g, " ");
+      if (/SELECT id, delivery_key FROM "journey_state"/i.test(normalized)) return {rows:status==='failed'?[journeyRow({status})]:[]};
+      if (/FROM \( SELECT status, error_code/i.test(normalized)) return {rows:[]};
       if (/UPDATE "journey_state".*status = 'scheduled'/i.test(normalized)) {
         if (status !== "failed") return {rows: []};
         status = "scheduled";

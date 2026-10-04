@@ -358,6 +358,24 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       requireAdminRetry(actor);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
+        const unknown = rowsFrom(await transaction.execute(sql`
+          SELECT id, delivery_key FROM ${journeyState} WHERE id = ${id} AND status = 'failed' FOR UPDATE
+        `));
+        if (!unknown.length || typeof unknown[0].delivery_key !== "string") throw new JourneyTransitionError();
+        const effectKey = unknown[0].delivery_key;
+        const effects = rowsFrom(await transaction.execute(sql`
+          SELECT 1 FROM (
+            SELECT status, error_code FROM ${emailLog} WHERE journey_state_id = ${id} OR idempotency_key = ${effectKey}
+            UNION ALL
+            SELECT status, error_code FROM ${whatsappLog} WHERE journey_state_id = ${id} OR idempotency_key = ${effectKey + ":whatsapp"}
+          ) AS delivery
+          WHERE status = 'processing' OR (status = 'failed' AND error_code IN (
+            'retryable_network','retryable_server','provider_unclassified_failure',
+            'provider_acceptance_uncertain','admin_retry_retryable_network',
+            'admin_retry_retryable_server','admin_retry_provider_unclassified_failure'
+          )) LIMIT 1
+        `));
+        if (effects.length) throw new Error("DELIVERY_RECONCILIATION_REQUIRED");
         const journey = transitionResult(await transaction.execute(sql`
           UPDATE ${journeyState}
           SET status = 'scheduled', scheduled_at = ${scheduledAt},

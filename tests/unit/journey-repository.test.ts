@@ -134,24 +134,25 @@ describe("journeys repository SQL and transitions", () => {
 
   it("allows failed -> scheduled only as an atomic audited admin retry", async () => {
     const fake = sequenceDatabase([
+      [journeyRow({status: "failed"})], [],
       [journeyRow({status: "scheduled", error_code: null})],
       [], [], [],
     ]);
     const result = await createJourneysRepository(async () => fake.database).retryFailed(admin, journeyRow().id, now);
 
     expect(result).toMatchObject({status: "scheduled", errorCode: null});
-    expect(fake.commands).toHaveLength(4);
-    expect(fake.commands[0]).toMatch(/status = 'scheduled'.*error_code = NULL.*status = 'failed'/i);
-    expect(fake.compiledCommands[0].params).not.toContain("admin_retry_authorized");
-    expect(fake.commands[1]).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
-    expect(fake.commands[2]).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
-    expect(fake.compiledCommands[1].params).toContain("admin_retry_provider_client_error");
-    expect(fake.compiledCommands[2].params).toContain("admin_retry_provider_client_error");
-    expect(fake.commands[3]).toMatch(
+    expect(fake.commands).toHaveLength(6);
+    expect(fake.commands[2]).toMatch(/status = 'scheduled'.*error_code = NULL.*status = 'failed'/i);
+    expect(fake.compiledCommands[2].params).not.toContain("admin_retry_authorized");
+    expect(fake.commands[3]).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
+    expect(fake.commands[4]).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
+    expect(fake.compiledCommands[3].params).toContain("admin_retry_provider_client_error");
+    expect(fake.compiledCommands[4].params).toContain("admin_retry_provider_client_error");
+    expect(fake.commands[5]).toMatch(
       /INSERT INTO "audit_events".*journey\.failed_retry_requested/i,
     );
-    expect(fake.compiledCommands[3].params).toContain(admin.profileId);
-    expect(fake.compiledCommands[3].params).not.toContain(admin.userId);
+    expect(fake.compiledCommands[5].params).toContain(admin.profileId);
+    expect(fake.compiledCommands[5].params).not.toContain(admin.userId);
   });
 
   it("does not audit or reopen sent/skipped/non-failed rows", async () => {

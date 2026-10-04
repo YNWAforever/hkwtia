@@ -1,4 +1,5 @@
 import "server-only";
+import {providerEffectIsUncertain} from "@/lib/automation/delivery-retry-authorization";
 
 import {sql} from "drizzle-orm";
 import {z} from "zod";
@@ -77,27 +78,31 @@ export function createShowcaseLeadEmailOutboxRepository(
     const cutoff = new Date(now.getTime() - SAFE_RETRY_MS);
     const claimUntil = new Date(now.getTime() + LEASE_MS);
     return database.transaction(async (transaction) => {
-      // A provider-accepted send whose lease expired after the 24-hour
-      // idempotency window cannot safely be issued again. Surface it to staff
-      // in the same statement that makes the row terminal.
+      // Freeze unknown effects for reconciliation as soon as they are observed.
+      // Provider idempotency TTL is not proof that a previous send was refused.
       await transaction.execute(sql`
         WITH expired AS (
           UPDATE showcase_lead_email_outbox AS outbox
           SET status = 'uncertain', claim_expires_at = NULL,
-              error_code = 'dedupe_window_elapsed', updated_at = ${now}
+              error_code = CASE WHEN first_attempt_at <= ${cutoff} THEN 'dedupe_window_elapsed' ELSE 'provider_acceptance_uncertain' END, updated_at = ${now}
           WHERE outbox.id IN (
             SELECT id FROM showcase_lead_email_outbox
             WHERE status IN ('queued', 'sending')
-              AND first_attempt_at IS NOT NULL
-              AND first_attempt_at <= ${cutoff}
-              AND (status = 'queued' AND next_attempt_at <= ${now}
-                OR status = 'sending' AND claim_expires_at <= ${now})
+              AND (
+                first_attempt_at IS NOT NULL AND first_attempt_at <= ${cutoff}
+                  AND (status = 'queued' AND next_attempt_at <= ${now}
+                    OR status = 'sending' AND claim_expires_at <= ${now})
+                OR status = 'queued' AND next_attempt_at <= ${now}
+                  AND error_code IN ('retryable_network','retryable_server','provider_unclassified_failure','provider_acceptance_uncertain','delivery_unknown')
+                OR status = 'sending' AND claim_expires_at <= ${now}
+                  AND first_attempt_at IS NOT NULL
+              )
               AND (${leadId}::uuid IS NULL OR lead_id = ${leadId}::uuid)
             ORDER BY next_attempt_at, id
             FOR UPDATE SKIP LOCKED
             LIMIT 100
           )
-          RETURNING outbox.id, outbox.lead_id, outbox.kind
+          RETURNING outbox.id, outbox.lead_id, outbox.kind, outbox.error_code
         )
         INSERT INTO staff_tasks
           (profile_id, journey_state_id, kind, dedupe_key, summary_code, context)
@@ -108,7 +113,7 @@ export function createShowcaseLeadEmailOutboxRepository(
             'contactEmail', leads.email,
             'locale', leads.locale,
             'noticeKind', expired.kind,
-            'reasonCode', 'dedupe_window_elapsed'
+            'reasonCode', expired.error_code
           )
         FROM expired JOIN leads ON leads.id = expired.lead_id
         ON CONFLICT (dedupe_key) DO NOTHING
@@ -119,6 +124,8 @@ export function createShowcaseLeadEmailOutboxRepository(
           WHERE (status = 'queued' AND next_attempt_at <= ${now}
             OR status = 'sending' AND claim_expires_at <= ${now})
             AND (first_attempt_at IS NULL OR first_attempt_at > ${cutoff})
+            AND NOT (status = 'sending' AND first_attempt_at IS NOT NULL)
+            AND (error_code IS NULL OR error_code NOT IN ('retryable_network','retryable_server','provider_unclassified_failure','provider_acceptance_uncertain','delivery_unknown'))
             AND (${leadId}::uuid IS NULL OR lead_id = ${leadId}::uuid)
           ORDER BY next_attempt_at, id
           FOR UPDATE SKIP LOCKED
@@ -256,6 +263,7 @@ export function createShowcaseLeadEmailOutboxRepository(
     ): Promise<boolean> {
       requireDeliveryActor(actor);
       const validatedAttempt = attemptSchema.parse(attemptCount);
+      if (providerEffectIsUncertain(errorCode)) return terminal(actor, id, validatedAttempt, now, "uncertain", "provider_acceptance_uncertain");
       if (validatedAttempt >= MAX_ATTEMPTS) {
         return terminal(actor, id, validatedAttempt, now, "blocked", "attempts_exhausted");
       }

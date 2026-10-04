@@ -563,7 +563,7 @@ describe("runJourneyBatch", () => {
     const welcome = due("welcome");
     const test = harness([welcome]);
     test.deps.emailTransport.send = vi.fn(async () => {
-      throw new DeliveryFailure("retryable_network");
+      throw new DeliveryFailure("retryable_rate_limit");
     });
 
     const summary = await runJourneyBatch(test.deps, {now, limit: 1});
@@ -573,11 +573,11 @@ describe("runJourneyBatch", () => {
       id: welcome.id,
       claimedAt: now,
       scheduledAt: new Date(now.getTime() + 5 * 60_000),
-      code: "retryable_network",
+      code: "retryable_rate_limit",
     }]);
   });
 
-  it("reuses the delivery key after a provider-success completion crash", async () => {
+  it("does not resend after a provider-success completion crash", async () => {
     const welcome = due("welcome");
     const retryNow = new Date(now.getTime() + 5 * 60_000);
     const retryClaim = due("welcome", {
@@ -610,22 +610,21 @@ describe("runJourneyBatch", () => {
     const first = await runJourneyBatch(test.deps, {now, limit: 1});
     const second = await runJourneyBatch(test.deps, {now: retryNow, limit: 1});
 
-    expect(first).toMatchObject({retried: 1, sent: 0});
-    expect(second).toMatchObject({retried: 0, sent: 1});
+    expect(first).toMatchObject({retried: 0, failed: 1, sent: 0});
+    expect(second).toMatchObject({retried: 0, failed: 1, sent: 0});
     expect(test.sentEmails.map((item) => item.idempotencyKey)).toEqual([
-      welcome.deliveryKey,
       welcome.deliveryKey,
     ]);
     expect(test.logs).toHaveLength(1);
-    expect(test.logs.get(welcome.deliveryKey)).toMatchObject({status: "sent"});
-    expect(test.sent).toEqual([{id: welcome.id, claimedAt: retryNow}]);
+    expect(test.logs.get(welcome.deliveryKey)).toMatchObject({status: "processing"});
+    expect(test.sent).toEqual([]);
   });
 
   it("fails attempt three permanently and creates one deduplicated task", async () => {
     const welcome = due("welcome", {attemptCount: 3});
     const test = harness([welcome]);
     test.deps.emailTransport.send = vi.fn(async () => {
-      throw new DeliveryFailure("retryable_network");
+      throw new DeliveryFailure("retryable_rate_limit");
     });
 
     const summary = await runJourneyBatch(test.deps, {now, limit: 1});

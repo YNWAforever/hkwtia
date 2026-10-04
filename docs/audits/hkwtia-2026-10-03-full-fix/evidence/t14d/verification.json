@@ -1,0 +1,102 @@
+{
+  "observedAt": "2026-10-04T06:49:13.682420+00:00",
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "branch": "codex/delivery-recovery-20261003",
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/135",
+  "baseSha": "708e6276",
+  "production": false,
+  "migration": null,
+  "ledger": 59,
+  "focused": {
+    "earlierPassed": 294,
+    "earlierSkipped": 0,
+    "latestLegacyAndActualSqlPassed": 119,
+    "latestActualFullMigrationSql": 48,
+    "latestSkipped": 0
+  },
+  "mutation": {
+    "baseline": "708e6276",
+    "failedBehaviours": 34,
+    "green": 41,
+    "filteredSkips": 7,
+    "restoredBytesEqual": true
+  },
+  "lint": {
+    "exitCode": 0,
+    "warnings": 94,
+    "errors": 0
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "finalHarnessExitCode": 0
+  },
+  "strings": {
+    "exitCode": 0,
+    "files": 317
+  },
+  "full": {
+    "exitCode": 0,
+    "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "passed": 6657,
+    "skipped": 519,
+    "failed": 0,
+    "filesPassed": 787,
+    "filesSkipped": 97,
+    "durationSeconds": 966.43,
+    "environment": "PowerShell; RUN_POSTGRES_INTEGRATION and DATABASE_URL_TEST unset; explicitly skipped integrations are not passes"
+  },
+  "native": {
+    "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "buildId": "XPeRxVjxcSqaEF1qWY38y",
+    "observedAt": "2026-10-04T06:47:32.158Z",
+    "nativeExit": 0,
+    "ledger": 59,
+    "dbSourcePositivelyProven": true,
+    "googleVerified": false,
+    "magicLinkVerified": false,
+    "realProviderSends": 0,
+    "realDeliveryReceipt": false,
+    "production": false,
+    "passed": 6,
+    "failed": 0,
+    "mobileWidth": 390,
+    "receipts": [
+      "native-current.json",
+      "native-9603519a-worker-0.json"
+    ],
+    "testHarnessOnlyChangedAfterBuild": true,
+    "applicationHashesUnchanged": true
+  },
+  "preview": {
+    "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "deploymentId": "dpl_F7owZgh31gWmE2Ecr4kBQ2jtzacD",
+    "origin": "https://hkwtia-delivery-recovery-20261003.vercel.app",
+    "positiveChecks": 17,
+    "ledger": 59,
+    "actualIsolatedDbAuth": true
+  },
+  "ci": {
+    "run": 37181949858,
+    "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "all7": "SUCCESS",
+    "unitPassed": 6657,
+    "guardedSkipped": 519,
+    "workerPassed": 57,
+    "failed": 0
+  },
+  "realProvider": "BLOCKED_APPROVED_SYNTHETIC_RECIPIENT_AND_PROVIDER_RECEIPTS",
+  "worker": "BLOCKED_PINNED_ISOLATED_BINDING_AND_TWO_ACTUAL_WINDOWS",
+  "googleMagicLink": "SEPARATE_T14A_OWNER_GATE",
+  "limits": [
+    "Only connection loader/provider boundary substituted in actual all59-migration SQL tests",
+    "Synthetic callbacks and explicit test sinks are not real-provider receipts",
+    "First full6634pass20fail517skip targeted legacy contracts; source/test boundary repaired, final full6657/519/0 subsequently passed",
+    "No Production migration, publication, real-message effect or full-fix claim"
+  ],
+  "build": {
+    "exitCode": 0,
+    "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "buildId": "XPeRxVjxcSqaEF1qWY38y",
+    "applicationFilesHashed": 25
+  }
+}

@@ -144,3 +144,12 @@ describe("InboxThread", () => {
     expect(Object.keys(zh.Admin.inbox.delivery).sort()).toEqual(Object.keys(en.Admin.inbox.delivery).sort());
   });
 });
+
+
+describe("known pre-send refusal", () => {
+  it("does not label a refused preflight as unknown provider acceptance or expose its internal code", () => {
+    const html = markup([message({role:"staff",direction:"outbound",deliveryStatus:"failed",errorCode:"pre_send_blocked",providerMessageId:null})]);
+    expect(html).not.toContain(en.Admin.inbox.delivery.uncertain);
+    expect(html).not.toContain("pre_send_blocked");
+  });
+});

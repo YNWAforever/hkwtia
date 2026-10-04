@@ -156,7 +156,7 @@ async function processClaims(
 
     if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
       if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
-        await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
+        await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "ticket_resend_paused");
         continue;
       }
       if (!claim.seatId) {
@@ -218,6 +218,33 @@ async function processClaims(
         continue;
       }
       if (!await dependencies.outbox.freezePayload(claim.id, claim.attemptCount, payload, now)) continue;
+    }
+
+    // Rendering/freezing may overlap a refund or revocation. Check the current
+    // paid-order authority again immediately before invoking the provider.
+    let currentOrder: OrderRecord | null;
+    try {currentOrder = await dependencies.orders.orderById(claim.orderId);}
+    catch {
+      await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "order_read_failed");
+      continue;
+    }
+    if (!currentOrder || !admissible(claim.kind, currentOrder.status)) {
+      await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
+      continue;
+    }
+    if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
+      if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
+        await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "ticket_resend_paused");
+        continue;
+      }
+      let valid: boolean;
+      try {valid = claim.seatId !== null
+        && await dependencies.orders.resendEligible(claim.seatId, now);}
+      catch {
+        await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "resend_eligibility_read_failed");
+        continue;
+      }
+      if (!valid) {await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now); continue;}
     }
 
     const startedAt = performance.now();

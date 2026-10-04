@@ -74,7 +74,7 @@ export default async function AdminEventDetailPage({params, searchParams}: Props
   const tOrders = await getTranslations({locale, namespace: "Admin.eventsMgmt.orders"});
   const updateActionMessages = {successMessage: t("updateSuccess"), validationMessage: t("validation"), errorMessage: t("error"), conflictMessage: t("editConflict")};
   const checkInActionMessages = {successMessage: t("checkInSuccess"), eventCancelledMessage: t("checkInEventCancelled"), errorMessage: t("checkInError")};
-  const resendPassMessages = {successMessage: t("resendSuccess"), errorMessage: t("resendError")};
+  const resendPassMessages = {successMessage: t("resendSuccess"), errorMessage: t("resendError"), queuedMessage: t("resendQueued"), uncertainMessage: t("resendUncertain")};
   const seatCheckInMessages = {successMessage: tc("checkInSuccess"), successMessageAlready: tc("alreadyCheckedIn"), successMessageUndone: tc("undoSuccess"), notCheckedInMessage: tc("notCheckedIn"), notAdmissibleMessage: tc("notAdmissible"), errorMessage: tc("updateError")};
   const eventPath = "/" + locale + "/admin/events-mgmt/" + parsedId.data;
   const updateAction = updateEventAction.bind(null, parsedId.data, eventPath, updateActionMessages);

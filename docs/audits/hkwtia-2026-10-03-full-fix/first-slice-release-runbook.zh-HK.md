@@ -69,3 +69,12 @@ Fresh project metadata reports Production Git branch `release`。本 session 的
 T14C沒有migration，目前隔離ledger59。Production仍需獨立批准0057–0059／新能力，不能因main合併推斷已發布。先核對ledger相容性與web/worker的APP_URL/service credential/version，再按具體批准發布web；worker本增量無需改變，保持新AI／sender／bulk flags closed。Stripe webhook保持既有簽名secret與idempotency，不改Production provider配置。
 
 回退T14C相容web至base e12add4e或上一個已驗證版本，保留資料庫訂單、grant、provider退款及不可變audit/outbox；不逆刪schema、不嘗試撤回真實已發生退款。先停新增effect/dequeue，再按providerreceipt逐筆對帳。T16仍需真實發布與回復演練、批准candidate/rollback deployment和每個啟用能力的cloud窗口。
+
+
+## T14D sender capability 發布／回復单
+
+程式source9603519已在隔離Preview，SQL48/native6/Preview17與完整6657pass519skip0fail已核對；無migration。Production、real-provider配置與G5仍未發布／驗證。
+
+先核對web/worker/ledger及目前in-flight效果，再由具體T16批准單選擇能力。Production首次仍需0057–0059相容性與獨立批准；本task不能默認開sender/AI/bulk。保留原key、audit/outbox/provider receipts。
+
+舊版可能重試未知效果，故持續發送時不應整體回退至unsafe sender程式。若需回復，先暫停所有相關人工及worker發送入口，再部署相容guard或forward repair，逐筆對帳後才恢復。單獨關閉bulk flag不能暫停人工補發。不得刪資料或用TTL當已退款／未發送證據。T16真實回復演練仍待完成。

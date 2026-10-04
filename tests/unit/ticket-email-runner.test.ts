@@ -167,7 +167,7 @@ describe("ticket email outbox runner", () => {
     vi.unstubAllEnvs();
   });
 
-  it("suppresses queued resends when the separate resend delivery flag is off", async () => {
+  it("preserves queued resends when the separate resend delivery flag is off", async () => {
     const seatId = "66666666-6666-4666-8666-666666666666";
     const {dependencies, orders, outbox, transport} = fixture({
       kind: "pass", seatId, eventKey: "ticket-resend:batch-item-2",
@@ -179,7 +179,8 @@ describe("ticket email outbox runner", () => {
     vi.stubEnv("TICKET_RESEND_BATCH_ENABLED", "");
     try {
       await deliverTicketEmailsForOrder(orderId, dependencies, now);
-      expect(outbox.markSuppressed).toHaveBeenCalledWith(noticeId, 1, now);
+      expect(outbox.markRetryable).toHaveBeenCalledWith(noticeId, 1, now, "ticket_resend_paused");
+    expect(outbox.markSuppressed).not.toHaveBeenCalled();
       expect(transport.sends).toEqual([]);
     } finally {vi.unstubAllEnvs();}
   });

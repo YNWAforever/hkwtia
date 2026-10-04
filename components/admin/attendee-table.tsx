@@ -37,14 +37,22 @@ function SeatCheckInForm({action, seatId, labels, disabled}: Readonly<{action: (
 /**
  * A ticket seat's pass is sent by the webhook on payment, so this is a resend:
  * staff press it when an attendee says the email never arrived. The action
- * supplies its own fresh attempt key, so pressing it again always sends.
+ * retains its attempt until acceptance; unknown effects require reconciliation.
  *
  * It is bound here rather than in the page because the seat id varies per row,
  * and `resendPassAction` takes the seat id first.
  */
 function ResendPassForm({seatId, path, messages, labels}: Readonly<{seatId: string; path: string; messages: CheckInActionMessages; labels: Labels}>) {
-  const [state, formAction, pending] = useActionState(resendPassAction.bind(null, seatId, path, messages), initialState);
-  return <form action={formAction} className="space-y-1"><input name="seatId" type="hidden" value={seatId}/><button className="text-sm underline disabled:no-underline disabled:opacity-60" disabled={pending} type="submit">{pending ? labels.resending : labels.resendPass}</button>{state.message ? <p aria-live="polite" className={state.status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}</form>;
+  const [attemptId, setAttemptId] = useState("");
+  const [state, formAction, pending] = useActionState(async (previous: EventActionState, data: FormData) => {
+    const intent = attemptId || crypto.randomUUID();
+    setAttemptId(intent);
+    data.set("attemptId", intent);
+    const result = await resendPassAction(seatId, path, messages, previous, data);
+    if (result.status === "success" && result.values?.attemptId === intent) setAttemptId("");
+    return result;
+  }, initialState);
+  return <form action={formAction} className="space-y-1"><input name="attemptId" type="hidden" value={attemptId}/><input name="seatId" type="hidden" value={seatId}/><button className="text-sm underline disabled:no-underline disabled:opacity-60" disabled={pending} type="submit">{pending ? labels.resending : labels.resendPass}</button>{state.message ? <p aria-live="polite" className={state.status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}</form>;
 }
 
 /** Member, guest and paid-seat IDs remain distinct on the door list. */

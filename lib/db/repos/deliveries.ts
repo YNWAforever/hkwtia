@@ -5,6 +5,7 @@ import {sql} from "drizzle-orm";
 import {
   authorizedProviderFailureCode,
   providerFailureCode,
+  providerEffectIsUncertain,
 } from "@/lib/automation/delivery-retry-authorization";
 import type {JourneyChannel, MessageClassification} from "@/lib/automation/types";
 import type {DeliveryFailureCode} from "@/lib/email/transport";
@@ -185,7 +186,7 @@ async function retryFailedDelivery(
   const failureCode =
     authorizedProviderFailureCode(expectedErrorCode)
     ?? providerFailureCode(expectedErrorCode);
-  if (!failureCode) throw new Error("INVALID_DELIVERY_RETRY");
+  if (!failureCode || providerEffectIsUncertain(failureCode)) throw new Error("INVALID_DELIVERY_RETRY");
   const table = deliveryTable(channel);
   const row = rowsFrom(await transaction.execute(sql`
     UPDATE ${table}

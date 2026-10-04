@@ -3026,7 +3026,8 @@
         "delivered": "Delivered",
         "read": "Read",
         "failed": "Not delivered",
-        "uncertain": "Delivery uncertain; reconcile provider records before retrying"
+        "uncertain": "Delivery uncertain; reconcile provider records before retrying",
+        "preflightBlocked": "Not sent: requirements changed before dispatch."
       },
       "errors": {
         "INVALID": "Check the message and the template.",
@@ -3566,6 +3567,8 @@
       "resendPass": "Resend pass",
       "resending": "Sending pass...",
       "resendSuccess": "Pass email sent.",
+      "resendQueued": "The pass is queued. Keep this attempt while the worker finishes.",
+      "resendUncertain": "The earlier send result is unknown. Reconcile provider records before resending.",
       "resendError": "We could not send this pass email. Please try again.",
       "exportCsv": "Download attendees (CSV)",
       "exportPreview": "Preview attendee CSV export",
@@ -3994,6 +3997,7 @@
       "retryValidation": "This retry request is invalid.",
       "retryUnavailable": "This failure is no longer eligible for retry.",
       "retryError": "We could not schedule this retry. Please try again.",
+      "retryReconciliation": "The send result is unknown. Ask the owner to reconcile provider records before retrying.",
       "notAvailable": "Not available",
       "next": "Next page"
     },

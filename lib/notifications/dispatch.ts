@@ -268,14 +268,12 @@ const PROVIDER_FAILURE_CODES = new Set<string>([
  * Only the three transient codes are replayed against the provider. A persisted
  * `provider_client_error` fails identically on a second attempt (a rejected
  * template parameter does not heal), and `provider_acceptance_uncertain` must
- * never be retried at all (S-15) — both are returned as the failure they
+ * never be retried at all (S-15). Persisted network/5xx transport failures are
+ * also unknown; only a definite rate-limit refusal is eligible for retry. They
+ * are returned as the failure they
  * already are, without touching the transport.
  */
-const RETRYABLE_PERSISTED_CODES = new Set<string>([
-  "retryable_network",
-  "retryable_rate_limit",
-  "retryable_server",
-]);
+const RETRYABLE_PERSISTED_CODES = new Set<string>(["retryable_rate_limit"]);
 
 function notificationFailureCode(value: string | null | undefined): NotificationFailureCode {
   return value !== null && value !== undefined && PROVIDER_FAILURE_CODES.has(value)
@@ -290,7 +288,9 @@ function providerFailureCodeFrom(error: unknown): NotificationFailureCode {
     && "code" in error
     && typeof error.code === "string"
   ) {
-    return notificationFailureCode(error.code);
+    // A transport timeout/5xx does not establish that the effect was refused.
+    return error.code === "retryable_network" || error.code === "retryable_server"
+      ? "provider_acceptance_uncertain" : notificationFailureCode(error.code);
   }
   return "provider_unclassified_failure";
 }
@@ -360,7 +360,8 @@ async function settleReservation(
       kind: "settled",
       result: {
         status: "failed",
-        errorCode: notificationFailureCode(persisted),
+        errorCode: persisted === "retryable_network" || persisted === "retryable_server"
+          ? "provider_acceptance_uncertain" : notificationFailureCode(persisted),
         deliveryId: record.id,
       },
     };
@@ -398,6 +399,20 @@ async function completeOrThrow(
   } catch {
     throw new NotificationDispatchFailure("retryable_network");
   }
+}
+
+/** Re-read consent and eligibility after any reservation wait, before a provider request. */
+async function recheckRecipient(
+  actor: DispatchActor, request: ParsedRequest, ledger: Ledger, deliveryId: string,
+  dependencies: NotificationDispatchDependencies,
+): Promise<{facts: RecipientFacts} | {refused: Extract<NotificationResult, {status: "skipped"}>}> {
+  const facts = await dependencies.eligibility.factsFor(actor, request.recipient);
+  const category = facts === null ? "unknown_recipient" : classifyRecipient(facts, request.channel);
+  if (facts === null || category !== "eligible") {
+    await completeOrThrow(ledger, deliveryId, {status: "failed", errorCode: "recipient_ineligible"});
+    return {refused: {status: "skipped", reason: category === "eligible" ? "unknown_recipient" : category}};
+  }
+  return {facts};
 }
 
 async function dispatchWhatsApp(
@@ -449,12 +464,19 @@ async function dispatchWhatsApp(
   const outcome = await settleReservation(ledger, await reserveOrThrow(ledger));
   if (outcome.kind === "settled") return outcome.result;
   const deliveryId = outcome.deliveryId;
+  const current = await recheckRecipient(actor, request, ledger, deliveryId, dependencies);
+  if ("refused" in current) return current.refused;
+  if (!(await approvedTemplateKeys(dependencies.templates)).has(request.template)) {
+    await completeOrThrow(ledger, deliveryId, {status: "failed", errorCode: "template_not_approved"});
+    return {status: "skipped", reason: "template_not_approved"};
+  }
 
   let provider: Awaited<ReturnType<ChannelAdapter["sendTemplateMessage"]>>;
   try {
     provider = await dependencies.whatsappTransport.sendTemplateMessage({
-      whatsappOptIn: facts.whatsappOptIn,
-      whatsappNumber,
+      whatsappOptIn: current.facts.whatsappOptIn,
+      // classifyRecipient proved the fresh stored number is present.
+      whatsappNumber: campaignNumberFor(current.facts)!,
       template: request.template,
       variables,
       idempotencyKey: request.idempotencyKey,
@@ -543,11 +565,14 @@ async function dispatchEmail(
   const outcome = await settleReservation(ledger, await reserveOrThrow(ledger));
   if (outcome.kind === "settled") return outcome.result;
   const deliveryId = outcome.deliveryId;
+  const current = await recheckRecipient(actor, request, ledger, deliveryId, dependencies);
+  if ("refused" in current) return current.refused;
 
   let provider: Awaited<ReturnType<EmailTransport["send"]>>;
   try {
     provider = await dependencies.emailTransport.send({
-      to,
+      // classifyRecipient proved the fresh stored address is present.
+      to: campaignEmailFor(current.facts)!,
       from: dependencies.emailFrom,
       subject: rendered.subject,
       html: rendered.html,
@@ -601,7 +626,7 @@ export function createProductionNotificationDependencies(): NotificationDispatch
 
 /**
  * The order is `factsFor` → `classifyRecipient` → the approved-template gate →
- * reserve → send → complete, and it is not rearrangeable: every step before the
+ * reserve → current facts/approval recheck → send → complete, and it is not rearrangeable: every step before the
  * reservation must be able to refuse WITHOUT writing a log row, so that a
  * suppressed recipient leaves no trace of an attempt that never happened.
  */

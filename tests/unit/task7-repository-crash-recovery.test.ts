@@ -129,9 +129,9 @@ describe("Task 7 repository crash-recovery contracts", () => {
     await expect(repo.retryEmailFailure(
       cronActor,
       String(processing.id),
-      "retryable_network",
+      "retryable_rate_limit",
     )).resolves.toMatchObject({
-      failureCode: "retryable_network",
+      failureCode: "retryable_rate_limit",
       record: {
         status: "processing", attemptCount: 2, errorCode: null,
       },
