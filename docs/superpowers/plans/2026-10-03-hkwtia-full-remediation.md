@@ -368,11 +368,11 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** Board narrative 與 KPI 仍分開；透過 T08 傳 sourceRefs／claims；`prepareContentDraft(actor:AdminActor,input:{kind:'event'|'news';sourceFacts:ApprovedFactPack}):Promise<AdminAiDraft>` 只用已有核准 facts。為 staff 新增授權路徑，不繞過原 member Writer actor/quota。
 
-- [ ] 寫0分母、無比較期、HK月界、票價HKD100不得寫90、時間／場地中英一致、中文標題不得仍自動填英文的測試。
-- [ ] Run focused unit先失敗；生成的MDX按現有安全literal render，不執行模型程式碼。
-- [ ] report sourceKey 的provider前claim重用已完成結果；雙語摘要由各自schema校驗；沿現有staff預覽及發布權限。
-- [ ] 活動editor提供由facts起稿／翻譯，不改價格、容量、報名方式、發布checkbox；保留草稿和preview。
-- [ ] 記錄正確facts／字句評測，提交 `feat: review bilingual administrative content drafts`。
+- [x] 寫0分母、無比較期、HK月界、票價HKD100不得寫90、時間／場地中英一致、中文標題不得仍自動填英文的測試。
+- [x] Run focused unit先失敗；生成的MDX按現有安全literal render，不執行模型程式碼。
+- [x] report sourceKey 的provider前claim重用已完成結果；雙語摘要由各自schema校驗；沿現有staff預覽及發布權限。
+- [x] 活動editor提供由facts起稿／翻譯，不改價格、容量、報名方式、發布checkbox；保留草稿和preview。
+- [x] 記錄正確facts／字句評測，提交 `feat: review bilingual administrative content drafts`。
 
 
 **AC-18/AC-19：** event date/venue/price/capacity/registration mode 保持 typed facts；AI 翻譯不更新業務欄位。雙語各可保留草稿，公開只讀 published version；不能用 AI 生成正式機構中文名、歷史獎項或新的權益承諾。發布仍走 T17 的 preview＋CAS＋audit。
@@ -664,3 +664,12 @@ npm --prefix workers test
 - [x] Actual all60 PG61 distinct, native2 EN/HK390/keyboard/axe0, exact Preview19/source894e; CI6698pass555skip0fail/worker57. Initial failures preserved and resolved in current receipts.
 - [x] 0060 only isolated Neon59→60; no historical cleanup. SOP/source-map and original22/28/64 tracking retained.
 - [ ] Approved real model/data/caps/receipts, pinned worker two actual windows, HK/SG/human G5 and Production capability gates remain; no full-fix claim. Continue T12.
+
+## T12 execution record — 2026-10-04
+
+- [x] Actual target RED→GREEN: zero denominator/ratio, absent comparison, HK month, actual amount, correct Chinese title, source key reuse, pre-call durable claim/unknown result, current facts and dirty edit race.
+- [x] 0061 only positively proven isolated Neon60→61; restricted existing post result; no historical overwrite or Production migration. T08/T11/backward SQL68 distinct, source6719pass562skip0fail+worker57, all7 CI.
+- [x] Actual password Auth/native2 EN/HK/6journeys/12screenshots; exact d348 Preview23 positive marker/roles/review/copy-only/stale/390/keyboard/axe0. Offline proposals are not real models or human pilot evidence.
+- [x] Source safe renderer now restores serialized punctuation as React text after token parsing and recognizes app-owned bilingual report structure. Actual RED2→GREEN27; HTML/MDX/escaped links inert, public buildlog unchanged.
+- [x] SOP, original22/28/64 and baseline case fields preserved; small reviewable commits and PR138. Original failures retained and source current gates proved.
+- [ ] Real approved administrative model/data/caps/receipts, human content signoff/pilot and specific Production capabilities remain blocked. Navigation7.6s measured only; regional/3s performance remains T15. Continue T13.

@@ -1,0 +1,19 @@
+{
+  "commands": [
+    "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run --maxWorkers=1 tests/integration/ai-draft-review.test.ts tests/integration/ai-budget-concurrency.test.ts tests/integration/ai-retention-batch.test.ts tests/integration/ai-admin-content-facts.test.ts tests/integration/ai-board-draft-work.test.ts",
+    "node node_modules/vitest/vitest.mjs run tests/integration/m4c-acceptance.test.ts tests/unit/news-localized-bodies.test.tsx tests/unit/ai-admin-content-facts.test.ts tests/unit/ai-admin-content-editor.test.tsx tests/unit/server-action-actor-boundary.test.ts",
+    "node node_modules/vitest/vitest.mjs run tests/unit/safe-generated-content.test.tsx tests/unit/board-reporter-render.test.ts tests/unit/news-localized-bodies.test.tsx",
+    "npm.cmd test -- --reporter=json --outputFile=.playwright/full-fix-t12-full.json (first failure retained)",
+    "npm.cmd run lint",
+    "npm.cmd run typecheck",
+    "npm.cmd run audit:strings",
+    "npm.cmd run build",
+    "node --experimental-strip-types --env-file=.env.local .playwright/full-fix-t12-migrate-isolated.mjs",
+    "node --experimental-strip-types --env-file=.env.local scripts/verify-full-content-drafts.mjs --workers=1",
+    "node --env-file=.env.local .playwright/full-fix-t12-preview-runtime.mjs",
+    "gh run view 37201908791 --repo YNWAforever/hkwtia --log"
+  ],
+  "scriptsOutsideSource": ".playwright scripts are ignored controlled test harnesses; no secrets in commands/evidence",
+  "repositoryExpectMs": 20000,
+  "offlineIsNotLive": true
+}

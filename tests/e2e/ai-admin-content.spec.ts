@@ -65,6 +65,7 @@ test.describe("actual isolated administrative content review, copy-only adoption
           sourceSha: process.env.FULL_FIX_EXPECTED_SOURCE_SHA,
           actualPasswordAuth: true,
           syntheticOfflineProposals: true,
+        humanPilotVerified: false,
           externalModelCalls: 0,
           realProviderSends: 0,
           googleVerified: false,
@@ -261,7 +262,7 @@ test.describe("actual isolated administrative content review, copy-only adoption
           checks.push({
             locale,
             kind: entry.kind,
-            humanReviewed: true,
+            staffReviewActionVerified: true,
             copyOnly: true,
             unchangedBusinessAndPublicationFields: true,
             staleFactsBlocked: true,

@@ -1,0 +1,18 @@
+{
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "runId": 37201908791,
+  "environment": "Actual GitHub Linux CI, two required shards",
+  "unitPassed": 6719,
+  "skipped": 562,
+  "failed": 0,
+  "workerPassed": 57,
+  "all7Checks": "SUCCESS",
+  "firstLocalRun": {
+    "passed": 6714,
+    "skipped": 562,
+    "failed": 3,
+    "success": false
+  },
+  "skipsAreNotPasses": true,
+  "originalRepositoryExpectMs": 20000
+}

@@ -1205,35 +1205,35 @@
     "taskId": "T12",
     "symbol": "prepareContentDraft",
     "path": "lib/ai/content-drafts.ts",
-    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
     "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
   },
   {
     "taskId": "T12",
-    "symbol": "readContentFacts",
+    "symbol": "readContentDraftFacts",
     "path": "lib/ai/drafts/content-facts.ts",
-    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
     "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
   },
   {
     "taskId": "T12",
     "symbol": "runBoardReporter",
     "path": "lib/ai/board-reporter/service.ts",
-    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
     "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
   },
   {
     "taskId": "T12",
     "symbol": "getBoardDraftBySourceKey",
     "path": "lib/db/repos/posts.ts",
-    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
     "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
   },
   {
     "taskId": "T12",
     "symbol": "ContentDraftPanel",
     "path": "components/admin/content-draft-panel.tsx",
-    "headSha": "f0bd49ce45034823208205128832ac24f7148450",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
     "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
   }
 ]
