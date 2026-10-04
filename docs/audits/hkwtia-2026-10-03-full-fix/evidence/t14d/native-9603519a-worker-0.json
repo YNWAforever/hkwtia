@@ -1,0 +1,71 @@
+{
+  "observedAt": "2026-10-04T06:47:32.057Z",
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "origin": "http://localhost:3450",
+  "run": "00b59932-a27a-4cd6-ba15-75d924ef65a7",
+  "checks": [
+    {
+      "locale": "en",
+      "case": "visible unknown, no same-body attempt escape, retained draft/token, actual owner/due/next/close/reopen audit",
+      "conversationRef": "9d9a197c0a6d4f2b",
+      "mobileWidth": 390,
+      "providerSends": 0
+    },
+    {
+      "locale": "en",
+      "case": "actual password staff, legitimate repeated copy2 with same-attempt controls; test-sink accepted not delivered, render→STOP prevents effect",
+      "conversationRef": "2839d9ac645138b9",
+      "actualSinkAccepted": 2,
+      "realProviderSends": 0
+    },
+    {
+      "locale": "en",
+      "case": "actual staff manual pass unknown effect denied before test sink; no new key escape",
+      "orderRef": "aaaf39f18e869c2e",
+      "realProviderSends": 0
+    },
+    {
+      "locale": "en",
+      "case": "unknown keeps intent; synthetic definite refusal unblocks two legitimate sink-accepted resends; refunded fixture denies third",
+      "actualSinkAccepted": 2,
+      "realProviderSends": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "visible unknown, no same-body attempt escape, retained draft/token, actual owner/due/next/close/reopen audit",
+      "conversationRef": "b325891cff64cbec",
+      "mobileWidth": 390,
+      "providerSends": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "actual password staff, legitimate repeated copy2 with same-attempt controls; test-sink accepted not delivered, render→STOP prevents effect",
+      "conversationRef": "d1cf486e8338d79e",
+      "actualSinkAccepted": 2,
+      "realProviderSends": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "actual staff manual pass unknown effect denied before test sink; no new key escape",
+      "orderRef": "aff5901a00c21255",
+      "realProviderSends": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "unknown keeps intent; synthetic definite refusal unblocks two legitimate sink-accepted resends; refunded fixture denies third",
+      "actualSinkAccepted": 2,
+      "realProviderSends": 0
+    }
+  ],
+  "ownedConversationRefs": [
+    "9d9a197c0a6d4f2b",
+    "2839d9ac645138b9",
+    "b325891cff64cbec",
+    "d1cf486e8338d79e"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticFixtures": true,
+  "transport": "explicit test sink; no real recipient or provider receipt",
+  "production": false,
+  "cleanup": "Owned synthetic history retained, unrelated data preserved"
+}

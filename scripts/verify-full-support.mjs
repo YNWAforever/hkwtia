@@ -30,7 +30,7 @@ try {
     assert.equal(Number((await pool.query("SELECT count(*) AS n FROM profiles WHERE email IS NOT NULL AND email NOT LIKE '%example.test'")).rows[0].n), 0);
     await pool.query("INSERT INTO posts(id,slug,kind,title_en,title_zh,body_mdx,body_mdx_zh_hk,published_at,author,source_key) VALUES($1,$2,'news',$3,$3,$3,$3,now(),'Synthetic acceptance',$2)", [id, slug, marker]);
     inserted = true;
-    const runtimeEnv = { ...process.env, NODE_ENV: "production", APP_URL: origin, AGENTS_ENABLED: "false", ADMIN_AI_ENABLED: "false", EMAIL_DELIVERY_MODE: "test", RUN_LIVE_WOZTELL: "0", WORKER_PAUSED_TEST: "true", TICKET_PASS_TOKEN_SECRET: randomBytes(32).toString("hex"), CONCIERGE_COOKIE_SECRET: randomBytes(32).toString("hex"), CRON_SECRET: randomBytes(32).toString("hex"), UNSUBSCRIBE_TOKEN_SECRET: randomBytes(32).toString("hex") };
+    const runtimeEnv = { ...process.env, NODE_ENV: "production", VERCEL_ENV: "preview", APP_URL: origin, AGENTS_ENABLED: "false", ADMIN_AI_ENABLED: "false", EMAIL_DELIVERY_MODE: "test", RUN_LIVE_WOZTELL: "0", WORKER_PAUSED_TEST: "true", TICKET_PASS_TOKEN_SECRET: randomBytes(32).toString("hex"), CONCIERGE_COOKIE_SECRET: randomBytes(32).toString("hex"), CRON_SECRET: randomBytes(32).toString("hex"), UNSUBSCRIBE_TOKEN_SECRET: randomBytes(32).toString("hex") };
     // No live provider credentials are needed for this explicit test sink.
     for (const key of ["RESEND_API_KEY", "OPENAI_API_KEY", "OPENCODE_API_KEY", "WOZTELL_API_TOKEN", "WOZTELL_CHANNEL_ID"])
         delete runtimeEnv[key];

@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-10-04T06:04:41.794Z",
+  "projectId": "solitary-wave-52860119",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "state": "ready",
+  "primary": false,
+  "default": false,
+  "protected": false,
+  "expiresAt": "2026-10-04T12:00:00Z",
+  "production": false
+}

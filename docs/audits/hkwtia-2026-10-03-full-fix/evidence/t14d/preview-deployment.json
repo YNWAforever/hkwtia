@@ -1,0 +1,10 @@
+{
+  "id": "dpl_F7owZgh31gWmE2Ecr4kBQ2jtzacD",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "gitRef": "codex/delivery-recovery-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-delivery-recovery-20261003.vercel.app",
+  "production": false
+}

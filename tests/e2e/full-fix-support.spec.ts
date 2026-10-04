@@ -50,11 +50,21 @@ test.describe("T14D actual isolated support UI; test sink is not live delivery",
             // Explicit synthetic refusal fixture, not a real provider reconciliation claim.
             await pool.query("UPDATE ticket_email_outbox SET status='blocked',error_code='provider_client_error' WHERE id=$1",[notice]);
             for(let n=1;n<=2;n++){
-                await form.getByRole('button').press('Enter');await expect(form.getByRole('status')).toHaveText(t.Admin.eventsMgmt.resendSuccess);
+                // The remote DB clock can be ahead of this local worker. A durable queued
+                // response is truthful; repeat only this unchanged known-unsent intent.
+                await expect.poll(async()=>{
+                    await form.getByRole('button').press('Enter');
+                    await expect(form.getByRole('button')).toBeEnabled();
+                    const outcome=await form.getByRole('status').textContent();
+                    expect([t.Admin.eventsMgmt.resendQueued,t.Admin.eventsMgmt.resendSuccess]).toContain(outcome);
+                    return outcome;
+                },{intervals:[1200],timeout:20000}).toBe(t.Admin.eventsMgmt.resendSuccess);
                 await expect.poll(async()=>Number((await pool.query("SELECT count(*) AS n FROM ticket_email_outbox WHERE seat_id=$1 AND status='sent' AND provider_id LIKE 'test:%'",[seat])).rows[0].n)).toBe(n);
                 await expect(form.locator('input[name=attemptId]')).not.toHaveValue(stableAttempt);
             }
-            await pool.query("UPDATE event_orders SET status='refunded' WHERE id=$1",[order]);await form.getByRole('button').press('Enter');await expect(form.getByRole('alert')).toHaveText(t.Admin.eventsMgmt.resendError);
+            await pool.query("UPDATE event_orders SET status='refunded' WHERE id=$1",[order]);await form.getByRole('button').press('Enter');
+            // Existing attendee policy excludes refunded orders after revalidation.
+            await expect(form).toHaveCount(0);await expect(page.getByText(t.Admin.eventsMgmt.attendeeNoMatches,{exact:true})).toBeVisible();
             expect((await pool.query('SELECT count(*)::int AS n FROM ticket_email_outbox WHERE seat_id=$1',[seat])).rows).toEqual([{n:3}]);
             await page.screenshot({path:root+locale+'-manual-pass-refunded.png',fullPage:false});checks.push({locale,case:'unknown keeps intent; synthetic definite refusal unblocks two legitimate sink-accepted resends; refunded fixture denies third',actualSinkAccepted:2,realProviderSends:0});
         });

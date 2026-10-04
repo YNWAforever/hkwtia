@@ -1,0 +1,37 @@
+{
+  "observedAt": "2026-10-04T06:45:29.087Z",
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "origin": "http://localhost:3450",
+  "run": "9afc3ead-b109-4b33-b731-b1e7997b753b",
+  "checks": [
+    {
+      "locale": "zh-HK",
+      "case": "visible unknown, no same-body attempt escape, retained draft/token, actual owner/due/next/close/reopen audit",
+      "conversationRef": "d43143a1c04cb077",
+      "mobileWidth": 390,
+      "providerSends": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "actual password staff, legitimate repeated copy2 with same-attempt controls; test-sink accepted not delivered, render→STOP prevents effect",
+      "conversationRef": "baca64b1a5921834",
+      "actualSinkAccepted": 2,
+      "realProviderSends": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "actual staff manual pass unknown effect denied before test sink; no new key escape",
+      "orderRef": "1c2d866db56fd914",
+      "realProviderSends": 0
+    }
+  ],
+  "ownedConversationRefs": [
+    "d43143a1c04cb077",
+    "baca64b1a5921834"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticFixtures": true,
+  "transport": "explicit test sink; no real recipient or provider receipt",
+  "production": false,
+  "cleanup": "Owned synthetic history retained, unrelated data preserved"
+}

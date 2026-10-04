@@ -1,0 +1,18 @@
+{
+  "run": 37181949858,
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "all7Checks": "SUCCESS",
+  "summaries": [
+    "worker\tRun npm --prefix workers test\t2026-10-04T06:09:30.2072692Z       Tests  57 passed (57)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T06:12:59.8663651Z       Tests  3518 passed | 274 skipped (3792)",
+    "checks\tRun npm run audit:strings\t2026-10-04T06:09:21.4695718Z Visible-string audit passed (317 TSX files scanned).",
+    "checks\tRun npm run lint\t2026-10-04T06:09:44.3611022Z \u2716 76 problems (0 errors, 76 warnings)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T06:13:20.5961401Z       Tests  3139 passed | 245 skipped (3384)"
+  ],
+  "unitPassed": 6657,
+  "guardedSkipped": 519,
+  "unitFailed": 0,
+  "workerPassed": 57,
+  "trackedLintWarnings": 76,
+  "stringsFiles": 317
+}

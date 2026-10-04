@@ -1,0 +1,8 @@
+{
+  "observedAt": "2026-10-04T06:08:46.307322+00:00",
+  "baseline": "708e6276",
+  "mutationExit": 1,
+  "restoredExit": 0,
+  "restoredBytesEqual": true,
+  "production": false
+}
