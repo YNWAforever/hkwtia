@@ -1,0 +1,27 @@
+(node:2028) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:48524) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48524) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+  ok 1 [chromium] › tests\e2e\ai-admin-usability.spec.ts:91:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters (53.2s)
+  ok 2 [chromium] › tests\e2e\ai-admin-usability.spec.ts:91:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters (45.0s)
+
+  2 passed (1.7m)
+{"sourceSha":"946bad06a41f09939c779709d7e31951617ffce6","origin":"https://hkwtia-usability-20261003.vercel.app","positiveDb":true,"ledger":61,"smokeChecks":10,"nativeExit":0,"production":false}

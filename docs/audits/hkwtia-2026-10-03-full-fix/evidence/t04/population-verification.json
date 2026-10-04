@@ -32,8 +32,8 @@
   },
   "migrationRequired": false,
   "scope": "support created/active in window; distinct audited seven business kinds; requested/reviewed AI cases; distinct observations. All counts by (kind,caseId). Unknown timing stays missing; reopening accumulates time once per case.",
-  "operationalGate": "Operations + QA: agreed recorded-platform comparison scope; off-platform manual collection; actual two-week baseline. Synthetic cases do not establish operating ROI.",
-  "sourceState": "source refinement committed next; fresh native/build/Preview pending",
+  "operationalGate": "Actual two-week human baseline, agreed platform/off-platform comparison scope and operational/release approval remain",
+  "sourceState": "Final946bad06 source CI6771/596skip/0fail/worker57 and currentnative5/Preview2+10smoke verified",
   "productionEffects": false,
   "nativeReceipt": "../t16/operations-native.json",
   "baselineRegression": {

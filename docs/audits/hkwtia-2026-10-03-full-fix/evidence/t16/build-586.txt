@@ -4,20 +4,23 @@
 
 ▲ Next.js 16.3.6 (webpack)
 - Environments: .env.local
-✓ Running next.config.ts took 674ms
+✓ Running next.config.ts took 770ms
 
   Creating an optimized production build ...
 ⚠ The Edge Runtime is deprecated. You can use the "nodejs" runtime instead. Learn more: https://nextjs.org/docs/messages/edge-runtime-deprecated
-✓ Compiled successfully in 47s
+Browserslist: browsers data (caniuse-lite) is 16 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ Compiled successfully in 2.1min
   Running TypeScript ...
-  Finished TypeScript in 40s ...
+  Finished TypeScript in 57s ...
   Collecting page data using 11 workers ...
 ⚠ Using edge runtime on a page currently disables static generation for that page
   Generating static pages using 11 workers (0/273) ...
   Generating static pages using 11 workers (68/273) 
   Generating static pages using 11 workers (136/273) 
   Generating static pages using 11 workers (204/273) 
-✓ Generating static pages using 11 workers (273/273) in 11.2s
+✓ Generating static pages using 11 workers (273/273) in 17.1s
   Finalizing page optimization ...
   Collecting build traces ...
 

@@ -1,6 +1,6 @@
 {
-  "sourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
-  "buildId": "bmjmd2lTxxPgXy-kO2uK1",
+  "sourceSha": "586fd6ede8f9b4533d48ca8109ad14671c00e399",
+  "buildId": "epOFHaKGaepNCNAqz8_3g",
   "buildExit": 0,
   "appFiles": {
     "app/api/admin/batches/[id]/export/route.ts": "5b0c42b0c77e2f0d85d7885c683049d7a22a74918f6566565189899ca6ebdd23",
@@ -712,7 +712,7 @@
     "lib/db/repos/membership-policy-acceptances.ts": "2f2ee2b816b85a3df76757db714660a5bba6a815eb5912c1d2be5a20723150f7",
     "lib/db/repos/memberships.ts": "afd5bb5d52d6f186ad5ad80666278d33483e367b9f83f0ba692ec1194ccc9e2c",
     "lib/db/repos/message-eligibility.ts": "df09159cc1e194659088e0d85b979fd7d5c7a5f2891e531297d3def68053d029",
-    "lib/db/repos/operations-metrics.ts": "f93a29cec31abde1938cae1d93f2affb7707f660020301504ca9104a8085ed3f",
+    "lib/db/repos/operations-metrics.ts": "205e3554fd4a1e99eb17094fb931ef8b1a35c6942d5f1940c0fffd0bed458d80",
     "lib/db/repos/page-copy.ts": "98d190c2cc5fb6a0571d7991f7bc0fc189710f14dbb6d01d894ce914b60224eb",
     "lib/db/repos/partners.ts": "983ba71ed0e0c4f59580dc293fddeb368c313b497d54292e9a73817430023e95",
     "lib/db/repos/portal-content.ts": "e4e1771b3a2ff5c9b96c38f6f777b88dbfd8b5ce8e92be0b4e231548d3fa5074",
@@ -895,7 +895,7 @@
     "messages/en.json": "e02b63852a6ea5698df352acd47624043e516ae362ae7a07c42d60c8ea63c31b",
     "messages/zh-HK.json": "9576efc6b776309d81d35ed9787e69e49daa25ea3f275b2578120ae4694d34ec"
   },
-  "observedAt": "2026-10-04T21:02:51.111208+00:00",
+  "observedAt": "2026-10-04T20:42:56.791492+00:00",
   "command": "npm run build (Next16.3.6 --webpack)",
-  "meaning": "Fresh current946bad06 build; exact runtime files hashed after successful build"
+  "meaning": "Build started at source586fd6e; later e42f323d changed tests/scripts only; runtime Git-identical"
 }

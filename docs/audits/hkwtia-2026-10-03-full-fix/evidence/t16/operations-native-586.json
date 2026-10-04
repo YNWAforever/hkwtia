@@ -1,7 +1,7 @@
 {
-  "sourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "sourceSha": "e42f323d74ae8f7bb28dce5f1e0c55df4fdf03e3",
   "runtime": "next start / NODE_ENV=production",
-  "observedAt": "2026-10-04T21:08:04.963Z",
+  "observedAt": "2026-10-04T20:42:57.079Z",
   "productionDeployment": false,
   "realProviderAcceptance": false,
   "checks": [
@@ -15,14 +15,15 @@
     }
   ],
   "stats": {
-    "startTime": "2026-10-04T21:08:37.848Z",
-    "duration": 45368.537,
+    "startTime": "2026-10-04T20:43:06.176Z",
+    "duration": 48505.696,
     "expected": 5,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
   },
-  "buildId": "bmjmd2lTxxPgXy-kO2uK1",
-  "buildSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "buildId": "epOFHaKGaepNCNAqz8_3g",
+  "buildSourceSha": "586fd6ede8f9b4533d48ca8109ad14671c00e399",
+  "exactRuntimeEquivalence": "git diff586fd6e..e42f323d app/lib/components/messages/public/config/deps empty",
   "scopeLabelsActuallyVisible": true
 }

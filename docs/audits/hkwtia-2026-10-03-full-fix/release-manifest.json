@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "RECOVERY_AND_RECORDED_POPULATION_VERIFIED_CANDIDATE_CI_NATIVE_PENDING_OPERATIONAL_GATED",
-  "generatedAt": "2026-10-04T20:41:14.728636+00:00",
+  "status": "SOURCE_CI_ISOLATED_PREVIEW_RECOVERY_VERIFIED_OPERATIONAL_RELEASE_GATED",
+  "generatedAt": "2026-10-04T21:11:56.310757+00:00",
   "fullFixComplete": false,
   "taskLedger": "tasks.csv",
   "findingLedger": "status.csv",
@@ -12,7 +12,7 @@
     "cases": 64
   },
   "baselineSourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-  "candidateSourceSha": "e42f323d74ae8f7bb28dce5f1e0c55df4fdf03e3",
+  "candidateSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
   "candidateProductionDeployment": null,
   "production": {
     "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
@@ -44,11 +44,11 @@
     "databaseAuthPositivelyProven": true,
     "previewAlias": "https://hkwtia-usability-20261003.vercel.app",
     "productionFixtures": 0,
-    "previewDeployment": "dpl_7naz7ueCt1AXR6UeEPBwvX36TGEy",
-    "previewAppSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "previewDeployment": "dpl_CaFyCEuC6pewkfG2Bg3Z6hr277FR",
+    "previewAppSha": "946bad06a41f09939c779709d7e31951617ffce6",
     "previewReceipts": [
-      "evidence/t15/preview-runtime.json",
-      "evidence/t15/native-preview.json"
+      "evidence/t16/preview-runtime.json",
+      "evidence/t16/native-preview.json"
     ],
     "expiresAt": "2026-10-05T12:00:00Z"
   },
@@ -139,7 +139,7 @@
     "manifestVerified": "8 outer / 91 inner; T00 receipt retained",
     "receipt": "evidence/t00/input-and-version.json"
   },
-  "appSha": "586fd6ede8f9b4533d48ca8109ad14671c00e399",
+  "appSha": "946bad06a41f09939c779709d7e31951617ffce6",
   "workerSha": null,
   "workerBinding": {
     "status": "BLOCKED_FRESH_SCOPED_CLOUD_BINDING",
@@ -186,11 +186,9 @@
     "recoveryReceipt": "evidence/t16/migration-recovery.json"
   },
   "runtimeEquivalence": {
-    "deployedSourceSha": "145443b69df74ad2f70af172c310d10e05803220",
-    "mainSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
-    "gitDiffRuntimeDirectories": "historical empty proof predates T04 correction; no current equivalence claim",
-    "notNewProductionDeployment": true,
-    "meaning": "Prior 145443b6 Preview matched main899c before T04 correction. Current candidate changes operations metrics and bilingual scope; fresh build/native/Preview pending."
+    "deployedSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "meaning": "Final documentation checkpoint must retain Git-identical application runtime; exact-head CI tracked separately",
+    "productionDeployed": false
   },
   "capabilities": [
     {
@@ -206,7 +204,7 @@
       "code": "bounded SQL/mobile/keyboard/private actor/native PASS",
       "configured": "Production RATE_LIMIT_KEY_SECRET present; value/function/readiness/migrations require release verification",
       "isolatedVerified": true,
-      "deployed": "isolated Preview only",
+      "deployed": "isolated Preview946bad06 only",
       "operational": "human/screen-reader/regional gates"
     },
     {
@@ -246,7 +244,7 @@
       "code": "private draft/CAS/history/back-forward/native PASS",
       "configured": "content field-level signoff gate",
       "isolatedVerified": true,
-      "deployed": "isolated Preview only",
+      "deployed": "isolated Preview946bad06 only",
       "operational": "human/content owner gate"
     },
     {
@@ -254,7 +252,7 @@
       "code": "offline70x3/final body/atomic budget/knowledge/drafts PASS",
       "configured": "owner provider/data/tasks/caps approval absent; live auto-review denied",
       "isolatedVerified": "no real provider/human blind reviews",
-      "deployed": "generation remains off in isolated Preview",
+      "deployed": "isolated Preview; generation and effectful flags remain off",
       "operational": "BLOCKED"
     },
     {
@@ -267,17 +265,24 @@
     }
   ],
   "localAcceptance": {
-    "buildId": "epOFHaKGaepNCNAqz8_3g",
+    "buildId": "bmjmd2lTxxPgXy-kO2uK1",
     "buildExit": 0,
     "typecheckExit": 0,
     "stringsExit": 0,
     "lintExit": 0,
     "lintWarnings": 97,
-    "recordedPopulationPg16": 4,
+    "recordedPopulationPg16": 5,
     "baselineNeonRegression": 9,
     "nativeTiming": 5,
     "migrationRecovery": 3,
     "historicalWeb": 3,
-    "fullSourceCi": "pending"
+    "fullSourceCi": {
+      "sha": "946bad06a41f09939c779709d7e31951617ffce6",
+      "runId": 37234145326,
+      "passed": 6771,
+      "guardedSkipped": 596,
+      "failed": 0,
+      "workerPassed": 57
+    }
   }
 }

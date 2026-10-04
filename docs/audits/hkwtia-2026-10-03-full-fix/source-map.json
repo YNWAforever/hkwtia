@@ -1376,24 +1376,24 @@
     "taskId": "T16",
     "symbol": "backupAndRestore",
     "path": "tests/integration/audit-database-fixture.ts",
-    "headSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
-    "evidenceBasis": "Existing owned PG16 fixture extended; actual custom dump/restore, no environment URL",
-    "implementedInWorkingTree": true
+    "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "evidenceBasis": "Existing owned PG16 fixture extended; actual custom dump/restore, no environment URL; byte-verified committed source/current receipts",
+    "implementedInWorkingTree": false
   },
   {
     "taskId": "T16",
     "symbol": "verify historical web",
     "path": "scripts/verify-full-rollback-web.mjs",
-    "headSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
-    "evidenceBasis": "Exact old archive/build/runtime byte proof; isolated unique marker/auth/current schema; 3 native passes",
-    "implementedInWorkingTree": true
+    "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "evidenceBasis": "Exact old archive/build/runtime byte proof; isolated unique marker/auth/current schema; 3 native passes; byte-verified committed source/current receipts",
+    "implementedInWorkingTree": false
   },
   {
     "taskId": "T04",
     "symbol": "createOperationsMetricsRepository.read/record",
     "path": "lib/db/repos/operations-metrics.ts",
-    "headSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
-    "implementedInWorkingTree": true,
-    "evidenceBasis": "actual PostgreSQL16 recorded population and strict CMS/AI source attribution regression"
+    "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "implementedInWorkingTree": false,
+    "evidenceBasis": "actual PostgreSQL16 recorded population and strict CMS/AI source attribution regression; byte-verified committed source/current receipts"
   }
 ]
