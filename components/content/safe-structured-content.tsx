@@ -1,40 +1,75 @@
-import type {ReactNode} from "react";
+import type { ReactNode } from "react";
 
-const REPORT_TITLE = /^Board report: \d{4}-(0[1-9]|1[0-2])$/;
-const SECTION_HEADINGS = new Set([
-  "Key performance indicators",
-  "Executive summary",
-  "Highlights",
-  "Risks",
-  "Recommended actions",
-  "App links",
-]);
-const KPI_HEADER = "| KPI | Value |";
+import en from "@/messages/en.json";
+import zh from "@/messages/zh-HK.json";
+const REPORT_LABELS = [
+  en.Admin.reports.generatedReport,
+  zh.Admin.reports.generatedReport,
+];
+function isReportTitle(value: string): boolean {
+  return REPORT_LABELS.some(
+    (labels) =>
+      value.startsWith(labels.title + ": ") &&
+      /^\d{4}-(0[1-9]|1[0-2])$/.test(value.slice(labels.title.length + 2)),
+  );
+}
+const SECTION_HEADINGS = new Set(
+  REPORT_LABELS.flatMap((labels) => [
+    labels.kpis,
+    labels.summary,
+    labels.highlights,
+    labels.risks,
+    labels.actions,
+    labels.links,
+  ]),
+);
+const KPI_HEADERS = new Set(
+  REPORT_LABELS.map((labels) => `| ${labels.kpi} | ${labels.value} |`),
+);
+/** Decode only literal text nodes AFTER the bounded token parser. Never parse decoded text as HTML, MDX or links. */
+function boardLiteral(value: string): string {
+  const escaped = "\\`*_[]{}()#!|~>+-=.";
+  return value
+    .replace(/\\(.)/g, (original, character: string) =>
+      escaped.includes(character) ? character : original,
+    )
+    .replace(
+      /&(amp|lt|gt);/g,
+      (_, entity: "amp" | "lt" | "gt") =>
+        ({ amp: "&", lt: "<", gt: ">" })[entity]!,
+    );
+}
 const KPI_SEPARATOR = "| --- | ---: |";
 const KPI_ROW = /^\| ([^|\n]+) \| ([^|\n]+) \|$/;
 const INLINE_TOKEN =
   /\*\*([^*\n]+)\*\*|(?<!!)\[([^\]\n]+)\]\((\/(?!\/)[A-Za-z0-9/_?=&.%#~-]*)\)/g;
 
-export type SafeStructuredContentMode =
-  | "board-report"
-  | "build-log";
+export type SafeStructuredContentMode = "board-report" | "build-log";
 
 type TableHeaders = Readonly<{
   kpi: string;
   value: string;
 }>;
 
-function inlineNodes(value: string, keyPrefix: string): ReactNode[] {
+function inlineNodes(
+  value: string,
+  keyPrefix: string,
+  mode: SafeStructuredContentMode,
+): ReactNode[] {
+  const text =
+    mode === "board-report" ? boardLiteral : (value: string) => value;
   const nodes: ReactNode[] = [];
   let cursor = 0;
   let tokenIndex = 0;
 
   for (const match of value.matchAll(INLINE_TOKEN)) {
     const index = match.index;
-    if (index > cursor) nodes.push(value.slice(cursor, index));
+    if (index > cursor) nodes.push(text(value.slice(cursor, index)));
     if (match[1]) {
       nodes.push(
-        <strong key={`${keyPrefix}-strong-${tokenIndex}`}>{match[1]}</strong>,
+        <strong key={`${keyPrefix}-strong-${tokenIndex}`}>
+          {text(match[1])}
+        </strong>,
       );
     } else {
       nodes.push(
@@ -43,7 +78,7 @@ function inlineNodes(value: string, keyPrefix: string): ReactNode[] {
           href={match[3]}
           key={`${keyPrefix}-link-${tokenIndex}`}
         >
-          {match[2]}
+          {text(match[2])}
         </a>,
       );
     }
@@ -51,14 +86,12 @@ function inlineNodes(value: string, keyPrefix: string): ReactNode[] {
     tokenIndex += 1;
   }
 
-  if (cursor < value.length) nodes.push(value.slice(cursor));
+  if (cursor < value.length) nodes.push(text(value.slice(cursor)));
   return nodes;
 }
 
 function isBuildLogHeading(value: string): boolean {
-  return value.length >= 1
-    && value.length <= 120
-    && !/[<>{}]/.test(value);
+  return value.length >= 1 && value.length <= 120 && !/[<>{}]/.test(value);
 }
 
 function safeBlocks(
@@ -77,12 +110,15 @@ function safeBlocks(
     }
 
     if (
-      mode === "board-report"
-      && line.startsWith("# ")
-      && REPORT_TITLE.test(line.slice(2))
+      mode === "board-report" &&
+      line.startsWith("# ") &&
+      isReportTitle(line.slice(2))
     ) {
       blocks.push(
-        <h1 className="font-serif text-3xl font-semibold" key={`block-${index}`}>
+        <h1
+          className="font-serif text-3xl font-semibold"
+          key={`block-${index}`}
+        >
           {line.slice(2)}
         </h1>,
       );
@@ -98,7 +134,10 @@ function safeBlocks(
           : isBuildLogHeading(heading);
       if (accepted) {
         blocks.push(
-          <h2 className="font-serif text-2xl font-semibold" key={`block-${index}`}>
+          <h2
+            className="font-serif text-2xl font-semibold"
+            key={`block-${index}`}
+          >
             {heading}
           </h2>,
         );
@@ -108,24 +147,28 @@ function safeBlocks(
     }
 
     if (
-      mode === "board-report"
-      && line === KPI_HEADER
-      && lines[index + 1] === KPI_SEPARATOR
+      mode === "board-report" &&
+      KPI_HEADERS.has(line) &&
+      lines[index + 1] === KPI_SEPARATOR
     ) {
-      const rows: Array<{label: string; value: string}> = [];
+      const rows: Array<{ label: string; value: string }> = [];
       let rowIndex = index + 2;
       for (; rowIndex < lines.length; rowIndex += 1) {
         const row = KPI_ROW.exec(lines[rowIndex]);
         if (!row) break;
-        rows.push({label: row[1], value: row[2]});
+        rows.push({ label: row[1], value: row[2] });
       }
       blocks.push(
         <div className="overflow-x-auto" key={`block-${index}`}>
           <table className="min-w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="px-3 py-2" scope="col">{tableHeaders.kpi}</th>
-                <th className="px-3 py-2" scope="col">{tableHeaders.value}</th>
+                <th className="px-3 py-2" scope="col">
+                  {tableHeaders.kpi}
+                </th>
+                <th className="px-3 py-2" scope="col">
+                  {tableHeaders.value}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -135,10 +178,10 @@ function safeBlocks(
                   key={`${row.label}-${tableIndex}`}
                 >
                   <th className="px-3 py-2 font-medium" scope="row">
-                    {inlineNodes(row.label, `table-label-${tableIndex}`)}
+                    {inlineNodes(row.label, `table-label-${tableIndex}`, mode)}
                   </th>
                   <td className="px-3 py-2">
-                    {inlineNodes(row.value, `table-value-${tableIndex}`)}
+                    {inlineNodes(row.value, `table-value-${tableIndex}`, mode)}
                   </td>
                 </tr>
               ))}
@@ -164,7 +207,7 @@ function safeBlocks(
         <ul className="list-disc space-y-1 pl-5" key={`block-${index}`}>
           {items.map((item, listIndex) => (
             <li key={`item-${listIndex}`}>
-              {inlineNodes(item, `list-${index}-${listIndex}`)}
+              {inlineNodes(item, `list-${index}-${listIndex}`, mode)}
             </li>
           ))}
         </ul>,
@@ -178,7 +221,7 @@ function safeBlocks(
         className="whitespace-pre-wrap break-words leading-6"
         key={`block-${index}`}
       >
-        {inlineNodes(line, `paragraph-${index}`)}
+        {inlineNodes(line, `paragraph-${index}`, mode)}
       </p>,
     );
     index += 1;

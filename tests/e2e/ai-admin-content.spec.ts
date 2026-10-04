@@ -283,6 +283,15 @@ test.describe("actual isolated administrative content review, copy-only adoption
             { exact: true },
           ),
         ).toBeVisible();
+        await expect(page.getByRole("table")).toHaveCount(1);
+        await expect(page.getByRole("rowheader")).toHaveCount(10);
+        await expect(
+          page.getByRole("heading", {
+            level: 2,
+            name: m.Admin.reports.generatedReport.kpis,
+            exact: true,
+          }),
+        ).toBeVisible();
         expect(
           await page.locator("main script,main iframe,main object").count(),
         ).toBe(0);
