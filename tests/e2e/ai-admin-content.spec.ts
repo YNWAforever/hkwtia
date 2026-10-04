@@ -168,15 +168,13 @@ test.describe("actual isolated administrative content review, copy-only adoption
           await expect(
             page.getByRole("heading", { name: t.title, exact: true }),
           ).toBeVisible();
-          const form = page
-            .locator("form")
-            .filter({
-              has: page.locator(
-                'textarea[name="' +
-                  (entry.kind === "event" ? "descriptionEn" : "bodyMdx") +
-                  '"]',
-              ),
-            });
+          const form = page.locator("form").filter({
+            has: page.locator(
+              'textarea[name="' +
+                (entry.kind === "event" ? "descriptionEn" : "bodyMdx") +
+                '"]',
+            ),
+          });
           const fieldsBefore = await form.evaluate((node) =>
             Object.fromEntries(new FormData(node as HTMLFormElement)),
           );
@@ -274,9 +272,9 @@ test.describe("actual isolated administrative content review, copy-only adoption
         await page.goto(
           origin + prefix + "/admin/reports/board-drafts/" + fixture.boardId,
         );
-        await expect(page.getByRole("heading", { level: 1 })).toContainText(
-          m.Admin.reports.generatedReport.title,
-        );
+        await expect(
+          page.locator("main header").getByRole("heading", { level: 1 }),
+        ).toContainText(m.Admin.reports.generatedReport.title);
         await expect(
           page.getByText(
             locale === "en"
