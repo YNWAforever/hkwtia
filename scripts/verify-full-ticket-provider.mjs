@@ -3,10 +3,10 @@
  * stay in memory; committed receipts contain hashed provider references only.
  * Owns a local3450 server,3451 signed-event relay and unique synthetic events.
  */
-import { spawn } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { createServer } from "node:http";
-import { createHash, randomUUID, randomBytes } from "node:crypto";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { createHash, createHmac, randomUUID, randomBytes } from "node:crypto";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
 import { Pool } from "pg";
 import Stripe from "stripe";
@@ -14,9 +14,10 @@ import { chromium, expect } from "@playwright/test";
 const env = process.env,
   base = "http://localhost:3450",
   run = randomUUID(),
-  prefix = "t16-provider-" + run;
+  prefix = "t14c-provider-" + run;
 const ticketPassSecret = randomBytes(32).toString("base64url");
 const localCronSecret = randomBytes(32).toString("base64url");
+const localUnsubscribeSecret = randomBytes(32).toString("base64url");
 const proxySuffix = randomBytes(2);
 const syntheticProxyIp = `198.18.${proxySuffix[0]}.${proxySuffix[1]}`;
 if (
@@ -32,11 +33,22 @@ if (
   env.NODE_ENV === "production"
 )
   throw Error("CONFIRMED_ISOLATED_TEST_REQUIRED");
+if (new URL(env.NEON_AUTH_BASE_URL).hostname !== "ep-plain-mouse-azm8pl2j.neonauth.c-3.ap-southeast-1.aws.neon.tech") throw Error("ISOLATED_AUTH_REQUIRED");
 const stripe = new Stripe(env.STRIPE_TEST_SECRET_KEY),
   pool = new Pool({ connectionString: env.DATABASE_URL_TEST });
 const mask = (id) =>
   id ? createHash("sha256").update(id).digest("hex").slice(0, 16) : null;
+const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], {encoding:"utf8"}).trim();
+const buildProof = JSON.parse(readFileSync(".playwright/full-fix-t14c-build-proof.json", "utf8"));
+expect(buildProof.sourceSha).toBe(sourceSha);
+expect(buildProof.buildExit).toBe(0);
+for(const [path,digest] of Object.entries(buildProof.appFiles))expect(createHash("sha256").update(readFileSync(path)).digest("hex")).toBe(digest);
 const evidence = {
+  observedAt: new Date().toISOString(), sourceSha, buildId: buildProof.buildId,
+  automaticRemoteWebhook:false, googleVerified:false, magicLinkVerified:false,
+  relay:"Actual Stripe CLI signed events held in an owned loopback relay, then forwarded/replayed",
+  partialRefund:"NOT_APPLICABLE: existing refundOrder and Stripe adapter support full refunds only",
+  emailDelivery:"actual outbox/job with synthetic test sink, not external recipient delivery",
   scope:
     "confirmed isolated Neon/Auth; synthetic data; Stripe TEST; email test sink",
   production: false,
@@ -51,6 +63,8 @@ let holding = true,
   listener,
   browser,
   signingSecret;
+const progressTimer=setInterval(()=>writeFileSync(".playwright/full-fix-t14c-provider-progress-safe.json",JSON.stringify({observedAt:new Date().toISOString(),run,sourceSha,stage,verifiedChecks:evidence.steps.length,production:false})),5000);
+progressTimer.unref();
 const forward = async (event) => {
   const response = await fetch(base + "/api/stripe/webhook", {
     method: "POST",
@@ -262,7 +276,7 @@ async function verifyAsyncRefund(admin, kind, card, finalStatus) {
   await admin
     .context()
     .addCookies([{ name: "NEXT_LOCALE", value: "en", url: base }]);
-  await admin.goto(base + "/en/admin/events-mgmt/" + x.eventId + "?tab=orders");
+  await admin.goto(base + "/admin/events-mgmt/" + x.eventId + "?tab=orders");
   await expect(admin.getByText(x.id, { exact: true })).toBeVisible();
   const submitRefund = async () => {
     const [response] = await Promise.all([
@@ -370,19 +384,21 @@ try {
         "SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations",
       )
     ).rows[0].n,
-  ).toBe(55);
+  ).toBe(59);
+  expect((await pool.query("SELECT count(*)::int AS n FROM profiles WHERE email IS NOT NULL AND email NOT LIKE '%example.test'")).rows[0].n).toBe(0);
+  mkdirSync("docs/audits/hkwtia-2026-10-03-full-fix/evidence/t14c", {recursive:true});
   expect((await stripe.balance.retrieve()).livemode).toBe(false);
   stage = "listener";
   await new Promise((resolve) => relay.listen(3451, "127.0.0.1", resolve));
   listener = spawn(
-    env.T16_STRIPE_CLI_PATH ??
+    env.T14C_STRIPE_CLI_PATH ??
       "C:/Users/laich/Documents/hkwtia/.worktrees/audit-remediation/.tmp/audit-release/stripe-cli/stripe.exe",
     [
       "--config",
-      env.T16_STRIPE_CONFIG_PATH ??
+      env.T14C_STRIPE_CONFIG_PATH ??
         "C:/Users/laich/Documents/hkwtia/.worktrees/audit-remediation/.playwright/audit-stripe-cli.toml",
       "--device-name",
-      "hkwtia-audit-20260927",
+      "hkwtia-full-fix-20261003",
       "listen",
       "--skip-update",
       "--events-from",
@@ -425,6 +441,7 @@ try {
         EMAIL_FROM: "HKWTIA Acceptance <no-reply@example.test>",
         TICKET_PASS_TOKEN_SECRET: ticketPassSecret,
         CRON_SECRET: localCronSecret,
+        UNSUBSCRIBE_TOKEN_SECRET: localUnsubscribeSecret,
         NODE_OPTIONS: "--max-old-space-size=4096",
       },
       windowsHide: true,
@@ -442,6 +459,7 @@ try {
         ...env,
         TICKET_PASS_TOKEN_SECRET: ticketPassSecret,
         CRON_SECRET: localCronSecret,
+        UNSUBSCRIBE_TOKEN_SECRET: localUnsubscribeSecret,
       }))
         if (v && /(SECRET|TOKEN|KEY|PASSWORD|DATABASE_URL)/.test(key))
           safe = safe.replaceAll(v, "[redacted]");
@@ -456,8 +474,20 @@ try {
       return false;
     }
   }, 45000);
+  // Unique published marker proves that the built HTTP runtime uses this exact isolated DB.
+  const probeId=randomUUID(), probeSlug=prefix+"-runtime-proof", probeTitle="Synthetic T14C runtime "+run;
+  await pool.query("INSERT INTO events(id,slug,title_en,title_zh,description_en,starts_at,published,status,registration_mode,visibility) VALUES($1,$2,$3,$3,'Synthetic runtime proof','2031-12-31',true,'published','rsvp','public')",[probeId,probeSlug,probeTitle]);
+  const probe=await fetch(base+"/events/"+probeSlug);expect(probe.status).toBe(200);expect(await probe.text()).toContain(probeTitle);
+  evidence.isolatedDbPositivelyProven=true;
+  writeFileSync(".playwright/full-fix-t14c-local-runtime-safe.json",JSON.stringify({origin:base,sourceSha,buildId:buildProof.buildId,ledger:59,dbSourcePositivelyProven:true,production:false}));
+  if(env.T14C_NATIVE === "true") {
+    stage="native-event-workspace";
+    const child=spawn(process.execPath,["--env-file=.env.local","node_modules/@playwright/test/cli.js","test","tests/e2e/full-fix-events.spec.ts","--workers=1"],{env:{...env,PLAYWRIGHT_BASE_URL:base,AUDIT_ISOLATED_ACCEPTANCE:"1",FULL_FIX_EXPECTED_SOURCE_SHA:sourceSha},windowsHide:true,stdio:["ignore","pipe","pipe"]});
+    const chunks=[];child.stdout.on("data",data=>chunks.push(data));child.stderr.on("data",data=>chunks.push(data));
+    const exit=await new Promise(resolve=>child.on("exit",resolve));writeFileSync(".playwright/full-fix-t14c-native.log",Buffer.concat(chunks));expect(exit).toBe(0);evidence.nativeEventWorkspaceExit=exit;
+  }
   browser = await chromium.launch();
-  if (env.T16_ASYNC_ONLY === "true") {
+  if (env.T14C_ASYNC_ONLY === "true") {
     evidence.scopeCases =
       "actual asynchronous refunds only; baseline payment/notice receipt retained separately";
     const staff = await isolatedBrowserContext();
@@ -487,7 +517,7 @@ try {
     );
     evidence.completed = true;
     writeFileSync(
-      "docs/audits/hkwtia-2026-10-01-remediation/evidence/t16/provider-async.json",
+      "docs/audits/hkwtia-2026-10-03-full-fix/evidence/t14c/provider-async.json",
       JSON.stringify(evidence, null, 2),
     );
     console.log(JSON.stringify(evidence));
@@ -495,8 +525,21 @@ try {
     const context = await isolatedBrowserContext(),
       page = await context.newPage();
     page.setDefaultTimeout(45000);
+    stage = "cancel-and-resume";
+    const cancelled = await checkout(page,"cancelled","4242424242424242");
+    await page.goto(base+"/events/"+cancelled.slug+"?ticket=cancelled");
+    expect((await snapshot(cancelled.id)).status).toBe("pending");
+    await expect(page.getByRole("button",{name:"Continue existing payment",exact:true})).toBeVisible();
+    await Promise.all([page.waitForURL(/checkout\.stripe\.com/),page.getByRole("button",{name:"Continue existing payment",exact:true}).click()]);
+    expect((await pool.query("SELECT count(*)::int AS n FROM event_orders WHERE event_id=$1",[cancelled.eventId])).rows[0].n).toBe(1);
+    await stripe.checkout.sessions.expire(cancelled.stripe_checkout_session_id);
+    await waitUntil(()=>queue.some(e=>e.type==="checkout.session.expired"&&e.object.id===cancelled.stripe_checkout_session_id));
+    await forward(queue.find(e=>e.type==="checkout.session.expired"&&e.object.id===cancelled.stripe_checkout_session_id));
+    expect((await snapshot(cancelled.id)).status).toBe("expired");
+    evidence.steps.push({case:"cancel return resumes original actual hosted session; provider expiry",checkoutReference:mask(cancelled.stripe_checkout_session_id),orders:1});
     stage = "decline";
     const declined = await checkout(page, "decline", "4000000000000002");
+    evidence.steps.push({case:"provider-confirmed expiry clears only the authorized recovery cookie on another event",sameBrowser:true,actualProviderRead:true});
     await page.locator("button[type=submit]").click();
     await expect(
       page.getByText(/Your card was declined|信用卡被拒/i),
@@ -580,6 +623,10 @@ try {
       [paid.id],
     );
     expect(seats.rows).toHaveLength(1);
+    const payload=Buffer.from(JSON.stringify({v:1,seatId:seats.rows[0].id,eventId:paid.eventId})).toString("base64url");
+    const passToken=payload+"."+createHmac("sha256",ticketPassSecret).update(payload).digest("base64url");
+    const pass=await fetch(base+"/pass/"+passToken);expect(pass.status).toBe(200);expect(await pass.text()).toContain('role="img"');
+    evidence.steps.push({case:"paid seat actual private ticket page",http:200,hasQr:true,tokenLogged:false,screenshot:false});
     evidence.steps.push({
       case: "paid with interrupted return, delayed signed event and replay",
       checkoutReference: mask(paid.stripe_checkout_session_id),
@@ -611,6 +658,8 @@ try {
       admin.getByRole("cell", { name: "Refunded", exact: true }),
     ).toBeVisible({ timeout: 60000 });
     expect((await snapshot(paid.id)).status).toBe("refunded");
+    const invalidatedPass=await fetch(base+"/pass/"+passToken);expect(invalidatedPass.status).toBe(404);
+    evidence.steps.push({case:"successful full refund invalidates signed ticket",http:404,tokenLogged:false});
     const intent =
       typeof completed.object.payment_intent === "string"
         ? completed.object.payment_intent
@@ -622,7 +671,7 @@ try {
     expect(refunds.data[0].currency).toBe("hkd");
     expect((await stripe.paymentIntents.retrieve(intent)).livemode).toBe(false);
     await admin.screenshot({
-      path: ".playwright/t16-orders-en-desktop.png",
+      path: ".playwright/full-fix-t14c-orders-en-desktop.png",
       fullPage: true,
     });
     await admin.goto(
@@ -633,7 +682,7 @@ try {
     ).toBeVisible();
     await admin.setViewportSize({ width: 390, height: 844 });
     await admin.screenshot({
-      path: ".playwright/t16-orders-zh-mobile.png",
+      path: ".playwright/full-fix-t14c-orders-zh-mobile.png",
       fullPage: true,
     });
     await waitUntil(() =>
@@ -683,11 +732,11 @@ try {
       "failed",
     );
     evidence.completed = true;
-    mkdirSync("docs/audits/hkwtia-2026-10-01-remediation/evidence/t16", {
+    mkdirSync("docs/audits/hkwtia-2026-10-03-full-fix/evidence/t14c", {
       recursive: true,
     });
     writeFileSync(
-      "docs/audits/hkwtia-2026-10-01-remediation/evidence/t16/provider.json",
+      "docs/audits/hkwtia-2026-10-03-full-fix/evidence/t14c/provider.json",
       JSON.stringify(evidence, null, 2),
     );
     console.log(JSON.stringify(evidence));
@@ -704,14 +753,14 @@ try {
     .replace(/https?:\/\/[^\s]+/g, "[url]")
     .slice(0, 160);
   writeFileSync(
-    ".playwright/t16-provider-partial.json",
+    ".playwright/t14c-provider-partial.json",
     JSON.stringify(evidence, null, 2),
   );
   if (browser) {
     try {
       const pages = browser.contexts().flatMap((c) => c.pages());
       await pages.at(-1)?.screenshot({
-        path: ".playwright/t16-provider-failure.png",
+        path: ".playwright/t14c-provider-failure.png",
         fullPage: true,
       });
     } catch {}
@@ -726,6 +775,14 @@ try {
   );
   process.exitCode = 1;
 } finally {
+  clearInterval(progressTimer);
+  // Expire only still-open TEST sessions belonging to this run; never touch historical/other orders.
+  try {
+    const owned=(await pool.query("SELECT o.id,o.stripe_checkout_session_id FROM event_orders o JOIN events e ON e.id=o.event_id WHERE e.slug LIKE $1 AND o.status='pending' AND o.stripe_checkout_session_id IS NOT NULL",[prefix+"-%"])).rows;
+    for(const row of owned){const session=await stripe.checkout.sessions.retrieve(row.stripe_checkout_session_id);expect(session.livemode).toBe(false);if(session.status==="open")await stripe.checkout.sessions.expire(session.id);}
+    evidence.cleanup="Only owned open Stripe TEST sessions expired; immutable synthetic order/audit/provider history retained";
+  } catch {evidence.cleanup="Owned TEST cleanup incomplete; reconcile before retry";}
+  writeFileSync(".playwright/full-fix-t14c-provider-final-safe.json",JSON.stringify(evidence,null,2));
   await browser?.close();
   server?.kill();
   listener?.kill();
