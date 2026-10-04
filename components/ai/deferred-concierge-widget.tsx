@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ConciergeLauncher } from "./concierge-launcher";
 import type { ConciergeWidget, ConciergeWidgetProps } from "./concierge-widget";
 import { CONCIERGE_OPEN_EVENT } from "@/lib/ai/concierge-open";
@@ -11,40 +11,40 @@ export function DeferredConciergeWidget(props: ConciergeWidgetProps) {
   const [loading, setLoading] = useState(false),
     [failed, setFailed] = useState(false);
   const mounted = useRef(false),
-    pending = useRef(false),
-    invoker = useRef<HTMLElement | null>(null);
-  async function open() {
+    pending = useRef(false);
+  const [initialInvoker, setInitialInvoker] = useState<HTMLElement | null>(
+    null,
+  );
+  const open = useCallback(async () => {
     if (pending.current) return;
     const active = document.activeElement;
-    invoker.current = active instanceof HTMLElement ? active : null;
+    setInitialInvoker(active instanceof HTMLElement ? active : null);
     pending.current = true;
     setLoading(true);
     setFailed(false);
     try {
-      const module = await import("./concierge-widget");
-      if (mounted.current) setWidget(() => module.ConciergeWidget);
+      const loaded = await import("./concierge-widget");
+      if (mounted.current) setWidget(() => loaded.ConciergeWidget);
     } catch {
       if (mounted.current) setFailed(true);
     } finally {
       pending.current = false;
       if (mounted.current) setLoading(false);
     }
-  }
-  const openRef = useRef(open);
-  openRef.current = open;
+  }, []);
   useEffect(() => {
     mounted.current = true;
     const request = () => {
-      if (!Widget) void openRef.current();
+      if (!Widget) void open();
     };
     window.addEventListener(CONCIERGE_OPEN_EVENT, request);
     return () => {
       mounted.current = false;
       window.removeEventListener(CONCIERGE_OPEN_EVENT, request);
     };
-  }, [Widget]);
+  }, [Widget, open]);
   if (Widget)
-    return <Widget {...props} initialOpen initialInvoker={invoker.current} />;
+    return <Widget {...props} initialOpen initialInvoker={initialInvoker} />;
   return (
     <>
       <ConciergeLauncher label={props.labels.launcher}>

@@ -73,3 +73,46 @@ for (const locale of ["en", "zh-HK"] as const) {
     await expect(invoker).toBeFocused();
   });
 }
+for (const locale of ["en", "zh-HK"] as const) {
+  test(`${locale} a failed dialog download keeps manual journeys and can recover`, async ({
+    page,
+  }) => {
+    test.skip(
+      process.env.AUDIT_ISOLATED_ACCEPTANCE !== "1" ||
+        process.env.PLAYWRIGHT_BASE_URL !== "http://localhost:3450",
+      "BLOCKED: owned positively proven isolated production build required",
+    );
+    const labels = JSON.parse(
+      readFileSync(`messages/${locale}.json`, "utf8"),
+    ).Concierge;
+    const heavy = chunks(".next/static/chunks");
+    expect(heavy.length).toBeGreaterThan(0);
+    const prefix = locale === "zh-HK" ? "/zh" : "";
+    await page.route("**/*", (route) =>
+      heavy.includes(basename(new URL(route.request().url()).pathname))
+        ? route.abort("failed")
+        : route.continue(),
+    );
+    await page.goto(prefix + "/about");
+    const launcher = page.getByRole("button", {
+      name: labels.launcher,
+      exact: true,
+    });
+    await launcher.click();
+    const alert = page.getByRole("alert");
+    await expect(alert).toContainText(labels.temporarilyUnavailable);
+    await expect(
+      alert.getByRole("link", { name: labels.applicationGuide }),
+    ).toHaveAttribute("href", prefix + "/join");
+    await expect(
+      alert.getByRole("link", { name: labels.contactSupport }),
+    ).toHaveAttribute("href", prefix + "/contact");
+    await page.unroute("**/*");
+    await launcher.click();
+    const dialog = page.getByRole("dialog", { name: labels.title });
+    await expect(dialog).toBeVisible();
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(launcher).toBeFocused();
+  });
+}
