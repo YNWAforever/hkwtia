@@ -53,7 +53,7 @@ test.describe("T10 isolated actual staff inbox assistance",()=>{
    await expect.poll(async()=>page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('wtia:inbox-protected:')).length)).toBe(1);
    // Use the actual UI sign-out. The unsaved-work prompt is an explicit user choice.
    page.on('dialog',dialog=>dialog.accept());
-   const account=page.locator('details').filter({has:page.getByRole('button',{name:t.Admin.shell.signOut,exact:true})});
+   const account=page.locator('details').filter({has:page.getByRole('button',{name:t.Admin.shell.signOut,exact:true,includeHidden:true})});
    await account.locator('summary').click();
    await page.getByRole('button',{name:t.Admin.shell.signOut,exact:true}).click();
    await expect.poll(async()=>new URL(page.url()).pathname).toBe(prefix+'/admin-login');
