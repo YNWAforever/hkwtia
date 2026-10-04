@@ -61,7 +61,7 @@
     "path": "lib/membership/onboarding.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.ensureProfile",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T18",
@@ -141,7 +141,7 @@
     "path": "lib/membership/lifecycle.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.lifecycle.canTransitionMembership",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T14B",
@@ -149,7 +149,7 @@
     "path": "lib/membership/onboarding.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.completeApplication",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T14B",
@@ -157,7 +157,7 @@
     "path": "lib/membership/grants.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.grants.isMembershipGrantEffectiveAt",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T14B",
@@ -165,7 +165,7 @@
     "path": "lib/membership/onboarding.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.loadOrCreateApplication",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T14B",
@@ -173,7 +173,7 @@
     "path": "lib/membership/policy.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.policy.resolveMembershipPolicy",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T14B",
@@ -181,7 +181,7 @@
     "path": "lib/membership/join-service.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.join-service.resumeOrStartJoin",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T02",
@@ -325,7 +325,7 @@
     "path": "lib/db/repos/membership-grants.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.membership-grants.grantMembership",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T14B",
@@ -333,7 +333,7 @@
     "path": "lib/db/repos/membership-grant-expiry.ts",
     "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.membership-grant-expiry.expireFiniteGrants",
     "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "evidenceBasis": "current-checkout"
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
   },
   {
     "taskId": "T04",
@@ -847,5 +847,32 @@
     "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
     "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
     "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "jobsRepository.processWebhookLifecycle",
+    "path": "lib/db/repos/jobs.ts",
+    "headSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "interface": "existing actor/system correlated WebhookLifecycleCommand; transactional stale invoice engagement ignored",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
+    "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "JoinPage",
+    "path": "app/[locale]/(join)/join/page.tsx",
+    "headSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "interface": "explicit current-member owned completed application reads existing getByApplicationId; localized authoritative complete route or manual recovery",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
+    "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "real Stripe TEST verifier",
+    "path": "scripts/verify-full-fix-membership-provider.mjs",
+    "headSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "interface": "explicit isolated opt-in; actual hosted Checkout/provider-retrieved events; controlled signed replay separate from automatic remote delivery",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
+    "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
   }
 ]

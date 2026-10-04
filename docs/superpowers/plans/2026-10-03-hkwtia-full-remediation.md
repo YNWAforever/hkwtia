@@ -613,3 +613,11 @@ npm --prefix workers test
 - [x] Exact Preview17positive DB/Auth entry checks + final single full9browser cases all pass. EN/HK five entity kinds,51/101 workspace keysets, Back/Forward, member denial,390px/44px/axe0; message/membership/billing/budget delta0. Earlier native7pass2fail was scale-fixture label collision, corrected at fixture source without changing product limits.
 - [x] Traditional Chinese operational handbook and daily/weekly/monthly recovery entries provided.
 - [ ] Full T10/T14/T17 journeys, true provider/worker windows and3–5 human staff G5 observations remain task-specific gates; no full-fix or Production claim.
+
+## T14B execution record — 2026-10-04
+
+- [x] Disposable PostgreSQL all59migrations: 13 lifecycle cases; real target stale-engagement RED→GREEN. Existing actor, attempts, live-owner uniqueness and audit transaction preserved.
+- [x] Completed-owned continuation unitRED4/nativeRED2→new Preview native4; missing/failed read gives manual recovery; EN/HK and390px screenshots.
+- [x] Actual Stripe TEST hosted payment, unchanged Checkout on return, real provider-event signed replay/duplicate, owned test subscription cancellation and reconciliation; no Production/refund/send.
+- [x] Actual isolatedNeon billing/identity/policy/5000renewal regression28; existing finite/legacy grant and entitlement boundaries18; full6637pass455skip; checks/build/type/lint/strings and exactCI7 green.
+- [ ] Verified-email/no-profile/Google/magic, automatic remote webhook/recurring provider, G5worker/sender/3–5humanstaff and remaining review/scale acceptance remain separate gates; T14B and mixed64cases stayPARTIAL.
