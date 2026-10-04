@@ -214,6 +214,15 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")("staff delivery re
         expect(await resendStaffPass(staff, o.seat, intent, d)).toMatchObject({status: 'uncertain'});
         expect(await resendStaffPass(staff, o.seat, randomUUID(), d)).toMatchObject({status: 'uncertain'}); expect(d.send).toHaveBeenCalledTimes(1);
     });
+    it('manual pass order refunded during render is rechecked before the provider request', async () => {
+        const o = await passFixture(), d = manualPorts(); const runner = d.runner;
+        const deps = {...d, runner: () => ({...runner(), renderEmail: async (...args: Parameters<typeof renderEmail>) => {
+            const rendered = await renderEmail(...args); await f.pool.query("UPDATE event_orders SET status='refunded' WHERE id=$1", [o.order]); return rendered;
+        }})};
+        expect(await resendStaffPass(staff, o.seat, randomUUID(), deps)).toMatchObject({status: 'blocked'});
+        expect(d.send).not.toHaveBeenCalled();
+        expect((await f.pool.query('SELECT status,error_code FROM ticket_email_outbox WHERE seat_id=$1', [o.seat])).rows).toEqual([{status: 'suppressed', error_code: 'order_state_changed'}]);
+    });
     it('concurrent manual intents serialize before queueing; pending does not become a false sent result', async () => {
         const o = await passFixture(), d = manualPorts();
         const notices = await Promise.all([d.outbox.queueStaffPass(staff, o.seat, randomUUID()), d.outbox.queueStaffPass(staff, o.seat, randomUUID())]);
