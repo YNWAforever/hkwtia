@@ -1,0 +1,64 @@
+(node:51120) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:17944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › en streamed membership catalogue and event filters retain manual journeys (3.1s)
+(node:28752) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › zh-HK streamed membership catalogue and event filters retain manual journeys (1.8s)
+
+
+  1) [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › en streamed membership catalogue and event filters retain manual journeys 
+
+    Error: Public activity output must be bounded to 12 cards
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 12
+    Received:    282
+
+      54 |       page.getByText(messages.Common.eventsListLoading, { exact: true }),
+      55 |     ).toHaveCount(0);
+    > 56 |     expect(await page.locator(".event-library > article").count(), "Public activity output must be bounded to 12 cards").toBeLessThanOrEqual(12);
+         |                                                                                                                          ^
+      57 |     const nextPage = page.getByRole("link", {name: messages.Common.nextPage, exact: true});
+      58 |     await expect(nextPage).toBeVisible();
+      59 |     const firstLinks = await page.locator(".event-library > article h3 a").evaluateAll(nodes => nodes.map(node => node.getAttribute("href")));
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\public-read-model-streaming.spec.ts:56:122
+
+    Error Context: test-results\public-read-model-streamin-65ea0-ters-retain-manual-journeys-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › zh-HK streamed membership catalogue and event filters retain manual journeys 
+
+    Error: Public activity output must be bounded to 12 cards
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 12
+    Received:    282
+
+      54 |       page.getByText(messages.Common.eventsListLoading, { exact: true }),
+      55 |     ).toHaveCount(0);
+    > 56 |     expect(await page.locator(".event-library > article").count(), "Public activity output must be bounded to 12 cards").toBeLessThanOrEqual(12);
+         |                                                                                                                          ^
+      57 |     const nextPage = page.getByRole("link", {name: messages.Common.nextPage, exact: true});
+      58 |     await expect(nextPage).toBeVisible();
+      59 |     const firstLinks = await page.locator(".event-library > article h3 a").evaluateAll(nodes => nodes.map(node => node.getAttribute("href")));
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\public-read-model-streaming.spec.ts:56:122
+
+    Error Context: test-results\public-read-model-streamin-ad0c1-ters-retain-manual-journeys-chromium\error-context.md
+
+  2 failed
+    [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › en streamed membership catalogue and event filters retain manual journeys 
+    [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › zh-HK streamed membership catalogue and event filters retain manual journeys 
+{"error":"USABILITY_ACCEPTANCE_GATE_FAILED","stage":"native","sqlState":null,"production":false}

@@ -1,0 +1,112 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL
+T13_SOURCE_FROZEN
+
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > resolves500 members with one bounded query instead of repeating page aggregates 40ms
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > keeps explicit IDs and all-matching exclusions consistent, rejects total overflow before exclusions 100ms
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > rejects a non-admin before opening either explicit or all-matching selection 3ms
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > shares company and membership-row scope with the existing list, including revocation 157ms
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > rejects invalid snapshot bounds and unsupported filters before executing SQL 2ms
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > retains repeatable-read scope when another transaction changes matching rows 390ms
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 1
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 6
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 11
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 16
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 21
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 26
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 31
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 1
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 6
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 11
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 16
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 21
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 26
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 31
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 1
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 6
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 11
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 16
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 21
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 26
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 31
+
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans 27468ms
+ ✓ tests/integration/admin-batch-snapshot.test.ts > admin batch snapshot on disposable PostgreSQL > materializes the filtered membership selection once, honors exclusions, and rejects foreign and tampered commits 287ms
+ ✓ tests/integration/admin-batch-snapshot.test.ts > admin batch snapshot on disposable PostgreSQL > reads exact 5000-item totals but only 50 details and detects a retryable failure off-page 466ms
+ ✓ tests/integration/admin-batch-snapshot.test.ts > admin batch snapshot on disposable PostgreSQL > retries only one actor-owned transient item without changing effect keys or uncertain outcomes 224ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 synthetic profiles: seed and measure search, keyset and aggregate report 2472ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-0 keyset has no omissions or duplicates 910ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-1 keyset has no omissions or duplicates 140ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-2 keyset has no omissions or duplicates 2349ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-3 keyset has no omissions or duplicates 578ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-4 keyset has no omissions or duplicates 1337ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-5 keyset has no omissions or duplicates 185ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-6 keyset has no omissions or duplicates 1064ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: descending keyset has no omissions or duplicates 2813ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 profiles: renewal keyset has no omissions or duplicates 1034ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 1000 synthetic drafts: bounded queue, filters, current actor and keyset coverage 9461ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 synthetic profiles: seed and measure search, keyset and aggregate report 13302ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-0 keyset has no omissions or duplicates 55053ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-1 keyset has no omissions or duplicates 5198ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-2 keyset has no omissions or duplicates 14379ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-3 keyset has no omissions or duplicates 24255ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-4 keyset has no omissions or duplicates 25939ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-5 keyset has no omissions or duplicates 8326ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates 51762ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates 55540ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 profiles: renewal keyset has no omissions or duplicates 30621ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 10000 synthetic drafts: bounded queue, filters, current actor and keyset coverage 16792ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 50-row defaults and 100-row inbox cap are enforced by actual repositories 44ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > default draft review queue returns50 of55 actual drafts 50ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > inbox UI defaults to50 actual conversations 30ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > inbox refuses a request above100 rows before querying 1ms
+ ✓ tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > set visibility preserves personal and company memberships, active seats, revoked-seat exclusion and matching membership IDs 125ms
+
+ Test Files  3 passed (3)
+      Tests  37 passed (37)
+   Start at  23:15:18
+   Duration  390.87s (transform 6.01s, setup 7.21s, collect 23.44s, tests 458.29s, environment 22.14s, prepare 2.27s)
+

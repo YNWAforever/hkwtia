@@ -1,0 +1,15 @@
+{
+  "gitSourceBindingApplied": true,
+  "configuredVariableNamesPresent": 54,
+  "disabledProviderVariablesAbsent": [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "OPENCODE_API_KEY",
+    "RESEND_API_KEY",
+    "WOZTELL_API_TOKEN",
+    "WOZTELL_CHANNEL_ID"
+  ],
+  "emptyVariablesAreOmittedByPlatform": true,
+  "sourceSha": "1aefcbdb654fe408291621e0e70b9e4230a02041",
+  "production": false
+}

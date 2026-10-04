@@ -1,0 +1,41 @@
+
+> hkwtia-platform@0.0.0 test
+> vitest run tests/unit/audit-full-workspace.test.tsx --maxWorkers=1
+
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/audit-full-workspace.test.tsx (3 tests | 1 failed) 190ms
+   ✓ organizes six daily-work groups while retaining every existing route 2ms
+   ✓ renders semantic SVG icons with the localized existing text/deep link 126ms
+   × keeps advanced filters collapsed without losing the GET filter values 61ms
+     → expect(received).toHaveValue()
+
+received value must be an HTMLElement or an SVGElement.
+Received has type:  Null
+Received has value: null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/audit-full-workspace.test.tsx > keeps advanced filters collapsed without losing the GET filter values
+Error: expect(received).toHaveValue()
+
+received value must be an HTMLElement or an SVGElement.
+Received has type:  Null
+Received has value: null
+ ❯ tests/unit/audit-full-workspace.test.tsx:67:57
+     65|     document.querySelector('input[name="status"][value="active"]'),
+     66|   ).toBeChecked();
+     67|   expect(document.querySelector('input[name="limit"]')).toHaveValue("5…
+       |                                                         ^
+     68| });
+     69| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  00:04:11
+   Duration  26.18s (transform 294ms, setup 1.87s, collect 3.75s, tests 190ms, environment 9.90s, prepare 923ms)
+

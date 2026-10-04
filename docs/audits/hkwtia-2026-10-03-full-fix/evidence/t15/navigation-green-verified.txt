@@ -1,0 +1,16 @@
+
+> hkwtia-platform@0.0.0 test
+> vitest run tests/unit/admin-member-navigation.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/member-query-contract.test.ts --maxWorkers=2
+
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/unit/admin-member-navigation.test.tsx (8 tests) 465ms
+ ✓ tests/unit/admin-presentational.test.tsx (12 tests) 473ms
+ ✓ tests/unit/member-query-contract.test.ts (4 tests) 17ms
+
+ Test Files  3 passed (3)
+      Tests  24 passed (24)
+   Start at  23:47:51
+   Duration  12.21s (transform 8.49s, setup 732ms, collect 14.25s, tests 955ms, environment 3.21s, prepare 574ms)
+

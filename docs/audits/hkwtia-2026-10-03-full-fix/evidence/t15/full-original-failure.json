@@ -1,0 +1,25 @@
+{
+  "command": "npm test -- --reporter=default --reporter=json --outputFile=.playwright/full-fix-t15-full-results.json --maxWorkers=4",
+  "classification": "Original full run FAILED; focused recovery is recorded separately and not added to this result",
+  "passed": 6746,
+  "failed": 3,
+  "skipped": 589,
+  "failedCases": [
+    {
+      "file": "admin-member-navigation.test.tsx",
+      "case": "admin member navigation renders keyboard-usable previous and next links while preserving a validated search trail"
+    },
+    {
+      "file": "admin-presentational.test.tsx",
+      "case": "admin presentation uses localized brand copy and preserves the query in next-page links without a false previous link"
+    },
+    {
+      "file": "admin-presentational.test.tsx",
+      "case": "admin presentation uses localized brand copy and preserves the query in next-page links without a false previous link"
+    }
+  ],
+  "workingTree": true,
+  "gitBase": "899e74cfc034f3f223dec39c51ecf18c26de4fdb",
+  "providerSuccessClaimed": false,
+  "production": false
+}

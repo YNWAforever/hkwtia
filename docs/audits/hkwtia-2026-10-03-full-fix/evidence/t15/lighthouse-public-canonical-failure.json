@@ -1,0 +1,257 @@
+{
+  "sourceSha": "1aefcbdb654fe408291621e0e70b9e4230a02041",
+  "experiment": "Public canonical versus local middleware origin mismatch; not product SEO evidence. Original performance scores retained.",
+  "exitCode": 1,
+  "reports": [
+    {
+      "path": "/",
+      "scores": {
+        "performance": 0.85,
+        "accessibility": 0.97,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 216.97,
+        "first-contentful-paint": 1295.088,
+        "largest-contentful-paint": 3073.264,
+        "total-blocking-time": 362,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/)"
+      },
+      "rawSha256": "07f685226b665df3c7fc712fd1ca69a1f1d2c9fff6dec99c4afc5a328c5474d0"
+    },
+    {
+      "path": "/membership",
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 0.97,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 513.9359999999999,
+        "first-contentful-paint": 1227.9291000000003,
+        "largest-contentful-paint": 2319.9291000000003,
+        "total-blocking-time": 105.01772499999993,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/membership)"
+      },
+      "rawSha256": "5751498386e2b0a71908b60c2edee77b4c0eb51c82506dc8d0eba9b2ab82ab7a"
+    },
+    {
+      "path": "/events",
+      "scores": {
+        "performance": 0.82,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 468.006,
+        "first-contentful-paint": 1410.7780000000002,
+        "largest-contentful-paint": 3203.4725000000008,
+        "total-blocking-time": 435.0000000000002,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/events)"
+      },
+      "rawSha256": "2f67cd7b86234fcb70cd32f6053ad433ace0376b2cbc3e54f8b1838289c124cb"
+    },
+    {
+      "path": "/programmes",
+      "scores": {
+        "performance": 0.95,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 14.344000000000001,
+        "first-contentful-paint": 1065.078,
+        "largest-contentful-paint": 2490.078,
+        "total-blocking-time": 197.50000000000023,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/programmes)"
+      },
+      "rawSha256": "523196b48e8ecaeea7c4470b6d196705877f69dfa8156ac1c042aa914adbaea1"
+    },
+    {
+      "path": "/partners",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 403.628,
+        "first-contentful-paint": 1231.62,
+        "largest-contentful-paint": 2656.62,
+        "total-blocking-time": 81,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/partners)"
+      },
+      "rawSha256": "fd489df94ab9cdb75d2551c3e9ce10dcf6e2b2b7f8888cb69b010ea1e3864784"
+    },
+    {
+      "path": "/zh",
+      "scores": {
+        "performance": 0.94,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 50.835,
+        "first-contentful-paint": 1229.5010000000002,
+        "largest-contentful-paint": 2378.2515,
+        "total-blocking-time": 211.00000000000023,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/zh)"
+      },
+      "rawSha256": "74816e6052ec50396a567676466b813a5edcaab15661e727872b1ae079e52b31"
+    },
+    {
+      "path": "/zh/membership",
+      "scores": {
+        "performance": 0.94,
+        "accessibility": 0.97,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 73.723,
+        "first-contentful-paint": 1265.6180000000002,
+        "largest-contentful-paint": 2900.545,
+        "total-blocking-time": 124.69100000000003,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/zh/membership)"
+      },
+      "rawSha256": "4e81070e28f09e1d10b9785c48ecb26d946639e3383ebe0d8433d1a4edd64dcc"
+    },
+    {
+      "path": "/zh/events",
+      "scores": {
+        "performance": 0.79,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 631.881,
+        "first-contentful-paint": 1499.328,
+        "largest-contentful-paint": 3303.984,
+        "total-blocking-time": 513.836,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/zh/events)"
+      },
+      "rawSha256": "e1dcc2e48c616f7d38fdeba72e5d36996637ef5e84a18ed9ed386a5007394c8e"
+    },
+    {
+      "path": "/zh/programmes",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 14.786,
+        "first-contentful-paint": 1264.7323999999999,
+        "largest-contentful-paint": 2415.4647999999997,
+        "total-blocking-time": 124.63380000000006,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/zh/programmes)"
+      },
+      "rawSha256": "04b7a47a51915c04ece0bfb46c889b2e528938302b4605e3fddaf3a6b9015832"
+    },
+    {
+      "path": "/zh/partners",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "server-response-time": 379.162,
+        "first-contentful-paint": 1347.499,
+        "largest-contentful-paint": 2607.998,
+        "total-blocking-time": 88.5,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": {
+        "id": "canonical",
+        "title": "Document does not have a valid `rel=canonical`",
+        "description": "Canonical links suggest which URL to show in search results. [Learn more about canonical links](https://developer.chrome.com/docs/lighthouse/seo/canonical/).",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "explanation": "Points to another `hreflang` location (http://localhost:3450/zh/partners)"
+      },
+      "rawSha256": "842f0f7b593c1f90c1e7d47d23a3cb5ff42ee7e6c50e2e1bdf4cb3c85c62b28d"
+    }
+  ]
+}

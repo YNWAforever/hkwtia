@@ -1,0 +1,60 @@
+{
+  "observedGitBase": "899e74cfc034f3f223dec39c51ecf18c26de4fdb",
+  "runtimeWasWorkingTree": true,
+  "sourceSha256": {
+    "lib/db/repos/admin-members.ts": "683dbbe5773f2d8fe5d99b05c7f341da13831fce24c353fb6e2ee8013840529b",
+    "lib/admin/member-query.ts": "f4dbd8a2af6fc9c92759a10bbdcd9ec5dd8bc9b71be226c85ba946a032e84b4d",
+    "lib/db/repos/ai-drafts.ts": "c72015e37f690fc52549c7eace78443dfe1fc830b948a4a73542b20f3bcd948a",
+    "lib/db/repos/inbox.ts": "3831564e52434e4678ab18bc31210ae3854a1f53ea602557e626214bae773b2d",
+    "lib/admin/inbox.ts": "4b829d72c370a98ffa5cb60aa139e2048d728a89401df754bd9afd05ebe6d501"
+  },
+  "environment": "owned disposable loopback PostgreSQL16/all61 migrations and positively proven isolated Neon DB/Auth; synthetic only",
+  "baseline": {
+    "performanceOriginal": {
+      "pass": 20,
+      "fail": 2,
+      "timeoutsMs": 60000,
+      "reason": "10k renewal-date and descending pagination"
+    },
+    "fixtureAttempt": {
+      "notApplicationRegression": true,
+      "reason": "test fixture enum casting and staff search inclusion; corrected with original attempt retained"
+    }
+  },
+  "after": {
+    "actualPostgres": 37,
+    "failed": 0,
+    "skipped": 0,
+    "commands": [
+      "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/admin-workflow-performance.test.ts tests/integration/admin-batch-snapshot.test.ts tests/integration/audit-full-batch-snapshot.test.ts --reporter=verbose"
+    ],
+    "defaultsRed": {
+      "targets": 4,
+      "reasons": [
+        "member default20 not50",
+        "draft default20 not50",
+        "inbox accepts101",
+        "inbox UI returns55 not50"
+      ]
+    },
+    "invariantMutation": {
+      "revokedSeatBugDetected": true,
+      "sourceRestored": true
+    },
+    "nativeInitial": {
+      "pass": 2,
+      "fail": 0,
+      "localFirstActionSamples": 12,
+      "allWithin3s": true,
+      "zeroAxeSeriousCritical": true,
+      "keyboardAndSameBrowserIdentitySwitch": true
+    }
+  },
+  "limits": [
+    "live provider and human staff/screensreader/real regional/RUM results remain unverified",
+    "baseline and after include shared-host load and GC variability; no production speed or regional recommendation claimed",
+    "Git base and worktree source hashes are separate; current full/Preview/source commit checks pending"
+  ],
+  "productionReleased": false,
+  "flagsEnabledInProduction": false
+}

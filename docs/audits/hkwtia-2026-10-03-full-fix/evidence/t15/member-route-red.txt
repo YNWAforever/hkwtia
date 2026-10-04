@@ -1,0 +1,67 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/member-query-contract.test.ts (4 tests | 2 failed) 40ms
+   × member operations query contract > preserves explicit20-row pages when the default is50 18ms
+     → expected 50 to be 20 // Object.is equality
+   × member operations query contract > normalizes strict multi-value filters and preserves a Hong Kong date window 16ms
+     → expected { search: 'Acme', …(10) } to match object { search: 'Acme', …(10) }
+   ✓ member operations query contract > binds a cursor to its sort and filters and uses Hong Kong midnight 4ms
+   ✓ member operations query contract > rejects unknown filters, contradictory dates and invalid statuses instead of widening audience 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/member-query-contract.test.ts > member operations query contract > preserves explicit20-row pages when the default is50
+AssertionError: expected 50 to be 20 // Object.is equality
+
+- Expected
++ Received
+
+- 20
++ 50
+
+ ❯ tests/unit/member-query-contract.test.ts:13:54
+     11|     const href=adminMemberListHref("/zh",{...base,limit:20});
+     12|     const params=Object.fromEntries(new URL(href,"https://example.test…
+     13|     expect(parseAdminMemberRouteQuery(params).limit).toBe(20);
+       |                                                      ^
+     14|     expect(new URL(adminMemberListHref("/zh",{...base,limit:50}),"http…
+     15|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/unit/member-query-contract.test.ts > member operations query contract > normalizes strict multi-value filters and preserves a Hong Kong date window
+AssertionError: expected { search: 'Acme', …(10) } to match object { search: 'Acme', …(10) }
+
+- Expected
++ Received
+
+@@ -1,10 +1,10 @@
+  {
+    "companyId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "completeness": "incomplete",
+    "cursor": null,
+-   "limit": 20,
++   "limit": 50,
+    "locale": "zh-HK",
+    "planCode": [
+      "corporate",
+    ],
+    "renewalFrom": "2026-10-01",
+
+ ❯ tests/unit/member-query-contract.test.ts:21:9
+     19|       renewalFrom: "2026-10-01", renewalTo: "2026-10-31", companyId,
+     20|       locale: "zh-HK", completeness: "incomplete", sort: "renewal_asc",
+     21|     })).toMatchObject({
+       |         ^
+     22|       search: "Acme", status: ["active", "past_due"], planCode: ["corp…
+     23|       renewalFrom: "2026-10-01", renewalTo: "2026-10-31", companyId,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  23:20:18
+   Duration  38.12s (transform 192ms, setup 2.79s, collect 412ms, tests 40ms, environment 17.62s, prepare 1.18s)
+

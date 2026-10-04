@@ -1,0 +1,98 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL
+T13_SOURCE_FROZEN
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 1
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 6
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 11
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 16
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 21
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 26
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 50 31
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 1
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 6
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 11
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 16
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 21
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 26
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 500 31
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 1
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 6
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 11
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 16
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 21
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 26
+
+stdout | tests/integration/audit-full-batch-snapshot.test.ts > all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans
+T13_SAMPLES 5000 31
+
+ ✓ tests/integration/audit-full-batch-snapshot.test.ts (7 tests) 12693ms
+   ✓ all-matching batch snapshot on actual isolated SQL > records actual50/500/5000 SQL round trips and warm plans  1805ms
+ ✓ tests/integration/admin-batch-snapshot.test.ts (3 tests) 12635ms
+   ✓ admin batch snapshot on disposable PostgreSQL > reads exact 5000-item totals but only 50 details and detects a retryable failure off-page  436ms
+ ✓ tests/integration/admin-workflow-performance.test.ts (22 tests) 219465ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 synthetic profiles: seed and measure search, keyset and aggregate report  2790ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-0 keyset has no omissions or duplicates  665ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-4 keyset has no omissions or duplicates  409ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-6 keyset has no omissions or duplicates  676ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: descending keyset has no omissions or duplicates  721ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 profiles: renewal keyset has no omissions or duplicates  742ms
+   ✓ T15 actual full-schema synthetic administrative scale > 1000 synthetic drafts: bounded queue, filters, current actor and keyset coverage  5842ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 synthetic profiles: seed and measure search, keyset and aggregate report  8978ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-0 keyset has no omissions or duplicates  26318ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-1 keyset has no omissions or duplicates  3124ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-2 keyset has no omissions or duplicates  8861ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-3 keyset has no omissions or duplicates  6604ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-4 keyset has no omissions or duplicates  19081ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-5 keyset has no omissions or duplicates  5313ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates  34634ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates  35610ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 profiles: renewal keyset has no omissions or duplicates  25097ms
+   ✓ T15 actual full-schema synthetic administrative scale > 10000 synthetic drafts: bounded queue, filters, current actor and keyset coverage  12714ms
+
+ Test Files  3 passed (3)
+      Tests  32 passed (32)
+   Start at  22:55:49
+   Duration  223.14s (transform 7.51s, setup 607ms, collect 12.83s, tests 244.79s, environment 17.70s, prepare 527ms)
+

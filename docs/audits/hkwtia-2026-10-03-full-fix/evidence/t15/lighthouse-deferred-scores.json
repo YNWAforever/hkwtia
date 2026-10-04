@@ -1,0 +1,195 @@
+{
+  "sourceSha": "5b0653f883f005314cb255876c9098e3284fd816",
+  "checkoutSha": "553738ee",
+  "exitCode": 1,
+  "originalThresholds": {
+    "performance": 0.9,
+    "accessibility": 0.95,
+    "seo": 0.95
+  },
+  "routeCount": 10,
+  "numberOfRuns": 1,
+  "localLabNotRUM": true,
+  "reports": [
+    {
+      "path": "/",
+      "scores": {
+        "performance": 0.9,
+        "accessibility": 0.97,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 250.33900000000003,
+        "first-contentful-paint": 1322.4319999999998,
+        "largest-contentful-paint": 3268.8639999999987,
+        "total-blocking-time": 161.5,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "e0da6fbadab3dc8bc96141676ded9677f3be416a18a554dd04f5bd1d3d6b0c6d"
+    },
+    {
+      "path": "/membership",
+      "scores": {
+        "performance": 0.95,
+        "accessibility": 0.97,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 442.865,
+        "first-contentful-paint": 1220.1620000000003,
+        "largest-contentful-paint": 2573.162,
+        "total-blocking-time": 141.99999999999955,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "376273cb5403d5dc7bb142400cbdb7aa39ee0e1ea9e0d9817505b726c0866d99"
+    },
+    {
+      "path": "/events",
+      "scores": {
+        "performance": 0.84,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 477.61800000000005,
+        "first-contentful-paint": 1407.5389999999998,
+        "largest-contentful-paint": 3205.1737499999995,
+        "total-blocking-time": 357.9999999999998,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "a9eeb5a661bc7eda08b60606157a74c18f92ebc3d57024642879b2aea5630167"
+    },
+    {
+      "path": "/programmes",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 14.389999999999999,
+        "first-contentful-paint": 1076.923,
+        "largest-contentful-paint": 2426.923,
+        "total-blocking-time": 161,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "b606b613c06adc8ce555d06e5a9398f6889bcd3a81969eb3225dd21a08b1c263"
+    },
+    {
+      "path": "/partners",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 517.4100000000001,
+        "first-contentful-paint": 1234.216,
+        "largest-contentful-paint": 2346.216,
+        "total-blocking-time": 113,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "2518c2c067485109c006eeda8cfebe3b57b74661b0a41fa69be9e007273b5264"
+    },
+    {
+      "path": "/zh",
+      "scores": {
+        "performance": 0.92,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 38.959,
+        "first-contentful-paint": 1213.8720000000003,
+        "largest-contentful-paint": 2317.808,
+        "total-blocking-time": 302.5639999999996,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "08b3c39663a1562931f59b18793d66db8263da587e339f055c9c8e176fc2e75a"
+    },
+    {
+      "path": "/zh/membership",
+      "scores": {
+        "performance": 0.83,
+        "accessibility": 0.97,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 496.105,
+        "first-contentful-paint": 1590.906,
+        "largest-contentful-paint": 2400.812,
+        "total-blocking-time": 549,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "2c8702b18fd43751f863f5431fad24c9b3d457d1ee5662cbcc18a774287e7022"
+    },
+    {
+      "path": "/zh/events",
+      "scores": {
+        "performance": 0.83,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 882.326,
+        "first-contentful-paint": 1483.442,
+        "largest-contentful-paint": 3101.105,
+        "total-blocking-time": 411,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "2681084d2aab3e0f1c4b33b1ece2323be8c62116dfa2e8a7ce64d580fe6d4040"
+    },
+    {
+      "path": "/zh/programmes",
+      "scores": {
+        "performance": 0.93,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 15.336000000000002,
+        "first-contentful-paint": 1347.7035,
+        "largest-contentful-paint": 2567.4069999999997,
+        "total-blocking-time": 213,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "e3638dba61d68f68be9e588baac8794b76887eb04b22c2eebfea37db5e70c008"
+    },
+    {
+      "path": "/zh/partners",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 1
+      },
+      "metrics": {
+        "server-response-time": 401.58599999999996,
+        "first-contentful-paint": 1415.991,
+        "largest-contentful-paint": 2465.982,
+        "total-blocking-time": 84.5,
+        "cumulative-layout-shift": 0
+      },
+      "canonical": 1,
+      "rawSha256": "cf365f94e2a6a9303d66f27fb3046bca4ca0d0f7a1f952ebb7224df951f6eedb"
+    }
+  ]
+}

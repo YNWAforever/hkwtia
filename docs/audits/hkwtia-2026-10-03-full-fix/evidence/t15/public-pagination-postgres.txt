@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/integration/public-event-pagination.test.ts (1 test) 15714ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  03:33:41
+   Duration  18.50s (transform 394ms, setup 189ms, collect 1.50s, tests 15.71s, environment 0ms, prepare 150ms)
+

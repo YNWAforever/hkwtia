@@ -1291,5 +1291,85 @@
     "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.summarizeBlindReviews",
     "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
     "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T15",
+    "symbol": "memberMatchingFrom",
+    "path": "lib/db/repos/admin-members.ts",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph inbound callers + current matching list/snapshot interfaces; real SQL before/after",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "ApprovalsPage",
+    "path": "app/[locale]/(admin)/admin/approvals/page.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph + current caller; canonical plan labels",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "ApprovalList",
+    "path": "components/admin/approval-list.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph with stale ranges + current source; native width/keyboard",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "AiReviewPage",
+    "path": "app/[locale]/(admin)/admin/ai-review/page.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "new T10 symbol absent from stale graph; current caller and labels read",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "listInbox",
+    "path": "lib/admin/inbox.ts",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph + current caller/repository limit contract",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "MemberTable",
+    "path": "components/admin/member-table.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Current hidden limit + strict query shape and native selection/pagination",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "DeferredConciergeWidget",
+    "path": "components/ai/deferred-concierge-widget.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Native heavy chunk before-intent RED; event/focus/download recovery and safe503; existing widget runtime reused",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "AwaitReadModel",
+    "path": "components/server/await-read-model.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Two real held-read behaviour REDs; catalogue/public pricing/status tests, original CMS scope preserved",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "listPublicEvents / EventsPage",
+    "path": "lib/db/repos/events.ts",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Graph list/count/filter interfaces and current public caller; real native 282-card RED, bounded SQL offset/order 25-row PASS; original uncapped count/sitemap preserved",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "Hero",
+    "path": "components/home/hero.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Graph has no current home symbol; current caller/provenance/picture interfaces read; 2unit +2native REDs, static derivatives unchanged input hash, actual LH10 PASS",
+    "implementedInWorkingTree": false
   }
 ]

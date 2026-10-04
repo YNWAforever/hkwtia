@@ -1,0 +1,854 @@
+﻿2026-10-04T17:25:36.5949771Z Current runner version: '2.337.0'
+2026-10-04T17:25:36.5966197Z ##[group]Runner Image Provisioner
+2026-10-04T17:25:36.5966718Z Hosted Compute Agent
+2026-10-04T17:25:36.5967068Z Version: 20260901.588
+2026-10-04T17:25:36.5967509Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-04T17:25:36.5967931Z Build Date: 2026-09-01T19:56:44Z
+2026-10-04T17:25:36.5968388Z Worker ID: {012efb7b-de14-4f46-b728-727991a8a040}
+2026-10-04T17:25:36.5968812Z Azure Region: westus3
+2026-10-04T17:25:36.5969138Z ##[endgroup]
+2026-10-04T17:25:36.5969906Z ##[group]Operating System
+2026-10-04T17:25:36.5970247Z Ubuntu
+2026-10-04T17:25:36.5970539Z 24.04.5
+2026-10-04T17:25:36.5970886Z LTS
+2026-10-04T17:25:36.5971206Z ##[endgroup]
+2026-10-04T17:25:36.5971593Z ##[group]Runner Image
+2026-10-04T17:25:36.5971940Z Image: ubuntu-24.04
+2026-10-04T17:25:36.5972257Z Version: 20260927.320.1
+2026-10-04T17:25:36.5973015Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-04T17:25:36.5973927Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-04T17:25:36.5974644Z ##[endgroup]
+2026-10-04T17:25:36.5975282Z ##[group]GITHUB_TOKEN Permissions
+2026-10-04T17:25:36.5976406Z Contents: read
+2026-10-04T17:25:36.5976756Z Metadata: read
+2026-10-04T17:25:36.5977143Z ##[endgroup]
+2026-10-04T17:25:36.5978374Z Secret source: Actions
+2026-10-04T17:25:36.5978977Z Cache mode: write
+2026-10-04T17:25:36.5979399Z Prepare workflow directory
+2026-10-04T17:25:36.6172690Z Prepare all required actions
+2026-10-04T17:25:36.6201756Z Getting action download info
+2026-10-04T17:25:36.9287228Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-04T17:25:36.9954504Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-04T17:25:37.1533116Z Complete job name: tests (1)
+2026-10-04T17:25:37.1913694Z ##[group]Run actions/checkout@v4
+2026-10-04T17:25:37.1914203Z with:
+2026-10-04T17:25:37.1914459Z   repository: YNWAforever/hkwtia
+2026-10-04T17:25:37.1916457Z   token: ***
+2026-10-04T17:25:37.1916684Z   ssh-strict: true
+2026-10-04T17:25:37.1916919Z   ssh-user: git
+2026-10-04T17:25:37.1917158Z   persist-credentials: true
+2026-10-04T17:25:37.1917416Z   clean: true
+2026-10-04T17:25:37.1917655Z   sparse-checkout-cone-mode: true
+2026-10-04T17:25:37.1917930Z   fetch-depth: 1
+2026-10-04T17:25:37.1918161Z   fetch-tags: false
+2026-10-04T17:25:37.1918396Z   show-progress: true
+2026-10-04T17:25:37.1918634Z   lfs: false
+2026-10-04T17:25:37.1918901Z   submodules: false
+2026-10-04T17:25:37.1919257Z   set-safe-directory: true
+2026-10-04T17:25:37.1919648Z   allow-unsafe-pr-checkout: false
+2026-10-04T17:25:37.1920233Z ##[endgroup]
+2026-10-04T17:25:37.2538995Z Syncing repository: YNWAforever/hkwtia
+2026-10-04T17:25:37.2540077Z ##[group]Getting Git version info
+2026-10-04T17:25:37.2540502Z Working directory is '/home/runner/work/hkwtia/hkwtia'
+2026-10-04T17:25:37.2541030Z [command]/usr/bin/git version
+2026-10-04T17:25:37.2611935Z git version 2.55.0
+2026-10-04T17:25:37.2629053Z ##[endgroup]
+2026-10-04T17:25:37.2649629Z Temporarily overriding HOME='/home/runner/work/_temp/4f532463-2a61-4c22-867c-4528c35dfb60' before making global git config changes
+2026-10-04T17:25:37.2650784Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T17:25:37.2653007Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:25:37.2700075Z Deleting the contents of '/home/runner/work/hkwtia/hkwtia'
+2026-10-04T17:25:37.2703475Z ##[group]Initializing the repository
+2026-10-04T17:25:37.2706298Z [command]/usr/bin/git init /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:25:37.2804352Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-04T17:25:37.2805322Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-04T17:25:37.2806148Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-04T17:25:37.2807448Z hint: call:
+2026-10-04T17:25:37.2808000Z hint:
+2026-10-04T17:25:37.2808602Z hint: 	git config --global init.defaultBranch <name>
+2026-10-04T17:25:37.2809261Z hint:
+2026-10-04T17:25:37.2809878Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-04T17:25:37.2810776Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-04T17:25:37.2811540Z hint:
+2026-10-04T17:25:37.2812036Z hint: 	git branch -m <name>
+2026-10-04T17:25:37.2812736Z hint:
+2026-10-04T17:25:37.2813356Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-04T17:25:37.2814572Z Initialized empty Git repository in /home/runner/work/hkwtia/hkwtia/.git/
+2026-10-04T17:25:37.2816573Z [command]/usr/bin/git remote add origin https://github.com/YNWAforever/hkwtia
+2026-10-04T17:25:37.2867967Z ##[endgroup]
+2026-10-04T17:25:37.2868656Z ##[group]Disabling automatic garbage collection
+2026-10-04T17:25:37.2871249Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-04T17:25:37.2900539Z ##[endgroup]
+2026-10-04T17:25:37.2901183Z ##[group]Setting up auth
+2026-10-04T17:25:37.2906352Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T17:25:37.2934144Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T17:25:37.3214914Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T17:25:37.3241581Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T17:25:37.3403704Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T17:25:37.3429751Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T17:25:37.3593411Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-04T17:25:37.3623963Z ##[endgroup]
+2026-10-04T17:25:37.3624725Z ##[group]Fetching the repository
+2026-10-04T17:25:37.3631071Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d47f340b10cfad5405f4247f658488ca565fdbd6:refs/remotes/pull/140/merge
+2026-10-04T17:25:43.3818636Z From https://github.com/YNWAforever/hkwtia
+2026-10-04T17:25:43.3820134Z  * [new ref]         d47f340b10cfad5405f4247f658488ca565fdbd6 -> pull/140/merge
+2026-10-04T17:25:43.3822874Z ##[endgroup]
+2026-10-04T17:25:43.3823740Z ##[group]Determining the checkout info
+2026-10-04T17:25:43.3824931Z ##[endgroup]
+2026-10-04T17:25:43.3827067Z [command]/usr/bin/git sparse-checkout disable
+2026-10-04T17:25:43.3869528Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-04T17:25:43.3921830Z ##[group]Checking out the ref
+2026-10-04T17:25:43.3922728Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+2026-10-04T17:25:44.0654570Z Note: switching to 'refs/remotes/pull/140/merge'.
+2026-10-04T17:25:44.0655766Z 
+2026-10-04T17:25:44.0655999Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-04T17:25:44.0656466Z changes and commit them, and you can discard any commits you make in this
+2026-10-04T17:25:44.0656912Z state without impacting any branches by switching back to a branch.
+2026-10-04T17:25:44.0657185Z 
+2026-10-04T17:25:44.0657388Z If you want to create a new branch to retain commits you create, you may
+2026-10-04T17:25:44.0657826Z do so (now or later) by using -c with the switch command. Example:
+2026-10-04T17:25:44.0658053Z 
+2026-10-04T17:25:44.0658175Z   git switch -c <new-branch-name>
+2026-10-04T17:25:44.0658418Z 
+2026-10-04T17:25:44.0658547Z Or undo this operation with:
+2026-10-04T17:25:44.0659019Z 
+2026-10-04T17:25:44.0659118Z   git switch -
+2026-10-04T17:25:44.0659264Z 
+2026-10-04T17:25:44.0659504Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-04T17:25:44.0659766Z 
+2026-10-04T17:25:44.0660083Z HEAD is now at d47f340 Merge cf14c5c35f20d3be03425864ccec3920d4927a80 into 899e74cfc034f3f223dec39c51ecf18c26de4fdb
+2026-10-04T17:25:44.0733006Z ##[endgroup]
+2026-10-04T17:25:44.0734367Z [command]/usr/bin/git log -1 --format=%H
+2026-10-04T17:25:44.0756722Z d47f340b10cfad5405f4247f658488ca565fdbd6
+2026-10-04T17:25:44.0944327Z ##[group]Run actions/setup-node@v4
+2026-10-04T17:25:44.0944523Z with:
+2026-10-04T17:25:44.0944669Z   node-version: 22
+2026-10-04T17:25:44.0944806Z   cache: npm
+2026-10-04T17:25:44.0944941Z   always-auth: false
+2026-10-04T17:25:44.0945122Z   check-latest: false
+2026-10-04T17:25:44.0946350Z   token: ***
+2026-10-04T17:25:44.0946510Z ##[endgroup]
+2026-10-04T17:25:44.1858973Z (node:2080) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-04T17:25:44.1859820Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-04T17:25:44.1861269Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-04T17:25:44.1861751Z ##[group]Environment details
+2026-10-04T17:25:44.4708720Z node: v22.23.3
+2026-10-04T17:25:44.4709150Z npm: 10.9.9
+2026-10-04T17:25:44.4709373Z yarn: 1.22.22
+2026-10-04T17:25:44.4710070Z ##[endgroup]
+2026-10-04T17:25:44.4720563Z [command]/opt/hostedtoolcache/node/22.23.3/x64/bin/npm config get cache
+2026-10-04T17:25:44.5428065Z /home/runner/.npm
+2026-10-04T17:25:44.7525453Z Cache hit for: node-cache-Linux-x64-npm-8cacd1b24d264d32f057d37f1f8e9c2649cd9f86bc10f533d5d018e67f8fdbc5
+2026-10-04T17:25:44.7588703Z (node:2080) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-04T17:25:45.9751290Z Received 46137344 of 247453452 (18.6%), 44.0 MBs/sec
+2026-10-04T17:25:46.9640730Z Received 247453452 of 247453452 (100.0%), 118.6 MBs/sec
+2026-10-04T17:25:46.9641573Z Cache Size: ~236 MB (247453452 B)
+2026-10-04T17:25:46.9729067Z [command]/usr/bin/tar -xf /home/runner/work/_temp/a848812f-7b06-4991-8f35-d95085b52dd6/cache.tzst -P -C /home/runner/work/hkwtia/hkwtia --use-compress-program unzstd
+2026-10-04T17:25:47.3438367Z Cache restored successfully
+2026-10-04T17:25:47.3537345Z Cache restored from key: node-cache-Linux-x64-npm-8cacd1b24d264d32f057d37f1f8e9c2649cd9f86bc10f533d5d018e67f8fdbc5
+2026-10-04T17:25:47.3686310Z ##[group]Run npm ci
+2026-10-04T17:25:47.3686503Z [36;1mnpm ci[0m
+2026-10-04T17:25:47.3907632Z shell: /usr/bin/bash -e {0}
+2026-10-04T17:25:47.3907808Z ##[endgroup]
+2026-10-04T17:25:51.6363445Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-04T17:25:51.6799663Z npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.hirok.io
+2026-10-04T17:25:51.7101100Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T17:25:51.7113079Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T17:25:51.7231303Z npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+2026-10-04T17:25:51.7465280Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-04T17:25:51.8037624Z npm warn deprecated abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+2026-10-04T17:25:51.8296756Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:51.8300862Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:51.8303631Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:51.8311051Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:51.8319264Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:51.8370835Z npm warn deprecated whatwg-encoding@2.0.0: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-10-04T17:25:51.8508507Z npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.hirok.io
+2026-10-04T17:25:51.9274384Z npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0841948Z npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0843476Z npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0861537Z npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0862757Z npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0863884Z npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0865396Z npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0866402Z npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0867394Z npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0868402Z npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0869353Z npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0891745Z npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0892811Z npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.0982195Z npm warn deprecated domexception@4.0.0: Use your platform's native DOMException instead
+2026-10-04T17:25:52.1121026Z npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.1122430Z npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.1123633Z npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.1361016Z npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.1573009Z npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.4911619Z npm warn deprecated fstream@1.0.12: This package is no longer supported.
+2026-10-04T17:25:52.8389031Z npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:52.9739994Z npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:53.1799691Z npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+2026-10-04T17:25:53.3802005Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:26:03.1977347Z 
+2026-10-04T17:26:03.1977954Z added 1431 packages, and audited 1432 packages in 16s
+2026-10-04T17:26:03.1978138Z 
+2026-10-04T17:26:03.1978226Z 245 packages are looking for funding
+2026-10-04T17:26:03.1978401Z   run `npm fund` for details
+2026-10-04T17:26:03.2709876Z 
+2026-10-04T17:26:03.2710494Z 43 vulnerabilities (3 low, 18 moderate, 22 high)
+2026-10-04T17:26:03.2710732Z 
+2026-10-04T17:26:03.2710944Z To address issues that do not require attention, run:
+2026-10-04T17:26:03.2711217Z   npm audit fix
+2026-10-04T17:26:03.2711341Z 
+2026-10-04T17:26:03.2711626Z To address all issues possible (including breaking changes), run:
+2026-10-04T17:26:03.2711945Z   npm audit fix --force
+2026-10-04T17:26:03.2712066Z 
+2026-10-04T17:26:03.2712223Z Some issues need review, and may require choosing
+2026-10-04T17:26:03.2712497Z a different dependency.
+2026-10-04T17:26:03.2712599Z 
+2026-10-04T17:26:03.2712667Z Run `npm audit` for details.
+2026-10-04T17:26:03.3965660Z ##[group]Run npx vitest run --shard=1/2
+2026-10-04T17:26:03.3965868Z [36;1mnpx vitest run --shard=1/2[0m
+2026-10-04T17:26:03.4021573Z shell: /usr/bin/bash -e {0}
+2026-10-04T17:26:03.4021720Z ##[endgroup]
+2026-10-04T17:26:04.0113697Z 
+2026-10-04T17:26:04.0115160Z [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m/home/runner/work/hkwtia/hkwtia[39m
+2026-10-04T17:26:04.0115480Z 
+2026-10-04T17:26:05.8935615Z  [2m[90m↓[39m[22m tests/integration/automation-runners-postgres.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m
+2026-10-04T17:26:06.0204867Z  [32m✓[39m tests/integration/phase-c2-blast.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 72[2mms[22m[39m
+2026-10-04T17:26:07.1001468Z  [32m✓[39m tests/unit/woztell-backfill.test.ts [2m([22m[2m34 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+2026-10-04T17:26:07.2086127Z  [2m[90m↓[39m[22m tests/integration/audit-full-renewal-window.test.ts [2m([22m[2m11 tests[22m[2m | [22m[33m11 skipped[39m[2m)[22m
+2026-10-04T17:26:08.1893509Z  [32m✓[39m tests/unit/wisetech-route-parity.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+2026-10-04T17:26:08.2213329Z  [32m✓[39m tests/unit/member-event-repository.test.ts [2m([22m[2m27 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+2026-10-04T17:26:09.4026086Z  [32m✓[39m tests/integration/phase-c1-human-lane.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+2026-10-04T17:26:10.0816320Z  [32m✓[39m tests/unit/wt-pages/campaigns-page.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[32m 292[2mms[22m[39m
+2026-10-04T17:26:10.6091576Z  [32m✓[39m tests/unit/ai-tools.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+2026-10-04T17:26:10.7146433Z  [32m✓[39m tests/unit/env-contract.test.ts [2m([22m[2m41 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:26:10.9564932Z  [32m✓[39m tests/unit/server-action-actor-boundary.test.ts [2m([22m[2m110 tests[22m[2m)[22m[33m 1088[2mms[22m[39m
+2026-10-04T17:26:10.9566293Z    [33m[2m✓[22m[39m Server Action actor boundary[2m > [22mdetects actor-taking runtime functions through every local export shape [33m 814[2mms[22m[39m
+2026-10-04T17:26:11.6353708Z  [32m✓[39m tests/unit/contacts-consent-audit.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+2026-10-04T17:26:12.2448988Z  [32m✓[39m tests/unit/campaign-delivery.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:12.6316986Z  [2m[90m↓[39m[22m tests/integration/m2-acceptance.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m10 skipped[39m[2m)[22m
+2026-10-04T17:26:12.8625373Z  [32m✓[39m tests/unit/job-routes.test.ts [2m([22m[2m39 tests[22m[2m)[22m[32m 105[2mms[22m[39m
+2026-10-04T17:26:13.1156029Z  [32m✓[39m tests/unit/concierge-service.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+2026-10-04T17:26:13.6849154Z  [32m✓[39m tests/unit/wisetech-authoritative-source-reconciliation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+2026-10-04T17:26:13.7198043Z  [32m✓[39m tests/unit/contact-profile-merge.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:26:13.8044966Z  [32m✓[39m tests/unit/campaign-queue.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:26:14.6768650Z  [32m✓[39m tests/unit/company-profiles-repository.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+2026-10-04T17:26:14.6800880Z  [32m✓[39m tests/unit/wt-primitives.test.tsx [2m([22m[2m25 tests[22m[2m)[22m[32m 229[2mms[22m[39m
+2026-10-04T17:26:15.2816218Z  [32m✓[39m tests/unit/notification-dispatch.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:26:15.3184937Z  [32m✓[39m tests/unit/wisetech-css-port.test.ts [2m([22m[2m95 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:16.2427166Z  [32m✓[39m tests/integration/m4c-acceptance.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 112[2mms[22m[39m
+2026-10-04T17:26:16.2989327Z  [32m✓[39m tests/unit/ticket-checkout-core.test.ts [2m([22m[2m28 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:26:16.9273035Z  [32m✓[39m tests/integration/m4b-acceptance.test.ts [2m([22m[2m7 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[32m 34[2mms[22m[39m
+2026-10-04T17:26:17.0756469Z  [32m✓[39m tests/unit/join-actions.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+2026-10-04T17:26:17.4016113Z  [32m✓[39m tests/integration/woztell-hostile-provider-field.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+2026-10-04T17:26:17.8831000Z  [32m✓[39m tests/unit/campaign-wizard.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:26:18.1556826Z  [32m✓[39m tests/unit/retention-analyst-service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+2026-10-04T17:26:18.3248848Z  [32m✓[39m tests/unit/inbox-repeat-reply.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+2026-10-04T17:26:18.8977198Z  [32m✓[39m tests/unit/repository-exists-scope-sql.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+2026-10-04T17:26:19.1268012Z  [32m✓[39m tests/unit/woztell-delivery-stamp.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:19.1400694Z  [2m[90m↓[39m[22m tests/integration/m4c-seed-postgres.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:26:19.7521382Z  [32m✓[39m tests/unit/ai-runtime-review.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+2026-10-04T17:26:20.0702227Z  [32m✓[39m tests/unit/ai-runtime-rereview.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:20.6756814Z  [32m✓[39m tests/unit/schema-contract.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:26:20.9768081Z  [32m✓[39m tests/unit/repository-boundary.test.ts [2m([22m[2m32 tests[22m[2m)[22m[33m 987[2mms[22m[39m
+2026-10-04T17:26:20.9825231Z    [33m[2m✓[22m[39m repository database boundary[2m > [22mallows runtime database imports only within repositories [33m 970[2mms[22m[39m
+2026-10-04T17:26:21.0365981Z  [32m✓[39m tests/unit/webhook-repository-sequential.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:26:21.6568203Z  [32m✓[39m tests/unit/job-handler.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+2026-10-04T17:26:22.1313666Z  [2m[90m↓[39m[22m tests/integration/bulk-communication-eligibility.test.ts [2m([22m[2m6 tests[22m[2m | [22m[33m6 skipped[39m[2m)[22m
+2026-10-04T17:26:22.2226071Z  [32m✓[39m tests/unit/refund-core.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:22.6272103Z  [32m✓[39m tests/unit/member-event-core.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:26:23.0200930Z  [32m✓[39m tests/unit/journey-repository.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+2026-10-04T17:26:23.1621966Z  [32m✓[39m tests/unit/aiops-page.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 203[2mms[22m[39m
+2026-10-04T17:26:23.9516668Z  [31m❯[39m tests/unit/public-shell.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 317[2mms[22m[39m
+2026-10-04T17:26:23.9517862Z    [32m✓[39m public shell server surfaces[2m > [22mrenders complete en header copy[32m 94[2mms[22m[39m
+2026-10-04T17:26:23.9518794Z    [32m✓[39m public shell server surfaces[2m > [22mrenders complete zh-HK header copy[32m 31[2mms[22m[39m
+2026-10-04T17:26:23.9519859Z    [32m✓[39m public shell server surfaces[2m > [22mcarries the route's variant and the announcement modifier on the header element[32m 15[2mms[22m[39m
+2026-10-04T17:26:23.9521373Z    [32m✓[39m public shell server surfaces[2m > [22memits the donor's header slots in order inside .header-inner[32m 6[2mms[22m[39m
+2026-10-04T17:26:23.9522432Z    [32m✓[39m public shell server surfaces[2m > [22mderives every English footer journey anchor from the shared navigation model[32m 46[2mms[22m[39m
+2026-10-04T17:26:23.9523490Z    [32m✓[39m public shell server surfaces[2m > [22mmakes every footer route and contact control a 44px, wrapping-safe target[32m 42[2mms[22m[39m
+2026-10-04T17:26:23.9524854Z [31m   [31m×[31m public shell server surfaces[2m > [22mkeeps the public shell owner order and exactly one named main[39m[32m 6[2mms[22m[39m
+2026-10-04T17:26:23.9525666Z [31m     → expected false to be true // Object.is equality[39m
+2026-10-04T17:26:23.9526553Z    [32m✓[39m public shell server surfaces[2m > [22muses a non-landmark layout placeholder for the desktop navigation suspense fallback[32m 0[2mms[22m[39m
+2026-10-04T17:26:23.9527646Z    [32m✓[39m public shell server surfaces[2m > [22mgives events-programmes a heading, titled columns and a feature aside[32m 20[2mms[22m[39m
+2026-10-04T17:26:23.9528724Z    [32m✓[39m public shell server surfaces[2m > [22mgives membership-ecosystem a heading, titled columns and a feature aside[32m 16[2mms[22m[39m
+2026-10-04T17:26:23.9529760Z    [32m✓[39m public shell server surfaces[2m > [22mgives impact-insights a heading, titled columns and a feature aside[32m 13[2mms[22m[39m
+2026-10-04T17:26:23.9530747Z    [32m✓[39m public shell server surfaces[2m > [22mgives about-wtia a heading, titled columns and a feature aside[32m 15[2mms[22m[39m
+2026-10-04T17:26:23.9532077Z    [32m✓[39m public shell server surfaces[2m > [22mmarks the exact current leaf inside a panel[32m 5[2mms[22m[39m
+2026-10-04T17:26:23.9533014Z    [32m✓[39m public shell server surfaces[2m > [22mmarks the event-first trigger and keeps the trigger hook[32m 7[2mms[22m[39m
+2026-10-04T17:26:24.0445458Z  [32m✓[39m tests/unit/contacts-admin-repository.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:24.5086249Z  [32m✓[39m tests/unit/journey-whatsapp-template-variables.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+2026-10-04T17:26:24.5680668Z  [32m✓[39m tests/unit/m4b-seed.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+2026-10-04T17:26:24.9726994Z  [32m✓[39m tests/unit/refund-refund-commit.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:26:25.4719995Z  [32m✓[39m tests/unit/checkout-service.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:25.5408394Z  [32m✓[39m tests/unit/event-cancellation-repository.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:25.8280779Z  [32m✓[39m tests/unit/segment-query.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:26:26.4502841Z  [32m✓[39m tests/unit/safe-generated-content.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+2026-10-04T17:26:26.4706334Z  [32m✓[39m tests/unit/unsubscribe.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+2026-10-04T17:26:26.4966089Z  [32m✓[39m tests/unit/stripe-ticket-adapter.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:26:27.0421900Z  [2m[90m↓[39m[22m tests/integration/aiops-materialized-view.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:26:27.3697820Z  [32m✓[39m tests/unit/woztell-consent-audit.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:26:27.4685994Z  [32m✓[39m tests/unit/campaign-eligibility.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:26:28.0296406Z  [32m✓[39m tests/unit/admin-partners.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+2026-10-04T17:26:28.2743247Z  [32m✓[39m tests/unit/journey-enrollment.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:28.3554564Z  [32m✓[39m tests/unit/admin-announcements.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+2026-10-04T17:26:29.1338490Z  [32m✓[39m tests/unit/history-page.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 323[2mms[22m[39m
+2026-10-04T17:26:29.3267387Z [90mstderr[2m | tests/unit/admin-events.test.ts[2m > [22m[2madmin Event mutations and registration capacity[2m > [22m[2mkeeps a registration that succeeded when the reminder enrolment fails
+2026-10-04T17:26:29.3268788Z [22m[39mevent-reminder-enrolment {
+2026-10-04T17:26:29.3273890Z   profileId: [32m'profile-a'[39m,
+2026-10-04T17:26:29.3274752Z   eventId: [32m'11111111-1111-4111-8111-111111111111'[39m,
+2026-10-04T17:26:29.3275287Z   error: Error: journey unavailable
+2026-10-04T17:26:29.3275987Z       at [90m/home/runner/work/hkwtia/hkwtia/[39mtests/unit/admin-events.test.ts:82:54
+2026-10-04T17:26:29.3277085Z       at mockCall [90m(file:///home/runner/work/hkwtia/hkwtia/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:96:15[90m)[39m
+2026-10-04T17:26:29.3278220Z       at spy [90m(file:///home/runner/work/hkwtia/hkwtia/[39mnode_modules/[4mtinyspy[24m/dist/index.js:47:80[90m)[39m
+2026-10-04T17:26:29.3279206Z       at registerForEvent [90m(/home/runner/work/hkwtia/hkwtia/[39mlib/db/repos/events.ts:542:39[90m)[39m
+2026-10-04T17:26:29.3280026Z   [90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+2026-10-04T17:26:29.3280822Z       at [90m/home/runner/work/hkwtia/hkwtia/[39mtests/unit/admin-events.test.ts:84:5
+2026-10-04T17:26:29.3282248Z       at [90mfile:///home/runner/work/hkwtia/hkwtia/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+2026-10-04T17:26:29.3282875Z }
+2026-10-04T17:26:29.3283113Z 
+2026-10-04T17:26:29.3325416Z  [32m✓[39m tests/unit/admin-events.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+2026-10-04T17:26:29.8399795Z  [32m✓[39m tests/unit/ticket-email-runner.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+2026-10-04T17:26:29.9586040Z  [32m✓[39m tests/unit/contacts-repository.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:26:30.5143463Z  [32m✓[39m tests/unit/preview-session-harness.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+2026-10-04T17:26:30.7967942Z  [32m✓[39m tests/unit/webhook-service.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:30.8393205Z  [2m[90m↓[39m[22m tests/integration/admin-audit-load.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:26:31.3947214Z  [32m✓[39m tests/unit/m3-seed.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+2026-10-04T17:26:31.6866204Z  [32m✓[39m tests/unit/auth-route-rate-limit.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+2026-10-04T17:26:32.4232056Z  [32m✓[39m tests/unit/aiops-components.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 390[2mms[22m[39m
+2026-10-04T17:26:32.4632650Z  [32m✓[39m tests/unit/announcement.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[32m 115[2mms[22m[39m
+2026-10-04T17:26:32.5480496Z  [32m✓[39m tests/unit/admin-presentational.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 218[2mms[22m[39m
+2026-10-04T17:26:33.3842361Z  [32m✓[39m tests/unit/campaign-review-boundary.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:33.4017582Z  [2m[90m↓[39m[22m tests/integration/ticket-eligibility-postgres.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m
+2026-10-04T17:26:33.9166127Z [90mstderr[2m | tests/unit/homepage.test.tsx[2m > [22m[2mHome page[2m > [22m[2mrenders the active sections as labelled landmarks, in order, in en
+2026-10-04T17:26:33.9167163Z [22m[39mEach child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9167439Z 
+2026-10-04T17:26:33.9167903Z Check the top-level render call using <Root>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9168971Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9169179Z 
+2026-10-04T17:26:33.9169621Z Check the top-level render call using <section>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9170147Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9170363Z 
+2026-10-04T17:26:33.9170883Z Check the top-level render call using <div>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9171442Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9171678Z 
+2026-10-04T17:26:33.9174811Z Check the render method of `Link`. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9175685Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9176018Z 
+2026-10-04T17:26:33.9176497Z Check the top-level render call using <article>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9177128Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9177427Z 
+2026-10-04T17:26:33.9177864Z Check the top-level render call using <small>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9178447Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9178760Z 
+2026-10-04T17:26:33.9179237Z Check the top-level render call using <figure>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9180160Z Each child in a list should have a unique "key" prop.
+2026-10-04T17:26:33.9180468Z 
+2026-10-04T17:26:33.9180984Z Check the top-level render call using <figcaption>. See https://react.dev/link/warning-keys for more information.
+2026-10-04T17:26:33.9181498Z 
+2026-10-04T17:26:34.2739520Z  [32m✓[39m tests/unit/woztell-claim-v2.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:26:34.2851979Z  [32m✓[39m tests/unit/homepage.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1090[2mms[22m[39m
+2026-10-04T17:26:34.2853086Z    [33m[2m✓[22m[39m Home page[2m > [22mrenders the active sections as labelled landmarks, in order, in en [33m 765[2mms[22m[39m
+2026-10-04T17:26:34.7508551Z  [32m✓[39m tests/unit/news-localized-bodies.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 52[2mms[22m[39m
+2026-10-04T17:26:34.9555389Z  [32m✓[39m tests/unit/refund-actions.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+2026-10-04T17:26:35.2664497Z  [2m[90m↓[39m[22m tests/integration/showcase-review-transition-postgres.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m
+2026-10-04T17:26:36.1805944Z  [32m✓[39m tests/unit/event-form-contract.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 149[2mms[22m[39m
+2026-10-04T17:26:36.2986003Z  [2m[90m↓[39m[22m tests/integration/admin-batch-snapshot.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:26:36.6703155Z  [32m✓[39m tests/unit/event-public-detail-review.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 114[2mms[22m[39m
+2026-10-04T17:26:37.1695597Z  [32m✓[39m tests/unit/ai-runtime-source-cleanup.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:37.2143171Z  [32m✓[39m tests/unit/home-highlights.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:26:37.5996177Z  [32m✓[39m tests/unit/suppressions-whatsapp.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:26:38.1066172Z  [32m✓[39m tests/unit/portal-authorization.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:26:38.4003176Z  [32m✓[39m tests/unit/orders-table.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 182[2mms[22m[39m
+2026-10-04T17:26:38.4969965Z  [32m✓[39m tests/unit/page-copy-repository.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:26:38.7759483Z [90mstderr[2m | tests/unit/wt-pages/members-page.test.tsx[2m > [22m[2m/members directory (D-11)[2m > [22m[2mshows an unavailable state when the database is unreachable
+2026-10-04T17:26:38.7776133Z [22m[39m{"event":"public_directory_read_failed","requestId":"3c49a29a-ca92-4f11-aa31-38ee3551a9d4","code":"read_failed","deployment":"unknown","occurredAt":"2026-10-04T17:26:38.772Z"}
+2026-10-04T17:26:38.7777043Z 
+2026-10-04T17:26:38.8032208Z  [32m✓[39m tests/unit/wt-pages/members-page.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+2026-10-04T17:26:39.2244354Z  [32m✓[39m tests/unit/cancel-event-panel.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 152[2mms[22m[39m
+2026-10-04T17:26:39.3657497Z  [32m✓[39m tests/unit/woztell-live-acceptance-guard.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:26:39.4476661Z  [32m✓[39m tests/unit/approved-templates.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:26:40.2563558Z  [2m[90m↓[39m[22m tests/integration/event-attendee-batch-export.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:26:40.7201185Z  [32m✓[39m tests/unit/refund-email.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 111[2mms[22m[39m
+2026-10-04T17:26:40.7556073Z  [32m✓[39m tests/unit/build-log-pages.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 139[2mms[22m[39m
+2026-10-04T17:26:41.3625533Z  [32m✓[39m tests/unit/portal-writer-action.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:41.5736672Z  [32m✓[39m tests/unit/engagement-score-runner.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:26:42.2346898Z  [32m✓[39m tests/unit/job-runner-context-event-reminder.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:42.5252747Z  [32m✓[39m tests/unit/ai-provider-registry.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+2026-10-04T17:26:42.6456160Z  [32m✓[39m tests/unit/automation-dashboard.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+2026-10-04T17:26:43.4293767Z  [32m✓[39m tests/unit/cancel-event-action.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 661[2mms[22m[39m
+2026-10-04T17:26:43.4324861Z    [33m[2m✓[22m[39m cancelEventAction[2m > [22mrefuses without a staff session, never reaches the repository, and hides the route [33m 657[2mms[22m[39m
+2026-10-04T17:26:43.4936561Z  [32m✓[39m tests/unit/check-in-page.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:26:43.5623697Z  [2m[90m↓[39m[22m tests/integration/admin-pagination.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:26:44.3621250Z  [32m✓[39m tests/unit/wt-pages/partners-page.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 280[2mms[22m[39m
+2026-10-04T17:26:44.4114837Z  [32m✓[39m tests/unit/m5-repository.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:44.4899102Z  [32m✓[39m tests/unit/event-attendees-csv.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:44.9018548Z  [32m✓[39m tests/unit/program-contradicted-claims.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:26:45.0234661Z  [32m✓[39m tests/unit/woztell-adapter.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+2026-10-04T17:26:45.8376170Z  [32m✓[39m tests/unit/wt-pages/programs-editions.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 224[2mms[22m[39m
+2026-10-04T17:26:45.8430152Z  [32m✓[39m tests/unit/concierge-shell.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 406[2mms[22m[39m
+2026-10-04T17:26:46.1076172Z  [32m✓[39m tests/unit/ai-admin-content-editor.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 354[2mms[22m[39m
+2026-10-04T17:26:46.5662817Z  [32m✓[39m tests/unit/wt-pages/membership-page.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+2026-10-04T17:26:46.6733346Z  [32m✓[39m tests/unit/ticket-check-in-actions.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+2026-10-04T17:26:46.7038636Z  [32m✓[39m tests/unit/event-orders-sql.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:26:47.4692748Z  [32m✓[39m tests/unit/admin-media.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:26:47.6267669Z  [32m✓[39m tests/unit/profile-consent-audit.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:26:47.6920657Z  [32m✓[39m tests/unit/audit-full-cms-draft.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 312[2mms[22m[39m
+2026-10-04T17:26:48.4678067Z  [32m✓[39m tests/unit/institutional-components.test.tsx [2m([22m[2m42 tests[22m[2m)[22m[32m 137[2mms[22m[39m
+2026-10-04T17:26:48.6498932Z  [32m✓[39m tests/unit/ticket-checkout-actions.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 593[2mms[22m[39m
+2026-10-04T17:26:48.6505843Z    [33m[2m✓[22m[39m submitTicketCheckoutAction[2m > [22mfails closed without creating an order when the shared limiter store is unavailable [33m 424[2mms[22m[39m
+2026-10-04T17:26:49.0086414Z  [32m✓[39m tests/unit/admin-member-navigation.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 241[2mms[22m[39m
+2026-10-04T17:26:49.2795964Z  [32m✓[39m tests/unit/contact-concierge-launcher.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 102[2mms[22m[39m
+2026-10-04T17:26:49.4675997Z  [32m✓[39m tests/unit/locale-switcher.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[32m 154[2mms[22m[39m
+2026-10-04T17:26:49.9746197Z  [32m✓[39m tests/integration/chat-retention-route.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:50.1734775Z  [2m[90m↓[39m[22m tests/integration/membership-grant.test.ts [2m([22m[2m6 tests[22m[2m | [22m[33m6 skipped[39m[2m)[22m
+2026-10-04T17:26:50.3740256Z  [2m[90m↓[39m[22m tests/integration/showcase-lead-contact-postgres.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:26:50.9936331Z  [32m✓[39m tests/unit/admin-batch-service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:51.1135479Z  [32m✓[39m tests/integration/agent-runs-provenance.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:26:51.2384547Z  [32m✓[39m tests/unit/wt-pages/about-history.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 253[2mms[22m[39m
+2026-10-04T17:26:51.5679454Z  [32m✓[39m tests/unit/m3-acceptance-safety.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:26:52.0373417Z  [32m✓[39m tests/unit/concierge-cancellation-lifecycle.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+2026-10-04T17:26:52.1796137Z  [32m✓[39m tests/unit/engagement-repository.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:26:52.6787739Z  [32m✓[39m tests/unit/concierge-security.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+2026-10-04T17:26:52.7281809Z  [32m✓[39m tests/unit/download-milestone-images.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:26:52.9516018Z  [32m✓[39m tests/unit/approval-service.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:26:53.3030878Z  [32m✓[39m tests/unit/apply-page-copy.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:26:53.3496389Z  [32m✓[39m tests/unit/login-profile-action.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:54.2319155Z  [32m✓[39m tests/unit/admin-cohort-management.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:26:54.2363257Z  [32m✓[39m tests/unit/showcase-lead-email-runner.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:26:54.3170362Z  [32m✓[39m tests/unit/inbox-thread.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+2026-10-04T17:26:54.7997348Z  [32m✓[39m tests/unit/wisetech-pr3-scope-boundary.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:26:55.1529110Z  [32m✓[39m tests/unit/approvals-expirer.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:26:55.2811942Z  [32m✓[39m tests/unit/audit-full-job-health.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:26:55.5423129Z  [32m✓[39m tests/unit/aiops-public-repository.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+2026-10-04T17:26:55.7934238Z  [32m✓[39m tests/unit/board-reporter-render.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+2026-10-04T17:26:56.1017040Z  [32m✓[39m tests/unit/member-event-new-page.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+2026-10-04T17:26:56.7400607Z  [32m✓[39m tests/unit/email-catalog.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:26:56.8780949Z  [32m✓[39m tests/unit/admin-cms-dirty-forms.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 172[2mms[22m[39m
+2026-10-04T17:26:57.3421993Z  [32m✓[39m tests/unit/audit-full-cms-workspace.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 886[2mms[22m[39m
+2026-10-04T17:26:57.3423283Z    [33m[2m✓[22m[39m retains all bilingual field values while switching blocks, searching and resetting one visible field [33m 496[2mms[22m[39m
+2026-10-04T17:26:57.3424733Z    [33m[2m✓[22m[39m keeps the selected block after a successful action resets form controls [33m 315[2mms[22m[39m
+2026-10-04T17:26:57.7149685Z  [2m[90m↓[39m[22m tests/integration/member-event-review-version-postgres.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:26:57.8801783Z  [32m✓[39m tests/unit/campaign-repository-boundary.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:26:58.2546561Z  [32m✓[39m tests/unit/event-attendees-ticket-rows.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:26:58.6068420Z  [32m✓[39m tests/unit/event-check-in.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:26:58.8476084Z  [2m[90m↓[39m[22m tests/integration/cohort-role-revocation-postgres.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:26:59.1615814Z  [32m✓[39m tests/unit/acceptance-guard.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:26:59.7675025Z  [32m✓[39m tests/unit/events-repository-cancelled.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-04T17:26:59.7932769Z  [32m✓[39m tests/unit/attendee-table-seat-check-in.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 125[2mms[22m[39m
+2026-10-04T17:27:00.2777800Z  [32m✓[39m tests/unit/woztell-production-wiring.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:00.3326064Z  [32m✓[39m tests/unit/woztell-review-gaps.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:00.6745978Z  [32m✓[39m tests/unit/m5-schema-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:00.8796001Z  [32m✓[39m tests/unit/news-action-state.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:01.1696573Z  [32m✓[39m tests/unit/m7-media-schema-contract.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:01.6372321Z  [2m[90m↓[39m[22m tests/integration/admin-batch-history.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:27:01.8315966Z  [2m[90m↓[39m[22m tests/integration/join-resume.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:27:01.9965652Z  [32m✓[39m tests/unit/ai-runtime-prepared-single-use.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:02.5296499Z  [2m[90m↓[39m[22m tests/integration/company-profile-review-version-postgres.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:27:02.6803987Z  [32m✓[39m tests/unit/auth-server-runtime.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 71[2mms[22m[39m
+2026-10-04T17:27:02.8012598Z  [32m✓[39m tests/unit/full-fix-workspace-search.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 163[2mms[22m[39m
+2026-10-04T17:27:03.1961569Z  [32m✓[39m tests/unit/extract-milestones.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:03.7309728Z  [32m✓[39m tests/integration/retention-analyst-candidates.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+2026-10-04T17:27:04.0375997Z  [32m✓[39m tests/unit/m4a-knowledge-seed.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 93[2mms[22m[39m
+2026-10-04T17:27:04.0892481Z  [32m✓[39m tests/integration/board-reporter-route.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+2026-10-04T17:27:04.5115825Z  [32m✓[39m tests/unit/home-market-products.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 126[2mms[22m[39m
+2026-10-04T17:27:04.6735710Z  [32m✓[39m tests/unit/event-action-state.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:05.2106367Z  [32m✓[39m tests/unit/admin-page-auth-source.test.ts [2m([22m[2m50 tests[22m[2m)[22m[33m 329[2mms[22m[39m
+2026-10-04T17:27:05.4746157Z  [32m✓[39m tests/unit/member-notes.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:05.6382429Z  [32m✓[39m tests/unit/scheduled-jobs-repository.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:06.0131640Z  [32m✓[39m tests/unit/showcase-page-degrades.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+2026-10-04T17:27:06.4206090Z  [32m✓[39m tests/unit/admin-members-repository.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:27:06.5226938Z  [32m✓[39m tests/unit/journey-whatsapp-stop.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:06.5566221Z  [32m✓[39m tests/unit/page-copy-action-state.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:07.0096473Z  [32m✓[39m tests/unit/login-destination.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:07.5747919Z  [32m✓[39m tests/unit/member-login-actions.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+2026-10-04T17:27:07.5753825Z  [2m[90m↓[39m[22m tests/integration/admin-batch-ticket-resend.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:07.7771295Z  [32m✓[39m tests/unit/audit-full-batch-capabilities.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+2026-10-04T17:27:08.2071750Z  [32m✓[39m tests/unit/unsubscribe-secret-rotation.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:08.7603550Z  [32m✓[39m tests/unit/portal-content-scope.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:09.2953988Z  [32m✓[39m tests/unit/public-environment-isolation.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 1081[2mms[22m[39m
+2026-10-04T17:27:09.2955814Z    [33m[2m✓[22m[39m public environment boundaries[2m > [22mimports the database client with only DATABASE_URL configured [33m 357[2mms[22m[39m
+2026-10-04T17:27:09.2957363Z    [33m[2m✓[22m[39m public environment boundaries[2m > [22mimports the public showcase lead action without unrelated production values [33m 382[2mms[22m[39m
+2026-10-04T17:27:09.4150746Z  [32m✓[39m tests/unit/sitemap-host.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 157[2mms[22m[39m
+2026-10-04T17:27:09.7455357Z  [32m✓[39m tests/unit/page-indexability.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:10.0152480Z  [32m✓[39m tests/unit/public-directory-availability.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+2026-10-04T17:27:10.4166569Z Browserslist: browsers data (caniuse-lite) is 16 months old. Please run:
+2026-10-04T17:27:10.4185035Z   npx update-browserslist-db@latest
+2026-10-04T17:27:10.4214866Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2026-10-04T17:27:10.5946630Z  [32m✓[39m tests/unit/refund-failure.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:10.6848034Z  [32m✓[39m tests/unit/layout-client-messages.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 107[2mms[22m[39m
+2026-10-04T17:27:10.9706097Z  [2m[90m↓[39m[22m tests/integration/public-directory-pagination.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:27:11.2676105Z  [32m✓[39m tests/unit/application-draft-actions.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:11.5011998Z  [2m[90m↓[39m[22m tests/integration/member-360-purchases.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:27:12.1876580Z  [32m✓[39m tests/unit/partner-action-state.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:12.1908959Z  [2m[90m↓[39m[22m tests/integration/member-import-audit-load.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:12.2315881Z  [32m✓[39m tests/unit/home-archive-stories.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 143[2mms[22m[39m
+2026-10-04T17:27:13.0796081Z  [32m✓[39m tests/unit/dunning-lapse-repository.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:13.2437302Z  [2m[90m↓[39m[22m tests/integration/admin-batch-profile-cleanup.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:27:13.5046007Z  [32m✓[39m tests/unit/m1-acceptance-services.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:13.6106150Z  [32m✓[39m tests/unit/m2-browser-acceptance-contract.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:14.2286002Z  [32m✓[39m tests/unit/audit-full-billing-recovery.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:14.3748933Z  [32m✓[39m tests/unit/showcase-logo-render.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+2026-10-04T17:27:14.4411877Z  [2m[90m↓[39m[22m tests/integration/public-directory-availability-postgres.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:15.0420454Z  [32m✓[39m tests/unit/ticket-checkout-recovery.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:15.2836320Z  [32m✓[39m tests/unit/checkout-recovery-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:15.3109502Z  [2m[90m↓[39m[22m tests/integration/auth-shared-rate-limit.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:27:16.1885163Z  [32m✓[39m tests/unit/audit-full-renewal-window.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:16.1965617Z  [32m✓[39m tests/unit/m4c-schema-contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:16.6316096Z  [32m✓[39m tests/unit/admin-member-page-lazy.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+2026-10-04T17:27:16.9196154Z  [32m✓[39m tests/unit/m5-request-intro-form.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+2026-10-04T17:27:17.1776783Z  [32m✓[39m tests/unit/admin-member-summary.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:27:17.5546419Z  [2m[90m↓[39m[22m tests/integration/journey-claim-concurrency.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:27:17.8473499Z  [32m✓[39m tests/unit/segment-schema.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:27:18.3925780Z  [32m✓[39m tests/integration/woztell-server-uncertain.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:18.3975883Z  [32m✓[39m tests/unit/member-import-validation.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 155[2mms[22m[39m
+2026-10-04T17:27:18.6136099Z  [32m✓[39m tests/unit/concierge-unavailable-ui.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 677[2mms[22m[39m
+2026-10-04T17:27:18.9982863Z  [32m✓[39m tests/unit/media-action-state.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:19.3633999Z  [32m✓[39m tests/unit/member-event-edit-page.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+2026-10-04T17:27:19.6733325Z  [32m✓[39m tests/unit/refund-success.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:19.8685492Z  [32m✓[39m tests/unit/event-orders-list.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:20.5401552Z  [2m[90m↓[39m[22m tests/integration/writer-quota-postgres.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:27:20.6458589Z  [32m✓[39m tests/unit/wt-pages/launchpad-page.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 656[2mms[22m[39m
+2026-10-04T17:27:20.6459971Z    [33m[2m✓[22m[39m Launch Pad page — GBA opening[2m > [22mrenders the page hero, the 3-node route board, and 4 descriptive service cards with no CTA [33m 607[2mms[22m[39m
+2026-10-04T17:27:20.8973517Z  [32m✓[39m tests/unit/m5-member-listing.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+2026-10-04T17:27:21.2408219Z  [32m✓[39m tests/unit/profile-review-preview.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:27:21.3186111Z  [32m✓[39m tests/unit/ai-review-panel.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 120[2mms[22m[39m
+2026-10-04T17:27:21.8787774Z  [32m✓[39m tests/unit/m6-seed.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+2026-10-04T17:27:21.8969610Z  [32m✓[39m tests/unit/m4b-runtime-guard.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:22.0066024Z  [32m✓[39m tests/unit/event-public-page.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+2026-10-04T17:27:22.7836440Z [90mstderr[2m | tests/unit/admin-unsaved-changes-guard.test.tsx[2m > [22m[2madmin unsaved form navigation[2m > [22m[2mkeeps the draft when a sidebar navigation is cancelled and warns on reload
+2026-10-04T17:27:22.7845287Z [22m[39mReceived `false` for a non-boolean attribute `prefetch`.
+2026-10-04T17:27:22.7864486Z 
+2026-10-04T17:27:22.7879828Z If you want to write it to the DOM, pass a string instead: prefetch="false" or prefetch={value.toString()}.
+2026-10-04T17:27:22.7882535Z 
+2026-10-04T17:27:22.7883538Z If you used to conditionally omit it with prefetch={condition && value}, pass prefetch={condition ? value : undefined} instead.
+2026-10-04T17:27:22.7884356Z 
+2026-10-04T17:27:22.8073801Z  [32m✓[39m tests/unit/admin-unsaved-changes-guard.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 85[2mms[22m[39m
+2026-10-04T17:27:22.8145790Z  [32m✓[39m tests/unit/announcement-whitespace-contract.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:22.9795967Z  [32m✓[39m tests/unit/admin-login-page.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 122[2mms[22m[39m
+2026-10-04T17:27:23.4826263Z  [32m✓[39m tests/unit/showcase-lead-task-table.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+2026-10-04T17:27:23.7439094Z  [32m✓[39m tests/unit/media-upload-form-rendered.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 129[2mms[22m[39m
+2026-10-04T17:27:23.7684351Z  [32m✓[39m tests/unit/wisetech-announcement-schema-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:24.2753439Z  [32m✓[39m tests/unit/home-conversion-paths.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 153[2mms[22m[39m
+2026-10-04T17:27:24.3174721Z  [32m✓[39m tests/unit/journey-conditions.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:24.5365082Z  [32m✓[39m tests/unit/refund-policy-links.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 112[2mms[22m[39m
+2026-10-04T17:27:24.9395878Z  [32m✓[39m tests/unit/ai-operations-metrics.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:25.0641058Z  [32m✓[39m tests/unit/whatsapp-template-body.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:25.2336363Z  [32m✓[39m tests/unit/m7-schema-contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:25.4576020Z  [32m✓[39m tests/unit/portal-continuation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:25.9692905Z  [32m✓[39m tests/unit/delivery-retry-idempotency.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:26.1175980Z  [32m✓[39m tests/unit/event-member-guest-capacity.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:26.3903303Z  [32m✓[39m tests/unit/actor-authorization.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:26.6024766Z  [32m✓[39m tests/unit/sitemap-milestones.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+2026-10-04T17:27:26.6674783Z  [32m✓[39m tests/unit/revalidate-public-path.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:27.3847720Z  [32m✓[39m tests/unit/internal-shell-primitives.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 137[2mms[22m[39m
+2026-10-04T17:27:27.5616212Z  [32m✓[39m tests/unit/m5-admin-review.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 103[2mms[22m[39m
+2026-10-04T17:27:27.7371902Z  [32m✓[39m tests/unit/admin-event-order-page.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:28.2796079Z  [32m✓[39m tests/unit/writer-agent-actor.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:27:28.2837703Z  [32m✓[39m tests/unit/seed-guard-boundary.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:28.3421836Z  [32m✓[39m tests/unit/home-programme-showcase.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 149[2mms[22m[39m
+2026-10-04T17:27:28.7985867Z  [32m✓[39m tests/unit/engagement-scoring.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:29.2276924Z  [32m✓[39m tests/unit/public-news-locale.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:29.6595954Z  [32m✓[39m tests/unit/private-link-boundary.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 431[2mms[22m[39m
+2026-10-04T17:27:29.6596638Z    [33m[2m✓[22m[39m private link boundary[2m > [22mkeeps every discovered private caller behind the same boundary [33m 363[2mms[22m[39m
+2026-10-04T17:27:30.1735941Z  [32m✓[39m tests/unit/member-note-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:30.2696141Z  [32m✓[39m tests/unit/audit-observability.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:27:30.4436027Z  [32m✓[39m tests/unit/job-health-dashboard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 152[2mms[22m[39m
+2026-10-04T17:27:31.0879039Z  [32m✓[39m tests/unit/wt-pages/contact-page.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 151[2mms[22m[39m
+2026-10-04T17:27:31.2613126Z  [32m✓[39m tests/unit/member-communication-form.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 167[2mms[22m[39m
+2026-10-04T17:27:31.6506573Z  [32m✓[39m tests/unit/operations-metrics-action.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:27:31.7943692Z  [32m✓[39m tests/unit/renewal-production-dependencies.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:32.1915193Z  [32m✓[39m tests/integration/woztell-network-uncertain.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:32.2706174Z  [2m[90m↓[39m[22m tests/integration/admin-batch-export.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:32.7592203Z  [32m✓[39m tests/unit/showcase-review-preview.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:27:32.7593213Z  [2m[90m↓[39m[22m tests/integration/communication-audit-load.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:33.0806175Z [90mstderr[2m | tests/unit/admin-batch-detail-page.test.tsx[2m > [22m[2mbatch detail pagination[2m > [22m[2mpasses a validated scoped cursor to the owner-scoped preview read
+2026-10-04T17:27:33.0837352Z [22m[39mReceived `false` for a non-boolean attribute `prefetch`.
+2026-10-04T17:27:33.0838156Z 
+2026-10-04T17:27:33.0838709Z If you want to write it to the DOM, pass a string instead: prefetch="false" or prefetch={value.toString()}.
+2026-10-04T17:27:33.0839201Z 
+2026-10-04T17:27:33.0839799Z If you used to conditionally omit it with prefetch={condition && value}, pass prefetch={condition ? value : undefined} instead.
+2026-10-04T17:27:33.0856104Z 
+2026-10-04T17:27:33.1176597Z  [32m✓[39m tests/unit/admin-batch-detail-page.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 103[2mms[22m[39m
+2026-10-04T17:27:33.6383941Z  [32m✓[39m tests/unit/portal-layout-admin-redirect.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:33.6541317Z [90mstderr[2m | tests/unit/login-resolution.test.ts[2m > [22m[2mlogin resolution[2m > [22m[2mreports a session or profile-store outage as unavailable, not signed out
+2026-10-04T17:27:33.6542856Z [22m[39m{"event":"login_resolution_unavailable","reference":"15c389c5-1dd4-48d6-93e9-c2409703d16b","occurredAt":"2026-10-04T17:27:33.652Z"}
+2026-10-04T17:27:33.6543471Z 
+2026-10-04T17:27:33.6595124Z [90mstderr[2m | tests/unit/login-resolution.test.ts[2m > [22m[2mlogin resolution[2m > [22m[2mreports a session or profile-store outage as unavailable, not signed out
+2026-10-04T17:27:33.6615496Z [22m[39m{"event":"login_resolution_unavailable","reference":"d07a7915-2cd0-40eb-b4c4-4d17856aa6fe","occurredAt":"2026-10-04T17:27:33.656Z"}
+2026-10-04T17:27:33.6616201Z 
+2026-10-04T17:27:33.6628075Z  [32m✓[39m tests/unit/login-resolution.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:33.7277927Z  [2m[90m↓[39m[22m tests/integration/admin-batch-concurrency.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:34.1627958Z  [32m✓[39m tests/unit/member-query-contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:34.4563387Z  [32m✓[39m tests/unit/portal-tools-list-page.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 136[2mms[22m[39m
+2026-10-04T17:27:34.6745961Z  [32m✓[39m tests/unit/ticket-schema-contract.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:35.0990111Z  [32m✓[39m tests/unit/posts-repository.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:35.3169883Z  [32m✓[39m tests/unit/hero-variant.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+2026-10-04T17:27:35.3470133Z  [32m✓[39m tests/unit/wisetech-media-upload-schema-contract.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:35.6691600Z  [32m✓[39m tests/integration/woztell-delivery-outbox.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:35.9091205Z  [32m✓[39m tests/unit/admin-login-guard.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:35.9379022Z  [32m✓[39m tests/unit/automation-admin-indexes.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:36.5675072Z  [32m✓[39m tests/unit/admin-batch-profile-patch.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:36.9099131Z  [32m✓[39m tests/unit/inbox-reply-action-outcome.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:37.1986638Z  [32m✓[39m tests/unit/news-draft-preview.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 115[2mms[22m[39m
+2026-10-04T17:27:37.5020031Z  [32m✓[39m tests/unit/segment-save-action.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:37.5672974Z  [32m✓[39m tests/unit/home-impact-evidence.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+2026-10-04T17:27:38.0971251Z  [32m✓[39m tests/unit/inbox-draft-protection.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:38.2236131Z  [2m[90m↓[39m[22m tests/integration/admin-batch-browser-fixture.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:38.5233425Z  [32m✓[39m tests/unit/company-portal-role-race.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:39.1422349Z  [32m✓[39m tests/unit/audit-full-workspace.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 158[2mms[22m[39m
+2026-10-04T17:27:39.2446126Z  [32m✓[39m tests/unit/audit-full-company-picker.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 569[2mms[22m[39m
+2026-10-04T17:27:39.2447927Z    [33m[2m✓[22m[39m ignores an older search response and separates failure from zero results [33m 313[2mms[22m[39m
+2026-10-04T17:27:39.4061239Z  [32m✓[39m tests/unit/job-run-key.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:39.8365938Z  [32m✓[39m tests/unit/page-copy-local-draft-boundary.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:39.8648604Z  [32m✓[39m tests/unit/guest-rsvp-form-recovery.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+2026-10-04T17:27:40.3476067Z  [32m✓[39m tests/unit/login-pages-resolution.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+2026-10-04T17:27:40.4685421Z  [32m✓[39m tests/unit/ticket-seat-input.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:40.5845986Z  [32m✓[39m tests/unit/dual-brand-lockup.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 82[2mms[22m[39m
+2026-10-04T17:27:40.9255658Z  [32m✓[39m tests/unit/about-page.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:41.1845869Z  [32m✓[39m tests/unit/csv-export.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:41.4579815Z  [2m[90m↓[39m[22m tests/integration/auth-last-login.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:41.5544508Z  [32m✓[39m tests/unit/membership-checkout-polling.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+2026-10-04T17:27:41.8865842Z  [32m✓[39m tests/unit/home-ecosystem.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 109[2mms[22m[39m
+2026-10-04T17:27:42.0091052Z  [2m[90m↓[39m[22m tests/integration/woztell-live.acceptance.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:27:42.1326173Z  [32m✓[39m tests/unit/guest-registration-email.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:42.6525936Z  [32m✓[39m tests/unit/home-gba-gateway.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 129[2mms[22m[39m
+2026-10-04T17:27:42.9562475Z  [2m[90m↓[39m[22m tests/integration/audit-migration-upgrade.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:27:43.0029237Z  [32m✓[39m tests/unit/worker-readiness-reasons.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:43.5158222Z  [32m✓[39m tests/unit/writer-schema-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:43.9119601Z  [32m✓[39m tests/unit/concierge-atomic-start.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:44.0146088Z  [32m✓[39m tests/unit/next-route-exports.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:27:44.4032214Z  [32m✓[39m tests/unit/policy-confirmation.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:44.4694906Z  [32m✓[39m tests/unit/member-import-match.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:44.5116042Z  [32m✓[39m tests/unit/support-draft-privacy.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 421[2mms[22m[39m
+2026-10-04T17:27:44.5117284Z    [33m[2m✓[22m[39m deleting all typed text also clears the stored envelope [33m 369[2mms[22m[39m
+2026-10-04T17:27:44.9947072Z  [32m✓[39m tests/unit/writer-contracts.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:45.0260357Z  [32m✓[39m tests/unit/og-route.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:27:45.1305464Z  [32m✓[39m tests/unit/audit-full-cms-preview.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+2026-10-04T17:27:45.5904435Z  [32m✓[39m tests/unit/journey-scheduling.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:45.6762390Z  [32m✓[39m tests/unit/m4b-e2e-safety.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:45.8072534Z  [32m✓[39m tests/unit/application-draft-adopt.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 92[2mms[22m[39m
+2026-10-04T17:27:46.4028995Z [90mstderr[2m | tests/unit/admin-batch-history-page.test.tsx[2m > [22m[2mbatch operation centre[2m > [22m[2mshows actor-scoped recent jobs and a path back to the partial job
+2026-10-04T17:27:46.4059198Z [22m[39mReceived `false` for a non-boolean attribute `prefetch`.
+2026-10-04T17:27:46.4113575Z 
+2026-10-04T17:27:46.4119009Z If you want to write it to the DOM, pass a string instead: prefetch="false" or prefetch={value.toString()}.
+2026-10-04T17:27:46.4161712Z 
+2026-10-04T17:27:46.4217465Z If you used to conditionally omit it with prefetch={condition && value}, pass prefetch={condition ? value : undefined} instead.
+2026-10-04T17:27:46.4239369Z 
+2026-10-04T17:27:46.4255698Z  [32m✓[39m tests/unit/admin-dashboard-tiles.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+2026-10-04T17:27:46.4366393Z  [32m✓[39m tests/unit/admin-batch-history-page.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 127[2mms[22m[39m
+2026-10-04T17:27:46.5206989Z  [32m✓[39m tests/unit/home-open-now-recovery.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 95[2mms[22m[39m
+2026-10-04T17:27:47.0239643Z  [32m✓[39m tests/unit/news-actions-auth-order.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:47.1798432Z  [32m✓[39m tests/unit/programme-grid.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 89[2mms[22m[39m
+2026-10-04T17:27:47.2612467Z  [32m✓[39m tests/unit/site-header-streaming.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+2026-10-04T17:27:47.6055221Z  [32m✓[39m tests/unit/portal-member-tools.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:27:47.7326286Z  [32m✓[39m tests/unit/admin-page-header-alignment.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:47.9746087Z  [32m✓[39m tests/unit/admin-batch-progress.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+2026-10-04T17:27:48.1705421Z  [32m✓[39m tests/unit/wisetech-protected-route-interception.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:48.3093284Z  [32m✓[39m tests/unit/whatsapp-templates-config.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:48.7428187Z  [32m✓[39m tests/unit/admin-private-prefetch.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 120[2mms[22m[39m
+2026-10-04T17:27:49.0994232Z  [32m✓[39m tests/unit/m2-schema-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:49.2878891Z  [32m✓[39m tests/unit/ai-usage-contract.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:49.3719771Z  [32m✓[39m tests/unit/portal-events-registration-mode.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-04T17:27:49.8903393Z  [32m✓[39m tests/unit/login-entry-routing.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:27:49.9395876Z  [32m✓[39m tests/unit/membership-checkout-status-route.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+2026-10-04T17:27:50.1757135Z  [32m✓[39m tests/unit/admin-member-list.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:50.4706308Z  [32m✓[39m tests/unit/media-bounded-body.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+2026-10-04T17:27:50.8215879Z  [32m✓[39m tests/unit/portal-nav.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 186[2mms[22m[39m
+2026-10-04T17:27:50.8835746Z  [32m✓[39m tests/unit/portal-sign-out-button.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+2026-10-04T17:27:51.0715825Z  [32m✓[39m tests/unit/breadcrumb-coverage.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:51.3556122Z  [32m✓[39m tests/unit/membership-catalog.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:51.4675663Z  [32m✓[39m tests/unit/programme-summaries.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:51.7454665Z  [32m✓[39m tests/unit/member-views.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:52.2255762Z  [32m✓[39m tests/unit/staff-tasks-admin.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:52.5046270Z  [32m✓[39m tests/unit/admin-member-workspace-page.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 45[2mms[22m[39m
+2026-10-04T17:27:52.6716099Z  [32m✓[39m tests/unit/m6-contracts.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:52.7590286Z  [32m✓[39m tests/unit/membership-entitlements.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:53.3759148Z  [32m✓[39m tests/unit/audit-acceptance-artifacts.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+2026-10-04T17:27:53.6520079Z  [32m✓[39m tests/unit/application-queue-table.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 88[2mms[22m[39m
+2026-10-04T17:27:53.7377210Z  [32m✓[39m tests/unit/event-review-core.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:53.9364940Z  [32m✓[39m tests/unit/legacy-network-groups.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:54.2856000Z  [32m✓[39m tests/unit/event-detail-seo.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:54.5170491Z  [32m✓[39m tests/unit/membership-links.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+2026-10-04T17:27:54.8299865Z  [32m✓[39m tests/unit/repository-scope.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:27:54.9646027Z  [32m✓[39m tests/unit/admin-member-detail-lazy.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:55.4712896Z  [32m✓[39m tests/unit/media-upload-registry-invariants.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:55.7342681Z  [32m✓[39m tests/unit/home-outcomes.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 112[2mms[22m[39m
+2026-10-04T17:27:55.8791559Z  [32m✓[39m tests/unit/admin-member-history-view.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-04T17:27:55.9975888Z  [32m✓[39m tests/unit/admin-login-actions.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:27:56.3125668Z  [32m✓[39m tests/unit/audit-full-performance-guard.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:56.4565671Z  [31m❯[39m tests/unit/concierge-layouts.test.ts [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:27:56.4579795Z [31m   [31m×[31m Concierge layout translation loading[2m > [22mloads scoped server translations: 'app/[locale]/(public)/layout.tsx'[39m[32m 5[2mms[22m[39m
+2026-10-04T17:27:56.4614776Z [31m     → Target cannot be null or undefined.[39m
+2026-10-04T17:27:56.4645186Z    [32m✓[39m Concierge layout translation loading[2m > [22mloads scoped server translations: 'app/[locale]/(member)/portal/layout.t…'[32m 1[2mms[22m[39m
+2026-10-04T17:27:56.5490844Z  [32m✓[39m tests/unit/home-highlights-bounded-event.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:57.0805873Z  [32m✓[39m tests/unit/shared-rate-limit.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:57.2066019Z  [32m✓[39m tests/unit/automation-dashboard-review.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+2026-10-04T17:27:57.4054495Z  [32m✓[39m tests/unit/approval-expiry-orphan.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:57.6914459Z  [32m✓[39m tests/unit/showcase-review-action-version.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:27:57.9792906Z  [32m✓[39m tests/unit/event-registration-form.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 115[2mms[22m[39m
+2026-10-04T17:27:58.0541723Z  [32m✓[39m tests/unit/audit-full-cms-action.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:58.4996853Z  [32m✓[39m tests/unit/aiops-cost-unknown.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 39[2mms[22m[39m
+2026-10-04T17:27:58.5415828Z  [32m✓[39m tests/unit/refund-confirm-message.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:27:58.7933015Z  [32m✓[39m tests/unit/private-record-prefetch.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 106[2mms[22m[39m
+2026-10-04T17:27:59.1040220Z  [32m✓[39m tests/unit/portal-presentational.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:27:59.1363296Z  [32m✓[39m tests/unit/admin-page-auth.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:27:59.3747483Z  [32m✓[39m tests/unit/content-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:27:59.7094488Z  [32m✓[39m tests/unit/membership-lifecycle.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:00.0305952Z  [32m✓[39m tests/unit/profile-identity-billing.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:28:00.3423860Z  [32m✓[39m tests/unit/audit-event-profile-identity.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:00.6007029Z  [32m✓[39m tests/unit/woztell-recovery-repository.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:28:00.8830436Z  [32m✓[39m tests/unit/og-metadata.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:00.9733741Z  [32m✓[39m tests/unit/membership-grant-service.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:28:01.1466256Z  [32m✓[39m tests/unit/worktree-webpack-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:01.4906115Z  [32m✓[39m tests/unit/board-reporting-window.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:01.5751929Z  [32m✓[39m tests/unit/segment-save-form.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:28:01.7035065Z  [32m✓[39m tests/unit/member-note-server-action-boundary.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:02.0346063Z  [32m✓[39m tests/unit/m3-schema-contract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:02.3897557Z  [32m✓[39m tests/unit/member-saved-views.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-04T17:28:02.5791007Z  [32m✓[39m tests/unit/showcase-review-filter.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-04T17:28:02.6084620Z [90mstderr[2m | tests/unit/login-resolution-server.test.ts[2m > [22m[2mcurrent login resolution[2m > [22m[2mkeeps session read failures separate from signed-out
+2026-10-04T17:28:02.6086599Z [22m[39m{"event":"login_resolution_unavailable","reference":"4b6c5145-862c-4deb-94a6-a994fb9a9b5a","occurredAt":"2026-10-04T17:28:02.599Z"}
+2026-10-04T17:28:02.6087251Z 
+2026-10-04T17:28:02.6091934Z  [32m✓[39m tests/unit/login-resolution-server.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:28:02.9261244Z  [32m✓[39m tests/unit/db-seed-split.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:03.2002065Z  [32m✓[39m tests/unit/event-entitlement.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:03.2496382Z  [32m✓[39m tests/unit/ai-provider-content-filter.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:03.5665954Z  [32m✓[39m tests/unit/industry-tags.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:03.8186040Z  [32m✓[39m tests/unit/admin-archive-toggle-labels.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:04.2584548Z  [32m✓[39m tests/unit/member-selection.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+2026-10-04T17:28:04.2784357Z  [32m✓[39m tests/unit/campaign-server-action-auth.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:04.4667089Z  [32m✓[39m tests/unit/repository-contract.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:04.8532383Z  [32m✓[39m tests/unit/ai-redaction.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:05.2156076Z  [32m✓[39m tests/unit/approval-server-action-auth.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:05.4052574Z  [32m✓[39m tests/unit/campaign-draft-url.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:28:05.5171126Z  [32m✓[39m tests/unit/audit-full-admin-labels.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-04T17:28:05.7939835Z  [32m✓[39m tests/unit/partners-public-groups.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:05.9806396Z  [32m✓[39m tests/unit/admin-membership.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:06.1076934Z  [32m✓[39m tests/unit/admin-member-page-boundary.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+2026-10-04T17:28:06.7205860Z  [32m✓[39m tests/unit/membership-comp-form.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 41[2mms[22m[39m
+2026-10-04T17:28:06.7520613Z  [32m✓[39m tests/unit/whatsapp-consent.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:07.2386616Z  [32m✓[39m tests/unit/member-view-presets.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+2026-10-04T17:28:07.2922920Z  [32m✓[39m tests/unit/event-public-status.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:07.4406593Z  [32m✓[39m tests/unit/board-capability-gate.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:07.8030216Z  [32m✓[39m tests/unit/ticket-qr.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+2026-10-04T17:28:08.0425715Z  [32m✓[39m tests/unit/whatsapp-number.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:08.1986607Z  [32m✓[39m tests/unit/portal-content-runtime-authorization.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:08.4146098Z  [32m✓[39m tests/unit/route-ownership.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:08.5800033Z  [32m✓[39m tests/unit/migration-journal-order.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:08.8295993Z  [32m✓[39m tests/unit/ticket-format.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+2026-10-04T17:28:08.9546033Z  [32m✓[39m tests/unit/engagement-trend-precision.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:09.1467811Z  [32m✓[39m tests/unit/m2-acceptance-docs-contract.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:09.3928142Z  [32m✓[39m tests/unit/campaign-no-delivery.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:09.4662757Z  [32m✓[39m tests/unit/admin-repository-authorization.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:09.7095828Z  [32m✓[39m tests/unit/at-risk-message-contract.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:09.9645032Z  [32m✓[39m tests/unit/i18n-routing.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-04T17:28:10.6948091Z  [2m[90m↓[39m[22m tests/integration/ai-application-triage.test.ts [2m([22m[2m13 tests[22m[2m | [22m[33m13 skipped[39m[2m)[22m
+2026-10-04T17:28:10.7331104Z  [2m[90m↓[39m[22m tests/integration/ai-retention-batch.test.ts [2m([22m[2m15 tests[22m[2m | [22m[33m15 skipped[39m[2m)[22m
+2026-10-04T17:28:11.1766464Z  [2m[90m↓[39m[22m tests/integration/audit-full-batch-failures.test.ts [2m([22m[2m13 tests[22m[2m | [22m[33m13 skipped[39m[2m)[22m
+2026-10-04T17:28:11.4834548Z  [2m[90m↓[39m[22m tests/integration/full-fix-membership-lifecycle.test.ts [2m([22m[2m13 tests[22m[2m | [22m[33m13 skipped[39m[2m)[22m
+2026-10-04T17:28:11.6275691Z [90mstdout[2m | tests/integration/audit-full-batch-scale-matrix.test.ts
+2026-10-04T17:28:11.6290305Z [22m[39mBATCH_MATRIX_RECEIPT_DIRECTORY .playwright/full-fix-batch-matrix-fe0e7f87-360c-45d0-9c8a-09cbe199e014
+2026-10-04T17:28:11.6348517Z 
+2026-10-04T17:28:11.6371029Z  [2m[90m↓[39m[22m tests/integration/audit-full-batch-scale-matrix.test.ts [2m([22m[2m24 tests[22m[2m | [22m[33m24 skipped[39m[2m)[22m
+2026-10-04T17:28:11.9206229Z  [2m[90m↓[39m[22m tests/integration/ai-knowledge-retrieval.test.ts [2m([22m[2m31 tests[22m[2m | [22m[33m31 skipped[39m[2m)[22m
+2026-10-04T17:28:12.1782645Z  [2m[90m↓[39m[22m tests/integration/audit-full-workspace.test.ts [2m([22m[2m7 tests[22m[2m | [22m[33m7 skipped[39m[2m)[22m
+2026-10-04T17:28:12.4607233Z  [2m[90m↓[39m[22m tests/integration/ai-admin-content-facts.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m
+2026-10-04T17:28:12.6826555Z  [32m✓[39m tests/unit/ai-provider-endpoint-contract.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 271[2mms[22m[39m
+2026-10-04T17:28:12.7899830Z  [2m[90m↓[39m[22m tests/integration/full-fix-workspace-search.test.ts [2m([22m[2m13 tests[22m[2m | [22m[33m13 skipped[39m[2m)[22m
+2026-10-04T17:28:12.9845123Z  [32m✓[39m tests/unit/ai-runtime-budget.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+2026-10-04T17:28:13.1478148Z  [32m✓[39m tests/integration/wisetech-partner-import-neon.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[32m 2[2mms[22m[39m
+2026-10-04T17:28:13.4484966Z  [2m[90m↓[39m[22m tests/integration/audit-full-policy-acceptance.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m
+2026-10-04T17:28:13.6841961Z  [2m[90m↓[39m[22m tests/integration/ai-operations-metrics.test.ts [2m([22m[2m6 tests[22m[2m | [22m[33m6 skipped[39m[2m)[22m
+2026-10-04T17:28:13.7666654Z  [2m[90m↓[39m[22m tests/integration/operations-baseline.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:28:13.8346047Z  [32m✓[39m tests/unit/page-copy-request-config.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+2026-10-04T17:28:14.4254976Z  [2m[90m↓[39m[22m tests/integration/audit-full-auth-identity.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:28:14.4802692Z  [32m✓[39m tests/unit/public-data-cache.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-04T17:28:15.0321278Z  [2m[90m↓[39m[22m tests/integration/audit-full-grant-boundary.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:28:15.1697904Z  [2m[90m↓[39m[22m tests/integration/audit-full-segment-pagination.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+2026-10-04T17:28:15.6321082Z  [2m[90m↓[39m[22m tests/integration/audit-full-company-search.test.ts [2m([22m[2m2 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m
+2026-10-04T17:28:15.9865829Z  [32m✓[39m tests/unit/ai-review-readiness.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+2026-10-04T17:28:16.1785988Z  [32m✓[39m tests/unit/ai-draft-work-boundary.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-04T17:28:16.2390129Z  [2m[90m↓[39m[22m tests/integration/full-remediation-fixture.test.ts [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+2026-10-04T17:28:16.6822306Z  [32m✓[39m tests/unit/ai-embedding-budget.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 33[2mms[22m[39m
+2026-10-04T17:28:16.8162743Z  [32m✓[39m tests/unit/audit-full-translations.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 2842[2mms[22m[39m
+2026-10-04T17:28:16.8163780Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mfails the actual audit command for corrupt value "????" [33m 350[2mms[22m[39m
+2026-10-04T17:28:16.8164901Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mfails the actual audit command for corrupt value "Member � name" [33m 379[2mms[22m[39m
+2026-10-04T17:28:16.8165876Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mfails the actual audit command for corrupt value "   " [33m 325[2mms[22m[39m
+2026-10-04T17:28:16.8166834Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mallows legitimate single question marks and URL queries [33m 357[2mms[22m[39m
+2026-10-04T17:28:16.8167926Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mdoes not bypass broken labels merely because another label contains a URL [33m 342[2mms[22m[39m
+2026-10-04T17:28:16.8169026Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mrejects an empty message discovery rather than passing vacuously [33m 387[2mms[22m[39m
+2026-10-04T17:28:16.8170008Z    [33m[2m✓[22m[39m full remediation translation quality[2m > [22mchecks leaf keys and interpolation tokens in the same audit command [33m 694[2mms[22m[39m
+2026-10-04T17:28:16.8432151Z 
+2026-10-04T17:28:16.8433403Z [31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+2026-10-04T17:28:16.8433774Z 
+2026-10-04T17:28:16.8434788Z [41m[1m FAIL [22m[49m tests/unit/concierge-layouts.test.ts[2m > [22mConcierge layout translation loading[2m > [22mloads scoped server translations: 'app/[locale]/(public)/layout.tsx'
+2026-10-04T17:28:16.8455795Z [31m[1mAssertionError[22m: Target cannot be null or undefined.[39m
+2026-10-04T17:28:16.8456373Z [36m [2m❯[22m tests/unit/concierge-layouts.test.ts:[2m33:49[22m[39m
+2026-10-04T17:28:16.8465407Z     [90m 31| [39m    [34mexpect[39m(layout)[33m.[39m[34mtoMatch[39m([36m/namespace:\s*["']Concierge["']/[39m)[33m;[39m
+2026-10-04T17:28:16.8466795Z     [90m 32| [39m    [34mexpect[39m(layout)[33m.[39m[34mtoContain[39m([32m"concierge.raw(key)"[39m)[33m;[39m
+2026-10-04T17:28:16.8467775Z     [90m 33| [39m    [34mexpect[39m(layout[33m.[39m[34mmatch[39m([36m/<ConciergeWidget\b/g[39m))[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+2026-10-04T17:28:16.8468519Z     [90m   | [39m                                                [31m^[39m
+2026-10-04T17:28:16.8468981Z     [90m 34| [39m  })[33m;[39m
+2026-10-04T17:28:16.8469317Z     [90m 35| [39m})[33m;[39m
+2026-10-04T17:28:16.8469582Z 
+2026-10-04T17:28:16.8469876Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+2026-10-04T17:28:16.8470120Z 
+2026-10-04T17:28:16.8470904Z [41m[1m FAIL [22m[49m tests/unit/public-shell.test.tsx[2m > [22mpublic shell server surfaces[2m > [22mkeeps the public shell owner order and exactly one named main
+2026-10-04T17:28:16.8471795Z [31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+2026-10-04T17:28:16.8472181Z 
+2026-10-04T17:28:16.8472366Z [32m- Expected[39m
+2026-10-04T17:28:16.8472660Z [31m+ Received[39m
+2026-10-04T17:28:16.8472880Z 
+2026-10-04T17:28:16.8473050Z [32m- true[39m
+2026-10-04T17:28:16.8473330Z [31m+ false[39m
+2026-10-04T17:28:16.8473545Z 
+2026-10-04T17:28:16.8473889Z [36m [2m❯[22m tests/unit/public-shell.test.tsx:[2m162:58[22m[39m
+2026-10-04T17:28:16.8546392Z     [90m160| [39m    const ordered = ["skip-link", "<Suspense fallback={<SiteHeader", "…
+2026-10-04T17:28:16.8547182Z 
+2026-10-04T17:28:16.8548148Z     [90m161| [39m    [35mconst[39m positions [33m=[39m ordered[33m.[39m[34mmap[39m((token) [33m=>[39m source[33m.[39m[34mindexOf[39m(token))[33m;[39m
+2026-10-04T17:28:16.8549225Z     [90m162| [39m    [34mexpect[39m(positions[33m.[39m[34mevery[39m((position) [33m=>[39m position [33m>=[39m [34m0[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+2026-10-04T17:28:16.8550029Z     [90m   | [39m                                                         [31m^[39m
+2026-10-04T17:28:16.8550916Z     [90m163| [39m    [34mexpect[39m(positions)[33m.[39m[34mtoEqual[39m([[33m...[39mpositions][33m.[39m[34msort[39m((a[33m,[39m b) [33m=>[39m a [33m-[39m b))[33m;[39m
+2026-10-04T17:28:16.8551932Z     [90m164| [39m    [34mexpect[39m(source[33m.[39m[34mmatch[39m([36m/<main\b/g[39m))[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+2026-10-04T17:28:16.8552449Z 
+2026-10-04T17:28:16.8552789Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+2026-10-04T17:28:16.8553102Z 
+2026-10-04T17:28:16.8562031Z [2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m395 passed[39m[22m[2m | [22m[33m52 skipped[39m[90m (449)[39m
+2026-10-04T17:28:16.8578435Z [2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m3171 passed[39m[22m[2m | [22m[33m264 skipped[39m[90m (3437)[39m
+2026-10-04T17:28:16.8579166Z [2m   Start at [22m 17:26:04
+2026-10-04T17:28:16.8585298Z [2m   Duration [22m 132.82s[2m (transform 11.30s, setup 21.17s, collect 133.20s, tests 28.66s, environment 125.05s, prepare 30.44s)[22m
+2026-10-04T17:28:16.8585886Z 
+2026-10-04T17:28:16.8608270Z 
+2026-10-04T17:28:16.8630398Z ##[error]AssertionError: Target cannot be null or undefined.
+ ❯ tests/unit/concierge-layouts.test.ts:33:49
+
+
+2026-10-04T17:28:16.8637337Z 
+2026-10-04T17:28:16.8639229Z ##[error]AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/public-shell.test.tsx:162:58
+
+
+2026-10-04T17:28:16.9649843Z ##[error]Process completed with exit code 1.
+2026-10-04T17:28:16.9748365Z Post job cleanup.
+2026-10-04T17:28:17.0266277Z [command]/usr/bin/git version
+2026-10-04T17:28:17.0294778Z git version 2.55.0
+2026-10-04T17:28:17.0321232Z Temporarily overriding HOME='/home/runner/work/_temp/bc81ed09-82e2-4b98-9685-f28e3e75c271' before making global git config changes
+2026-10-04T17:28:17.0321738Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T17:28:17.0324345Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:28:17.0356685Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T17:28:17.0385526Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T17:28:17.0584763Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T17:28:17.0612729Z http.https://github.com/.extraheader
+2026-10-04T17:28:17.0626060Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-04T17:28:17.0657018Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T17:28:17.0846102Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T17:28:17.0875578Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T17:28:17.1179902Z Cleaning up orphan processes
+2026-10-04T17:28:17.1365203Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,140 @@
+{
+  "sourceSha": "b0509ea0d5a065258f77948150a8b4baf9c66eea",
+  "buildSourceSha": "b0509ea0d5a065258f77948150a8b4baf9c66eea",
+  "observedAt": "2026-10-04T19:41:59.991Z",
+  "dbSourcePositivelyProven": true,
+  "production": false,
+  "rows": [
+    {
+      "path": "/events",
+      "nodes": 491,
+      "eventCards": 12,
+      "libraryChildren": 12,
+      "bodyTags": {
+        "DIV": 2,
+        "SCRIPT": 33,
+        "NEXT-ROUTE-ANNOUNCER": 1
+      },
+      "topSubtrees": [
+        {
+          "tag": "DIV",
+          "id": "",
+          "class": "site-root",
+          "nodes": 421
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "class": "",
+          "nodes": 0
+        },
+        {
+          "tag": "NEXT-ROUTE-ANNOUNCER",
+          "id": "",
+          "class": "",
+          "nodes": 0
+        }
+      ],
+      "rscFetches": [
+        "/",
+        "/events",
+        "/launchpad",
+        "/showcase",
+        "/member-login",
+        "/",
+        "/events",
+        "/launchpad",
+        "/member-login",
+        "/showcase"
+      ]
+    },
+    {
+      "path": "/zh/events",
+      "nodes": 487,
+      "eventCards": 12,
+      "libraryChildren": 12,
+      "bodyTags": {
+        "DIV": 2,
+        "SCRIPT": 32,
+        "NEXT-ROUTE-ANNOUNCER": 1
+      },
+      "topSubtrees": [
+        {
+          "tag": "DIV",
+          "id": "",
+          "class": "site-root",
+          "nodes": 419
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "class": "",
+          "nodes": 0
+        },
+        {
+          "tag": "NEXT-ROUTE-ANNOUNCER",
+          "id": "",
+          "class": "",
+          "nodes": 0
+        }
+      ],
+      "rscFetches": [
+        "/zh",
+        "/zh/events",
+        "/zh/launchpad",
+        "/zh/showcase",
+        "/zh",
+        "/zh/events",
+        "/zh/launchpad",
+        "/zh/member-login",
+        "/zh/member-login",
+        "/zh/showcase"
+      ]
+    },
+    {
+      "path": "/zh",
+      "nodes": 614,
+      "eventCards": 0,
+      "libraryChildren": 0,
+      "bodyTags": {
+        "DIV": 2,
+        "SCRIPT": 42,
+        "NEXT-ROUTE-ANNOUNCER": 1
+      },
+      "topSubtrees": [
+        {
+          "tag": "DIV",
+          "id": "",
+          "class": "site-root",
+          "nodes": 532
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "class": "",
+          "nodes": 0
+        },
+        {
+          "tag": "NEXT-ROUTE-ANNOUNCER",
+          "id": "",
+          "class": "",
+          "nodes": 0
+        }
+      ],
+      "rscFetches": [
+        "/zh/events",
+        "/zh/join",
+        "/zh/members",
+        "/zh/events",
+        "/zh/join",
+        "/zh/members",
+        "/zh/member-login",
+        "/zh/events/d4a-ticket-walk-en-muqxi1vg",
+        "/zh",
+        "/zh/member-login",
+        "/zh/events",
+        "/zh/events/d4a-ticket-walk-en-muqxi1vg"
+      ]
+    }
+  ]
+}

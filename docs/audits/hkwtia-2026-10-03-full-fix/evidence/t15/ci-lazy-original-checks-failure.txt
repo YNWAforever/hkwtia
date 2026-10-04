@@ -1,0 +1,455 @@
+﻿2026-10-04T17:25:32.9074631Z Current runner version: '2.337.0'
+2026-10-04T17:25:32.9095966Z ##[group]Runner Image Provisioner
+2026-10-04T17:25:32.9096727Z Hosted Compute Agent
+2026-10-04T17:25:32.9097200Z Version: 20260901.588
+2026-10-04T17:25:32.9097705Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-04T17:25:32.9098395Z Build Date: 2026-09-01T19:56:44Z
+2026-10-04T17:25:32.9098946Z Worker ID: {83450e89-df9c-4c05-b326-5dd4062e89bd}
+2026-10-04T17:25:32.9099591Z Azure Region: westus
+2026-10-04T17:25:32.9100055Z ##[endgroup]
+2026-10-04T17:25:32.9101104Z ##[group]Operating System
+2026-10-04T17:25:32.9101707Z Ubuntu
+2026-10-04T17:25:32.9102137Z 24.04.5
+2026-10-04T17:25:32.9102582Z LTS
+2026-10-04T17:25:32.9103016Z ##[endgroup]
+2026-10-04T17:25:32.9103468Z ##[group]Runner Image
+2026-10-04T17:25:32.9104168Z Image: ubuntu-24.04
+2026-10-04T17:25:32.9104631Z Version: 20260927.320.1
+2026-10-04T17:25:32.9105702Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-04T17:25:32.9106928Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-04T17:25:32.9107780Z ##[endgroup]
+2026-10-04T17:25:32.9108694Z ##[group]GITHUB_TOKEN Permissions
+2026-10-04T17:25:32.9110275Z Contents: read
+2026-10-04T17:25:32.9110788Z Metadata: read
+2026-10-04T17:25:32.9111332Z ##[endgroup]
+2026-10-04T17:25:32.9113102Z Secret source: Actions
+2026-10-04T17:25:32.9113954Z Cache mode: write
+2026-10-04T17:25:32.9114649Z Prepare workflow directory
+2026-10-04T17:25:32.9380552Z Prepare all required actions
+2026-10-04T17:25:32.9419267Z Getting action download info
+2026-10-04T17:25:33.2801042Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-04T17:25:34.5102791Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-04T17:25:34.8163497Z Complete job name: checks
+2026-10-04T17:25:34.8950015Z ##[group]Run actions/checkout@v4
+2026-10-04T17:25:34.8951189Z with:
+2026-10-04T17:25:34.8951978Z   repository: YNWAforever/hkwtia
+2026-10-04T17:25:34.8959980Z   token: ***
+2026-10-04T17:25:34.8960725Z   ssh-strict: true
+2026-10-04T17:25:34.8961481Z   ssh-user: git
+2026-10-04T17:25:34.8962253Z   persist-credentials: true
+2026-10-04T17:25:34.8963087Z   clean: true
+2026-10-04T17:25:34.8964088Z   sparse-checkout-cone-mode: true
+2026-10-04T17:25:34.8964998Z   fetch-depth: 1
+2026-10-04T17:25:34.8965749Z   fetch-tags: false
+2026-10-04T17:25:34.8966538Z   show-progress: true
+2026-10-04T17:25:34.8967329Z   lfs: false
+2026-10-04T17:25:34.8968065Z   submodules: false
+2026-10-04T17:25:34.8968859Z   set-safe-directory: true
+2026-10-04T17:25:34.8969742Z   allow-unsafe-pr-checkout: false
+2026-10-04T17:25:34.8970889Z ##[endgroup]
+2026-10-04T17:25:34.9854905Z Syncing repository: YNWAforever/hkwtia
+2026-10-04T17:25:34.9857440Z ##[group]Getting Git version info
+2026-10-04T17:25:34.9858659Z Working directory is '/home/runner/work/hkwtia/hkwtia'
+2026-10-04T17:25:34.9860262Z [command]/usr/bin/git version
+2026-10-04T17:25:35.2165342Z git version 2.55.0
+2026-10-04T17:25:35.2184023Z ##[endgroup]
+2026-10-04T17:25:35.2197756Z Temporarily overriding HOME='/home/runner/work/_temp/0f78123a-ff38-4a9e-adf1-9fdd6a946f5a' before making global git config changes
+2026-10-04T17:25:35.2201128Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T17:25:35.2204022Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:25:35.2248642Z Deleting the contents of '/home/runner/work/hkwtia/hkwtia'
+2026-10-04T17:25:35.2252380Z ##[group]Initializing the repository
+2026-10-04T17:25:35.2255794Z [command]/usr/bin/git init /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:25:35.3206576Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-04T17:25:35.3209295Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-04T17:25:35.3211542Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-04T17:25:35.3213885Z hint: call:
+2026-10-04T17:25:35.3214808Z hint:
+2026-10-04T17:25:35.3216105Z hint: 	git config --global init.defaultBranch <name>
+2026-10-04T17:25:35.3217343Z hint:
+2026-10-04T17:25:35.3218323Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-04T17:25:35.3219851Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-04T17:25:35.3221088Z hint:
+2026-10-04T17:25:35.3221791Z hint: 	git branch -m <name>
+2026-10-04T17:25:35.3222617Z hint:
+2026-10-04T17:25:35.3224039Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-04T17:25:35.3225646Z Initialized empty Git repository in /home/runner/work/hkwtia/hkwtia/.git/
+2026-10-04T17:25:35.3228548Z [command]/usr/bin/git remote add origin https://github.com/YNWAforever/hkwtia
+2026-10-04T17:25:35.3294231Z ##[endgroup]
+2026-10-04T17:25:35.3295570Z ##[group]Disabling automatic garbage collection
+2026-10-04T17:25:35.3296676Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-04T17:25:35.3333060Z ##[endgroup]
+2026-10-04T17:25:35.3334474Z ##[group]Setting up auth
+2026-10-04T17:25:35.3335654Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T17:25:35.3365002Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T17:25:35.5546577Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T17:25:35.5588343Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T17:25:35.5791080Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T17:25:35.5825419Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T17:25:35.6021620Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-04T17:25:35.6761598Z ##[endgroup]
+2026-10-04T17:25:35.6762926Z ##[group]Fetching the repository
+2026-10-04T17:25:35.6769864Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d47f340b10cfad5405f4247f658488ca565fdbd6:refs/remotes/pull/140/merge
+2026-10-04T17:25:42.1015380Z From https://github.com/YNWAforever/hkwtia
+2026-10-04T17:25:42.1016967Z  * [new ref]         d47f340b10cfad5405f4247f658488ca565fdbd6 -> pull/140/merge
+2026-10-04T17:25:42.1019432Z ##[endgroup]
+2026-10-04T17:25:42.1019845Z ##[group]Determining the checkout info
+2026-10-04T17:25:42.1020945Z ##[endgroup]
+2026-10-04T17:25:42.1026683Z [command]/usr/bin/git sparse-checkout disable
+2026-10-04T17:25:42.1392459Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-04T17:25:42.1425890Z ##[group]Checking out the ref
+2026-10-04T17:25:42.1428599Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+2026-10-04T17:25:42.9818604Z Note: switching to 'refs/remotes/pull/140/merge'.
+2026-10-04T17:25:42.9819035Z 
+2026-10-04T17:25:42.9819321Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-04T17:25:42.9819896Z changes and commit them, and you can discard any commits you make in this
+2026-10-04T17:25:42.9820546Z state without impacting any branches by switching back to a branch.
+2026-10-04T17:25:42.9820939Z 
+2026-10-04T17:25:42.9821234Z If you want to create a new branch to retain commits you create, you may
+2026-10-04T17:25:42.9821827Z do so (now or later) by using -c with the switch command. Example:
+2026-10-04T17:25:42.9822167Z 
+2026-10-04T17:25:42.9822322Z   git switch -c <new-branch-name>
+2026-10-04T17:25:42.9822653Z 
+2026-10-04T17:25:42.9822823Z Or undo this operation with:
+2026-10-04T17:25:42.9823331Z 
+2026-10-04T17:25:42.9823471Z   git switch -
+2026-10-04T17:25:42.9824149Z 
+2026-10-04T17:25:42.9824483Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-04T17:25:42.9824920Z 
+2026-10-04T17:25:42.9825394Z HEAD is now at d47f340 Merge cf14c5c35f20d3be03425864ccec3920d4927a80 into 899e74cfc034f3f223dec39c51ecf18c26de4fdb
+2026-10-04T17:25:42.9861554Z ##[endgroup]
+2026-10-04T17:25:43.0120931Z [command]/usr/bin/git log -1 --format=%H
+2026-10-04T17:25:43.0151989Z d47f340b10cfad5405f4247f658488ca565fdbd6
+2026-10-04T17:25:43.0446739Z ##[group]Run actions/setup-node@v4
+2026-10-04T17:25:43.0446992Z with:
+2026-10-04T17:25:43.0447189Z   node-version: 22
+2026-10-04T17:25:43.0447361Z   cache: npm
+2026-10-04T17:25:43.0447528Z   always-auth: false
+2026-10-04T17:25:43.0447713Z   check-latest: false
+2026-10-04T17:25:43.0449760Z   token: ***
+2026-10-04T17:25:43.0449968Z ##[endgroup]
+2026-10-04T17:25:43.2436152Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-04T17:25:43.2440120Z (node:2082) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-04T17:25:43.2440984Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-04T17:25:43.2442729Z ##[group]Environment details
+2026-10-04T17:25:44.3490620Z node: v22.23.3
+2026-10-04T17:25:44.3490864Z npm: 10.9.9
+2026-10-04T17:25:44.3491038Z yarn: 1.22.22
+2026-10-04T17:25:44.3492067Z ##[endgroup]
+2026-10-04T17:25:44.3507960Z [command]/opt/hostedtoolcache/node/22.23.3/x64/bin/npm config get cache
+2026-10-04T17:25:44.5925740Z /home/runner/.npm
+2026-10-04T17:25:44.8461436Z Cache hit for: node-cache-Linux-x64-npm-8cacd1b24d264d32f057d37f1f8e9c2649cd9f86bc10f533d5d018e67f8fdbc5
+2026-10-04T17:25:44.8544884Z (node:2082) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-04T17:25:46.1322224Z Received 4194304 of 247453452 (1.7%), 4.0 MBs/sec
+2026-10-04T17:25:47.1534455Z Received 134217728 of 247453452 (54.2%), 63.4 MBs/sec
+2026-10-04T17:25:47.9437013Z Received 247453452 of 247453452 (100.0%), 83.9 MBs/sec
+2026-10-04T17:25:47.9437691Z Cache Size: ~236 MB (247453452 B)
+2026-10-04T17:25:47.9497197Z [command]/usr/bin/tar -xf /home/runner/work/_temp/368f8022-3ad1-44f7-8c27-89ad44f935a8/cache.tzst -P -C /home/runner/work/hkwtia/hkwtia --use-compress-program unzstd
+2026-10-04T17:25:48.3984700Z Cache restored successfully
+2026-10-04T17:25:48.4089332Z Cache restored from key: node-cache-Linux-x64-npm-8cacd1b24d264d32f057d37f1f8e9c2649cd9f86bc10f533d5d018e67f8fdbc5
+2026-10-04T17:25:48.4301184Z ##[group]Run npm ci
+2026-10-04T17:25:48.4301467Z [36;1mnpm ci[0m
+2026-10-04T17:25:48.6233306Z shell: /usr/bin/bash -e {0}
+2026-10-04T17:25:48.6233574Z ##[endgroup]
+2026-10-04T17:25:58.8221973Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-04T17:25:58.8813309Z npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.hirok.io
+2026-10-04T17:25:58.9209024Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T17:25:58.9225537Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T17:25:58.9374133Z npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+2026-10-04T17:25:58.9762888Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-04T17:25:59.1725630Z npm warn deprecated abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+2026-10-04T17:25:59.2082304Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:59.2085153Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:59.2090196Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:59.2099679Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:59.2110885Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:25:59.2176874Z npm warn deprecated whatwg-encoding@2.0.0: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-10-04T17:25:59.2368550Z npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.hirok.io
+2026-10-04T17:25:59.3503608Z npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5605244Z npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5606276Z npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5607140Z npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5607919Z npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5615074Z npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5617196Z npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5618864Z npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5620344Z npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5621863Z npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5623384Z npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5625279Z npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5626942Z npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5785404Z npm warn deprecated domexception@4.0.0: Use your platform's native DOMException instead
+2026-10-04T17:25:59.5954210Z npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5956076Z npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.5957112Z npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.6298985Z npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:25:59.6603786Z npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:26:00.0247464Z npm warn deprecated fstream@1.0.12: This package is no longer supported.
+2026-10-04T17:26:00.9766192Z npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:26:01.1691614Z npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T17:26:01.6027997Z npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+2026-10-04T17:26:02.2990607Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T17:26:15.7006746Z 
+2026-10-04T17:26:15.7007586Z added 1431 packages, and audited 1432 packages in 27s
+2026-10-04T17:26:15.7014506Z 
+2026-10-04T17:26:15.7014743Z 245 packages are looking for funding
+2026-10-04T17:26:15.7015003Z   run `npm fund` for details
+2026-10-04T17:26:15.8030792Z 
+2026-10-04T17:26:15.8031458Z 43 vulnerabilities (3 low, 18 moderate, 22 high)
+2026-10-04T17:26:15.8031721Z 
+2026-10-04T17:26:15.8031901Z To address issues that do not require attention, run:
+2026-10-04T17:26:15.8032169Z   npm audit fix
+2026-10-04T17:26:15.8032279Z 
+2026-10-04T17:26:15.8032487Z To address all issues possible (including breaking changes), run:
+2026-10-04T17:26:15.8032790Z   npm audit fix --force
+2026-10-04T17:26:15.8032911Z 
+2026-10-04T17:26:15.8033053Z Some issues need review, and may require choosing
+2026-10-04T17:26:15.8033321Z a different dependency.
+2026-10-04T17:26:15.8033430Z 
+2026-10-04T17:26:15.8033534Z Run `npm audit` for details.
+2026-10-04T17:26:15.9292642Z ##[group]Run npm ls --package-lock-only @neondatabase/auth @neondatabase/auth-ui better-auth better-call
+2026-10-04T17:26:15.9293229Z [36;1mnpm ls --package-lock-only @neondatabase/auth @neondatabase/auth-ui better-auth better-call[0m
+2026-10-04T17:26:15.9352727Z shell: /usr/bin/bash -e {0}
+2026-10-04T17:26:15.9352938Z ##[endgroup]
+2026-10-04T17:26:16.9879995Z hkwtia-platform@0.0.0 /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:26:16.9880925Z └─┬ @neondatabase/auth@0.5.0-beta
+2026-10-04T17:26:16.9881433Z   ├─┬ @neondatabase/auth-ui@0.3.0-beta overridden
+2026-10-04T17:26:16.9881915Z   │ ├─┬ @better-auth/passkey@1.6.23
+2026-10-04T17:26:16.9882379Z   │ │ ├─┬ @better-auth/core@1.6.23 overridden
+2026-10-04T17:26:16.9882821Z   │ │ │ └── better-call@1.3.7 deduped
+2026-10-04T17:26:16.9883233Z   │ │ ├── better-auth@1.6.23 deduped
+2026-10-04T17:26:16.9883923Z   │ │ └── better-call@1.3.7 deduped
+2026-10-04T17:26:16.9884448Z   │ ├─┬ @daveyplate/better-auth-ui@3.3.15 overridden
+2026-10-04T17:26:16.9885044Z   │ │ ├─┬ @daveyplate/better-auth-tanstack@1.3.6
+2026-10-04T17:26:16.9885532Z   │ │ │ └── better-auth@1.6.23 deduped
+2026-10-04T17:26:16.9885965Z   │ │ └── better-auth@1.6.23 deduped
+2026-10-04T17:26:16.9886422Z   │ ├── @neondatabase/auth@0.5.0-beta deduped
+2026-10-04T17:26:16.9886823Z   │ ├─┬ better-auth@1.6.23
+2026-10-04T17:26:16.9887203Z   │ │ └── better-call@1.3.7 deduped
+2026-10-04T17:26:16.9888027Z   │ └── better-call@1.3.7
+2026-10-04T17:26:16.9888443Z   └─┬ better-auth@1.6.23
+2026-10-04T17:26:16.9888862Z     ├─┬ @better-auth/core@1.6.23 overridden
+2026-10-04T17:26:16.9889296Z     │ └── better-call@1.3.7 deduped
+2026-10-04T17:26:16.9889668Z     └── better-call@1.3.7
+2026-10-04T17:26:16.9889855Z 
+2026-10-04T17:26:17.0001679Z ##[group]Run npm run audit:strings
+2026-10-04T17:26:17.0001937Z [36;1mnpm run audit:strings[0m
+2026-10-04T17:26:17.0057527Z shell: /usr/bin/bash -e {0}
+2026-10-04T17:26:17.0057743Z ##[endgroup]
+2026-10-04T17:26:17.0912438Z 
+2026-10-04T17:26:17.0912843Z > hkwtia-platform@0.0.0 audit:strings
+2026-10-04T17:26:17.0913195Z > node scripts/audit-visible-strings.mjs
+2026-10-04T17:26:17.0913368Z 
+2026-10-04T17:26:17.8204011Z Visible-string audit passed (323 TSX files scanned).
+2026-10-04T17:26:17.8369075Z ##[group]Run npm run lint
+2026-10-04T17:26:17.8369318Z [36;1mnpm run lint[0m
+2026-10-04T17:26:17.8425826Z shell: /usr/bin/bash -e {0}
+2026-10-04T17:26:17.8426052Z ##[endgroup]
+2026-10-04T17:26:17.9222867Z 
+2026-10-04T17:26:17.9223364Z > hkwtia-platform@0.0.0 lint
+2026-10-04T17:26:17.9223929Z > eslint .
+2026-10-04T17:26:17.9224087Z 
+2026-10-04T17:26:49.8552968Z 
+2026-10-04T17:26:49.8554327Z /home/runner/work/hkwtia/hkwtia/components/admin/inbox-composer.tsx
+2026-10-04T17:26:49.8576544Z ##[warning]  163:38  warning  The ref value 'sequence.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'sequence.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+2026-10-04T17:26:49.8583904Z 
+2026-10-04T17:26:49.8584344Z /home/runner/work/hkwtia/hkwtia/components/ai/deferred-concierge-widget.tsx
+2026-10-04T17:26:49.8589658Z ##[error]  24:7   error  Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @next/next/no-assign-module-variable
+2026-10-04T17:26:49.8592232Z   34:3   error  Error: Cannot access refs during render
+2026-10-04T17:26:49.8592522Z 
+2026-10-04T17:26:49.8593989Z React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+2026-10-04T17:26:49.8594761Z 
+2026-10-04T17:26:49.8595048Z /home/runner/work/hkwtia/hkwtia/components/ai/deferred-concierge-widget.tsx:34:3
+2026-10-04T17:26:49.8595391Z   32 |   }
+2026-10-04T17:26:49.8595598Z   33 |   const openRef = useRef(open);
+2026-10-04T17:26:49.8595867Z > 34 |   openRef.current = open;
+2026-10-04T17:26:49.8596136Z      |   ^^^^^^^^^^^^^^^ Cannot update ref during render
+2026-10-04T17:26:49.8596387Z   35 |   useEffect(() => {
+2026-10-04T17:26:49.8596615Z   36 |     mounted.current = true;
+2026-10-04T17:26:49.8597032Z   37 |     const request = () => {                                                                                                              react-hooks/refs
+2026-10-04T17:26:49.8597483Z   47:59  error  Error: Cannot access refs during render
+2026-10-04T17:26:49.8597676Z 
+2026-10-04T17:26:49.8598584Z React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+2026-10-04T17:26:49.8599596Z 
+2026-10-04T17:26:49.8599860Z /home/runner/work/hkwtia/hkwtia/components/ai/deferred-concierge-widget.tsx:47:59
+2026-10-04T17:26:49.8600208Z   45 |   }, [Widget]);
+2026-10-04T17:26:49.8600390Z   46 |   if (Widget)
+2026-10-04T17:26:49.8600732Z > 47 |     return <Widget {...props} initialOpen initialInvoker={invoker.current} />;
+2026-10-04T17:26:49.8601169Z      |                                                           ^^^^^^^^^^^^^^^ Cannot access ref value during render
+2026-10-04T17:26:49.8601462Z   48 |   return (
+2026-10-04T17:26:49.8601633Z   49 |     <>
+2026-10-04T17:26:49.8602111Z   50 |       <ConciergeLauncher label={props.labels.launcher}>  react-hooks/refs
+2026-10-04T17:26:49.8602341Z 
+2026-10-04T17:26:49.8602565Z /home/runner/work/hkwtia/hkwtia/components/layout/footer-newsletter.tsx
+2026-10-04T17:26:49.8604772Z ##[warning]  123:5  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+2026-10-04T17:26:49.8605984Z 
+2026-10-04T17:26:49.8606388Z /home/runner/work/hkwtia/hkwtia/docs/audits/hkwtia-2026-10-01-remediation/evidence/t22/reproduction/lighthouse-config.js
+2026-10-04T17:26:49.8607893Z ##[warning]  5:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+2026-10-04T17:26:49.8608557Z 
+2026-10-04T17:26:49.8608951Z /home/runner/work/hkwtia/hkwtia/docs/audits/hkwtia-2026-10-01-remediation/evidence/t22/reproduction/lighthouse.config.js
+2026-10-04T17:26:49.8626995Z ##[warning]  5:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+2026-10-04T17:26:49.8627842Z 
+2026-10-04T17:26:49.8628297Z /home/runner/work/hkwtia/hkwtia/docs/audits/hkwtia-2026-10-01-remediation/evidence/t22/reproduction/sequential-final-gates.mjs
+2026-10-04T17:26:49.8629209Z ##[warning]  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8629842Z 
+2026-10-04T17:26:49.8630264Z /home/runner/work/hkwtia/hkwtia/docs/audits/hkwtia-2026-10-01-remediation/evidence/t22/reproduction/sequential-paced-gates.mjs
+2026-10-04T17:26:49.8631095Z ##[warning]  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8631765Z 
+2026-10-04T17:26:49.8632170Z /home/runner/work/hkwtia/hkwtia/docs/audits/hkwtia-2026-10-01-remediation/evidence/t22/reproduction/sequential-unpaced-gates.mjs
+2026-10-04T17:26:49.8632958Z ##[warning]  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8633583Z 
+2026-10-04T17:26:49.8633998Z /home/runner/work/hkwtia/hkwtia/lib/admin/event-actions.ts
+2026-10-04T17:26:49.8634842Z ##[warning]  7:31  warning  'runCheckInAction' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8635455Z 
+2026-10-04T17:26:49.8635635Z /home/runner/work/hkwtia/hkwtia/lib/ai/knowledge/policy.ts
+2026-10-04T17:26:49.8636402Z ##[warning]  6:9  warning  'knowledgeRefSchema' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8637029Z 
+2026-10-04T17:26:49.8637231Z /home/runner/work/hkwtia/hkwtia/lib/automation/journey-runner.ts
+2026-10-04T17:26:49.8637951Z ##[warning]  481:10  warning  'whatsappVariables' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8638578Z 
+2026-10-04T17:26:49.8638747Z /home/runner/work/hkwtia/hkwtia/lib/og/renderers.tsx
+2026-10-04T17:26:49.8640609Z ##[warning]  51:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8643459Z ##[warning]  64:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8644829Z 
+2026-10-04T17:26:49.8644996Z /home/runner/work/hkwtia/hkwtia/tests/helpers/fakes.ts
+2026-10-04T17:26:49.8645781Z ##[warning]  79:33  warning  '_sessionId' is defined but never used       @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8646972Z ##[warning]  85:54  warning  '_idempotencyKey' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8647601Z 
+2026-10-04T17:26:49.8647817Z /home/runner/work/hkwtia/hkwtia/tests/unit/admin-login-page.test.tsx
+2026-10-04T17:26:49.8649657Z ##[warning]  17:249  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8650767Z 
+2026-10-04T17:26:49.8650992Z /home/runner/work/hkwtia/hkwtia/tests/unit/admin-presentational.test.tsx
+2026-10-04T17:26:49.8651540Z   40:1  warning  Unused eslint-disable directive (no problems were reported from 'import/first')
+2026-10-04T17:26:49.8651815Z 
+2026-10-04T17:26:49.8652066Z /home/runner/work/hkwtia/hkwtia/tests/unit/attendee-table-seat-check-in.test.tsx
+2026-10-04T17:26:49.8652721Z ##[warning]   59:38  warning  '_state' is defined but never used     @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8653873Z ##[warning]   59:64  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8654884Z ##[warning]  113:44  warning  '_state' is defined but never used     @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8655842Z ##[warning]  113:70  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8656441Z 
+2026-10-04T17:26:49.8656652Z /home/runner/work/hkwtia/hkwtia/tests/unit/campaign-wizard.test.ts
+2026-10-04T17:26:49.8657242Z ##[warning]   77:37  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8658156Z ##[warning]   78:39  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8659047Z ##[warning]   79:34  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8659948Z ##[warning]   80:51  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8660894Z ##[warning]  201:35  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8661813Z ##[warning]  202:31  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8662820Z ##[warning]  203:36  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8663889Z ##[warning]  204:38  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8664505Z 
+2026-10-04T17:26:49.8664739Z /home/runner/work/hkwtia/hkwtia/tests/unit/cancelled-event-page.test.tsx
+2026-10-04T17:26:49.8666543Z ##[warning]  17:118  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8668777Z ##[warning]  17:118  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8669830Z 
+2026-10-04T17:26:49.8670031Z /home/runner/work/hkwtia/hkwtia/tests/unit/d4b-seed-guard.test.ts
+2026-10-04T17:26:49.8670639Z ##[warning]  66:31  warning  '_databaseUrl' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8671236Z 
+2026-10-04T17:26:49.8671452Z /home/runner/work/hkwtia/hkwtia/tests/unit/dual-brand-lockup.test.tsx
+2026-10-04T17:26:49.8672765Z ##[warning]  7:24  warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8675320Z ##[warning]  8:5   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8677592Z ##[warning]  8:5   warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8678483Z 
+2026-10-04T17:26:49.8678729Z /home/runner/work/hkwtia/hkwtia/tests/unit/event-private-media-render.test.tsx
+2026-10-04T17:26:49.8680519Z ##[warning]  6:90  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8682701Z ##[warning]  6:90  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8683582Z 
+2026-10-04T17:26:49.8683978Z /home/runner/work/hkwtia/hkwtia/tests/unit/event-public-detail-review.test.tsx
+2026-10-04T17:26:49.8685770Z ##[warning]  17:118  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8687985Z ##[warning]  17:118  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8688881Z 
+2026-10-04T17:26:49.8689093Z /home/runner/work/hkwtia/hkwtia/tests/unit/guest-cancel-route.test.ts
+2026-10-04T17:26:49.8689743Z ##[warning]  10:9  warning  'cancelTokenDigest' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8690355Z 
+2026-10-04T17:26:49.8690571Z /home/runner/work/hkwtia/hkwtia/tests/unit/home-archive-stories.test.tsx
+2026-10-04T17:26:49.8692324Z ##[warning]  33:66  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8693548Z 
+2026-10-04T17:26:49.8693923Z /home/runner/work/hkwtia/hkwtia/tests/unit/login-pages-resolution.test.tsx
+2026-10-04T17:26:49.8695668Z ##[warning]  9:94  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8696774Z 
+2026-10-04T17:26:49.8696974Z /home/runner/work/hkwtia/hkwtia/tests/unit/m2-session-reuse.test.ts
+2026-10-04T17:26:49.8697661Z ##[warning]  6:28  warning  '_path' is defined but never used     @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8698624Z ##[warning]  6:43  warning  '_options' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8699211Z 
+2026-10-04T17:26:49.8699393Z /home/runner/work/hkwtia/hkwtia/tests/unit/m5-leads.test.ts
+2026-10-04T17:26:49.8699957Z ##[warning]  107:65  warning  '_actor' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8700887Z ##[warning]  107:82  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8701466Z 
+2026-10-04T17:26:49.8701687Z /home/runner/work/hkwtia/hkwtia/tests/unit/member-detail-page.test.tsx
+2026-10-04T17:26:49.8703444Z ##[warning]  42:90  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8705880Z ##[warning]  42:90  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8706770Z 
+2026-10-04T17:26:49.8707021Z /home/runner/work/hkwtia/hkwtia/tests/unit/member-event-form-disabled.test.tsx
+2026-10-04T17:26:49.8707658Z ##[warning]  17:33  warning  '_state' is defined but never used    @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8708610Z ##[warning]  17:50  warning  'formData' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8709185Z 
+2026-10-04T17:26:49.8709399Z /home/runner/work/hkwtia/hkwtia/tests/unit/member-login-page.test.tsx
+2026-10-04T17:26:49.8711185Z ##[warning]  16:249  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8712304Z 
+2026-10-04T17:26:49.8712509Z /home/runner/work/hkwtia/hkwtia/tests/unit/mobile-navigation.test.tsx
+2026-10-04T17:26:49.8713829Z ##[warning]  24:24   warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8716177Z ##[warning]  24:115  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8718366Z ##[warning]  24:115  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8719372Z 
+2026-10-04T17:26:49.8719634Z /home/runner/work/hkwtia/hkwtia/tests/unit/partner-confirmation-provenance.test.ts
+2026-10-04T17:26:49.8720266Z ##[warning]  54:31  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8720834Z 
+2026-10-04T17:26:49.8721090Z /home/runner/work/hkwtia/hkwtia/tests/unit/public-directory-availability.test.tsx
+2026-10-04T17:26:49.8722970Z ##[warning]  28:76  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8725365Z ##[warning]  28:76  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8726241Z 
+2026-10-04T17:26:49.8726433Z /home/runner/work/hkwtia/hkwtia/tests/unit/public-shell.test.tsx
+2026-10-04T17:26:49.8728146Z ##[warning]  43:12  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8730319Z ##[warning]  43:12  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8731198Z 
+2026-10-04T17:26:49.8731407Z /home/runner/work/hkwtia/hkwtia/tests/unit/shared-rate-limit.test.ts
+2026-10-04T17:26:49.8731983Z ##[warning]  10:43  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8732893Z ##[warning]  23:43  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8733450Z 
+2026-10-04T17:26:49.8733641Z /home/runner/work/hkwtia/hkwtia/tests/unit/site-footer.test.tsx
+2026-10-04T17:26:49.8734940Z ##[warning]  45:24   warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8737276Z ##[warning]  45:115  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8739460Z ##[warning]  45:115  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8740351Z 
+2026-10-04T17:26:49.8740573Z /home/runner/work/hkwtia/hkwtia/tests/unit/stripe-ticket-adapter.test.ts
+2026-10-04T17:26:49.8741178Z ##[warning]    9:31  warning  '_params' is defined but never used   @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8742252Z ##[warning]    9:49  warning  '_options' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8743189Z ##[warning]   10:33  warning  '_id' is defined but never used       @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8744275Z ##[warning]  184:33  warning  '_input' is defined but never used    @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8744844Z 
+2026-10-04T17:26:49.8745083Z /home/runner/work/hkwtia/hkwtia/tests/unit/wisetech-partner-import.test.ts
+2026-10-04T17:26:49.8745678Z ##[warning]  38:27  warning  'row' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8746586Z ##[warning]  39:29  warning  'row' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8747580Z ##[warning]  40:27  warning  'row' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8748140Z 
+2026-10-04T17:26:49.8748381Z /home/runner/work/hkwtia/hkwtia/tests/unit/wt-pages/event-detail-page.test.tsx
+2026-10-04T17:26:49.8750280Z ##[warning]  28:118  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8752512Z ##[warning]  28:118  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8753400Z 
+2026-10-04T17:26:49.8753635Z /home/runner/work/hkwtia/hkwtia/tests/unit/wt-pages/members-page.test.tsx
+2026-10-04T17:26:49.8755575Z ##[warning]  34:90  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8757777Z ##[warning]  34:90  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8758659Z 
+2026-10-04T17:26:49.8758855Z /home/runner/work/hkwtia/hkwtia/tests/unit/wt-primitives.test.tsx
+2026-10-04T17:26:49.8760019Z ##[warning]  22:30  warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+2026-10-04T17:26:49.8762348Z ##[warning]  23:5   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2026-10-04T17:26:49.8764696Z ##[warning]  23:5   warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+2026-10-04T17:26:49.8765639Z 
+2026-10-04T17:26:49.8766019Z ✖ 80 problems (3 errors, 77 warnings)
+2026-10-04T17:26:49.8766366Z   0 errors and 1 warning potentially fixable with the `--fix` option.
+2026-10-04T17:26:49.8766583Z 
+2026-10-04T17:26:50.1659761Z ##[error]Process completed with exit code 1.
+2026-10-04T17:26:50.1777970Z Post job cleanup.
+2026-10-04T17:26:50.2443230Z [command]/usr/bin/git version
+2026-10-04T17:26:50.2477303Z git version 2.55.0
+2026-10-04T17:26:50.2505617Z Temporarily overriding HOME='/home/runner/work/_temp/ad84a4a7-b5e7-4770-bc2a-560e0afa0f6a' before making global git config changes
+2026-10-04T17:26:50.2506702Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T17:26:50.2509431Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hkwtia/hkwtia
+2026-10-04T17:26:50.2607035Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T17:26:50.2665136Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T17:26:50.2841624Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T17:26:50.2911726Z http.https://github.com/.extraheader
+2026-10-04T17:26:50.2920651Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-04T17:26:50.2965471Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T17:26:50.3178472Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T17:26:50.3214398Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T17:26:50.3553090Z Cleaning up orphan processes
+2026-10-04T17:26:50.3782635Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
