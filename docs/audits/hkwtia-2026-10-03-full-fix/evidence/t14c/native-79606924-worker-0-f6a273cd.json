@@ -1,0 +1,119 @@
+{
+  "observedAt": "2026-10-04T03:10:33.495Z",
+  "sourceSha": "79606924427f1044fa8f584b38d5f5d026c66cee",
+  "origin": "http://localhost:3450",
+  "run": "f6a273cd-0162-400b-ac43-a10dbf59cdd0",
+  "checks": [
+    {
+      "locale": "en",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "external",
+      "format": "online",
+      "eventRef": "7fbada8fedc88d05",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "en",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "external",
+      "format": "hybrid",
+      "eventRef": "7c61c0cf99554b5a",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "en",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "rsvp",
+      "format": "in_person",
+      "eventRef": "3b74b220bd608d37",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "en",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "ticketed",
+      "format": "in_person",
+      "eventRef": "e78af3336d558990",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "zh-HK",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "external",
+      "format": "online",
+      "eventRef": "efc6917be5a105af",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "zh-HK",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "external",
+      "format": "hybrid",
+      "eventRef": "9013e65eebbf015f",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "zh-HK",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "rsvp",
+      "format": "in_person",
+      "eventRef": "0ac174ffc75ebbeb",
+      "hongKongDatePreserved": true
+    },
+    {
+      "locale": "zh-HK",
+      "case": "event editor/private draft preview/keyboard publish/edit/public",
+      "mode": "ticketed",
+      "format": "in_person",
+      "eventRef": "f6028158166bbf12",
+      "hongKongDatePreserved": true
+    },
+    {
+      "case": "actual guest RSVP replay/waitlist/consent",
+      "eventRef": "54c7102dc12448d0",
+      "registered": 1,
+      "waitlist": 1,
+      "orders": 0,
+      "marketingConsent": false,
+      "emailDelivery": "test sink"
+    },
+    {
+      "case": "restricted event UI",
+      "mode": "private",
+      "status": 404,
+      "orders": 0
+    },
+    {
+      "case": "restricted event UI",
+      "mode": "cancelled",
+      "status": 200,
+      "orders": 0
+    },
+    {
+      "case": "restricted event UI",
+      "mode": "ended",
+      "status": 200,
+      "orders": 0
+    }
+  ],
+  "ownedEventRefs": [
+    "7fbada8fedc88d05",
+    "7c61c0cf99554b5a",
+    "3b74b220bd608d37",
+    "e78af3336d558990",
+    "efc6917be5a105af",
+    "9013e65eebbf015f",
+    "0ac174ffc75ebbeb",
+    "f6028158166bbf12",
+    "54c7102dc12448d0",
+    "6c7cc14628976a8d",
+    "727dda73acd8dba3",
+    "9b6d93066a2fc3a1"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticFixture": true,
+  "emailMode": "test sink only",
+  "stripeAcceptance": "separate actual provider receipt",
+  "production": false,
+  "cleanup": "Owned synthetic events/registrations/audits retained; unrelated data preserved"
+}

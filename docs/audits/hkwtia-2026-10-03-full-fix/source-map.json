@@ -906,5 +906,69 @@
     "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
     "evidenceBasis": "current checkout and actual isolated PG/browser",
     "mapping": "Existing CMS publish and browser-history tests reused by path mapping; eight current exact Preview cases, no fake sessions/provider pass."
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "settlePaid",
+    "path": "lib/db/repos/event-orders.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "expireBySession",
+    "path": "lib/db/repos/event-orders.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "normalizeTicketWebhookEvent",
+    "path": "lib/billing/webhook-service.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createTicketProcessor",
+    "path": "lib/billing/ticket-webhook-processor.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "isProviderExpiredTicketRecovery",
+    "path": "lib/tickets/checkout-recovery.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "GET",
+    "path": "app/api/events/checkout-recovery/route.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "native event/payment acceptance",
+    "path": "tests/e2e/full-fix-events.spec.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "existing isolated provider driver",
+    "path": "scripts/verify-full-ticket-provider.mjs",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
   }
 ]

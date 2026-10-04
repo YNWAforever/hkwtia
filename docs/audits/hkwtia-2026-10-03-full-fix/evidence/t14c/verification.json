@@ -1,0 +1,89 @@
+{
+  "observedAt": "2026-10-04T04:01:47.053988+00:00",
+  "baseSha": "e12add4ed9abfd54166a32aeff3d34e57f2e17eb",
+  "sourceSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+  "testHarnessSha": "a08b877ebdcc20fb8c9871bd58c2f30d4a85c1b5",
+  "branch": "codex/event-payment-recovery-20261003",
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/134",
+  "sourceCommits": [
+    "79606924427f1044fa8f584b38d5f5d026c66cee",
+    "fe92e533f8634f084b0105b3fb58b056d7091203"
+  ],
+  "testCommit": "a08b877ebdcc20fb8c9871bd58c2f30d4a85c1b5",
+  "migration": null,
+  "ledger": 59,
+  "production": false,
+  "red": [
+    {
+      "cases": 6,
+      "suite": "actual PostgreSQL payment receipt boundary",
+      "log": ".playwright/full-fix-t14c-event-target-red.log",
+      "green": 11,
+      "mutationFail": 6,
+      "byteRestored": true
+    },
+    {
+      "cases": 2,
+      "suite": "expired recovery cookie original behaviour",
+      "log": ".playwright/full-fix-t14c-expired-cookie-red.log",
+      "providerGuardRedCases": 5,
+      "greenRouteCases": 17,
+      "mutationFail": 2,
+      "byteRestored": true
+    }
+  ],
+  "focused": {
+    "passed": 171,
+    "skipped": 0,
+    "failed": 0,
+    "files": 13,
+    "actualPostgreSQLCases": 23,
+    "environment": "disposable loopback PostgreSQL16, all59 migrations; real transactions, locking, authorization and SQL audit; only connection loader substituted"
+  },
+  "full": {
+    "command": "npm test -- --maxWorkers=2",
+    "passed": 6652,
+    "skipped": 471,
+    "failed": 0,
+    "exitCode": 0,
+    "seconds": 714.98,
+    "skipReasons": "96 optional suites guarded by isolated DB/provider/live environment opt-ins; skips are not passing acceptance. 23 relevant real PG cases ran separately."
+  },
+  "gates": {
+    "lintErrors": 0,
+    "lintWarnings": 93,
+    "trackedSourceWarnings": 75,
+    "lintLimit": "two added local warnings are ignored private T17 helpers, not tracked T14C source; prior local baseline91",
+    "typecheck": 0,
+    "build": 0,
+    "stringsExit": 0,
+    "stringsTsxFiles": 317
+  },
+  "browser": {
+    "nativeCases": 4,
+    "failed": 0,
+    "skipped": 0,
+    "sourceSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "nativeReceipt": "native-fe92e533-worker-0-e8b273ab.json",
+    "nativeCommand": "T14C_NATIVE=true node --env-file=.env.local scripts/verify-full-ticket-provider.mjs",
+    "previewRuntimeChecks": 17,
+    "origin": "https://hkwtia-event-payment-20261003.vercel.app",
+    "limits": "Actual password Auth, EN/HK event CRUD/private preview/keyboard publish/modes/HK timezone/390px; private/cancelled/ended/RSVP/waitlist and no order effects. No Google/magic identity claim."
+  },
+  "provider": {
+    "actualHostedStripeTestChecks": 9,
+    "signedCallbackDeliveries": 12,
+    "receipt": "stripe-test-provider.json",
+    "refundPolicy": "Existing full-only; not a new association policy",
+    "refundPending": "Actual card7726 pending→succeeded, initial app paid, one provider refund even on retry",
+    "refundFailed": "Actual card5126 succeeded→failed, app refund_failed, one failed audit"
+  },
+  "preview": {
+    "sourceSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "deploymentId": "dpl_H48GCDUfEmB8n97VsgBoNPQArbwN",
+    "appCodeEqualAtTestCommit": true,
+    "target": null,
+    "production": false
+  },
+  "limits": "Automatic remote webhook/real sender delivery, controlled Google/magic identity, cloud-worker windows and 3–5 human staff G5 remain unverified. Actual Stripe TEST receipts were signed CLI events held/forwarded/replayed by the owned loopback relay. Outbox ran with synthetic email test sink, not real recipient delivery. Partial refund NOT_APPLICABLE under existing full-only policy. No Production effects."
+}

@@ -1,0 +1,37 @@
+{
+  "observedAt": "2026-10-04T03:06:51.497Z",
+  "sourceSha": "79606924427f1044fa8f584b38d5f5d026c66cee",
+  "origin": "http://localhost:3450",
+  "run": "bd3655a5-fe4e-4369-bdd4-88e0af5ea7a8",
+  "checks": [
+    {
+      "case": "restricted event UI",
+      "mode": "private",
+      "status": 404,
+      "orders": 0
+    },
+    {
+      "case": "restricted event UI",
+      "mode": "cancelled",
+      "status": 200,
+      "orders": 0
+    },
+    {
+      "case": "restricted event UI",
+      "mode": "ended",
+      "status": 200,
+      "orders": 0
+    }
+  ],
+  "ownedEventRefs": [
+    "b9067b55b2160736",
+    "1bf574a1ee644352",
+    "2c14070471c6669c"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticFixture": true,
+  "emailMode": "test sink only",
+  "stripeAcceptance": "separate actual provider receipt",
+  "production": false,
+  "cleanup": "Owned synthetic events/registrations/audits retained; unrelated data preserved"
+}

@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-10-04T04:01:47.053988+00:00",
+  "sourceSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+  "files": [
+    {
+      "path": "attempts.json",
+      "sha256": "a3cd820bf5f17a0b575891289488869918caabd182d083597b790c9ccd418b5f",
+      "bytes": 1771
+    },
+    {
+      "path": "ci-source.json",
+      "sha256": "463813918328fd59dbba477c5f0a9533e7793ff36df3123bb0787a22993c2092",
+      "bytes": 1344
+    },
+    {
+      "path": "commands.md",
+      "sha256": "4d4f686eb6c2c58963030166862066048bd059ff4cd42fc4dc4f1144bf1c453b",
+      "bytes": 2049
+    },
+    {
+      "path": "en-ticketed-event.png",
+      "sha256": "58094510bf27d76acea41e808434a3c291d016163dd7fdcd9c4d57b3d760c61b",
+      "bytes": 117474
+    },
+    {
+      "path": "expiry-mutation.json",
+      "sha256": "843f96311bf5af4e18f819dfc679a2f95db9a9678ce0828cdeb0139b28180dd9",
+      "bytes": 78
+    },
+    {
+      "path": "local-runtime.json",
+      "sha256": "dc3fbc2c860ba155587ca46b24d572f75b906e16c99de6282a97cc2b11fabf0e",
+      "bytes": 186
+    },
+    {
+      "path": "log-receipts.json",
+      "sha256": "5ee177484cae40f0ff020e1a55d012d2eaba34ecaf5772726d3ebb3e1fcf5887",
+      "bytes": 11043
+    },
+    {
+      "path": "native-79606924-worker-0-f6a273cd.json",
+      "sha256": "9e448e5c7bdb1e0983f4620367d953db07b189eecc5c32495b883965c011ae52",
+      "bytes": 3325
+    },
+    {
+      "path": "native-79606924.json",
+      "sha256": "265b1d5d3ba4908cb227154677e911b040b1327d2c486d5680dd984fcdc227e7",
+      "bytes": 916
+    },
+    {
+      "path": "native-fe92e533-worker-0-e8b273ab.json",
+      "sha256": "f2a2ff3a95b9eed91d83653b622ef9f3c40e0b2144caf72f56404ec53f1dd633",
+      "bytes": 3325
+    },
+    {
+      "path": "orders-en-desktop.png",
+      "sha256": "88043207b4eeb176224983fdbed646a19c9a91dcea806944a7aa33523f805dd4",
+      "bytes": 65589
+    },
+    {
+      "path": "orders-zh-mobile.png",
+      "sha256": "14465b490c7599053ca4cf7201104c223ae161faaa61c8aab7cc54182d6c7a80",
+      "bytes": 40448
+    },
+    {
+      "path": "payment-mutation.json",
+      "sha256": "df2f86f206417c602da60c54243d273447967b7b36fd6c723c76598cfa65a932",
+      "bytes": 78
+    },
+    {
+      "path": "preview-deployment.json",
+      "sha256": "f4fc92f8cf540da7396eacb458eb536cbbd7f6acc9e4c11855c1987872c6fef6",
+      "bytes": 334
+    },
+    {
+      "path": "preview-env.json",
+      "sha256": "49cd0d3b9bda4849175fb8bbf22de85419faf64a76655fc79f92d26a8c87fddc",
+      "bytes": 7978
+    },
+    {
+      "path": "preview-origin.json",
+      "sha256": "b82da582701170b724ae609ac677a5d46548c549758415ca6d2243575908b6db",
+      "bytes": 181
+    },
+    {
+      "path": "preview-runtime.json",
+      "sha256": "7d2309a3541169f8bf68467645ecdc5a15e0a01aa8abd51f3fc8589f72a70c50",
+      "bytes": 2049
+    },
+    {
+      "path": "provider.json",
+      "sha256": "3fa73633c3ab1182189f0c48a1c733fa9feccbfc8f6ed334124344db36b7fc12",
+      "bytes": 5956
+    },
+    {
+      "path": "reviewer-binding.json",
+      "sha256": "cfb69022c109d243d2c954c5976d624911df569c7d30790cd580a94396daef3c",
+      "bytes": 375
+    },
+    {
+      "path": "source-review.md",
+      "sha256": "c81ce76896c481f67c935ac07dce4c7ec1f510f3a599718f6b8d8eb5c390cdfb",
+      "bytes": 1182
+    },
+    {
+      "path": "stripe-test-provider.json",
+      "sha256": "f7db013e12887631b09e551f4af5476b1a221fa9c9e40156b0b5db0d46e4a86b",
+      "bytes": 6076
+    },
+    {
+      "path": "verification.json",
+      "sha256": "9b85b200acd628575a982eb3b0c88f5edb7940c8ca27314f12cccb288699a547",
+      "bytes": 3793
+    },
+    {
+      "path": "zh-HK-rsvp-waitlist.png",
+      "sha256": "97d0b09e259cf6d75017d499f05b94fc02f41751138cace9bc4b220faf390c5c",
+      "bytes": 232193
+    },
+    {
+      "path": "zh-HK-ticketed-event.png",
+      "sha256": "d9a43c33cd83bc3abb89c3238a958c4e0e002f47efd4bd8503ccde044342a584",
+      "bytes": 69000
+    }
+  ]
+}
