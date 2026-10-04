@@ -308,7 +308,7 @@ describe("runCampaignBatch", () => {
     test.deps.emailTransport.send = vi.fn(async (input) => {
       test.providerCalls.push({to: input.to, idempotencyKey: input.idempotencyKey});
       if (input.to === second.email && secondAttempts++ === 0) {
-        throw new DeliveryFailure("retryable_network");
+        throw new DeliveryFailure("retryable_rate_limit");
       }
       return {status: "sent" as const, providerId: `provider-${input.idempotencyKey}`};
     });

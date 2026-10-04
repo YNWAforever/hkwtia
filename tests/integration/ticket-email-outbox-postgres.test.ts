@@ -76,7 +76,7 @@ describe.skipIf(!enabled)("ticket email outbox on disposable PostgreSQL", () => 
       subject: "Receipt", html: "<p>Receipt</p>", text: "Receipt", headers: {},
       idempotencyKey: receipt.eventKey};
     expect(await repo.freezePayload(receipt.id, receipt.attemptCount, payload, now)).toBe(true);
-    expect(await repo.markRetryable(receipt.id, receipt.attemptCount, now, "retryable_network")).toBe(true);
+    expect(await repo.markRetryable(receipt.id, receipt.attemptCount, now, "retryable_rate_limit")).toBe(true);
     const later = new Date(now.getTime() + 11 * 60_000);
     const retried = await repo.claimDue(automationCronActor(), later, 2);
     const retriedReceipt = retried.find((claim) => claim.id === receipt.id);

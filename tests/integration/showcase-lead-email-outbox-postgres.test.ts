@@ -98,7 +98,7 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
     expect(await repository.freezePayload(actor, ack.id, ack.attemptCount, payload, now)).toBe(true);
     expect(await repository.freezePayload(actor, staff.id, staff.attemptCount, {...payload, to: "staff@example.com", idempotencyKey: staff.idempotencyKey}, now)).toBe(true);
     expect(await repository.markSent(actor, staff.id, staff.attemptCount, "provider-staff")).toBe(true);
-    expect(await repository.markRetryable(actor, ack.id, ack.attemptCount, now, "retryable_network")).toBe(true);
+    expect(await repository.markRetryable(actor, ack.id, ack.attemptCount, now, "retryable_rate_limit")).toBe(true);
 
     const later = new Date(now.getTime() + 11 * 60_000);
     const retried = await repository.claimDue(actor, later, 1);
@@ -117,9 +117,9 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
     await pool.query("INSERT INTO showcase_listings VALUES ($1, 'harbour-vision-ai', 'Harbour Vision AI')", [listingId]);
     await pool.query(`INSERT INTO leads (id, listing_id, contact_name, email, locale, idempotency_key)
       VALUES ($1, $2, 'Ada', 'ada@example.com', 'en', 'delivery-test')`, [listedLead, listingId]);
-    await pool.query(`INSERT INTO showcase_lead_email_outbox (lead_id, kind, idempotency_key)
-      VALUES ($1, 'ack', 'showcase-lead:delivery-test:ack'),
-             ($1, 'staff', 'showcase-lead:delivery-test:staff')`, [listedLead]);
+    await pool.query(`INSERT INTO showcase_lead_email_outbox (lead_id, kind, idempotency_key, next_attempt_at)
+      VALUES ($1, 'ack', 'showcase-lead:delivery-test:ack', now()-interval '1 minute'),
+             ($1, 'staff', 'showcase-lead:delivery-test:staff', now()-interval '1 minute')`, [listedLead]);
     const sent: {to: string; idempotencyKey: string}[] = [];
     await deliverLeadEmailForLead(listedLead, {
       outbox: store(),
@@ -161,8 +161,8 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
     const id = String(inserted.rows[0]?.id);
     const repository = store();
     const actor = automationCronActor();
-    expect(await repository.markRetryable(actor, id, 8, now, "retryable_network")).toBe(true);
-    expect(await repository.markRetryable(actor, id, 8, now, "retryable_network")).toBe(false);
+    expect(await repository.markRetryable(actor, id, 8, now, "retryable_rate_limit")).toBe(true);
+    expect(await repository.markRetryable(actor, id, 8, now, "retryable_rate_limit")).toBe(false);
     const outbox = await pool.query(
       "SELECT status, error_code FROM showcase_lead_email_outbox WHERE id = $1", [id],
     );

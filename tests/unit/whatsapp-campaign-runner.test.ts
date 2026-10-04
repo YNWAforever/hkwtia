@@ -155,7 +155,7 @@ function harness(options: HarnessOptions = {}) {
         record.status = "processing";
         record.errorCode = null;
         record.attemptCount += 1;
-        return {record, failureCode: "retryable_network" as const};
+        return {record, failureCode: "retryable_rate_limit" as const};
       },
       reserveEmail: vi.fn(),
       completeEmail: vi.fn(),
@@ -405,10 +405,10 @@ describe("runWhatsAppCampaignBatch", () => {
       expect(test.rows[0]).toMatchObject({status: "failed", errorCode: "provider_acceptance_uncertain"});
     });
 
-    it("existing + failed: retries the persisted transient failure", async () => {
+    it("existing + failed: retries a definite provider rate-limit refusal", async () => {
       const deliveries = new Map<string, DeliveryRow>([[
         `notify:campaign:${CAMPAIGN_ID}:${RECIPIENT_ID}`,
-        {id: "whatsapp-1", status: "failed", providerId: null, errorCode: "retryable_network", attemptCount: 1},
+        {id: "whatsapp-1", status: "failed", providerId: null, errorCode: "retryable_rate_limit", attemptCount: 1},
       ]]);
       const test = harness({deliveries});
 
