@@ -156,7 +156,7 @@ async function processClaims(
 
     if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
       if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
-        await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
+        await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "ticket_resend_paused");
         continue;
       }
       if (!claim.seatId) {
@@ -233,8 +233,12 @@ async function processClaims(
       continue;
     }
     if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
+      if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
+        await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "ticket_resend_paused");
+        continue;
+      }
       let valid: boolean;
-      try {valid = process.env.TICKET_RESEND_BATCH_ENABLED === "true" && claim.seatId !== null
+      try {valid = claim.seatId !== null
         && await dependencies.orders.resendEligible(claim.seatId, now);}
       catch {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "resend_eligibility_read_failed");

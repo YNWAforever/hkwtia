@@ -28,6 +28,7 @@ import { WoztellDeliveryFailure } from "@/lib/channels/woztell";
 const isolated = vi.hoisted(() => ({database: null as Awaited<ReturnType<typeof isolatedAuditDatabase>>['database'] | null}));
 vi.mock('@/lib/db/repos/common', async original => ({...await original<typeof import('@/lib/db/repos/common')>(), getDb: async () => {if (!isolated.database) throw Error('ISOLATED_DATABASE_NOT_READY'); return isolated.database;}}));
 import {eventOrdersRepository} from '@/lib/db/repos/event-orders';
+import {deliverTicketEmailsForOrder} from "@/lib/billing/ticket-email-runner";
 import {resendStaffPass} from '@/lib/admin/ticket-resend';
 const staff = { kind: "staff", profileId: "t14d-staff", userId: "t14d-auth" } as const;
 const member = { kind: "member", profileId: "t14d-member", userId: "t14d-member-auth" } as const;
@@ -222,6 +223,16 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")("staff delivery re
         expect(await resendStaffPass(staff, o.seat, randomUUID(), deps)).toMatchObject({status: 'blocked'});
         expect(d.send).not.toHaveBeenCalled();
         expect((await f.pool.query('SELECT status,error_code FROM ticket_email_outbox WHERE seat_id=$1', [o.seat])).rows).toEqual([{status: 'suppressed', error_code: 'order_state_changed'}]);
+    });
+    it('pausing batch pass sends preserves the queued notice and resumes the original effect only',async()=>{
+        const o=await passFixture(),d=manualPorts(),key='ticket-resend:'+randomUUID();
+        await f.pool.query("INSERT INTO ticket_email_outbox(order_id,seat_id,kind,event_key,next_attempt_at) VALUES($1,$2,'pass',$3,now()-interval '1 minute')",[o.order,o.seat,key]);
+        try {
+            vi.stubEnv('TICKET_RESEND_BATCH_ENABLED','false');await deliverTicketEmailsForOrder(o.order,d.runner());
+            expect(d.send).not.toHaveBeenCalled();expect((await f.pool.query('SELECT status,event_key FROM ticket_email_outbox WHERE seat_id=$1',[o.seat])).rows).toEqual([{status:'queued',event_key:key}]);
+            vi.stubEnv('TICKET_RESEND_BATCH_ENABLED','true');await deliverTicketEmailsForOrder(o.order,d.runner(),new Date(Date.now()+5*60000));
+            expect(d.send).toHaveBeenCalledTimes(1);expect((await f.pool.query('SELECT status,event_key FROM ticket_email_outbox WHERE seat_id=$1',[o.seat])).rows).toEqual([{status:'sent',event_key:key}]);
+        } finally {vi.unstubAllEnvs();}
     });
     it('concurrent manual intents serialize before queueing; pending does not become a false sent result', async () => {
         const o = await passFixture(), d = manualPorts();
