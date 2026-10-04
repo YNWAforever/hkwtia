@@ -70,6 +70,7 @@ vi.mock("next/navigation", () => ({
     throw new Error("NEXT_NOT_FOUND");
   },
 }));
+vi.mock("@/lib/auth/server",()=>({getSession:async()=>null}));
 vi.mock("@/lib/admin/page-auth", () => ({
   requireAdminPageActor: async () => ({
     kind: "staff",

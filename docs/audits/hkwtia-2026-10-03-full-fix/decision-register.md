@@ -30,3 +30,13 @@ Original D01-D06 wording and owners below are copied without new approval from .
 - Reuse the owned clean worktree on a new branch, preserve ignored historical evidence and test credentials, and leave root dirty files untouched.
 - The existing parseLoginDestination owns returnTo; do not add parallel routing. Existing page-copy/news private drafts and worker health remain authoritative.
 - Current production is now 36ebae1; older e7fa production readback remains historical evidence. No deployment mismatch inferred.
+
+## T10 implementation rulings — 2026-10-04
+
+- PR136 sourcebe77a3a7, harnessd060f423; unchanged runtime bytes and current build proven. Sequential author self-review honors user no-agent request; remaining minor state/due labels recorded in evidence/t10/self-review.json. Independent human review remains stronger.
+- `/admin/ai-review` is a new route over existing immutable draft/review/work/budget stores; existing `/admin/tasks?draft=` and T18 search/owner/reopen remain authoritative. No new approval/sender system or migration.
+- Optional browser recovery is off by default. Independent key, explicit flag, authenticated session/conversation binding and configurable60..3600sec provide engineering protection; TTL is not association policy. Preview testing may enable synthetic recovery; Production activation needs owner decision.
+- Final actual all59 PG21, native2 actual password Auth/EN-HK390/keyboard/axe0, exact CI6683pass540skip/worker57/all7, local full4workers6683pass540skip0fail. Default-worker repository scan timeout preserved as a failed attempt; deadlines were not increased.
+- Preview credential/config changes were branch-scoped and expressly authorized for isolated test acceptance. AI generation/provider approval remain false, agentsfalse/caps0; no actual model/sends/payment/Production. T13 and identity/worker/staff gates remain open.
+
+- T10 final Preview19 passed2026-10-04T08:55:20Z, source d060/dpl_ELFx9FrAXc4JA6sJq2Ra2MXimC4E. Actual EN/HK review/adopt0outbound/protected compose/390/axe0; final receipt supersedes failed harness attempts. Native2 and all19 checks use actual isolated DB/password Auth; no real AI provider or sender delivery claim.

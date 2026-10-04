@@ -1,4 +1,5 @@
 "use server";
+import {draftSelectionSchema,reviewDraftSelection} from "./ai-draft-selection";
 import { requireAdminActor } from "@/lib/auth/actor";
 import { isAuthorizationDenial } from "@/lib/auth/authorization-denial";
 import {
@@ -63,4 +64,11 @@ export async function editAiDraftAction(
   } catch (error) {
     return failure(error);
   }
+}
+
+export async function reviewAiDraftSelectionAction(input:unknown){
+ try{const actor=await requireAdminActor();if(process.env.ADMIN_AI_DRAFTS_ENABLED!=="true")return {status:'disabled' as const};
+ const parsed=draftSelectionSchema.safeParse(input);if(!parsed.success)return {status:'invalid' as const};
+ return {status:'results' as const,items:await reviewDraftSelection(actor,parsed.data)};
+ }catch(error){return failure(error);}
 }

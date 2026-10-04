@@ -1,0 +1,40 @@
+{
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "actualAll59MigrationPostgres": {
+    "finalNewSupportCases": 21,
+    "skipped": 0,
+    "earlierSupportAndApplicationGeneration": 33,
+    "provider": "explicit simulation, not real model"
+  },
+  "focused": {
+    "earlierPassed": 186,
+    "finalTargetedPassed": 84,
+    "skipped": 0,
+    "receiptsOverlap": true
+  },
+  "lint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 95
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "testHarnessExitCode": 0
+  },
+  "strings": {
+    "exitCode": 0,
+    "tsxFiles": 320
+  },
+  "build": {
+    "exitCode": 0,
+    "id": "sF7-WIgnuTTwj-0Qs5ePx"
+  },
+  "native": {
+    "passed": 2,
+    "failed": 0,
+    "actualPasswordAuth": true,
+    "externalModelCalls": 0,
+    "realProviderSends": 0
+  },
+  "production": false
+}

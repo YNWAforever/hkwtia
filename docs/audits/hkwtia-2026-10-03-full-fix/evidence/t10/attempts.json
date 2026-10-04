@@ -1,0 +1,84 @@
+{
+  "behaviourRed": [
+    {
+      "receipt": "full-fix-t10-privacy-red.log",
+      "target": "plaintext storage and prior login recovery",
+      "failures": 2
+    },
+    {
+      "receipt": "full-fix-t10-delete-red.log",
+      "target": "deleting content clears prior encrypted blob",
+      "failures": 1
+    },
+    {
+      "receipt": "full-fix-t10-native-behaviour-red.log",
+      "target": "missing bilingual reply assistance in actual built baseline",
+      "failures": 2
+    },
+    {
+      "receipt": "full-fix-t10-contact-body-red.log",
+      "target": "unbound personal email rejected from final body",
+      "failures": 1
+    },
+    {
+      "receipt": "full-fix-t10-dedicated-secret-red.log",
+      "target": "Auth/Concierge key reuse refused",
+      "failures": 1
+    },
+    {
+      "receipt": "full-fix-t10-readiness-red.log",
+      "target": "wrong provider credential or missing caps cannot report ready",
+      "failures": 2
+    },
+    {
+      "receipt": "full-fix-t10-retention-flag-red.log",
+      "target": "key alone cannot activate optional retention",
+      "failures": 1
+    }
+  ],
+  "existingRegression": [
+    {
+      "receipt": "full-fix-t10-international-email-red.log",
+      "result": "27 pass before new changes; filename does not establish RED"
+    }
+  ],
+  "fixtureOrHarnessFailures": [
+    "Invalid initial fixture conversation/profile, nonexistent setup table/column and JSON module imports repaired without counting as behaviour RED",
+    "Actual native account-menu locator required includeHidden before expanding details; native fifth run2pass",
+    "Preview EN assertion initially followed retained HK locale cookie; explicit /en selects intended locale; no application locale change",
+    "Preview inline SQL parameter expanded by PowerShell; source/application unchanged; script parameter restored",
+    "Preview adoption assertion originally checked before async action completed; bounded20s toHaveValue reuses native expectation, no application or timeout change"
+  ],
+  "fullAttempts": [
+    {
+      "receipt": "full-fix-t10-full.log",
+      "passed": 6670,
+      "failed": 11,
+      "skipped": 539,
+      "limit": "Source changed during this initial run; legacy inventory assertions and targeted behaviour subsequently corrected; no pass claim"
+    },
+    {
+      "receipt": "full-fix-t10-full-final.log",
+      "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+      "passed": 6682,
+      "failed": 1,
+      "skipped": 540,
+      "limit": "Repository scan original30s deadline under default worker load; exact-head CI6683/540/0 and full bounded4-workers6683/540/0 subsequently passed without raising deadlines"
+    },
+    {
+      "exitCode": 0,
+      "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+      "passed": 6683,
+      "failed": 0,
+      "skipped": 540,
+      "filesPassed": 791,
+      "filesSkipped": 98,
+      "durationSeconds": 561.42,
+      "command": "npm.cmd test -- --maxWorkers=4 --reporter=default --reporter=json --outputFile=.playwright/full-fix-t10-full-bounded.json",
+      "originalTimeoutsUnchanged": true,
+      "skipsAreNotPasses": true
+    }
+  ],
+  "noTimeoutIncrease": true,
+  "noProduction": true
+}

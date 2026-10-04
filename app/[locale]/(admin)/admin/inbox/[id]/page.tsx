@@ -1,3 +1,13 @@
+import en from "@/messages/en.json";
+import zh from "@/messages/zh-HK.json";
+import {getSession} from "@/lib/auth/server";
+import {inboxDraftScope,inboxDraftProtectionConfigured} from "@/lib/admin/inbox-draft-protection";
+import {protectInboxDraftAction,restoreInboxDraftAction} from "@/lib/admin/inbox-draft-actions";
+import {aiDraftsRepository} from "@/lib/db/repos/ai-drafts";
+import {supportDraftConfiguration} from "@/lib/ai/support-drafts";
+import {supportCaseId} from "@/lib/ai/drafts/support-facts";
+import {SupportDraftPanel,type SupportAssistance} from "@/components/admin/support-draft-panel";
+import {z} from "zod";
 import {
   SupportFollowUpForm,
   type SupportFollowUpLabels,
@@ -32,9 +42,9 @@ import { requireAdminPageActor } from "@/lib/admin/page-auth";
 import { localizedPath } from "@/lib/urls";
 import { approvedTemplateKeys } from "@/lib/whatsapp/approved-templates";
 
-type Props = Readonly<{ params: Promise<{ locale: string; id: string }> }>;
+type Props = Readonly<{ params: Promise<{ locale: string; id: string }>;searchParams?:Promise<{draft?:string}> }>;
 
-export default async function AdminInboxThreadPage({ params }: Props) {
+export default async function AdminInboxThreadPage({ params,searchParams }: Props) {
   const { locale: localeValue, id } = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
@@ -43,6 +53,19 @@ export default async function AdminInboxThreadPage({ params }: Props) {
   const transcript = await readTranscript(actor, id);
   if (!transcript) notFound();
   const conversation = transcript.conversation;
+  const session=await getSession();
+  const scope=session?inboxDraftScope(actor.profileId,actor.userId,session.session.id):"";
+  const supportLabels=(locale==="zh-HK"?zh:en).SupportAssistance as SupportAssistance["labels"];
+  const enabled=process.env.ADMIN_AI_DRAFTS_ENABLED==="true";
+  let configured=false;try{const config=supportDraftConfiguration();configured=config.ready;}catch{/* Safe manual fallback. */}
+  let detail:SupportAssistance["draft"]=null,unavailable=false;
+  const query=await searchParams??{};
+  if(enabled&&query.draft){try{
+    const draftId=z.string().uuid().parse(query.draft),loaded=await aiDraftsRepository.getDraft(actor,draftId);
+    if(loaded.draft.kind!=="support"||loaded.draft.caseId!==supportCaseId(id))throw Error("SUPPORT_DRAFT_CASE_MISMATCH");
+    detail=loaded;
+  }catch{unavailable=true;}}
+  const assistance:SupportAssistance={locale,labels:supportLabels,enabled,configured,draft:detail,unavailable};
 
   // The INTERNAL app-router path, which is where `/zh-HK/…` is the correct
   // spelling — `revalidatePath` does not go through `localizedPath`, and
@@ -265,6 +288,9 @@ export default async function AdminInboxThreadPage({ params }: Props) {
       {conversation.channel === "whatsapp" &&
       conversation.handling === "human" ? (
         <InboxComposer
+          key={scope+":"+id}
+          assistance={assistance}
+          draftProtection={scope?{scope,enabled:inboxDraftProtectionConfigured(),protect:protectInboxDraftAction,restore:restoreInboxDraftAction}:undefined}
           action={sendInboxReplyAction.bind(null, path)}
           conversationId={conversation.id}
           labels={{
@@ -286,7 +312,7 @@ export default async function AdminInboxThreadPage({ params }: Props) {
           windowMessage={windowMessage}
           windowState={replyState.state}
         />
-      ) : null}
+      ) : <SupportDraftPanel conversationId={id} value={assistance}/>}
     </div>
   );
 }

@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-04T08:44:48.484053+00:00",
+  "sourceRange": "c6d56868..d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "method": "author self-review; explicit user sequential/no-subagent constraint",
+  "reviewed": [
+    "actor and profile/session identity before reads/writes",
+    "private conversation exclusion and minimized intent allowlist",
+    "final body and suggested analysis validation",
+    "facts/version CAS and per-row partial review outcomes",
+    "review/adopt versus send and existing T14D sender safeguards",
+    "durable work, conservative unknown and actual budget liability",
+    "independent encryption key/flag/TTL, session/conversation binding, async cleanup and logout",
+    "localized owned route inventory85/admin46 and historical path mappings"
+  ],
+  "unresolvedCriticalOrImportant": [],
+  "deferredMinor": [
+    {
+      "finding": "AI review state filter label uses proposed rather than generic state; ISO due-filter format has no localized help",
+      "effect": "Filter works, wording clarity can improve in staff pilot",
+      "owner": "UX / Operations"
+    }
+  ],
+  "externalGates": [
+    "Approved administrative AI route/data/credential and run/day/month cap plus real model receipts",
+    "Controlled Google/test-mailbox acceptance",
+    "Approved external sender receipts/pinned worker windows",
+    "Policy approval for Production retention/capability rollout"
+  ],
+  "productionRelease": false
+}

@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-04T08:57:32.944925+00:00",
+  "originalBaselinePreserved": true,
+  "files": {
+    "attempts.json": "5a4d335fdf32387532a386676ed14b8b4df71092896cf8bda01b3841375b2e86",
+    "build-proof.json": "0eddb5fa59641039d8350853990ad04606d424cd72fee40ca300de107c85c9b1",
+    "ci-source-counts.json": "e76fc2741cc951bebce38ab67a3885c3a57487d0138afec02af9e2efbc3110da",
+    "ci-source.json": "dfe6923bb305ff3115541a12ddece3dde88b4dad4f8da2ce4b6bf07a43346566",
+    "commands.json": "7a35387345bc66bdb7fb242cc2d149bbdb50a6142e2793832a483b0fdf8ecba0",
+    "en-reviewed-adopt-mobile.png": "7279ae5390fd186769aaee35d461941148a5984fc2d5287cac30607a1a96cb69",
+    "en-stale-adoption-mobile.png": "0b9be6280de7f2c7c819f33ece708e451baf898b7d8966bd84464c8d006e532b",
+    "focused.json": "9324789c1899722c7e4babd592dfe7d85848ad238b10d4f6f0d48ab207202697",
+    "full-skips.json": "217f70a9e1af22de029320f24b9493ce5d6ee969e4c0ba0735e66996f844286c",
+    "full.json": "928c918a22833e9c624b03bc5c609b08a6491c70358d0f95bf6e98a88053fc1a",
+    "native-current.json": "d94683293d0dd4c81f4eeac1287c5cf4e1294e2d107d67b8dd680b0256b039cc",
+    "native-safe.json": "85a072c6767e247f76c3105d77fbf99b9d3873094bbc0f9468628b9f3a8bf683",
+    "preview-configuration.json": "4e9f023398d7b4a53a0d756ccc8b33f5fcfe8534a90027fbf44d5959f54a32c2",
+    "preview-deployment.json": "7fd67fe077893353b6e444197e6bfbd9a87b600a44dc22f1b9141e51076938f6",
+    "preview-en-adopt-mobile.png": "4f894b699a31be9dd01e76a520b1956a42e87a3c06c80b001f4d9858f9ca5385",
+    "preview-en-review.png": "b56f4e3824aa7e5e71509801290f483ff812dd75292791c99c0f0de4cfe26566",
+    "preview-runtime.json": "e9290f50cf3a9accf2cbb5f0603fcc97a18feba65d60b5dace84eabdc31f6ace",
+    "preview-verification.mjs": "49684e2e02673cab2436543fcc87e5a6d879da552cb901f4a4834d11fce85ec4",
+    "preview-zh-HK-adopt-mobile.png": "bf7af54fda42e5d47acd719f559ea1f307d6684d2605f6806e78dcb337690213",
+    "preview-zh-HK-review.png": "aac6319edd77449a3b794f3ad5a26a8c1637a22dc09e3c946de68ff1a9090973",
+    "production-readonly.json": "dbb433afe14ae98b6906dd253beff88b53fe0e8ccb157a05a25075d286466cd9",
+    "self-review.json": "9d76c4bbb4e18dcd8e777756a7e6fe78b53cf3288ed87be14124c061038cacc6",
+    "verification.json": "be3a35860b27161c93acbb7346aac1afee6586a02550e1437e4db71d3268cbb9",
+    "zh-HK-reviewed-adopt-mobile.png": "2cba3578cc295204a87b551f7eccd2083a567c17866c11a2b9f554cdf8f2f170",
+    "zh-HK-stale-adoption-mobile.png": "aabb27cd4e7d03945383ece97b3c12a6ac54f733d03dac84e6e32962a51fe6f5"
+  },
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe"
+}

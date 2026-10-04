@@ -81,3 +81,9 @@ Source1e9709ce, Previewdpl_9m5BHcTshdDpN1jwcuzwLaWDwbDw / hkwtia-membership-life
 ## T14D verified candidate — 2026-10-04
 
 PR135 source9603519; Previewdpl_F7owZgh31gWmE2Ecr4kBQ2jtzacD / hkwtia-delivery-recovery-20261003.vercel.app. Existing approved isolated43branch env values only. Positive DB marker/all59ledger/actual staff Auth; Preview17/native6/SQL48. Full6657PASS519SKIP0FAIL; sourceCI37181949858 all7/worker57. No new migration. Neither test-sink acceptance nor synthetic callbacks proves Resend/Woztell delivery. Required external receipts and worker service binding/two cloud windows remain blocked; Production stays36ebae1/release. Final docs+harness CI is a separate gate.
+
+## T10 candidate — 2026-10-04
+
+Source/harnessd060f423, PR136; isolated branchbr-lingering-unit-azxl75s5 reverifiedready/nonprimary/nondefault/unprotected, expiry2026-10-04T12:00Z. Existing approved test DB/Auth/rate-limit/StripeTEST/R2 names provided only to this Git Preview branch. R2 is shared existing partner storage and was not used for T10 isolation evidence. Review and synthetic protected compose enabled only in Preview; support generation/provider approvalfalse, agentsfalse, caps0, all new effectful business flagsfalse. No provider calls or real member data. Production readonly2026-10-04T08:42:17Z remains36ebae1/dpl9j READY; Production branchrelease.
+
+T10 exact Preview19 includes actual bilingual review/adoption with0outbound and private recovery; pinned dpl_ELFx9FrAXc4JA6sJq2Ra2MXimC4E/source d060. No Production change.

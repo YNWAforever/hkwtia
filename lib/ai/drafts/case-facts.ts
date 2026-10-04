@@ -1,4 +1,5 @@
 import "server-only";
+import {readSupportDraftSource} from "./support-facts";
 import { readApplicationTriageSource } from "@/lib/db/repos/applications";
 import { applicationDraftFacts } from "./application-facts";
 import { createHash } from "node:crypto";
@@ -22,6 +23,7 @@ export const readApprovedDraftFacts: ApprovedDraftFactReader = async (
     return applicationDraftFacts(source, input.asOf);
   }
   if (input.kind !== "support") throw Error("AI_DRAFT_FACT_READER_UNAVAILABLE");
+  if(input.caseId.startsWith("inbox:"))return (await readSupportDraftSource(actor,input.caseId.slice(6),tx,input.asOf)).facts;
   const id = z.string().uuid().parse(input.caseId);
   const result = await tx.execute(
     sql`SELECT id,status,kind,summary_code,context FROM staff_tasks WHERE id=${id} FOR SHARE`,
