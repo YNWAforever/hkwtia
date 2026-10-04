@@ -744,6 +744,7 @@
     }
   },
   "Membership": {
+    "plansLoading": "Loading membership plans…",
     "metaTitle": "Membership | WiseTech Hong Kong",
     "metaDescription": "Compare WTIA membership tiers and benefits.",
     "eyebrow": "Membership",
@@ -1614,6 +1615,7 @@
     "operationsMethodology": "Include bot outcomes, human handoffs and reopened cases. Measure human work, review and rework separately; waiting is not staff work. Fix a comparison group before the pilot."
   },
   "Events": {
+    "listLoading": "Loading events…",
     "metaTitle": "Events | WiseTech Hong Kong",
     "metaDescription": "Discover WTIA events and community gatherings.",
     "eyebrow": "Events",

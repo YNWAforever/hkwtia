@@ -1,127 +1,248 @@
-import type {Metadata} from "next";
-import {getTranslations, setRequestLocale} from "next-intl/server";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { AwaitReadModel } from "@/components/server/await-read-model";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import {MembershipDimensions} from "@/components/marketing/membership-dimensions";
-import {ActionLink} from "@/components/wt/action-link";
-import {PlanGrid, type PlanGridTier} from "@/components/marketing/plan-grid";
-import {PricingNote} from "@/components/marketing/pricing-note";
-import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
-import {StructuredData} from "@/components/seo/structured-data";
-import {ClosingBand} from "@/components/wt/closing-band";
-import {HonestEmpty} from "@/components/wt/honest-empty";
-import {PageHero} from "@/components/wt/page-hero";
-import {Section} from "@/components/wt/section";
-import {StepGrid} from "@/components/wt/step-grid";
-import {siteConfig} from "@/config/site";
-import type {AppLocale} from "@/i18n/routing";
-import {membershipPlansRepository} from "@/lib/db/repos/membership-plans";
-import {buildPageMetadata} from "@/lib/metadata";
-import {buildPublicMembershipCatalog, publicPriceIds, type PublicMembershipTier} from "@/lib/membership/public-catalog";
-import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
-import {buildBreadcrumbData} from "@/lib/structured-data";
+import { MembershipDimensions } from "@/components/marketing/membership-dimensions";
+import { ActionLink } from "@/components/wt/action-link";
+import { PlanGrid, type PlanGridTier } from "@/components/marketing/plan-grid";
+import { PricingNote } from "@/components/marketing/pricing-note";
+import { WhatsAppLink } from "@/components/marketing/whatsapp-link";
+import { StructuredData } from "@/components/seo/structured-data";
+import { ClosingBand } from "@/components/wt/closing-band";
+import { HonestEmpty } from "@/components/wt/honest-empty";
+import { PageHero } from "@/components/wt/page-hero";
+import { Section } from "@/components/wt/section";
+import { StepGrid } from "@/components/wt/step-grid";
+import { siteConfig } from "@/config/site";
+import type { AppLocale } from "@/i18n/routing";
+import { membershipPlansRepository } from "@/lib/db/repos/membership-plans";
+import { buildPageMetadata } from "@/lib/metadata";
+import {
+  buildPublicMembershipCatalog,
+  publicPriceIds,
+  type PublicMembershipTier,
+} from "@/lib/membership/public-catalog";
+import { routeBreadcrumbItems } from "@/lib/seo/route-breadcrumbs";
+import { buildBreadcrumbData } from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
-type Props = {params: Promise<{locale: string}>};
+type Props = { params: Promise<{ locale: string }> };
 
 const DIMENSION_KEYS = [
-  "network", "programmes", "visibility", "events", "showcase", "committees",
-  "seats", "billing", "onboarding", "governance", "support", "renewal",
+  "network",
+  "programmes",
+  "visibility",
+  "events",
+  "showcase",
+  "committees",
+  "seats",
+  "billing",
+  "onboarding",
+  "governance",
+  "support",
+  "renewal",
 ] as const;
 
-function priceLines(price: PublicMembershipTier["price"], labels: Readonly<{free: string; review: string; annual: string; monthly: string}>): readonly string[] {
+function priceLines(
+  price: PublicMembershipTier["price"],
+  labels: Readonly<{
+    free: string;
+    review: string;
+    annual: string;
+    monthly: string;
+  }>,
+): readonly string[] {
   if (price.kind === "free") return [labels.free];
   if (price.kind === "review") return [labels.review];
-  return price.options.map((option) => `${option.amount} ${labels[option.cadence]}`);
+  return price.options.map(
+    (option) => `${option.amount} ${labels[option.cadence]}`,
+  );
 }
 
-export async function generateMetadata({params}: Props): Promise<Metadata> {
-  const {locale} = await params;
-  const t = await getTranslations({locale, namespace: "Membership"});
-  return buildPageMetadata({locale: locale as AppLocale, pathname: "/membership", title: t("metaTitle"), description: t("metaDescription")});
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Membership" });
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    pathname: "/membership",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  });
 }
 
-export default async function MembershipPage({params}: Props) {
-  const {locale: rawLocale} = await params;
+export default async function MembershipPage({ params }: Props) {
+  const { locale: rawLocale } = await params;
   const locale = rawLocale as AppLocale;
   setRequestLocale(locale);
 
-  const [t, tCommon, tWhatsApp, tRoot, rows] = await Promise.all([
-    getTranslations({locale, namespace: "Membership"}),
-    getTranslations({locale, namespace: "Common"}),
-    getTranslations({locale, namespace: "WhatsApp"}),
+  const rowsPromise = membershipPlansRepository.list().catch(() => null);
+  const [t, tCommon, tWhatsApp, tRoot] = await Promise.all([
+    getTranslations({ locale, namespace: "Membership" }),
+    getTranslations({ locale, namespace: "Common" }),
+    getTranslations({ locale, namespace: "WhatsApp" }),
     // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
-    getTranslations({locale}),
-    membershipPlansRepository.list().catch(() => null),
+    getTranslations({ locale }),
   ]);
-  const publicTiers = rows === null ? [] : buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()});
-  const labels = {free: t("priceLabels.free"), review: t("priceLabels.review"), annual: t("cadenceLabels.annual"), monthly: t("cadenceLabels.monthly")};
-  const tiers: PlanGridTier[] = publicTiers.map((tier) => ({
-    code: tier.code,
-    name: t(`tiers.${tier.code}.name`),
-    description: t(`tiers.${tier.code}.description`),
-    priceLines: priceLines(tier.price, labels),
-    // Programme D-5: the copy for each tier's real entitlements lives in the
-    // bundle beside lib/membership/entitlements.ts; the old shared triple
-    // said the same thing about every tier, which sells nothing.
-    benefits: (t.raw(`tierBenefits.${tier.code}`) as string[]),
-    action: tier.cta.kind === "join" ? t("actions.join") : t("actions.contact"),
-    href: tier.cta.href,
+  const dimensions = DIMENSION_KEYS.map((key) => ({
+    title: t(`dimensions.${key}.title`),
+    copy: t(`dimensions.${key}.copy`),
   }));
-  // "Ready" means both configured Startup/Corporate price ids actually resolved into the
-  // catalog -- the same gate buildPublicMembershipCatalog already applies, read back here.
-  // If either tier didn't resolve, PlanGrid silently omits it, so the page must not claim
-  // both fees shown are confirmed -- only one would even be on the page.
-  const pricingReady = publicTiers.some((tier) => tier.code === "startup") && publicTiers.some((tier) => tier.code === "corporate");
-  const dimensions = DIMENSION_KEYS.map((key) => ({title: t(`dimensions.${key}.title`), copy: t(`dimensions.${key}.copy`)}));
-  const steps = [0, 1, 2, 3, 4].map((index) => ({title: t(`first90.steps.${index}.title`), copy: t(`first90.steps.${index}.copy`)}));
-  const questions = Array.from({length: 9}, (_, index) => ({question: t(`faq.${index}.question`), answer: t(`faq.${index}.answer`)}));
+  const steps = [0, 1, 2, 3, 4].map((index) => ({
+    title: t(`first90.steps.${index}.title`),
+    copy: t(`first90.steps.${index}.copy`),
+  }));
+  const questions = Array.from({ length: 9 }, (_, index) => ({
+    question: t(`faq.${index}.question`),
+    answer: t(`faq.${index}.answer`),
+  }));
 
-  return <>
-    <PageHero
-        className="defer-following-sections"
-      breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
-      breadcrumbLabel={tCommon("breadcrumbLabel")}
-      eyebrow={t("eyebrow")}
-      lead={t("summary")}
-      title={t("title")}
-    />
-    <Section id="plans" labelledBy="membership-plans-title">
-      <h2 className="sr-only" id="membership-plans-title">{t("tiersTitle")}</h2>
-      {tiers.length > 0
-        ? <>
-            <PlanGrid sme={{label: t("sme.label"), title: t("sme.title"), copy: t("sme.copy"), action: t("sme.action"), href: "/contact"}} tiers={tiers} />
-            <PricingNote copy={t(pricingReady ? "pricing.readyCopy" : "pricing.fallbackCopy")} label={t(pricingReady ? "pricing.readyLabel" : "pricing.fallbackLabel")} />
+  function renderPlans(
+    rows: Awaited<ReturnType<typeof membershipPlansRepository.list>> | null,
+  ) {
+    const publicTiers =
+      rows === null
+        ? []
+        : buildPublicMembershipCatalog({
+            locale,
+            rows,
+            priceIds: publicPriceIds(),
+          });
+    const labels = {
+      free: t("priceLabels.free"),
+      review: t("priceLabels.review"),
+      annual: t("cadenceLabels.annual"),
+      monthly: t("cadenceLabels.monthly"),
+    };
+    const tiers: PlanGridTier[] = publicTiers.map((tier) => ({
+      code: tier.code,
+      name: t(`tiers.${tier.code}.name`),
+      description: t(`tiers.${tier.code}.description`),
+      priceLines: priceLines(tier.price, labels),
+      // Programme D-5: the copy for each tier's real entitlements lives in the
+      // bundle beside lib/membership/entitlements.ts; the old shared triple
+      // said the same thing about every tier, which sells nothing.
+      benefits: t.raw(`tierBenefits.${tier.code}`) as string[],
+      action:
+        tier.cta.kind === "join" ? t("actions.join") : t("actions.contact"),
+      href: tier.cta.href,
+    }));
+    // "Ready" means both configured Startup/Corporate price ids actually resolved into the
+    // catalog -- the same gate buildPublicMembershipCatalog already applies, read back here.
+    // If either tier didn't resolve, PlanGrid silently omits it, so the page must not claim
+    // both fees shown are confirmed -- only one would even be on the page.
+    const pricingReady =
+      publicTiers.some((tier) => tier.code === "startup") &&
+      publicTiers.some((tier) => tier.code === "corporate");
+    return (
+      <Section id="plans" labelledBy="membership-plans-title">
+        <h2 className="sr-only" id="membership-plans-title">
+          {t("tiersTitle")}
+        </h2>
+        {tiers.length > 0 ? (
+          <>
+            <PlanGrid
+              sme={{
+                label: t("sme.label"),
+                title: t("sme.title"),
+                copy: t("sme.copy"),
+                action: t("sme.action"),
+                href: "/contact",
+              }}
+              tiers={tiers}
+            />
+            <PricingNote
+              copy={t(
+                pricingReady ? "pricing.readyCopy" : "pricing.fallbackCopy",
+              )}
+              label={t(
+                pricingReady ? "pricing.readyLabel" : "pricing.fallbackLabel",
+              )}
+            />
           </>
-        : <HonestEmpty copy={t("tiersIntro")} title={t("unavailable")} variant="inner" />}
-    </Section>
-    <Section labelledBy="membership-dimensions-title">
-      <h2 className="sr-only" id="membership-dimensions-title">{t("dimensionsTitle")}</h2>
-      <MembershipDimensions items={dimensions} />
-    </Section>
-    <Section id="faq" labelledBy="membership-faq-title">
-      <h2 id="membership-faq-title">{t("faqTitle")}</h2>
-      <dl className="mt-8 grid gap-6 md:grid-cols-2">
-        {questions.map(({question, answer}) => <div className="rounded-lg border bg-card p-5" key={question}>
-          <dt className="font-semibold">{question}</dt>
-          <dd className="mt-2 text-muted-foreground">{answer}</dd>
-        </div>)}
-      </dl>
-      <div className="mt-6 flex flex-wrap gap-5">
-        <ActionLink href="/refund-policy" variant="text-link">{t("faqLinks.refund")}</ActionLink>
-        <ActionLink href="/contact" variant="text-link">{t("faqLinks.contact")}</ActionLink>
-      </div>
-    </Section>
-    <Section labelledBy="membership-first90-title">
-      <h2 id="membership-first90-title">{t("first90.heading")}</h2>
-      <StepGrid steps={steps} />
-    </Section>
-    <ClosingBand
-      actions={[{label: t("closing.join"), href: "/join"}, {label: t("closing.contact"), href: `mailto:${siteConfig.contact.email}`}]}
-      copy={t("closing.copy")}
-      extra={<WhatsAppLink className="text-link light-link" label={tWhatsApp("chat")} locale={locale} prefill={tWhatsApp("prefill.membership")} source="membership" />}
-      eyebrow={t("closing.eyebrow")}
-      title={t("closing.title")}
-    />
-    <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/membership", tRoot))} />
-  </>;
+        ) : (
+          <HonestEmpty
+            copy={t("tiersIntro")}
+            title={t("unavailable")}
+            variant="inner"
+          />
+        )}
+      </Section>
+    );
+  }
+
+  return (
+    <>
+      <PageHero
+        className="defer-following-sections"
+        breadcrumb={{
+          homeHref: "/",
+          homeLabel: tCommon("breadcrumbHome"),
+          current: t("title"),
+        }}
+        breadcrumbLabel={tCommon("breadcrumbLabel")}
+        eyebrow={t("eyebrow")}
+        lead={t("summary")}
+        title={t("title")}
+      />
+      <Suspense fallback={<p role="status">{t("plansLoading")}</p>}>
+        <AwaitReadModel pending={rowsPromise}>{renderPlans}</AwaitReadModel>
+      </Suspense>
+      <Section labelledBy="membership-dimensions-title">
+        <h2 className="sr-only" id="membership-dimensions-title">
+          {t("dimensionsTitle")}
+        </h2>
+        <MembershipDimensions items={dimensions} />
+      </Section>
+      <Section id="faq" labelledBy="membership-faq-title">
+        <h2 id="membership-faq-title">{t("faqTitle")}</h2>
+        <dl className="mt-8 grid gap-6 md:grid-cols-2">
+          {questions.map(({ question, answer }) => (
+            <div className="rounded-lg border bg-card p-5" key={question}>
+              <dt className="font-semibold">{question}</dt>
+              <dd className="mt-2 text-muted-foreground">{answer}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-6 flex flex-wrap gap-5">
+          <ActionLink href="/refund-policy" variant="text-link">
+            {t("faqLinks.refund")}
+          </ActionLink>
+          <ActionLink href="/contact" variant="text-link">
+            {t("faqLinks.contact")}
+          </ActionLink>
+        </div>
+      </Section>
+      <Section labelledBy="membership-first90-title">
+        <h2 id="membership-first90-title">{t("first90.heading")}</h2>
+        <StepGrid steps={steps} />
+      </Section>
+      <ClosingBand
+        actions={[
+          { label: t("closing.join"), href: "/join" },
+          {
+            label: t("closing.contact"),
+            href: `mailto:${siteConfig.contact.email}`,
+          },
+        ]}
+        copy={t("closing.copy")}
+        extra={
+          <WhatsAppLink
+            className="text-link light-link"
+            label={tWhatsApp("chat")}
+            locale={locale}
+            prefill={tWhatsApp("prefill.membership")}
+            source="membership"
+          />
+        }
+        eyebrow={t("closing.eyebrow")}
+        title={t("closing.title")}
+      />
+      <StructuredData
+        data={buildBreadcrumbData(
+          routeBreadcrumbItems(locale, "/membership", tRoot),
+        )}
+      />
+    </>
+  );
 }

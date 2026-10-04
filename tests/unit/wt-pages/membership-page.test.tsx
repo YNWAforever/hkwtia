@@ -1,70 +1,142 @@
-import {readFileSync} from "node:fs";
-import {resolve} from "node:path";
+import { resolveReadModelTree } from "@/tests/fixtures/resolve-read-model-tree";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
-import {renderToStaticMarkup} from "react-dom/server";
-import type {ReactNode} from "react";
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type {PersistedMembershipPlan} from "@/lib/membership/public-catalog";
+import type { PersistedMembershipPlan } from "@/lib/membership/public-catalog";
 
 const bundles = {
-  en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
-  "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
+  en: JSON.parse(
+    readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8"),
+  ),
+  "zh-HK": JSON.parse(
+    readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8"),
+  ),
 } as const;
 
-function messageAt(locale: "en" | "zh-HK", namespace: string | undefined, key: string): unknown {
-  const root = namespace === undefined
-    ? bundles[locale]
-    : namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
-  return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
+function messageAt(
+  locale: "en" | "zh-HK",
+  namespace: string | undefined,
+  key: string,
+): unknown {
+  const root =
+    namespace === undefined
+      ? bundles[locale]
+      : namespace
+          .split(".")
+          .reduce<unknown>(
+            (v, p) => (v as Record<string, unknown> | undefined)?.[p],
+            bundles[locale],
+          );
+  return key
+    .split(".")
+    .reduce<unknown>(
+      (v, p) => (v as Record<string, unknown> | undefined)?.[p],
+      root,
+    );
 }
 
-const membershipPlans = vi.hoisted(() => ({list: vi.fn()}));
+const membershipPlans = vi.hoisted(() => ({ list: vi.fn() }));
 
-vi.mock("@/lib/db/repos/membership-plans", () => ({membershipPlansRepository: membershipPlans}));
+vi.mock("@/lib/db/repos/membership-plans", () => ({
+  membershipPlansRepository: membershipPlans,
+}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
-  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace?: string}) => {
-    const t = (key: string) => String(messageAt(locale, namespace, key));
-    (t as unknown as {raw: (key: string) => unknown}).raw = (key: string) => messageAt(locale, namespace, key);
-    return t;
-  }),
+  getTranslations: vi.fn(
+    async ({
+      locale,
+      namespace,
+    }: {
+      locale: "en" | "zh-HK";
+      namespace?: string;
+    }) => {
+      const t = (key: string) => String(messageAt(locale, namespace, key));
+      (t as unknown as { raw: (key: string) => unknown }).raw = (key: string) =>
+        messageAt(locale, namespace, key);
+      return t;
+    },
+  ),
 }));
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+  Link: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: ReactNode;
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 import MembershipPage from "@/app/[locale]/(public)/membership/page";
 
 const startup: PersistedMembershipPlan = {
-  code: "startup", audience: "startup", billingBehavior: "checkout", seatAllowance: 5, active: true,
-  annualPriceHkd: 120000, monthlyPriceHkd: 12000, stripePriceReference: "price_startup",
+  code: "startup",
+  audience: "startup",
+  billingBehavior: "checkout",
+  seatAllowance: 5,
+  active: true,
+  annualPriceHkd: 120000,
+  monthlyPriceHkd: 12000,
+  stripePriceReference: "price_startup",
 };
 const community: PersistedMembershipPlan = {
-  code: "community", audience: "individual", billingBehavior: "free", seatAllowance: 1, active: true,
-  annualPriceHkd: 0, monthlyPriceHkd: null, stripePriceReference: null,
+  code: "community",
+  audience: "individual",
+  billingBehavior: "free",
+  seatAllowance: 1,
+  active: true,
+  annualPriceHkd: 0,
+  monthlyPriceHkd: null,
+  stripePriceReference: null,
 };
 const patron: PersistedMembershipPlan = {
-  code: "patron", audience: "patron", billingBehavior: "review", seatAllowance: 1, active: true,
-  annualPriceHkd: null, monthlyPriceHkd: null, stripePriceReference: null,
+  code: "patron",
+  audience: "patron",
+  billingBehavior: "review",
+  seatAllowance: 1,
+  active: true,
+  annualPriceHkd: null,
+  monthlyPriceHkd: null,
+  stripePriceReference: null,
 };
 const corporate: PersistedMembershipPlan = {
-  code: "corporate", audience: "corporate", billingBehavior: "checkout", seatAllowance: 25, active: true,
-  annualPriceHkd: 480000, monthlyPriceHkd: 48000, stripePriceReference: "price_corporate",
+  code: "corporate",
+  audience: "corporate",
+  billingBehavior: "checkout",
+  seatAllowance: 25,
+  active: true,
+  annualPriceHkd: 480000,
+  monthlyPriceHkd: 48000,
+  stripePriceReference: "price_corporate",
 };
 
 async function renderMembership(rows: readonly PersistedMembershipPlan[]) {
   membershipPlans.list.mockResolvedValue(rows);
-  const originalEnv = {...process.env};
+  const originalEnv = { ...process.env };
   process.env.STRIPE_STARTUP_PRICE_ID = "price_startup";
   process.env.STRIPE_CORPORATE_PRICE_ID = "price_corporate";
-  const html = renderToStaticMarkup(await MembershipPage({params: Promise.resolve({locale: "en"})}));
+  const html = renderToStaticMarkup(
+    await resolveReadModelTree(
+      await MembershipPage({ params: Promise.resolve({ locale: "en" }) }),
+    ),
+  );
   process.env = originalEnv;
   return html;
 }
 
 describe("/membership rewrite", () => {
-  beforeEach(() => { membershipPlans.list.mockReset(); });
+  beforeEach(() => {
+    membershipPlans.list.mockReset();
+  });
 
   it("renders the plan grid with four anchors plus a fifth, distinct SME card", async () => {
     const html = await renderMembership([community, startup, patron]);
@@ -78,7 +150,8 @@ describe("/membership rewrite", () => {
     // membership-dimensions panel and the first-90-days step grid, so counting across the
     // whole page (as a naive `html.match(/<article/g)` would) overcounts. The test's intent,
     // per its name, is "the plan grid itself has four cards."
-    const planGridHtml = html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
+    const planGridHtml =
+      html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
     expect((planGridHtml.match(/<article/g) ?? []).length).toBe(4);
     expect(html).toContain(bundles.en.Membership.sme.title);
     expect(html).toContain('href="/join?plan=community"');
@@ -136,7 +209,9 @@ describe("/membership rewrite", () => {
 
     expect(html).toContain('class="intro-process"');
     expect(html).not.toContain("first-90");
-    expect((html.match(/<article/g) ?? []).length).toBeGreaterThanOrEqual(5 + 4);
+    expect((html.match(/<article/g) ?? []).length).toBeGreaterThanOrEqual(
+      5 + 4,
+    );
   });
 
   it("closes with /join and mailto: actions", async () => {
