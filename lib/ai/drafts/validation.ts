@@ -217,6 +217,7 @@ export function validateGroundedContent(
     }
     return "";
   });
+  if (/[^\s@]+@[^\s@]+\.[^\s@]+/u.test(withoutUrls)) reject("body", "UNBOUND_PERSONAL_CONTACT");
   if (rawNumeric.test(withoutUrls)) reject("body", "UNBOUND_CRITICAL_FACT");
   if (criticalWords.test(withoutUrls)) reject("body", "UNBOUND_FACT_LABEL");
   if (

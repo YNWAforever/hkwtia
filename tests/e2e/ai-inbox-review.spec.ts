@@ -1,0 +1,72 @@
+import {mkdirSync,writeFileSync,readFileSync} from "node:fs";
+import {execFileSync} from "node:child_process";
+import AxeBuilder from "@axe-core/playwright";
+import en from "@/messages/en.json";
+import zh from "@/messages/zh-HK.json";
+import {randomUUID} from "node:crypto";
+import {Pool} from "pg";
+import {test,expect} from "@playwright/test";
+import {assertIsolatedSeedEnvironment,assertSeedSentinel} from "../../scripts/lib/acceptance-guard";
+import {signInForM2} from "../fixtures/m2-auth";
+const origin="http://localhost:3450";
+let pool:Pool;
+const root="docs/audits/hkwtia-2026-10-03-full-fix/evidence/t10/",checks:unknown[]=[];
+test.use({trace:"off",video:"off"});
+test.describe("T10 isolated actual staff inbox assistance",()=>{
+ test.skip(process.env.AUDIT_ISOLATED_ACCEPTANCE!=="1","Confirmed isolated DB/Auth required");
+ test.beforeAll(async({baseURL})=>{expect(baseURL).toBe(origin);const db=assertIsolatedSeedEnvironment(process.env,{prefix:"FULL_REMEDIATION",flag:"FULL_REMEDIATION_ACCEPTANCE_SEED",hostAllowlistVar:"FULL_REMEDIATION_DATABASE_HOST_ALLOWLIST"});expect(db).toBe(process.env.DATABASE_URL_TEST);pool=new Pool({connectionString:db});mkdirSync(root,{recursive:true});await assertSeedSentinel("FULL_REMEDIATION",async()=>Number((await pool.query("SELECT count(*) AS n FROM acceptance_sentinel")).rows[0].n));expect(JSON.parse(readFileSync(".playwright/full-fix-t10-local-runtime-safe.json","utf8"))).toMatchObject({origin,ledger:59,dbSourcePositivelyProven:true,production:false});});
+ test.afterAll(async()=>{writeFileSync(root+"native-current.json",JSON.stringify({observedAt:new Date().toISOString(),sourceSha:process.env.FULL_FIX_EXPECTED_SOURCE_SHA,actualPasswordAuth:true,syntheticOfflineDrafts:true,externalModelCalls:0,realProviderSends:0,production:false,checks},null,2));await pool?.end()});
+ for(const locale of ["en","zh-HK"] as const){
+  test(locale+" exposes genuine readiness and separate review/adopt without an AI provider",async({page})=>{
+   await signInForM2(page,"staff");const id=randomUUID(),profile="t10-native-"+randomUUID();
+   await pool.query("INSERT INTO profiles(id,auth_user_id,display_name,email,whatsapp_opt_in,whatsapp_number) VALUES($1,$1,'Synthetic Support Member',$2,true,'+85290000008')",[profile,profile+"@example.test"]);
+   await pool.query("INSERT INTO conversations(id,profile_id,channel,locale,handling,last_inbound_at,expires_at) VALUES($1,$2,'whatsapp',$3,'human',now(),now()+interval '1 day')",[id,profile,locale]);
+   await page.goto(origin+(locale==='en'?'':'/zh')+'/admin/inbox/'+id);
+   await expect(page.getByRole('heading',{name:locale==='en'?'Reply assistance':'回覆草稿助手',exact:true})).toBeVisible({timeout:5000});
+   const t=locale==='en'?en:zh,prefix=locale==='en'?'':'/zh',labels=t.SupportAssistance;
+   await expect(page.getByRole('button',{name:labels.prepare,exact:true})).toBeDisabled();
+   const seeded=JSON.parse(execFileSync(process.execPath,['--conditions=react-server','--import','tsx','scripts/lib/full-support-draft-fixture.ts',id],{encoding:'utf8',env:{...process.env,NODE_ENV:'test'},timeout:60000,windowsHide:true}));
+   expect(seeded).toMatchObject({syntheticOfflineFixture:true,externalModelCalls:0,state:'needs_review'});
+   await page.goto(origin+prefix+'/admin/ai-review?draft='+seeded.draftId);
+   await expect(page.getByRole('heading',{name:t.AiDraftReview.heading,level:1,exact:true})).toBeVisible();
+   await expect(page.getByRole('button',{name:t.AiDraftReview.approve,exact:true})).toBeEnabled();
+   await page.getByRole('button',{name:t.AiDraftReview.approve,exact:true}).press('Enter');
+   await expect.poll(async()=>(await pool.query('SELECT state FROM ai_review_drafts WHERE id=$1',[seeded.draftId])).rows[0].state).toBe('approved');
+   await page.goto(origin+prefix+'/admin/inbox/'+id+'?draft='+seeded.draftId);
+   const composer=page.locator('form:has(textarea[name=content])');
+   await page.getByRole('button',{name:labels.adopt,exact:true}).press('Enter');
+   const body='Please ask the assigned staff member to check this request.';
+   await expect(composer.locator('textarea')).toHaveValue(body);
+   const attempt=await composer.locator('input[name=attemptId]').inputValue();
+   expect((await pool.query("SELECT count(*)::int AS n FROM messages WHERE conversation_id=$1 AND direction='outbound'",[id])).rows).toEqual([{n:0}]);
+   await expect.poll(async()=>page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('wtia:inbox-protected:')).length)).toBe(1);
+   expect(await page.evaluate(()=>Object.values(sessionStorage).join(' '))).not.toContain(body);
+   await page.reload();await expect(composer.locator('textarea')).toHaveValue(body);await expect(composer.locator('input[name=attemptId]')).toHaveValue(attempt);
+   await page.setViewportSize({width:390,height:844});
+   await page.screenshot({path:root+locale+'-reviewed-adopt-mobile.png',fullPage:false});
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+   expect((await new AxeBuilder({page}).include('main').analyze()).violations).toEqual([]);
+   await composer.locator('textarea').fill('');
+   await expect.poll(async()=>page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('wtia:inbox-protected:')).length)).toBe(0);
+   await composer.locator('textarea').fill('Synthetic retained private reply');
+   await expect.poll(async()=>page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('wtia:inbox-protected:')).length)).toBe(1);
+   // Use the actual UI sign-out. The unsaved-work prompt is an explicit user choice.
+   page.on('dialog',dialog=>dialog.accept());
+   const account=page.locator('details').filter({has:page.getByRole('button',{name:t.Admin.shell.signOut,exact:true})});
+   await account.locator('summary').click();
+   await page.getByRole('button',{name:t.Admin.shell.signOut,exact:true}).click();
+   await expect.poll(async()=>new URL(page.url()).pathname).toBe(prefix+'/admin-login');
+   expect(await page.evaluate(()=>Object.keys(sessionStorage).filter(k=>/^wtia:inbox-(draft|attempt|protected):/.test(k)))).toEqual([]);
+   await signInForM2(page,'staff');await page.goto(origin+prefix+'/admin/inbox/'+id+'?draft='+seeded.draftId);
+   await expect(composer.locator('textarea')).toHaveValue('');
+   // Change current consent after render: approved copy cannot be adopted from stale facts.
+   await pool.query('UPDATE profiles SET whatsapp_opt_in=false WHERE id=$1',[profile]);
+   await page.getByRole('button',{name:labels.adopt,exact:true}).press('Enter');
+   await expect(page.getByText(labels.stale,{exact:true})).toBeVisible();
+   await expect(composer.locator('textarea')).toHaveValue('');
+   expect((await pool.query("SELECT count(*)::int AS n FROM messages WHERE conversation_id=$1 AND direction='outbound'",[id])).rows).toEqual([{n:0}]);
+   await page.screenshot({path:root+locale+'-stale-adoption-mobile.png',fullPage:false});
+   checks.push({locale,case:'real staff password Auth; offline synthetic draft reviewed→adopted but not sent; encrypted reload preserves attempt, deletion/sign-out clear, new login empty, consent CAS stale,390 keyboard axe0',syntheticOfflineDraft:true,externalModelCalls:0,outboundMessages:0});
+  });
+ }
+});

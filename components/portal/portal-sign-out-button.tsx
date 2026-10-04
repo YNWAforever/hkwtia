@@ -1,5 +1,6 @@
 "use client";
 
+import {clearInboxDraftStorage} from "@/lib/admin/inbox-draft-storage";
 import {useState} from "react";
 
 import {authClient} from "@/lib/auth/client";
@@ -23,6 +24,7 @@ export function PortalSignOutButton({label, errorLabel, destination = "/member-l
           try {
             const result = await authClient.signOut();
             if (result.error) throw new Error("SIGN_OUT_FAILED");
+            clearInboxDraftStorage();
             router.push(destination);
             router.refresh();
           } catch {

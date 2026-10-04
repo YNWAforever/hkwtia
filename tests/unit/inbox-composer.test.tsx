@@ -6,7 +6,9 @@ import {INBOX_REPLY_ERROR_CODES, type InboxReplyErrorCode} from "@/lib/admin/inb
 import en from "@/messages/en.json";
 
 const conversationId = "11111111-1111-4111-8111-111111111111";
-const draftKey = `wtia:inbox-draft:${conversationId}`;
+const scope="a".repeat(64);
+const draftKey = `wtia:inbox-protected:${scope}:${conversationId}`;
+const protection={scope,enabled:true,protect:vi.fn(async()=>({status:"protected" as const,envelope:"opaque-test-envelope"})),restore:vi.fn(async()=>({status:"restored" as const,draft:{content:"Half a reply",attemptId:"22222222-2222-4222-8222-222222222222"}}))};
 
 const labels: InboxComposerLabels = {
   ...en.Admin.inbox.compose,
@@ -29,6 +31,7 @@ function composer(overrides: Partial<Parameters<typeof InboxComposer>[0]> = {}) 
       templates={templates}
       windowMessage="3h 20m left to reply freely"
       windowState="open"
+      draftProtection={protection}
       {...overrides}
     />,
   );
@@ -90,7 +93,7 @@ describe("InboxComposer", () => {
   });
 
   it("restores a draft for this thread and says so", async () => {
-    window.sessionStorage.setItem(draftKey, "Half a reply");
+    window.sessionStorage.setItem(draftKey, "opaque-test-envelope");
     composer();
     expect(await screen.findByDisplayValue("Half a reply")).toBeInTheDocument();
     expect(screen.getByText(labels.draftRestored)).toBeInTheDocument();
@@ -105,7 +108,7 @@ describe("InboxComposer", () => {
   it("saves what is typed, and clears it once the reply is sent", async () => {
     const {rerender} = composer();
     fireEvent.change(screen.getByLabelText(labels.message), {target: {value: "On my way"}});
-    expect(window.sessionStorage.getItem(draftKey)).toBe("On my way");
+    await vi.waitFor(()=>expect(window.sessionStorage.getItem(draftKey)).toBe("opaque-test-envelope"));
 
     rerender(
       <InboxComposer
@@ -115,6 +118,7 @@ describe("InboxComposer", () => {
         templates={templates}
         windowMessage="3h 20m left to reply freely"
         windowState="open"
+        draftProtection={protection}
       />,
     );
     fireEvent.click(screen.getByRole("button", {name: labels.send}));
@@ -158,7 +162,7 @@ describe("InboxComposer", () => {
     expect(status).not.toHaveTextContent(labels.sent);
     // The text staff typed is the evidence of what did NOT go out, so it stays.
     expect(screen.getByLabelText(labels.message)).toHaveValue("Thanks!");
-    expect(window.sessionStorage.getItem(draftKey)).toBe("Thanks!");
+    await vi.waitFor(()=>expect(window.sessionStorage.getItem(draftKey)).toBe("opaque-test-envelope"));
   });
 
   /**

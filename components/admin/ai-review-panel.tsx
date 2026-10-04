@@ -118,6 +118,7 @@ export function AiReviewPanel({
           </div>
         ))}
       </dl>
+      {details.analysis?<div className="space-y-2"><h3 className="font-semibold">{labels.analysisSummary}</h3><p className="whitespace-pre-wrap break-words">{details.analysis.summary}</p><h3 className="font-semibold">{labels.analysisTasks}</h3><ul>{details.analysis.tasks.map((task,i)=><li key={i} className="break-words">{task}</li>)}</ul></div>:null}
       <div>
         <h3 className="font-semibold">{labels.facts}</h3>
         <dl>

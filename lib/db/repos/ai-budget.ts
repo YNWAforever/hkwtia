@@ -1,4 +1,6 @@
 import "server-only";
+import {requireAdmin} from "@/lib/auth/authorize";
+import {forbidden,type AdminActor} from "@/lib/membership/lifecycle";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 import {AI_PRICING_VERSION} from "@/config/ai-pricing";
@@ -264,6 +266,15 @@ export function createAiBudgetRepository(
           await tx.execute(
             sql`UPDATE ai_budget_control SET halted=true,reason_code='actual_exceeds_reservation',updated_at=${now()} WHERE id=true`,
           );
+      });
+    },
+    async readRemainingDay(actor:AdminActor,asOf=new Date()):Promise<number|null>{
+      requireAdmin(actor);const caps=limits();if(!validLimits(caps))return null;
+      const db=await load(),day=new Date(asOf);day.setUTCHours(0,0,0,0);
+      return db.transaction(async tx=>{
+        if(rows(await tx.execute(sql`SELECT id FROM profiles WHERE id=${actor.profileId} AND auth_user_id=${actor.userId} AND role=${actor.kind} FOR SHARE`)).length!==1)forbidden();
+        const spent=BigInt(String(rows(await tx.execute(sql`SELECT COALESCE(SUM(charged_microusd) FILTER(WHERE created_at>=${day} OR usage_state IN ('held','unknown')),0)::text AS spent FROM ai_budget_reservations`))[0]?.spent));
+        return Number(BigInt(caps.dayMicrousd)>spent?BigInt(caps.dayMicrousd)-spent:0n);
       });
     },
     async releaseUndispatched(id: string): Promise<void> {

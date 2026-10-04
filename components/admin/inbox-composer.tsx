@@ -1,26 +1,17 @@
 "use client";
 
-import {useActionState, useEffect, useState} from "react";
+import {useActionState, useEffect, useState, useRef} from "react";
 
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
 import type {InboxReplyErrorCode, InboxReplyState} from "@/lib/admin/inbox-action-core";
+import {purgeLegacyInboxPlaintext,inboxDraftStorageGeneration} from "@/lib/admin/inbox-draft-storage";
+import type {protectInboxDraftAction,restoreInboxDraftAction} from "@/lib/admin/inbox-draft-actions";
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
+import {SupportDraftPanel,type SupportAssistance} from "./support-draft-panel";
 import {newAttemptId} from "@/lib/random-id";
 
-/**
- * The staff reply box: the one `'use client'` file C-2 adds.
- *
- * The repo has ~40 client components and treats the count as a budget, so the
- * thread, the header and every take-over/assign/close form stay Server
- * Components with plain `<form action={…}>`. Only three things here genuinely
- * need the browser: the draft that survives a mis-click, the free-text/template
- * switch that decides which fields exist, and `useActionState`'s pending flag.
- *
- * Nothing here is a gate. The window countdown is formatted on the server and
- * the disabled button is a courtesy; `sendInboxReply` re-checks the window, the
- * channel, the handling state, consent and template approval against the row,
- * and the adapter checks the window again after that. A client that posts its
- * own `formData` gets the same answers.
- */
+/** Manual send remains an explicit action. Browser persistence contains only
+ * a session-bound encrypted envelope; the server rechecks every delivery gate. */
 export type InboxComposerLabels = Readonly<{
   legend: string;
   kindSession: string;
@@ -48,53 +39,9 @@ const EMPTY_DRAFT: Draft = {content: "", restored: false};
 
 const initialState: InboxReplyState = {status: "idle"};
 
-/**
- * Per thread, per tab, and deliberately `sessionStorage` rather than
- * `localStorage`: a half-written reply to a member is not something to leave on
- * a shared workstation after the tab closes.
- */
-function draftKey(conversationId: string): string {
-  return `wtia:inbox-draft:${conversationId}`;
-}
-
-/**
- * The per-attempt token that bounds the server's `outbound_key` dedupe to ONE
- * send attempt — see `outboundKeyFor` in lib/admin/inbox-action-core.ts for the
- * dropped-reply incident that made it necessary.
- *
- * It lives beside the draft, in the same storage and for the same lifetime,
- * because it answers the same question: is this still the reply staff were
- * composing before the reload? A retry after a timeout has to find the row its
- * first attempt wrote, so the token has to come back with the text.
- */
-function attemptKey(conversationId: string): string {
-  return `wtia:inbox-attempt:${conversationId}`;
-}
-
-/**
- * Every access is wrapped, and not out of superstition: reading or writing
- * `sessionStorage` THROWS — it does not return null — in a private window and
- * wherever site data is blocked. An unguarded read at mount takes the whole
- * composer down with it, which would mean staff cannot reply at all because a
- * convenience feature could not remember a draft.
- */
-function readDraft(conversationId: string): string | null {
-  try {
-    return window.sessionStorage.getItem(draftKey(conversationId));
-  } catch {
-    return null;
-  }
-}
-
-function writeDraft(conversationId: string, value: string): void {
-  try {
-    if (value === "") window.sessionStorage.removeItem(draftKey(conversationId));
-    else window.sessionStorage.setItem(draftKey(conversationId), value);
-  } catch {
-    // Nothing to do and nothing to tell staff: the reply still sends.
-  }
-}
-
+export type InboxDraftProtection=Readonly<{scope:string;enabled:boolean;protect:typeof protectInboxDraftAction;restore:typeof restoreInboxDraftAction}>;
+function protectedKey(conversationId:string,scope:string){return `wtia:inbox-protected:${scope}:${conversationId}`;}
+function attemptKey(conversationId:string):string{return `wtia:inbox-attempt:${conversationId}`;}
 /**
  * Reads this thread's attempt token, minting and storing one on first use.
  *
@@ -137,6 +84,8 @@ export function InboxComposer({
   templates,
   windowMessage,
   windowState,
+  draftProtection,
+  assistance,
 }: Readonly<{
   action: (state: InboxReplyState, formData: FormData) => Promise<InboxReplyState>;
   conversationId: string;
@@ -145,7 +94,14 @@ export function InboxComposer({
   /** Already formatted on the server, from the same constant the adapter enforces. */
   windowMessage: string;
   windowState: "open" | "closed" | "never";
+  draftProtection?:InboxDraftProtection;
+  assistance?:SupportAssistance;
 }>) {
+  const scope=draftProtection?.scope??"volatile",identity=scope+":"+conversationId;
+  const encryptedKey=protectedKey(conversationId,scope);
+  const protectionEnabled=draftProtection?.enabled??false,protect=draftProtection?.protect,restoreProtected=draftProtection?.restore;
+  const sequence=useRef(0),[loaded,setLoaded]=useState(false);
+  const {setDirty}=useAdminUnsavedChanges();
   const [kind, setKind] = useState<Kind>("session");
   const [templateKey, setTemplateKey] = useState("");
   // One piece of state, not two: the notice is a fact about the CONTENT — this
@@ -173,29 +129,53 @@ export function InboxComposer({
       // failure — DELIVERY_FAILED's retry is a re-take of the row this attempt
       // already wrote, which only the unchanged token can find.
       if (result.status === "sent") {
-        writeDraft(conversationId, "");
+        sequence.current++;
+        try{window.sessionStorage.removeItem(encryptedKey);}catch{/* In-memory typing remains available. */}
         setDraft(EMPTY_DRAFT);
-        setAttemptId(rotateAttemptId(conversationId));
+        setAttemptId(rotateAttemptId(identity));
       }
       return result;
     },
     initialState,
   );
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of the browser-only sessionStorage API after mount, the same shape as components/layout/announcement-dismiss.tsx; reading it during render instead would mismatch the server-rendered markup, which never has a draft.
-    setAttemptId(readAttemptId(conversationId));
-    const saved = readDraft(conversationId);
-    if (saved === null || saved === "") return;
-    // Deliberately NOT a second disable directive: react-hooks/set-state-in-effect
-    // reports one diagnostic per effect, anchored on the first synchronous
-    // setState, so the directive above is the only one that can ever match and a
-    // second one is dead text that reads as a suppressed rule. The draft and its
-    // attempt token are read together because they are one fact — a retry has to
-    // find the row its first attempt wrote, so the token has to come back with
-    // the text it belongs to.
-    setDraft({content: saved, restored: true});
-  }, [conversationId]);
+  useEffect(()=>{
+    let active=true;
+    purgeLegacyInboxPlaintext();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restore this mounted session's opaque draft after browser storage becomes available.
+    setAttemptId(readAttemptId(identity));
+    const restoreVersion=sequence.current;
+    async function restore(){
+      try{
+        const saved=protectionEnabled?window.sessionStorage.getItem(encryptedKey):null;
+        if(saved&&restoreProtected){
+          const result=await restoreProtected(conversationId,saved);
+          if(active&&sequence.current===restoreVersion&&result.status==="restored"){
+            setDraft({content:result.draft.content,restored:true});setAttemptId(result.draft.attemptId);
+          }else if(active&&result.status==="missing")window.sessionStorage.removeItem(encryptedKey);
+        }
+      }catch{/* A denied storage/network read does not disable manual work. */}
+      finally{if(active)setLoaded(true);}
+    }
+    void restore();
+    const clear=()=>{sequence.current++;setDraft(EMPTY_DRAFT);setAttemptId(newAttemptId());};
+    window.addEventListener("hkwtia:inbox-drafts-cleared",clear);
+    return()=>{active=false;sequence.current++;window.removeEventListener("hkwtia:inbox-drafts-cleared",clear);};
+  },[identity,conversationId,encryptedKey,protectionEnabled,restoreProtected]);
+  useEffect(()=>{setDirty(Boolean(draft.content));return()=>setDirty(false);},[draft.content,setDirty]);
+  useEffect(()=>{
+    if(!loaded)return;
+    if(!draft.content){sequence.current++;try{window.sessionStorage.removeItem(encryptedKey);}catch{/* Storage is optional. */}return;}
+    if(!protectionEnabled||!protect||!attemptId)return;
+    const version=++sequence.current,epoch=inboxDraftStorageGeneration();
+    const timeout=window.setTimeout(async()=>{
+      let result:Awaited<ReturnType<typeof protect>>;
+      try{result=await protect(conversationId,{content:draft.content,attemptId});}catch{return;}
+      if(result.status!=="protected"||version!==sequence.current||epoch!==inboxDraftStorageGeneration())return;
+      try{window.sessionStorage.setItem(encryptedKey,result.envelope);}catch{/* Keep the visible draft. */}
+    },350);
+    return()=>window.clearTimeout(timeout);
+  },[loaded,protectionEnabled,protect,draft.content,attemptId,conversationId,encryptedKey]);
 
   // A free-text reply outside the window is refused by the server and by the
   // adapter. `never` is disabled alongside `closed`: a thread nobody has written
@@ -213,6 +193,9 @@ export function InboxComposer({
     : [];
 
   return (
+    <div className="space-y-4">
+    {assistance?<SupportDraftPanel conversationId={conversationId} value={assistance} dirty={Boolean(draft.content)} onAdopt={content=>{sequence.current++;setDraft({content,restored:false});}}/>:null}
+    {assistance?<p className="text-sm text-muted-foreground">{draftProtection?.enabled?assistance.labels.draftProtected:assistance.labels.draftVolatile}</p>:null}
     <form action={formAction} className="space-y-4 rounded-md border border-border p-4">
       <input name="conversationId" type="hidden" value={conversationId} />
       {/* The per-attempt token. Hidden rather than derived on the server,
@@ -278,7 +261,7 @@ export function InboxComposer({
               // Typing retires the "draft restored" notice: it stops being true
               // the moment the text is the reader's own again.
               setDraft({content: event.target.value, restored: false});
-              writeDraft(conversationId, event.target.value);
+              sequence.current++;
             }}
             placeholder={labels.placeholder}
             required
@@ -311,5 +294,6 @@ export function InboxComposer({
               : draft.restored ? labels.draftRestored : ""}
       </p>
     </form>
+    </div>
   );
 }

@@ -315,3 +315,9 @@ describe("deterministic final-body validation", () => {
     ).toContainEqual({ field: "growth", code: "COMPARISON_MISSING" });
   });
 });
+
+it("rejects another person's email in final support prose, even without numeric claims",()=>{
+ expect(validateGroundedContent({body:"Contact other@example.test",claims:[],sourceRefs:[]},pack({values:{},sourceRefs:[],sourceUrls:{}})).valid).toBe(false);
+});
+
+it("rejects unbound international email addresses in final prose",()=>{expect(validateGroundedContent({body:"請聯絡 陳@例子.hk",claims:[],sourceRefs:[]},pack({values:{},sourceRefs:[],sourceUrls:{}})).valid).toBe(false);});

@@ -118,3 +118,6 @@ export type DraftValidation = Readonly<{
   valid: boolean;
   violations: readonly DraftViolation[];
 }>;
+
+export const supportAnalysisSchema=z.object({summary:z.string().min(1).max(600),category:z.enum(['membership','renewal','event','billing','privacy','other']),tasks:z.array(z.string().min(1).max(500)).max(5)}).strict();
+export type SupportAnalysis=z.infer<typeof supportAnalysisSchema>;
