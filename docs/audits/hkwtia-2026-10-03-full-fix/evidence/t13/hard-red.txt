@@ -1,0 +1,110 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-ai-grader.test.ts (7 tests | 6 failed) 28ms
+   × administrative AI deterministic hard gates > rejects wrong amount even when the judge approves 22ms
+     → expected true to be false // Object.is equality
+   × administrative AI deterministic hard gates > rejects authority claimed in the final body 1ms
+     → expected true to be false // Object.is equality
+   × administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value 1ms
+     → expected true to be false // Object.is equality
+   × administrative AI deterministic hard gates > rejects invalid first JSON without repairing it 1ms
+     → expected true to be false // Object.is equality
+   × administrative AI deterministic hard gates > rejects expired policy even when its values match 1ms
+     → expected true to be false // Object.is equality
+   × administrative AI deterministic hard gates > rejects a draft missing human review 1ms
+     → expected true to be false // Object.is equality
+   ✓ administrative AI deterministic hard gates > accepts current server-labelled facts in a review-only draft 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI deterministic hard gates > rejects wrong amount even when the judge approves
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:15:198
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI deterministic hard gates > rejects authority claimed in the final body
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:16:208
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:17:230
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI deterministic hard gates > rejects invalid first JSON without repairing it
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:18:135
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI deterministic hard gates > rejects expired policy even when its values match
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:19:254
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI deterministic hard gates > rejects a draft missing human review
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:20:169
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 1 passed (7)
+   Start at  21:11:27
+   Duration  10.96s (transform 123ms, setup 1.63s, collect 285ms, tests 28ms, environment 0ms, prepare 677ms)
+
