@@ -1,0 +1,7 @@
+{
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "skipped": 540,
+  "environment": "RUN_POSTGRES_INTEGRATION and DATABASE_URL_TEST unset in full suite; provider/acceptance guards closed. New actual support SQL21 executed separately with disposable PG16/all59.",
+  "files": [],
+  "notPasses": true
+}

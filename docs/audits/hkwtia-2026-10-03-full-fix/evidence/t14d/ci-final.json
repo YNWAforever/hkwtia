@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-10-04T07:51:00Z",
+  "sourceSha": "fc44eabbdec90e608360566a143689617166564e",
+  "run": 37183971143,
+  "conclusion": "success",
+  "status": "completed",
+  "jobs": [
+    {
+      "name": "checks",
+      "conclusion": "success"
+    },
+    {
+      "name": "tests (2)",
+      "conclusion": "success"
+    },
+    {
+      "name": "worker",
+      "conclusion": "success"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "success"
+    },
+    {
+      "name": "quality",
+      "conclusion": "success"
+    }
+  ]
+}

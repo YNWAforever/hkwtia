@@ -323,12 +323,12 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Interfaces:** `prepareSupportDraft(actor:AdminActor,conversationId:string):Promise<AdminAiDraft>`；server 為資料選擇、最小化、角色／owner篩選負責；composer 的 draft text 由職員採用後填入，不自動submit。
 
-- [ ] 寫租戶／會員越權、要求退款、查別人 email、policy注入、舊對話變更五組；保留既有 takeover 與渠道發送限制。
-- [ ] Run focused E2E 先驗功能缺失；fixtures 放隔離DB。
-- [ ] 加摘要、分類、待辦、建議稿、來源及過往處理；「採用到回覆框」與「發送」是兩步，發送沿既有 action檢查consent/window/template。
-- [ ] AI-review隊列用keyset分頁，按負責人／狀態／種類篩選；無生成記錄時說明 readiness，不顯示假成功；頂部顯示核准模型、預算剩餘及worker狀態，只顯示readiness而非secret。
-- [ ] 接入 T18 的 `lib/admin/workspace-search.ts`，其介面為 `searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:'member'|'company'|'application'|'event'|'conversation';id:string;label:string;href:string}[];nextCursor:string|null}>`；頂部按分類顯示結果，先授權後查詢。測跨角色對話不可被搜尋結果或計數洩露；空查詢不掃全表。
-- [ ] 驗職員編輯、部分失敗、轉交、reopen及有作用域及登出清除的草稿保留（優先既有私有 server draft；未加保護不得把會員對話持久放 browser storage），提交 `feat: add grounded inbox reply assistance`。
+- [x] 寫租戶／會員越權、要求退款、查別人 email、policy注入、舊對話變更五組；保留既有 takeover 與渠道發送限制。
+- [x] Run focused E2E 先驗功能缺失；fixtures 放隔離DB。
+- [x] 加摘要、分類、待辦、建議稿、來源及過往處理；「採用到回覆框」與「發送」是兩步，發送沿既有 action檢查consent/window/template。
+- [x] AI-review隊列用keyset分頁，按負責人／狀態／種類篩選；無生成記錄時說明 readiness，不顯示假成功；頂部顯示核准模型、預算剩餘及worker狀態，只顯示readiness而非secret。
+- [x] 接入 T18 的 `lib/admin/workspace-search.ts`，其介面為 `searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:'member'|'company'|'application'|'event'|'conversation';id:string;label:string;href:string}[];nextCursor:string|null}>`；頂部按分類顯示結果，先授權後查詢。測跨角色對話不可被搜尋結果或計數洩露；空查詢不掃全表。
+- [x] 驗職員編輯、部分失敗、轉交、reopen及有作用域及登出清除的草稿保留（優先既有私有 server draft；未加保護不得把會員對話持久放 browser storage），提交 `feat: add grounded inbox reply assistance`。
 
 
 **AC-16/AC-17：** 對話正文包含 email/電話/附件/付款片段時，server 先 allowlist 最小 facts、去識別再送核准模型，附件不得自動外傳。數字與稱呼由應用代入。統一 review queue 有 owner/due/kind/state filters、keyset、empty/error/permission states；多選覆核只接受同 kind、valid、未 stale、有權且 matching version 的草稿，逐筆回傳衝突，不假裝全成功。
@@ -336,6 +336,8 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 
 **Focused verification:** 分別執行 `npx playwright test tests/e2e/ai-inbox-review.spec.ts`；預期所有適用assertions PASS，外部guard缺失列BLOCKED。
 
+
+**Engineering receipts:** PR136 sourcebe77/harnessd060, actualPG21, bilingual native2, exactCI/full6683pass540skip0fail/worker57. Preview final receipt and real-model/identity/worker/human gates remain separately recorded; task operational closure is not claimed.
 
 ## T11 — 續會草稿及批次效能
 

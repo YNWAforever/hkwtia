@@ -1,10 +1,11 @@
 {
-  "observedAt": "2026-10-04T06:49:13.682420+00:00",
+  "observedAt": "2026-10-04T08:57:32.944925+00:00",
   "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
   "originalBaselinePreserved": true,
   "files": {
     "attempts.json": "105f18009f32087b45ac95d160f0c33a439eeae4ff3aac59a009884610b674f3",
     "build-proof.json": "f83310da5335119fc136986fbf279e066d2d777308d7697bce987fc65d3d41a2",
+    "ci-final.json": "623cbec98653c5110a2d66a98359a9c9e4515c95035d37c333d137e3a3e2eb6a",
     "ci-source-counts.json": "edec22af01582cfd248ca7e1c89d371c08adfb5a21c65b5d3e491760bf71cec8",
     "ci-source.json": "70a92f08f96dc1e3be75cb1dd1af5faa29700a3d9a2c5e1a090f85325ecfe75b",
     "commands.json": "9b0a0412d52c7b83bc60bd46468122100fdda66ece8ca2d6e2daf4061a9532e6",
@@ -13,6 +14,7 @@
     "en-support-recovery.png": "2b5675bae7afe679fd84b3f78d81a1afc45e777a5c97d5ec030e1ba6bed0e47b",
     "expanded-mutation-safe.json": "422ac6e50720c82bec69efbef2d0a5e7fb844c5ad0809a66c703c32e1c1dac74",
     "full-skips.json": "5e6e52bd9aa7ff9b71aa14ad5f89ca653e4f433b701e0a47f69704c6ded25ee9",
+    "merge.json": "538fabf3fe9d85fbc73cbb30d47a529f9455f4cfe0be23a8ab2d9c14cd9b4e74",
     "native-9603519a-worker-0.json": "c3a57b370c97c494ca44737aaa1edea1f20814d754f2bc21cb441ceec669dfb8",
     "native-9603519a-worker-1.json": "fe8dd63aaf30d58e75570460deb8e6202a2712151bef7714517e0cec286a7403",
     "native-current.json": "6c8618c2eecc8bca400d04c05df690a52461576915af44be48370bf11c4b5411",

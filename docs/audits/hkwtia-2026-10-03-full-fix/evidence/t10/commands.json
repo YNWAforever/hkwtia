@@ -1,0 +1,18 @@
+{
+  "cwd": "C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia",
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "commands": [
+    "npm.cmd run lint",
+    "npm.cmd run typecheck",
+    "npm.cmd run audit:strings",
+    "npm.cmd run build",
+    "node --experimental-strip-types --env-file=.env.local scripts/verify-full-support-drafts.mjs",
+    "npm.cmd test -- --reporter=default --reporter=json --outputFile=.playwright/full-fix-t10-full-final.json",
+    "npm.cmd test -- --maxWorkers=4 --reporter=default --reporter=json --outputFile=.playwright/full-fix-t10-full-bounded.json",
+    "node --env-file=.env.local .playwright/full-fix-t10-preview-runtime.mjs",
+    "gh pr view 136 --repo YNWAforever/hkwtia --json headRefOid,statusCheckRollup"
+  ],
+  "limitations": "Environment values, cookies, private session files and raw logs excluded. SQL fixture always owns disposable loopback PG16/all59, native/Preview positively prove isolated Neon DB/Auth. Offline synthetic drafts and simulated provider are explicitly distinguished.",
+  "historicalFocusedCommandAvailability": "Focused logs preserve exact test targets/results but omit shell invocation. No reconstructed invocation is labelled exact; targets stored separately in focused receipts.",
+  "previewHarness": "Curated source of the actual final standalone browser runner is included as preview-verification.mjs; env values/state/raw logs omitted."
+}

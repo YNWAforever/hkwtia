@@ -1096,5 +1096,61 @@
     "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
     "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
     "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "prepareSupportDraft",
+    "path": "lib/ai/support-drafts.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Purpose wrapper reuses T08 generation/runtime/work/budget; caller actor remains server-derived"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "reviewDraftSelection",
+    "path": "lib/admin/ai-draft-selection.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Same existing AI draft repository, manual per-row review/CAS, no send"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "listReviewQueue",
+    "path": "lib/db/repos/ai-drafts.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing queue extended with scoped keyset/filters; same immutable store"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "readSupportDraftSource",
+    "path": "lib/ai/drafts/support-facts.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Current concierge server facts and minimized intent codes; private agent conversations excluded"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "AiReviewPage",
+    "path": "app/[locale]/(admin)/admin/ai-review/page.tsx",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "New owned route over existing repository; historical /admin/tasks?draft= retained"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "readRemainingDay",
+    "path": "lib/db/repos/ai-budget.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing atomic budget ledger; unknown prior-day liability stays held"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "InboxComposer",
+    "path": "components/admin/inbox-composer.tsx",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing sender unchanged; only explicit adoption and optional opaque private recovery"
   }
 ]

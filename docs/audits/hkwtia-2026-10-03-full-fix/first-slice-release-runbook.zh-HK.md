@@ -78,3 +78,13 @@ T14C沒有migration，目前隔離ledger59。Production仍需獨立批准0057–
 先核對web/worker/ledger及目前in-flight效果，再由具體T16批准單選擇能力。Production首次仍需0057–0059相容性與獨立批准；本task不能默認開sender/AI/bulk。保留原key、audit/outbox/provider receipts。
 
 舊版可能重試未知效果，故持續發送時不應整體回退至unsafe sender程式。若需回復，先暫停所有相關人工及worker發送入口，再部署相容guard或forward repair，逐筆對帳後才恢復。單獨關閉bulk flag不能暫停人工補發。不得刪資料或用TTL當已退款／未發送證據。T16真實回復演練仍待完成。
+
+## T10 private review／protected compose 发布界线
+
+PR136 无migration，沿用ledger59。当前CI/full/native已绿灯，Preview final receipt另读evidence/t10/preview-runtime.json；AI模型／cloud worker／人員試點仍獨立待驗，不得稱full fix。
+
+1. 維持 sender 與新AI work pause；核對 pinned app／worker／ledger／provider／flags，每能力單獨批准。
+2. 只先部署相容程式；private review、support generation與protected retention為不同 flags。未批准行政資料用途、model route、caps或保留政策時，各相關能力保持 off。
+3. 保留目前人工流程與T14D unknown safeguards；browser key獨立於Auth／Concierge。Key輪替會失去舊 envelope 的恢復能力，需職員先人工保留未送文字。
+4. 回退先關新生成／新私有保留，保留draft/work/budget/audit/unknown與既有outbox，使用相容app／worker；不刪history，不以TTL解除budget/providerunknown。不回退至舊可盲重試sender。
+5. 精確Production版本／範圍／0057–59／flags與T16實際回復演練、provider receipts／worker兩窗口仍為最後發布單門檻；本PR合併不切Production。

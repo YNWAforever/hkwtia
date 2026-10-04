@@ -1,0 +1,10 @@
+{
+  "id": "dpl_ELFx9FrAXc4JA6sJq2Ra2MXimC4E",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "gitRef": "codex/grounded-support-drafts-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-grounded-support-20261003.vercel.app",
+  "production": false
+}

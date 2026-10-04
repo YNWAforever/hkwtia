@@ -122,3 +122,7 @@ T18 source/native 工程測試與 3–5 位真人職員 G5 試點分開。下面
 ## T14D sender recovery
 
 Follow [繁中 sender recovery SOP](delivery-recovery-sop.zh-HK.md). Unknown network/server/accepted-timeout effects are held for provider reconciliation; retry only proven refusals with the same intent. Staff pass resends use the existing durable ticket outbox. A queued response is not Sent; preserve the intent until settled. Recheck current recipient, both consent stores, window, locale, approval and order authority before dispatch.
+
+## 收件匣回覆助手（T10）
+
+按 [回覆草稿 SOP](support-draft-sop.zh-HK.md) 操作。從對話的「覆核草稿」進入統一隊列，按負責人、期限、種類及狀態篩選。核准與採用到回覆框不會發送；另按發送才會重驗現有兩個同意來源、時窗、範本及職員身份。多選須逐筆讀取結果，unknown 先對帳。未獲模型、資料用途或預算批准時，直接人工跟進；加密保留缺配置或已過期時，不會顯示假成功。

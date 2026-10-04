@@ -1,0 +1,99 @@
+{
+  "observedAt": "2026-10-04T08:51:12.393327+00:00",
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "runtimeSourceSha": "be77a3a77b24d656a6c8531a18619ba036c39bd6",
+  "branch": "codex/grounded-support-drafts-20261003",
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/136",
+  "migration": null,
+  "ledger": 59,
+  "focused": {
+    "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "actualAll59MigrationPostgres": {
+      "finalNewSupportCases": 21,
+      "skipped": 0,
+      "earlierSupportAndApplicationGeneration": 33,
+      "provider": "explicit simulation, not real model"
+    },
+    "focused": {
+      "earlierPassed": 186,
+      "finalTargetedPassed": 84,
+      "skipped": 0,
+      "receiptsOverlap": true
+    },
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 95
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "testHarnessExitCode": 0
+    },
+    "strings": {
+      "exitCode": 0,
+      "tsxFiles": 320
+    },
+    "build": {
+      "exitCode": 0,
+      "id": "sF7-WIgnuTTwj-0Qs5ePx"
+    },
+    "native": {
+      "passed": 2,
+      "failed": 0,
+      "actualPasswordAuth": true,
+      "externalModelCalls": 0,
+      "realProviderSends": 0
+    },
+    "production": false
+  },
+  "full": {
+    "exitCode": 0,
+    "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "passed": 6683,
+    "failed": 0,
+    "skipped": 540,
+    "filesPassed": 791,
+    "filesSkipped": 98,
+    "durationSeconds": 561.42,
+    "command": "npm.cmd test -- --maxWorkers=4 --reporter=default --reporter=json --outputFile=.playwright/full-fix-t10-full-bounded.json",
+    "originalTimeoutsUnchanged": true,
+    "skipsAreNotPasses": true
+  },
+  "ci": {
+    "run": 37188831141,
+    "all7": "SUCCESS",
+    "unitPassed": 6683,
+    "guardedSkipped": 540,
+    "workerPassed": 57
+  },
+  "native": {
+    "passed": 2,
+    "failed": 0,
+    "actualPasswordAuth": true,
+    "mobileWidth": 390,
+    "keyboard": true,
+    "axeViolations": 0,
+    "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "buildId": "sF7-WIgnuTTwj-0Qs5ePx"
+  },
+  "preview": {
+    "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "deploymentId": "dpl_ELFx9FrAXc4JA6sJq2Ra2MXimC4E",
+    "origin": "https://hkwtia-grounded-support-20261003.vercel.app",
+    "checks": 19,
+    "actualReviewAdoptionCases": 2,
+    "actualIsolatedDbAuth": true,
+    "externalModelCalls": 0,
+    "outboundMessages": 0
+  },
+  "realProvider": "BLOCKED_APPROVED_ADMINISTRATIVE_ROUTE_DATA_CREDENTIAL_CAPS_AND_REAL_RECEIPTS",
+  "worker": "BLOCKED_PINNED_SERVICE_BINDING_TWO_ACTUAL_WINDOWS",
+  "productionReleased": false,
+  "capabilityEnabledInProduction": false,
+  "limits": [
+    "Offline synthetic proposals and simulated provider are not real model/sender evidence",
+    "Google/magic-link, model costs/wording and human staff pilot remain explicit owner gates",
+    "No Production migration, publication, real-message or payment effect",
+    "Per-receipt focused counts overlap; not summed"
+  ]
+}
