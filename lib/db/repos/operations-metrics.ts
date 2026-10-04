@@ -121,7 +121,7 @@ export function createOperationsMetricsRepository(loadDatabase: () => Promise<Da
         WITH audited_cases AS (
           SELECT CASE
             WHEN target_type IN ('membership_application','application') THEN 'application'
-            WHEN target_type='conversation' THEN 'support'
+            WHEN target_type='conversation' THEN COALESCE((SELECT CASE c.agent_kind WHEN 'retention-analyst' THEN 'renewal' WHEN 'board-reporter' THEN 'board' ELSE 'support' END FROM conversations c WHERE c.id::text=audit_events.target_id), 'support')
             WHEN target_type='membership' AND action ~* '(renew|invoice)' THEN 'renewal'
             WHEN target_type IN ('membership','profile') THEN 'membership'
             WHEN target_type IN ('event','event_order','event_registration') THEN 'event'
@@ -131,7 +131,7 @@ export function createOperationsMetricsRepository(loadDatabase: () => Promise<Da
           END AS case_kind, target_id
           FROM audit_events WHERE created_at >= ${window.from} AND created_at < ${window.toExclusive}
         ), case_population AS (
-          SELECT 'support:' || id::text AS case_id FROM conversations
+          SELECT (CASE agent_kind WHEN 'retention-analyst' THEN 'renewal' WHEN 'board-reporter' THEN 'board' ELSE 'support' END) || ':' || id::text AS case_id FROM conversations
           WHERE (created_at >= ${window.from} AND created_at < ${window.toExclusive})
              OR (last_message_at >= ${window.from} AND last_message_at < ${window.toExclusive})
           UNION

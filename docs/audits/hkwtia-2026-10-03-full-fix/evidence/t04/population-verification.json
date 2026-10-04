@@ -13,7 +13,7 @@
     "reason": "authoritative AI kind/case source not resolved"
   },
   "finalPostgres": {
-    "passed": 4,
+    "passed": 5,
     "failed": 0,
     "skipped": 0,
     "receipt": "population-postgres.json"
@@ -33,7 +33,7 @@
   "migrationRequired": false,
   "scope": "support created/active in window; distinct audited seven business kinds; requested/reviewed AI cases; distinct observations. All counts by (kind,caseId). Unknown timing stays missing; reopening accumulates time once per case.",
   "operationalGate": "Operations + QA: agreed recorded-platform comparison scope; off-platform manual collection; actual two-week baseline. Synthetic cases do not establish operating ROI.",
-  "sourceState": "source586fd6e committed; real native5 passed; full CI and isolated Preview pending",
+  "sourceState": "source refinement committed next; fresh native/build/Preview pending",
   "productionEffects": false,
   "nativeReceipt": "../t16/operations-native.json",
   "baselineRegression": {
@@ -41,5 +41,17 @@
     "failed": 0,
     "skipped": 0,
     "receipt": "population-regression.txt"
+  },
+  "agentClassification": {
+    "redExpected": 14,
+    "redActual": 16,
+    "redFailed": 1,
+    "greenCases": 14,
+    "greenSamples": 4,
+    "behavior": "legacy board/retention conversations and their audits use their stored workflow kind; observed work does not create a second support case"
+  },
+  "fixtureAgentEnumFailure": {
+    "receipt": "population-agent-red.txt",
+    "meaning": "invalid test enum, not target behavior red"
   }
 }

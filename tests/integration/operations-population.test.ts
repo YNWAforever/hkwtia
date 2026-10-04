@@ -43,6 +43,18 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")("actual recorded o
   await expect(repo.record(actor,{...observation,caseKind:'board'},toExclusive)).rejects.toThrow('OPERATION_SOURCE_MISMATCH');
   await repo.record(actor,observation,toExclusive);
   const report=await repo.read(actor,{from,toExclusive});expect(report.caseCount).toBe(12);expect(report.sampleCount).toBe(2);expect(report.missingRate).toBeCloseTo(10/12);
-  writeFileSync('docs/audits/hkwtia-2026-10-03-full-fix/evidence/t04/population-postgres.json',JSON.stringify({observedAt:new Date().toISOString(),sourceSha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),workingTree:true,sourceSha256:createHash('sha256').update(readFileSync('lib/db/repos/operations-metrics.ts')).digest('hex'),testSha256:createHash('sha256').update(readFileSync('tests/integration/operations-population.test.ts')).digest('hex'),isolated:'owned disposable loopback PostgreSQL16',ledger:Number((await fixture.pool.query('SELECT count(*) n FROM drizzle.__drizzle_migrations')).rows[0].n),passed:4,failed:0,skipped:0,uniqueCases:12,observedCases:2,providerCalls:0,production:false,scope:'created support + distinct audited business cases + requested/reviewed AI cases + observed cases; not off-platform unrecorded work'},null,2));
+
+ });
+ it("deduplicates the actual board and renewal agent conversations against their observed business kind",async()=>{
+  for(const [agent,caseKind] of [['board-reporter','board'],['retention-analyst','renewal']] as const){
+   const conversation=randomUUID(),run=randomUUID();
+   await fixture.pool.query("INSERT INTO conversations(id,agent_kind,anonymous_owner_hash,expires_at,created_at) VALUES($1,$2,$3,'2031-01-01',$4)",[conversation,agent,randomUUID(),instant]);
+   await fixture.pool.query("INSERT INTO agent_runs(id,conversation_id,agent,trigger) VALUES($1,$2,$3,'scheduled')",[run,conversation,agent.replaceAll('-','_')]);
+   await fixture.pool.query("INSERT INTO audit_events(actor_type,action,target_type,target_id,created_at) VALUES('system','agent.case.updated','conversation',$1,$2)",[conversation,instant]);
+   const minute=caseKind==='board'?4:6;
+   await repo.record(actor,{observationId:randomUUID(),comparisonId:randomUUID(),caseId:conversation,caseKind,auditId:null,runId:run,startedAt:`2030-01-03T00:0${minute}:00.000Z`,endedAt:`2030-01-03T00:0${minute+1}:00.000Z`,humanMinutes:1,reviewMinutes:0,reworkMinutes:0,waitMinutes:0,decision:'manual',reopened:false,cohort:'baseline'},toExclusive);
+  }
+  const report=await repo.read(actor,{from,toExclusive});expect(report.caseCount).toBe(14);expect(report.sampleCount).toBe(4);expect(report.missingRate).toBeCloseTo(10/14);
+  writeFileSync('docs/audits/hkwtia-2026-10-03-full-fix/evidence/t04/population-postgres.json',JSON.stringify({observedAt:new Date().toISOString(),sourceSha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),workingTree:true,sourceSha256:createHash('sha256').update(readFileSync('lib/db/repos/operations-metrics.ts')).digest('hex'),testSha256:createHash('sha256').update(readFileSync('tests/integration/operations-population.test.ts')).digest('hex'),isolated:'owned disposable loopback PostgreSQL16',ledger:Number((await fixture.pool.query('SELECT count(*) n FROM drizzle.__drizzle_migrations')).rows[0].n),passed:5,failed:0,skipped:0,uniqueCases:14,observedCases:4,providerCalls:0,production:false,scope:'created support + distinct audited business cases + requested/reviewed AI cases + observed cases; not off-platform unrecorded work'},null,2));
  });
 });
