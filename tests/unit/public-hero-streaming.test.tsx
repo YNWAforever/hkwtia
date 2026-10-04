@@ -67,6 +67,15 @@ describe("public hero streaming", () => {
             (child) => isValidElement(child) && child.type === PageHero,
           ),
         ).toBe(true);
+        if (kind === "membership")
+          expect(
+            result!.props.children.some(
+              (child) =>
+                isValidElement<{ labelledBy?: string }>(child) &&
+                child.props.labelledBy === "membership-dimensions-title",
+            ),
+            "Following content must not paint above the pending catalogue then jump below it",
+          ).toBe(false);
       } finally {
         release([]);
         await page;

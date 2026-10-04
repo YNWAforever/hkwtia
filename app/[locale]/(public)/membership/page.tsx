@@ -185,64 +185,81 @@ export default async function MembershipPage({ params }: Props) {
         lead={t("summary")}
         title={t("title")}
       />
-      <Suspense fallback={<p role="status">{tCommon("membershipPlansLoading")}</p>}>
-        <AwaitReadModel pending={rowsPromise}>{renderPlans}</AwaitReadModel>
-      </Suspense>
-      <Section labelledBy="membership-dimensions-title">
-        <h2 className="sr-only" id="membership-dimensions-title">
-          {t("dimensionsTitle")}
-        </h2>
-        <MembershipDimensions items={dimensions} />
-      </Section>
-      <Section id="faq" labelledBy="membership-faq-title">
-        <h2 id="membership-faq-title">{t("faqTitle")}</h2>
-        <dl className="mt-8 grid gap-6 md:grid-cols-2">
-          {questions.map(({ question, answer }) => (
-            <div className="rounded-lg border bg-card p-5" key={question}>
-              <dt className="font-semibold">{question}</dt>
-              <dd className="mt-2 text-muted-foreground">{answer}</dd>
-            </div>
-          ))}
-        </dl>
-        <div className="mt-6 flex flex-wrap gap-5">
-          <ActionLink href="/refund-policy" variant="text-link">
-            {t("faqLinks.refund")}
-          </ActionLink>
-          <ActionLink href="/contact" variant="text-link">
-            {t("faqLinks.contact")}
-          </ActionLink>
-        </div>
-      </Section>
-      <Section labelledBy="membership-first90-title">
-        <h2 id="membership-first90-title">{t("first90.heading")}</h2>
-        <StepGrid steps={steps} />
-      </Section>
-      <ClosingBand
-        actions={[
-          { label: t("closing.join"), href: "/join" },
-          {
-            label: t("closing.contact"),
-            href: `mailto:${siteConfig.contact.email}`,
-          },
-        ]}
-        copy={t("closing.copy")}
-        extra={
-          <WhatsAppLink
-            className="text-link light-link"
-            label={tWhatsApp("chat")}
-            locale={locale}
-            prefill={tWhatsApp("prefill.membership")}
-            source="membership"
-          />
+      <Suspense
+        fallback={
+          <div className="min-h-screen">
+            <p className="shell py-10" role="status">
+              {tCommon("membershipPlansLoading")}
+            </p>
+          </div>
         }
-        eyebrow={t("closing.eyebrow")}
-        title={t("closing.title")}
-      />
-      <StructuredData
-        data={buildBreadcrumbData(
-          routeBreadcrumbItems(locale, "/membership", tRoot),
-        )}
-      />
+      >
+        <AwaitReadModel pending={rowsPromise}>
+          {(rows) => (
+            <>
+              {renderPlans(rows)}
+              <Section labelledBy="membership-dimensions-title">
+                <h2 className="sr-only" id="membership-dimensions-title">
+                  {t("dimensionsTitle")}
+                </h2>
+                <MembershipDimensions items={dimensions} />
+              </Section>
+              <Section id="faq" labelledBy="membership-faq-title">
+                <h2 id="membership-faq-title">{t("faqTitle")}</h2>
+                <dl className="mt-8 grid gap-6 md:grid-cols-2">
+                  {questions.map(({ question, answer }) => (
+                    <div
+                      className="rounded-lg border bg-card p-5"
+                      key={question}
+                    >
+                      <dt className="font-semibold">{question}</dt>
+                      <dd className="mt-2 text-muted-foreground">{answer}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <div className="mt-6 flex flex-wrap gap-5">
+                  <ActionLink href="/refund-policy" variant="text-link">
+                    {t("faqLinks.refund")}
+                  </ActionLink>
+                  <ActionLink href="/contact" variant="text-link">
+                    {t("faqLinks.contact")}
+                  </ActionLink>
+                </div>
+              </Section>
+              <Section labelledBy="membership-first90-title">
+                <h2 id="membership-first90-title">{t("first90.heading")}</h2>
+                <StepGrid steps={steps} />
+              </Section>
+              <ClosingBand
+                actions={[
+                  { label: t("closing.join"), href: "/join" },
+                  {
+                    label: t("closing.contact"),
+                    href: `mailto:${siteConfig.contact.email}`,
+                  },
+                ]}
+                copy={t("closing.copy")}
+                extra={
+                  <WhatsAppLink
+                    className="text-link light-link"
+                    label={tWhatsApp("chat")}
+                    locale={locale}
+                    prefill={tWhatsApp("prefill.membership")}
+                    source="membership"
+                  />
+                }
+                eyebrow={t("closing.eyebrow")}
+                title={t("closing.title")}
+              />
+              <StructuredData
+                data={buildBreadcrumbData(
+                  routeBreadcrumbItems(locale, "/membership", tRoot),
+                )}
+              />
+            </>
+          )}
+        </AwaitReadModel>
+      </Suspense>
     </>
   );
 }
