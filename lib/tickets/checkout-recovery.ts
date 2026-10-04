@@ -49,6 +49,12 @@ export async function readTicketRecovery(input: TicketRecoveryInput, deps: Ticke
   return {eventId: record.eventId, status: record.status, seatCount: record.seatCount,
     amountHkdCents: record.amountHkdCents, expiresAt: record.expiresAt.toISOString()};
 }
+/** Local TTL/status alone cannot prove that an unknown provider attempt is safe to replace. */
+export async function isProviderExpiredTicketRecovery(input: TicketRecoveryInput, deps: Pick<TicketRecoveryDependencies, "store" | "now" | "stripe">): Promise<boolean> {
+  const record = await verifiedRecord(input, deps);
+  if (record?.status !== "expired" || !record.stripeCheckoutSessionId) return false;
+  return await deps.stripe.ticketSessionStatus(record.stripeCheckoutSessionId) === "expired";
+}
 export async function resumeTicketRecovery(input: TicketRecoveryInput, deps: TicketRecoveryDependencies): Promise<TicketRecoveryResumeResult> {
   const record = await verifiedRecord(input, deps);
   if (!record) return {status: "error", code: "NOT_FOUND"};
