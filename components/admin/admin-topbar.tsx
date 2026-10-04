@@ -4,6 +4,7 @@ import type {ReactNode} from "react";
 import {usePathname} from "next/navigation";
 import {useTranslations} from "next-intl";
 
+import {Search} from "lucide-react";
 import {AdminAccountMenu} from "@/components/admin/admin-account-menu";
 import {GuardedAdminLink, useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
@@ -32,6 +33,7 @@ export function AdminTopbar({locale, identity, role, mobileTrigger}: Readonly<{l
       <GuardedAdminLink className="text-muted-foreground underline underline-offset-4" href={localizedPath(locale, "/admin")}>{t("navigation.dashboard")}</GuardedAdminLink>
       {current && current.href !== "/admin" ? <><span aria-hidden="true" className="mx-2">/</span><span aria-current="page">{t(linkLabelKeys[current.id])}</span></> : null}
     </nav>
+    <GuardedAdminLink className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md border px-3 text-sm focus-visible:outline-2 focus-visible:outline-primary" aria-label={t("shell.searchWorkspace")} href={localizedPath(locale, "/admin/search")}><Search className="size-4 shrink-0" aria-hidden="true"/><span className="hidden xl:inline">{t("shell.searchWorkspace")}</span></GuardedAdminLink>
     <GuardedAdminLink className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/admin/members")}>{t("shell.searchMembers")}</GuardedAdminLink>
     <GuardedAdminLink className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/")}>{t("shell.viewSite")}</GuardedAdminLink>
     <LocaleSwitcher beforeSwitch={confirmLeave} locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
