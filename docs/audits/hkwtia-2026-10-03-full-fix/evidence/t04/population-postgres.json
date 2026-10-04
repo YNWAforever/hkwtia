@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-04T20:30:26.468Z",
+  "sourceSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
+  "workingTree": true,
+  "sourceSha256": "205e3554fd4a1e99eb17094fb931ef8b1a35c6942d5f1940c0fffd0bed458d80",
+  "testSha256": "6f99042a91621ab395335fb518a8b2d2da6c0c198a439ee36a3dd285af5dc367",
+  "isolated": "owned disposable loopback PostgreSQL16",
+  "ledger": 61,
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0,
+  "uniqueCases": 12,
+  "observedCases": 2,
+  "providerCalls": 0,
+  "production": false,
+  "scope": "created support + distinct audited business cases + requested/reviewed AI cases + observed cases; not off-platform unrecorded work"
+}

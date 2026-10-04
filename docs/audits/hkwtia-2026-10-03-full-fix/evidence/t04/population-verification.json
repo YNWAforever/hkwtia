@@ -1,0 +1,38 @@
+{
+  "observedAt": "2026-10-04T20:34:10.423668+00:00",
+  "historicalVerificationRetained": "verification.json; its remainingEngineering entry predates this correction",
+  "targetBehaviorRed": {
+    "initialCases": 3,
+    "expectedCases": 11,
+    "failed": 3,
+    "sourceMismatch": "real page_copy_draft audit not accepted"
+  },
+  "aiSourceRed": {
+    "passed": 3,
+    "failed": 1,
+    "reason": "authoritative AI kind/case source not resolved"
+  },
+  "finalPostgres": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "receipt": "population-postgres.json"
+  },
+  "focused": {
+    "passed": 166,
+    "failed": 0,
+    "skipped": 0
+  },
+  "fixtureFailures": {
+    "files": [
+      "population-red.txt",
+      "population-behavior-red.txt"
+    ],
+    "meaning": "setup/schema mistakes, not target behavior regression evidence"
+  },
+  "migrationRequired": false,
+  "scope": "support created/active in window; distinct audited seven business kinds; requested/reviewed AI cases; distinct observations. All counts by (kind,caseId). Unknown timing stays missing; reopening accumulates time once per case.",
+  "operationalGate": "Operations + QA: agreed recorded-platform comparison scope; off-platform manual collection; actual two-week baseline. Synthetic cases do not establish operating ROI.",
+  "sourceState": "implemented in working tree; full CI/native acceptance pending",
+  "productionEffects": false
+}

@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/integration/operations-population.test.ts (4 tests) 17195ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  04:30:05
+   Duration  20.70s (transform 926ms, setup 227ms, collect 2.28s, tests 17.19s, environment 0ms, prepare 257ms)
+
