@@ -14,6 +14,7 @@ import {allowedMemberDestination} from "@/lib/auth/login-destination";
 import {parseJoinContinuation} from "@/lib/membership/join-navigation";
 import {buildPageMetadata} from "@/lib/metadata";
 import {applicationsRepository} from "@/lib/db/repos/applications";
+import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {buildBreadcrumbData} from "@/lib/structured-data";
@@ -134,6 +135,25 @@ export default async function JoinPage({params, searchParams}: Props) {
     const applications = await applicationsRepository.listOwned(actor, plan);
     const requestedId = queryValue(query.application);
     if (requestedId && !applications.some((application) => application.id === requestedId)) notFound();
+    // An explicit completed application is a continuation of its existing
+    // membership. Do not offer a new application just because completed rows
+    // are deliberately excluded from the ordinary resumable draft list.
+    const completed = applications.find(application => application.id === requestedId && application.status === "completed");
+    if (completed) {
+      let membership: Awaited<ReturnType<typeof membershipsRepository.getByApplicationId>> = null;
+      try { membership = await membershipsRepository.getByApplicationId(actor, completed.id); }
+      catch { /* A failed scoped read must give manual recovery, never a duplicate join. */ }
+      if (membership) redirect(`${localizedPath(locale, "/join/complete")}?${new URLSearchParams({membership_id: membership.id})}`);
+      return (
+        <section className="glass-card p-6 sm:p-10">
+          <h1 className="font-serif text-4xl font-semibold">{t("status.failed.title")}</h1>
+          <p className="mt-4 text-muted-foreground" role="alert">{t("resume.statusUnavailable")}</p>
+          <Link className="mt-6 inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, "/portal")}>{t("resume.account")}</Link>
+          <Link className="ms-6 mt-6 inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, "/contact")}>{t("checkoutSummary.contactSupport")}</Link>
+          {trail}
+        </section>
+      );
+    }
     const resumable = applications.filter((application) => ["draft", "pending_payment", "pending_review"].includes(application.status));
     return (
       <section className="glass-card p-6 sm:p-10">
