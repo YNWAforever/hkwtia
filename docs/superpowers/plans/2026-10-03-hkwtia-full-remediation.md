@@ -479,10 +479,10 @@ T08另擁有共用 `lib/ai/drafts/work.ts` 的durable generation claim，T11/T12
 **Interfaces:** `searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:'member'|'company'|'application'|'event'|'conversation';id:string;label:string;href:string}[];nextCursor:string|null}>`。DB先按actor/權限過濾，不能先查全量再UI遮；空/過長query不掃全表。只用既有role/capability，不另造frontend superadmin bool。
 
 - [ ] 寫 AC-06/07/17/24：mine空但unassigned非空有明確入口；owner/due/overdue清楚；search counts/snippets也不能洩漏跨權限資料；51/101筆segment同sort值翻頁無重漏；URL保留filters/sort/cursor並支援返回。
-- [ ] Run `npx vitest run tests/integration/full-fix-workspace-search.test.ts`；先失敗後實作role-scoped search。頂部結果按entity分類；沒有結果、服務失效及無權不同文案，不用「0」代替讀取失敗。
-- [ ] 保留六組導航並以真工作命名：今日工作、會員及申請、通訊支援、活動內容、報告、設定/健康（實際名稱跟locale bundle）；顯示未指派/逾期/失敗，不建立另一套聊天首頁。member搜尋與global搜尋明確分別；worker/batch/AI-review各能回原案。
+- [x] Run `npx vitest run tests/integration/full-fix-workspace-search.test.ts`；先失敗後實作role-scoped search。頂部結果按entity分類；沒有結果、服務失效及無權不同文案，不用「0」代替讀取失敗。
+- [x] 保留六組導航並以真工作命名：今日工作、會員及申請、通訊支援、活動內容、報告、設定/健康（實際名稱跟locale bundle）；顯示未指派/逾期/失敗，不建立另一套聊天首頁。member搜尋與global搜尋明確分別；worker/batch/AI-review各能回原案。
 - [ ] 批次selection/bar與row action可由鍵盤操作；預設目前頁，多頁全篩選須明確確認；關閉能力仍可讀歷史和停用原因；save/retry/export有進度及逐筆結果。dangerous權益/財務動作用既有高權限與review，AI不新增捷徑。
-- [ ] 寫操作手冊：每日登入→worker異常→逾期/未指派→補件/回覆→批次預覽→部分失敗/unknown對帳→交班；每週policy到期/錯誤抽樣；每月續會/KPI/費用。每流程附入口、必需role、正常結果、錯誤復原、證據reference。
+- [x] 寫操作手冊：每日登入→worker異常→逾期/未指派→補件/回覆→批次預覽→部分失敗/unknown對帳→交班；每週policy到期/錯誤抽樣；每月續會/KPI/費用。每流程附入口、必需role、正常結果、錯誤復原、證據reference。
 - [ ] Run `npx playwright test tests/e2e/full-fix-admin-workspace.spec.ts`；3–5位職員在G5各自完成補件、回覆、50筆batch預覽/失敗復原及CMS發布，記完成率/時間/誤操作/需工程師協助次數。目標每項關鍵任務可獨立完成、0不可逆誤操作；未達即修UI/SOP再驗。Commit `feat: complete the administrative daily workspace`。
 
 
@@ -605,3 +605,11 @@ npm --prefix workers test
 - [x] 已確認隔離Neon0059（58→59、profiles不變、零provider）。
 - [x] T08 exact9cf full CI6567pass416skip、worker57、native Preview17+12及mobile44px；receipt見evidence/t08。
 - [ ] T09–T12業務facts/生成、T13真模型、T14D送達及正式release各自驗證。
+
+## T18 engineering receipt — 2026-10-04
+
+- [x] New search behaviour12RED/UI8RED/long-ID1RED → current actor-scoped SQL, no private body/contact/count projection. Focused174 incl disposablePG20 passed0skip.
+- [x] Exact28322fd3 full6632pass442skip0fail/CI all7+worker57; typecheck/lint/strings/build exit0.
+- [x] Exact Preview17positive DB/Auth entry checks + final single full9browser cases all pass. EN/HK five entity kinds,51/101 workspace keysets, Back/Forward, member denial,390px/44px/axe0; message/membership/billing/budget delta0. Earlier native7pass2fail was scale-fixture label collision, corrected at fixture source without changing product limits.
+- [x] Traditional Chinese operational handbook and daily/weekly/monthly recovery entries provided.
+- [ ] Full T10/T14/T17 journeys, true provider/worker windows and3–5 human staff G5 observations remain task-specific gates; no full-fix or Production claim.

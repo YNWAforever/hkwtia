@@ -18,7 +18,7 @@ async function main() {
     await assertSeedSentinel("FULL_REMEDIATION",async()=>Number((await pool.query("SELECT count(*) AS n FROM acceptance_sentinel")).rows[0].n));
     const proof=(await pool.query("SELECT role FROM profiles WHERE id=$1 AND auth_user_id=$2",[binding.profileId,binding.userId])).rows;assert.deepEqual(proof,[{role:"staff"}]);
     const run=randomUUID(),label="Synthetic T18 "+run,profileId="t18ws-"+run,companyId=randomUUID(),applicationId=randomUUID(),eventId=randomUUID(),conversationId=randomUUID();
-    const queries=[51,101].map(count=>({count,query:"Synthetic T18 "+run+" set"+count}));
+    const queries=[51,101].map(count=>({count,query:"Synthetic T18 set"+count+" "+run}));
     await pool.query("BEGIN");
     try {
       await pool.query("INSERT INTO profiles(id,auth_user_id,email,display_name,role) VALUES($1,$1,$2,$3,'member')",[profileId,profileId+"@example.test",label]);

@@ -1,0 +1,37 @@
+{
+  "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+  "origin": "https://hkwtia-admin-workspace-20261003.vercel.app",
+  "observedAt": "2026-10-04T00:20:38.382Z",
+  "checks": [
+    {
+      "locale": "en",
+      "case": "stable search keyset",
+      "records": 51,
+      "pages": 3,
+      "noDuplicateOrMissing": true,
+      "historyPreserved": true
+    },
+    {
+      "locale": "en",
+      "case": "stable search keyset",
+      "records": 101,
+      "pages": 6,
+      "noDuplicateOrMissing": true,
+      "historyPreserved": true
+    },
+    {
+      "locale": "en",
+      "case": "recovery/mobile/readable closed history",
+      "mobileWidth": 390,
+      "targetMinHeight": 44,
+      "seriousOrCriticalAxe": 0,
+      "cloudWorkerWindowsVerified": false
+    }
+  ],
+  "actualNeonPasswordAuth": true,
+  "messagesMembershipBillingBudgetDelta": 0,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderRequests": 0,
+  "production": false
+}

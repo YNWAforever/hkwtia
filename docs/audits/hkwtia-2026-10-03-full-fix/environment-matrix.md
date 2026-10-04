@@ -59,3 +59,16 @@ Flags remain per-capability. RUN_LIVE_WOZTELL=0 selects a mock; it is not a real
 - Platform/data/AI/finance owner must approve the versioned application route/data purpose, controlled administrative test credential and run/day/month caps; T13 real model/usage/invoice receipts follow. Controlled Google/test mailbox and cloud service binding/two real windows remain independently unresolved.
 
 - T09 finalcdd: deploymentdpl_HKFD3MBFZDveZhEbhRv3qoLheMSZ, exactCI6618pass429skip/worker57/all7, actualNative17入口＋13cases all-green full run. 原7c儲存提示消失是真productRED；cdd導航立即URLassert是test timing，改等待目標URL後两項通過，不增加timeout。所有cases消息／會籍／付款／budget delta0；Google/magic-link/realmodel/worker窗口未由此驗證。
+
+
+## T18 workspace candidate — 2026-10-04
+
+- PR130 final059 exact CI6618pass429skip/worker57/all7 checks; merged a7d7abda. Final tree equals source059 and app bytes equal native-testedcdd. Final receipts `evidence/t09/ci-checks-final.json` and `merge.json` supersede pending CI/merge notes.
+- Fresh Production read2026-10-03T23:27:30Z remains36eb/dpl9j READY; project Production branch release. No Production0057/58/59/new flags/config published.
+- New branch codex/administrative-workspace-20261003, dedicated Preview alias hkwtia-admin-workspace-20261003.vercel.app. Existing user-approved isolated/test credentials reused only on this branch. Source generation/review, agents and budget dispatch remain closed; sender test adapter is not real-provider readiness proof.
+- Fresh Neon metadata: br-lingering-unit-azxl75s5 ready/nonprimary/default/protected; exact isolated DB/Auth pair/sentinel/outside-reserved-domain proof; expiry2026-10-04T12:00Z. Add only this exact Preview origin to isolated better_auth trust; no Production Auth origins modified.
+- T18 existing daily-work/source denominators/owner/due/history/six navigation groups retained and actualPG7 regression passed. New global search actualPG13 and focused174 passed; new role/scope reads do not write membership, billing, grants, messages or budgets. No migration required.
+- First full had8 route owner/count failures plus1 Auth-tree process timeout under concurrent build. Owner/count fixed and route/Auth focused46 passed without increasing timeout. Final full/native/CI are pending here, never claimed pass. Initial native test discovery JSON import-attribute error is harness setup, not product RED; corrected with typed file reads.
+- Pending owner: platform/provider/policy gates from other tasks, and3–5 human staff pilots with actual completion/rework/irreversible-error observations. Operations handbook provides concrete entries/recovery and leaves uncollected pilot results empty.
+
+- T18 final source28322fd3: local full6632pass442skip0fail, exact CI37164254853 all7/worker57; focused174 inclPG20; lint0errors/91warnings, typecheck/build/strings0. Exact Previewdpl_E9M78kznkuc8SWq5DccGNt7nZt6N verified17entry+final single full9native cases with actualNeonPasswordAuth, EN/HK390/keyboard/axe0, five entities and51/101workspace keysets,0effect delta. First native7pass2fail reflects fixture prefix collision; minimal seed labels made disjoint, all product limits/scope retained. Final receipts supersede earlier pending native/CI notes. Human G5/true provider/business dependencies remain unresolved; source-only fixture correction is not a Production mutation.
