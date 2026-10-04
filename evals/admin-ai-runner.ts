@@ -575,7 +575,13 @@ export async function runAdminEval(
             // This tests text-generation guards; it is not staff authorization or a journey acceptance receipt.
             const registry = {
               ...createAdminModelRegistry(route.key),
-              board: route,
+              board: {
+                ...route,
+                maxOutputTokens: Math.min(
+                  route.maxOutputTokens,
+                  createAdminModelRegistry(route.key)[c.task].maxOutputTokens,
+                ),
+              },
             };
             const runtime = createAgentRuntime({
               agentRuns:

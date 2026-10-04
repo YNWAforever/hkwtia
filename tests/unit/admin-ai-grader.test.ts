@@ -467,3 +467,71 @@ it("retains known completed results if private review capture fails, without reg
   expect(report.blockers).toContain("PRIVATE_REVIEW_CAPTURE_UNAVAILABLE");
   expect(report.results).toHaveLength(1);
 });
+
+it("keeps the application's existing output ceiling in the evaluation runtime", async () => {
+  const seen: number[] = [];
+  const c = fixture();
+  const providerFactory: import("@/lib/ai/provider").AgentProviderFactory = ({
+    route: r,
+  }) => {
+    seen.push(r!.maxOutputTokens);
+    return {
+      stream: async (request) => {
+        await request.onProviderReceipt?.("synthetic-unit-receipt");
+        return {
+          textStream: (async function* () {
+            yield JSON.stringify(response(c));
+          })(),
+          finish: Promise.resolve({
+            usage: { inputTokens: 100, outputTokens: 100 },
+            finishReason: "stop",
+            steps: 1,
+            toolExecutions: 0,
+            citations: [],
+          }),
+        };
+      },
+    };
+  };
+  const noIo = {
+    start: async () => {},
+    configureModel: async () => {},
+    finish: async () => {},
+    fail: async () => {},
+    escalate: async () => {},
+    disable: async () => {},
+  };
+  const env = {
+    RUN_LIVE_AI_EVALS: "true",
+    RUN_LIVE_EVALS: "1",
+    LIVE_AI_EVALS_AUTHORIZED: "true",
+    ADMIN_AI_PROVIDER_APPROVED: "true",
+    ADMIN_AI_EVAL_DATA_APPROVED: "true",
+    ADMIN_AI_EVAL_TASKS: "application",
+    LIVE_AI_PRICING_VERIFIED_VERSION: route.pricingVersion,
+    LIVE_AI_EVAL_TOTAL_MICROUSD: "10000000",
+    OPENAI_API_KEY: "synthetic-unit-only",
+  };
+  // Unit contract only: injected transport/lifecycle/ledger never call a real provider or database.
+  await runAdminEval(
+    {
+      routes: [route],
+      repeats: 3,
+      cases: [c],
+      mode: "live",
+      maxCostMicrousd: 10000000,
+    },
+    {
+      env,
+      assertIsolation: async () => {},
+      agentRuns: noIo,
+      budget: budgetBase(),
+      providerFactories: {
+        openai: providerFactory,
+        anthropic: providerFactory,
+      },
+    },
+  );
+  expect(seen.length).toBeGreaterThan(0);
+  expect(seen.every((cap) => cap === 1200)).toBe(true);
+});
