@@ -1,0 +1,16 @@
+{
+  "sourceSha": "92fa8e338bf0dab773490d38f0bbc86d73b0926e",
+  "command": "node --experimental-strip-types --env-file=.env.local scripts/verify-full-retention-drafts.mjs --workers=1",
+  "observedAt": "2026-10-04T10:23:54.837284+00:00",
+  "passed": 1,
+  "failed": 1,
+  "locale": "zh-HK",
+  "behavior": "stale approval alert text has serious color contrast violation",
+  "foreground": "#df3a3a",
+  "background": "#f4f5f6",
+  "contrast": 4,
+  "minimum": 4.5,
+  "fixture": "synthetic isolated Neon + actual password Auth",
+  "externalModelCalls": 0,
+  "production": false
+}

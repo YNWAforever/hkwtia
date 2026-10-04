@@ -1,0 +1,18 @@
+{
+  "runId": 37195649773,
+  "sourceSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+  "unitPassed": 6698,
+  "unitSkipped": 555,
+  "unitFailed": 0,
+  "workerPassed": 57,
+  "workerSkipped": 0,
+  "summaryLines": [
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T10:35:02.8381381Z  Test Files  397 passed | 48 skipped (445)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T10:35:02.8382310Z       Tests  3540 passed | 295 skipped (3835)",
+    "worker\tRun npm --prefix workers test\t2026-10-04T10:32:03.6862699Z  Test Files  7 passed (7)",
+    "worker\tRun npm --prefix workers test\t2026-10-04T10:32:03.6863734Z       Tests  57 passed (57)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T10:35:32.5090864Z  Test Files  395 passed | 51 skipped (446)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T10:35:32.5117354Z       Tests  3158 passed | 260 skipped (3418)"
+  ],
+  "skipsAreNotPasses": true
+}

@@ -87,3 +87,10 @@ PR135 source9603519; Previewdpl_F7owZgh31gWmE2Ecr4kBQ2jtzacD / hkwtia-delivery-r
 Source/harnessd060f423, PR136; isolated branchbr-lingering-unit-azxl75s5 reverifiedready/nonprimary/nondefault/unprotected, expiry2026-10-04T12:00Z. Existing approved test DB/Auth/rate-limit/StripeTEST/R2 names provided only to this Git Preview branch. R2 is shared existing partner storage and was not used for T10 isolation evidence. Review and synthetic protected compose enabled only in Preview; support generation/provider approvalfalse, agentsfalse, caps0, all new effectful business flagsfalse. No provider calls or real member data. Production readonly2026-10-04T08:42:17Z remains36ebae1/dpl9j READY; Production branchrelease.
 
 T10 exact Preview19 includes actual bilingual review/adoption with0outbound and private recovery; pinned dpl_ELFx9FrAXc4JA6sJq2Ra2MXimC4E/source d060. No Production change.
+
+## T11 — verified isolated capability (2026-10-04)
+
+- App source894e923b / Preview dpl_f7V6G4UVuDGLyXrJhYd1Wu6E6u55, exactbranch `codex/bounded-retention-drafts-20261003`; marker proves isolated DB.
+- Neon nonprimary/defaultfalse/protectedfalse `br-lingering-unit-azxl75s5`, sentinel1, reserved fixture domains, ledger60; expiry2026-10-05T12:00Z. Auth same isolated endpoint and read-back trusted Preview origin.
+- Existing user-authorized test credentials configured only branch-scoped Preview; dedicated protection/Cron/Concierge values independent. Retention generation/agents/send flags false, budgets0.
+- 0060 verified on loopback and isolated Neon; Production unchanged. Actual model, worker identity/two windows and release authority remain gates. See evidence/t11.

@@ -1,0 +1,95 @@
+{
+  "sourceSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+  "behaviorFailures": [
+    {
+      "case": "bounded-behaviour",
+      "logSha256": "df8e2cd9601dc8ed7bb52b3dbf62a3a5424819bce567c6231e61b5110d2dacb2",
+      "observedFailure": [
+        "\u2192 expected 1000 to be less than or equal to 101",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+        "FAIL  .playwright/t11-red.test.ts > T11 bounded SQL retention candidate reads using actual all59-migration PostgreSQL > never transfers more than101 candidate rows from a database query while preserving all1000 in the compatibility facade",
+        "AssertionError: expected 1000 to be less than or equal to 101",
+        "Tests  1 failed (1)"
+      ]
+    },
+    {
+      "case": "work",
+      "logSha256": "5f8d6470a0597dcde3f36b1ca2c2ced90947c158b9ddc4e2d005b9d751057e63",
+      "observedFailure": [
+        "\u2192 expected \"spy\" to be called 1 times, but got 3 times",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+        "FAIL  tests/unit/retention-analyst-service.test.ts > admits one provider caller across two workers and a cross-day rerun",
+        "AssertionError: expected \"spy\" to be called 1 times, but got 3 times",
+        "Tests  1 failed | 7 passed (8)"
+      ]
+    },
+    {
+      "case": "grounding",
+      "logSha256": "f9c4d698f82b57a285e63c96ed361f28d5e2a04a9c851191c3d4d21c4ad7593e",
+      "observedFailure": [
+        "\u2192 expected [Function] to throw an error",
+        "\u2192 expected [Function] to throw an error",
+        "\u2192 expected [Function] to throw an error",
+        "\u2192 expected [Function] to throw an error",
+        "\u2192 expected [Function] to throw an error",
+        "\u2192 expected [Function] to throw an error",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 6 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+        "FAIL  tests/unit/retention-analyst-contracts.test.ts > whole-body grounded retention proposals > rejects unbound or effectful prose Your renewal costs HKD 90.",
+        "FAIL  tests/unit/retention-analyst-contracts.test.ts > whole-body grounded retention proposals > rejects unbound or effectful prose Your renewal costs HKD \u4e5d\u5341\u5143.",
+        "FAIL  tests/unit/retention-analyst-contracts.test.ts > whole-body grounded retention proposals > rejects unbound or effectful prose Your application has been approved.",
+        "FAIL  tests/unit/retention-analyst-contracts.test.ts > whole-body grounded retention proposals > rejects unbound or effectful prose <script>publish()</script>",
+        "FAIL  tests/unit/retention-analyst-contracts.test.ts > whole-body grounded retention proposals > rejects unbound or effectful prose Please contact private@example.test.",
+        "FAIL  tests/unit/retention-analyst-contracts.test.ts > whole-body grounded retention proposals > rejects unbound or effectful prose Renewal date: {{facts.renewalDate}}",
+        "AssertionError: expected [Function] to throw an error",
+        "- Expected:",
+        "+ Received:",
+        "Tests  6 failed | 6 skipped (12)"
+      ]
+    },
+    {
+      "case": "capability",
+      "logSha256": "7480b4d4e3940bbf76dbe54f4f158f6652254742d580a17eb0b2f9030144dbc7",
+      "observedFailure": [
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+        "FAIL  tests/unit/retention-capability-gate.test.ts > keeps the new retention capability off without reading model credentials or creating work",
+        "AssertionError: promise rejected \"Error: UNAPPROVED_PROVIDER_CONFIGURATION_\u2026\" instead of resolving",
+        "Tests  1 failed (1)"
+      ]
+    },
+    {
+      "case": "readiness",
+      "logSha256": "abaaa029394c6a2b65db01bd891c1f8d21ca5a4ca3adcb37ba105a4fdb1f3197",
+      "observedFailure": [
+        "\u2192 expected true to be false // Object.is equality",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+        "FAIL  tests/unit/retention-capability-gate.test.ts > reports a disabled retention capability instead of unknown worker failure",
+        "AssertionError: expected true to be false // Object.is equality",
+        "- Expected",
+        "+ Received",
+        "Tests  1 failed | 1 passed (2)"
+      ]
+    },
+    {
+      "case": "facts-ui",
+      "logSha256": "e7701f4d1497b659c1d06c54458fad7da508c7dee224ec37914409e3d3a6b60a",
+      "observedFailure": [
+        "\u2192 expected '<div class=\"overflow-x-auto rounded-m\u2026' to contain 'Current period end'",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+        "FAIL  tests/unit/approval-list.test.tsx > shows the retention snapshot facts and a separately reviewed renewal batch entry after human approval",
+        "AssertionError: expected '<div class=\"overflow-x-auto rounded-m\u2026' to contain 'Current period end'",
+        "Expected: \"Current period end\"",
+        "Received: \"<div class=\"overflow-x-auto rounded-md border border-border\"><table class=\"min-w-full text-left text-sm\"><caption class=\"caption-top px-4 py-3 text-left font-medium text-foreground\">Pending</caption><thead class=\"border-y border-border bg-muted/40 text-muted-foreground\"><tr><th class=\"px-4 py-3\" scope=\"col\">Action</th><th class=\"px-4 py-3\" scope=\"col\">Requested</th><th class=\"px-4 py-3\" scope=\"col\">Summary</th><th class=\"px-4 py-3\" scope=\"col\">Actions</th></tr></thead><tbody><tr class=\"border-b border-border last:border-0\"><th class=\"px-4 py-3 font-medium\" scope=\"row\">Unavailable</th><td class=\"px-4 py-3\">2027\u5e746\u67081\u65e5 \u4e0a\u53488:00</td><td class=\"px-4 py-3\"><dl class=\"space-y-2\"><div><dt class=\"font-medium\">Member</dt><dd>member-test</dd></div><div><dt class=\"font-medium\">Language</dt><dd>en</dd></div><div><dt class=\"font-medium\">Run</dt><dd class=\"break-all\">44444444-4444-4444-8444-444444444444</dd></div><div><dt class=\"font-medium\">Subject</dt><dd>Stay in touch</dd></div><div><dt class=\"font-medium\">Body</dt><dd class=\"whitespace-pre-wrap\">Please contact the team.</dd></div><div><dt class=\"font-medium\">Reasons</dt><dd><ul class=\"list-disc space-y-1 pl-5\"><li>Unavailable</li></ul></dd></div></dl></td><td class=\"px-4 py-3\"><div class=\"flex flex-wrap gap-2\"><form class=\"space-y-1\" action=\"javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)\"><input type=\"hidden\" name=\"approvalId\" value=\"33333333-3333-4333-8333-333333333333\"/><button class=\"rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60\" type=\"submit\" value=\"approved\" name=\"decision\">Approve</button><span aria-live=\"polite\" class=\"block text-xs text-muted-foreground\" role=\"status\"></span></form><form class=\"space-y-1\" action=\"javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)\"><input type=\"hidden\" name=\"approvalId\" value=\"33333333-3333-4333-8333-333333333333\"/><button class=\"rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-60\" type=\"submit\" value=\"rejected\" name=\"decision\">Reject</button><span aria-live=\"polite\" class=\"block text-xs text-muted-foreground\" role=\"status\"></span></form></div></td></tr></tbody></table></div><script>addEventListener(\"submit\",function(a){if(!a.defaultPrevented){var c=a.target,d=a.submitter,e=c.action,b=d;if(d){var f=d.getAttribute(\"formAction\");null!=f&&(e=f,b=null)}\"javascript:throw new Error('React form unexpectedly submitted.')\"===e&&(a.preventDefault(),b?(a=document.createElement(\"input\"),a.name=b.name,a.value=b.value,b.parentNode.insertBefore(a,b),b=new FormData(c),a.parentNode.removeChild(a)):b=new FormData(c),a=c.ownerDocument||c,(a.$$reactFormReplay=a.$$reactFormReplay||[]).push(c,d,b))}});</script>\"",
+        "Tests  1 failed | 3 skipped (4)"
+      ]
+    }
+  ],
+  "initialNative": "native-red.json",
+  "initialFull": "full-first-fail.json",
+  "green": "focused.json,verification.json and current exactsource CI",
+  "groundingMutation": "Original unchecked body was reintroduced once,6 actual assertions failed, original current source bytes restored; no unsafe code retained",
+  "notProductRed": [
+    "initial disposable fixture missing seat_limit",
+    "initial test used nonexistent outbound_messages table",
+    "historical forward migration fixture count57 vs current60"
+  ]
+}

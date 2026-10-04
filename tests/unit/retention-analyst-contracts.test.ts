@@ -1,3 +1,4 @@
+import {validateRetentionDraft,buildGroundedRetentionPrompt} from '@/lib/ai/retention-analyst/grounding';
 import {describe, expect, it} from "vitest";
 
 import {
@@ -110,4 +111,15 @@ describe("retention analyst contracts", () => {
       tools: [],
     });
   });
+});
+
+describe('whole-body grounded retention proposals',()=>{
+ it.each(['Your renewal costs HKD 90.','Your renewal costs HKD 九十元.','Your application has been approved.','<script>publish()</script>','Please contact private@example.test.','Renewal date: {{facts.renewalDate}}'])('rejects unbound or effectful prose %s',body=>{
+  expect(()=>validateRetentionDraft({subject:'Stay in touch',body,reasonCodes:['inactive_before_renewal']},candidate,new Date('2027-04-01'))).toThrow('RETENTION_DRAFT_UNGROUNDED');
+ });
+ it('renders a whole server-labelled date, keeps risk reasons owned by source and minimizes the prompt',()=>{
+  const draft=validateRetentionDraft({subject:'Stay in touch',body:'Please contact our team.\n{{facts.renewalDate}}',reasonCodes:['inactive_before_renewal']},candidate,new Date('2027-04-01'));
+  expect(draft.body).toContain('2027-05-01');expect(draft.reasonCodes).toEqual(candidate.riskCodes);
+  const prompt=buildGroundedRetentionPrompt(candidate);expect(prompt).not.toContain(candidate.profileId);expect(prompt).not.toContain(candidate.membershipId);expect(prompt).not.toContain(candidate.renewalDate!);
+ });
 });

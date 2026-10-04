@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-04T10:42:45.495389+00:00",
+  "neonProjectId": "solitary-wave-52860119",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "currentState": "ready",
+  "primary": false,
+  "default": false,
+  "protected": false,
+  "expiresAt": "2026-10-05T12:00:00Z",
+  "expiryExtendedForAuthorizedIsolatedTesting": true,
+  "sentinel": 1,
+  "ledger": 60,
+  "reservedDomainsOnly": true,
+  "nativePreviewAppDbMarkerProven": true,
+  "trustedAuthPreviewOriginAddedAndReadBack": true,
+  "production": false
+}

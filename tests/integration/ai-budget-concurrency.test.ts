@@ -1,5 +1,6 @@
 // @vitest-environment node
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
+import {readFileSync} from "node:fs";
 import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
 import {isolatedAuditDatabase} from "./audit-database-fixture";
 import {
@@ -487,6 +488,8 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
             )
           ).rows[0].n,
         );
+        const journal=JSON.parse(readFileSync("drizzle/meta/_journal.json","utf8")) as {entries:{idx:number;tag:string}[]};
+        expect(before).toBe(journal.entries.filter(entry=>entry.idx<=56).length);
         await prior.migrateRemaining();
         expect(
           Number(
@@ -496,7 +499,9 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")(
               )
             ).rows[0].n,
           ),
-        ).toBe(before + 1);
+        ).toBe(journal.entries.length);
+        const expectedHashes=journal.entries.map(entry=>createHash('sha256').update(readFileSync('drizzle/'+entry.tag+'.sql','utf8')).digest('hex')).sort();
+        expect((await prior.pool.query('SELECT hash FROM drizzle.__drizzle_migrations')).rows.map(row=>row.hash).sort()).toEqual(expectedHashes);
         expect(
           (
             await prior.pool.query(
