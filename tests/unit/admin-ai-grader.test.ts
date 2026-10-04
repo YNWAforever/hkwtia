@@ -421,3 +421,49 @@ it("reports the independent-review agreement uncertainty without inventing sampl
     agreement95: [expect.any(Number), 1],
   });
 });
+
+it("provides a private, model-blind review sample tied to the exact accepted output", async () => {
+  const samples: unknown[] = [];
+  const report = await runAdminEval(
+    {
+      routes: [route],
+      repeats: 3,
+      cases: [fixture()],
+      mode: "offline",
+      maxCostMicrousd: 0,
+    },
+    {
+      onReviewSample: async (sample) => {
+        samples.push(sample);
+      },
+    },
+  );
+  expect(samples).toHaveLength(3);
+  expect(samples[0]).toMatchObject({
+    sampleId: expect.stringMatching(/^[a-f0-9]{64}$/),
+    renderedBody: expect.stringContaining("$1,200.00"),
+    executionMode: "offline",
+  });
+  expect(samples[0]).not.toHaveProperty("routeKey");
+  expect(samples[0]).not.toHaveProperty("expectedClaims");
+  expect(report.humanReviewVerified).toBe(false);
+});
+it("retains known completed results if private review capture fails, without regenerating", async () => {
+  const report = await runAdminEval(
+    {
+      routes: [route],
+      repeats: 3,
+      cases: [fixture()],
+      mode: "offline",
+      maxCostMicrousd: 0,
+    },
+    {
+      onReviewSample: async () => {
+        throw Error("private capture unavailable");
+      },
+    },
+  );
+  expect(report.status).toBe("BLOCKED");
+  expect(report.blockers).toContain("PRIVATE_REVIEW_CAPTURE_UNAVAILABLE");
+  expect(report.results).toHaveLength(1);
+});

@@ -139,7 +139,7 @@ export function gradeAdminResponse(
   };
 }
 
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -298,6 +298,15 @@ export type AdminEvalDependencies = {
   providerFactories?: RuntimeDependencies["providerFactories"];
   assertIsolation?: () => Promise<void>;
   sourceSha?: string;
+  onReviewSample?: (sample: {
+    sampleId: string;
+    locale: "en" | "zh-HK";
+    task: AdminAiTask;
+    input: string;
+    renderedBody: string;
+    facts: ApprovedFactPack;
+    executionMode: "offline" | "live";
+  }) => Promise<void>;
 };
 /** A second, run-wide ceiling wraps the existing durable ledger; dispatch/unknown holds never expire here. */
 export function createEvaluationBudget(
@@ -674,6 +683,27 @@ export async function runAdminEval(
           responseHash: raw === null ? null : hash(raw),
           providerReceiptHash: receipt,
         });
+        if (grade.passed && raw !== null && dependencies.onReviewSample) {
+          try {
+            const output = outputSchema.parse(JSON.parse(raw)),
+              renderedBody = renderGroundedBody(output.body, c.facts);
+            if (!safeSyntheticText(renderedBody))
+              throw Error("REVIEW_SAMPLE_NOT_SYNTHETIC");
+            await dependencies.onReviewSample({
+              sampleId: hash(`${route.key}|${c.id}|${repeat}|${hash(raw)}`),
+              locale: c.locale,
+              task: c.task,
+              input: c.input,
+              renderedBody,
+              facts: c.facts,
+              executionMode: input.mode,
+            });
+          } catch {
+            report.status = "BLOCKED";
+            report.blockers = ["PRIVATE_REVIEW_CAPTURE_UNAVAILABLE"];
+            return report;
+          }
+        }
         if (
           input.mode === "live" &&
           (executionFailure || costMicrousd === null)
@@ -892,15 +922,30 @@ async function main() {
     modelKeys = (
       process.env.ADMIN_AI_EVAL_MODELS ?? "openai:gpt-4.1-mini"
     ).split(",");
-  const report = await runAdminEval({
-    routes: modelKeys.map((key) => createAdminModelRegistry(key).board),
-    repeats: 3,
-    cases,
-    mode: live ? "live" : "offline",
-    maxCostMicrousd: live
-      ? Number(process.env.LIVE_AI_EVAL_TOTAL_MICROUSD ?? 0)
-      : 0,
-  });
+  const capture = process.argv.includes("--capture-review-samples");
+  const onReviewSample: AdminEvalDependencies["onReviewSample"] = capture
+    ? async (sample) => {
+        const dir = resolve(process.cwd(), ".playwright/admin-ai-blind-review");
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(
+          resolve(dir, `${sample.sampleId}.json`),
+          JSON.stringify(sample, null, 2) + "\n",
+          { encoding: "utf8", mode: 0o600 },
+        );
+      }
+    : undefined;
+  const report = await runAdminEval(
+    {
+      routes: modelKeys.map((key) => createAdminModelRegistry(key).board),
+      repeats: 3,
+      cases,
+      mode: live ? "live" : "offline",
+      maxCostMicrousd: live
+        ? Number(process.env.LIVE_AI_EVAL_TOTAL_MICROUSD ?? 0)
+        : 0,
+    },
+    { onReviewSample },
+  );
   process.stdout.write(
     JSON.stringify({ report, summary: summarizeAdminEval(report) }) + "\n",
   );
