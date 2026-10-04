@@ -341,7 +341,9 @@ export const jobsRepository = {
           await insertWebhookLifecycleEnrollment(actor, tx, transition, membership);
         }
 
-        if (command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {
+        // A stale invoice is an ignored observation, including engagement metrics.
+        // Recording it as a new renewal would distort scoring despite unchanged entitlement.
+        if (!stale && command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {
           const profileId = requiredString(membership, "profile_id");
           const periodStart = command.billingPeriodStart?.toISOString();
           const periodEnd = command.billingPeriodEnd?.toISOString();

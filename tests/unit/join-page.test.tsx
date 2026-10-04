@@ -6,10 +6,13 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const social = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/auth/client", () => ({authClient: {signIn: {social}}}));
 const state = vi.hoisted(() => ({
-  actor: null as {kind: "member"; userId: string} | null,
+  actor: null as {kind: "member"; userId: string; profileId?:string} | null,
   redirectUrl: null as string | null,
   startJoinCalls: [] as unknown[][],
   ownedApplications: [] as Array<Record<string, unknown>>,
+  completionMembership:null as {id:string;status:string}|null,
+  completionReads:[] as unknown[][],
+  completionReadFails:false,
   loginResolution: {kind: "signed-out"} as {kind: string},
 }));
 
@@ -24,6 +27,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => state.actor}));
 vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: async () => state.loginResolution}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {listOwned: async () => state.ownedApplications}}));
+vi.mock("@/lib/db/repos/memberships",()=>({membershipsRepository:{getByApplicationId:async(...args:unknown[])=>{state.completionReads.push(args);if(state.completionReadFails)throw Error("SYNTHETIC_READ_FAILURE");return state.completionMembership;}}}));
 vi.mock("@/lib/membership/join-service", () => ({
   startJoin: async (...args: unknown[]) => { state.startJoinCalls.push(args); return {applicationId: "application-a", next: "profile"}; },
 }));
@@ -47,6 +51,7 @@ describe("JoinPage portal continuation auth", () => {
     state.redirectUrl = null;
     state.startJoinCalls = [];
     state.ownedApplications = [];
+    state.completionMembership=null;state.completionReads=[];state.completionReadFails=false;
     social.mockReset();
     state.loginResolution = {kind: "signed-out"};
   });
@@ -120,5 +125,24 @@ describe("JoinPage portal continuation auth", () => {
     await expect(JoinPage(props("zh-HK", {next: "/portal/profile"}))).rejects.toThrow("NEXT_REDIRECT");
     expect(state.redirectUrl).toBe("/zh/portal/profile");
     expect(state.startJoinCalls).toHaveLength(0);
+  });
+
+  it.each(["en","zh-HK"])("%s completed owned application returns to its authoritative membership rather than a new application",async locale=>{
+    state.actor={kind:"member",userId:"auth-a",profileId:"profile-a"};
+    state.ownedApplications=[{id:"completed-app",planCode:"community",status:"completed",currentStep:"complete"}];
+    state.completionMembership={id:"membership-existing",status:"active"};
+    await expect(JoinPage(props(locale,{plan:"community",application:"completed-app"}))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe((locale==="zh-HK"?"/zh":"")+"/join/complete?membership_id=membership-existing");
+    expect(state.completionReads).toEqual([[state.actor,"completed-app"]]);expect(state.startJoinCalls).toHaveLength(0);
+  });
+  it.each([false,true])("missing or failed completed membership read (%s) gives manual recovery without offering a duplicate application",async fails=>{
+    state.actor={kind:"member",userId:"auth-a",profileId:"profile-a"};state.completionReadFails=fails;
+    state.ownedApplications=[{id:"completed-app",planCode:"community",status:"completed",currentStep:"complete"}];
+    const markup=renderToStaticMarkup(await JoinPage(props("zh-HK",{plan:"community",application:"completed-app"})));
+    expect(markup).toContain("localized:resume.statusUnavailable");expect(markup).toContain('href="/zh/contact"');expect(markup).toContain('href="/zh/portal"');expect(markup).not.toContain("localized:resume.start");expect(state.startJoinCalls).toHaveLength(0);
+  });
+  it("a foreign completed application cannot trigger a membership lookup",async()=>{
+    state.actor={kind:"member",userId:"auth-a",profileId:"profile-a"};state.ownedApplications=[{id:"owned-app",planCode:"community",status:"completed"}];
+    await expect(JoinPage(props("en",{plan:"community",application:"foreign-app"}))).rejects.toThrow("NEXT_NOT_FOUND");expect(state.completionReads).toHaveLength(0);
   });
 });

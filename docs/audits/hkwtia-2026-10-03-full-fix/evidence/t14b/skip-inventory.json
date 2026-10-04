@@ -1,0 +1,477 @@
+{
+  "skippedTotal": 455,
+  "filesReportedSkipped": 94,
+  "inventory": [
+    {
+      "file": "tests/unit/webhook-postgres-concurrency.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-renewal-window.test.ts",
+      "skipped": 11,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-audit-load.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-browser-fixture.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-history.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-concurrency.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-export.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-snapshot.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-profile-cleanup.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-pagination.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/aiops-materialized-view.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/admin-batch-ticket-resend.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/auth-last-login.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-migration-upgrade.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/auth-shared-rate-limit.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/bulk-communication-eligibility.test.ts",
+      "skipped": 6,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/company-profile-review-version-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/company-review-demotion-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/cohort-role-revocation-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/company-profile-role-revocation-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/communication-audit-load.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/automation-runners-postgres.test.ts",
+      "skipped": 5,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/event-attendee-batch-export.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/event-edit-version-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/event-cancellation-notices.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/login-profile-provision-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/journey-claim-concurrency.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/m4b-cross-window-cleanup.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/guest-check-in.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/login-profile-provision-neon.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/m2-acceptance.test.ts",
+      "skipped": 10,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/m3-acceptance.test.ts",
+      "skipped": 5,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-360-purchases.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/join-resume.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-application-queues.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/m4c-seed-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-event-review-version-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-event-role-revocation-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-filter-selection.test.ts",
+      "skipped": 4,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-import-commit.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/member-import-audit-load.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/migration.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/news-edit-version-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/public-directory-availability-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/membership-grant-benefits.test.ts",
+      "skipped": 4,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/membership-grant.test.ts",
+      "skipped": 6,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/page-copy-edit-concurrency-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/membership-grant-batch.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/public-directory-pagination.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/shared-rate-limit.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/refund-actor-postgres.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/showcase-lead-contact-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+      "skipped": 4,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/task8-automations-postgres.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/showcase-review-transition-postgres.test.ts",
+      "skipped": 4,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/showcase-manager-revocation-postgres.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ticket-eligibility-postgres.test.ts",
+      "skipped": 5,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/woztell-live.acceptance.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ticket-email-capacity.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ticket-email-outbox-postgres.test.ts",
+      "skipped": 5,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/writer-quota-postgres.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/unit/task10-postgres-integration.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/unit/task7-postgres-integration.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/unit/task8-postgres-integration.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/unit/task9-postgres-integration.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-auth-identity.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-policy-acceptance.test.ts",
+      "skipped": 5,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-billing-scope.test.ts",
+      "skipped": 9,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/full-fix-membership-lifecycle.test.ts",
+      "skipped": 13,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ai-application-triage.test.ts",
+      "skipped": 13,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ai-draft-review.test.ts",
+      "skipped": 30,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ai-budget-concurrency.test.ts",
+      "skipped": 16,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ai-operations-metrics.test.ts",
+      "skipped": 6,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/ai-knowledge-retrieval.test.ts",
+      "skipped": 31,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-application-case.test.ts",
+      "skipped": 8,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-company-search.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-batch-snapshot.test.ts",
+      "skipped": 7,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-cms-workspace.test.ts",
+      "skipped": 9,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-campaign-entry.test.ts",
+      "skipped": 13,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-segment-pagination.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-migration-recovery.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-grant-boundary.test.ts",
+      "skipped": 2,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-job-health.test.ts",
+      "skipped": 7,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/full-remediation-fixture.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-import-export.test.ts",
+      "skipped": 6,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-batch-failures.test.ts",
+      "skipped": 13,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-support-handoff.test.ts",
+      "skipped": 18,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-workspace.test.ts",
+      "skipped": 7,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/full-fix-batch-snapshot-100.test.ts",
+      "skipped": 1,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-batch-scale-matrix.test.ts",
+      "skipped": 24,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/operations-baseline.test.ts",
+      "skipped": 3,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/full-fix-workspace-search.test.ts",
+      "skipped": 13,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    },
+    {
+      "file": "tests/integration/audit-full-ticket-lifecycle.test.ts",
+      "skipped": 7,
+      "reason": "opt-in isolated DB/provider/environment guard; not a pass"
+    }
+  ],
+  "note": "Full command output remains private; inventory preserves explicit guarded suites."
+}

@@ -90,3 +90,7 @@ T18 source/native 工程測試與 3–5 位真人職員 G5 試點分開。下面
 目標：每項關鍵操作可獨立完成，零不可逆誤操作；未達時修 UI／SOP 再驗。AI 試點按 T16：先 2 位職員、50 cases/day、draft-only 一週；須有具體 capability release 授權，不能在本 T18 自行啟用。
 
 工程驗證：T18 exact28322fd3 的工作台搜尋／角色拒絕／五類結果／51及101筆游標／Browser Back與Forward／中英390px及鍵盤共9項真瀏覽器驗收通過；見 `evidence/t18/verification.json` 及 `native-28322fd3-worker-0.json`。這不代表真人職員試點、segment所有條件、付款／送達或正式發布完成。
+
+### 已完成入會及待付款返回復原（T14B）
+
+會員可由原申請返回既有會籍結果；已完成申請讀取失敗時使用聯絡支援／會員專區，記申請參考，不另建權益。公司待付款從原Checkout繼續使用同一付款嘗試；瀏覽器顯示成功或帶session參數不是付款證據，必須核對Member360的provider事件及會籍狀態。過期／舊invoice保持對帳歷史，不能新增續會engagement或倒退已付款期間。不得以comp、手改paid或撤銷歷史grant修復付款。實際StripeTEST證據：evidence/t14b/stripe-test-provider.json；受控重播並非正式webhook自動送達驗收。
