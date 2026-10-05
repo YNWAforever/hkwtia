@@ -140,3 +140,11 @@ Auth owner：可控制的 Google challenge／mailbox；worker owner：精確 clo
 - 續期前後均 READ ONLY 正向核對原 DB/Auth host、sentinel1、ledger61及保留合成網域外 profile/contact0；0fixture writes／provider calls。先前03:54Z回執與舊ZIP的10月5日期限是歷史觀察，沒有覆寫。
 - Fresh anonymous Preview三個入口仍302 Vercel Authentication；fresh單一Production DATABASE_URL仍敏感值遮罩，0SQL。實際Production source仍ed550b96。沒有把exit0 diagnostic寫成integration pass。
 - Actual maintenance、isolation及blocked receipts：`evidence/t16/environment-refresh-20261005/`。遠端Preview／Cloudflare服務secret傳送的具體批准仍pending；AI專用key／data-purpose-spend、受控Google／允許mailbox、provider／worker兩窗口及真人政策門檻均保留。
+
+## 2026-10-05 正式冷首頁 Lighthouse 反證
+
+兩次正常 Linux gate 的 EN首頁0.88／0.82均FAIL，保留全部20reports；本機不同Chrome版本0.97–0.98不作closure。T15轉回調查，UC-37／AC-23及F-AI14追加新反證，原40UC baseline/source JSON不變。選用CPU診斷與實際限制見 `evidence/t15/production-monitor-20261005/README.md`／`results.json`；沒有降低門檻或改正式配置。
+
+## 2026-10-05 21:44 香港時間 — CPU 來源已分辨，正式效能仍未結案
+
+PR145選用診斷及讀取器新17focused、同一真Chrome trace、完整6779unit／596guardedskip／worker57及strings/lint/types/build通過。保留首次local2FAIL及兩次正常Production0.88/0.82FAIL；兩個採樣run0.91PASS／0.75首頁與0.71eventsFAIL都不作normal acceptance。內部read_85.961ms不是網站compiled asset，但whole rootCauseConfirmed=false。Actual20sampled metrics／CPU來源與local/CI receipts見 `evidence/t15/production-monitor-20261005/{cpu-diagnostics,repository-gates}.json`；原40UC不變、194refs完整。只做診斷來源與证據，沒有Production配置／app／DB／worker／provider變更，fullFixComplete=false。

@@ -1395,5 +1395,21 @@
     "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
     "implementedInWorkingTree": false,
     "evidenceBasis": "actual PostgreSQL16 recorded population and strict CMS/AI source attribution regression; byte-verified committed source/current receipts"
+  },
+  {
+    "taskId": "T15",
+    "symbol": "summarizeLighthouseTrace",
+    "path": "scripts/summarize-lighthouse-cpu.mjs",
+    "qualifiedName": null,
+    "headSha": "51a6f1bac59dd2d794fd44126e680914ea5cb7e1",
+    "evidenceBasis": "current-checkout; diagnostic only, no application rewrite"
+  },
+  {
+    "taskId": "T15",
+    "symbol": "capture_profile",
+    "path": ".github/workflows/weekly-lighthouse.yml",
+    "qualifiedName": null,
+    "headSha": "13a81a4522d419c3cb55a6aa628a549ab8be0707",
+    "evidenceBasis": "current-checkout; diagnostic only, no application rewrite"
   }
 ]

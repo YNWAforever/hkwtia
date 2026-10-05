@@ -11,6 +11,12 @@ on:
         required: false
         default: false
 
+      capture_profile:
+        description: Diagnostic CPU sampling; preserves thresholds but sampled timings are not normal acceptance
+        type: boolean
+        required: false
+        default: false
+
 permissions:
   contents: read
 
@@ -30,10 +36,18 @@ jobs:
         id: target
         run: node scripts/resolve-production-lhci-target.mjs
       - name: Audit production routes in both locales
-        if: ${{ !inputs.local_lab }}
+        if: ${{ !inputs.local_lab && !inputs.capture_profile }}
         run: npm run test:lighthouse
         env:
           LHCI_BASE_URL: ${{ steps.target.outputs.base_url }}
+      - name: Capture diagnostic CPU profiles with the unchanged gate
+        if: ${{ !inputs.local_lab && inputs.capture_profile }}
+        run: npm run test:lighthouse -- --collect.settings.saveAssets=true --collect.settings.additionalTraceCategories=disabled-by-default-v8.cpu_profiler --upload.target=filesystem --upload.outputDir=.lighthouseci/profile-reports
+        env:
+          LHCI_BASE_URL: ${{ steps.target.outputs.base_url }}
+      - name: Preserve safe CPU coordinates and timing
+        if: ${{ always() && !inputs.local_lab && inputs.capture_profile }}
+        run: node scripts/summarize-lighthouse-cpu.mjs
       - name: Build isolated local lab
         if: inputs.local_lab
         env:
@@ -57,7 +71,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.local_lab && 'isolated-build-lighthouse' || 'production-lighthouse' }}
+          name: ${{ inputs.local_lab && 'isolated-build-lighthouse' || inputs.capture_profile && 'public-cpu-diagnostics' || 'production-lighthouse' }}
           path: .lighthouseci/
           include-hidden-files: true
           if-no-files-found: warn
