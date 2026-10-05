@@ -14,7 +14,7 @@
   --xp-signal-soft: rgba(143, 196, 224, 0.34);
   --xp-ink-deep: #0a3d67;
   --xp-on-ink-muted: rgba(255, 255, 255, 0.76);
-  --xp-text-muted: #4a6570; /* 5.9:1 on #fff, 5.5:1 on #f6f6f6 */
+  --xp-text-muted: #4a6570; /* 6.20:1 on #fff, 5.74:1 on #f6f6f6 */
   --xp-radius: 14px;
   --xp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --xp-dur-draw: 620ms;
@@ -548,10 +548,10 @@
 
 /* ─── Index numerals on white ─────────────────────────────────────────────────────────────
  * Three donor index styles colour their "01/02/03" numerals in the light accent blues, which
- * pass on ink and fail on white: --wt-blue #729bb5 measures 2.96:1 (.programme-groupings on
+ * pass on ink and fail on white: --wt-blue #729bb5 measures 2.97:1 (.programme-groupings on
  * /programmes, .solution-needs on /showcase) and --wt-jade #5188bf 3.73:1 (.service-grid on
  * /launchpad). axe flagged all three on production 2026-10-05. --wt-accent-text #315f82 keeps
- * the blue family at 6.9:1. */
+ * the blue family at 6.80:1. */
 .programme-groupings a span:first-child,
 .programme-groupings li span:first-child,
 .solution-needs button > span:first-child,
@@ -567,3 +567,29 @@
 /* A flex row's input keeps its intrinsic min width, so between 521 and 820px the search box and
  * its button overran the shell by ~38px. */
 .directory-search > div > input { min-width: 0; }
+
+/* The donor rule `.concierge-trigger span` (0,1,1) draws every span in the trigger as the 38px
+ * "W+" disc, so the wrapped label was squeezed into a second disc. Restore the label as text at
+ * (0,2,0); the phone collapse is restated at the same specificity after it so it still wins.
+ * Pinned by tests/e2e/experience-contrast.spec.ts. */
+.concierge-trigger .concierge-trigger-label {
+  display: inline;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+@media (max-width: 520px) {
+  .concierge-trigger .concierge-trigger-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

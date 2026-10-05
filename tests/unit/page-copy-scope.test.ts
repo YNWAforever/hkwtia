@@ -127,7 +127,11 @@ describe("page copy scope", () => {
       // rewritten as a composition of the 13 home/* sections and nothing referenced them
       // any more, leaving the 2 metaTitle/metaDescription leaves plus the 13 sections'
       // 161 editable fields already accounted for above (206 - 43 = 163).
-      Home: 166,
+      // The 2026-10 experience pass made 22 more Home strings staff-editable: the route finder
+      // (pathways.legend/routeEyebrow/routeLead/primaryLabel = 4, plus label/copy for each of the
+      // 8 destinations = 16), hero.actions.findRoute (1) and openNow.recordLabel (1) --
+      // 166 + 22 = 188.
+      Home: 188,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -177,7 +181,8 @@ describe("page copy scope", () => {
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(577);
+    // 577 + the 22 Home strings of the 2026-10 experience pass (see Home above) = 599.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(599);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

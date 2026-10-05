@@ -107,6 +107,21 @@ test.describe('public surface contrast', () => {
     expect(await contrastOf(page, '.service-grid article > span')).toBeGreaterThanOrEqual(4.5);
   });
 
+  test('the concierge launcher shows its label on desktop and collapses to its mark on phones', async ({page}) => {
+    // components/ai/concierge-launcher.tsx. The donor styles *every* span in the trigger as the
+    // 38px white "W+" disc, so wrapping the label in a span squeezed "Ask WiseTech" into a disc.
+    const markup = `<div class="concierge"><button class="concierge-trigger" type="button" aria-label="Ask WiseTech"><span aria-hidden="true">W+</span><span class="concierge-trigger-label">Ask WiseTech</span></button></div>`;
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, markup);
+    const desktop = await page.locator('.concierge-trigger-label').boundingBox();
+    expect(desktop?.width ?? 0).toBeGreaterThan(60);
+    expect(desktop?.height ?? 99).toBeLessThan(30);
+
+    await page.setViewportSize({width: 390, height: 844});
+    const phone = await page.locator('.concierge-trigger-label').boundingBox();
+    expect(phone?.width ?? 99).toBeLessThanOrEqual(1);
+  });
+
   test('the measuring helper detects an unreadable pair', async ({page}) => {
     // Proves the guard can fail: white on white must measure 1:1.
     await render(page, `<div style="background:#fff"><p id="bad" style="color:#fff">x</p></div>`);
