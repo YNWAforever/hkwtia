@@ -314,6 +314,14 @@
     ],
     "receipt": "evidence/t15/production-monitor-20261005/results.json",
     "normalThresholdsUnchanged": true,
-    "diagnosticSamplingNotAcceptance": true
+    "diagnosticSamplingNotAcceptance": true,
+    "diagnosticRuns": [
+      37313464634,
+      37317327401
+    ],
+    "cpuReceipt": "evidence/t15/production-monitor-20261005/cpu-diagnostics.json",
+    "sourceGateReceipt": "evidence/t15/production-monitor-20261005/repository-gates.json",
+    "rootCauseConfirmed": false,
+    "sourceDiagnosticSha": "51a6f1bac59dd2d794fd44126e680914ea5cb7e1"
   }
 }

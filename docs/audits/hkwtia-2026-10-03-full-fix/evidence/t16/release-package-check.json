@@ -1,17 +1,17 @@
 {
-  "observedAt": "2026-10-05T12:56:28.678Z",
+  "observedAt": "2026-10-05T13:46:44.969Z",
   "tasks": 22,
   "findings": 28,
   "cases": 64,
   "immutableHistoricalUc": 40,
   "newAcceptanceCases": 24,
-  "validEvidenceReferences": 190,
+  "validEvidenceReferences": 194,
   "hashes": {
-    "tasks.csv": "12b8534fce2ad4bc6e55fc7b5bfb1c621597f247bb7c27555e9fe4da0e8d2954",
+    "tasks.csv": "f0be7e809c05720fd586b32fda4d159fdb658f11b1c78d1a2d1a976a0c3ce6fc",
     "status.csv": "90e9cdb7ce39db4e3adaad32e765aa5a7780934558fdedeac1e68e69eaae65bf",
-    "acceptance.csv": "23f51d4352fda2078ef5dac7c7a3184553e135eaf207455bae9cae0e504e881e",
-    "source-map.json": "3adb9c6162aeb79291491f54a1827858f24a92c0025a75f329d5ce50c18078cb",
-    "release-manifest.json": "913a3aca27c7154d2e6246dacd9e09676683a378acf0d3cc674f6bb1ecc1e842",
+    "acceptance.csv": "92cb0dd4a34350c97715a13c9921e2ed3301edd8259ae1a400d0d1ae5d8896fe",
+    "source-map.json": "838448788a38f920061c8ed60c4418e6de5dd70060578092c378e26cc7995ad7",
+    "release-manifest.json": "25faf89561bda55f3a1751829bd4954a54936569d761c2d468927a11b65d2fa9",
     "rollout.md": "fb6cf310f0aa160f2c3d7c07734af51d3adeb4410f784628c2fc73b34e04efac",
     "rollback.md": "e9b119354d855214129b2b075959bc26d33adab974c65c86c7a05695bc09fe50",
     "runbook.md": "3a44e75edf3c4d1c9234da2f220deb93c0ebcece994c8cf358f2b38464965fc1"

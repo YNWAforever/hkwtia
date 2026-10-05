@@ -1,0 +1,2975 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-05T13:44:21.798Z",
+  "productionSourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "productionDeployment": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "applicationChangesThisSlice": 0,
+  "normalProductionGate": "FAIL_UNRESOLVED",
+  "rootCauseConfirmed": false,
+  "normalResultsNotReplaced": true,
+  "runs": [
+    {
+      "runId": 37313464634,
+      "sourceSha": "13a81a4522d419c3cb55a6aa628a549ab8be0707",
+      "conclusion": "success",
+      "normalAcceptance": false,
+      "metrics": [
+        {
+          "file": "lhr-1791205269921.json",
+          "path": "/",
+          "benchmark": 2451,
+          "perf": 0.91,
+          "TBT": 257.5,
+          "LCP": 2672.8115,
+          "SI": 2560.9571600000104,
+          "server": 2.4369999999999994,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205285130.json",
+          "path": "/membership",
+          "benchmark": 2498,
+          "perf": 0.98,
+          "TBT": 98,
+          "LCP": 2178.234,
+          "SI": 1215.234,
+          "server": 2.6080000000000005,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205300090.json",
+          "path": "/events",
+          "benchmark": 2476,
+          "perf": 0.98,
+          "TBT": 72.5,
+          "LCP": 2386.459,
+          "SI": 1222.4589999999998,
+          "server": 2.666999999999998,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205315026.json",
+          "path": "/programmes",
+          "benchmark": 2492.5,
+          "perf": 0.96,
+          "TBT": 164,
+          "LCP": 2262.422,
+          "SI": 1062.422,
+          "server": 2.7670000000000012,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205336840.json",
+          "path": "/partners",
+          "benchmark": 2467,
+          "perf": 0.98,
+          "TBT": 100.5,
+          "LCP": 1819.101,
+          "SI": 2706.5199920000373,
+          "server": 3.336999999999998,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205354590.json",
+          "path": "/zh",
+          "benchmark": 2494.5,
+          "perf": 0.93,
+          "TBT": 205,
+          "LCP": 2628.975,
+          "SI": 2491.117089283458,
+          "server": 2.5020000000000007,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205371279.json",
+          "path": "/zh/membership",
+          "benchmark": 2469.5,
+          "perf": 0.92,
+          "TBT": 201,
+          "LCP": 2623.73,
+          "SI": 3749.1127589680173,
+          "server": 2.655999999999999,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205386102.json",
+          "path": "/zh/events",
+          "benchmark": 2464,
+          "perf": 0.95,
+          "TBT": 196.5,
+          "LCP": 2406.6615,
+          "SI": 1140.6615000000002,
+          "server": 2.4940000000000015,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205401588.json",
+          "path": "/zh/programmes",
+          "benchmark": 2476,
+          "perf": 0.94,
+          "TBT": 198,
+          "LCP": 2416.062,
+          "SI": 2467.1439059999266,
+          "server": 2.9239999999999995,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791205423466.json",
+          "path": "/zh/partners",
+          "benchmark": 2466,
+          "perf": 0.94,
+          "TBT": 264,
+          "LCP": 1667.424,
+          "SI": 2747.770485999969,
+          "server": 2.480999999999998,
+          "sampling": "disabled-by-default-v8.cpu_profiler",
+          "warningCount": 0,
+          "extraHeaderNames": []
+        }
+      ],
+      "profile": {
+        "observedAt": "2026-10-05T13:03:45.313Z",
+        "diagnosticOnly": true,
+        "samplingCanAffectTimings": true,
+        "normalGateUnchanged": true,
+        "rawTracesAndDevtoolsLogsExported": false,
+        "traces": [
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-00-53-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 49402,
+            "clockAdjustedSamples": 179,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 8457.789
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 260.225
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 80.083
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 32.956999999999994
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 7.328
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 5.038
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 4.142999999999997
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 4.086
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 3.49
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 2.609
+              },
+              {
+                "functionName": "w",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 1,
+                "column": 79363,
+                "selfMs": 2.561
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.776
+              },
+              {
+                "functionName": "ib",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 91996,
+                "selfMs": 1.604
+              },
+              {
+                "functionName": "t",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 26804,
+                "selfMs": 1.486
+              },
+              {
+                "functionName": "requestAnimationFrame",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.4609999999999999
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 80.507,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 60.859,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-01-13-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 28805,
+            "clockAdjustedSamples": 97,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 4778.93
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 167.655
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 79.919
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 32.659000000000006
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 6.259
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 5.207999999999997
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 2.778
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 2.401
+              },
+              {
+                "functionName": "rN",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 33232,
+                "selfMs": 2.249
+              },
+              {
+                "functionName": "iE",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 93086,
+                "selfMs": 2.171
+              },
+              {
+                "functionName": "A",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 1,
+                "column": 114864,
+                "selfMs": 1.95
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.703
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.6139999999999999
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 47654,
+                "selfMs": 1.566
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.523
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 80.461,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 51.513,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-01-28-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 31852,
+            "clockAdjustedSamples": 109,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 5313.973
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 194.601
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 79.72
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 34.182
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 6.769
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 5.945
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 4.815999999999993
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 3.592
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 3.061
+              },
+              {
+                "functionName": "sy",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 129312,
+                "selfMs": 2.574
+              },
+              {
+                "functionName": "nl",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 10183,
+                "selfMs": 2.348
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.715
+              },
+              {
+                "functionName": "iE",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 93086,
+                "selfMs": 1.6870000000000003
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 1.651
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.315
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 80.155,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-01-43-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 32633,
+            "clockAdjustedSamples": 77,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 5469.92
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 186.118
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 85.545
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 31.604000000000006
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 5.494
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 4.162999999999995
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 2.6029999999999998
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.511
+              },
+              {
+                "functionName": "removeChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.23
+              },
+              {
+                "functionName": "ef",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 24774,
+                "selfMs": 1.19
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 47654,
+                "selfMs": 1.1340000000000001
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.119
+              },
+              {
+                "functionName": "i",
+                "path": "/_next/static/chunks/197-13458f35dc84d028.js",
+                "line": 1,
+                "column": 2364,
+                "selfMs": 1.088
+              },
+              {
+                "functionName": "si",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 125740,
+                "selfMs": 1.017
+              },
+              {
+                "functionName": "59248",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 84,
+                "selfMs": 1.014
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 85.977,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 52.463,
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js"
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-01-58-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 42813,
+            "clockAdjustedSamples": 112,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 7167.411
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 205.82899999999998
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 88.131
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 31.759000000000004
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 6.386
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 4.143
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 4.117999999999999
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 2.6739999999999995
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 2.2479999999999998
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.918
+              },
+              {
+                "functionName": "sy",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 129312,
+                "selfMs": 1.74
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 1.73
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 131763,
+                "selfMs": 1.544
+              },
+              {
+                "functionName": "la",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 40010,
+                "selfMs": 1.507
+              },
+              {
+                "functionName": "w",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 1,
+                "column": 62718,
+                "selfMs": 1.33
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 88.553,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-02-19-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 40306,
+            "clockAdjustedSamples": 155,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 6768.2080000000005
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 276.138
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 93.37
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 32.974999999999994
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 6.355999999999992
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 5.41
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 5.261
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 3.7159999999999993
+              },
+              {
+                "functionName": "r2",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 37184,
+                "selfMs": 3.691
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 2.8560000000000003
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 2.812
+              },
+              {
+                "functionName": "requestAnimationFrame",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 2.2110000000000003
+              },
+              {
+                "functionName": "t.useInsertionEffect",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 1,
+                "column": 146681,
+                "selfMs": 2.078
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.909
+              },
+              {
+                "functionName": "rN",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 33232,
+                "selfMs": 1.727
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 93.818,
+                "path": null
+              },
+              {
+                "name": "Layout",
+                "durationMs": 60.578,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-02-37-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 51226,
+            "clockAdjustedSamples": 111,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 8690.981
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 200.042
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 76.934
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 32.53099999999999
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 6.585
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 4.262
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 3.891
+              },
+              {
+                "functionName": "iE",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 93086,
+                "selfMs": 3.272
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 3.183
+              },
+              {
+                "functionName": "sk",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 131680,
+                "selfMs": 2.661
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.948
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 1.785
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.702
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 1.532
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 131763,
+                "selfMs": 1.359
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 77.062,
+                "path": null
+              },
+              {
+                "name": "Layout",
+                "durationMs": 54.707,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 51.074,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-02-54-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 35485,
+            "clockAdjustedSamples": 124,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 5914.882
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 240.22
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 92.831
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 36.99900000000001
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 6.07
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 4.655999999999994
+              },
+              {
+                "functionName": "j",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 14086,
+                "selfMs": 4.641
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 3.5549999999999997
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 2.883
+              },
+              {
+                "functionName": "o8",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 74536,
+                "selfMs": 2.875
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 2.447
+              },
+              {
+                "functionName": "sy",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 129312,
+                "selfMs": 1.935
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.883
+              },
+              {
+                "functionName": "i",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 46684,
+                "selfMs": 1.815
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 1.754
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 93.33,
+                "path": null
+              },
+              {
+                "name": "Layout",
+                "durationMs": 51.181,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 50.967,
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js"
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-03-09-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 38829,
+            "clockAdjustedSamples": 76,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 6535.895
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 191.898
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 99.653
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 32.859000000000016
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 5.887
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 3.2550000000000003
+              },
+              {
+                "functionName": "o",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 1,
+                "column": 84513,
+                "selfMs": 2.239
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 131763,
+                "selfMs": 1.625
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/app/%5Blocale%5D/(public)/layout-872f7929958010ce.js",
+                "line": 1,
+                "column": 4123,
+                "selfMs": 1.484
+              },
+              {
+                "functionName": "requestAnimationFrame",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.419
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 1.2510000000000001
+              },
+              {
+                "functionName": "iE",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 93086,
+                "selfMs": 1.2279999999999998
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.214
+              },
+              {
+                "functionName": "sy",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 129312,
+                "selfMs": 1.127
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 27467,
+                "selfMs": 1.053
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 100.159,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 57.716,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              },
+              {
+                "name": "Layout",
+                "durationMs": 50.332,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-03-24-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 42992,
+            "clockAdjustedSamples": 96,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 7203.446
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 259.36400000000003
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "line": 1,
+                "column": 49920,
+                "selfMs": 87.343
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 60,
+                "selfMs": 32.53799999999999
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 7.095000000000001
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 2.955
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 2.6069999999999993
+              },
+              {
+                "functionName": "11697",
+                "path": "/_next/static/chunks/1697-e2534e4003c3e8a9.js",
+                "line": 1,
+                "column": 84,
+                "selfMs": 2.465
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 2.3489999999999998
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 2.31
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 131763,
+                "selfMs": 2.182
+              },
+              {
+                "functionName": "ef",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "line": 52,
+                "column": 24774,
+                "selfMs": 2.146
+              },
+              {
+                "functionName": "getElementById",
+                "path": null,
+                "line": null,
+                "column": null,
+                "selfMs": 1.932
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.812
+              },
+              {
+                "functionName": "sy",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "line": 1,
+                "column": 129312,
+                "selfMs": 1.689
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 87.7,
+                "path": null
+              },
+              {
+                "name": "Layout",
+                "durationMs": 55.385,
+                "path": null
+              },
+              {
+                "name": "EvaluateScript",
+                "durationMs": 52.496,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "runId": 37317327401,
+      "sourceSha": "51a6f1bac59dd2d794fd44126e680914ea5cb7e1",
+      "conclusion": "failure",
+      "normalAcceptance": false,
+      "metrics": [
+        {
+          "file": "lhr-1791207096910.json",
+          "path": "/",
+          "fetchTime": "2026-10-05T13:31:21.642Z",
+          "benchmark": 1659,
+          "performance": 0.75,
+          "accessibility": 1,
+          "seo": 1,
+          "TBT": 841.5,
+          "LCP": 2944.4525,
+          "SI": 1956.8647317156049,
+          "server": 2.442999999999998,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207111872.json",
+          "path": "/membership",
+          "fetchTime": "2026-10-05T13:31:40.111Z",
+          "benchmark": 3047.5,
+          "performance": 0.97,
+          "accessibility": 0.97,
+          "seo": 1,
+          "TBT": 88,
+          "LCP": 2477.977,
+          "SI": 2449.2570329987407,
+          "server": 2.4049999999999994,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207126528.json",
+          "path": "/events",
+          "fetchTime": "2026-10-05T13:31:54.564Z",
+          "benchmark": 3009,
+          "performance": 0.71,
+          "accessibility": 1,
+          "seo": 1,
+          "TBT": 1405,
+          "LCP": 2726.5075,
+          "SI": 2317.987134000001,
+          "server": 2.3459999999999983,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207141092.json",
+          "path": "/programmes",
+          "fetchTime": "2026-10-05T13:32:09.244Z",
+          "benchmark": 2906,
+          "performance": 0.97,
+          "accessibility": 0.96,
+          "seo": 1,
+          "TBT": 115,
+          "LCP": 2276.024,
+          "SI": 2177.9542519999914,
+          "server": 2.271000000000001,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207162375.json",
+          "path": "/partners",
+          "fetchTime": "2026-10-05T13:32:23.764Z",
+          "benchmark": 2920,
+          "performance": 0.99,
+          "accessibility": 1,
+          "seo": 1,
+          "TBT": 105.00000000000023,
+          "LCP": 1528.867,
+          "SI": 2622.3561659999837,
+          "server": 3.0600000000000023,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207178627.json",
+          "path": "/zh",
+          "fetchTime": "2026-10-05T13:32:45.067Z",
+          "benchmark": 2973,
+          "performance": 0.93,
+          "accessibility": 1,
+          "seo": 1,
+          "TBT": 267,
+          "LCP": 2282.206,
+          "SI": 1821.8216499999955,
+          "server": 2.182999999999998,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207191868.json",
+          "path": "/zh/membership",
+          "fetchTime": "2026-10-05T13:33:01.306Z",
+          "benchmark": 3007.5,
+          "performance": 0.99,
+          "accessibility": 0.97,
+          "seo": 1,
+          "TBT": 85,
+          "LCP": 1817.0729999999999,
+          "SI": 1217.0729999999999,
+          "server": 2.7459999999999987,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207205976.json",
+          "path": "/zh/events",
+          "fetchTime": "2026-10-05T13:33:14.575Z",
+          "benchmark": 3092,
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "TBT": 130,
+          "LCP": 2283.631,
+          "SI": 1093.6309999999999,
+          "server": 2.1220000000000017,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207219135.json",
+          "path": "/zh/programmes",
+          "fetchTime": "2026-10-05T13:33:28.697Z",
+          "benchmark": 2957.5,
+          "performance": 0.98,
+          "accessibility": 0.96,
+          "seo": 1,
+          "TBT": 118,
+          "LCP": 2268.932,
+          "SI": 1218.932,
+          "server": 2.731,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        },
+        {
+          "file": "lhr-1791207239065.json",
+          "path": "/zh/partners",
+          "fetchTime": "2026-10-05T13:33:41.806Z",
+          "benchmark": 3132,
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "TBT": 171,
+          "LCP": 1843.277,
+          "SI": 2628.3427799999736,
+          "server": 2.686,
+          "warningCount": 0,
+          "extraHeaderNames": []
+        }
+      ],
+      "profile": {
+        "observedAt": "2026-10-05T13:34:00.618Z",
+        "diagnosticOnly": true,
+        "samplingCanAffectTimings": true,
+        "normalGateUnchanged": true,
+        "rawTracesAndDevtoolsLogsExported": false,
+        "traces": [
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-31-21-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 41745,
+            "clockAdjustedSamples": 211,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6558.58
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 502.42400000000004
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 85.961
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 32.259
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 28.486999999999995
+              },
+              {
+                "functionName": "createContextualFragment",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 12.803
+              },
+              {
+                "functionName": "o",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 84513,
+                "selfMs": 9.861
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6.289
+              },
+              {
+                "functionName": "w",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 79363,
+                "selfMs": 5.394
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 5.364
+              },
+              {
+                "functionName": "44081",
+                "path": "/_next/static/chunks/main-app-b4a4ebf9ad3af6c4.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 456,
+                "selfMs": 4.582
+              },
+              {
+                "functionName": "53887",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 101160,
+                "selfMs": 4.518
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 4.423
+              },
+              {
+                "functionName": "r4",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 38254,
+                "selfMs": 4.414
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 86619,
+                "selfMs": 4.395999999999999
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "EvaluateScript",
+                "durationMs": 104.073,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              },
+              {
+                "name": "FunctionCall",
+                "durationMs": 86.193,
+                "path": null
+              },
+              {
+                "name": "Layout",
+                "durationMs": 64.556,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-31-40-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 41625,
+            "clockAdjustedSamples": 87,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6658.518
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 144.264
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 59.342
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 22.440000000000005
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 8.035
+              },
+              {
+                "functionName": "r4",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 38254,
+                "selfMs": 4.508
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 3.333
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 2.9929999999999937
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 1.8519999999999999
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.777
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.533
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 1.497
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.276
+              },
+              {
+                "functionName": "iE",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 93086,
+                "selfMs": 1.217
+              },
+              {
+                "functionName": "h",
+                "path": "/_next/static/chunks/8437-a09d0b83fcec76af.js",
+                "sourceKind": "app-static",
+                "line": 2,
+                "column": 806,
+                "selfMs": 1.0379999999999998
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 59.62,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-31-54-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 41834,
+            "clockAdjustedSamples": 292,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6426.594999999999
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 170131,
+                "selfMs": 383.406
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 346.35900000000004
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 64.878
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 24.03
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 7.099
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 5.316999999999999
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 3.677999999999996
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 3.44
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 2.194
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.999
+              },
+              {
+                "functionName": "l",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 63358,
+                "selfMs": 1.637
+              },
+              {
+                "functionName": "t",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 26804,
+                "selfMs": 1.393
+              },
+              {
+                "functionName": "sk",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 131680,
+                "selfMs": 1.226
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 119979,
+                "selfMs": 1.22
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 392.277,
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js"
+              },
+              {
+                "name": "FunctionCall",
+                "durationMs": 65.318,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-32-09-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 41620,
+            "clockAdjustedSamples": 74,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6655.531999999999
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 124.032
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 69.34
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 24.41799999999999
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6.168
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 4.171999999999999
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 3.882
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/7968-ba1d1b83a9f512b5.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 6516,
+                "selfMs": 1.836
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 1.776
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.5
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 1.3739999999999999
+              },
+              {
+                "functionName": "r2",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 37184,
+                "selfMs": 1.223
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 131763,
+                "selfMs": 1.0919999999999999
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 27467,
+                "selfMs": 0.963
+              },
+              {
+                "functionName": "t",
+                "path": "/_next/static/chunks/main-app-b4a4ebf9ad3af6c4.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 880,
+                "selfMs": 0.848
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 69.593,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-32-23-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 44203,
+            "clockAdjustedSamples": 106,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 7003.991
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 166.257
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 64.49
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 23.259999999999994
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 7.829000000000001
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 4.726
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 3.819
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 2.8339999999999996
+              },
+              {
+                "functionName": "sy",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 129312,
+                "selfMs": 2.303
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 1.7659999999999998
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/app/%5Blocale%5D/(public)/layout-872f7929958010ce.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 4123,
+                "selfMs": 1.583
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.439
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 1.3719999999999999
+              },
+              {
+                "functionName": "ef",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 24774,
+                "selfMs": 1.3519999999999999
+              },
+              {
+                "functionName": "r2",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 37184,
+                "selfMs": 1.322
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 64.929,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-32-45-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 40510,
+            "clockAdjustedSamples": 172,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6347.781
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 421.13599999999997
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 65.504
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 26.077999999999996
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 10.059
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 4.091999999999997
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 3.634
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 3.435
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/8437-a09d0b83fcec76af.js",
+                "sourceKind": "app-static",
+                "line": 2,
+                "column": 2666,
+                "selfMs": 2.809
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 2.466
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.996
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/app/%5Blocale%5D/(public)/page-7c40d6d90afd34ab.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 560,
+                "selfMs": 1.545
+              },
+              {
+                "functionName": "aU",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 56174,
+                "selfMs": 1.502
+              },
+              {
+                "functionName": "h",
+                "path": "/_next/static/chunks/8437-a09d0b83fcec76af.js",
+                "sourceKind": "app-static",
+                "line": 2,
+                "column": 806,
+                "selfMs": 1.405
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 1.365
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "Layout",
+                "durationMs": 210.112,
+                "path": null
+              },
+              {
+                "name": "FunctionCall",
+                "durationMs": 66.32,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-33-01-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 31608,
+            "clockAdjustedSamples": 107,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 4965.647999999999
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 164.33
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 54.589
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 23.01400000000001
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 9.179
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 3.801999999999995
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 2.97
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 2.7520000000000002
+              },
+              {
+                "functionName": "i",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 46684,
+                "selfMs": 2.6460000000000004
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 46649,
+                "selfMs": 2.188
+              },
+              {
+                "functionName": "r4",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 38254,
+                "selfMs": 2.181
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 1.923
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.422
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 1.417
+              },
+              {
+                "functionName": "iE",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 93086,
+                "selfMs": 1.371
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 55.027,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-33-14-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 38748,
+            "clockAdjustedSamples": 110,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6108.099
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 186.258
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 67.433
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 25.326999999999988
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6.718
+              },
+              {
+                "functionName": "us",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108481,
+                "selfMs": 4.88
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 4.0489999999999995
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 3.5079999999999947
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 3.185
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 2.686
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 2.668
+              },
+              {
+                "functionName": "setTimeout",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.256
+              },
+              {
+                "functionName": "ey",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 27652,
+                "selfMs": 1.222
+              },
+              {
+                "functionName": "t.useEffect",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 146444,
+                "selfMs": 1.172
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/7968-ba1d1b83a9f512b5.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 17026,
+                "selfMs": 1.164
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 67.827,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-33-28-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 30133,
+            "clockAdjustedSamples": 80,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 4730.48
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 144.738
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 70.531
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 23.766000000000002
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 8.077
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 4.881
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 3.7019999999999946
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 2.0140000000000002
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 1.4189999999999996
+              },
+              {
+                "functionName": "ef",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 24774,
+                "selfMs": 1.3639999999999999
+              },
+              {
+                "functionName": "la",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 40010,
+                "selfMs": 1.171
+              },
+              {
+                "functionName": "57121",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 111384,
+                "selfMs": 1.06
+              },
+              {
+                "functionName": "59248",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 84,
+                "selfMs": 1.043
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.036
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 27467,
+                "selfMs": 0.849
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 70.86,
+                "path": null
+              }
+            ]
+          },
+          {
+            "file": "hkwtia.vercel.app_2026-10-05_13-33-41-0.trace.json",
+            "sampledProfiles": 2,
+            "sampleCount": 45198,
+            "clockAdjustedSamples": 110,
+            "cpuSelf": [
+              {
+                "functionName": "(idle)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 7174.976000000001
+              },
+              {
+                "functionName": "(program)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 224.661
+              },
+              {
+                "functionName": "read_",
+                "path": null,
+                "sourceKind": "auditor-or-browser-internal",
+                "line": 1,
+                "column": 49920,
+                "selfMs": 57.478
+              },
+              {
+                "functionName": "s",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 60,
+                "selfMs": 25.810999999999996
+              },
+              {
+                "functionName": "(garbage collector)",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 6.886
+              },
+              {
+                "functionName": "ax",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 53645,
+                "selfMs": 5.098
+              },
+              {
+                "functionName": "appendChild",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 4.011
+              },
+              {
+                "functionName": "ih",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 83649,
+                "selfMs": 3.138
+              },
+              {
+                "functionName": "fetch",
+                "path": null,
+                "sourceKind": "native-or-unknown",
+                "line": null,
+                "column": null,
+                "selfMs": 1.655
+              },
+              {
+                "functionName": "s.tu",
+                "path": "/_next/static/chunks/webpack-fd7bc305a5f98e8f.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 2541,
+                "selfMs": 1.565
+              },
+              {
+                "functionName": "uf",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 108968,
+                "selfMs": 1.5430000000000001
+              },
+              {
+                "functionName": "cs",
+                "path": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 159847,
+                "selfMs": 1.419
+              },
+              {
+                "functionName": "e",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 52,
+                "column": 24797,
+                "selfMs": 1.383
+              },
+              {
+                "functionName": "(anonymous)",
+                "path": "/_next/static/chunks/8437-a09d0b83fcec76af.js",
+                "sourceKind": "app-static",
+                "line": 2,
+                "column": 2561,
+                "selfMs": 1.324
+              },
+              {
+                "functionName": "eM",
+                "path": "/_next/static/chunks/3794-47c81dc35ec85979.js",
+                "sourceKind": "app-static",
+                "line": 1,
+                "column": 38784,
+                "selfMs": 1.305
+              }
+            ],
+            "longTasks": [
+              {
+                "name": "FunctionCall",
+                "durationMs": 57.838,
+                "path": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "observations": {
+    "firstInternalReadSelfMs": 85.961,
+    "internalReadSourceKind": "auditor-or-browser-internal",
+    "internalReadIsNotAppCompiledAsset": true,
+    "internalReadDoesNotProveWholeRootCause": true,
+    "normalReportUnusedJavascriptBytes": {
+      "react": 23042,
+      "next": 23013
+    },
+    "normalReportFrameworkBootupMs": {
+      "next": 928.836,
+      "webpack": 306.576
+    },
+    "normalReportJavaScriptEvaluationMs": 1375.904,
+    "normalReportStyleLayoutMs": 665.036,
+    "documentResponseIsNotDatabaseTiming": true,
+    "securityOrAuthorizationDisabled": false
+  },
+  "remainingEvidence": "Controlled same-browser/hardware cold/warm measurements and measured-window attribution of the actual failed normal navigation; do not infer root cause from CPU sampling or change the original acceptance threshold."
+}

@@ -144,3 +144,7 @@ Auth owner：可控制的 Google challenge／mailbox；worker owner：精確 clo
 ## 2026-10-05 正式冷首頁 Lighthouse 反證
 
 兩次正常 Linux gate 的 EN首頁0.88／0.82均FAIL，保留全部20reports；本機不同Chrome版本0.97–0.98不作closure。T15轉回調查，UC-37／AC-23及F-AI14追加新反證，原40UC baseline/source JSON不變。選用CPU診斷與實際限制見 `evidence/t15/production-monitor-20261005/README.md`／`results.json`；沒有降低門檻或改正式配置。
+
+## 2026-10-05 21:44 香港時間 — CPU 來源已分辨，正式效能仍未結案
+
+PR145選用診斷及讀取器新17focused、同一真Chrome trace、完整6779unit／596guardedskip／worker57及strings/lint/types/build通過。保留首次local2FAIL及兩次正常Production0.88/0.82FAIL；兩個採樣run0.91PASS／0.75首頁與0.71eventsFAIL都不作normal acceptance。內部read_85.961ms不是網站compiled asset，但whole rootCauseConfirmed=false。Actual20sampled metrics／CPU來源與local/CI receipts見 `evidence/t15/production-monitor-20261005/{cpu-diagnostics,repository-gates}.json`；原40UC不變、194refs完整。只做診斷來源與证據，沒有Production配置／app／DB／worker／provider變更，fullFixComplete=false。

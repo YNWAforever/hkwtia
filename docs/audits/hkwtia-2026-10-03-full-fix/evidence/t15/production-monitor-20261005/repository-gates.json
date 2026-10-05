@@ -1,0 +1,109 @@
+{
+  "observedAt": "2026-10-05T13:44:21.806Z",
+  "sourceHeadSha": "51a6f1bac59dd2d794fd44126e680914ea5cb7e1",
+  "exactHeadCi": {
+    "conclusion": "success",
+    "createdAt": "2026-10-05T13:30:28Z",
+    "databaseId": 37317330063,
+    "headSha": "51a6f1bac59dd2d794fd44126e680914ea5cb7e1",
+    "updatedAt": "2026-10-05T13:35:20Z",
+    "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37317330063",
+    "tests": {
+      "unitPassed": 6779,
+      "guardedSkipped": 596,
+      "workerPassed": 57,
+      "failed": 0
+    }
+  },
+  "local": {
+    "environment": {
+      "os": "Windows",
+      "node": "24.18.0",
+      "next": "16.3.6",
+      "runner": "Vitest3.2.7",
+      "developmentEnv": "existing isolated .env.local; no Production values/fixture writes in this slice"
+    },
+    "firstUnboundedRun": {
+      "command": "npm.cmd test",
+      "passed": 6776,
+      "skipped": 596,
+      "failed": 2,
+      "failedFile": "tests/unit/homepage.test.tsx",
+      "failures": [
+        "English async render exceeded the existing 20000ms timeout",
+        "Following zh-HK render found 24 landmarks instead of 12 after the timed-out English render"
+      ],
+      "preserved": true
+    },
+    "unchangedHomepageFocused": {
+      "command": "npm.cmd test -- tests/unit/homepage.test.tsx",
+      "passed": 9,
+      "failed": 0
+    },
+    "boundedFullRun": {
+      "command": "npm.cmd test -- --maxWorkers=2",
+      "passed": 6779,
+      "skipped": 596,
+      "failed": 0,
+      "passedFiles": 798,
+      "fullySkippedFiles": 104,
+      "partialSkipFiles": 6,
+      "durationSeconds": 1637.43,
+      "workspaceProgressedDuringRun": "13a81a to 51a6f1; the log confirms all eight final diagnostic tests executed; exact immutable-head proof is the CI receipt above.",
+      "unchangedAssertionsAndTimeouts": true
+    },
+    "sequentialGates": [
+      {
+        "gate": "full-unit",
+        "exitCode": 0,
+        "observedAt": "2026-10-05T13:33:26.050Z"
+      },
+      {
+        "gate": "strings",
+        "exitCode": 0,
+        "observedAt": "2026-10-05T13:33:29.979Z"
+      },
+      {
+        "gate": "lint",
+        "exitCode": 0,
+        "observedAt": "2026-10-05T13:35:28.224Z"
+      },
+      {
+        "gate": "typecheck",
+        "exitCode": 0,
+        "observedAt": "2026-10-05T13:35:56.126Z"
+      },
+      {
+        "gate": "build",
+        "exitCode": 0,
+        "observedAt": "2026-10-05T13:38:03.946Z"
+      }
+    ],
+    "lint": {
+      "errors": 0,
+      "warnings": 100
+    },
+    "focused": {
+      "command": "npm.cmd test -- tests/unit/lighthouse-cpu-evidence.test.ts tests/unit/production-lhci-target.test.ts",
+      "passed": 17,
+      "failed": 0
+    },
+    "behaviorFailuresBeforeFix": {
+      "missingSourceKind": 2,
+      "blobOriginMisclassification": 1,
+      "existingProfileClockAndThreadFailures": 2
+    },
+    "realExistingAnonymousChromeTrace": {
+      "command": "node C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia/scripts/summarize-lighthouse-cpu.mjs",
+      "cwd": "ignored profile-native directory",
+      "exitCode": 0,
+      "sampledProfiles": 1,
+      "sampleCount": 9520,
+      "clockAdjustedSamples": 8,
+      "newBrowserOrProviderCalls": 0
+    },
+    "skips": "596 explicitly guarded tests; original task-scoped real integration receipts remain in the full release package, skips are not passes."
+  },
+  "normalProductionLighthouse": "FAIL_UNRESOLVED",
+  "fullFixComplete": false
+}
