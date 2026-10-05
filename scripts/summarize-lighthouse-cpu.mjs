@@ -12,6 +12,21 @@ function publicScriptPath(value) {
     return /^\/_next\/static\/[A-Za-z0-9/_.()%\[\]-]+$/.test(url.pathname) ? url.pathname : null;
   } catch { return null; }
 }
+function cpuSourceKind(value) {
+  if (typeof value !== 'string' || value === '') return 'native-or-unknown';
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'blob:') return 'blob';
+    if (url.protocol === 'wasm:') return 'wasm';
+    if (url.protocol === 'data:') return 'data';
+    if (url.protocol === 'chrome-extension:') return 'extension';
+    if (PUBLIC_ORIGINS.has(url.origin) && !url.username && !url.password) {
+      return publicScriptPath(value) ? 'app-static' : 'app-inline-or-eval';
+    }
+    if (['pptr:', 'lighthouse:', 'chrome:', 'devtools:'].includes(url.protocol)) return 'auditor-or-browser-internal';
+    return 'external-or-redacted';
+  } catch { return 'eval-or-injected'; }
+}
 function safeFunctionName(value) {
   return typeof value === 'string' && /^[$\w()[\].<> -]{0,120}$/.test(value) && !/sk_(?:test|live)_|sk-proj-|secret|token|password|cookie/i.test(value)
     ? value || '(anonymous)' : '(redacted)';
@@ -49,7 +64,7 @@ export function summarizeLighthouseTrace(trace) {
     for (const [id, us] of profile.times) {
       const frame = profile.nodes.get(id);
       if (!frame) throw new Error('LIGHTHOUSE_PROFILE_NODE_MISSING');
-      const row = {functionName: safeFunctionName(frame.functionName), path: publicScriptPath(frame.url), line: Number.isInteger(frame.lineNumber) && frame.lineNumber >= 0 ? frame.lineNumber + 1 : null, column: Number.isInteger(frame.columnNumber) && frame.columnNumber >= 0 ? frame.columnNumber + 1 : null};
+      const row = {functionName: safeFunctionName(frame.functionName), path: publicScriptPath(frame.url), sourceKind: cpuSourceKind(frame.url), line: Number.isInteger(frame.lineNumber) && frame.lineNumber >= 0 ? frame.lineNumber + 1 : null, column: Number.isInteger(frame.columnNumber) && frame.columnNumber >= 0 ? frame.columnNumber + 1 : null};
       const key = JSON.stringify(row), previous = frames.get(key);
       if (previous) previous.selfMs += us / 1000;
       else frames.set(key, {...row, selfMs: us / 1000});

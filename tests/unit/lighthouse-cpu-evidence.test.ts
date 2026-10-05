@@ -13,7 +13,7 @@ describe('public Lighthouse CPU evidence', () => {
     const result = summarizeLighthouseTrace(trace());
     expect(result.sampledProfiles).toBe(1);
     expect(result.sampleCount).toBe(2);
-    expect(result.cpuSelf).toEqual([{functionName: 'hydrate', path: '/_next/static/chunks/app.js', line: 1, column: 41, selfMs: 3}]);
+    expect(result.cpuSelf).toEqual([{functionName: 'hydrate', path: '/_next/static/chunks/app.js', sourceKind: 'app-static', line: 1, column: 41, selfMs: 3}]);
   });
   it('keeps equal node IDs in different renderer profiles separate', () => {
     const first = trace();
@@ -45,6 +45,14 @@ describe('public Lighthouse CPU evidence', () => {
     const exported = JSON.stringify(result);
     for (const value of [secret, 'password', 'synthetic-token', 'secret-code', 'synthetic-cookie', 'private-token', 'private-bearer', 'synthetic-email']) expect(exported).not.toContain(value);
     expect(result.cpuSelf[0].path).toBe(null);
+  });
+  it('distinguishes worker and injected CPU sources without disclosing their private URLs', () => {
+    for (const [url, sourceKind] of [['blob:https://hkwtia.vercel.app/private-canary', 'blob'], ['wasm://wasm/private-canary', 'wasm'], ['pptr:internal?token=private-canary', 'auditor-or-browser-internal'], ['https://hkwtia.vercel.app/?code=private-canary', 'app-inline-or-eval'], ['https://external.example/private-canary', 'external-or-redacted']] as const) {
+      const result = summarizeLighthouseTrace(trace([frame(1, 'read_', url)]));
+      expect(result.cpuSelf[0].sourceKind).toBe(sourceKind);
+      expect(result.cpuSelf[0].path).toBeNull();
+      expect(JSON.stringify(result)).not.toContain('private-canary');
+    }
   });
   it('does not invent CPU samples from a normal unsampled trace', () => {
     const result = summarizeLighthouseTrace({traceEvents: [{name: 'Layout', dur: 60000}]});
