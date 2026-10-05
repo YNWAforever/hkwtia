@@ -2,6 +2,7 @@ import type {MilestoneRecord} from "@/content/schemas";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {byYearDescending} from "@/lib/history/milestones";
+import {readableMilestoneBody} from "@/lib/history/readable-body";
 
 type MilestoneTimelineProps = Readonly<{
   locale: AppLocale;
@@ -48,8 +49,7 @@ export function MilestoneTimeline({locale, readMoreLabel, milestones}: Milestone
                       </p>
                     ) : (
                       <div className="mt-4 max-w-3xl space-y-3 leading-relaxed text-muted-foreground">
-                        {(locale === "en" ? milestone.bodyEn : milestone.bodyZh)
-                          .split("\n\n")
+                        {readableMilestoneBody(locale === "en" ? milestone.bodyEn : milestone.bodyZh)
                           .map((paragraph, index) => (
                             // Paragraphs belong to one frozen content record and never reorder, so
                             // an index key is stable for this list's lifetime.

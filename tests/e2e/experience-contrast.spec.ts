@@ -92,6 +92,21 @@ test.describe('public surface contrast', () => {
     expect(await contrastOf(page, '.route-lead')).toBeGreaterThanOrEqual(4.5);
   });
 
+  test('index numerals on white read at AA on /programmes, /showcase and /launchpad', async ({page}) => {
+    // Pre-existing on production 2026-10-05 (axe): the light accent blues measured 2.96:1 and
+    // 3.73:1 as 10-11px numerals on white.
+    await render(page, `
+      <section class="section"><div class="shell">
+        <nav class="programme-groupings"><a href="#catalogue"><span>01</span><span>Catalogue</span></a></nav>
+        <div class="solution-needs"><form class="contents"><button type="submit"><span>01</span><span>AI concierge</span></button></form></div>
+        <div class="service-grid"><article><span>01</span><h3>Cohort</h3><p>Copy</p></article></div>
+      </div></section>`);
+
+    expect(await contrastOf(page, '.programme-groupings a > span:first-child')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.solution-needs button > span:first-child')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.service-grid article > span')).toBeGreaterThanOrEqual(4.5);
+  });
+
   test('the measuring helper detects an unreadable pair', async ({page}) => {
     // Proves the guard can fail: white on white must measure 1:1.
     await render(page, `<div style="background:#fff"><p id="bad" style="color:#fff">x</p></div>`);

@@ -545,3 +545,25 @@
  * isolated database, which has open events, shows it on every load. Pinned by
  * tests/e2e/experience-contrast.spec.ts. */
 .opportunity-section .service-link h3 { color: var(--wt-ink); }
+
+/* ─── Index numerals on white ─────────────────────────────────────────────────────────────
+ * Three donor index styles colour their "01/02/03" numerals in the light accent blues, which
+ * pass on ink and fail on white: --wt-blue #729bb5 measures 2.96:1 (.programme-groupings on
+ * /programmes, .solution-needs on /showcase) and --wt-jade #5188bf 3.73:1 (.service-grid on
+ * /launchpad). axe flagged all three on production 2026-10-05. --wt-accent-text #315f82 keeps
+ * the blue family at 6.9:1. */
+.programme-groupings a span:first-child,
+.programme-groupings li span:first-child,
+.solution-needs button > span:first-child,
+.service-grid article > span { color: var(--wt-accent-text); }
+
+/* ─── Long tokens never widen the page ────────────────────────────────────────────────────
+ * Archive bodies carry bare URLs (http://contest2020.bestasiaapp.hk/) and event titles can
+ * carry slugs; one unbreakable token pushed nine /about/history entries and the open-event
+ * cards past a 320px screen, where .site-root's overflow clip cut the text off (WCAG 1.4.10).
+ * `anywhere` also lowers min-content, which is what lets the grid track shrink. */
+.site-root main :is(p, li, dd, h2, h3, a) { overflow-wrap: anywhere; }
+.service-grid, .service-grid > * { min-width: 0; }
+/* A flex row's input keeps its intrinsic min width, so between 521 and 820px the search box and
+ * its button overran the shell by ~38px. */
+.directory-search > div > input { min-width: 0; }

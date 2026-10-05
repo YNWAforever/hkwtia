@@ -5,6 +5,7 @@ import {Arrow} from '@/components/wt/arrow';
 import {milestones} from '@/content/milestones';
 import {Link} from '@/i18n/navigation';
 import {featuredOnly} from '@/lib/history/milestones';
+import {readableMilestoneBody} from '@/lib/history/readable-body';
 
 // Section 11 of 13 (D-9). Top 4 featured milestones with at least one image; hidden
 // entirely below that. app/styles/wisetech.css:517 .archive-proof; :521 .archive-photo-grid;
@@ -42,7 +43,7 @@ export async function ArchiveStories({locale, copyOverrides}: HomeCopyProps) {
             // token and uses [0] as its hero lead); dropping the whole body into one
             // <p> collapsed every break to a space and rendered the card as a single
             // run-on block.
-            const body = (useChinese ? story.bodyZh : story.bodyEn).split('\n\n')[0]!;
+            const body = readableMilestoneBody(useChinese ? story.bodyZh : story.bodyEn)[0] ?? '';
             const alt = useChinese ? image.altZh : image.altEn;
             return (
               <figure className={index === 0 ? 'archive-photo-card archive-photo-feature' : 'archive-photo-card'} key={story.slug}>

@@ -13,6 +13,7 @@ import {
 import {milestones} from "@/content/milestones";
 import {findBySlug, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle} from "@/lib/metadata";
+import {readableMilestoneBody} from "@/lib/history/readable-body";
 import {ogImagePath} from "@/lib/og/resolve-renderer";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
@@ -201,7 +202,9 @@ describe("history detail pages", () => {
         locale,
         pathname: `/about/history/${gallerySlug}`,
         title: brandedTitle(locale, title),
-        description: body.slice(0, 160),
+        // Built from the readable paragraphs: the raw body carried "\n\n" breaks and, in eight
+        // migrated records, `[pdf-embedder …]` shortcodes into the meta description.
+        description: readableMilestoneBody(body).join(" ").slice(0, 160),
         // Phase D: every detail page now points its metadata at its own share card.
         image: ogImagePath({kind: "milestone", title, eyebrow, imageUrl: null}),
       };
