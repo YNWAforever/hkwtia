@@ -158,8 +158,8 @@ viewports are not physical devices.
   count as the repo's own baseline receipts), and **1 failed**: `page-copy-scope` pins the
   number of staff-editable strings. This pass deliberately added 22 editable Home strings;
   the test was updated to the new exact counts (166 → 188, 577 → 599) with the arithmetic
-  written beside them. The assertion is still an exact equality, not a loosened one. See the
-  full re-run result below.
+  written beside them. The assertion is still an exact equality, not a loosened one. The full re-run after that
+  change: **6,792 passed, 596 guarded skips, 0 failed** (904 files, 1,472s).
 - `npm run typecheck`: 0 errors. `npm run lint`: 0 errors, 77 pre-existing warnings, and
   **0 warnings in any file this branch touches**. `npm run audit:strings`: passed (325 files).
 - `npm run build` (Next 16.3.6, webpack): passed three times during the pass.
