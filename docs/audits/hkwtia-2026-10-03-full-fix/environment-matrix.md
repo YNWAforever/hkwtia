@@ -112,3 +112,9 @@ T10 exact Preview19 includes actual bilingual review/adoption with0outbound and 
 - 單一Production DATABASE_URL官方API也遮罩value，已確認唯一Production-scoped配置type=sensitive；0SQL/0migrations。需DB owner提供provenance已核對的只讀來源，不另選Neon branch或匯出全部Production env。
 - Existing cloud worker67abdfce的bounded passive tail沒有兩個已驗證排程窗口；沒有觸發或修改它。未觀察到事件不代表所有jobs故障，仍不能宣稱T02 operational。
 - 原40UC／24AC、source-map及過去回執未改。新receipt在evidence/t16/operational-readiness-20261005；待批准操作及分開資源來源見operational-acceptance-approval.zh-HK.md。三項具體資源／授權要求已提出且仍pending；elapsed time／「完整修復」不能填作具體provider費用、憑證傳送或安全配置批准。
+## 2026-10-05 19:51 香港時間 — 隔離環境續期及最新門檻
+
+- Owned synthetic branch `br-lingering-unit-azxl75s5`／`codex-audit-20260927` 在到期前只延長 expiration 24 小時：新期限 `2026-10-06T12:00Z`（香港10月6日20:00）。官方 CLI `branches set-expiration` 後另做 branch list readback；nonprimary/nondefault/unprotected/ready 保持。沒有修改 compute、schema、資料、Auth、憑證或正式環境。
+- 續期前後均 READ ONLY 正向核對原 DB/Auth host、sentinel1、ledger61及保留合成網域外 profile/contact0；0fixture writes／provider calls。先前03:54Z回執與舊ZIP的10月5日期限是歷史觀察，沒有覆寫。
+- Fresh anonymous Preview三個入口仍302 Vercel Authentication；fresh單一Production DATABASE_URL仍敏感值遮罩，0SQL。實際Production source仍ed550b96。沒有把exit0 diagnostic寫成integration pass。
+- Actual maintenance、isolation及blocked receipts：`evidence/t16/environment-refresh-20261005/`。遠端Preview／Cloudflare服務secret傳送的具體批准仍pending；AI專用key／data-purpose-spend、受控Google／允許mailbox、provider／worker兩窗口及真人政策門檻均保留。

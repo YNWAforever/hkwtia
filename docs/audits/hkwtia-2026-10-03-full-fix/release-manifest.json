@@ -66,7 +66,10 @@
       "evidence/t16/preview-runtime.json",
       "evidence/t16/native-preview.json"
     ],
-    "expiresAt": "2026-10-05T12:00:00Z"
+    "expiresAt": "2026-10-06T12:00:00Z",
+    "previousExpiresAtObserved": "2026-10-05T12:00:00Z",
+    "lifecycleReceipt": "evidence/t16/environment-refresh-20261005/isolated-branch-extension.json",
+    "latestReadOnlyIsolationReceipt": "evidence/t16/environment-refresh-20261005/isolation-current.json"
   },
   "rollback": {
     "migrationReceipt": "evidence/t16/migration-recovery.json",
