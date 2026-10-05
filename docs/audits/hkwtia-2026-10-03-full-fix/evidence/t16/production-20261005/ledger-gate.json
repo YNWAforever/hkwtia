@@ -1,0 +1,12 @@
+{
+  "observedAt": "2026-10-05T02:01:11.373Z",
+  "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "status": "BLOCKED_DEPLOYMENT_DATABASE_URL_REDACTED",
+  "scope": "read-only migration ledger/schema metadata; no member records or fixture data",
+  "credentialSource": "specific current deployment DATABASE_URL in memory only; no Production env export",
+  "databaseQueriesExecuted": 0,
+  "migrationWrites": 0,
+  "seedWrites": 0,
+  "secretValuesPrintedOrStored": false
+}

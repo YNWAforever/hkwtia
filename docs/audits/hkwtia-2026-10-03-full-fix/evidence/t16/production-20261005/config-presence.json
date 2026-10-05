@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-10-05T01:47:26.659Z",
+  "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "state": "READY",
+  "target": "production",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "gitProductionBranch": "release",
+  "selectedProductionPresence": {
+    "CONCIERGE_COOKIE_SECRET": false,
+    "NEON_AUTH_COOKIE_SECRET": true,
+    "RATE_LIMIT_KEY_SECRET": true,
+    "ADMIN_BATCH_ENABLED": false,
+    "AGENTS_ENABLED": false,
+    "ADMIN_AI_ENABLED": false
+  },
+  "secretValuesReadOrPrinted": false,
+  "runtimeFlagsValues": "not verified by redacted env presence",
+  "productionChangedByThisRun": false
+}

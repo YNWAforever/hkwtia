@@ -1,0 +1,9 @@
+{
+  "route": "/admin-login",
+  "publicMainLandmarks": 1,
+  "ids": [
+    ""
+  ],
+  "source": "#main-content is not the standalone admin-login landmark contract",
+  "noLoginOrMessageAttempt": true
+}

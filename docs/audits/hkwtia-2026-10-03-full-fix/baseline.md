@@ -17,3 +17,7 @@ All nine recorded commands exited 0 at runtime source `36ebae1dac68a7e0e420870cf
 ## Latest execution state
 
 T00 values above remain historical. Current candidate, Preview, Production readback and separate code/configuration/deployment/operational gates are recorded in release-manifest.json and status.csv. Root unrelated work remains untouched.
+
+## 2026-10-05 deployment drift
+
+Historical audit source36eb and original receipts remain immutable. Fresh readback independently observes Production ed550b96 redeploy; no force checkout/reset/rollback or inferred new approvals. See evidence/t16/production-20261005.

@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-05T02:06:17.899Z",
+  "applicationChanged": false,
+  "initialRun": {
+    "passed": 12,
+    "expected": 16,
+    "failure": "Standalone admin-login uses an accessible main without #main-content; incorrect probe selector, not product failure."
+  },
+  "secondRun": {
+    "passed": 14,
+    "expected": 16,
+    "failure": "Shared anonymous context retained HK locale cookie; corrected to fresh locale contexts, no product routing change."
+  },
+  "originalNativeFailuresRetained": true,
+  "productionLedger": "specific deployment DATABASE_URL redacted; 0 queries; no full env export or secret values",
+  "snapshot": "Oct1 generated file excluded from new staging; byte-equal to committed content"
+}

@@ -1,0 +1,158 @@
+{
+  "observedAt": "2026-10-05T01:59:49.560Z",
+  "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "target": "production",
+  "publicUrl": "https://hkwtia.vercel.app",
+  "browser": "fresh anonymous Chromium contexts; no reused user cookies",
+  "passed": 14,
+  "expected": 16,
+  "checks": [
+    {
+      "case": "public concise fallback",
+      "locale": "en",
+      "width": 1440,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "en-1440-safe-disabled.png",
+      "screenshotSha256": "63e69d3bda59871a64fba462866266223f05f49d8c3cdf3e717399a14a981696"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "en",
+      "width": 390,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "en-390-safe-disabled.png",
+      "screenshotSha256": "1db49f292b7f784e5b263a230a0d538f59eee97373cfc1ea61fe5f872e51acdd"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "zh-HK",
+      "width": 1440,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "zh-HK-1440-safe-disabled.png",
+      "screenshotSha256": "403e63df1b547c35e6017ef2a0edc98abbc70eb152da2fca8785309a445d009b"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "zh-HK",
+      "width": 390,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "zh-HK-390-safe-disabled.png",
+      "screenshotSha256": "1fcbb424c9f3d3de73021c1d32da13b04ffe00b6f15bec1bb7f0e2cdfc06c1b8"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/membership",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/membership",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/events",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/events",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/partners",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/partners",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/admin-login",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/admin-login",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    }
+  ],
+  "failure": {
+    "name": "AssertionError",
+    "code": "ERR_ASSERTION",
+    "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '/zh/admin-login'\n- '/admin-login'\n"
+  },
+  "fixtureWrites": 0,
+  "identityLoginRequests": 0,
+  "memberMessages": 0,
+  "paymentsOrRefunds": 0,
+  "providerCalls": "rejected before actor/database/provider runtime by exact deployed readiness source; provider telemetry not separately sampled",
+  "deploymentOrConfigMutations": 0,
+  "limits": "Safe disabled/fallback and anonymous reads only. Google/magic, authenticated Production operations, worker windows, provider success and migration ledger not verified."
+}
