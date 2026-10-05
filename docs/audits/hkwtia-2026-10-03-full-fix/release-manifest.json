@@ -304,5 +304,16 @@
       "workerPassed": 57
     }
   },
-  "candidateProductionDeploymentMeaning": "No Production candidate created or promoted by this execution; current independently observed deployment is listed under production."
+  "candidateProductionDeploymentMeaning": "No Production candidate created or promoted by this execution; current independently observed deployment is listed under production.",
+  "performanceReadback": {
+    "observedAt": "2026-10-05T12:56:27.538Z",
+    "normalProductionGate": "FAIL_UNRESOLVED",
+    "runIds": [
+      37289652737,
+      37309208646
+    ],
+    "receipt": "evidence/t15/production-monitor-20261005/results.json",
+    "normalThresholdsUnchanged": true,
+    "diagnosticSamplingNotAcceptance": true
+  }
 }
