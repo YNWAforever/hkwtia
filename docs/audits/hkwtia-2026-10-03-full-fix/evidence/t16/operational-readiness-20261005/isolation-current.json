@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-10-05T03:54:27.399Z",
+  "isolationProven": true,
+  "databaseHost": "ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech",
+  "authHost": "ep-plain-mouse-azm8pl2j.neonauth.c-3.ap-southeast-1.aws.neon.tech",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "expiresAt": "2026-10-05T12:00:00Z",
+  "sentinelCount": 1,
+  "ledgerCount": 61,
+  "outsideReservedProfiles": 0,
+  "outsideReservedContacts": 0,
+  "readOnlyTransaction": true,
+  "fixtureWrites": 0,
+  "providerCalls": 0,
+  "production": false
+}

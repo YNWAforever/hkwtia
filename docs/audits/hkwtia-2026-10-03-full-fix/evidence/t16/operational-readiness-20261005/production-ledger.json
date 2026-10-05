@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-05T03:29:19.917Z",
+  "scope": "current Production project DATABASE_URL and migration ledger metadata only",
+  "status": "BLOCKED_SPECIFIC_PRODUCTION_DATABASE_URL_REDACTED",
+  "credentialValuesStored": false,
+  "fullProductionEnvExported": false,
+  "databaseQueriesExecuted": 0,
+  "migrationWrites": 0,
+  "fixtureWrites": 0,
+  "productionDeploymentOrConfigurationMutations": 0,
+  "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "createdAt": 1791164567141,
+  "readyAt": 1791164684098,
+  "matchingProductionDatabaseConfigurations": 1,
+  "configuration": {
+    "id": "kpqyr5b9hVa3aQaP",
+    "key": "DATABASE_URL",
+    "target": [
+      "production"
+    ],
+    "type": "sensitive",
+    "updatedAt": 1784913102755,
+    "createdAt": 1784912897216
+  },
+  "safeFailure": {
+    "name": "Error",
+    "code": "BLOCKED_SPECIFIC_PRODUCTION_DATABASE_URL_REDACTED"
+  }
+}

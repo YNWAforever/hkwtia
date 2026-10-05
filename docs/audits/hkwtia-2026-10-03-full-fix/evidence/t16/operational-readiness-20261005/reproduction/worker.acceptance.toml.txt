@@ -1,0 +1,13 @@
+# Dedicated isolated target. This file is a reviewable configuration, not deployment evidence.
+# CRON_SECRET must be supplied privately after target/access/credential transport approval.
+name = "hkwtia-remediation-acceptance-20261001"
+main = "<OWNED_WORKTREE>/workers/src/entry.ts"
+compatibility_date = "2026-07-26"
+
+[triggers]
+crons = ["0 * * * *"]
+
+[vars]
+APP_URL = "https://hkwtia-usability-20261003.vercel.app"
+WORKER_REVISION = "4da4bc590dc984768bd87b1f597dfde96c81593a"
+WORKER_JOB_ALLOWLIST = "none"

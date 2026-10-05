@@ -1,0 +1,6 @@
+import {writeFileSync,mkdirSync} from 'node:fs';
+const base='https://hkwtia-usability-20261003.vercel.app';const results=[];
+for(const path of ['/zh/admin-login','/api/webhooks/stripe','/api/jobs/health']){
+ const response=await fetch(base+path,{redirect:'manual',signal:AbortSignal.timeout(20000)});const body=await response.text();results.push({path,method:'GET',status:response.status,contentType:response.headers.get('content-type'),vercelProtectionPage:/Authentication Required|Vercel Authentication/.test(body),locationHost:response.headers.get('location')?new URL(response.headers.get('location'),base).hostname:null});
+}
+const receipt={observedAt:new Date().toISOString(),target:base,results,credentialsOrCookiesSent:false,postRequests:0,providerCalls:0};mkdirSync('.playwright/complete-20261005',{recursive:true});writeFileSync('.playwright/complete-20261005/anonymous-preview-access.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));

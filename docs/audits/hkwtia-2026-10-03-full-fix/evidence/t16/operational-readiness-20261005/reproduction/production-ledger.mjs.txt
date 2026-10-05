@@ -1,0 +1,37 @@
+import {spawnSync} from 'node:child_process';
+import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {Pool} from 'pg';
+import assert from 'node:assert/strict';
+const out='.playwright/complete-20261005';mkdirSync(out,{recursive:true});
+const cli='C:/Users/laich/AppData/Roaming/npm/node_modules/vercel/dist/vc.js';
+const api=path=>{const r=spawnSync(process.execPath,[cli,'api',path,'--scope','ynwaforevers-projects'],{encoding:'utf8',windowsHide:true,maxBuffer:16*1024*1024,timeout:45000});if(r.status!==0)return null;try{return JSON.parse(r.stdout)}catch{return null}};
+const receipt={observedAt:new Date().toISOString(),scope:'current Production project DATABASE_URL and migration ledger metadata only',status:'BLOCKED_METADATA',credentialValuesStored:false,fullProductionEnvExported:false,databaseQueriesExecuted:0,migrationWrites:0,fixtureWrites:0,productionDeploymentOrConfigurationMutations:0};
+try{
+ const projectId='prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n';
+ const d=api('/v13/deployments/hkwtia.vercel.app');assert(d,'DEPLOYMENT_METADATA_UNAVAILABLE');assert.equal(d.projectId,projectId);assert.equal(d.target,'production');
+ Object.assign(receipt,{deploymentId:d.id,sourceSha:d.meta?.githubCommitSha,createdAt:d.createdAt,readyAt:d.ready});
+ const e=api('/v10/projects/'+projectId+'/env?decrypt=false');assert(e,'ENV_METADATA_UNAVAILABLE');
+ const candidates=(e.envs??[]).filter(x=>x.key==='DATABASE_URL'&&x.target?.includes('production')&&!x.gitBranch&&!x.customEnvironmentIds?.length);
+ receipt.matchingProductionDatabaseConfigurations=candidates.length;assert.equal(candidates.length,1,'DATABASE_URL_CONFIG_AMBIGUOUS');const meta=candidates[0];
+ receipt.configuration={id:meta.id,key:meta.key,target:meta.target,type:meta.type,updatedAt:meta.updatedAt,createdAt:meta.createdAt};
+ if(meta.updatedAt>d.createdAt){receipt.status='BLOCKED_CONFIGURATION_CHANGED_AFTER_DEPLOYMENT';throw new Error(receipt.status)}
+ const specific=api('/v1/projects/'+projectId+'/env/'+encodeURIComponent(meta.id));assert(specific,'SPECIFIC_ENV_READ_UNAVAILABLE');assert.equal(specific.key,'DATABASE_URL');assert(specific.target?.includes('production'));
+ const url=specific.value;if(typeof url!=='string'||!/^postgres(?:ql)?:\/\//.test(url)){receipt.status='BLOCKED_SPECIFIC_PRODUCTION_DATABASE_URL_REDACTED';throw new Error(receipt.status)}
+ const host=new URL(url).hostname;assert(host.endsWith('.neon.tech'));assert.notEqual(host,'ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech','ISOLATED_HOST_CANNOT_ESTABLISH_PRODUCTION');
+ receipt.databaseHost=host;receipt.configProvenance='single current Production-scoped DATABASE_URL; updated before observed deployment; specific value in memory only';
+ const pool=new Pool({connectionString:url,connectionTimeoutMillis:15000,query_timeout:15000,options:'-c default_transaction_read_only=on -c statement_timeout=15000'});let c;
+ try{
+  c=await pool.connect();await c.query('BEGIN READ ONLY');receipt.databaseQueriesExecuted++;
+  const flag=(await c.query('SHOW transaction_read_only')).rows[0];receipt.databaseQueriesExecuted++;assert.equal(flag.transaction_read_only,'on');receipt.readOnlyTransactionProven=true;
+  const rows=(await c.query('SELECT hash,created_at::text FROM drizzle.__drizzle_migrations ORDER BY created_at,id')).rows;receipt.databaseQueriesExecuted++;
+  const entries=JSON.parse(readFileSync('drizzle/meta/_journal.json','utf8')).entries;const lookup=new Map();
+  for(const item of entries){const r=spawnSync('git',['show','HEAD:drizzle/'+item.tag+'.sql'],{windowsHide:true,maxBuffer:3*1024*1024});assert.equal(r.status,0,'COMMITTED_MIGRATION_MISSING');const sql=r.stdout.toString('utf8');for(const variant of [sql,sql.replace(/\r\n/g,'\n'),sql.replace(/\r?\n/g,'\r\n')])lookup.set(createHash('sha256').update(variant).digest('hex'),item.tag)}
+  receipt.ledger=rows.map(row=>({hash:row.hash,createdAt:row.created_at,matchingCommittedTag:lookup.get(row.hash)??null}));receipt.ledgerCount=rows.length;receipt.committedMigrationCount=entries.length;receipt.unmatchedLedgerHashes=receipt.ledger.filter(x=>x.matchingCommittedTag===null).length;
+  const present=new Set(receipt.ledger.map(x=>x.matchingCommittedTag));receipt.missingCommittedMigrations=entries.filter(x=>!present.has(x.tag)).map(x=>x.tag);
+  await c.query('ROLLBACK');receipt.databaseQueriesExecuted++;receipt.status='READ_ONLY_PRODUCTION_LEDGER_OBSERVED';
+ }finally{if(c){await c.query('ROLLBACK').catch(()=>{});c.release()}await pool.end()}
+ const after=api('/v13/deployments/hkwtia.vercel.app');assert.equal(after?.id,d.id,'PRODUCTION_DEPLOYMENT_CHANGED_DURING_READ');receipt.deploymentStableDuringRead=true;
+}catch(error){receipt.safeFailure={name:error.name,code:/^[0-9A-Z_]+$/.test(error.message??'')?error.message:/^[0-9A-Z]{5}$/.test(error.code??'')?error.code:'READBACK_UNAVAILABLE'};if(receipt.status==='BLOCKED_METADATA')receipt.status='BLOCKED_READ_ONLY_VERIFICATION';}
+writeFileSync(out+'/production-ledger.json',JSON.stringify(receipt,null,2)+'\n');
+console.log(JSON.stringify({status:receipt.status,sourceSha:receipt.sourceSha,ledgerCount:receipt.ledgerCount??null,committed:receipt.committedMigrationCount??null,missing:receipt.missingCommittedMigrations??null,databaseQueriesExecuted:receipt.databaseQueriesExecuted,migrationWrites:0,credentialValuesStored:false,safeFailure:receipt.safeFailure??null}));
