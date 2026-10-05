@@ -1,5 +1,5 @@
 {
-  "observedAt": "2026-10-05T05:14:07.961Z",
+  "observedAt": "2026-10-05T11:53:21.654Z",
   "tasks": 22,
   "findings": 28,
   "cases": 64,
@@ -11,7 +11,7 @@
     "status.csv": "95b1f000887429829ddf2e3517cc78f9927ca7650f9d4b61ca3f31774a74605e",
     "acceptance.csv": "993badb85160507dd1e9039b938392a0c4dbaac39fc1d2a125756a0d532cf1c7",
     "source-map.json": "3adb9c6162aeb79291491f54a1827858f24a92c0025a75f329d5ce50c18078cb",
-    "release-manifest.json": "fc44af0c75344d021f5b3ce7552738804b278bdfe5f3b55e13a6e9e93616be14",
+    "release-manifest.json": "ff34ef4979365ce0a485f43bd50a30177dba6cf2281bc18891cd8c5f609a43fe",
     "rollout.md": "fb6cf310f0aa160f2c3d7c07734af51d3adeb4410f784628c2fc73b34e04efac",
     "rollback.md": "e9b119354d855214129b2b075959bc26d33adab974c65c86c7a05695bc09fe50",
     "runbook.md": "3a44e75edf3c4d1c9234da2f220deb93c0ebcece994c8cf358f2b38464965fc1"
