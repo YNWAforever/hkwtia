@@ -427,7 +427,8 @@
       "lead": "WiseTech Hong Kong is the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association — connecting corporates, SMEs, startups, professionals, academia, investors, public bodies, GBA partners and international markets.",
       "imageAlt": "Speakers and organisers at WTIA Tech Connect AI for ALL in Hong Kong",
       "actions": {
-        "findEvent": "Find Event or Activity",
+        "findRoute": "Find your route",
+        "findEvent": "Browse events",
         "join": "Join WiseTech",
         "members": "Explore Members & Solutions"
       },
@@ -449,7 +450,8 @@
         "copy": "Register for activity updates, or bring the team a defined business challenge to help shape a useful future session."
       },
       "updatesAction": "Get activity updates",
-      "challengeAction": "Submit a challenge"
+      "challengeAction": "Submit a challenge",
+      "recordLabel": "Most recent on the record"
     },
     "pathways": {
       "eyebrow": "Your pathway",
@@ -485,6 +487,44 @@
           "copy": "Connect with Hong Kong technology and market opportunities.",
           "benefits": "Soft landing · Delegations · Buyer matching",
           "cta": "Explore Launch Pad"
+        }
+      },
+      "legend": "Choose who you are",
+      "routeEyebrow": "Your route",
+      "routeLead": "Three places to start — each one a page you can act on today.",
+      "primaryLabel": "Start here",
+      "destinations": {
+        "membership": {
+          "label": "Membership",
+          "copy": "Compare plans and annual fees, from free Community to Corporate."
+        },
+        "showcase": {
+          "label": "Member & solution showcase",
+          "copy": "Browse reviewed member solutions by use case and deployment approach."
+        },
+        "events": {
+          "label": "Events",
+          "copy": "Upcoming sessions, and the record of the ones already held."
+        },
+        "launchpad": {
+          "label": "Launch Pad",
+          "copy": "Go-global cohorts, landing partners and a funding-scheme picker."
+        },
+        "partners": {
+          "label": "Partner network",
+          "copy": "Published partner records, and how to start a partnership with a defined purpose."
+        },
+        "programmes": {
+          "label": "Programmes & awards",
+          "copy": "Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, edition by edition."
+        },
+        "cpai": {
+          "label": "CPAI",
+          "copy": "A focused programme supporting applied innovation, issued directly by WTIA."
+        },
+        "committees": {
+          "label": "Committees",
+          "copy": "How WTIA committees support governance, programmes and members."
         }
       }
     },
@@ -1011,6 +1051,13 @@
     }
   },
   "AdminLogin": {
+    "explainer": {
+      "eyebrow": "Staff workspace",
+      "title": "Sign in with your WTIA staff email.",
+      "step1": "Enter your WTIA staff email address.",
+      "step2": "Open the secure sign-in link we email to you.",
+      "step3": "The workspace opens only for accounts that hold a staff role."
+    },
     "title": "Staff sign in",
     "help": "Use your WTIA staff email to request a secure sign-in link. Access to the workspace still requires a staff role.",
     "navigation": "Helpful links",
@@ -1047,6 +1094,13 @@
     }
   },
   "MemberLogin": {
+    "explainer": {
+      "eyebrow": "How sign-in works",
+      "title": "No password to remember.",
+      "step1": "Enter the email address you use with WTIA.",
+      "step2": "Open the secure sign-in link we email to you.",
+      "step3": "You return to the page you were trying to reach."
+    },
     "home": "Home",
     "join": "Join WTIA",
     "staffSignIn": "Staff sign in",
@@ -1530,6 +1584,7 @@
       "plan": "Membership",
       "anyPlan": "All tiers",
       "submit": "Search",
+      "apply": "Apply filters",
       "clear": "Clear"
     },
     "plans": {

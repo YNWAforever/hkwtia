@@ -78,7 +78,7 @@ export default async function MembersPage({params, searchParams}: Props) {
         filters={filters}
         labels={{
           search: t("filters.search"), tag: t("filters.tag"), anyTag: t("filters.anyTag"),
-          plan: t("filters.plan"), anyPlan: t("filters.anyPlan"), submit: t("filters.submit"),
+          plan: t("filters.plan"), anyPlan: t("filters.anyPlan"), submit: t("filters.submit"), apply: t("filters.apply"),
           clear: t("filters.clear"), plans,
         }}
         locale={locale}

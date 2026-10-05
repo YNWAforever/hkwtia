@@ -1,9 +1,9 @@
 import type {Metadata} from "next";
-import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {AccessDenied} from "@/components/auth/access-denied";
+import {AuthShell} from "@/components/auth/auth-shell";
 import {SignInForm} from "@/components/auth/sign-in-form";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
@@ -61,33 +61,30 @@ export default async function AdminLoginPage({params, searchParams}: Props) {
     redirect(`${localizedPath(locale, "/admin-login")}?${target.toString()}`);
   }
 
-  return <main className="min-h-screen bg-background px-4 py-8 sm:px-6 sm:py-12">
-    <div className="mx-auto max-w-3xl">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <Link aria-label={tNav("homeLabel")} className="inline-flex min-h-11 items-center gap-3" href="/">
-          <Image alt={tNav("logoAlt")} height={40} src="/images/wtia-logo.png" width={112}/>
-          <span className="text-lg font-semibold text-primary">{tNav("brand.publicName")}</span>
-        </Link>
-        <nav aria-label={t("navigation")} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/">{t("home")}</Link>
-          <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/member-login">{t("memberSignIn")}</Link>
-          <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
-        </nav>
-        <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
-      </header>
+  return <AuthShell
+      brand={{homeLabel: tNav("homeLabel"), logoAlt: tNav("logoAlt"), name: tNav("brand.publicName")}}
+      explainer={{eyebrow: t("explainer.eyebrow"), title: t("explainer.title"), steps: [t("explainer.step1"), t("explainer.step2"), t("explainer.step3")]}}
+      links={[
+        {label: t("home"), href: "/"},
+        {label: t("memberSignIn"), href: "/member-login"},
+        {label: t("support"), href: `mailto:${siteConfig.contact.email}`, external: true},
+      ]}
+      localeSwitcher={<LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>}
+      navigationLabel={t("navigation")}
+    >
       {resolution.kind === "forbidden"
-        ? <div className="mx-auto max-w-xl"><AccessDenied title={t("accessDenied")} copy={t("accessDeniedHelp")} home={t("home")} portal={t("memberPortal")}/><PortalSignOutButton destination="/admin-login" errorLabel={t("switchAccountError")} label={t("switchAccount")}/></div>
-        : resolution.kind === "needs-profile" ? <section className="glass-card mx-auto max-w-xl p-6 sm:p-10" role="alert">
+        ? <div><AccessDenied title={t("accessDenied")} copy={t("accessDeniedHelp")} home={t("home")} portal={t("memberPortal")}/><PortalSignOutButton destination="/admin-login" errorLabel={t("switchAccountError")} label={t("switchAccount")}/></div>
+        : resolution.kind === "needs-profile" ? <section className="glass-card p-6 sm:p-10" role="alert">
           <h1 className="font-serif text-3xl">{t("profileRecovery")}</h1>
           <p className="mt-3">{t("profileRecoveryHelp")}</p>
           <Link className="mt-4 inline-flex min-h-11 items-center underline" href="/member-login">{t("memberSignIn")}</Link>
           <PortalSignOutButton destination="/admin-login" errorLabel={t("switchAccountError")} label={t("switchAccount")}/>
         </section>
-        : resolution.kind === "unavailable" ? <section className="glass-card mx-auto max-w-xl p-6 sm:p-10" role="alert">
+        : resolution.kind === "unavailable" ? <section className="glass-card p-6 sm:p-10" role="alert">
           <h1 className="font-serif text-3xl">{t("identityUnavailable", {reference: resolution.reference})}</h1>
           <a className="mt-4 inline-flex min-h-11 items-center underline" href={`${localizedPath(locale, "/admin-login")}?next=${encodeURIComponent(destination)}`}>{t("retry")}</a>
         </section>
-        : <section aria-labelledby="admin-login-heading" className="glass-card mx-auto max-w-xl p-6 sm:p-10">
+        : <section aria-labelledby="admin-login-heading" className="glass-card p-6 sm:p-10">
           <h1 className="font-serif text-4xl font-semibold" id="admin-login-heading">{t("title")}</h1>
           <p className="mt-3 text-muted-foreground">{t("help")}</p>
           {errorKey(scalar(query.error)) ? <p className="mt-4 text-sm text-destructive" role="alert">{t(errorKey(scalar(query.error))!)}</p> : null}
@@ -98,6 +95,5 @@ export default async function AdminLoginPage({params, searchParams}: Props) {
               googleUnavailable: t("googleUnavailable"), providerError: t("errors.auth"), maskedTo: t("maskedTo"), waitSeconds: t("waitSeconds")}}/>
           <p className="mt-5 text-sm text-muted-foreground">{t("deliveryHelp")}</p>
         </section>}
-    </div>
-  </main>;
+    </AuthShell>;
 }

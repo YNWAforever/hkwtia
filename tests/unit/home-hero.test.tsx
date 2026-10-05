@@ -72,10 +72,16 @@ describe("Hero", () => {
 
 
     const actions = section.querySelectorAll(".hero-actions a");
+    // The primary action used to open /events?status=open, which is an empty list whenever no
+    // event is accepting registrations -- the state production was in on 2026-10-05. A first
+    // click must never land on an empty state, so the primary action now opens the route
+    // finder on this page, and events stay one click away on their full listing.
     expect(actions).toHaveLength(3);
-    expect(actions[0]).toHaveAttribute("href", "/events?status=open");
+    expect(actions[0]).toHaveAttribute("href", "#pathways");
+    expect(actions[0]).toHaveTextContent(bundles[locale].Home.hero.actions.findRoute);
     expect(actions[1]).toHaveAttribute("href", "/join");
-    expect(actions[2]).toHaveAttribute("href", "/members");
+    expect(actions[2]).toHaveAttribute("href", "/events");
+    expect(actions[2]).toHaveTextContent(bundles[locale].Home.hero.actions.findEvent);
 
     const discover = screen.getByRole("link", {name: new RegExp(bundles[locale].Home.hero.discover)});
     expect(discover).toHaveAttribute("href", "#home-discover");

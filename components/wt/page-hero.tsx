@@ -28,6 +28,52 @@ type PageHeroProps = Readonly<{
 
 const BREADCRUMB_LABEL_FALLBACK = 'Breadcrumb';
 
+// A page with no photograph used to render the right half of its hero as an empty navy slab
+// -- six public pages looked identical above the fold. The signal mark is the design system's
+// own motif (WTIA began as the wireless association: transmission arcs, receiving nodes),
+// drawn inline so it costs no request and cannot break the `img-src 'self'` CSP. The node
+// positions are derived from the title, so each page gets its own constellation while the
+// family stays consistent; the same title always draws the same mark, which keeps server and
+// client output identical and screenshots comparable.
+function signalSeed(text: string) {
+  let hash = 2166136261;
+  for (const char of text) hash = Math.imul(hash ^ (char.codePointAt(0) ?? 0), 16777619);
+  return hash >>> 0;
+}
+
+const SIGNAL_ARCS = [120, 200, 280, 360, 440] as const;
+
+// One node on each of the outer four arcs, at an angle inside the visible quarter. A pure
+// function of the seed, kept outside the component so render stays free of mutation.
+function signalNodes(seed: string) {
+  const nodes: {x: number; y: number; r: number}[] = [];
+  let state = signalSeed(seed);
+  for (const radius of SIGNAL_ARCS.slice(1)) {
+    state = Math.imul(state ^ (state >>> 15), 2246822507) >>> 0;
+    state = Math.imul(state ^ (state >>> 13), 3266489909) >>> 0;
+    const angle = Math.PI * (1.04 + ((state ^ (state >>> 16)) >>> 0) / 4294967296 * 0.42);
+    nodes.push({x: 520 + radius * Math.cos(angle), y: 520 + radius * Math.sin(angle), r: radius});
+  }
+  return nodes;
+}
+
+function SignalMark({seed}: {seed: string}) {
+  const nodes = signalNodes(seed);
+
+  return (
+    <svg className="page-hero-signal" viewBox="0 0 520 520" aria-hidden="true" focusable="false">
+      {SIGNAL_ARCS.map((radius) => (
+        <path key={radius} className="signal-arc" d={`M ${520 - radius} 520 A ${radius} ${radius} 0 0 1 520 ${520 - radius}`} />
+      ))}
+      <polyline className="signal-link" points={nodes.map((node) => `${node.x.toFixed(1)},${node.y.toFixed(1)}`).join(' ')} />
+      {nodes.map((node) => (
+        <circle key={node.r} className="signal-node" cx={node.x.toFixed(1)} cy={node.y.toFixed(1)} r="5" />
+      ))}
+      <circle className="signal-source" cx="520" cy="520" r="14" />
+    </svg>
+  );
+}
+
 export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark, actions, priority = true, breadcrumb, breadcrumbLabel, id, className}: PageHeroProps) {
   // CSP is img-src 'self': the figure is own-origin or the render fails, never a remote fetch.
   const imageSrc = image ? assertOwnOriginEditorialImage(image.src) : undefined;
@@ -50,6 +96,7 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
           <span>{artMark}</span>
         </div>
       ) : null}
+      {!image && !artMark ? <SignalMark seed={title} /> : null}
       <Shell>
         <Eyebrow light>{eyebrow}</Eyebrow>
         <h1>{title}</h1>
