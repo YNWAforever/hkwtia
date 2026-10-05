@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "SOURCE_CI_ISOLATED_PREVIEW_RECOVERY_VERIFIED_OPERATIONAL_RELEASE_GATED",
-  "generatedAt": "2026-10-04T21:11:56.310757+00:00",
+  "status": "SOURCE_CI_ISOLATED_PREVIEW_PRODUCTION_SOURCE_OBSERVED_OPERATIONAL_GATES_REMAIN",
+  "generatedAt": "2026-10-05T02:06:17.856Z",
   "fullFixComplete": false,
   "taskLedger": "tasks.csv",
   "findingLedger": "status.csv",
@@ -15,9 +15,9 @@
   "candidateSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
   "candidateProductionDeployment": null,
   "production": {
-    "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
-    "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
-    "observedAt": "2026-10-04T20:39:34.417Z",
+    "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+    "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+    "observedAt": "2026-10-05T02:03:46.738Z",
     "releasedThisScope": false,
     "flagsEnabledThisScope": false,
     "migrationsAppliedThisScope": false,
@@ -30,7 +30,23 @@
       "AGENTS_ENABLED": false,
       "ADMIN_AI_ENABLED": false
     },
-    "migrationLedger": "not freshly verified; owner gate"
+    "migrationLedger": "BLOCKED_DEPLOYMENT_DATABASE_URL_REDACTED; no Production DB query executed; ledger-gate.json",
+    "state": "READY",
+    "sourceRef": "main",
+    "deploymentSource": "redeploy",
+    "applicationSourceDeployed": true,
+    "applicationSourceDeployedByThisExecution": false,
+    "previousObservedDeployment": {
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+      "observedAt": "2026-10-04T20:39:34.417Z"
+    },
+    "operationalAcceptance": "Only anonymous reads and safe disabled concierge are verified; providers, authenticated business writes, ledger and worker windows remain gated.",
+    "readbackReceipt": "evidence/t16/production-20261005/deployment.json",
+    "configurationReceipt": "evidence/t16/production-20261005/config-presence.json",
+    "safetyReceipt": "evidence/t16/production-20261005/browser-final.json",
+    "agentRuntime": "AI_DISABLED observed; no actor/database/provider runtime entered by this probe",
+    "deploymentAuthorizationProvenance": "Observed existing redeploy; not executed by this readback. No additional capability or migration authorization inferred."
   },
   "isolated": {
     "ledger": 61,
@@ -104,7 +120,7 @@
     {
       "id": "RELEASE",
       "owner": "Release / DB operator",
-      "minimumEvidence": "named source/capability production candidate configuration, schema/flags/worker deployment approval and one-week 2staff/50perday draft-only pilot"
+      "minimumEvidence": "Release owner review of observed ed550b96 production redeploy and existing configuration; verified Production migration ledger/compatible rollback; explicit new migration/capability authorization and one-week 2staff/50perday draft-only pilot after other gates."
     }
   ],
   "releaseOrder": [
@@ -284,5 +300,6 @@
       "failed": 0,
       "workerPassed": 57
     }
-  }
+  },
+  "candidateProductionDeploymentMeaning": "No Production candidate created or promoted by this execution; current independently observed deployment is listed under production."
 }

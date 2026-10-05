@@ -116,3 +116,12 @@ Auth owner：可控制的 Google challenge／mailbox；worker owner：精確 clo
 - 946bad06：修正 legacy board/retention 對話分類，真PG RED16→GREEN14；5PG16、9Neon、166focused、最新build／5native及隔離Preview2native＋10smokePASS。
 - 程式 source CI37234145326全7green，完整6771pass／596guardedskip／0fail、worker57。完整skip檔案／environment guard清單見 evidence/t16/guarded-skip-inventory.json。
 - 發布 package 是準備與隔離回復證明；正式部署、能力啟用、真provider／Google／magic、cloud windows、human/region/policy／pilot沒有被宣稱完成。
+
+## 2026-10-05 最新正式環境讀回（取代先前36eb的當前狀態）
+
+- 正式 alias 已指向 ed550b96 / dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV，READY、main ref、source=redeploy。這是本次檢查前已有的部署；本 execution 沒有發布、migration、flags 或 provider mutation。
+- 配置及 runtime 分開：CONCIERGE_COOKIE_SECRET 未配置；AGENTS_ENABLED 未在該部署 env 名稱清單。正式 API 實際回安全503 AI_DISABLED，並非 AI 正常回答成功。獨立 cookie secret、provider/budget/purpose批准仍是啟用門檻。
+- 新 native receipt 見 evidence/t16/production-20261005/browser-final.json：4個EN/HK1440/390安全降級＋10匿名頁面＋2fresh locale context admin guard，共16項。沒有使用會員登入 cookie、沒有建 fixtures、沒有請求登入連結、沒有付款／退款／訊息／AI provider。
+- Production DATABASE_URL 在指定部署 API 被遮罩。只讀 ledger checker 以 BLOCKED 停止，0 SQL query；沒有讀完整Production env、沒有以測試 DB 代替、沒有執行 migrations。解除條件：Release/DB owner 提供 provenance 已核對、只讀連線／既有secret-store路徑，或提交当前 ledger hashes。
+- 隔離 branch br-lingering-unit-azxl75s5 新讀回仍 ready/nonprimary/nondefault/unprotected，2026-10-05T12:00Z（香港20:00）到期；Google／允許測試mailbox、worker服務身份／兩窗口、provider receipts、人工／政策／区域／pilot仍需原各owner。
+- 原始40UC、舊Production與測試回執保持其歷史時間。部署已觀察到不等於新能力已批准／啟用／operational；fullFixComplete仍false。

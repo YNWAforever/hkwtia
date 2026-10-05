@@ -1,0 +1,144 @@
+{
+  "observedAt": "2026-10-05T01:56:57.725Z",
+  "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "target": "production",
+  "publicUrl": "https://hkwtia.vercel.app",
+  "browser": "fresh anonymous Chromium contexts; no reused user cookies",
+  "passed": 12,
+  "expected": 16,
+  "checks": [
+    {
+      "case": "public concise fallback",
+      "locale": "en",
+      "width": 1440,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "en-1440-safe-disabled.png",
+      "screenshotSha256": "ed8bfba776117ea1b40bf61efa7438db421bee673e5e4128d0d74c427707b3c9"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "en",
+      "width": 390,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "en-390-safe-disabled.png",
+      "screenshotSha256": "9dd79c111a4f4827f1e83ccc1b6f0d1f6d0f7d2c716d61a2d89a0cf7e7f499d4"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "zh-HK",
+      "width": 1440,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "zh-HK-1440-safe-disabled.png",
+      "screenshotSha256": "a7c4bbf1db1c699f9d6687ffd4cb5fcb30e07bf142c4b55ff7128a23365ddbd9"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "zh-HK",
+      "width": 390,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "zh-HK-390-safe-disabled.png",
+      "screenshotSha256": "1beebed3fa0b744e509c13fb1f7954b836f896b88810a094b8ae2ff00e59da15"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/membership",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/membership",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/events",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/events",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/partners",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/partners",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    }
+  ],
+  "failure": {
+    "name": "AssertionError",
+    "code": "ERR_ASSERTION",
+    "message": "Expected values to be strictly equal:\n\n0 !== 1\n"
+  },
+  "fixtureWrites": 0,
+  "identityLoginRequests": 0,
+  "memberMessages": 0,
+  "paymentsOrRefunds": 0,
+  "providerCalls": "rejected before actor/database/provider runtime by exact deployed readiness source; provider telemetry not separately sampled",
+  "deploymentOrConfigMutations": 0,
+  "limits": "Safe disabled/fallback and anonymous reads only. Google/magic, authenticated Production operations, worker windows, provider success and migration ledger not verified."
+}

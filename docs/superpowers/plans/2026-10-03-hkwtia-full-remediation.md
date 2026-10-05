@@ -689,3 +689,9 @@ npm --prefix workers test
 - [ ] 真Google／magic mailbox、remoteprovider／真送達、scopedcloudworker兩窗口、3–5真人／screenreader／HKSG-RUM、兩星期baseline／policy與一週pilot：精確owner及最小證據见release-manifest/rollout。
 
 以上是追加的最新核對；先前任務區的未勾項是歷史跑次／外部門檻，不能藉最新source PASS推定其全部operational成立。
+
+## 2026-10-05 continued runtime readback
+- [x] Observed existing Production ed550b96/dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV redeploy; preserved historical36eb receipts. This execution performed no deployment/migration/flag/provider mutation.
+- [x] Actual Production anonymous native16: EN/HK1440/390 safe503 AI_DISABLED, question/manual links/keyboard/axe, ten public/login reads and two fresh-locale admin redirects.
+- [x] Updated22task/28finding/64case ledgers; original40UC payload unchanged; release package verifierPASS.
+- [ ] Real Google/magic identity/mailbox, scoped worker windows, provider receipts, human/policy/regional/pilot and Production ledger/config/enablement gates remain. API-redacted Production DATABASE_URL caused0SQL; no test DB substitute.

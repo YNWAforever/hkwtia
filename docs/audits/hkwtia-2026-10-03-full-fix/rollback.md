@@ -32,3 +32,12 @@ Release owner指定正式rollback deployment與值班人；Worker owner提供sco
 `node --env-file=.env.local --import tsx scripts/verify-full-rollback-web.mjs --reuse-build`
 
 程式從git archive取得36ebae1dac68a7e0e420870cf0df68fa166b7874，package-lock保持一致，以原Next16.3.6建置。第一次建置成功；重用時逐一驗archive hash、runtime檔案bytes、config/lock与BUILD_ID。唯一合成marker正向證明runtime的隔離DB來源。真密碼Auth與server取得actor，不用mock session。原Home私有草稿導致保護檢查停止，因此改用沒有own草稿的About；未刪除Home工作。真server actions儲存私人draft、public不變、發布、previous-copy回復及第二次發布成功，public projection與原fingerprint完全一致且audit retained。回執：evidence/t16/historical-web-runtime.json / historical-cms.json。此範圍沒有付款、sender、AI或cloud worker effects。
+
+## 2026-10-05 最新正式環境讀回（取代先前36eb的當前狀態）
+
+- 正式 alias 已指向 ed550b96 / dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV，READY、main ref、source=redeploy。這是本次檢查前已有的部署；本 execution 沒有發布、migration、flags 或 provider mutation。
+- 配置及 runtime 分開：CONCIERGE_COOKIE_SECRET 未配置；AGENTS_ENABLED 未在該部署 env 名稱清單。正式 API 實際回安全503 AI_DISABLED，並非 AI 正常回答成功。獨立 cookie secret、provider/budget/purpose批准仍是啟用門檻。
+- 新 native receipt 見 evidence/t16/production-20261005/browser-final.json：4個EN/HK1440/390安全降級＋10匿名頁面＋2fresh locale context admin guard，共16項。沒有使用會員登入 cookie、沒有建 fixtures、沒有請求登入連結、沒有付款／退款／訊息／AI provider。
+- Production DATABASE_URL 在指定部署 API 被遮罩。只讀 ledger checker 以 BLOCKED 停止，0 SQL query；沒有讀完整Production env、沒有以測試 DB 代替、沒有執行 migrations。解除條件：Release/DB owner 提供 provenance 已核對、只讀連線／既有secret-store路徑，或提交当前 ledger hashes。
+- 隔離 branch br-lingering-unit-azxl75s5 新讀回仍 ready/nonprimary/nondefault/unprotected，2026-10-05T12:00Z（香港20:00）到期；Google／允許測試mailbox、worker服務身份／兩窗口、provider receipts、人工／政策／区域／pilot仍需原各owner。
+- 原始40UC、舊Production與測試回執保持其歷史時間。部署已觀察到不等於新能力已批准／啟用／operational；fullFixComplete仍false。
