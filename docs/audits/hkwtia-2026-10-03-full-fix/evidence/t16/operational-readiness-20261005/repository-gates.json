@@ -1,0 +1,65 @@
+{
+  "observedAt": "2026-10-05T05:28:56.5433049Z",
+  "sourceSha": "4da4bc590dc984768bd87b1f597dfde96c81593a",
+  "branch": "codex/operational-verification-20261005",
+  "environment": {
+    "os": "Windows",
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "next": "16.3.6",
+    "providerTestEnvironmentLoadedForRootUnit": false
+  },
+  "fullUnit": {
+    "command": "npm.cmd test -- --maxWorkers=4",
+    "startedAt": "2026-10-05T05:14:33.4024123Z",
+    "finishedAt": "2026-10-05T05:24:18.032966Z",
+    "exitCode": 0,
+    "passed": 6771,
+    "skipped": 596,
+    "failed": 0,
+    "passedFiles": 797,
+    "fullySkippedFiles": 104,
+    "durationSeconds": 573.64,
+    "skipReceipt": "root-suite-skips.json"
+  },
+  "gates": [
+    {
+      "command": "npm.cmd run audit:strings",
+      "startedAt": "2026-10-05T05:24:35.473561Z",
+      "finishedAt": "2026-10-05T05:24:38.3464483Z",
+      "exitCode": 0,
+      "log": ".playwright/complete-20261005/audit-strings.log"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "startedAt": "2026-10-05T05:24:38.4188883Z",
+      "finishedAt": "2026-10-05T05:26:00.5514538Z",
+      "exitCode": 0,
+      "log": ".playwright/complete-20261005/lint.log"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "startedAt": "2026-10-05T05:26:00.567513Z",
+      "finishedAt": "2026-10-05T05:26:17.1215867Z",
+      "exitCode": 0,
+      "log": ".playwright/complete-20261005/typecheck.log"
+    },
+    {
+      "command": "npm.cmd run build",
+      "startedAt": "2026-10-05T05:26:17.1326659Z",
+      "finishedAt": "2026-10-05T05:27:26.9768103Z",
+      "exitCode": 0,
+      "log": ".playwright/complete-20261005/build.log"
+    }
+  ],
+  "visibleStringFiles": 324,
+  "lintErrors": 0,
+  "lintWarnings": 98,
+  "workerFocusedReceipt": "verification.json",
+  "focusedIntegrityCommand": "node scripts/verify-full-release-package.mjs",
+  "focusedIntegrityResult": "22 tasks / 28 findings / 64 cases / original 40 UC unchanged / 188 valid evidence references",
+  "applicationRuntimeDiff": false,
+  "productionMigrationOrConfigurationWrites": 0,
+  "fullFixComplete": false,
+  "meaning": "Required source gates passed; guarded skips and blocked provider/human/worker integrations are not successful acceptance"
+}

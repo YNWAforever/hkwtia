@@ -103,3 +103,12 @@ T10 exact Preview19 includes actual bilingual review/adoption with0outbound and 
 - Production DATABASE_URL 在指定部署 API 被遮罩。只讀 ledger checker 以 BLOCKED 停止，0 SQL query；沒有讀完整Production env、沒有以測試 DB 代替、沒有執行 migrations。解除條件：Release/DB owner 提供 provenance 已核對、只讀連線／既有secret-store路徑，或提交当前 ledger hashes。
 - 隔離 branch br-lingering-unit-azxl75s5 新讀回仍 ready/nonprimary/nondefault/unprotected，2026-10-05T12:00Z（香港20:00）到期；Google／允許測試mailbox、worker服務身份／兩窗口、provider receipts、人工／政策／区域／pilot仍需原各owner。
 - 原始40UC、舊Production與測試回執保持其歷史時間。部署已觀察到不等於新能力已批准／啟用／operational；fullFixComplete仍false。
+
+## 2026-10-05 剩餘整合門檻實際核對
+
+- main4da4bc59 的 worker focused57/57（0skip）與typecheck、native10.80KiB acceptance bundle dry-run通過。未部署／未上傳secret／未觸發job；private reviewed配置只指向既有隔離Preview且allowlist=none。
+- 現有隔離DB/Auth重新正向證明：ready/nonprimary/nondefault/unprotected、sentinel1、ledger61、保留合成網域外profiles0/contacts0；READ ONLY，0fixtures。expiry仍香港2026-10-05 20:00。
+- 真callback access blocker已定位：隔離Preview登入／Stripe webhook／jobs的anonymous GET回302 Vercel Authentication。不能把CLI/browser已登入的200當外部provider可達。只提出單一Preview domain exception的具體待批准範圍；沒有關閉project protection／應用authorization或傳project-wide bypass secret到provider。
+- 單一Production DATABASE_URL官方API也遮罩value，已確認唯一Production-scoped配置type=sensitive；0SQL/0migrations。需DB owner提供provenance已核對的只讀來源，不另選Neon branch或匯出全部Production env。
+- Existing cloud worker67abdfce的bounded passive tail沒有兩個已驗證排程窗口；沒有觸發或修改它。未觀察到事件不代表所有jobs故障，仍不能宣稱T02 operational。
+- 原40UC／24AC、source-map及過去回執未改。新receipt在evidence/t16/operational-readiness-20261005；待批准操作及分開資源來源見operational-acceptance-approval.zh-HK.md。三項具體資源／授權要求已提出且仍pending；elapsed time／「完整修復」不能填作具體provider費用、憑證傳送或安全配置批准。
