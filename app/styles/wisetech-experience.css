@@ -854,3 +854,75 @@
 .conversion-section .section-heading p:not(.eyebrow) { color: rgba(255, 255, 255, 0.76); }
 .conversion-grid { border-color: transparent; background: var(--wt-paper-bright); }
 .site-root:has(.conversion-section) .site-footer { border-top: 1px solid rgba(255, 255, 255, 0.12); }
+
+/* ─── Round 5 (2026-10-06): a chaptered page, one layout that breaks the rhythm ───────────
+ * After round 4 the homepage had ten sections, nine of them opening the same way: eyebrow,
+ * display heading, lead on the right, content below. */
+
+/* Chapter numbers. The homepage reads as one argument in nine chapters, so each eyebrow
+ * carries its place in it. Scoped to the homepage (the only page whose <main> starts with
+ * the hero). The numeral is decoration: the `/ ""` alternative text keeps screen readers
+ * from announcing "zero one" before every eyebrow.
+ * Not a CSS counter: every section after the hero is `content-visibility: auto`, whose
+ * implied style containment scopes counters to each section, so every chapter read "01".
+ * Position does the counting instead -- a section that renders nothing (no partners, no
+ * archive photographs) is simply not there, and the chapters after it close up. */
+main:has(> .hero) > section :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow { display: flex; align-items: center; gap: 12px; }
+main:has(> .hero) > section :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before {
+  flex: none;
+  padding-right: 12px;
+  border-right: 1px solid currentColor;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+main:has(> .hero) > section:nth-of-type(2) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "01"; content: "01" / ""; }
+main:has(> .hero) > section:nth-of-type(3) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "02"; content: "02" / ""; }
+main:has(> .hero) > section:nth-of-type(4) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "03"; content: "03" / ""; }
+main:has(> .hero) > section:nth-of-type(5) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "04"; content: "04" / ""; }
+main:has(> .hero) > section:nth-of-type(6) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "05"; content: "05" / ""; }
+main:has(> .hero) > section:nth-of-type(7) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "06"; content: "06" / ""; }
+main:has(> .hero) > section:nth-of-type(8) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "07"; content: "07" / ""; }
+main:has(> .hero) > section:nth-of-type(9) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "08"; content: "08" / ""; }
+main:has(> .hero) > section:nth-of-type(10) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "09"; content: "09" / ""; }
+main:has(> .hero) > section:nth-of-type(11) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "10"; content: "10" / ""; }
+main:has(> .hero) > section:nth-of-type(12) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "11"; content: "11" / ""; }
+main:has(> .hero) > section:nth-of-type(13) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "12"; content: "12" / ""; }
+
+/* The event journey is a sequence, so on a wide screen it is laid out as one: the question
+ * on the left, the three stages descending the rail on the right (the phone layout's rail,
+ * given room). It is the one chapter that does not open heading-over-content. */
+@media (min-width: 1121px) {
+  #events-journey > .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: clamp(56px, 7vw, 120px);
+    align-items: start;
+  }
+  #events-journey > .shell > :not(.section-heading):not(.event-stage-grid) { grid-column: 1 / -1; margin-top: 56px; }
+  #events-journey .section-heading { position: sticky; top: 132px; grid-template-columns: 1fr; gap: 22px; margin-bottom: 0; }
+  #events-journey .section-heading h2 { font-size: clamp(44px, 4.4vw, 72px); }
+  #events-journey .event-stage-grid { grid-template-columns: 1fr; gap: 0; padding: 8px 0 0 52px; }
+  #events-journey .event-stage-grid::before {
+    top: 16px; right: auto; bottom: 16px; left: 7px; width: 2px; height: auto;
+    background: linear-gradient(180deg, var(--wt-ink), var(--xp-signal) 70%, rgba(143, 196, 224, 0.25));
+  }
+  #events-journey .event-stage-grid article { padding: 0 0 clamp(40px, 4vw, 64px); }
+  #events-journey .event-stage-grid article:last-child { padding-bottom: 0; }
+  #events-journey .event-stage-grid article::before { top: 2px; left: -52px; }
+  #events-journey .event-stage-grid h3 { margin-top: 8px; font-size: clamp(36px, 3.2vw, 52px); }
+  #events-journey .event-stage-grid p { font-size: 16px; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1121px) {
+    #events-journey .event-stage-grid::before { animation-name: xp-rail; transform-origin: center top; }
+  }
+}
+
+/* The closing cards on a phone: the donor's 90px above each title was the largest gap left
+ * in the last screen of the page. */
+@media (max-width: 520px) {
+  .conversion-grid h3 { margin-top: 24px; }
+}
