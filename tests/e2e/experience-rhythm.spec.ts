@@ -69,3 +69,29 @@ test.describe('public surface rhythm', () => {
     expect(total).toBeLessThan(844 * 1.25);
   });
 });
+
+// components/home/hero.tsx (round 3).
+const hero = `<section class="hero"><div class="hero-scrim"></div><div class="hero-content shell">
+  <p class="eyebrow light">WiseTech Hong Kong</p><h1>How can Hong Kong lead the AI+ era?</h1><p>Lead</p>
+  <div class="hero-actions"><a class="button" href="#pathways">Find your route</a></div></div>
+  <div class="hero-note">WiseTech Hong Kong · AI+ industry platform</div></section>`;
+
+test.describe('homepage hero', () => {
+  test('the duplicate corner note is gone on desktop', async ({page}) => {
+    // At 1440x900 the note repeated the eyebrow and sat 2px from the concierge launcher.
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, hero);
+    await expect(page.locator('.hero-note')).toBeHidden();
+  });
+
+  test('the entrance plays once and is skipped under reduced motion', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, hero);
+    const motion = await page.locator('.hero-content > h1').evaluate((h) => getComputedStyle(h).animationName);
+    expect(motion).toBe('xp-rise');
+
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    const still = await page.locator('.hero-content > h1').evaluate((h) => getComputedStyle(h).animationName);
+    expect(still).toBe('none');
+  });
+});
