@@ -95,3 +95,54 @@ test.describe('homepage hero', () => {
     expect(still).toBe('none');
   });
 });
+
+// Round 5: chapter numbers, the side-by-side event journey, the phone close.
+async function renderMain(page: Page, main: string) {
+  await page.setContent(`<!doctype html><html lang="en"><head><style>${css}</style></head><body><div class="site-root" lang="en">${main}</div></body></html>`);
+}
+const beforeContent = (page: Page, selector: string) =>
+  page.locator(selector).first().evaluate((el) => getComputedStyle(el, '::before').content);
+
+test.describe('homepage chapters', () => {
+  test('chapter numbers follow position, survive content-visibility, and stay off other pages', async ({page}) => {
+    // Every section after the hero is content-visibility:auto, whose style containment scoped a
+    // CSS counter to each section, so every chapter read "01". Reproduced here inline.
+    const cv = 'style="content-visibility:auto"';
+    await renderMain(page, `<main>
+      <section class="hero"><div class="hero-content shell"><p class="eyebrow light">WiseTech</p><h1>H</h1></div></section>
+      <section class="section" id="a" ${cv}><div class="shell"><div class="section-heading split-heading"><div><p class="eyebrow">Open now</p><h2>A</h2></div></div></div></section>
+      <section class="gba-section" id="b" ${cv}><div class="shell gba-copy"><p class="eyebrow light">GBA Gateway</p><h2>B</h2></div></section>
+      <section class="legacy-network" id="c" ${cv}><div class="shell"><div class="legacy-network-heading"><div><p class="eyebrow">Network</p><h2>C</h2></div></div></div></section>
+    </main>`);
+    expect(await beforeContent(page, '#a .eyebrow')).toContain('"01"');
+    expect(await beforeContent(page, '#b .eyebrow')).toContain('"02"');
+    expect(await beforeContent(page, '#c .eyebrow')).toContain('"03"');
+    expect(await beforeContent(page, '.hero .eyebrow')).toBe('none');
+
+    // Any other page: no hero, no numbers.
+    await renderMain(page, `<main><section class="section" id="x"><div class="shell"><div class="section-heading"><div><p class="eyebrow">Events</p><h2>X</h2></div></div></div></section></main>`);
+    expect(await beforeContent(page, '#x .eyebrow')).toBe('none');
+  });
+
+  test('on a wide screen the event journey sits beside its heading, stages descending', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    await renderMain(page, `<main><section class="section" id="events-journey"><div class="shell">
+      <div class="section-heading split-heading"><div><p class="eyebrow">Events</p><h2>A useful event is a journey, not a single date.</h2></div><p>Lead</p></div>
+      <div class="event-stage-grid"><article><span>01</span><h3>Before</h3><p>a</p></article><article><span>02</span><h3>During</h3><p>b</p></article><article><span>03</span><h3>After</h3><p>c</p></article></div>
+    </div></section></main>`);
+    const heading = await page.locator('#events-journey .section-heading').boundingBox();
+    const stages = await page.locator('#events-journey .event-stage-grid article').evaluateAll((a) => a.map((x) => x.getBoundingClientRect().top));
+    const grid = await page.locator('#events-journey .event-stage-grid').boundingBox();
+    expect(grid!.x).toBeGreaterThan(heading!.x + heading!.width);
+    expect(stages[1]).toBeGreaterThan(stages[0]);
+    expect(stages[2]).toBeGreaterThan(stages[1]);
+  });
+
+  test('the closing cards on a phone have no blank band above their titles', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<section class="section conversion-section"><div class="shell"><div class="conversion-grid">
+      <article><span class="status-label">Membership</span><h3>Build an active route</h3><p>Copy</p></article></div></div></section>`);
+    const margin = await page.locator('.conversion-grid h3').evaluate((h) => parseFloat(getComputedStyle(h).marginTop));
+    expect(margin).toBeLessThanOrEqual(32);
+  });
+});
