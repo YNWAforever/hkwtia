@@ -972,3 +972,16 @@ main:has(> .hero) > section:nth-of-type(13) :is(.section-heading > div, .archive
   .intro-process article { min-height: 0; }
   .intro-process h3 { margin-top: 14px; }
 }
+
+/* ─── Round 7 (2026-10-06): checkboxes in flex labels ─────────────────────────────────────
+ * /launchpad's application consent is a native checkbox in a Tailwind flex label; on a phone
+ * the long zh-HK consent sentence shrank it to 13x16px. A checkbox in any label row keeps its
+ * size and matches the 24px consent box from round 6. */
+.site-root main label:has(> input[type="checkbox"]) > input[type="checkbox"] {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--wt-ink);
+}

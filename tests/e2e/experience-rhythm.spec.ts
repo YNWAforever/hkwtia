@@ -180,4 +180,16 @@ test.describe('inner pages', () => {
     expect(box!.width).toBeLessThanOrEqual(28);
     expect(box!.height).toBeLessThanOrEqual(28);
   });
+
+  test('a checkbox in a flex label row is not squeezed by a long sentence', async ({page}) => {
+    // Round 7. /launchpad's consent is a native checkbox in a Tailwind flex label (the
+    // utilities are restated inline: they are not in the uncompiled stylesheet); the zh-HK
+    // sentence shrank it to 13x16px at 390.
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<form><label style="display:flex;align-items:flex-start;gap:12px" for="agree">
+      <input id="agree" type="checkbox"><span>${'我同意 WTIA 使用此申請作小組評審。'.repeat(4)}</span></label></form>`);
+    const box = await page.locator('#agree').boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(24);
+    expect(box!.height).toBeGreaterThanOrEqual(24);
+  });
 });
