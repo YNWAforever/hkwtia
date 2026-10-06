@@ -146,3 +146,38 @@ test.describe('homepage chapters', () => {
     expect(margin).toBeLessThanOrEqual(32);
   });
 });
+
+// Round 6: inner pages.
+test.describe('inner pages', () => {
+  test('a bare section h2 takes the section heading scale, not the browser default', async ({page}) => {
+    // app/[locale]/(public)/membership/page.tsx: "Membership FAQ" and "What happens after you
+    // join" are unclassed h2s in the section shell; they rendered at 16px.
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, `<section class="section"><div class="shell"><h2 id="faq">Membership FAQ</h2></div></section>
+      <section class="section"><div class="shell"><h2 class="any-own-class" id="classed">Classed</h2></div></section>`);
+    const size = await page.locator('#faq').evaluate((h) => parseFloat(getComputedStyle(h).fontSize));
+    expect(size).toBeGreaterThanOrEqual(36);
+    // A heading that carries its own class (sr-only, a component's own) is left alone.
+    const classed = await page.locator('#classed').evaluate((h) => parseFloat(getComputedStyle(h).fontSize));
+    expect(classed).not.toBe(size);
+  });
+
+  test('the breadcrumb keeps "Home" on one line beside a long page title on a phone', async ({page}) => {
+    // components/wt/page-hero.tsx. It measured 31x37px ("Hom / e") on /membership at 390.
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<section class="page-hero"><div class="shell"><nav class="breadcrumb"><a href="/">Home</a><span>/</span>
+      <b>Find your place in Hong Kong's technology community</b></nav></div></section>`);
+    const home = await page.locator('.breadcrumb > a').boundingBox();
+    expect(home!.height).toBeLessThan(28);
+  });
+
+  test('a consent checkbox is a checkbox, not a full-width field', async ({page}) => {
+    // /events opt-in: the form field rule sized it 325x52 with its label pushed aside.
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, `<form class="partner-form interest-form"><label class="consent" for="opt"><input id="opt" type="checkbox"><span>Also send me updates on WhatsApp</span></label></form>`);
+    const box = await page.locator('#opt').boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(24);
+    expect(box!.width).toBeLessThanOrEqual(28);
+    expect(box!.height).toBeLessThanOrEqual(28);
+  });
+});
