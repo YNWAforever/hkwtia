@@ -256,8 +256,8 @@ test.describe('programme history list', () => {
   });
 });
 
-// Round 11: the homepage's last small print, the pinned header, tap targets, the archive grid.
-test.describe('round 11', () => {
+// Round 10: the homepage's last small print, the pinned header, tap targets, the archive grid.
+test.describe('round 10', () => {
   test('the homepage has no text under 11px in the industry list, its chips or the partner tabs', async ({page}) => {
     // components/home/ecosystem.tsx and the partner tabs: index and arrow 10px, chips 10px,
     // record counts 9px; the industry names were 14px in 106px rows.

@@ -1050,7 +1050,7 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   line-height: 1.5;
 }
 
-/* ─── Round 11 (2026-10-07): homepage small print, the scrolled header, tap targets ───────
+/* ─── Round 10 (2026-10-07): homepage small print, the scrolled header, tap targets ───────
  * The homepage was the last page with text under 11px: the industry list's index and arrow
  * (10px), the selected industry's three chips (10px) and the partner tabs' record counts
  * (9px, inside a 35px ring that has room for far more). The industry names themselves were
