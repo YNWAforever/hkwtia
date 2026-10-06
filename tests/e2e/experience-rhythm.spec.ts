@@ -235,3 +235,23 @@ test.describe('record grids', () => {
     expect(await size('.rich-related-grid > a > span:last-child')).toBe(20);
   });
 });
+
+// Round 9: the programme history list.
+test.describe('programme history list', () => {
+  test('the span of years sits under the name, not in the 20px arrow track', async ({page}) => {
+    // app/[locale]/(public)/programmes/page.tsx: the list shares the nav links' 34px 1fr 20px
+    // grid; the third child fell into the arrow track and measured 20px wide, 537px tall.
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, `<section class="section"><div class="shell">
+      <nav class="programme-groupings"><a href="#c"><span>01</span><span>Catalogue</span><span aria-hidden="true">↗</span></a></nav>
+      <ul class="programme-groupings"><li><span>01</span><b>CPAI</b><span>Credential issued directly by WTIA; no editions to record.</span></li>
+      <li><span>02</span><b>HKICT Awards</b><span>2020–2025 · 6 recorded editions</span></li></ul></div></section>`);
+    const meta = await page.locator('ul.programme-groupings li').first().locator('span').last().boundingBox();
+    expect(meta!.width).toBeGreaterThan(150);
+    const item = await page.locator('ul.programme-groupings li').first().boundingBox();
+    expect(item!.height).toBeLessThan(160);
+    // The nav links keep their arrow track.
+    const arrow = await page.locator('nav.programme-groupings a span[aria-hidden]').boundingBox();
+    expect(arrow!.width).toBeLessThanOrEqual(20);
+  });
+});
