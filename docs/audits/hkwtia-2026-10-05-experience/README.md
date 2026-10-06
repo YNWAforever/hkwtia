@@ -3,8 +3,10 @@
 Branch `feat/award-grade-experience-20261005`, cut from `origin/main` `df2453fc`. Production
 (`hkwtia.vercel.app`) was confirmed to serve that same commit (`dpl_5u276U2z6EbgjjmASYwCVBn593Cm`,
 READY, `githubCommitSha df2453fc…`), so the live site is a valid "before" for this branch.
-**Nothing here is deployed.** No push, merge, migration, payment, email, WhatsApp, AI provider
-call or production data change was made. Local runs used the existing isolated Neon branch
+During development nothing was pushed, merged or deployed, and no migration, payment, email,
+WhatsApp, AI provider call or production data change was made. **Released 2026-10-06** on the
+owner's instruction: PR #146 squash-merged as `5cecf4fa` and promoted to production (§7).
+Local runs used the existing isolated Neon branch
 `br-lingering-unit-azxl75s5` (synthetic data, Stripe `sk_test_`, email delivery mode `test`,
 WhatsApp live off, no AI keys, batch worker paused), checked before use.
 
