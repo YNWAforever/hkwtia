@@ -193,3 +193,45 @@ test.describe('inner pages', () => {
     expect(box!.height).toBeGreaterThanOrEqual(24);
   });
 });
+
+// Round 8: record grids and the last sub-11px text.
+const recordCard = (logo: string) => `<article class="partner-record-card">${logo}
+  <div class="partner-record-body"><span class="status-label partner-status">Published record</span>
+  <h3>The Hong Kong Advertisers Association (HKAA)</h3>
+  <dl><div><dt>Relationship</dt><dd>Listed by WTIA as a supporting organisation.</dd></div><div><dt>Current status</dt><dd>Confirmed by WTIA</dd></div></dl></div></article>`;
+// A logo plate whose image has not loaded yet (lazy), as on first paint.
+const plate = '<div class="partner-record-logo"><img alt="HKAA logo" width="320" height="202" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div>';
+
+test.describe('record grids', () => {
+  test('a record card on a phone is a compact band, its logo held inside the plate', async ({page}) => {
+    // /partners: 79 cards at 545px each (a 233px plate over the record) ran 48,542px at 390.
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<section class="section partner-directory-page"><div class="shell"><div class="partner-record-grid">${recordCard(plate)}${recordCard(plate)}</div></div></section>`);
+    const card = await page.locator('.partner-record-card').first().boundingBox();
+    expect(card!.height).toBeLessThan(380);
+    const fits = await page.locator('.partner-record-logo').first().evaluate((l) => {
+      const box = l.getBoundingClientRect(); const img = l.querySelector('img')!.getBoundingClientRect();
+      return img.bottom <= box.bottom + 1 && img.right <= box.right + 1 && box.height > 0;
+    });
+    expect(fits).toBe(true);
+  });
+
+  test('a card without a logo keeps its stacked layout', async ({page}) => {
+    // components/marketing/showcase-card.tsx omits the plate when a listing has no logo.
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<div class="partner-record-grid">${recordCard('')}</div>`);
+    expect(await page.locator('.partner-record-card').evaluate((c) => getComputedStyle(c).flexDirection)).toBe('column');
+  });
+
+  test('rich-page labels reach 11px without shrinking the related-card arrow', async ({page}) => {
+    // /about, /about/history, /about/chairman: the related label was 9px and the compass label
+    // 10px. The arrow is the related card's last span (20px) and must keep its size.
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, `<section class="rich-compass"><div class="rich-compass-grid"><div><span>Founding year</span><strong>2001</strong></div></div></section>
+      <div class="rich-related-grid"><a href="/about"><span>Since 2001</span><h3>Our history</h3><p>Copy</p><span aria-hidden="true">↗</span></a></div>`);
+    const size = (selector: string) => page.locator(selector).first().evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+    expect(await size('.rich-compass-grid span')).toBeGreaterThanOrEqual(11);
+    expect(await size('.rich-related-grid > a > span:first-child')).toBeGreaterThanOrEqual(11);
+    expect(await size('.rich-related-grid > a > span:last-child')).toBe(20);
+  });
+});
