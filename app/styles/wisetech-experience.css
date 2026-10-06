@@ -926,3 +926,49 @@ main:has(> .hero) > section:nth-of-type(13) :is(.section-heading > div, .archive
 @media (max-width: 520px) {
   .conversion-grid h3 { margin-top: 24px; }
 }
+
+/* ─── Round 6 (2026-10-06): inner pages ───────────────────────────────────────────────────
+ * Walked /membership, /events and /about at 1440x900 and 390x844 on production. */
+
+/* Bare section headings. /membership's "Membership FAQ" and "What happens after you join" are
+ * plain <h2>s directly in the section shell; no donor class reaches them, so they rendered at
+ * the browser's 16px between 38px plan titles and a 94px closing heading. Every unclassed h2
+ * in that position now takes the inner-section heading scale. */
+.site-root main section > .shell > h2:not([class]) {
+  max-width: 900px;
+  margin: 0 0 clamp(24px, 3vw, 40px);
+  color: var(--wt-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 4vw, 60px);
+  font-weight: 500;
+  line-height: 1.02;
+}
+
+/* Breadcrumb on a phone: the round-1 `overflow-wrap: anywhere` rule reaches the "Home" link,
+ * and next to a long current-page title the flex row squeezed it to 31px, so it broke as
+ * "Hom / e". Each crumb but the last keeps its word whole. */
+.breadcrumb { flex-wrap: wrap; align-items: baseline; }
+.breadcrumb > :not(:last-child) { flex: none; overflow-wrap: normal; white-space: nowrap; }
+.breadcrumb > :last-child { flex: 1 1 12ch; min-width: 0; }
+
+/* Consent checkbox. The form field rule (full width, 52px tall) also sized the checkbox, so
+ * /events' WhatsApp opt-in rendered as a 325x52 empty box with its label pushed aside. */
+.consent { align-items: center; gap: 12px; }
+.consent input[type="checkbox"] {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--wt-ink);
+}
+
+/* "What happens after you join": 75px above each step title left most of every card blank,
+ * worst on a phone where the five stack. Same remedy as the homepage journey. */
+.intro-process article { min-height: 0; padding: 24px; }
+.intro-process h3 { margin-top: 28px; }
+@media (max-width: 520px) {
+  .intro-process article { min-height: 0; }
+  .intro-process h3 { margin-top: 14px; }
+}
