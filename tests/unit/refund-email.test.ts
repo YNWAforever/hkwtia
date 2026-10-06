@@ -1,4 +1,4 @@
-import {describe, expect, it, vi} from "vitest";
+import {describe, expect, it, vi, type Mock} from "vitest";
 
 import type {OrderRecord} from "@/lib/db/repos/event-orders";
 import {renderEmail, type RenderEmailInput} from "@/lib/email/render";
@@ -43,7 +43,9 @@ function order(overrides: Partial<OrderRecord> = {}): OrderRecord {
 }
 
 function emailDependencies(
-  options: Readonly<{render?: typeof renderEmail; onEmailError?: ReturnType<typeof vi.fn>}> = {},
+  // Typed with the callback's own signature: Vitest 4's bare `vi.fn()` type also admits a
+  // constructor, which no longer fits the dependency's function slot.
+  options: Readonly<{render?: typeof renderEmail; onEmailError?: Mock<(error: unknown, context: Readonly<{orderId: string; template: string}>) => void>}> = {},
 ) {
   const transport = createTestTransport();
   const renderEmailSpy = vi.fn(options.render ?? renderEmail);

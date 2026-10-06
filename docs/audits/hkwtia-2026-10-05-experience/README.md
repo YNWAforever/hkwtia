@@ -243,3 +243,23 @@ not met**, and this record does not claim it is.
 
 None of the three can be closed with the access available in this session. Each is listed with
 its dependency in §9.
+
+## 11. CI follow-up on PR #146 (2026-10-06)
+
+The PR's `checks` job failed on `npm audit --omit=dev --audit-level=high`, and `quality` is the
+aggregate gate. The cause was advisories published after `main`'s last green CI (2026-10-04),
+not this pass: the PR had changed no dependency. They were `tinypool` and `vitest` (critical; Vitest is
+counted as production because `better-auth` declares it as an optional peer) and
+`source-map-js` (high). The gate was not loosened. The fixes:
+
+- `vitest` 3.2.7 → **4.1.11** (no 3.x release is patched), plus `vite-node` pinned at its
+  current 3.2.4 as a direct devDependency, because Vitest 4 no longer ships it and the
+  `eval:*` scripts call it. `source-map-js` 1.2.1 → 1.2.2.
+- The lockfile was regenerated with **npm 10** (`npx npm@10 install --package-lock-only`), which
+  is what CI's Node 22 uses. The local npm 11 had dropped the Ajv optional-peer closure that
+  `tests/unit/ci-security-contract.test.ts` pins for `npm ci`.
+- Two tests adjusted to Vitest 4 semantics, with **no assertion changed**: `refund-email`
+  (typed mock signature) and `webhook-route` (a constructor mock must be a `function`).
+- Results: `npm audit --omit=dev --audit-level=high` exits 0 (moderate advisories remain below
+  the gate); npm 10 `npm ls --package-lock-only …` exits 0; typecheck 0 errors; lint 0 errors;
+  full suite **6,792 passed, 596 guarded skips, 0 failed**.
