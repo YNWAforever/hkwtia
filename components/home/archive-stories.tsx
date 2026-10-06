@@ -1,5 +1,6 @@
 import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 import Image from 'next/image';
+import type {ReactNode} from 'react';
 
 import {Arrow} from '@/components/wt/arrow';
 import {milestones} from '@/content/milestones';
@@ -7,15 +8,21 @@ import {Link} from '@/i18n/navigation';
 import {featuredOnly} from '@/lib/history/milestones';
 import {readableMilestoneBody} from '@/lib/history/readable-body';
 
-// Section 11 of 13 (D-9). Top 4 featured milestones with at least one image; hidden
-// entirely below that. app/styles/wisetech.css:517 .archive-proof; :521 .archive-photo-grid;
-// :522 .archive-photo-card; :530 .archive-photo-feature (first card, wide).
-export async function ArchiveStories({locale, copyOverrides}: HomeCopyProps) {
-  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.archiveStories'});
-  const useChinese = locale === 'zh-HK';
-  const stories = featuredOnly(milestones)
+/** D-9: the top 4 featured milestones with at least one image. */
+export function homeArchiveStories() {
+  return featuredOnly(milestones)
     .filter((milestone) => milestone.images.length > 0)
     .slice(0, 4);
+}
+
+// D-9: hidden entirely when no featured milestone has an image. app/styles/wisetech.css:517
+// .archive-proof; :521 .archive-photo-grid; :522 .archive-photo-card; :530 .archive-photo-feature
+// (first card, wide). `children` (the homepage since the 2026-10-06 consolidation) is the
+// ImpactEvidence strip, placed between the heading and the photographs it substantiates.
+export async function ArchiveStories({locale, copyOverrides, children}: HomeCopyProps & {children?: ReactNode}) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.archiveStories'});
+  const useChinese = locale === 'zh-HK';
+  const stories = homeArchiveStories();
 
   if (stories.length === 0) return null;
 
@@ -34,6 +41,7 @@ export async function ArchiveStories({locale, copyOverrides}: HomeCopyProps) {
             </a>
           </div>
         </div>
+        {children}
         <div className="archive-photo-grid">
           {stories.map((story, index) => {
             const image = story.images[0]!;

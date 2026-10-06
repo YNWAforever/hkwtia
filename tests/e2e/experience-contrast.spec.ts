@@ -122,6 +122,30 @@ test.describe('public surface contrast', () => {
     expect(phone?.width ?? 99).toBeLessThanOrEqual(1);
   });
 
+  test('the merged chapters read at AA: the charcoal close and the archive evidence strip', async ({page}) => {
+    // 2026-10-06 consolidation. components/home/conversion-paths.tsx now sits on the footer's
+    // charcoal, so its heading must have turned light; components/home/impact-evidence.tsx
+    // `embedded` moved the figures from ink onto the archive's pale ground.
+    await render(page, `
+      <section class="section conversion-section"><div class="shell">
+        <div class="section-heading split-heading"><div><p class="eyebrow">Take part</p><h2>Choose the relationship</h2></div><p>Membership supports ongoing participation.</p></div>
+      </div></section>
+      <section class="archive-proof"><div class="shell">
+        <div class="evidence-strip"><div><p class="eyebrow">Published evidence</p><h3>Clear facts</h3><p>These figures describe records.</p></div>
+          <div class="impact-metrics"><div><strong>16</strong><span>Asian regions represented</span><small><span>Definition: regions</span> · <span>2024 edition</span></small></div>
+          <div class="method-card"><span class="status-label">Source note</span><p>Source: hkwtia.org</p></div></div></div>
+      </div></section>`);
+
+    expect(await contrastOf(page, '.conversion-section h2')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.conversion-section .split-heading > p')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.conversion-section .eyebrow')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.evidence-strip strong')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.evidence-strip small span')).toBeGreaterThanOrEqual(4.5);
+    expect(await contrastOf(page, '.evidence-strip .method-card p')).toBeGreaterThanOrEqual(4.5);
+    // The donor's tile-label rule also matched these spans and set them bold ink.
+    expect(await page.locator('.evidence-strip small span').first().evaluate((s) => getComputedStyle(s).fontWeight)).toBe('400');
+  });
+
   test('the measuring helper detects an unreadable pair', async ({page}) => {
     // Proves the guard can fail: white on white must measure 1:1.
     await render(page, `<div style="background:#fff"><p id="bad" style="color:#fff">x</p></div>`);

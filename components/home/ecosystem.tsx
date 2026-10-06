@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, type ReactNode} from 'react';
 
 import {ActionLink} from '@/components/wt/action-link';
 import {Arrow} from '@/components/wt/arrow';
@@ -18,6 +18,8 @@ type EcosystemProps = Readonly<{
     enterAction: string;
     focusAreas: readonly string[];
   }>;
+  /** Server-rendered entry points shown after the board (MarketProducts `embedded`). */
+  children?: ReactNode;
 }>;
 
 // Section 7 of 13, and the first 'use client' homepage section: a stateful industry selector
@@ -25,7 +27,7 @@ type EcosystemProps = Readonly<{
 // as props, because a function cannot cross the server/client boundary as a prop.
 // app/styles/wisetech.css:164 .ecosystem-board; :165 .industry-list; :166 .industry-button;
 // :171 .industry-focus.
-export function Ecosystem({industries, labels}: EcosystemProps) {
+export function Ecosystem({industries, labels, children}: EcosystemProps) {
   const [selectedKey, setSelectedKey] = useState(industries[0]!.key);
   const current = industries.find((industry) => industry.key === selectedKey) ?? industries[0]!;
 
@@ -62,6 +64,7 @@ export function Ecosystem({industries, labels}: EcosystemProps) {
           <ActionLink href={current.href} variant="text-link">{labels.enterAction}</ActionLink>
         </div>
       </div>
+      {children}
     </Section>
   );
 }

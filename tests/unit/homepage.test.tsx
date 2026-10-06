@@ -66,10 +66,12 @@ vi.mock("@/content/programs/asa", () => ({
   asa: {id: "asa", editions: [{labelEn: "x", labelZh: "x", yearStart: 2013, funder: {kind: "none-recorded"}, regions: {kind: "unrecorded"}, winners: {kind: "unrecorded"}, images: []}]},
 }));
 
+// Since the 2026-10-06 consolidation, market-products and impact are labelled groups nested in
+// the ecosystem and archive sections (asserted below), so each follows its parent's label.
 const sectionIds = [
   "hero-title", "open-now-title", "pathways-title", "events-journey-title",
-  "market-products-title", "ecosystem-title", "programme-showcase-title",
-  "gba-gateway-title", "impact-title", "archive-stories-title", "legacy-network-title",
+  "ecosystem-title", "market-products-title", "programme-showcase-title",
+  "gba-gateway-title", "archive-stories-title", "impact-title", "legacy-network-title",
   "conversion-paths-title",
 ] as const;
 
@@ -121,6 +123,15 @@ describe("Home page", () => {
       .map((el) => el.getAttribute("aria-labelledby"))
       .filter((id): id is string => (sectionIds as readonly string[]).includes(id ?? ""));
     expect(labelled).toEqual([...sectionIds]);
+
+    // The merged chapters: each former section is a group inside its chapter, not a sibling
+    // landmark, and its heading steps down to h3 under the chapter's h2.
+    const ecosystem = document.querySelector('[aria-labelledby="ecosystem-title"]');
+    const archive = document.querySelector('[aria-labelledby="archive-stories-title"]');
+    expect(ecosystem?.querySelector('[aria-labelledby="market-products-title"]')).not.toBeNull();
+    expect(archive?.querySelector('[aria-labelledby="impact-title"]')).not.toBeNull();
+    expect(document.getElementById("market-products-title")?.tagName).toBe("H3");
+    expect(document.getElementById("impact-title")?.tagName).toBe("H3");
 
     expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
     expect(document.querySelector('script[type="application/ld+json"]')?.textContent).toContain('"@type":"Organization"');

@@ -51,6 +51,21 @@ describe("ImpactEvidence", () => {
     expect(screen.queryByText(bundles.en.Home.impact.publishedPartners.definition)).not.toBeInTheDocument();
   });
 
+  it("embedded, renders a labelled group with an h3 instead of its own section", async () => {
+    loadImpactMetrics.mockResolvedValueOnce({
+      pastEvents: {value: 3, asOf: new Date("2026-09-01T00:00:00.000Z")},
+      publishedPartners: null,
+      asaRegions: null,
+    });
+    const {ImpactEvidence} = await import("@/components/home/impact-evidence");
+    const {container} = render(await ImpactEvidence({locale: "en", embedded: true}));
+
+    expect(container.querySelector("section")).toBeNull();
+    expect(screen.getByRole("group", {name: bundles.en.Home.impact.title})).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 3, name: bundles.en.Home.impact.title})).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Home.impact.pastEvents.definition)).toBeInTheDocument();
+  });
+
   it("renders nothing when every tile is omitted", async () => {
     loadImpactMetrics.mockResolvedValueOnce({pastEvents: null, publishedPartners: null, asaRegions: null});
     const {ImpactEvidence} = await import("@/components/home/impact-evidence");

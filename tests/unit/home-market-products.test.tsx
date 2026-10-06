@@ -58,6 +58,19 @@ describe("MarketProducts", () => {
     expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/showcase");
   });
 
+  it("embedded, is a labelled group whose headings sit under the ecosystem h2 (h3, then h4)", async () => {
+    listPublished.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
+    const {MarketProducts} = await import("@/components/home/market-products");
+    const {container} = render(await MarketProducts({locale: "en", embedded: true}));
+
+    expect(container.querySelector("section")).toBeNull();
+    expect(screen.getByRole("group", {name: bundles.en.Home.marketProducts.title})).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 3, name: bundles.en.Home.marketProducts.title})).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 4, name: bundles.en.Home.marketProducts.directory.title})).toBeInTheDocument();
+    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/showcase");
+  });
+
   it("shows member directory availability without implying showcase listings exist", async () => {
     listPublished.mockResolvedValueOnce([]);
     listMembers.mockResolvedValueOnce({items: [{}], nextCursor: null});
