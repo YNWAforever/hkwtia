@@ -5,9 +5,12 @@ import {StatusLabel} from '@/components/wt/status-label';
 import {formatEventDate} from '@/lib/home/format-event-date';
 import {loadImpactMetrics} from '@/lib/home/impact-metrics';
 
-// Section 10 of 13. app/styles/wisetech.css:235 .impact-section; :236 .impact-grid;
-// :240 .impact-metrics; :245-246 .impact-metrics .method-card.
-export async function ImpactEvidence({locale, copyOverrides}: HomeCopyProps) {
+// app/styles/wisetech.css:235 .impact-section; :236 .impact-grid; :240 .impact-metrics;
+// :245-246 .impact-metrics .method-card.
+// `embedded` (the homepage since the 2026-10-06 consolidation): a strip inside the archive
+// section. The figures and the photographs are the same claim -- this is a platform with a
+// record -- so they are one chapter, with the figures as its evidence line. h3, not h2.
+export async function ImpactEvidence({locale, copyOverrides, embedded = false}: HomeCopyProps & {embedded?: boolean}) {
   const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.impact'});
   const metrics = await loadImpactMetrics();
   const formatDate = (value: Date) => formatEventDate(value, locale);
@@ -35,32 +38,44 @@ export async function ImpactEvidence({locale, copyOverrides}: HomeCopyProps) {
 
   if (tiles.length === 0) return null;
 
+  const Title = embedded ? 'h3' : 'h2';
+  const metricsGrid = (
+    <div className="impact-metrics">
+      {tiles.map((tile) => (
+        <div key={tile.label}>
+          <strong>{tile.value}</strong>
+          <span>{tile.label}</span>
+          {/* Definition and period stay in separate elements (not one interpolated string) so
+              each is independently queryable, matching tests/unit/home-impact-evidence.test.tsx's
+              exact-text assertion on the definition alone. */}
+          <small><span>{tile.definition}</span> · <span>{tile.period}</span></small>
+        </div>
+      ))}
+      <div className="method-card">
+        <StatusLabel>{t('sourceLabel')}</StatusLabel>
+        <p>{t('source')}</p>
+      </div>
+    </div>
+  );
+  const body = (
+    <>
+      <div>
+        <p className={embedded ? 'eyebrow' : 'eyebrow light'}>{t('eyebrow')}</p>
+        <Title id="impact-title">{t('title')}</Title>
+        <p>{t('intro')}</p>
+        <a className={embedded ? 'text-link' : 'text-link light-link'} href="https://hkwtia.org/" target="_blank" rel="noreferrer">{t('sourceLink')} <Arrow /></a>
+      </div>
+      {metricsGrid}
+    </>
+  );
+
+  if (embedded) {
+    return <div className="evidence-strip" role="group" aria-labelledby="impact-title">{body}</div>;
+  }
+
   return (
     <section className="impact-section" aria-labelledby="impact-title">
-      <div className="shell impact-grid">
-        <div>
-          <p className="eyebrow light">{t('eyebrow')}</p>
-          <h2 id="impact-title">{t('title')}</h2>
-          <p>{t('intro')}</p>
-          <a className="text-link light-link" href="https://hkwtia.org/" target="_blank" rel="noreferrer">{t('sourceLink')} <Arrow /></a>
-        </div>
-        <div className="impact-metrics">
-          {tiles.map((tile) => (
-            <div key={tile.label}>
-              <strong>{tile.value}</strong>
-              <span>{tile.label}</span>
-              {/* Definition and period stay in separate elements (not one interpolated string) so
-                  each is independently queryable, matching tests/unit/home-impact-evidence.test.tsx's
-                  exact-text assertion on the definition alone. */}
-              <small><span>{tile.definition}</span> · <span>{tile.period}</span></small>
-            </div>
-          ))}
-          <div className="method-card">
-            <StatusLabel>{t('sourceLabel')}</StatusLabel>
-            <p>{t('source')}</p>
-          </div>
-        </div>
-      </div>
+      <div className="shell impact-grid">{body}</div>
     </section>
   );
 }

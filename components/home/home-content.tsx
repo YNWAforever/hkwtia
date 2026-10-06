@@ -4,7 +4,7 @@ import {
   type HomeCopyProps,
 } from "@/lib/home/copy-preview";
 
-import { ArchiveStories } from "@/components/home/archive-stories";
+import { ArchiveStories, homeArchiveStories } from "@/components/home/archive-stories";
 import { ConversionPaths } from "@/components/home/conversion-paths";
 import { Ecosystem } from "@/components/home/ecosystem";
 import { EventsJourney } from "@/components/home/events-journey";
@@ -33,11 +33,34 @@ async function EcosystemSection({ locale, copyOverrides }: HomeCopyProps) {
     copyOverrides,
     namespace: "Home.ecosystem",
   });
+  // The directory and the marketplace are where an industry pathway leads, so they close this
+  // chapter rather than open their own (2026-10-06 consolidation). Their own boundary keeps the
+  // two repository reads from holding back the industry board.
   return (
     <Ecosystem
       industries={buildEcosystemIndustries((key) => t(key))}
       labels={buildEcosystemLabels(t)}
-    />
+    >
+      <Suspense fallback={null}>
+        <MarketProducts locale={locale} copyOverrides={copyOverrides} embedded />
+      </Suspense>
+    </Ecosystem>
+  );
+}
+
+// The figures and the photographs make one claim -- a platform with a record -- so the impact
+// figures run as the evidence line of the archive section. With no archive photographs (D-9
+// hides that section), the figures keep their own section instead of disappearing with it.
+async function ProofSection({ locale, copyOverrides }: HomeCopyProps) {
+  if (homeArchiveStories().length === 0) {
+    return <ImpactEvidence locale={locale} copyOverrides={copyOverrides} />;
+  }
+  return (
+    <ArchiveStories locale={locale} copyOverrides={copyOverrides}>
+      <Suspense fallback={null}>
+        <ImpactEvidence locale={locale} copyOverrides={copyOverrides} embedded />
+      </Suspense>
+    </ArchiveStories>
   );
 }
 
@@ -86,9 +109,6 @@ export async function HomeContent({ locale, copyOverrides }: HomeCopyProps) {
         <EventsJourney locale={locale} copyOverrides={copyOverrides} />
       </Suspense>
       <Suspense fallback={null}>
-        <MarketProducts locale={locale} copyOverrides={copyOverrides} />
-      </Suspense>
-      <Suspense fallback={null}>
         <EcosystemSection locale={locale} copyOverrides={copyOverrides} />
       </Suspense>
       <Suspense fallback={null}>
@@ -98,10 +118,7 @@ export async function HomeContent({ locale, copyOverrides }: HomeCopyProps) {
         <GbaGateway locale={locale} copyOverrides={copyOverrides} />
       </Suspense>
       <Suspense fallback={null}>
-        <ImpactEvidence locale={locale} copyOverrides={copyOverrides} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <ArchiveStories locale={locale} copyOverrides={copyOverrides} />
+        <ProofSection locale={locale} copyOverrides={copyOverrides} />
       </Suspense>
       <Suspense fallback={null}>
         <LegacyNetworkSection locale={locale} copyOverrides={copyOverrides} />
