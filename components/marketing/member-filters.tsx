@@ -9,7 +9,7 @@ import {localizedPath} from "@/lib/urls";
 
 type Labels = Readonly<{
   search: string; tag: string; anyTag: string; plan: string; anyPlan: string;
-  submit: string; clear: string; plans: Readonly<Record<MembershipPlanCode, string>>;
+  submit: string; apply: string; clear: string; plans: Readonly<Record<MembershipPlanCode, string>>;
 }>;
 
 /**
@@ -33,7 +33,7 @@ export function MemberFilters({locale, filters, labels}: Readonly<{locale: AppLo
       </div>
       <div className="directory-actions">
         <span>
-          <label className="sr-only" htmlFor="member-tag">{labels.tag}</label>
+          <label htmlFor="member-tag">{labels.tag}</label>
           <select defaultValue={filters.tag ?? ""} id="member-tag" name="tag">
             <option value="">{labels.anyTag}</option>
             {INDUSTRY_TAGS.map((tag) => (
@@ -42,7 +42,7 @@ export function MemberFilters({locale, filters, labels}: Readonly<{locale: AppLo
           </select>
         </span>
         <span>
-          <label className="sr-only" htmlFor="member-plan">{labels.plan}</label>
+          <label htmlFor="member-plan">{labels.plan}</label>
           <select defaultValue={filters.plan ?? ""} id="member-plan" name="plan">
             <option value="">{labels.anyPlan}</option>
             {MEMBERSHIP_PLAN_CODES.map((plan) => (
@@ -50,6 +50,9 @@ export function MemberFilters({locale, filters, labels}: Readonly<{locale: AppLo
             ))}
           </select>
         </span>
+        {/* A facet change was only applied by the search box's button above; the row that holds
+            the selects now carries its own submit for the same GET form. */}
+        <button className="button button-dark" type="submit">{labels.apply}</button>
         {/* `localizedPath`, never a hand-built prefix: `/zh-HK/members` is not a route (boundary 5). */}
         <Link className="text-link" href={localizedPath(locale, "/members")}>{labels.clear}</Link>
       </div>

@@ -32,9 +32,12 @@ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
         <h1 id="hero-title">{t('title')}</h1>
         <p>{t('lead')}</p>
         <div className="hero-actions">
-          <ActionLink href="/events?status=open" variant="button">{t('actions.findEvent')}</ActionLink>
+          {/* Not /events?status=open: that list is empty whenever nothing is accepting
+              registrations, and a first click must not land on an empty state. The route
+              finder (#pathways) answers "where do I start" for every audience on this page. */}
+          <ActionLink href="#pathways" variant="button">{t('actions.findRoute')}</ActionLink>
           <ActionLink href="/join" variant="text-link-light">{t('actions.join')}</ActionLink>
-          <ActionLink href="/members" variant="text-link-light">{t('actions.members')}</ActionLink>
+          <ActionLink href="/events" variant="text-link-light">{t('actions.findEvent')}</ActionLink>
         </div>
       </div>
       <div className="hero-note">{t('note')}</div>

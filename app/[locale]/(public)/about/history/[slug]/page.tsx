@@ -15,6 +15,7 @@ import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {ogImagePath} from "@/lib/og/resolve-renderer";
+import {readableMilestoneBody} from "@/lib/history/readable-body";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 
@@ -41,7 +42,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     locale: locale as AppLocale,
     pathname: `/about/history/${slug}`,
     title: brandedTitle(locale as AppLocale, title),
-    description: (locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).slice(0, 160),
+    description: readableMilestoneBody(locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).join(" ").slice(0, 160),
     // Milestone records carry images, but the card is editorial: the archive photographs are
     // not a consistent 1200x630 hero, so the unadorned editorial treatment is the honest one.
     image: ogImagePath({kind: "milestone", title, eyebrow: t("eyebrow"), imageUrl: null}),
@@ -63,7 +64,7 @@ export default async function HistoryDetailPage({params}: Props) {
 
   const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
-  const paragraphs = body.split("\n\n");
+  const paragraphs = readableMilestoneBody(body);
   const storyParagraphs = paragraphs.slice(1);
   const images = milestone.images.map((image) => ({
     alt: locale === "zh-HK" ? image.altZh : image.altEn,

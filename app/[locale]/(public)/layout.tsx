@@ -24,6 +24,9 @@ import "../../styles/wisetech.css";
 // Hand-written shell overrides; must load after the generated port so equal-specificity
 // rules win. See app/styles/wisetech-shell.css for what belongs here and why.
 import "../../styles/wisetech-shell.css";
+// The 2026-10 experience layer (route finder, signal heroes, bilingual typography). Last, so
+// it wins over both files above; reverting the pass is removing this line and the file.
+import "../../styles/wisetech-experience.css";
 
 type PublicLayoutProps = {
   children: ReactNode;

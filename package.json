@@ -132,7 +132,8 @@
     "tsx": "^4.23.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "vitest": "^3.2.4"
+    "vite-node": "^3.2.4",
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "@neondatabase/auth-ui@0.3.0-beta": {

@@ -427,7 +427,8 @@
       "lead": "WiseTech Hong Kong 是 Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台，連結企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場。",
       "imageAlt": "WTIA Tech Connect 全民 AI 香港活動的講者及主辦團隊",
       "actions": {
-        "findEvent": "尋找活動或參與機會",
+        "findRoute": "找出你的路徑",
+        "findEvent": "瀏覽活動",
         "join": "加入 WiseTech",
         "members": "探索會員及方案"
       },
@@ -449,7 +450,8 @@
         "copy": "登記接收活動通知，或向團隊提出明確業務挑戰，協助策劃實用的未來活動。"
       },
       "updatesAction": "接收活動通知",
-      "challengeAction": "提交挑戰"
+      "challengeAction": "提交挑戰",
+      "recordLabel": "最近一次活動紀錄"
     },
     "pathways": {
       "eyebrow": "你的路徑",
@@ -465,7 +467,7 @@
         "smes": {
           "title": "中小企",
           "copy": "把 AI 機遇轉化為實際業務改善。",
-          "benefits": "準備度評估 · 診所 · 可信供應商",
+          "benefits": "準備度評估 · 實務諮詢 · 可信供應商",
           "cta": "尋找活動"
         },
         "startups": {
@@ -485,6 +487,44 @@
           "copy": "連接香港科技力量與市場機遇。",
           "benefits": "落地支援 · 考察團 · 買家配對",
           "cta": "探索創科起動"
+        }
+      },
+      "legend": "選擇你的身份",
+      "routeEyebrow": "你的路徑",
+      "routeLead": "三個起步點，每一個都是今天就可以行動的頁面。",
+      "primaryLabel": "由此開始",
+      "destinations": {
+        "membership": {
+          "label": "會籍",
+          "copy": "比較各級會籍及年費，由免費社群會籍至企業會籍。"
+        },
+        "showcase": {
+          "label": "會員及方案展示",
+          "copy": "按應用場景及部署方式，瀏覽已審核的會員方案。"
+        },
+        "events": {
+          "label": "活動",
+          "copy": "即將舉行的活動，以及已舉辦活動的紀錄。"
+        },
+        "launchpad": {
+          "label": "創科起動",
+          "copy": "全球市場小組計劃、落地夥伴及資助計劃配對工具。"
+        },
+        "partners": {
+          "label": "夥伴網絡",
+          "copy": "已發布的夥伴紀錄，以及如何以清晰目的展開合作。"
+        },
+        "programmes": {
+          "label": "計劃及獎項",
+          "copy": "Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI 的歷屆紀錄。"
+        },
+        "cpai": {
+          "label": "CPAI",
+          "copy": "由 WTIA 直接頒發、支援應用創新的專題計劃。"
+        },
+        "committees": {
+          "label": "委員會",
+          "copy": "了解 WTIA 委員會如何支援管治、計劃及會員。"
         }
       }
     },
@@ -1011,6 +1051,13 @@
     }
   },
   "AdminLogin": {
+    "explainer": {
+      "eyebrow": "職員工作區",
+      "title": "以 WTIA 職員電郵登入。",
+      "step1": "輸入你的 WTIA 職員電郵地址。",
+      "step2": "開啟我們以電郵寄出的安全登入連結。",
+      "step3": "只有具職員角色的帳戶才能進入工作區。"
+    },
     "title": "職員登入",
     "help": "輸入你的 WTIA 職員電郵地址，索取安全登入連結。進入工作平台仍須通過職員權限驗證。",
     "navigation": "實用連結",
@@ -1047,6 +1094,13 @@
     }
   },
   "MemberLogin": {
+    "explainer": {
+      "eyebrow": "登入方式",
+      "title": "毋須記住密碼。",
+      "step1": "輸入你在 WTIA 使用的電郵地址。",
+      "step2": "開啟我們以電郵寄出的安全登入連結。",
+      "step3": "你會返回原本想前往的頁面。"
+    },
     "home": "主頁",
     "join": "加入 WTIA",
     "staffSignIn": "職員登入",
@@ -1530,6 +1584,7 @@
       "plan": "會籍",
       "anyPlan": "所有級別",
       "submit": "搜尋",
+      "apply": "套用篩選",
       "clear": "清除"
     },
     "plans": {

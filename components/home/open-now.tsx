@@ -1,11 +1,13 @@
 import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
+import {Arrow} from '@/components/wt/arrow';
 import {CardGrid} from '@/components/wt/card-grid';
 import {HonestEmpty} from '@/components/wt/honest-empty';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {eventsRepository} from '@/lib/db/repos/events';
 import {formatEventDate as formatDate} from '@/lib/home/format-event-date';
+import {Link} from '@/i18n/navigation';
 import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 
 // Section 2 of 13. #home-discover is the pre-existing scroll anchor (E-52); this is the
@@ -18,6 +20,17 @@ export async function OpenNow({locale, copyOverrides}: HomeCopyProps) {
     .then((events) => ({kind: "ready" as const, events}))
     .catch(() => ({kind: "unavailable" as const, events: []}));
   const events = result.events;
+  // An empty open list is backed by the latest completed event: proof the programme runs, and
+  // a page a first-time visitor can actually open. A separate `past` read, so a held event can
+  // never be presented as open; it only runs when the open read succeeded empty, and a failure
+  // drops the record rather than the honest empty state above it.
+  const latest = result.kind === 'ready' && events.length === 0
+    // Started from a resolved promise so a synchronous throw is caught like a rejection.
+    ? await Promise.resolve()
+      .then(() => eventsRepository.listPublic(ANONYMOUS_ACTOR, {status: 'past', asOf: new Date(), locale, limit: 1}))
+      .then((past) => past?.[0] ?? null)
+      .catch(() => null)
+    : null;
 
   return (
     <Section id="home-discover" tone="ink" labelledBy="open-now-title">
@@ -51,6 +64,16 @@ export async function OpenNow({locale, copyOverrides}: HomeCopyProps) {
           ]}
         />
       )}
+      {latest ? (
+        <p className="open-now-record">
+          <span>{t('recordLabel')}</span>
+          <Link href={`/events/${latest.slug}`}>
+            <strong>{latest.title}</strong>
+            <time dateTime={new Date(latest.startsAt).toISOString()}>{formatDate(latest.startsAt, locale)}</time>
+            <Arrow />
+          </Link>
+        </p>
+      ) : null}
     </Section>
   );
 }

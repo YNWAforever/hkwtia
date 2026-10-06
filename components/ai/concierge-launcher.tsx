@@ -36,7 +36,9 @@ const LauncherButton = forwardRef<
       >
         W+
       </span>
-      {label}
+      {/* Wrapped so a phone can collapse the pill to its mark (wisetech-experience.css);
+          the accessible name stays on aria-label either way. */}
+      <span className="concierge-trigger-label">{label}</span>
     </button>
   );
 });

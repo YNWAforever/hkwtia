@@ -1,13 +1,12 @@
 import type {Metadata} from "next";
-import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {siteConfig} from "@/config/site";
+import {AuthShell} from "@/components/auth/auth-shell";
 import {SignInForm} from "@/components/auth/sign-in-form";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
-import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
 import {provisionMemberProfileAction} from "./provision-action";
@@ -80,22 +79,19 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <Link aria-label={tNav("homeLabel")} className="inline-flex min-h-11 items-center gap-3" href="/">
-            <Image alt={tNav("logoAlt")} height={40} src="/images/wtia-logo.png" width={112} />
-            <span className="text-lg font-semibold text-primary">{tNav("brand.publicName")}</span>
-          </Link>
-          <nav aria-label={t("navigation")} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/">{t("home")}</Link>
-            <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/join">{t("join")}</Link>
-            <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/admin-login">{t("staffSignIn")}</Link>
-            <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
-          </nav>
-          <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
-        </header>
-        <section aria-labelledby="login-heading" className="glass-card mx-auto max-w-xl p-6 sm:p-10">
+    <AuthShell
+      brand={{homeLabel: tNav("homeLabel"), logoAlt: tNav("logoAlt"), name: tNav("brand.publicName")}}
+      explainer={{eyebrow: t("explainer.eyebrow"), title: t("explainer.title"), steps: [t("explainer.step1"), t("explainer.step2"), t("explainer.step3")]}}
+      links={[
+        {label: t("home"), href: "/"},
+        {label: t("join"), href: "/join"},
+        {label: t("staffSignIn"), href: "/admin-login"},
+        {label: t("support"), href: `mailto:${siteConfig.contact.email}`, external: true},
+      ]}
+      localeSwitcher={<LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>}
+      navigationLabel={t("navigation")}
+    >
+        <section aria-labelledby="login-heading" className="glass-card p-6 sm:p-10">
           <h1 className="font-serif text-4xl font-semibold" id="login-heading">{t("formLabel")}</h1>
           <p className="mt-3 text-muted-foreground">{t("help")}</p>
           {resolution.kind === "needs-profile" ? <div className="mt-6" role="status">
@@ -123,7 +119,6 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
           /> : null}
           {resolution.kind === "signed-out" ? <p className="mt-5 text-sm text-muted-foreground">{t("deliveryHelp")}</p> : null}
         </section>
-      </div>
-    </main>
+    </AuthShell>
   );
 }

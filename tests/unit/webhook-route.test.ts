@@ -68,9 +68,11 @@ describe("Stripe webhook route", () => {
 
     const constructEvent = vi.fn(() => checkoutCompleted());
     const processStripeEvent = vi.fn(async () => "processed" as const);
-    const Stripe = vi.fn(() => ({
-      webhooks: {constructEvent},
-    }));
+    // A `function`, not an arrow: the route calls `new Stripe(...)`, and since Vitest 4 a mock
+    // invoked with `new` constructs its implementation, which an arrow function cannot be.
+    const Stripe = vi.fn(function () {
+      return {webhooks: {constructEvent}};
+    });
 
     vi.doMock("stripe", () => ({default: Stripe}));
     vi.doMock("@/lib/billing/webhook-service", () => ({
