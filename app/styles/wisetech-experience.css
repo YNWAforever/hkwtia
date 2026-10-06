@@ -1028,3 +1028,24 @@ main:has(> .hero) > section:nth-of-type(13) :is(.section-heading > div, .archive
 .rich-related-grid > a > span:first-child, .rich-compass-grid > div > span { font-size: 11px; }
 .intro-process > article > span, .service-grid > article > span { font-size: 12px; }
 .programme-card > a, .footer-newsletter > a { font-size: 13px; }
+
+/* ─── Round 9 (2026-10-07): the programme history list ───────────────────────────────────
+ * /programmes "Built on programmes with lasting value" is a <ul class="programme-groupings">
+ * whose items are index · name · span-of-years. The grid it shares with the nav links above
+ * is 34px 1fr 20px -- the 20px track is the links' arrow -- so in the list the years-and-
+ * editions line fell into the arrow track and rendered one or two characters per line
+ * ("Cr/ed/en/tia/l", "20/25"), 20px wide and up to 537px tall, at every width. The list
+ * items have no arrow: two tracks, the span of years under the name. */
+ul.programme-groupings > li {
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-content: center;
+  row-gap: 6px;
+  padding-block: 20px;
+}
+ul.programme-groupings > li > span:last-child:not(:first-child) {
+  grid-column: 2;
+  color: var(--xp-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
