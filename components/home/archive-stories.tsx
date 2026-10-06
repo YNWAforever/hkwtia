@@ -7,6 +7,7 @@ import {milestones} from '@/content/milestones';
 import {Link} from '@/i18n/navigation';
 import {featuredOnly} from '@/lib/history/milestones';
 import {readableMilestoneBody} from '@/lib/history/readable-body';
+import {cn} from '@/lib/utils';
 
 /** D-9: the top 4 featured milestones with at least one image. */
 export function homeArchiveStories() {
@@ -53,8 +54,13 @@ export async function ArchiveStories({locale, copyOverrides, children}: HomeCopy
             // run-on block.
             const body = readableMilestoneBody(useChinese ? story.bodyZh : story.bodyEn)[0] ?? '';
             const alt = useChinese ? image.altZh : image.altEn;
+            // After the full-width lead, the rest pair up two per row. With an even count the
+            // last card had no partner and sat alone at half width beside an empty column, so
+            // it closes the grid as a second, mirrored feature instead.
+            const closing = index > 0 && index === stories.length - 1 && stories.length % 2 === 0;
+            const wide = index === 0 || closing;
             return (
-              <figure className={index === 0 ? 'archive-photo-card archive-photo-feature' : 'archive-photo-card'} key={story.slug}>
+              <figure className={cn('archive-photo-card', wide && 'archive-photo-feature', closing && 'archive-photo-feature-reverse')} key={story.slug}>
                 <div className="archive-photo-media">
                   {/* .archive-photo-feature splits 1.42fr/.58fr (image/caption) above the 1120px
                       breakpoint, where it collapses to a single stacked column (image full width);
@@ -63,7 +69,7 @@ export async function ArchiveStories({locale, copyOverrides, children}: HomeCopy
                   <Image
                     alt={alt}
                     height={606}
-                    sizes={index === 0 ? '(min-width: 1121px) 71vw, 100vw' : '(min-width: 821px) 50vw, 100vw'}
+                    sizes={wide ? '(min-width: 1121px) 71vw, 100vw' : '(min-width: 821px) 50vw, 100vw'}
                     src={image.src}
                     width={960}
                   />

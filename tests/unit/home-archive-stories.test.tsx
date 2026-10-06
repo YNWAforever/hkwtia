@@ -55,6 +55,25 @@ describe("ArchiveStories", () => {
   // records separated by "\n\n", and inside a <p> those breaks collapse to spaces, so
   // the card rendered as one run-on block. It now shows the lead paragraph only, which
   // is what app/[locale]/(public)/about/history/[slug] already uses as its hero lead.
+  // With four cards the lead spans the row and the rest pair up 2 + 1: the fourth sat alone at
+  // half width beside an empty column. It now closes the grid as a mirrored, full-width feature.
+  it("closes an even-count grid with a full-width mirrored card instead of an orphan", async () => {
+    const {ArchiveStories} = await import("@/components/home/archive-stories");
+    render(await ArchiveStories({locale: "en"}));
+
+    const cards = [...document.querySelectorAll(".archive-photo-card")];
+    expect(cards[0]).toHaveClass("archive-photo-feature");
+    expect(cards[0]).not.toHaveClass("archive-photo-feature-reverse");
+    for (const card of cards.slice(1, -1)) expect(card).not.toHaveClass("archive-photo-feature");
+    const last = cards.at(-1)!;
+    if (cards.length % 2 === 0) {
+      expect(last).toHaveClass("archive-photo-feature", "archive-photo-feature-reverse");
+      expect(last.querySelector("img")).toHaveAttribute("sizes", "(min-width: 1121px) 71vw, 100vw");
+    } else {
+      expect(last).not.toHaveClass("archive-photo-feature-reverse");
+    }
+  });
+
   it("renders only the lead paragraph of a multi-paragraph body", async () => {
     const {ArchiveStories} = await import("@/components/home/archive-stories");
     render(await ArchiveStories({locale: "en"}));

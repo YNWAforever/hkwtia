@@ -255,3 +255,61 @@ test.describe('programme history list', () => {
     expect(arrow!.width).toBeLessThanOrEqual(20);
   });
 });
+
+// Round 11: the homepage's last small print, the pinned header, tap targets, the archive grid.
+test.describe('round 11', () => {
+  test('the homepage has no text under 11px in the industry list, its chips or the partner tabs', async ({page}) => {
+    // components/home/ecosystem.tsx and the partner tabs: index and arrow 10px, chips 10px,
+    // record counts 9px; the industry names were 14px in 106px rows.
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, `<div class="ecosystem-board"><div class="industry-list">
+      <button type="button" class="industry-button active"><span>01</span><b>Commerce + Professional Services</b><span aria-hidden="true">↗</span></button></div>
+      <div class="industry-focus"><ul><li>Industry challenges</li></ul></div></div>
+      <div class="legacy-tabs"><button type="button" class="active"><span>Supporting Organizations</span><b>58</b></button></div>`);
+    const size = (selector: string) => page.locator(selector).first().evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+    for (const selector of ['.industry-button > span', '.industry-focus li', '.legacy-tabs b']) {
+      expect(await size(selector), selector).toBeGreaterThanOrEqual(12);
+    }
+    expect(await size('.industry-button b')).toBeGreaterThanOrEqual(16);
+  });
+
+  test('the pinned header drops the descriptor without moving the navigation', async ({page}) => {
+    // components/layout/header-shell.tsx adds .scrolled. `display: none` narrowed the brand
+    // column and the navigation jumped left; the descriptor now gives up its height only.
+    await page.setViewportSize({width: 1440, height: 900});
+    const header = (scrolled: boolean) => `<header class="site-header no-announcement${scrolled ? ' scrolled' : ''}"><div class="header-inner">
+      <a class="brand" href="/"><span class="brand-copy"><strong>WiseTech Hong Kong</strong>
+      <small>The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association</small></span></a>
+      <nav class="desktop-nav"><a href="/events">Events</a></nav></div></header>`;
+    await render(page, header(false));
+    const before = await page.locator('.desktop-nav').boundingBox();
+    await render(page, header(true));
+    const small = await page.locator('.brand-copy small').evaluate((s) => ({h: s.getBoundingClientRect().height, v: getComputedStyle(s).visibility}));
+    expect(small).toEqual({h: 0, v: 'hidden'});
+    const after = await page.locator('.desktop-nav').boundingBox();
+    expect(after!.x).toBe(before!.x);
+  });
+
+  test('the breadcrumb Home link and the partner note link reach the 24px target', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><b>About WTIA</b></nav>
+      <div class="legacy-network-note"><p>Every organisation shown here is a published record.</p><a href="/partners">View all partners <span aria-hidden="true">↗</span></a></div>`);
+    for (const selector of ['.breadcrumb > a', '.legacy-network-note a']) {
+      expect((await page.locator(selector).boundingBox())!.height, selector).toBeGreaterThanOrEqual(24);
+    }
+  });
+
+  test('an unpaired last archive story closes the grid full width, mirrored', async ({page}) => {
+    // components/home/archive-stories.tsx: four stories ran feature + 2 + 1, the last alone at
+    // half width beside an empty column.
+    await page.setViewportSize({width: 1440, height: 900});
+    const card = (cls: string) => `<figure class="archive-photo-card ${cls}"><div class="archive-photo-media"><img alt="" width="960" height="606" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div><figcaption><span>WTIA event highlights</span><h3>Title</h3><p>Body</p></figcaption></figure>`;
+    await render(page, `<div class="shell"><div class="archive-photo-grid">${card('archive-photo-feature')}${card('')}${card('')}${card('archive-photo-feature archive-photo-feature-reverse')}</div></div>`);
+    const grid = (await page.locator('.archive-photo-grid').boundingBox())!;
+    const last = page.locator('.archive-photo-card').last();
+    expect((await last.boundingBox())!.width).toBeCloseTo(grid.width, 0);
+    const media = (await last.locator('.archive-photo-media').boundingBox())!;
+    const caption = (await last.locator('figcaption').boundingBox())!;
+    expect(media.x).toBeGreaterThan(caption.x);
+  });
+});

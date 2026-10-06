@@ -1049,3 +1049,42 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   font-weight: 500;
   line-height: 1.5;
 }
+
+/* ─── Round 11 (2026-10-07): homepage small print, the scrolled header, tap targets ───────
+ * The homepage was the last page with text under 11px: the industry list's index and arrow
+ * (10px), the selected industry's three chips (10px) and the partner tabs' record counts
+ * (9px, inside a 35px ring that has room for far more). The industry names themselves were
+ * 14px in rows 106px tall, so each row read as an empty band with a caption in it. */
+.industry-button > span { font-size: 12px; }
+.industry-button > span[aria-hidden="true"] { font-size: 15px; }
+.industry-button b { font-size: 17px; line-height: 1.3; }
+.industry-focus li { font-size: 12px; }
+.legacy-tabs b { font-size: 12px; }
+
+/* The header's descriptor is three lines of 10px type beside the logo. At the top of a page it
+ * introduces the platform; once the header is pinned over the content it repeats on every
+ * screen and crowds the navigation, so the pinned header shows the name alone. It collapses
+ * in height only: `display: none` narrowed the brand column and the whole navigation jumped
+ * 37px left on the first scroll, so the line keeps its width and gives up its height. */
+.brand-copy small { max-height: 4.5em; overflow: hidden; transition: max-height 240ms ease, opacity 180ms ease; }
+.site-header.scrolled .brand-copy small { max-height: 0; opacity: 0; visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .brand-copy small { transition: none; } }
+
+/* Under the 24px target minimum (WCAG 2.5.8): the breadcrumb's Home link (19px tall, on every
+ * inner page), the partner note's "View all partners" link (22px) and the hero's vertical
+ * "Discover WiseTech" link (17px wide). Padding grows the hit area without moving the text. */
+.breadcrumb > a { display: inline-block; padding-block: 3px; }
+.legacy-network-note a { min-height: 24px; align-items: center; font-size: 13px; }
+/* .hero-scroll is rotated 90deg about its right-centre, so its on-screen width is its local height. */
+.hero-scroll { padding-block: 4px; }
+
+/* The sourcing note's serif quote kept the donor's 1.15 leading at 20px over two lines. */
+.evidence-strip .impact-metrics .method-card p { line-height: 1.3; }
+
+/* An even number of archive stories leaves the last one without a partner in the two-column
+ * grid; components/home/archive-stories.tsx promotes it to a second feature, mirrored so the
+ * section opens image-left and closes image-right. Below 1120px both features stack. */
+@media (min-width: 1121px) {
+  .archive-photo-feature-reverse { grid-template-columns: .58fr 1.42fr; }
+  .archive-photo-feature-reverse > .archive-photo-media { order: 2; }
+}
