@@ -20,7 +20,9 @@ export const eventSchema = z.object({
 export const programSchema = z.object({
   id: z.enum(['cpai', 'hkict', 'tct', 'asa']),
   namespace: z.string().min(1),
-  image: z.string().startsWith('/')
+  // Share image only (no page renders it). Optional: with none, lib/metadata.ts generates a
+  // card titled with the programme.
+  image: z.string().startsWith('/').optional()
 });
 
 export type EventRecord = z.infer<typeof eventSchema>;
