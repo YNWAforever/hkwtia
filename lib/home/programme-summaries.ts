@@ -7,7 +7,7 @@ export type ProgrammeType = 'event-series' | 'credential';
 export type ProgrammeSummary = Readonly<{
   id: 'cpai' | 'hkict' | 'tct' | 'asa';
   namespace: string;
-  image: string;
+  image?: string;
   type: ProgrammeType;
   editionCount: number | null;
   latestYear: number | null;
