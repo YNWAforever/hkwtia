@@ -3,8 +3,10 @@
 Branch `feat/award-grade-experience-20261005`, cut from `origin/main` `df2453fc`. Production
 (`hkwtia.vercel.app`) was confirmed to serve that same commit (`dpl_5u276U2z6EbgjjmASYwCVBn593Cm`,
 READY, `githubCommitSha df2453fc…`), so the live site is a valid "before" for this branch.
-**Nothing here is deployed.** No push, merge, migration, payment, email, WhatsApp, AI provider
-call or production data change was made. Local runs used the existing isolated Neon branch
+During development nothing was pushed, merged or deployed, and no migration, payment, email,
+WhatsApp, AI provider call or production data change was made. **Released 2026-10-06** on the
+owner's instruction: PR #146 squash-merged as `5cecf4fa` and promoted to production (§7).
+Local runs used the existing isolated Neon branch
 `br-lingering-unit-azxl75s5` (synthetic data, Stripe `sk_test_`, email delivery mode `test`,
 WhatsApp live off, no AI keys, batch worker paused), checked before use.
 
@@ -182,8 +184,12 @@ landscape, after the round-4 fixes. Header checked at 320, 360, 390, 768, 1024, 
 | WebKit / Firefox | Public-surface smoke 77/78 (§6); the one WebKit item is pre-existing and Low. Full journeys in WebKit and Firefox were not run |
 | Google sign-in rendering | The isolated env sets `AUTH_GOOGLE_ENABLED=false`, so local captures show the "Google sign-in will be available…" note; production has Google enabled (observed on live) |
 | Real devices, real users, field CWV (p75) | **NOT_STARTED**: emulation only; no CrUX or RUM data exists for this branch |
-| Preview deployment | **BLOCKED**: Vercel has no branch-scoped isolated env for this branch (queried 2026-10-06), so a Preview would run against unverified data. Not pushed |
-| Production | Not deployed; **PRODUCTION_VERIFIED is not claimed** |
+| Preview deployment | Vercel built Previews for the PR branch and for `main`, but there is still **no branch-scoped isolated env**, so no acceptance was run on a Preview |
+| Merge | **PR #146 squash-merged as `5cecf4fa`** on 2026-10-06 02:51Z, after all 7 checks passed on head `80c31c8f` (merge pinned with `--match-head-commit`). No schema or migration file changed |
+| Production | **Promoted 2026-10-06** with `vercel promote <main preview> --scope ynwaforevers-projects`, which rebuilds with production env (the Vercel MCP `request_promote` was deliberately not used, because it does not rebuild). Read back: `hkwtia.vercel.app` → `dpl_6uYGRm58UBuP6AbetjBengmjAYbz`, target production, `githubCommitSha 5cecf4fa`, `aliasError: null` |
+| Post-release checks (read-only) | 13 routes 200 (incl. `sitemap.xml`, `robots.txt`); hero CTA `#pathways`; route finder switches; no `[pdf-embedder` on `/about/history`; axe 0 critical / 0 serious on 5 pages; 0 Vercel runtime errors in the 30 minutes after release. No form was submitted on production |
+| **PRODUCTION_VERIFIED** | **Public surface only**, by the read-only checks above. Member and admin journeys, Google and magic link remain unverified on production (BLOCKED for the agent; owner walk required). No field Core Web Vitals yet |
+| Rollback | In Vercel, promote back to `dpl_5u276U2z6EbgjjmASYwCVBn593Cm` (`df2453fc`); or revert `5cecf4fa` on `main` and promote. No data or schema to undo |
 
 ## 8. Content to verify (not changed)
 
