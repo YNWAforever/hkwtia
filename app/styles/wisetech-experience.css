@@ -1159,3 +1159,23 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
 /* The filter selects' heavy display weight suits one-word values ("Any format"); these answers
  * run to a full clause, and in that weight a phone-width select cut them after a few words. */
 .funding-form select { font-size: 15px; font-weight: 600; letter-spacing: 0; text-overflow: ellipsis; }
+
+/* ─── Round 15 (2026-10-07): /membership's twelve dimensions on a phone ──────────────────
+ * Stacked one per row, each dimension was a 157px card -- marker, a 25px title 18px below
+ * it, then one or two lines of copy -- and the twelve ran ~1,810px at 390. A phone reads them
+ * as a list of terms and definitions: the name on the left, what it covers on the right. */
+@media (max-width: 520px) {
+  .membership-dimensions article {
+    display: grid;
+    /* A fixed name column, sized to the longest single-word names (Programmes, Governance) so
+     * no name breaks mid-word and every definition starts on the same line. */
+    grid-template-columns: 118px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+    padding: 18px 20px;
+  }
+  .membership-dimensions article > span:empty { display: none; }
+  .membership-dimensions article > span { grid-column: 1; }
+  .membership-dimensions h3 { grid-column: 1; margin: 0; font-size: 20px; line-height: 1.15; overflow-wrap: normal; }
+  .membership-dimensions p { grid-column: 2; grid-row: 1 / span 2; margin: 2px 0 0; }
+}
