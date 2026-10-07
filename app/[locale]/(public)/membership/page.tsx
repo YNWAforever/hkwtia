@@ -178,7 +178,7 @@ export default async function MembershipPage({ params }: Props) {
         breadcrumb={{
           homeHref: "/",
           homeLabel: tCommon("breadcrumbHome"),
-          current: t("title"),
+          current: t("breadcrumbCurrent"),
         }}
         breadcrumbLabel={tCommon("breadcrumbLabel")}
         eyebrow={t("eyebrow")}

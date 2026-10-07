@@ -330,3 +330,26 @@ test('the stacked rich-page related cards have no blank band above their titles 
   expect(gap).toBeLessThanOrEqual(40);
   expect((await page.locator('.rich-related-grid > a').boundingBox())!.height).toBeLessThan(220);
 });
+
+// Round 12: phone grids that kept a desktop composition.
+test.describe('round 12', () => {
+  test('/events recommendation cards and activity links stack one per row on a phone', async ({page}) => {
+    // A later 1120px rule kept the cards two-up at 390px: "Membership" broke as "Members/hip".
+    await page.setViewportSize({width: 390, height: 844});
+    const card = (title: string) => `<a class="inner-card" href="/membership"><span class="inner-card-index">03</span><h3>${title}</h3><p>Find the pathway that matches your organisation.</p><b>Compare plans <span aria-hidden="true">↗</span></b></a>`;
+    await render(page, `<section class="section"><div class="shell">
+      <nav class="activity-type-strip"><a href="#">Open events</a><a href="#">Launch Pad</a><a href="#">Showcase</a></nav>
+      <div class="inner-card-grid">${card('Launch Pad')}${card('Showcase')}${card('Membership')}</div></div></section>`);
+    const h3 = (await page.locator('.inner-card h3').last().boundingBox())!;
+    expect(h3.height).toBeLessThan(45); // one line, not "Members / hip"
+    const links = await page.locator('.activity-type-strip a').evaluateAll((as) => as.map((a) => Math.round(a.getBoundingClientRect().x)));
+    expect(new Set(links).size).toBe(1);
+  });
+
+  test('stacked service cards on a phone have no blank band above their titles', async ({page}) => {
+    // /launchpad: four one-line services took ~1,100px (280px boxes, 80px above each title).
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, `<section class="section"><div class="service-grid"><article><span>01</span><h3>Market entry</h3><p>Structured guidance on registration, distribution and first commercial contracts.</p></article></div></section>`);
+    expect((await page.locator('.service-grid article').boundingBox())!.height).toBeLessThan(220);
+  });
+});

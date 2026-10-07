@@ -1102,3 +1102,24 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .rich-related-grid > a { min-height: 0; padding: 24px; }
   .rich-related-grid h3 { margin-top: 28px; font-size: 30px; }
 }
+
+/* ─── Round 12 (2026-10-07): phone grids that kept a desktop composition ──────────────────
+ * /events: the three recommendation cards stayed two-up at 390px -- wisetech.css:690 sets
+ * repeat(2) under 1120px after the port's single-column phone rule -- so "Membership" broke
+ * as "Members/hip" in a 150px column and the third card sat alone. The three activity links
+ * above them (Open events, Launch Pad, Showcase) were two-up as well, one beside a blank cell. */
+@media (max-width: 640px) {
+  .inner-card-grid, .activity-type-strip { grid-template-columns: minmax(0, 1fr); }
+  .activity-type-strip a { min-height: 56px; }
+  .inner-card { min-height: 0; }
+  .inner-card h3 { margin-top: 24px; }
+  /* Without the min-height the link row no longer pushes away from the copy above it. */
+  .inner-card > p { margin-bottom: 18px; }
+}
+
+/* /launchpad services, card-grid links and principle cards: stacked on a phone, each kept a
+ * 280px box with an 80px gap above its title -- ~1,100px for four one-line services. */
+@media (max-width: 520px) {
+  :is(.service-grid article, .service-link, .principle-grid article) { min-height: 0; padding: 24px; }
+  :is(.service-grid, .service-link, .principle-grid) h3 { margin-top: 28px; font-size: 30px; }
+}
