@@ -1088,3 +1088,17 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .archive-photo-feature-reverse { grid-template-columns: .58fr 1.42fr; }
   .archive-photo-feature-reverse > .archive-photo-media { order: 2; }
 }
+
+/* ─── Round 11 (2026-10-07): /partners category counts ───────────────────────────────────
+ * The homepage partner tabs' counts went to 12px in round 10; the same counts in the
+ * /partners category nav (a 38px ring) stayed at the donor's 11px. One size for one idea. */
+.partner-category-nav b { font-size: 12px; }
+
+/* Under 520px the rich-page "related" cards stack one per row but keep the desktop
+ * composition: a 240px minimum and an 80px gap above the title, which left a ~90px blank
+ * band in each of the three cards closing /about, /about/history and every programme page.
+ * Stacked, the label leads straight into the title. */
+@media (max-width: 520px) {
+  .rich-related-grid > a { min-height: 0; padding: 24px; }
+  .rich-related-grid h3 { margin-top: 28px; font-size: 30px; }
+}
