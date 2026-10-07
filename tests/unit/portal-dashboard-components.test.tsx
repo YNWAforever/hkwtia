@@ -7,8 +7,12 @@ import {MembershipGlance} from "@/components/portal/dashboard/membership-glance"
 import {NextStep} from "@/components/portal/dashboard/next-step";
 import {WelcomeBand} from "@/components/portal/dashboard/welcome-band";
 
+// The stub surfaces `prefetch` so each private link can be held to prefetch={false}: these all
+// point at member-only /portal routes (tests/unit/private-link-boundary.test.tsx scans the source).
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+  Link: ({children, href, prefetch, ...props}: {children: ReactNode; href: string; prefetch?: boolean}) => (
+    <a href={href} data-prefetch={String(prefetch ?? "auto")} {...props}>{children}</a>
+  ),
 }));
 
 const glanceLabels = {title: "Membership at a glance", plan: "Plan", renews: "Renews on", ends: "Ends on", seats: "Seats", manageSeats: "Manage seats"};
@@ -36,6 +40,7 @@ describe("MembershipGlance", () => {
     expect(screen.getByText("0 seats")).toBeTruthy();
     expect(screen.getByText("Renews on")).toBeTruthy();
     expect(screen.getByRole("link", {name: /Manage seats/}).getAttribute("href")).toBe("/portal/company/seats");
+    expect(screen.getByRole("link", {name: /Manage seats/})).toHaveAttribute("data-prefetch", "false");
   });
 });
 
@@ -77,6 +82,7 @@ describe("NextStep", () => {
     expect(container.querySelector("ol.portal-steps")).toBe(list);
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getByRole("link").getAttribute("href")).toBe("/portal/company");
+    expect(screen.getByRole("link")).toHaveAttribute("data-prefetch", "false");
   });
 });
 
@@ -95,5 +101,6 @@ describe("BenefitCards", () => {
     );
     expect(screen.getByRole("heading", {name: "Your benefits"})).toBeTruthy();
     expect(screen.getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual(["/portal/events", "/portal/directory", "/portal/tools"]);
+    expect(screen.getAllByRole("link").map((a) => a.getAttribute("data-prefetch"))).toEqual(["false", "false", "false"]);
   });
 });

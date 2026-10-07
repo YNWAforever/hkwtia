@@ -35,7 +35,7 @@ export function MembershipGlance({locale, planLabel, periodEnd, endsAtPeriodEnd,
           <dt>{labels.seats}</dt>
           <dd>
             {seatsValue}
-            <ActionLink href="/portal/company/seats" variant="text-link">{labels.manageSeats}</ActionLink>
+            <ActionLink href="/portal/company/seats" variant="text-link" prefetch={false}>{labels.manageSeats}</ActionLink>
           </dd>
         </div>
       </dl>

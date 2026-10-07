@@ -23,7 +23,7 @@ vi.mock("next/image", () => ({
     <img {...props} data-fill={String(Boolean(fill))} data-sizes={sizes} />,
 }));
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
+  Link: ({href, prefetch, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string; prefetch?: boolean}) => <a href={href} data-prefetch={String(prefetch ?? "auto")} {...props} />,
 }));
 
 describe("wt primitives", () => {
@@ -85,6 +85,8 @@ describe("wt primitives", () => {
     render(<><ActionLink href="/events">Find an event</ActionLink><ActionLink href="/membership" variant="text-link-light">Compare</ActionLink></>);
     expect(screen.getByRole("link", {name: "Find an event"})).toHaveClass("button");
     expect(screen.getByRole("link", {name: "Compare"})).toHaveClass("text-link", "light-link");
+    // Public callers keep Next's default prefetch; only a member-portal caller opts out.
+    expect(screen.getByRole("link", {name: "Find an event"})).toHaveAttribute("data-prefetch", "auto");
   });
 
   it("HonestEmpty is a polite status region with a decorative pulse ring and wrapped ink actions", () => {

@@ -32,7 +32,7 @@ export function NextStep({label, title, body, action, progress}: NextStepProps) 
       </div>
       {action ? (
         <div className="open-now-actions">
-          <ActionLink href={action.href} variant="button-light">{action.label}</ActionLink>
+          <ActionLink href={action.href} variant="button-light" prefetch={false}>{action.label}</ActionLink>
         </div>
       ) : null}
     </section>
