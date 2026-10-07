@@ -60,6 +60,8 @@ export default async function NewsPage({params}: Props) {
         breadcrumbLabel={common("breadcrumbLabel")}
       />
       <Section tone="paper">
+        {/* Without it the outline jumped h1 -> h3 (the card or empty-state title). */}
+        <h2 className="sr-only">{t("resultsHeading")}</h2>
         {unavailable ? <HonestEmpty variant="inner" title={t("unavailableTitle")} copy={t("unavailableDescription")} /> : null}
         {availableNews.length > 0 || availableBuildLogs.length > 0 ? (
           <div className="archive-grid">

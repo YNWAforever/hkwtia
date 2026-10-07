@@ -1594,6 +1594,7 @@
       "patron": "Patron"
     },
     "resultsTitle": "{count} members on this page",
+    "resultsHeading": "Member directory",
     "loadMore": "View more members",
     "paginationLabel": "Member directory pages",
     "noPublishedTitle": "No public member profiles yet",
@@ -1911,6 +1912,7 @@
     "unavailableDescription": "Some items may be missing. Please try again shortly.",
     "breadcrumbCurrent": "News",
     "statusNews": "News",
+    "resultsHeading": "News and build logs",
     "statusBuildLog": "Build Log",
     "quality": {
       "eyebrow": "Editorial standards",

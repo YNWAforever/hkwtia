@@ -1594,6 +1594,7 @@
       "patron": "贊助人"
     },
     "resultsTitle": "本頁顯示 {count} 個會員",
+    "resultsHeading": "會員名錄",
     "loadMore": "查看更多會員",
     "paginationLabel": "會員名錄分頁",
     "noPublishedTitle": "尚未有公開會員專頁",
@@ -1911,6 +1912,7 @@
     "unavailableDescription": "部分內容可能未有顯示，請稍後再試。",
     "breadcrumbCurrent": "新聞",
     "statusNews": "新聞",
+    "resultsHeading": "新聞及開發日誌",
     "statusBuildLog": "開發日誌",
     "quality": {
       "eyebrow": "編採標準",

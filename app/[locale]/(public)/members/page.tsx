@@ -71,6 +71,8 @@ export default async function MembersPage({params, searchParams}: Props) {
       title={t("title")}
     />
     <Section id="results" labelledBy="members-results-title">
+      {/* Without it the outline jumped h1 -> h3 (the card or empty-state title). */}
+      <h2 className="sr-only">{t("resultsHeading")}</h2>
       {/* The count is the section's accessible name and a polite live region: a filter submit is a
           full navigation, so this is what tells a screen-reader user what came back. */}
       <p aria-live="polite" className="sr-only" id="members-results-title" role="status">{members === null ? t("unavailableTitle") : t("resultsTitle", {count: members.length})}</p>
