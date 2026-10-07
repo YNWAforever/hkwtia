@@ -19,7 +19,7 @@ import {resolve} from "node:path";
 import {fireEvent, render, waitFor} from "@testing-library/react";
 import {isValidElement, type ReactElement, type ReactNode} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {DashboardCompany, DashboardViewModel} from "@/lib/portal/queries";
 
@@ -215,6 +215,12 @@ describe("portal render fixtures", () => {
   beforeEach(() => {
     state.dashboard = dashboard();
     process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN = "fixture-token";
+  });
+
+  // Vitest shares process.env across files in a worker; a token left set would let another
+  // file's "no token configured" case pass or fail by test order.
+  afterEach(() => {
+    delete process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN;
   });
 
   const dashboardStates: ReadonlyArray<[string, () => DashboardViewModel]> = [

@@ -67,6 +67,8 @@ export default async function PortalPage({params}: Props) {
       label: t("nextStep.label"),
       title: t(`nextStep.${key}.title`),
       body: t(`nextStep.${key}.body`),
+      // The cast is sound: href is non-null exactly for the billing and onboarding keys, and each
+      // of those has an `action` string; pending_review has neither, so it never reaches t() here.
       ...(href ? {action: {href, label: t(`nextStep.${key}.action` as "nextStep.company.action")}} : {}),
       ...(step.kind === "onboarding" ? {progress: {
         summary: t("onboardingProgress", {completed: onboarding.completedSteps, total: onboarding.totalSteps}),
