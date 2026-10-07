@@ -14,20 +14,20 @@ const portalGroups: readonly InternalNavGroupConfig[] = portalNavigationGroups;
 const adminGroups: readonly InternalNavGroupConfig[] = adminNavigationGroups;
 
 describe("internal navigation config", () => {
-  it("defines exactly the Portal's 9 primary nav links, Dashboard first, no seats item", () => {
+  it("defines exactly the Portal's 10 nav links, Dashboard first, Seats under the company group", () => {
     const links = portalGroups.flatMap((group) => group.links);
     expect(links.map((link) => link.href)).toEqual([
       "/portal",
       "/portal/profile",
       "/portal/company",
       "/portal/company/listing",
-      "/portal/directory",
+      "/portal/company/seats",
       "/portal/events",
-      "/portal/documents",
+      "/portal/directory",
       "/portal/tools",
+      "/portal/documents",
       "/portal/billing",
     ]);
-    expect(links.some((link) => link.href.includes("seats"))).toBe(false);
   });
 
   it("retains existing destinations and exposes applications, health and knowledge in six groups", () => {

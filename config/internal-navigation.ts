@@ -6,17 +6,28 @@ export type InternalNavGroupConfig = Readonly<{id: string; links: readonly Inter
 // can derive a literal union of real link ids and have TypeScript catch a typo'd label-key lookup.
 export const portalNavigationGroups = [
   {
-    id: "primary",
+    id: "me",
     links: [
       {id: "dashboard", href: "/portal"},
       {id: "profile", href: "/portal/profile"},
+    ],
+  },
+  {
+    id: "company",
+    links: [
       {id: "company", href: "/portal/company"},
       {id: "showcase-listing", href: "/portal/company/listing"},
-      {id: "directory", href: "/portal/directory"},
+      {id: "seats", href: "/portal/company/seats"},
+    ],
+  },
+  {
+    id: "benefits",
+    links: [
       {id: "events", href: "/portal/events"},
-      {id: "documents", href: "/portal/documents"},
+      {id: "directory", href: "/portal/directory"},
       // Phase D-2: the member tools sit with the account's benefits, before billing.
       {id: "tools", href: "/portal/tools"},
+      {id: "documents", href: "/portal/documents"},
       {id: "billing", href: "/portal/billing"},
     ],
   },

@@ -19,6 +19,7 @@ const linkLabelKeys = {
   profile: "profile",
   company: "company",
   "showcase-listing": "showcaseListing.nav",
+  seats: "seats.title",
   directory: "directory.title",
   events: "events.title",
   documents: "documents.title",

@@ -2252,6 +2252,7 @@
   },
   "Portal": {
     "navigation": "Member portal navigation",
+    "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "dashboard": "Dashboard",
     "profile": "My profile",
     "company": "Company",
