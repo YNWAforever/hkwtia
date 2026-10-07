@@ -2287,24 +2287,14 @@
     "membershipUnavailableTitle": "This account has no current membership",
     "membershipUnavailableDescription": "You are signed in, but this account cannot open the member dashboard. Sign out to use another account or review membership options.",
     "membershipOptions": "View membership options",
-    "dashboardTitle": "Your WTIA dashboard",
     "welcome": "Welcome back, {name}.",
-    "membershipStatus": "Membership status",
-    "membershipPlan": "{plan} membership",
     "plans": {
       "community": "Community",
       "startup": "Startup",
       "corporate": "Corporate",
       "patron": "Patron"
     },
-    "onboarding": "Onboarding progress",
     "onboardingProgress": "{completed} of {total} steps complete",
-    "nextAction": "Next action",
-    "actions": {
-      "complete-profile": "Complete your profile",
-      "complete-company": "Complete company details",
-      "none": "You are all set"
-    },
     "status": {
       "expired": {"label": "Expired", "description": "Your membership has expired."},
       "cancelled": {"label": "Cancelled", "description": "Your membership has been cancelled."},

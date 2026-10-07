@@ -1,11 +1,18 @@
+import type {ComponentProps} from "react";
+
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
-import {StatusCard} from "@/components/portal/status-card";
+import {BenefitCards} from "@/components/portal/dashboard/benefit-cards";
+import {MembershipGlance} from "@/components/portal/dashboard/membership-glance";
+import {NextStep} from "@/components/portal/dashboard/next-step";
+import {WelcomeBand} from "@/components/portal/dashboard/welcome-band";
 import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
+import {HonestEmpty} from "@/components/wt/honest-empty";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {isAdminActor} from "@/lib/auth/authorize";
+import {pickNextStep} from "@/lib/portal/next-step";
 import {getDashboard, type DashboardViewModel} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
@@ -33,43 +40,64 @@ export default async function PortalPage({params}: Props) {
   } catch (error) {
     if (!(error instanceof Error && error.message === "MEMBERSHIP_INACTIVE")) throw error;
     const t = await getTranslations({locale, namespace: "Portal"});
-    return <section className="glass-card mx-auto max-w-xl p-6 sm:p-10" role="status">
-      <h1 className="font-serif text-3xl font-semibold">{t("membershipUnavailableTitle")}</h1>
-      <p className="mt-3 text-muted-foreground">{t("membershipUnavailableDescription")}</p>
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+    return <div className="space-y-6">
+      <HonestEmpty variant="inner" title={t("membershipUnavailableTitle")} copy={t("membershipUnavailableDescription")} />
+      <div className="flex flex-wrap items-center gap-3">
         <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />
         <a className="min-h-11 content-center underline underline-offset-4" href={localizedPath(locale, "/membership")}>
           {t("membershipOptions")}
         </a>
       </div>
-    </section>;
+    </div>;
   }
   const t = await getTranslations({locale, namespace: "Portal"});
-  const status = dashboard.primaryStatus;
-  const action = dashboard.onboarding.nextAction;
+  const {primaryStatus, onboarding, memberships, companies, profile} = dashboard;
+  const membership = memberships[0];
+  const step = pickNextStep(dashboard);
+
+  // The step -> copy/href mapping lives here, not in NextStep: the component stays presentational
+  // and the page owns which key and route each state resolves to.
+  let nextStep: ComponentProps<typeof NextStep> | null = null;
+  if (step) {
+    const key = step.kind === "billing" ? step.reason : step.kind === "review" ? "pending_review" : step.step;
+    const href = step.kind === "billing" ? "/portal/billing" : step.kind === "onboarding" ? `/portal/${step.step}` : null;
+    nextStep = {
+      label: t("nextStep.label"),
+      title: t(`nextStep.${key}.title`),
+      body: t(`nextStep.${key}.body`),
+      ...(href ? {action: {href, label: t(`nextStep.${key}.action` as "nextStep.company.action")}} : {}),
+      ...(step.kind === "onboarding" ? {progress: {
+        summary: t("onboardingProgress", {completed: onboarding.completedSteps, total: onboarding.totalSteps}),
+        steps: [
+          {label: t("onboardingSteps.profile"), done: onboarding.profileComplete},
+          {label: t("onboardingSteps.company"), done: onboarding.companyComplete},
+        ],
+      }} : {}),
+    };
+  }
+  const planLabel = t(`plans.${membership.planCode}`);
 
   return (
     <div className="space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("membershipStatus")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("dashboardTitle")}</h1>
-        <p className="text-lg text-muted-foreground">{t("welcome", {name: dashboard.profile.displayName})}</p>
-      </header>
-
-      <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
-        <StatusCard status={status} label={t(`status.${status}.label`)} title={t(`status.${status}.title`)} description={t(`status.${status}.description`)} />
-        <section className="glass-card p-5">
-          <p className="text-sm font-medium text-muted-foreground">{t("membershipPlan", {plan: t(`plans.${dashboard.memberships[0].planCode}`)})}</p>
-          <h2 className="mt-2 font-serif text-2xl font-semibold">{t("onboarding")}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{t("onboardingProgress", {completed: dashboard.onboarding.completedSteps, total: dashboard.onboarding.totalSteps})}</p>
-          <p className="mt-4 text-sm font-medium">{t("nextAction")}: {t(`actions.${action}`)}</p>
-        </section>
-      </div>
-
-      <section className="glass-card p-5 sm:p-7">
-        <h2 className="font-serif text-2xl font-semibold">{t("profileTitle")}</h2>
-        <p className="mt-2 text-muted-foreground">{t("profileDescription")}</p>
-      </section>
+      <WelcomeBand greeting={t("welcome", {name: profile.displayName})} companyName={companies[0]?.displayName} planLabel={planLabel} statusLabel={t(`status.${primaryStatus}.label`)} />
+      {nextStep ? <NextStep {...nextStep} /> : null}
+      <MembershipGlance
+        locale={locale}
+        planLabel={planLabel}
+        periodEnd={membership.billingPeriodEnd}
+        endsAtPeriodEnd={membership.cancelAtPeriodEnd}
+        seatsValue={t("glance.seatsValue", {count: membership.seatLimit})}
+        labels={{title: t("glance.title"), plan: t("glance.plan"), renews: t("glance.renews"), ends: t("glance.ends"), seats: t("glance.seats"), manageSeats: t("glance.manageSeats")}}
+      />
+      <BenefitCards
+        title={t("benefits.title")}
+        actionLabel={t("benefits.action")}
+        items={[
+          {href: "/portal/events", title: t("benefits.events.title"), copy: t("benefits.events.copy")},
+          {href: "/portal/directory", title: t("benefits.directory.title"), copy: t("benefits.directory.copy")},
+          {href: "/portal/tools", title: t("benefits.tools.title"), copy: t("benefits.tools.copy")},
+        ]}
+      />
     </div>
   );
 }

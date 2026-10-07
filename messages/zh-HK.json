@@ -2287,24 +2287,14 @@
     "membershipUnavailableTitle": "此帳戶目前沒有可使用的會籍",
     "membershipUnavailableDescription": "你已登入，但此帳戶無法開啟會員控制台。你可以登出並使用另一個帳戶，或查看會籍選項。",
     "membershipOptions": "查看會籍選項",
-    "dashboardTitle": "你的 WTIA 控制台",
     "welcome": "歡迎回來，{name}。",
-    "membershipStatus": "會員狀態",
-    "membershipPlan": "{plan} 會員",
     "plans": {
       "community": "社群",
       "startup": "初創",
       "corporate": "企業",
       "patron": "贊助"
     },
-    "onboarding": "啟用進度",
     "onboardingProgress": "已完成 {completed} / {total} 個步驟",
-    "nextAction": "下一步",
-    "actions": {
-      "complete-profile": "完成個人資料",
-      "complete-company": "完成公司資料",
-      "none": "已全部完成"
-    },
     "status": {
       "expired": {"label": "已到期", "description": "你的會籍已到期。"},
       "cancelled": {"label": "已取消", "description": "你的會籍已取消。"},
