@@ -160,7 +160,9 @@ describe("page copy scope", () => {
       // Phase A Task 1 (programme D-5) added tierBenefits.* -- the per-tier benefit
       // lists rendered on the plan grid (community 3 + startup 4 + corporate 5 +
       // patron 4 = 16 array elements) -- 82 + 16 = 98.
-      Membership: 113,
+      // Experience round 12 (2026-10-07) added breadcrumbCurrent: the breadcrumb had shown the
+      // full hero sentence ("Find your place in Hong Kong's technology community.") -- 113 + 1.
+      Membership: 114,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
@@ -181,8 +183,9 @@ describe("page copy scope", () => {
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    // 577 + the 22 Home strings of the 2026-10 experience pass (see Home above) = 599.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(599);
+    // 577 + the 22 Home strings of the 2026-10 experience pass (see Home above) = 599,
+    // + Membership.breadcrumbCurrent (experience round 12) = 600.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(600);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
