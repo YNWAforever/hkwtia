@@ -70,27 +70,27 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
   return (
     <>
       <LaunchpadGbaOpening labels={openingLabels} />
+      {/* The site's split heading (title left, intro right), as on every other section. These
+          four stacked the intro under the title in a 672px column and left the rest of a
+          1440px screen empty; the programme outcome was a bare paragraph standing in for a
+          subheading. */}
       <Section tone="paper">
-        <SectionHeading eyebrow={t('program.eyebrow')} title={t('program.title')} variant="stacked" />
-        <p className="mt-3 max-w-2xl text-muted-foreground">{t('program.intro')}</p>
-        <div className="mt-6 space-y-4">
-          <p className="text-lg font-medium">{t('program.outcomeTitle')}</p>
-          <p className="text-muted-foreground">{t('program.outcomeDescription')}</p>
+        <SectionHeading eyebrow={t('program.eyebrow')} title={t('program.title')} variant="split" lead={t('program.intro')} />
+        <div className="launchpad-outcome">
+          <h3>{t('program.outcomeTitle')}</h3>
+          <p>{t('program.outcomeDescription')}</p>
         </div>
       </Section>
       <Section tone="bright">
-        <SectionHeading eyebrow={t('calendar.eyebrow')} title={t('calendar.title')} variant="stacked" />
-        <p className="mt-3 max-w-2xl text-muted-foreground">{t('calendar.intro')}</p>
+        <SectionHeading eyebrow={t('calendar.eyebrow')} title={t('calendar.title')} variant="split" lead={t('calendar.intro')} />
         <div className="mt-6"><CohortCalendar cohorts={availableCohorts} locale={appLocale} labels={calendarLabels}/></div>
       </Section>
       <Section tone="paper">
-        <SectionHeading eyebrow={t('partners.eyebrow')} title={t('partners.title')} variant="stacked" />
-        <p className="mt-3 max-w-2xl text-muted-foreground">{t('partners.intro')}</p>
+        <SectionHeading eyebrow={t('partners.eyebrow')} title={t('partners.title')} variant="split" lead={t('partners.intro')} />
         <div className="mt-6"><LandingPartnerMap partners={partners ?? []} locale={appLocale} labels={partnerLabels}/></div>
       </Section>
       <Section tone="bright">
-        <SectionHeading eyebrow={t('funding.eyebrow')} title={t('funding.title')} variant="stacked" />
-        <p className="mt-3 max-w-2xl text-muted-foreground">{t('funding.intro')}</p>
+        <SectionHeading eyebrow={t('funding.eyebrow')} title={t('funding.title')} variant="split" lead={t('funding.intro')} />
         <div className="mt-6 space-y-10"><FundingWizard locale={appLocale} answers={answers} labels={fundingLabels}/><FundingResults results={fundingResults} labels={fundingResultsLabels}/></div>
       </Section>
       {openCohorts.length > 0 ? (

@@ -1123,3 +1123,29 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   :is(.service-grid article, .service-link, .principle-grid article) { min-height: 0; padding: 24px; }
   :is(.service-grid, .service-link, .principle-grid) h3 { margin-top: 28px; font-size: 30px; }
 }
+
+/* ─── Round 13 (2026-10-07): /launchpad in the site's grammar ────────────────────────────
+ * The page's sections now use the split heading (app/[locale]/(public)/launchpad/page.tsx).
+ * The programme outcome was a bare 18px paragraph standing in for a subheading; it is a
+ * ruled h3 block under the heading. */
+.launchpad-outcome { max-width: 760px; margin-top: clamp(32px, 4vw, 56px); border-top: 1px solid var(--wt-line); padding-top: 24px; }
+.launchpad-outcome h3 { margin: 0 0 10px; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(24px, 2.2vw, 30px); font-weight: 500; line-height: 1.15; }
+.launchpad-outcome p { margin: 0; color: var(--xp-text-muted); font-size: 15px; line-height: 1.65; }
+
+/* Funding results (components/marketing/funding-wizard.tsx) were the one block on the site in
+ * bold blue sans titles and browser-underlined links, with the same disclaimer printed in all
+ * five cards. Cards now speak the record-card language: status eyebrow, serif title, muted
+ * meta, the site's text link. An odd last card closes the grid full width. */
+.funding-results > h3 { margin: 0; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(28px, 2.6vw, 38px); font-weight: 500; line-height: 1.1; }
+.funding-results-note { max-width: 62ch; margin: 10px 0 0; color: var(--xp-text-muted); font-size: 14px; line-height: 1.6; }
+.funding-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 28px; }
+.funding-result-grid > .funding-result:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.funding-result { display: flex; flex-direction: column; border: 1px solid var(--wt-line); border-radius: 14px; background: #fff; padding: clamp(22px, 2.4vw, 32px); }
+.funding-result h4 { margin: 14px 0 12px; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(22px, 1.9vw, 27px); font-weight: 500; line-height: 1.15; }
+.funding-result > p:not([class]) { max-width: 68ch; margin: 0; color: #4f5b60; font-size: 15px; line-height: 1.65; }
+.funding-result-meta { margin: 14px 0 0; color: var(--xp-text-muted); font-size: 13px; line-height: 1.55; }
+.funding-result > p:last-of-type { margin-bottom: 16px; }
+.funding-result > .text-link { align-self: flex-start; margin-top: auto; }
+@media (max-width: 820px) {
+  .funding-result-grid { grid-template-columns: minmax(0, 1fr); }
+}
