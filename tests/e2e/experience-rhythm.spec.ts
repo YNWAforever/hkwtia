@@ -353,3 +353,17 @@ test.describe('round 12', () => {
     expect((await page.locator('.service-grid article').boundingBox())!.height).toBeLessThan(220);
   });
 });
+
+// Round 15: /membership's dimensions read as terms and definitions on a phone.
+test('membership dimensions on a phone are name-and-definition rows with whole-word names', async ({page}) => {
+  // components/marketing/membership-dimensions.tsx: twelve 157px stacked cards ran ~1,810px.
+  await page.setViewportSize({width: 360, height: 800});
+  const item = (title: string, copy: string) => `<article><span></span><h3>${title}</h3><p>${copy}</p></article>`;
+  await render(page, `<div class="membership-dimensions">${item('Programmes', 'Participation in WTIA programmes (ASA, TCT, HKICT, CPAI).')}${item('Governance', 'Voting rights and involvement in WTIA governance, where applicable.')}</div>`);
+  for (const h3 of await page.locator('.membership-dimensions h3').all()) {
+    expect((await h3.boundingBox())!.height).toBeLessThan(30); // one line: no "Programme / s"
+  }
+  const [name, copy] = await Promise.all([page.locator('.membership-dimensions h3').first().boundingBox(), page.locator('.membership-dimensions p').first().boundingBox()]);
+  expect(copy!.x).toBeGreaterThan(name!.x + 100);
+  expect((await page.locator('.membership-dimensions article').first().boundingBox())!.height).toBeLessThan(120);
+});
