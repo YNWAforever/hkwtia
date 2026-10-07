@@ -1,0 +1,71 @@
+/* The member portal's frame, in the public site's WiseTech language. Loaded by the portal
+ * layout only, after wisetech.css / wisetech-shell.css / wisetech-experience.css, so an
+ * equal-specificity tie goes to this file. Shell only: the portal pages' own content styles
+ * are separate. Tokens (--wt-*, --xp-*) only, so a palette change reaches the portal too.
+ *
+ * Class names are `portal-*` on purpose: the port's `.site-header` / `.brand` rules assume
+ * the public page's fixed, scroll-aware header, which the portal does not have. The brand
+ * lockup keeps the donor `.brand` classes because it is the same component. */
+
+.portal-root { min-height: 100vh; background: var(--wt-paper); color: var(--wt-ink); }
+
+/* Radix-style skip link: off-screen until focused, then pinned above everything. */
+.portal-skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 200;
+  background: var(--wt-ink); color: white; font-size: 13px; font-weight: 800; padding: 12px 18px;
+}
+.portal-skip-link:focus-visible { left: 16px; top: 16px; outline: 2px solid var(--wt-blue); outline-offset: 2px; }
+
+.portal-header {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  border-bottom: 1px solid var(--wt-line); background: rgba(255, 255, 255, 0.97);
+  padding: 10px clamp(16px, 3vw, 32px);
+  backdrop-filter: blur(18px);
+}
+.portal-header-label { color: var(--xp-text-muted); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.portal-header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-left: auto; }
+.portal-header-link,
+.portal-header-actions .language-link,
+.portal-header-actions button {
+  display: inline-flex; min-height: 44px; min-width: 44px; align-items: center; justify-content: center;
+  color: var(--wt-ink); font-size: 12px; font-weight: 800; letter-spacing: .04em;
+  background: none; border: 0; padding: 0 6px; cursor: pointer; white-space: nowrap;
+}
+.portal-header-link:hover,
+.portal-header-actions button:hover { color: var(--xp-ink-deep); text-decoration: underline; }
+
+.portal-frame { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.portal-main { min-width: 0; padding: clamp(24px, 4vw, 48px) clamp(16px, 3vw, 40px) 64px; }
+
+/* ─── Navigation ───────────────────────────────────────────────────────────── */
+.portal-nav-column { display: none; }
+.portal-nav-menu { padding: 10px clamp(16px, 3vw, 32px) 0; }
+.portal-nav-menu-button {
+  min-height: 44px; min-width: 44px; border: 1px solid var(--wt-line); border-radius: 10px;
+  background: white; color: var(--wt-ink); font-size: 12px; font-weight: 800; letter-spacing: .04em; padding: 0 18px; cursor: pointer;
+}
+.portal-nav-menu-button:hover { border-color: var(--wt-ink); }
+
+.portal-nav-group + .portal-nav-group { margin-top: 24px; }
+/* The same 11px uppercase tracking as .status-label, raised from the port's 10px for legibility. */
+.portal-nav-group-label { margin: 0 0 6px 14px; color: var(--xp-text-muted); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.portal-nav-group ul { margin: 0; padding: 0; list-style: none; }
+.portal-nav-link {
+  display: flex; min-height: 44px; align-items: center;
+  border-left: 2px solid transparent; padding: 8px 14px;
+  color: var(--wt-ink); font-size: 14px; font-weight: 600; transition: background 180ms ease, border-color 180ms ease;
+}
+.portal-nav-link:hover { background: rgba(15, 76, 129, 0.06); }
+.portal-nav-link:focus-visible { outline: 2px solid var(--wt-blue); outline-offset: -2px; }
+/* A 2px rule rather than a filled pill: the page already carries heavy blocks, and the rule
+ * reads as "you are here" without competing with the content for weight. */
+.portal-nav-link[aria-current="page"] { border-left-color: var(--wt-blue); background: rgba(114, 155, 181, 0.12); font-weight: 800; }
+.portal-nav-sheet { padding-top: 36px; }
+
+@media (min-width: 1121px) {
+  .portal-frame { grid-template-columns: 260px minmax(0, 1fr); }
+  .portal-nav { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; border-right: 1px solid var(--wt-line); }
+  .portal-nav-column { display: block; padding: 28px 12px 40px 0; }
+  .portal-nav-menu { display: none; }
+}

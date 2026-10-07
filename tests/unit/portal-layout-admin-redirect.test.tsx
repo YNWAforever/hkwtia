@@ -13,7 +13,7 @@ vi.mock("next-intl/server", () => ({
 vi.mock("next/headers", () => ({
   headers: vi.fn(async () => new Headers()),
 }));
-// PortalNav's import chain reaches i18n/navigation.ts, which calls next-intl's
+// PortalNavigation's import chain reaches i18n/navigation.ts, which calls next-intl's
 // createNavigation() at module scope -- that needs the full next/navigation
 // surface (permanentRedirect, usePathname, ...), not just redirect, so this
 // mock must preserve the rest of the real module rather than replace it.
@@ -37,7 +37,7 @@ describe("portal layout admin redirect", () => {
   // Regression: a staff actor cleared this layout's requireActor() and only then hit
   // FORBIDDEN inside page.tsx's getDashboard(). Layout and page render in parallel, so
   // a page-only guard still lets the layout build the whole member shell -- two
-  // getTranslations calls, localizeConcierge, InternalAppShell/PortalNav/ConciergeWidget
+  // getTranslations calls, localizeConcierge, PortalShell/PortalNavigation/ConciergeWidget
   // -- around someone about to be redirected away from it.
   it.each([
     ["staff", "en", "/admin"],

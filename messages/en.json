@@ -2253,6 +2253,7 @@
   "Portal": {
     "navigation": "Member portal navigation",
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
+    "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "dashboard": "Dashboard",
     "profile": "My profile",
     "company": "Company",

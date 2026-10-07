@@ -2253,6 +2253,7 @@
   "Portal": {
     "navigation": "會員平台導覽",
     "navGroups": {"me": "我的帳戶", "company": "我的公司", "benefits": "會員權益"},
+    "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},
     "dashboard": "控制台",
     "profile": "我的個人資料",
     "company": "公司資料",
