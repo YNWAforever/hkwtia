@@ -7,7 +7,10 @@
  * the public page's fixed, scroll-aware header, which the portal does not have. The brand
  * lockup keeps the donor `.brand` classes because it is the same component. */
 
-.portal-root { min-height: 100vh; background: var(--wt-paper); color: var(--wt-ink); }
+/* One source for the sticky header's height: the header takes it as a floor and the desktop nav
+ * column offsets itself by it. Without that, the column stuck at top: 0 slid under the header
+ * and its first group label and Dashboard link were covered once the page scrolled. */
+.portal-root { --portal-header-h: 72px; min-height: 100vh; background: var(--wt-paper); color: var(--wt-ink); }
 
 /* Radix-style skip link: off-screen until focused, then pinned above everything. */
 .portal-skip-link {
@@ -17,7 +20,7 @@
 .portal-skip-link:focus-visible { left: 16px; top: 16px; outline: 2px solid var(--wt-blue); outline-offset: 2px; }
 
 .portal-header {
-  position: sticky; top: 0; z-index: 40;
+  position: sticky; top: 0; z-index: 40; box-sizing: border-box; min-height: var(--portal-header-h);
   display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
   border-bottom: 1px solid var(--wt-line); background: rgba(255, 255, 255, 0.97);
   padding: 10px clamp(16px, 3vw, 32px);
@@ -65,7 +68,7 @@
 
 @media (min-width: 1121px) {
   .portal-frame { grid-template-columns: 260px minmax(0, 1fr); }
-  .portal-nav { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; border-right: 1px solid var(--wt-line); }
+  .portal-nav { position: sticky; top: var(--portal-header-h); align-self: start; max-height: calc(100vh - var(--portal-header-h)); overflow-y: auto; border-right: 1px solid var(--wt-line); }
   .portal-nav-column { display: block; padding: 28px 12px 40px 0; }
   .portal-nav-menu { display: none; }
 }

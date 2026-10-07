@@ -5,7 +5,7 @@ import {useId, useState} from "react";
 
 import {findCurrentLink, type InternalNavGroup} from "@/components/internal-shell/navigation";
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
-import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet";
+import {Sheet, SheetContent, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
 
 export type PortalNavGroup = InternalNavGroup & Readonly<{label: string}>;
 export type PortalNavigationLabels = Readonly<{navigationLabel: string; openMenu: string; closeMenu: string}>;
@@ -64,6 +64,7 @@ export function PortalNavigation({groups, labels}: Readonly<{groups: readonly Po
             <button type="button" className="portal-nav-menu-button">{labels.openMenu}</button>
           </SheetTrigger>
           <SheetContent aria-label={labels.navigationLabel} side="left" closeLabel={labels.closeMenu}>
+            <SheetTitle className="sr-only">{labels.navigationLabel}</SheetTitle>
             <div className="portal-nav-sheet">
               <GroupList groups={groups} currentHref={currentHref} onNavigate={() => setOpen(false)} />
             </div>
