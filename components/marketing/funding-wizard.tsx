@@ -1,5 +1,6 @@
 "use client";
 
+import {Arrow} from "@/components/wt/arrow";
 import type {FundingLocale} from "@/config/funding-schemes";
 import type {FundingAnswers, FundingQuestionKey} from "@/lib/launchpad/funding";
 
@@ -56,16 +57,22 @@ export function FundingResults({
   labels: FundingResultsLabels;
   results: ReadonlyArray<Readonly<{id: string; name: string; summary: string; sourceUrl: string; potentiallyEligible: boolean; disclaimer: string; asOf: string}>>;
 }>) {
-  return <section aria-labelledby="funding-results-heading" className="space-y-5">
-    <h3 className="font-serif text-2xl font-semibold" id="funding-results-heading">{labels.heading}</h3>
-    <div className="grid gap-4 lg:grid-cols-2">
-      {results.map((result) => <article className="rounded-lg border p-5" key={result.id}>
-        <p className="font-medium" role="status">{result.potentiallyEligible ? labels.eligible : labels.ineligible}</p>
-        <h4 className="mt-2 text-lg font-semibold">{result.name}</h4>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{result.summary}</p>
-        <p className="mt-4 text-sm text-muted-foreground">{labels.asOf} {result.asOf}</p>
-        <p className="mt-2 text-sm text-muted-foreground">{result.disclaimer}</p>
-        <a className="mt-4 inline-flex font-medium underline" href={result.sourceUrl} rel="noreferrer" target="_blank">{labels.source}</a>
+  // Every scheme carries the same verify-current-terms disclaimer, and printed in each card it
+  // read five times down the list. When they agree it is said once, under the heading.
+  const shared = results.length > 1 && results.every(({disclaimer}) => disclaimer === results[0]!.disclaimer)
+    ? results[0]!.disclaimer
+    : null;
+  return <section aria-labelledby="funding-results-heading" className="funding-results">
+    <h3 id="funding-results-heading">{labels.heading}</h3>
+    {shared ? <p className="funding-results-note">{shared}</p> : null}
+    <div className="funding-result-grid">
+      {results.map((result) => <article className="funding-result" key={result.id}>
+        <p className="status-label" role="status">{result.potentiallyEligible ? labels.eligible : labels.ineligible}</p>
+        <h4>{result.name}</h4>
+        <p>{result.summary}</p>
+        <p className="funding-result-meta">{labels.asOf} {result.asOf}</p>
+        {shared ? null : <p className="funding-result-meta">{result.disclaimer}</p>}
+        <a className="text-link" href={result.sourceUrl} rel="noreferrer" target="_blank">{labels.source} <Arrow /></a>
       </article>)}
     </div>
   </section>;
