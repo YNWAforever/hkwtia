@@ -79,7 +79,15 @@
 .portal-welcome-company { margin: 12px 0 0; font-size: 18px; font-weight: 600; color: var(--wt-ink); }
 .portal-welcome-meta { margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
 
-.portal-next-step { margin-bottom: 40px; }
+/* On the public site the ink ground comes from the host (.opportunity-section), not from
+ * .honest-empty itself, which only adds a faint translucent white. The portal main area is
+ * light, so this block carries its own ground; the contrast overrides mirror the ones
+ * wisetech-shell.css scopes to .opportunity-section .honest-empty (cyan label 1.77:1 and 64%
+ * white body 4.23:1 fall short). Measured on --wt-ink-soft + the 3.5% veil (#225586):
+ * label 4.90:1, body and undone steps 5.19:1, done steps 7.74:1, tick fill 4.90:1, tick glyph 5.61:1. */
+.honest-empty.portal-next-step { margin-bottom: 40px; background: linear-gradient(rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035)), var(--wt-ink-soft); color: #fff; }
+.portal-next-step .status-label { color: #a8d4ec; }
+.portal-next-step p { color: rgba(255, 255, 255, 0.75); }
 /* A done step takes a tick, so progress does not rest on colour alone. */
 .portal-steps { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 20px 0 0; padding: 0; list-style: none; }
 .portal-step { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: rgba(255, 255, 255, 0.75); }
