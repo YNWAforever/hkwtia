@@ -313,3 +313,20 @@ test.describe('round 10', () => {
     expect(media.x).toBeGreaterThan(caption.x);
   });
 });
+
+// Round 11: /partners category counts match the homepage tabs.
+test('the /partners category counts are 12px, like the homepage partner tabs', async ({page}) => {
+  // app/[locale]/(public)/partners/page.tsx: the count in a 38px ring stayed at 11px.
+  await page.setViewportSize({width: 1440, height: 900});
+  await render(page, `<nav class="partner-category-nav" aria-label="Categories"><a href="#partners-supporting"><span>Supporting Organisations</span><b>58</b></a></nav>`);
+  expect(await page.locator('.partner-category-nav b').evaluate((e) => parseFloat(getComputedStyle(e).fontSize))).toBe(12);
+});
+
+test('the stacked rich-page related cards have no blank band above their titles on a phone', async ({page}) => {
+  // /about, /about/history, programme pages: 240px cards with an 80px gap above the title.
+  await page.setViewportSize({width: 390, height: 844});
+  await render(page, `<div class="rich-related-grid"><a href="/about/chairman"><span>Leadership</span><h3>Chairman's message</h3><p>Working together to keep Hong Kong connected.</p><span aria-hidden="true">↗</span></a></div>`);
+  const gap = await page.locator('.rich-related-grid > a').evaluate((a) => a.querySelector('h3')!.getBoundingClientRect().top - a.querySelector('span')!.getBoundingClientRect().bottom);
+  expect(gap).toBeLessThanOrEqual(40);
+  expect((await page.locator('.rich-related-grid > a').boundingBox())!.height).toBeLessThan(220);
+});

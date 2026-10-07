@@ -107,6 +107,40 @@ describe("milestone timeline", () => {
     expect(document.querySelector('a[href^="/zh/zh"]')).not.toBeInTheDocument();
   });
 
+  // The full bodies inline made /about/history 36,000px on a phone (two records run 6,500 and
+  // 9,300 characters). A long or multi-paragraph record previews its lead and links on.
+  it("previews a long non-featured body with its lead only and a locale-aware link", () => {
+    const lead = "A".repeat(200);
+    const rest = "Second paragraph that belongs on the record page.";
+    renderWithIntl("zh-HK",
+      <MilestoneTimeline locale="zh-HK" readMoreLabel="閱讀更多" milestones={[
+        milestone({slug: "multi", bodyZh: `${lead}\n\n${rest}`}),
+        milestone({slug: "one-long", bodyZh: "B".repeat(400)}),
+      ]} />,
+    );
+
+    expect(screen.getByText(lead)).toHaveClass("line-clamp-3");
+    expect(screen.queryByText(rest)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", {name: "閱讀更多"}).map((a) => a.getAttribute("href")))
+      .toEqual(["/zh/about/history/multi", "/zh/about/history/one-long"]);
+  });
+
+  it("weighs Chinese characters by their width and skips a lead that only repeats the title", () => {
+    const echo = "Pandemic Deals Heavy Blow to IT SMEs";
+    const substance = "The industry asked for direct funding and a meeting with the Bureau.";
+    renderWithIntl("zh-HK",
+      <MilestoneTimeline locale="zh-HK" readMoreLabel="閱讀更多" milestones={[
+        // 150 CJK characters: under a raw-length limit, but ten lines on a phone.
+        milestone({slug: "dense", bodyZh: "會".repeat(150)}),
+        milestone({slug: "echo", titleZh: `[Press Release] ${echo}`, bodyZh: `[PRESS RELEASE]\n\n${echo}\n\n${substance}`}),
+      ]} />,
+    );
+
+    expect(document.querySelector('a[href="/zh/about/history/dense"]')).toBeInTheDocument();
+    expect(screen.getByText(substance)).toHaveClass("line-clamp-3");
+    expect(screen.queryByText(echo)).not.toBeInTheDocument();
+  });
+
   it("renders year headings newest first without empty years", () => {
     renderWithIntl("en",
       <MilestoneTimeline locale="en" readMoreLabel="Read more" milestones={[
