@@ -103,3 +103,21 @@
 @media (max-width: 520px) { .portal-glance dl { grid-template-columns: 1fr; } }
 
 .portal-benefits { margin-bottom: 40px; }
+
+/* ---- Fixes from the rendered sweep (tests/e2e/portal-experience.spec.ts) ---- */
+/* The lockup's descriptor is 10px on the public header (wisetech-experience.css), under the
+ * portal's 11px floor, and at its public width it ran to three lines, making the desktop header
+ * 83px against the 72px the nav column offsets by: the column's first group label slid 11px
+ * under the sticky header. Two lines at 11px on a wider measure keep the header inside its
+ * height, and the clamp holds that for the longer zh-HK descriptor too (measured 2 lines, both
+ * locales, 1121–1920px). */
+.portal-header .brand-copy small {
+  max-width: 340px; max-height: none; font-size: 11px; line-height: 1.2;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+}
+@media (max-width: 1120px) {
+  .portal-header .brand-copy small { display: none; }
+  /* Below the desktop column the header wraps to three rows (150px at 390), and pinned it kept
+   * 18% of a phone screen covered on every scroll. Nothing below it is sticky, so it scrolls away. */
+  .portal-header { position: static; }
+}
