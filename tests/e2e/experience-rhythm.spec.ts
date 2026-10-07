@@ -367,3 +367,31 @@ test('membership dimensions on a phone are name-and-definition rows with whole-w
   expect(copy!.x).toBeGreaterThan(name!.x + 100);
   expect((await page.locator('.membership-dimensions article').first().boundingBox())!.height).toBeLessThan(120);
 });
+
+// Round 16: no empty cells in fixed four-up grids; /contact's direct channels lead.
+test.describe('round 16', () => {
+  test('three or six inner cards fill a three-column grid; four keep four', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    const card = (i: number) => `<a class="inner-card" href="#"><span class="inner-card-index">0${i}</span><h3>Card ${i}</h3><p>Copy.</p><b>View <span aria-hidden="true">↗</span></b></a>`;
+    const grid = (n: number) => `<div class="inner-card-grid" data-n="${n}">${Array.from({length: n}, (_, i) => card(i + 1)).join('')}</div>`;
+    await render(page, `<div class="shell">${grid(3)}${grid(6)}${grid(4)}</div>`);
+    const cols = (n: number) => page.locator(`.inner-card-grid[data-n="${n}"]`).evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(' ').length);
+    expect(await cols(3)).toBe(3);
+    expect(await cols(6)).toBe(3);
+    expect(await cols(4)).toBe(4);
+  });
+
+  test('/contact channels are display-size and the composer is a framed form', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, `<section class="section"><div class="shell"><div class="contact-direct">
+      <address class="contact-channels"><h2>Contact WTIA directly</h2><a class="contact-channel-primary" href="mailto:contact@hkwtia.org">contact@hkwtia.org</a><p>4/F, KOHO, Kwun Tong, Hong Kong</p></address>
+      <div class="contact-compose"><div class="prepared-email-form"><label for="t">What is this about?</label><select id="t"><option>Member portal</option></select><a class="button" href="mailto:x">Compose email</a></div></div>
+    </div></div></section>`);
+    const size = (s: string) => page.locator(s).evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+    expect(await size('.contact-channels h2')).toBeGreaterThanOrEqual(36);
+    expect(await size('.contact-channel-primary')).toBeGreaterThanOrEqual(24);
+    expect(await page.locator('.prepared-email-form').evaluate((f) => getComputedStyle(f).borderTopWidth)).toBe('1px');
+    const [label, select] = await Promise.all([page.locator('.prepared-email-form label').boundingBox(), page.locator('.prepared-email-form select').boundingBox()]);
+    expect(select!.y).toBeGreaterThan(label!.y + label!.height - 1); // label above, not beside
+  });
+});

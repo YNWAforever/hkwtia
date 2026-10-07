@@ -64,27 +64,32 @@ export default async function ContactPage({params, searchParams = Promise.resolv
         breadcrumb={{homeHref: '/', homeLabel: common('breadcrumbHome'), current: t('breadcrumbCurrent')}}
         breadcrumbLabel={common('breadcrumbLabel')}
       />
+      {/* The page's purpose, given its weight: the direct channels large on the left, the
+          prepared-email composer as a framed form on the right. They were a 24px heading over
+          an unlabelled run of body-size lines, and a select floating beside a button. */}
       <Section tone="paper">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <address className="not-italic text-muted-foreground">
-            <h2 className="font-serif text-2xl font-semibold text-foreground">{t('channelsTitle')}</h2>
-            <a className="block font-medium text-foreground underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
+        <div className="contact-direct">
+          <address className="contact-channels">
+            <h2>{t('channelsTitle')}</h2>
+            <a className="contact-channel-primary" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
             {siteConfig.contact.phone === undefined ? null : (
-              <a className="block font-medium text-foreground underline-offset-4 hover:underline" href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}>{siteConfig.contact.phone}</a>
+              <a className="contact-channel-primary" href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}>{siteConfig.contact.phone}</a>
             )}
-            <WhatsAppLink className="block font-medium text-foreground underline-offset-4 hover:underline" label={tWhatsApp('chat')} locale={appLocale} prefill={tWhatsApp('prefill.contact')} source="contact" />
+            <WhatsAppLink className="text-link" label={tWhatsApp('chat')} locale={appLocale} prefill={tWhatsApp('prefill.contact')} source="contact" />
             <p>{t('address')}</p>
           </address>
 
-          <div>
+          <div className="contact-compose">
             <PreparedEmailForm labels={emailLabels} initialTopic={initialTopic} />
           </div>
         </div>
       </Section>
 
       <Section tone="bright" labelledBy="contact-routes-title">
-        <h2 id="contact-routes-title" className="font-serif text-3xl font-semibold">{t('routesTitle')}</h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">{t('routesDescription')}</p>
+        <div className="section-heading split-heading">
+          <div><h2 id="contact-routes-title">{t('routesTitle')}</h2></div>
+          <p>{t('routesDescription')}</p>
+        </div>
         <div className="mt-6">
           <InnerCardGrid items={routeCards} actionLabel={t('viewLabel')} />
         </div>
