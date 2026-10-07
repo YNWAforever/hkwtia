@@ -41,6 +41,8 @@ export default async function PortalPage({params}: Props) {
     if (!(error instanceof Error && error.message === "MEMBERSHIP_INACTIVE")) throw error;
     const t = await getTranslations({locale, namespace: "Portal"});
     return <div className="space-y-6">
+      {/* HonestEmpty's inner variant renders an h3, so without this the page would have no h1. */}
+      <h1 className="sr-only">{t("dashboard")}</h1>
       <HonestEmpty variant="inner" title={t("membershipUnavailableTitle")} copy={t("membershipUnavailableDescription")} />
       <div className="flex flex-wrap items-center gap-3">
         <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />

@@ -52,6 +52,7 @@ describe("portal dashboard page", () => {
   it("leads with one h1, the company next step, the glance and three benefit links", async () => {
     const html = await render();
     expect(html.match(/<h1/g)).toHaveLength(1);
+    expect(html).toMatch(/<h1>welcome:/);
     expect(html).toContain('href="/portal/company"');
     expect(html).toContain("nextStep.company.title");
     expect(html).toContain("glance.title");
@@ -85,6 +86,8 @@ describe("portal dashboard page", () => {
     state.error = "MEMBERSHIP_INACTIVE";
     const html = await render();
     expect(html).toContain("inner-honest");
+    expect(html.match(/<h1/g)).toHaveLength(1);
+    expect(html).toMatch(/<h1 class="sr-only">dashboard<\/h1>/);
     expect(html).toContain("membershipUnavailableTitle");
     expect(html).toContain("signOut");
     expect(html).toContain('href="/membership"');
