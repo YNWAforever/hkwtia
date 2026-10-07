@@ -49,6 +49,7 @@ import {FundingWizard} from "@/components/marketing/funding-wizard";
 const labels = {
   formLabel: "Funding scheme picker",
   instructions: "Choose an answer for every question.",
+  placeholder: "Choose…",
   submit: "See matching schemes",
   questions: {
     sector: {label: "Project focus", options: {trade: "Trade", "advanced-training": "Training", "smart-production": "Smart production", "life-health": "Life and health", "ai-data-science": "AI", "advanced-manufacturing-new-energy": "Advanced manufacturing", "research-development": "Research and development"}},

@@ -1149,3 +1149,13 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
 @media (max-width: 820px) {
   .funding-result-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ─── Round 14 (2026-10-07): the funding questionnaire ───────────────────────────────────
+ * components/marketing/funding-wizard.tsx now uses the /events filter form. Its questions
+ * are sentences, not one-word filters, so they read in sentence case at 13px; the
+ * instruction line above them is a muted note. */
+.funding-form-note { margin: 0 0 22px; color: var(--xp-text-muted); font-size: 14px; line-height: 1.6; }
+.funding-form .event-filter-grid label > span { font-size: 13px; font-weight: 700; letter-spacing: 0; line-height: 1.4; }
+/* The filter selects' heavy display weight suits one-word values ("Any format"); these answers
+ * run to a full clause, and in that weight a phone-width select cut them after a few words. */
+.funding-form select { font-size: 15px; font-weight: 600; letter-spacing: 0; text-overflow: ellipsis; }

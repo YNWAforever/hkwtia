@@ -1379,6 +1379,7 @@
       "intro": "Answer five questions for an informational screening against current published scheme rules.",
       "formLabel": "Funding scheme picker",
       "instructions": "Choose an answer for every question.",
+      "placeholder": "Choose…",
       "submit": "See matching schemes",
       "questions": {
         "sector": {
