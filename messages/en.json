@@ -2255,6 +2255,31 @@
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "dashboard": "Dashboard",
+    "nextStep": {
+      "label": "Your next step",
+      "past_due": {"title": "Update your payment details", "body": "Your last payment did not go through. Update billing to keep your membership active.", "action": "Go to billing"},
+      "pending_payment": {"title": "Complete your payment", "body": "Your membership activates once payment is complete.", "action": "Go to billing"},
+      "pending_review": {"title": "Your application is under review", "body": "WTIA will contact you when the review is complete."},
+      "profile": {"title": "Complete your profile", "body": "Add your role and contact preferences so WTIA can reach you.", "action": "Open profile"},
+      "company": {"title": "Add your company details", "body": "Your company details are used for your membership, seats and showcase listing.", "action": "Open company"}
+    },
+    "onboardingSteps": {"profile": "Profile", "company": "Company"},
+    "glance": {
+      "title": "Membership at a glance",
+      "plan": "Plan",
+      "renews": "Renews on",
+      "ends": "Ends on",
+      "seats": "Seats",
+      "seatsValue": "{count, plural, one {# seat} other {# seats}}",
+      "manageSeats": "Manage seats"
+    },
+    "benefits": {
+      "title": "Your benefits",
+      "action": "Open",
+      "events": {"title": "Events", "copy": "Register for WTIA events and manage your registrations."},
+      "directory": {"title": "Member directory", "copy": "Find and contact other WTIA members."},
+      "tools": {"title": "Member tools", "copy": "Use the tools included with your membership."}
+    },
     "profile": "My profile",
     "company": "Company",
     "signOut": "Sign out",

@@ -2255,6 +2255,31 @@
     "navGroups": {"me": "我的帳戶", "company": "我的公司", "benefits": "會員權益"},
     "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},
     "dashboard": "控制台",
+    "nextStep": {
+      "label": "下一步",
+      "past_due": {"title": "請更新付款資料", "body": "上次付款未能完成。請更新付款資料，以保持會籍有效。", "action": "前往帳單"},
+      "pending_payment": {"title": "完成付款", "body": "完成付款後，會籍即會生效。", "action": "前往帳單"},
+      "pending_review": {"title": "你的申請正在審核", "body": "審核完成後，WTIA 會與你聯絡。"},
+      "profile": {"title": "完善個人資料", "body": "加上職銜及聯絡偏好，方便 WTIA 與你聯絡。", "action": "前往個人資料"},
+      "company": {"title": "填寫公司資料", "body": "公司資料會用於會籍、名額及展示頁。", "action": "前往公司資料"}
+    },
+    "onboardingSteps": {"profile": "個人資料", "company": "公司"},
+    "glance": {
+      "title": "會籍概覽",
+      "plan": "計劃",
+      "renews": "續期日",
+      "ends": "結束日",
+      "seats": "名額",
+      "seatsValue": "{count} 個名額",
+      "manageSeats": "管理名額"
+    },
+    "benefits": {
+      "title": "你的會員權益",
+      "action": "前往",
+      "events": {"title": "活動", "copy": "報名 WTIA 活動及管理報名。"},
+      "directory": {"title": "會員名錄", "copy": "搜尋及聯絡其他 WTIA 會員。"},
+      "tools": {"title": "會員工具", "copy": "使用會籍包括的工具。"}
+    },
     "profile": "我的個人資料",
     "company": "公司資料",
     "signOut": "登出",
