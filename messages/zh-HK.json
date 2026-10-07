@@ -1379,6 +1379,7 @@
       "intro": "回答五條問題，按現行公開計劃條款取得資訊性初步配對。",
       "formLabel": "資助計劃配對工具",
       "instructions": "請回答每一條問題。",
+      "placeholder": "請選擇…",
       "submit": "查看配對計劃",
       "questions": {
         "sector": {
