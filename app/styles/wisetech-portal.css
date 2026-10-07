@@ -68,7 +68,11 @@
 
 @media (min-width: 1121px) {
   .portal-frame { grid-template-columns: 260px minmax(0, 1fr); }
-  .portal-nav { position: sticky; top: var(--portal-header-h); align-self: start; max-height: calc(100vh - var(--portal-header-h)); overflow-y: auto; border-right: 1px solid var(--wt-line); }
+  /* The divider is drawn by the frame, not the nav: the nav is a sticky, content-height column,
+   * so a border on it stopped where its links ended (~700px) on every long page. The frame runs
+   * the page's full height and is at least a screen tall, so the rule does too. */
+  .portal-frame { min-height: calc(100vh - var(--portal-header-h)); background: linear-gradient(var(--wt-line), var(--wt-line)) 259px 0 / 1px 100% no-repeat; }
+  .portal-nav { position: sticky; top: var(--portal-header-h); align-self: start; max-height: calc(100vh - var(--portal-header-h)); overflow-y: auto; }
   .portal-nav-column { display: block; padding: 28px 12px 40px 0; }
   .portal-nav-menu { display: none; }
 }
@@ -120,4 +124,35 @@
   /* Below the desktop column the header wraps to three rows (150px at 390), and pinned it kept
    * 18% of a phone screen covered on every scroll. Nothing below it is sticky, so it scrolls away. */
   .portal-header { position: static; }
+
+  /* One header row below the desktop column. The Menu trigger stays inside PortalNavigation's
+   * <nav> and its Radix Sheet (so the dialog, Escape and focus return are unchanged) but is
+   * lifted into the header's right edge; the header reserves that slot with its padding. As a
+   * separate row under a three-row header it pushed the dashboard h1 to 236px at 390. The slot
+   * is a fixed width so the reservation holds for both locales' labels. */
+  .portal-root { position: relative; --portal-menu-w: 104px; }
+  .portal-header { flex-wrap: nowrap; padding-right: calc(clamp(16px, 3vw, 32px) + var(--portal-menu-w) + 12px); }
+  .portal-nav-menu {
+    position: absolute; top: 0; right: clamp(16px, 3vw, 32px); z-index: 41;
+    display: flex; height: var(--portal-header-h); align-items: center; padding: 0;
+  }
+  .portal-nav-menu-button { width: var(--portal-menu-w); padding: 0 10px; }
+}
+/* The row is shed from the middle out as it narrows, each step measured to fit the row: the
+ * "Member portal" descriptor, then the wordmark beside the logo tile (the tile keeps the link and
+ * its "home" label), then "Back to public site", whose destination the logo link already is. */
+@media (max-width: 960px) { .portal-header-label { display: none; } }
+@media (max-width: 780px) { .portal-header .brand-copy { display: none; } }
+@media (max-width: 599px) {
+  .portal-root { --portal-header-h: 64px; }
+  .portal-header { gap: 8px; }
+  .portal-header-actions { gap: 4px; }
+  .portal-header-link { display: none; }
+}
+/* The narrowest phones (320) still wrapped the actions to a second line: a smaller tile and Menu
+ * slot buy back the 36px. The tile keeps the logo's own aspect at 66px (the lockup's `sizes`). */
+@media (max-width: 360px) {
+  .portal-root { --portal-menu-w: 88px; }
+  .portal-header { padding-right: calc(16px + var(--portal-menu-w) + 8px); }
+  .portal-header .brand-logo-wrap { width: 66px; flex-basis: 66px; padding-inline: 5px; }
 }

@@ -77,6 +77,23 @@ async function expectNavClearsHeader(page: Page) {
   expect(gap, 'nav column under the header').toBeGreaterThanOrEqual(0);
 }
 
+/**
+ * At 390 the header is one row holding the logo, the actions and the Menu trigger, and the h1
+ * starts within the first ~120px. The header once stacked logo / descriptor / actions over a
+ * separate Menu row, and the h1 sat at 236px.
+ */
+async function expectPhoneFirstView(page: Page) {
+  const geometry = await page.evaluate(() => {
+    const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+    const header = box('.portal-header');
+    const menu = box('.portal-nav-menu-button');
+    return {headerHeight: header.height, menuInHeader: menu.top >= header.top && menu.bottom <= header.bottom, h1Top: box('main h1').top};
+  });
+  expect(geometry.headerHeight, 'phone header height').toBeLessThanOrEqual(72);
+  expect(geometry.menuInHeader, 'Menu trigger inside the header row').toBe(true);
+  expect(geometry.h1Top, 'h1 top at 390').toBeLessThanOrEqual(120);
+}
+
 /** Text that is rendered and visible but set below 11px. Screen-reader-only text is 1px square. */
 async function smallText(page: Page) {
   return page.evaluate(() => {
@@ -123,6 +140,7 @@ test.describe('portal dashboard', () => {
         expect(await smallTargets(page), 'targets under 24x24').toEqual([]);
         expect(await seriousAxeViolations(page)).toEqual([]);
         if (viewport.width === 1440) await expectNavClearsHeader(page);
+        if (viewport.width === 390) await expectPhoneFirstView(page);
       });
     }
   }
