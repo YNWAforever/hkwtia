@@ -12,7 +12,7 @@ import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
 import {localizedPath} from "@/lib/urls";
 
-import {eventFormLabels} from "../../labels";
+import {eventFormLabels, submitBlockedReason} from "../../labels";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; id: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -55,7 +55,7 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
         {values.rejectionReason ? <p className="portal-form-alert">{t("rejectedWith", {reason: values.rejectionReason})}</p> : null}
       </PortalPageHeader>
       {typeof context === "string" ? <p className="portal-form-alert" role="alert">{t(`errors.${context}`)}</p> : null}
-      <EventForm action={saveMemberEventAction.bind(null, locale, row.organiser_company_id)} canSaveDraft={typeof context !== "string"} canUploadHero={typeof context !== "string" && context.limit > 0} canSubmit={typeof context !== "string" && (context.canPublish)} labels={eventFormLabels(t, tForms)} notice={notice} values={values} />
+      <EventForm action={saveMemberEventAction.bind(null, locale, row.organiser_company_id)} canSaveDraft={typeof context !== "string"} canUploadHero={typeof context !== "string" && context.limit > 0} canSubmit={typeof context !== "string" && (context.canPublish)} labels={eventFormLabels(t, tForms)} notice={notice} submitBlockedBy={submitBlockedReason(typeof context === "string" ? null : context)} values={values} />
     </div>
   );
 }

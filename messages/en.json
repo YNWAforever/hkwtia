@@ -2446,6 +2446,7 @@
       "backToEvents": "Back to events",
       "pageAddressHelp": "Your event will be at {path}",
       "submitUnavailable": "Submitting for review is not available: your plan has no reviewed events left this quarter.",
+      "submitNotIncluded": "Your plan does not include publishing events, so this event can be saved as a draft only.",
       "groups": {
         "basics": "Basics",
         "description": "Description",

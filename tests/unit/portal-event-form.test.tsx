@@ -6,6 +6,7 @@ import {describe, expect, it, vi} from "vitest";
 // eslint-disable-next-line @next/next/no-img-element -- a plain img stands in for next/image in jsdom
 vi.mock("next/image", () => ({default: ({src, alt}: ComponentProps<"img">) => <img alt={alt} src={src} />}));
 
+import {submitBlockedReason} from "@/app/[locale]/(member)/portal/events/labels";
 import {EventForm, type EventFormLabels} from "@/components/portal/event-form";
 import type {MemberEventView} from "@/lib/events/member-contract";
 
@@ -22,7 +23,7 @@ const labels: EventFormLabels = {
     label: "Hero image", empty: "No image yet", previewAlt: "Current hero image", external: "Linked image", remove: "Remove",
     upload: {choose: "Choose an image", alt: "Describe the image", upload: "Upload", uploading: "Uploading", done: "Uploaded", failed: "Failed"},
   },
-  saveDraft: "Save draft", submit: "Submit for review", submitUnavailable: "No reviewed events left this quarter.", saving: "Saving",
+  saveDraft: "Save draft", submit: "Submit for review", submitUnavailable: "No reviewed events left this quarter.", submitNotIncluded: "Your plan does not include publishing events.", saving: "Saving",
   errors: {INVALID: "Check the fields"},
 };
 
@@ -130,12 +131,30 @@ describe("member event form: actions", () => {
     expect(screen.queryByText(labels.submitUnavailable)).toBeNull();
   });
 
-  it("drops Submit for review and says why when it is unavailable", () => {
-    const {container} = render(<EventForm action={action} canSubmit={false} labels={labels} values={null} />);
+  it("drops Submit for review and says the quota is used up", () => {
+    const {container} = render(<EventForm action={action} canSubmit={false} labels={labels} submitBlockedBy="quota" values={null} />);
     expect(screen.queryByRole("button", {name: "Submit for review"})).toBeNull();
     expect(screen.getByText(labels.submitUnavailable)).toBeInTheDocument();
     expect(container.querySelectorAll(".button")).toHaveLength(1);
     expect(screen.getByRole("button", {name: "Save draft"})).toHaveAccessibleDescription(labels.submitUnavailable);
+  });
+
+  it("says the plan has no event publishing when that is why", () => {
+    const {container} = render(<EventForm action={action} canSubmit={false} labels={labels} submitBlockedBy="plan" values={null} />);
+    expect(screen.queryByRole("button", {name: "Submit for review"})).toBeNull();
+    expect(screen.getByText(labels.submitNotIncluded)).toBeInTheDocument();
+    expect(screen.queryByText(labels.submitUnavailable)).toBeNull();
+    expect(container.querySelectorAll(".button")).toHaveLength(1);
+    expect(screen.getByRole("button", {name: "Save draft"})).toHaveAccessibleDescription(labels.submitNotIncluded);
+  });
+
+  it("shows no reason line when the page already explains it", () => {
+    const {container} = render(<EventForm action={action} canSubmit={false} labels={labels} values={null} />);
+    expect(screen.queryByText(labels.submitUnavailable)).toBeNull();
+    expect(screen.queryByText(labels.submitNotIncluded)).toBeNull();
+    expect(container.querySelector("#event-submit-note")).toBeNull();
+    expect(screen.getByRole("button", {name: "Save draft"})).not.toHaveAttribute("aria-describedby");
+    expect(container.querySelectorAll(".button")).toHaveLength(1);
   });
 
   it("keeps exactly one primary when nothing can be saved either", () => {
@@ -181,5 +200,18 @@ describe("member event form: hero image and contract", () => {
   it("puts the fields in five titled groups", () => {
     render(<EventForm action={action} canSubmit labels={labels} values={null} />);
     for (const name of Object.values(labels.groups)) expect(screen.getByRole("group", {name})).toBeInTheDocument();
+  });
+});
+
+describe("submitBlockedReason", () => {
+  it("names the quota when the plan has reviewed events but they are used up", () => {
+    expect(submitBlockedReason({canPublish: false, limit: 2})).toBe("quota");
+  });
+  it("names the plan when it includes no event publishing", () => {
+    expect(submitBlockedReason({canPublish: false, limit: 0})).toBe("plan");
+  });
+  it("gives no reason when submitting is allowed or there is no publishing context", () => {
+    expect(submitBlockedReason({canPublish: true, limit: 2})).toBeNull();
+    expect(submitBlockedReason(null)).toBeNull();
   });
 });

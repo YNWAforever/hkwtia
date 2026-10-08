@@ -18,10 +18,12 @@ export type EventFormLabels = Readonly<{
   groups: Readonly<{basics: string; description: string; whenWhere: string; registration: string; imageTags: string}>;
   image: PortalImageFieldLabels;
   saveDraft: string; submit: string; saving: string;
-  /** The one line shown in place of "Submit for review" when `canSubmit` is false. */
-  submitUnavailable: string;
+  /** Why "Submit for review" is missing: the quarter's quota is used up, or the plan has none. */
+  submitUnavailable: string; submitNotIncluded: string;
   errors: Readonly<Record<string, string>>;
 }>;
+
+export type SubmitBlockedReason = "quota" | "plan";
 
 type Action = (state: MemberEventFormState, formData: FormData) => Promise<MemberEventFormState>;
 type TextField = Exclude<keyof MemberEventView, "status" | "rejectionReason" | "submittedAt" | "publishedAt">;
@@ -56,8 +58,10 @@ const serverHydrationSnapshot = () => false;
  * JavaScript off the server HTML is the whole form, and a field hidden there
  * could never be revealed, so the server renders every field visible and enabled.
  */
-export function EventForm({values, labels, action, canSubmit, canSaveDraft = true, canUploadHero, notice = null}: Readonly<{
+export function EventForm({values, labels, action, canSubmit, canSaveDraft = true, canUploadHero, notice = null, submitBlockedBy = null}: Readonly<{
   values: MemberEventView | null; labels: EventFormLabels; action: Action; canSubmit: boolean; canSaveDraft?: boolean; canUploadHero?: boolean; notice?: string | null;
+  /** Chosen by the page (`submitBlockedReason` in the events `labels.ts`); null when the page already explains it, e.g. an inactive membership. */
+  submitBlockedBy?: SubmitBlockedReason | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
   const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
@@ -75,6 +79,7 @@ export function EventForm({values, labels, action, canSubmit, canSaveDraft = tru
   const showOnlineUrl = !hydrated || format === "online" || format === "hybrid";
   const showExternalUrl = !hydrated || registrationMode === "external";
   const canUpload = canUploadHero ?? (canSaveDraft || canSubmit);
+  const submitNote = canSubmit || !submitBlockedBy ? null : submitBlockedBy === "quota" ? labels.submitUnavailable : labels.submitNotIncluded;
   const [helpBefore, helpAfter = ""] = labels.pageAddressHelp.split("{path}");
 
   // `startsAt`/`endsAt` post under the parser's names while their defaults come
@@ -168,8 +173,8 @@ export function EventForm({values, labels, action, canSubmit, canSaveDraft = tru
       {/* One primary per form: when submitting is unavailable, Save draft takes the primary style and
           the line above it says why, rather than a greyed "Submit for review" with no reason. */}
       <div className="portal-form-actions">
-        {canSubmit ? null : <p className="portal-field-help portal-actions-note" id="event-submit-note">{labels.submitUnavailable}</p>}
-        <button aria-describedby={canSubmit ? undefined : "event-submit-note"} className={canSubmit ? "portal-button-outline" : "button"} disabled={pending || !canSaveDraft} onClick={() => setIntent("draft")} type="submit">{pending ? labels.saving : labels.saveDraft}</button>
+        {submitNote ? <p className="portal-field-help portal-actions-note" id="event-submit-note">{submitNote}</p> : null}
+        <button aria-describedby={submitNote ? "event-submit-note" : undefined} className={canSubmit ? "portal-button-outline" : "button"} disabled={pending || !canSaveDraft} onClick={() => setIntent("draft")} type="submit">{pending ? labels.saving : labels.saveDraft}</button>
         {canSubmit ? <button className="button" disabled={pending} onClick={() => setIntent("submit")} type="submit">{pending ? labels.saving : labels.submit}</button> : null}
       </div>
     </form>

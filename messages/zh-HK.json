@@ -2446,6 +2446,7 @@
       "backToEvents": "返回活動",
       "pageAddressHelp": "活動網頁將位於 {path}",
       "submitUnavailable": "暫時未能提交審核：貴計劃本季已沒有剩餘的經審核活動名額。",
+      "submitNotIncluded": "貴計劃不包括發布活動，此活動只可儲存為草稿。",
       "groups": {
         "basics": "基本資料",
         "description": "簡介",

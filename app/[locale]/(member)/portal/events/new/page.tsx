@@ -14,7 +14,7 @@ import {isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
 import {getDashboard} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
-import {eventFormLabels} from "../labels";
+import {eventFormLabels, submitBlockedReason} from "../labels";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams?: Promise<{companyId?: string}>}>;
@@ -63,7 +63,7 @@ export default async function NewMemberEventPage({params, searchParams}: Props) 
         <p className="portal-status-note">{t("quota", {used: context.usedThisQuarter, limit: Number.isFinite(context.limit) ? String(context.limit) : t("unlimited")})}</p>
       </PortalPageHeader>
       {choices.length > 1 ? <EventCompanyPicker action={localizedPath(locale, "/portal/events/new")} choices={choices} companyId={context.companyId} labels={{choose: t("chooseCompany"), use: t("useCompany"), changeWarning: t("changeCompanyWarning")}} /> : null}
-      <EventForm action={saveMemberEventAction.bind(null, locale, context.companyId)} canSubmit={context.canPublish} canUploadHero={context.limit > 0} labels={eventFormLabels(t, tForms)} values={null} />
+      <EventForm action={saveMemberEventAction.bind(null, locale, context.companyId)} canSubmit={context.canPublish} canUploadHero={context.limit > 0} labels={eventFormLabels(t, tForms)} submitBlockedBy={submitBlockedReason(context)} values={null} />
     </div>
   );
 }

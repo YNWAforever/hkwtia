@@ -12,7 +12,7 @@ vi.mock("@/lib/events/member-core", () => ({loadMemberEventsContext: vi.fn(async
   return {canPublish: false, limit: state.limit};
 })}));
 vi.mock("@/lib/events/member-actions", () => ({saveMemberEventAction: vi.fn()}));
-vi.mock("@/components/portal/event-form", () => ({EventForm: ({canSubmit, canSaveDraft}: {canSubmit: boolean; canSaveDraft: boolean}) => <div data-can-save-draft={canSaveDraft} data-can-submit={canSubmit}>form</div>}));
+vi.mock("@/components/portal/event-form", () => ({EventForm: ({canSubmit, canSaveDraft, submitBlockedBy}: {canSubmit: boolean; canSaveDraft: boolean; submitBlockedBy: string | null}) => <div data-can-save-draft={canSaveDraft} data-can-submit={canSubmit} data-submit-blocked-by={String(submitBlockedBy)}>form</div>}));
 
 import EditMemberEventPage from "@/app/[locale]/(member)/portal/events/[id]/edit/page";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
@@ -36,6 +36,7 @@ describe("/portal/events/[id]/edit recovery", () => {
     render(await EditMemberEventPage(props));
     expect(screen.getByText("form")).toHaveAttribute("data-can-submit", "false");
     expect(screen.getByText("form")).toHaveAttribute("data-can-save-draft", "false");
+    expect(screen.getByText("form")).toHaveAttribute("data-submit-blocked-by", "null");
     expect(screen.getByText("errors.NO_MEMBERSHIP_FOR_COMPANY")).toBeVisible();
   });
 
@@ -49,12 +50,14 @@ describe("/portal/events/[id]/edit recovery", () => {
   it("disables resubmission of a pending event when the other submissions fill the quota", async () => {
     render(await EditMemberEventPage(props));
     expect(screen.getByText("form")).toHaveAttribute("data-can-submit", "false");
+    expect(screen.getByText("form")).toHaveAttribute("data-submit-blocked-by", "quota");
   });
 
   it("does not offer resubmission on a Community plan after downgrade", async () => {
     state.limit = 0;
     render(await EditMemberEventPage(props));
     expect(screen.getByText("form")).toHaveAttribute("data-can-submit", "false");
+    expect(screen.getByText("form")).toHaveAttribute("data-submit-blocked-by", "plan");
     expect(screen.getByText("form")).toHaveAttribute("data-can-save-draft", "true");
   });
   it("sizes the edit controls from the event owner's company", async () => {
