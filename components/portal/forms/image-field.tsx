@@ -41,7 +41,12 @@ export function PortalImageField({name, initialValue, store, readOnly, labels}: 
         )}
         {!readOnly && value ? <button className="portal-image-remove" onClick={() => setValue("")} type="button">{labels.remove}</button> : null}
       </div>
-      {readOnly ? null : <HeroUpload labels={labels.upload} onUploaded={(uploaded) => setValue(store === "id" ? uploaded : `${MEDIA_PREFIX}${uploaded}`)} />}
+      {readOnly ? null : (
+        // Own hook for HeroUpload: when read-only it is not rendered, so the CSS cannot target "the last child".
+        <div className="portal-image-upload">
+          <HeroUpload labels={labels.upload} onUploaded={(uploaded) => setValue(store === "id" ? uploaded : `${MEDIA_PREFIX}${uploaded}`)} />
+        </div>
+      )}
     </div>
   );
 }

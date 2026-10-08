@@ -85,4 +85,10 @@ describe("PortalImageField", () => {
     expect(container.querySelector('input[type="file"]')).toBeNull();
     expect(hidden(container, "logoMediaId")!.value).toBe(ID);
   });
+
+  it("renders no upload zone in read-only mode, and the preview is not inside one", () => {
+    const {container} = render(<PortalImageField name="logoMediaId" initialValue={ID} store="id" readOnly labels={labels} />);
+    expect(container.querySelector(".portal-image-upload")).toBeNull();
+    expect(screen.getByAltText("Current logo").closest(".portal-image-upload")).toBeNull();
+  });
 });
