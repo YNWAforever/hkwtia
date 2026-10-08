@@ -2251,6 +2251,9 @@
     "retry": "Try again"
   },
   "Portal": {
+    "common": {
+      "newTab": "(opens in a new tab)"
+    },
     "forms": {
       "readOnlyNote": "Only company owners and admins can edit these details.",
       "image": {"empty": "No logo yet", "previewAlt": "Current logo", "external": "Linked image", "remove": "Remove"},
@@ -2397,18 +2400,25 @@
       "search": "Search members",
       "empty": "No opted-in members found.",
       "next": "Next page",
-      "previous": "Previous page",
+      "first": "Back to first page",
+      "pages": "Directory pages",
+      "showingFor": "Showing results for “{query}”",
+      "clear": "Clear search",
+      "emptyQuery": "No members match “{query}”",
+      "emptyQueryHint": "Try a company name or industry.",
+      "emptyNone": "Members appear here once they choose to be listed.",
+      "emptyNoneAction": "Update your profile",
       "company": "Company",
       "industry": "Industry",
       "sizeBand": "Company size",
       "markets": "Markets"
     },
     "events": {
+      "emptyTitle": "No upcoming events yet",
+      "emptyAction": "Browse WTIA events",
       "title": "Member events",
       "description": "Upcoming WTIA events for members.",
       "empty": "No upcoming events are available.",
-      "date": "Date",
-      "venue": "Venue",
       "register": "Register",
       "registering": "Registering...",
       "viewTickets": "View tickets",
@@ -2437,6 +2447,22 @@
       "noCompany": "Event publishing needs a company you manage. Ask your company owner to make you an admin.",
       "quota": "{used} of {limit} reviewed events used this quarter.",
       "unlimited": "unlimited",
+      "unavailableTitle": "Event publishing is not available",
+      "backToEvents": "Back to events",
+      "pageAddressHelp": "Your event will be at {path}",
+      "submitUnavailable": "Submitting for review is not available: your plan has no reviewed events left this quarter.",
+      "submitNotIncluded": "Your plan does not include publishing events, so this event can be saved as a draft only.",
+      "groups": {
+        "basics": "Basics",
+        "description": "Description",
+        "whenWhere": "When and where",
+        "registration": "Audience and registration",
+        "imageTags": "Image and tags"
+      },
+      "image": {
+        "empty": "No image yet. The default photo is used.",
+        "previewAlt": "Current hero image"
+      },
       "submitted": "Submitted. WTIA reviews member events within three working days.",
       "draftSaved": "Draft saved.",
       "rejectedWith": "Returned by WTIA: {reason}",
@@ -2452,7 +2478,7 @@
         "cancelled": "Cancelled"
       },
       "fields": {
-        "slug": "URL slug",
+        "slug": "Page address",
         "titleEn": "Title (English)",
         "titleZh": "Title (Chinese)",
         "descriptionEn": "Description (English)",
@@ -2466,9 +2492,9 @@
         "visibility": "Who can see it",
         "registrationMode": "Registration",
         "externalRegistrationUrl": "External registration link",
-        "tags": "Tags (comma separated)",
-        "heroMediaId": "Hero image id",
-        "heroHelp": "Upload an image below to get an id, or leave blank for the default photo."
+        "tags": "Tags",
+        "heroImage": "Hero image",
+        "heroHelp": "Leave it empty to use the default photo."
       },
       "formats": {
         "in_person": "In person",
@@ -2484,7 +2510,7 @@
         "alt": "Describe the image",
         "upload": "Upload",
         "uploading": "Uploading…",
-        "done": "Uploaded — the id has been filled in above.",
+        "done": "Uploaded. Save to keep it.",
         "failed": "Upload failed. Check the file type and size."
       },
       "registrationModes": {
@@ -2493,11 +2519,11 @@
       },
       "errors": {
         "INVALID": "Check the required fields, dates and links, then try again.",
-        "EVENT_SLUG_TAKEN": "That URL slug is already used by another event.",
+        "EVENT_SLUG_TAKEN": "That page address is already used by another event.",
         "EVENT_QUOTA_EXCEEDED": "Your plan's quota of reviewed events for this quarter is used up. Save as draft or upgrade.",
         "EVENT_PUBLISHING_NOT_INCLUDED": "Community membership does not include event publishing.",
         "EVENT_NOT_EDITABLE": "This event has already been published; ask WTIA to reopen it.",
-        "EVENT_HERO_MEDIA_INVALID": "That image id is not one you uploaded.",
+        "EVENT_HERO_MEDIA_INVALID": "That image is not one you uploaded.",
         "NO_MANAGED_COMPANY": "Event publishing needs a company you manage.",
         "NO_MEMBERSHIP_FOR_COMPANY": "Your company has no active membership.",
         "FORBIDDEN": "You can only edit events your organisation submitted."
@@ -2551,7 +2577,9 @@
     "companySections": {
       "details": {
         "title": "Registered details",
-        "purpose": "Used for your membership and seats."
+        "purpose": "Used for your membership and seats.",
+        "directoryVisible": "List our team in the member directory",
+        "directoryHelp": "Colleagues appear in the portal member directory only if they also choose to on their own profile. This does not affect your public member page."
       },
       "public": {
         "title": "Public member page",
@@ -2562,22 +2590,28 @@
       "title": "Documents and receipts",
       "description": "Access approved WTIA resources and your billing receipts.",
       "empty": "No documents are available yet.",
-      "receipt": "Receipt",
-      "open": "Open receipt",
-      "resource": "Resource"
+      "emptyLine": "Receipts appear here after your first payment.",
+      "emptyAction": "Go to billing",
+      "receiptsHeading": "Receipts",
+      "receiptTitle": "Receipt — {amount}",
+      "receiptTitleNoAmount": "Membership receipt",
+      "resourcesHeading": "WTIA resources",
+      "openReceipt": "Open receipt",
+      "openDocument": "Open document"
     },
     "tools": {
-      "eyebrow": "Member tools",
       "title": "Your member tools",
       "description": "Tools included with your membership plan.",
       "open": "Open tool",
       "lockedTitle": "Not included in your plan",
-      "lockedDescription": "This tool is available on the Startup, Corporate and Patron plans.",
-      "upgrade": "View membership plans",
+      "includedWith": "Included with {plans}",
+      "viewPlans": "View membership options",
+      "back": "All tools",
       "unavailableTitle": "Temporarily unavailable",
       "unavailableDescription": "This tool could not be loaded. Please try again shortly.",
       "contentCalendar": {
-        "title": "Content calendar"
+        "title": "Content calendar",
+        "description": "Plan and schedule your company's posts with WTIA's shared content calendar."
       }
     },
     "billing": {
@@ -2590,7 +2624,15 @@
       "history": "View billing history",
       "support": "Contact membership support",
       "supportMessage": "Contact WTIA to confirm your renewal or payment record. Viewing billing does not restore membership benefits.",
-      "providerUnavailable": "The payment provider could not be verified. Contact support before making another payment."
+      "providerUnavailable": "The payment provider could not be verified. Contact support before making another payment.",
+      "renewsOn": "Renews on {date}",
+      "endsOn": "Ends on {date}",
+      "seats": "{count, plural, one {# seat} other {# seats}}",
+      "planHeading": "{plan}",
+      "manageHelp": "Opens Stripe's secure page to update your card, download invoices or cancel.",
+      "pastDue": "Your last payment did not go through. Update your payment method to keep your membership active.",
+      "emptyCopy": "Billing appears here once you have a membership.",
+      "emptyAction": "View membership options"
     },
     "seats": {
       "title": "Company seats",

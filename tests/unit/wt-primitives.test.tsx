@@ -120,7 +120,7 @@ describe("wt primitives", () => {
     expect(status.querySelector(".open-now-actions")).toBeNull();
   });
 
-  it("HonestEmpty variants map to the donor classes, and inner has no headingLevel choice", () => {
+  it("HonestEmpty variants map to the donor classes, and inner defaults to an h3", () => {
     const light = render(<HonestEmpty variant="light" label="l" title="t" copy="c" headingLevel={2} />);
     expect(light.container.firstElementChild).toHaveClass("honest-empty", "light-empty");
     expect(light.getByRole("heading", {level: 2})).toHaveTextContent("t");
@@ -131,6 +131,13 @@ describe("wt primitives", () => {
     expect(inner.container.firstElementChild).toHaveAttribute("role", "status");
     expect(inner.getByRole("heading", {level: 3})).toHaveTextContent("t");
     expect(inner.getByRole("link", {name: "Contact us"})).toHaveClass("button", "button-dark");
+  });
+
+  it("HonestEmpty inner takes headingLevel 2 when it sits directly under a page h1", () => {
+    const inner = render(<HonestEmpty variant="inner" title="t" copy="c" headingLevel={2} />);
+    expect(inner.container.firstElementChild).toHaveClass("inner-honest");
+    expect(inner.getByRole("heading", {level: 2})).toHaveTextContent("t");
+    expect(inner.queryByRole("heading", {level: 3})).toBeNull();
   });
 
   it("HonestEmpty light variant omits the label and renders bare action links", () => {

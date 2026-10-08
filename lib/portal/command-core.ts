@@ -50,6 +50,20 @@ const companyUpdateSchema = z.object({
   directoryVisible: z.boolean().optional(),
 });
 
+/**
+ * The company's directory switch, read only when the posting form actually rendered it.
+ *
+ * `companies.directory_visible` gates every colleague in the member directory
+ * (`lib/db/repos/portal-content.ts`). For a long time no form rendered it, yet
+ * `updateCompanyAction` sent `formData.get("directoryVisible") === "on"` — always `false` —
+ * so saving company details silently hid the whole company. A form now opts in with a hidden
+ * `directoryVisibleShown` field; without it the value is `undefined` and the stored one stands.
+ */
+export function companyDirectoryVisibility(formData: FormData): boolean | undefined {
+  if (!formData.has("directoryVisibleShown")) return undefined;
+  return formData.get("directoryVisible") === "on";
+}
+
 export type ProfileUpdateInput = z.input<typeof profileUpdateSchema>;
 export type CompanyUpdateInput = z.infer<typeof companyUpdateSchema>;
 export type PortalActionState = Readonly<{ok: boolean; message?: string}>;

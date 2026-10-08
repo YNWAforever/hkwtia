@@ -11,6 +11,7 @@ import type {MembershipPlanCode} from "../lib/membership/constants";
 export type MemberTool = Readonly<{
   key: string;
   titleKey: string;
+  descriptionKey: string;
   url: string;
   tokenParam: string;
   tokenField: keyof MemberToolsEnv;
@@ -28,6 +29,7 @@ export const MEMBER_TOOLS: readonly MemberTool[] = Object.freeze([
   Object.freeze({
     key: "content-calendar",
     titleKey: "tools.contentCalendar.title",
+    descriptionKey: "tools.contentCalendar.description",
     url: "https://content-calendar-internal.vercel.app/",
     tokenParam: "token",
     tokenField: "contentCalendarToken",

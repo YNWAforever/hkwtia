@@ -2251,6 +2251,9 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "common": {
+      "newTab": "（在新分頁開啟）"
+    },
     "forms": {
       "readOnlyNote": "只有公司擁有人及管理員可以編輯這些資料。",
       "image": {"empty": "尚未有標誌", "previewAlt": "目前標誌", "external": "外部連結圖片", "remove": "移除"},
@@ -2397,18 +2400,25 @@
       "search": "搜尋會員",
       "empty": "找不到已選擇公開資料的會員。",
       "next": "下一頁",
-      "previous": "上一頁",
+      "first": "返回第一頁",
+      "pages": "名錄分頁",
+      "showingFor": "顯示「{query}」的搜尋結果",
+      "clear": "清除搜尋",
+      "emptyQuery": "找不到符合「{query}」的會員",
+      "emptyQueryHint": "試試輸入公司名稱或行業。",
+      "emptyNone": "會員選擇公開資料後，便會顯示在名錄中。",
+      "emptyNoneAction": "更新你的個人資料",
       "company": "公司",
       "industry": "行業",
       "sizeBand": "公司規模",
       "markets": "市場"
     },
     "events": {
+      "emptyTitle": "暫時沒有活動",
+      "emptyAction": "瀏覽 WTIA 活動",
       "title": "會員活動",
       "description": "供會員參加的 WTIA 活動。",
       "empty": "目前沒有即將舉行的活動。",
-      "date": "日期",
-      "venue": "地點",
       "register": "登記",
       "registering": "登記中……",
       "viewTickets": "查看門票",
@@ -2437,6 +2447,22 @@
       "noCompany": "發布活動需要你管理的公司。請公司擁有人將你設為管理員。",
       "quota": "本季已使用 {used} / {limit} 個經審核活動。",
       "unlimited": "不限",
+      "unavailableTitle": "暫時未能發布活動",
+      "backToEvents": "返回活動",
+      "pageAddressHelp": "活動網頁將位於 {path}",
+      "submitUnavailable": "暫時未能提交審核：貴計劃本季已沒有剩餘的經審核活動名額。",
+      "submitNotIncluded": "貴計劃不包括發布活動，此活動只可儲存為草稿。",
+      "groups": {
+        "basics": "基本資料",
+        "description": "簡介",
+        "whenWhere": "時間及地點",
+        "registration": "對象及報名",
+        "imageTags": "圖片及標籤"
+      },
+      "image": {
+        "empty": "尚未有圖片，將使用預設相片。",
+        "previewAlt": "目前主圖片"
+      },
       "submitted": "已提交。WTIA 會於三個工作天內審核會員活動。",
       "draftSaved": "草稿已儲存。",
       "rejectedWith": "WTIA 已退回：{reason}",
@@ -2452,7 +2478,7 @@
         "cancelled": "已取消"
       },
       "fields": {
-        "slug": "網址代稱",
+        "slug": "網頁地址",
         "titleEn": "標題（英文）",
         "titleZh": "標題（中文）",
         "descriptionEn": "簡介（英文）",
@@ -2466,9 +2492,9 @@
         "visibility": "可見範圍",
         "registrationMode": "報名方式",
         "externalRegistrationUrl": "外部報名連結",
-        "tags": "標籤（以逗號分隔）",
-        "heroMediaId": "主圖片編號",
-        "heroHelp": "於下方上載圖片以取得編號，或留空以使用預設相片。"
+        "tags": "標籤",
+        "heroImage": "主圖片",
+        "heroHelp": "留空即使用預設相片。"
       },
       "formats": {
         "in_person": "實體",
@@ -2484,7 +2510,7 @@
         "alt": "描述此圖片",
         "upload": "上載",
         "uploading": "上載中…",
-        "done": "已上載 — 編號已填入上方。",
+        "done": "已上載，儲存後即生效。",
         "failed": "上載失敗。請檢查檔案類型及大小。"
       },
       "registrationModes": {
@@ -2493,11 +2519,11 @@
       },
       "errors": {
         "INVALID": "請檢查必填欄位、日期及連結，然後再試。",
-        "EVENT_SLUG_TAKEN": "此網址代稱已被另一活動使用。",
+        "EVENT_SLUG_TAKEN": "此網頁地址已被另一活動使用。",
         "EVENT_QUOTA_EXCEEDED": "貴計劃本季的經審核活動名額已用完。請儲存為草稿或升級計劃。",
         "EVENT_PUBLISHING_NOT_INCLUDED": "社群會籍不包括發布活動。",
         "EVENT_NOT_EDITABLE": "此活動已發布；如需修改，請聯絡 WTIA。",
-        "EVENT_HERO_MEDIA_INVALID": "此圖片編號並非你上載的圖片。",
+        "EVENT_HERO_MEDIA_INVALID": "此圖片並非你上載的圖片。",
         "NO_MANAGED_COMPANY": "發布活動需要你管理的公司。",
         "NO_MEMBERSHIP_FOR_COMPANY": "貴公司沒有生效的會籍。",
         "FORBIDDEN": "你只可編輯貴機構提交的活動。"
@@ -2551,7 +2577,9 @@
     "companySections": {
       "details": {
         "title": "登記資料",
-        "purpose": "用於會籍及席位。"
+        "purpose": "用於會籍及席位。",
+        "directoryVisible": "在會員名錄中列出本公司團隊",
+        "directoryHelp": "同事亦須在個人資料中選擇公開，才會出現在會員入口的會員名錄。此設定不影響貴公司的公開會員頁面。"
       },
       "public": {
         "title": "公開會員頁",
@@ -2562,22 +2590,28 @@
       "title": "文件及收據",
       "description": "查閱 WTIA 已批准資源及你的付款收據。",
       "empty": "目前沒有可用文件。",
-      "receipt": "收據",
-      "open": "開啟收據",
-      "resource": "資源"
+      "emptyLine": "首次付款後，收據會顯示在這裡。",
+      "emptyAction": "前往帳單",
+      "receiptsHeading": "收據",
+      "receiptTitle": "收據 — {amount}",
+      "receiptTitleNoAmount": "會籍收據",
+      "resourcesHeading": "WTIA 資源",
+      "openReceipt": "開啟收據",
+      "openDocument": "開啟文件"
     },
     "tools": {
-      "eyebrow": "會員工具",
       "title": "你的會員工具",
       "description": "包含於你的會籍計劃的工具。",
       "open": "開啟工具",
       "lockedTitle": "你的計劃未包含此工具",
-      "lockedDescription": "此工具適用於 Startup、Corporate 及 Patron 會籍。",
-      "upgrade": "查看會籍計劃",
+      "includedWith": "包含於{plans}計劃",
+      "viewPlans": "查看會籍選項",
+      "back": "所有工具",
       "unavailableTitle": "暫時無法使用",
       "unavailableDescription": "此工具暫時無法載入，請稍後再試。",
       "contentCalendar": {
-        "title": "內容日曆"
+        "title": "內容日曆",
+        "description": "透過 WTIA 共用的內容日曆，規劃及排程貴公司的帖文。"
       }
     },
     "billing": {
@@ -2590,7 +2624,15 @@
       "history": "查看帳單記錄",
       "support": "聯絡會籍支援",
       "supportMessage": "請聯絡 WTIA 核對續會或付款記錄。查看帳單不會恢復會籍權益。",
-      "providerUnavailable": "暫時無法核對付款服務，請先聯絡支援，勿再次付款。"
+      "providerUnavailable": "暫時無法核對付款服務，請先聯絡支援，勿再次付款。",
+      "renewsOn": "{date}續會",
+      "endsOn": "{date}屆滿",
+      "seats": "{count} 個席位",
+      "planHeading": "{plan}會籍",
+      "manageHelp": "會開啟 Stripe 的安全頁面，讓你更新信用卡、下載發票或取消會籍。",
+      "pastDue": "你上一次付款未能完成。請更新付款方式，以保持會籍有效。",
+      "emptyCopy": "取得會籍後，帳單資料會顯示在這裡。",
+      "emptyAction": "查看會籍選項"
     },
     "seats": {
       "title": "公司席位",

@@ -24,3 +24,13 @@ export function toolFrameSrc(tool: MemberTool, token: string): string {
   url.searchParams.set(tool.tokenParam, token);
   return url.toString();
 }
+
+/**
+ * The plans a tool is included with, as one readable phrase fragment ("Startup, Corporate and
+ * Patron"). `Intl.ListFormat` supplies the locale's own conjunction, so the zh-HK page does not
+ * inherit an English "and"; bare `en` is formatted as `en-GB` because the site writes "A, B and C"
+ * without the Oxford comma that `en` (US) inserts. The plan names themselves come from the caller's translations.
+ */
+export function toolPlanList(tool: MemberTool, locale: string, planName: (plan: MembershipPlanCode) => string): string {
+  return new Intl.ListFormat(locale === "en" ? "en-GB" : locale, {style: "long", type: "conjunction"}).format(tool.tiers.map(planName));
+}

@@ -306,3 +306,130 @@
  * (it spanned the full main width), and the back link stands clear of it instead of touching it. */
 .portal-root .portal-main .inner-honest { max-width: 880px; }
 .portal-root .inner-honest + .portal-form-actions { margin-top: 24px; }
+/* Directly under a page h1 the block's heading is an h2 (HonestEmpty headingLevel={2}), so the outline
+ * does not skip a level; it keeps the look wisetech.css gives `.inner-honest h3`. */
+.portal-root .inner-honest h2 { margin: 7px 0 6px; font-family: var(--font-serif); font-size: 29px; font-weight: 500; line-height: 1.2; color: var(--wt-ink); }
+
+/* ---- Shared page grammar for events, directory, documents, tools and billing ---- */
+.portal-root .portal-card { padding: 24px; border: 1px solid var(--wt-line); border-radius: 10px; background: var(--wt-paper-bright); color: var(--wt-ink); }
+.portal-root .portal-card-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+@media (min-width: 821px) { .portal-root .portal-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.portal-root .portal-date-block { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; width: 72px; padding: 10px 0; border: 1px solid var(--wt-line); border-radius: 8px; background: var(--wt-paper-bright); color: var(--wt-ink); text-align: center; }
+.portal-root .portal-date-day { font-family: var(--font-serif, Georgia, serif); font-size: 28px; font-weight: 700; line-height: 1; }
+.portal-root .portal-date-month { margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+/* Only for a date outside the current year, under the month. */
+.portal-root .portal-date-year { margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--xp-text-muted); }
+.portal-root .portal-record { display: grid; gap: 14px; margin: 0; }
+.portal-root .portal-record dt { margin: 0; font-size: 13px; font-weight: 700; color: var(--xp-text-muted); }
+.portal-root .portal-record dd { margin: 2px 0 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); overflow-wrap: anywhere; }
+/* Scoped to the events and documents heads: the company and listing pages use .portal-section-head as a
+ * stacked title-over-purpose grid, and an unscoped flex row pushed their purpose line to the right edge.
+ * max-width: none lets "Submit an event" reach the card grid's right edge instead of stopping at 880px. */
+.portal-root :is(.portal-events-mine, .portal-documents-group) > .portal-section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; max-width: none; margin: 0 0 16px; }
+.portal-root :is(.portal-events-mine, .portal-documents-group) > .portal-section-head > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
+.portal-root .portal-paging { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--wt-line); font-size: 14px; color: var(--wt-ink); }
+
+/* ---- Member directory ---- */
+/* 32px under the page header, as the dashboard, tools and billing have it (it was 0, so the search label
+ * crowded the lead line). The documents list gets the same. */
+.portal-root .portal-directory { display: grid; gap: 24px; margin-top: 32px; }
+.portal-root .portal-directory-search { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.portal-root .portal-directory-search .portal-field { flex: 1 1 260px; }
+/* The button matches the 52px input, so the two read as one control on desktop. */
+.portal-root .portal-directory-search > .button { min-height: 52px; }
+.portal-root .portal-directory-showing { font-size: 14px; }
+.portal-root .portal-directory-list { margin: 0; padding: 0; list-style: none; }
+.portal-root .portal-directory-name { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
+.portal-root .portal-directory-role { margin: 4px 0 0; font-size: 15px; color: var(--xp-text-muted); }
+.portal-root .portal-directory-list .portal-record { margin-top: 16px; }
+.portal-root .portal-directory-next { margin: 0; }
+
+/* ---- Events list ---- */
+.portal-root .portal-events { display: grid; gap: 48px; }
+.portal-root .portal-events-mine { display: grid; gap: 4px; }
+.portal-root .portal-events-mine > ul { margin: 12px 0 0; padding: 0; list-style: none; }
+/* The body stretches to the card's height and its last line (the registration control, the
+ * unavailable note, or Edit) sits on the card floor, so side-by-side cards line their actions up
+ * however many lines the title or the rejection reason takes. */
+.portal-root .portal-event-card { display: flex; gap: 20px; align-items: stretch; }
+.portal-root .portal-event-card > .portal-date-block { align-self: flex-start; }
+.portal-root .portal-event-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; align-items: flex-start; }
+.portal-root .portal-event-body > :last-child:not(:is(h2, h3, :only-child)) { margin-top: auto; }
+.portal-root .portal-event-body > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
+.portal-root .portal-event-body > p { margin: 0; font-size: 15px; color: var(--wt-ink); }
+/* RSVP: the button and the result line under it (was Tailwind space-y-2). */
+.portal-root .portal-registration-form { display: grid; gap: 8px; justify-items: start; }
+
+/* ---- New / edit event ---- */
+.portal-root .portal-event-editor { display: grid; gap: 32px; }
+.portal-root .portal-event-editor > .portal-welcome .portal-status-note { margin-top: 8px; }
+/* An alert inside the page header (billing ?error=1, a returned event) stands 16px clear of the lead
+ * line; billing's sat flush under it. */
+.portal-root .portal-welcome > .portal-form-alert { margin-top: 16px; }
+/* The online and external-registration links are hidden when they do not apply. .portal-field's
+ * display: grid, (0,2,0), outranks the UA sheet's [hidden] rule, so the field must restate it. */
+.portal-root .portal-field[hidden] { display: none; }
+/* "Your event will be at /events/…": the path wraps anywhere so a long address never scrolls a phone. */
+.portal-root .portal-field-help code { overflow-wrap: anywhere; font-size: 13px; color: var(--wt-ink); }
+/* Company picker: the select and its button share a row, and the button drops under it on phones. */
+.portal-root .portal-company-picker-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.portal-root .portal-company-picker-row > select { flex: 1 1 240px; width: auto; }
+
+/* ---- Documents ---- */
+.portal-root .portal-documents { display: grid; gap: 40px; margin-top: 32px; }
+.portal-root .portal-documents-list { margin: 0; padding: 0; list-style: none; }
+/* Flex column so "Open receipt" / "Open document" sit on the card floor and line up across a row. */
+.portal-root .portal-document { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.portal-root .portal-document h3 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 20px; line-height: 1.25; color: var(--wt-ink); overflow-wrap: anywhere; }
+.portal-root .portal-document-date { margin: 0; font-size: 14px; color: var(--xp-text-muted); }
+.portal-root .portal-document .portal-button-outline { display: inline-flex; align-items: center; margin-top: auto; text-decoration: none; }
+.portal-root .portal-document > :nth-last-child(2) { margin-bottom: 8px; }
+.portal-root .portal-documents-next { margin: 0; }
+
+/* ---- Tools ---- */
+.portal-root .portal-tools { display: grid; gap: 32px; }
+.portal-root .portal-tool-card { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.portal-root .portal-tool-card h2 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
+.portal-root .portal-tool-card p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
+.portal-root .portal-tool-card .portal-tool-locked { color: var(--xp-text-muted); }
+.portal-root .portal-tool-card :is(.button, .portal-button-outline) { margin-top: auto; text-decoration: none; }
+.portal-root .portal-tool-card > :nth-last-child(2) { margin-bottom: 8px; }
+.portal-root .portal-tool-card .portal-button-outline { display: inline-flex; align-items: center; }
+/* Tool page: a slim header, then the framed tool takes the rest of the viewport under the shell header. */
+.portal-root .portal-tool { display: grid; gap: 16px; }
+.portal-root .portal-tool-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
+.portal-root .portal-tool-head h1 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
+/* The frame fills what is left of the viewport and the page itself does not scroll, so there is one
+ * scrollbar (the tool's). It was a fixed calc (100dvh - header - 134px), which assumed a one-line
+ * shell header and tool header; a wrapping one put a second scrollbar back (final review M16). Now,
+ * on a page that frames a tool only, the shell is a viewport-tall flex column: the headers take
+ * what they need and the frame flexes into the rest, however many lines they wrap to. */
+.portal-root .portal-main:has(> .portal-tool) { padding-bottom: 24px; }
+.portal-root:has(iframe.portal-tool-frame) { display: flex; flex-direction: column; height: 100dvh; min-height: 0; }
+.portal-root:has(iframe.portal-tool-frame) > .portal-frame { flex: 1 1 auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr); align-items: stretch; }
+.portal-root:has(iframe.portal-tool-frame) .portal-main { display: flex; flex-direction: column; min-height: 0; }
+.portal-root .portal-tool:has(> iframe.portal-tool-frame) { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+.portal-root iframe.portal-tool-frame { display: block; flex: 1 1 auto; width: 100%; min-height: 320px; border: 1px solid var(--wt-line); border-radius: 8px; background: var(--wt-paper-bright); }
+@media (min-width: 1121px) {
+  /* One row here: the nav column and main sit side by side. */
+  .portal-root:has(iframe.portal-tool-frame) > .portal-frame { grid-template-rows: minmax(0, 1fr); }
+}
+
+/* Billing page: header, then the cards (was Tailwind space-y-8 on the wrapper). */
+.portal-root .portal-billing { display: grid; gap: 32px; }
+/* Billing cards: plan name, status word, renewal and seats as body text, one primary per card. */
+.portal-root .portal-billing-card { display: grid; gap: 10px; align-content: start; }
+.portal-root .portal-billing-card h2 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.25; color: var(--wt-ink); }
+.portal-root .portal-billing-card p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
+.portal-root .portal-billing-card .portal-form-alert { max-width: none; }
+.portal-root .portal-billing-card .portal-billing-muted { color: var(--xp-text-muted); }
+.portal-root .portal-billing-actions { display: grid; gap: 10px; justify-items: start; margin-top: 6px; }
+
+/* Phones: the 72px date block and 24px card padding left a 390 screen ~200px for an event title, so a
+ * Chinese title broke every six or seven characters. A narrower block and gutter give it ~240px. */
+@media (max-width: 520px) {
+  .portal-root .portal-card { padding: 20px; }
+  .portal-root .portal-event-card { gap: 14px; }
+  .portal-root .portal-date-block { width: 60px; padding: 8px 0; }
+  .portal-root .portal-date-day { font-size: 24px; }
+}
