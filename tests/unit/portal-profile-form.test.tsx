@@ -5,7 +5,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: (key: string) => key})),
   setRequestLocale: vi.fn(),
 }));
-vi.mock("@/lib/auth/actor", () => ({requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"}))}));
+vi.mock("@/lib/auth/actor", () => ({requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})), getActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"}))}));
 vi.mock("@/lib/portal/queries", () => ({
   getDashboard: vi.fn(async () => ({
     profile: {id: "p1", displayName: "Ada", phone: "123", jobTitle: "CTO", locale: "en", directoryVisible: true, whatsappNumber: null, whatsappOptIn: true},

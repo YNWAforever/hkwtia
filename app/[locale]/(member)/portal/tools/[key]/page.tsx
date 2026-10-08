@@ -5,7 +5,7 @@ import {notFound} from "next/navigation";
 
 import {MEMBER_TOOLS} from "@/config/member-tools";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {memberToolsEnv} from "@/lib/config/env";
 import {isToolAvailable, toolFrameSrc, toolPlanList} from "@/lib/portal/member-tools";
 import {getDashboard} from "@/lib/portal/queries";
@@ -19,7 +19,7 @@ export default async function PortalToolPage({params}: Props) {
   const {locale: localeValue, key} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/tools");
   const tool = MEMBER_TOOLS.find((candidate) => candidate.key === key);
   if (!tool) notFound();
   const [dashboard, t] = await Promise.all([

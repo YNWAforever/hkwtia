@@ -13,7 +13,7 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 vi.mock("@/lib/auth/actor", () => ({
-  requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})),
+  requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})), getActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})),
 }));
 vi.mock("@/lib/portal/queries", () => ({
   getDashboard: vi.fn(async () => ({

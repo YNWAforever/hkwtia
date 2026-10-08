@@ -9,6 +9,7 @@ import {HonestEmpty} from "@/components/wt/honest-empty";
 import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {registerForEvent} from "@/lib/db/repos/events";
 import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {listMyCompanyEvents, loadMemberEventsContext} from "@/lib/events/member-core";
@@ -26,7 +27,7 @@ export default async function MemberEventsPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/events");
   const events = await getMemberEvents(actor, undefined, locale);
   // Null when the member manages no company (or the membership is inactive):
   // the publishing section is then simply absent rather than an error.

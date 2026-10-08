@@ -2,7 +2,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {getDashboard} from "@/lib/portal/queries";
 import {updateProfileAction} from "@/lib/portal/commands";
 
@@ -14,7 +14,7 @@ export default async function ProfilePage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/profile");
   const dashboard = await getDashboard(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
   const profile = dashboard.profile;

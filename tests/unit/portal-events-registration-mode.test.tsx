@@ -6,7 +6,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
   setRequestLocale: () => undefined,
 }));
-vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u", profileId: "p"})}));
+vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u", profileId: "p"}), getActor: async () => ({kind: "member", userId: "u", profileId: "p"})}));
 vi.mock("@/lib/portal/content", () => ({getMemberEvents: async () => state.events}));
 vi.mock("@/lib/events/member-core", () => ({listMyCompanyEvents: async () => null}));
 vi.mock("@/components/portal/event-registration-form", () => ({

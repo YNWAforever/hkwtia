@@ -5,7 +5,7 @@ const state = vi.hoisted(() => ({dashboardFails: false, seatLimit: 3}));
 
 vi.mock("next-intl/server", () => ({setRequestLocale: vi.fn(), getTranslations: async () => (key: string) => `t:${key}`}));
 vi.mock("next/navigation", async (importOriginal) => ({...(await importOriginal<typeof import("next/navigation")>()), redirect: vi.fn()}));
-vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u1", profileId: "p1"})}));
+vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u1", profileId: "p1"}), getActor: async () => ({kind: "member", userId: "u1", profileId: "p1"})}));
 vi.mock("@/lib/billing/checkout-service", () => ({createBillingPortalSession: vi.fn(), createCheckoutSession: vi.fn()}));
 vi.mock("@/lib/membership/policy", () => ({policyAcceptanceEnabled: () => false}));
 vi.mock("@/lib/db/repos/memberships", () => ({membershipsRepository: {}}));

@@ -18,6 +18,7 @@ import {PortalShell} from "@/components/portal/portal-shell";
 import {portalNavigationGroups} from "@/config/internal-navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {memberLoginPath} from "@/lib/portal/page-actor";
 import {isAdminActor} from "@/lib/auth/authorize";
 import {localizeConcierge} from "@/lib/ai/concierge-labels";
 import {publicEnv} from "@/lib/config/env";
@@ -47,12 +48,6 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {robots: {index: false, follow: false}};
 
 type Props = Readonly<{children: ReactNode; params: Promise<{locale: string}>}>;
-
-/** Build the dedicated member sign-in redirect for an unauthenticated Portal visitor. */
-function memberLoginPath(locale: AppLocale, continuation: string): string {
-  const query = new URLSearchParams({next: continuation});
-  return `${localizedPath(locale, "/member-login")}?${query.toString()}`;
-}
 
 export default async function PortalLayout({children, params}: Props) {
   const {locale: localeValue} = await params;

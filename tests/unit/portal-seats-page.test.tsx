@@ -21,7 +21,7 @@ vi.mock("next/navigation", () => ({redirect: vi.fn()}));
 vi.mock("@/lib/auth/server", () => ({auth: {signIn: {magicLink: vi.fn()}}}));
 vi.mock("@/lib/config/env", () => ({appEnv: () => ({appUrl: "https://example.test"})}));
 const requireActor = vi.hoisted(() => vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})));
-vi.mock("@/lib/auth/actor", () => ({requireActor}));
+vi.mock("@/lib/auth/actor", () => ({requireActor, getActor: requireActor}));
 const acceptSeatInvitation = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db/repos/seats", () => ({
   inviteSeat: vi.fn(), revokeInvitation: vi.fn(), revokeSeat: vi.fn(), changeSeatRole: vi.fn(), acceptSeatInvitation,

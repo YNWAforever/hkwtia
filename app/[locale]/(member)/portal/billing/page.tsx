@@ -5,6 +5,7 @@ import {BillingActions, type BillingDetail} from "@/components/billing/billing-a
 import {PortalPageHeader} from "@/components/portal/page-header";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
 import {localizedPath} from "@/lib/urls";
 import {policyAcceptanceEnabled} from "@/lib/membership/policy";
@@ -27,7 +28,7 @@ export default async function BillingPage({params, searchParams}: Props) {
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
   const query = await searchParams;
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/billing");
   // Renewal and seat details come from the dashboard read; losing them only drops those lines.
   const [summary, dashboard] = await Promise.all([getBillingSummary(actor), getDashboard(actor).catch(() => null)]);
   const details: Record<string, BillingDetail> = {};

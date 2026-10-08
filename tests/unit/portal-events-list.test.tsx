@@ -20,7 +20,7 @@ vi.mock("next-intl/server", () => ({
 }));
 // ActionLink (inside HonestEmpty) uses the locale-aware Link, which needs an intl provider.
 vi.mock("@/i18n/navigation", () => ({Link: ({href, children, ...rest}: {href: string; children: React.ReactNode}) => <a href={href} {...rest}>{children}</a>}));
-vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u", profileId: "p"})}));
+vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u", profileId: "p"}), getActor: async () => ({kind: "member", userId: "u", profileId: "p"})}));
 vi.mock("@/lib/portal/content", () => ({getMemberEvents: async () => state.events}));
 vi.mock("@/lib/events/member-core", () => ({
   listMyCompanyEvents: async () => state.mine,
