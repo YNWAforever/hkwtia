@@ -362,3 +362,17 @@
 .portal-root .portal-document-date { margin: 0; font-size: 14px; color: var(--xp-text-muted); }
 .portal-root .portal-document .portal-button-outline { display: inline-flex; align-items: center; margin-top: 8px; text-decoration: none; }
 .portal-root .portal-documents-next { margin: 0; }
+
+/* ---- Tools ---- */
+.portal-root .portal-tools { display: grid; gap: 32px; }
+.portal-root .portal-tool-card { display: grid; gap: 12px; align-content: start; justify-items: start; }
+.portal-root .portal-tool-card h2 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
+.portal-root .portal-tool-card p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
+.portal-root .portal-tool-card .portal-tool-locked { color: var(--xp-text-muted); }
+.portal-root .portal-tool-card :is(.button, .portal-button-outline) { margin-top: 8px; text-decoration: none; }
+.portal-root .portal-tool-card .portal-button-outline { display: inline-flex; align-items: center; }
+/* Tool page: a slim header, then the framed tool takes the rest of the viewport under the shell header. */
+.portal-root .portal-tool { display: grid; gap: 16px; }
+.portal-root .portal-tool-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
+.portal-root .portal-tool-head h1 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
+.portal-root iframe.portal-tool-frame { display: block; width: 100%; height: calc(100dvh - var(--portal-header-h) - 120px); min-height: 480px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; }

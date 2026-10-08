@@ -2596,17 +2596,18 @@
       "openDocument": "Open document"
     },
     "tools": {
-      "eyebrow": "Member tools",
       "title": "Your member tools",
       "description": "Tools included with your membership plan.",
       "open": "Open tool",
       "lockedTitle": "Not included in your plan",
-      "lockedDescription": "This tool is available on the Startup, Corporate and Patron plans.",
-      "upgrade": "View membership plans",
+      "includedWith": "Included with {plans}",
+      "viewPlans": "View membership options",
+      "back": "All tools",
       "unavailableTitle": "Temporarily unavailable",
       "unavailableDescription": "This tool could not be loaded. Please try again shortly.",
       "contentCalendar": {
-        "title": "Content calendar"
+        "title": "Content calendar",
+        "description": "Plan and schedule your company's posts with WTIA's shared content calendar."
       }
     },
     "billing": {

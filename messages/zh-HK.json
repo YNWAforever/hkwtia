@@ -2596,17 +2596,18 @@
       "openDocument": "開啟文件"
     },
     "tools": {
-      "eyebrow": "會員工具",
       "title": "你的會員工具",
       "description": "包含於你的會籍計劃的工具。",
       "open": "開啟工具",
       "lockedTitle": "你的計劃未包含此工具",
-      "lockedDescription": "此工具適用於 Startup、Corporate 及 Patron 會籍。",
-      "upgrade": "查看會籍計劃",
+      "includedWith": "包含於{plans}計劃",
+      "viewPlans": "查看會籍選項",
+      "back": "所有工具",
       "unavailableTitle": "暫時無法使用",
       "unavailableDescription": "此工具暫時無法載入，請稍後再試。",
       "contentCalendar": {
-        "title": "內容日曆"
+        "title": "內容日曆",
+        "description": "透過 WTIA 共用的內容日曆，規劃及排程貴公司的帖文。"
       }
     },
     "billing": {

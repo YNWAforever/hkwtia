@@ -1,4 +1,5 @@
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
+import {HonestEmpty} from "@/components/wt/honest-empty";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
@@ -6,7 +7,7 @@ import {MEMBER_TOOLS} from "@/config/member-tools";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {memberToolsEnv} from "@/lib/config/env";
-import {isToolAvailable, toolFrameSrc} from "@/lib/portal/member-tools";
+import {isToolAvailable, toolFrameSrc, toolPlanList} from "@/lib/portal/member-tools";
 import {getDashboard} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
@@ -27,14 +28,24 @@ export default async function PortalToolPage({params}: Props) {
   ]);
   const available = isToolAvailable(tool, dashboard.memberships);
 
+  const header = (
+    <header className="portal-tool-head">
+      <Link className="text-link" href={localizedPath(locale, "/portal/tools")}>{t("tools.back")}</Link>
+      <h1>{t(tool.titleKey)}</h1>
+    </header>
+  );
+
   if (!available) {
     return (
-      <section className="glass-card max-w-2xl space-y-3 p-6">
-        <h1 className="font-serif text-3xl font-semibold">{t(tool.titleKey)}</h1>
-        <p className="font-medium">{t("tools.lockedTitle")}</p>
-        <p className="text-muted-foreground">{t("tools.lockedDescription")}</p>
-        <Link className="text-link" href={localizedPath(locale, "/membership")}>{t("tools.upgrade")}</Link>
-      </section>
+      <div className="portal-tool">
+        {header}
+        <HonestEmpty
+          actions={[{href: "/membership", label: t("tools.viewPlans")}]}
+          copy={t("tools.includedWith", {plans: toolPlanList(tool, locale, (plan) => t(`plans.${plan}`))})}
+          title={t("tools.lockedTitle")}
+          variant="inner"
+        />
+      </div>
     );
   }
 
@@ -43,11 +54,10 @@ export default async function PortalToolPage({params}: Props) {
   const token = memberToolsEnv()[tool.tokenField];
   if (!token) {
     return (
-      <section className="glass-card max-w-2xl space-y-3 p-6">
-        <h1 className="font-serif text-3xl font-semibold">{t(tool.titleKey)}</h1>
-        <p className="font-medium">{t("tools.unavailableTitle")}</p>
-        <p className="text-muted-foreground">{t("tools.unavailableDescription")}</p>
-      </section>
+      <div className="portal-tool">
+        {header}
+        <HonestEmpty copy={t("tools.unavailableDescription")} title={t("tools.unavailableTitle")} variant="inner" />
+      </div>
     );
   }
 
@@ -57,11 +67,14 @@ export default async function PortalToolPage({params}: Props) {
   // attribute is all but a no-op for a cross-origin frame. `referrerPolicy="no-referrer"`
   // keeps the token-bearing URL out of the Referer.
   return (
-    <iframe
-      className="h-[calc(100dvh-8rem)] w-full rounded-lg border border-border"
-      referrerPolicy="no-referrer"
-      src={toolFrameSrc(tool, token)}
-      title={t(tool.titleKey)}
-    />
+    <div className="portal-tool">
+      {header}
+      <iframe
+        className="portal-tool-frame"
+        referrerPolicy="no-referrer"
+        src={toolFrameSrc(tool, token)}
+        title={t(tool.titleKey)}
+      />
+    </div>
   );
 }
