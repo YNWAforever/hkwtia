@@ -65,7 +65,8 @@ export function CompanyProfileForm({values, labels, action, locale, readOnly, pu
           {/* Already localized by the page with `localizedPath`; this component never builds a prefix. */}
           {publicHref ? <Link className="text-link" href={publicHref}>{labels.viewPublic}</Link> : null}
         </p>
-        <p className="portal-field-help">{labels.reviewNotice}</p>
+        {/* Only someone who can edit can send the page back to review; a read-only member would read it as a warning about nothing. */}
+        {readOnly ? null : <p className="portal-field-help">{labels.reviewNotice}</p>}
         {labels.rejected ? <p className="portal-form-message" role="alert"><StatusLabel>{labels.rejected}</StatusLabel></p> : null}
       </div>
       <fieldset className="portal-fieldset">

@@ -2331,8 +2331,8 @@
       }
     },
     "profileTitle": "我的個人資料",
-    "profileDescription": "更新你的個人資料及目錄顯示選項。",
-    "profileGroups": {"contact": "聯絡資料", "whatsapp": "WhatsApp 通知", "directoryHelp": "讓其他會員在 WTIA 名錄中找到你。"},
+    "profileDescription": "更新你的個人資料及名錄顯示選項。",
+    "profileGroups": {"contact": "聯絡資料", "whatsapp": "WhatsApp 更新", "directoryHelp": "讓其他會員在 WTIA 名錄中找到你。"},
     "whatsapp": {
       "optIn": "透過 WhatsApp 向我發送 WTIA 活動更新及提醒",
       "consent": "WTIA 可就活動、計劃及會籍事宜向此號碼發送訊息。你可隨時回覆「取消」以停止接收。",
@@ -2352,7 +2352,7 @@
       "industry": "行業",
       "sizeBand": "公司規模",
       "description": "簡介",
-      "directoryVisible": "在 WTIA 會員目錄顯示此資料"
+      "directoryVisible": "在 WTIA 會員名錄顯示此資料"
     },
     "readOnly": "只有公司擁有人及管理員可以編輯這些資料。",
     "showcaseListing": {
@@ -2547,7 +2547,7 @@
     },
     "companySections": {
       "details": {
-        "title": "公司資料",
+        "title": "登記資料",
         "purpose": "用於會籍及名額。"
       },
       "public": {
@@ -2610,6 +2610,7 @@
       "full": "所有名額已用完。移除一位成員或一個待處理邀請後，便可再邀請。",
       "acceptBack": "返回會員主頁",
       "acceptTitle": "接受公司邀請",
+      "acceptErrorTitle": "此邀請無法使用",
       "actionsColumn": "操作",
       "errors": {
         "generic": "未能更新公司席位，請再試一次。",

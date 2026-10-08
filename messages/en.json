@@ -2547,7 +2547,7 @@
     },
     "companySections": {
       "details": {
-        "title": "Company details",
+        "title": "Registered details",
         "purpose": "Used for your membership and seats."
       },
       "public": {
@@ -2610,6 +2610,7 @@
       "full": "All seats are in use. Remove a member or a pending invitation to invite someone else.",
       "acceptBack": "Back to dashboard",
       "acceptTitle": "Accept company invitation",
+      "acceptErrorTitle": "This invitation can't be used",
       "actionsColumn": "Actions",
       "errors": {
         "generic": "We could not update company seats. Please try again.",

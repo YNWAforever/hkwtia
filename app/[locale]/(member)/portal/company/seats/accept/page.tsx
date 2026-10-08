@@ -36,7 +36,7 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "Portal"});
   const token = queryValue(query.token);
-  if (!token) return <AcceptError pageTitle={t("seats.acceptTitle")} back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
+  if (!token) return <AcceptError pageTitle={t("seats.acceptTitle")} back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.acceptErrorTitle")} />;
   try {
     const actor = await requireActor();
     await acceptSeatInvitation(actor, token);
@@ -45,8 +45,8 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     if (error instanceof SeatServiceError) {
       const message = t(`seats.errors.${seatInvitationErrorKey(error.code)}`);
-      return <AcceptError pageTitle={t("seats.acceptTitle")} back={t("seats.acceptBack")} locale={locale} message={message} title={t("seats.title")} />;
+      return <AcceptError pageTitle={t("seats.acceptTitle")} back={t("seats.acceptBack")} locale={locale} message={message} title={t("seats.acceptErrorTitle")} />;
     }
-    return <AcceptError pageTitle={t("seats.acceptTitle")} back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
+    return <AcceptError pageTitle={t("seats.acceptTitle")} back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.acceptErrorTitle")} />;
   }
 }

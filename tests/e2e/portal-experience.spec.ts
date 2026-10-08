@@ -202,6 +202,12 @@ test.describe('the member forms, in English and Chinese', () => {
         await expectNoHorizontalScroll(page);
         expect(await smallText(page), 'text under 11px').toEqual([]);
         expect(await smallTargets(page), 'targets under 24x24').toEqual([]);
+        // The accept-invitation error has no form; every other fixture must actually render one, or an
+        // empty page would pass the label check vacuously.
+        if (!name.startsWith('form-seats-accept-error')) {
+          const controls = await page.locator('main :is(input:not([type="hidden"]), select, textarea)').count();
+          expect(controls, 'visible form controls in main').toBeGreaterThan(0);
+        }
         expect(await unlabelledControls(page), 'form controls without a label').toEqual([]);
         expect(await seriousAxeViolations(page)).toEqual([]);
       });

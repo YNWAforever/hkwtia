@@ -49,8 +49,11 @@ describe("portal company page", () => {
 
   it("shows two titled sections with their purpose", async () => {
     const html = await render();
-    expect(html).toContain("Company details");
+    expect(html).toContain("Registered details");
     expect(html).toContain("Used for your membership and seats.");
+    // The page title and the first section heading must not read the same.
+    expect(html.match(/<h1[^>]*>Company details<\/h1>/)).not.toBeNull();
+    expect(html).not.toMatch(/<h2[^>]*>Company details<\/h2>/);
     expect(html).toContain("Public member page");
     expect(html).toContain("WTIA reviews this page before it goes live in the member directory.");
     expect(html.match(/<h1/g)).toHaveLength(1);
@@ -123,6 +126,13 @@ describe("portal company page", () => {
     expect(pub).not.toContain("Remove");
     expect(pub).not.toContain('name="intent"');
     expect(details).not.toContain('type="submit"');
+    // The review notice describes what an edit does; a member who cannot edit does not see it.
+    expect(pub).not.toContain("Editing a page that is already live");
+  });
+
+  it("tells a member who can edit that editing a live page sends it back to review", async () => {
+    const {pub} = forms(await render());
+    expect(pub).toContain("Editing a page that is already live");
   });
 
   it("submits an empty logoMediaId for a company with no logo", async () => {
