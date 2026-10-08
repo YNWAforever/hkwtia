@@ -13,7 +13,7 @@ function membership(id: string, status: BillingMembershipSummary["status"], over
 const labels = {
   history: "Billing history", support: "Contact support", supportMessage: "No entitlement restored", providerUnavailable: "Provider unavailable",
   manage: "Manage billing", manageHelp: "Opens Stripe's secure page", recover: "Continue payment", pastDue: "Last payment failed",
-  empty: "No billing actions", emptyCopy: "Billing appears here", emptyAction: "See membership options",
+  empty: "No billing actions", emptyCopy: "Billing appears here", emptyAction: "View membership options",
   plan: (code: string) => code, status: (value: string) => value,
   renewsOn: (date: Date) => `Renews on ${date.toISOString().slice(0, 10)}`, endsOn: (date: Date) => `Ends on ${date.toISOString().slice(0, 10)}`, seats: (count: number) => `${count} seats`,
 };
@@ -72,6 +72,6 @@ describe("BillingActions", () => {
     render(<BillingActions {...base} memberships={[]} actions={{}} details={{}} />);
     const region = screen.getByRole("status");
     expect(within(region).getByText("No billing actions")).toBeInTheDocument();
-    expect(screen.getByRole("link", {name: "See membership options"})).toHaveAttribute("href", "/membership");
+    expect(screen.getByRole("link", {name: "View membership options"})).toHaveAttribute("href", "/membership");
   });
 });

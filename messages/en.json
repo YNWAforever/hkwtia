@@ -2627,7 +2627,7 @@
       "manageHelp": "Opens Stripe's secure page to update your card, download invoices or cancel.",
       "pastDue": "Your last payment did not go through. Update your payment method to keep your membership active.",
       "emptyCopy": "Billing appears here once you have a membership.",
-      "emptyAction": "See membership options"
+      "emptyAction": "View membership options"
     },
     "seats": {
       "title": "Company seats",

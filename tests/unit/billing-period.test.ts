@@ -12,4 +12,10 @@ describe("billingPeriodLine", () => {
     expect(billingPeriodLine({billingPeriodEnd: end, cancelAtPeriodEnd: false})).toEqual({kind: "renews", date: end});
     expect(billingPeriodLine({billingPeriodEnd: "2026-11-12T00:00:00.000Z", cancelAtPeriodEnd: true})).toEqual({kind: "ends", date: end});
   });
+  it("says nothing for statuses where a stale period end would be untrue", () => {
+    const end = new Date("2026-11-12T00:00:00.000Z");
+    for (const status of ["pending_payment", "pending_review", "cancelled", "expired"]) expect(billingPeriodLine({billingPeriodEnd: end, cancelAtPeriodEnd: false, status})).toBeNull();
+    expect(billingPeriodLine({billingPeriodEnd: end, cancelAtPeriodEnd: false, status: "past_due"})?.kind).toBe("renews");
+    expect(billingPeriodLine({billingPeriodEnd: end, cancelAtPeriodEnd: false, status: "cancel_at_period_end"})?.kind).toBe("ends");
+  });
 });

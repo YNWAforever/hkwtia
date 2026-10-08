@@ -31,7 +31,7 @@ export default async function BillingPage({params, searchParams}: Props) {
   // Renewal and seat details come from the dashboard read; losing them only drops those lines.
   const [summary, dashboard] = await Promise.all([getBillingSummary(actor), getDashboard(actor).catch(() => null)]);
   const details: Record<string, BillingDetail> = {};
-  for (const record of dashboard?.memberships ?? []) details[record.id] = {period: billingPeriodLine(record), seatLimit: record.seatLimit ?? null};
+  for (const record of dashboard?.memberships ?? []) details[record.id] = {period: billingPeriodLine(record), seatLimit: record.seatLimit || null};
   const t = await getTranslations({locale, namespace: "Portal"});
   const errorPath = `${localizedPath(locale, "/portal/billing")}?error=1`;
   const actions: Record<string, () => Promise<void>> = {};

@@ -42,7 +42,7 @@ export function BillingActions({memberships, labels, supportHref, membershipHref
             <StatusLabel>{labels.status(membership.status)}</StatusLabel>
             <h2>{labels.plan(membership.planCode)}</h2>
             {period ? <p>{period.kind === "ends" ? labels.endsOn(period.date) : labels.renewsOn(period.date)}</p> : null}
-            {detail?.seatLimit != null ? <p>{labels.seats(detail.seatLimit)}</p> : null}
+            {detail?.seatLimit ? <p>{labels.seats(detail.seatLimit)}</p> : null}
             {membership.status === "past_due" ? <p className="portal-form-alert">{labels.pastDue}</p> : null}
             {needsSupport ? <p>{labels.supportMessage}</p> : null}
             {!membership.providerAvailable ? <p className="portal-billing-muted" role="status">{labels.providerUnavailable}</p> : null}
