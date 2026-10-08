@@ -71,7 +71,11 @@ describe("member Showcase listing lifecycle", () => {
     render(<ShowcaseListingForm
       value={input}
       labels={{
-        title: "Showcase listing", slug: "Slug", nameEn: "Name", nameZhHk: "Chinese name", taglineEn: "Tagline", taglineZhHk: "Chinese tagline", descriptionEn: "Description", descriptionZhHk: "Chinese description", category: "Category", useCases: "Use cases", deploymentOptions: "Deployment", supportedLanguages: "Languages", worksWith: "Works with", videoUrl: "Video URL", caseStudyUrl: "Case study URL", caseStudySummaryEn: "Case study", caseStudySummaryZhHk: "Chinese case study", logoReference: "Logo", saveDraft: "Save draft", submit: "Submit for review",
+        title: "Showcase listing",
+        groups: {basics: "Basics", nameTagline: "Name and tagline", descriptions: "Descriptions", details: "Details", links: "Links and media"},
+        fields: {slug: "Slug", nameEn: "Name", nameZhHk: "Chinese name", taglineEn: "Tagline", taglineZhHk: "Chinese tagline", descriptionEn: "Description", descriptionZhHk: "Chinese description", category: "Category", useCases: "Use cases", deploymentOptions: "Deployment", supportedLanguages: "Languages", worksWith: "Works with", videoUrl: "Video URL", caseStudyUrl: "Case study URL", caseStudySummaryEn: "Case study", caseStudySummaryZhHk: "Chinese case study"},
+        logo: {label: "Logo", empty: "No logo", previewAlt: "Logo", external: "Linked", remove: "Remove", upload: {choose: "Choose", alt: "Alt", upload: "Upload", uploading: "Uploading", done: "Done", failed: "Failed"}},
+        commaHelp: "Separate with commas", readOnly: "Read only", saveDraft: "Save draft", submit: "Submit for review",
       }}
       saveAction={async () => undefined}
       submitAction={async () => undefined}

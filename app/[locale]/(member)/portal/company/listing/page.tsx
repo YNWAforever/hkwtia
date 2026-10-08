@@ -1,6 +1,7 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {ShowcaseListingForm} from "@/components/portal/showcase-listing-form";
+import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
@@ -17,15 +18,60 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
   const dashboard = await getDashboard(actor);
   const company = dashboard.companies[0];
   const t = await getTranslations({locale, namespace: "Portal"});
+  const tListing = await getTranslations({locale, namespace: "Portal.showcaseListing"});
+  const tForms = await getTranslations({locale, namespace: "Portal.forms"});
+  const tProfile = await getTranslations({locale, namespace: "Portal.companyProfile"});
   if (!company) {
-    return <section className="glass-card space-y-3 p-6"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("showcaseListing.eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{t("showcaseListing.title")}</h1><p className="text-muted-foreground">{t("companyEmpty")}</p></section>;
+    return (
+      <div>
+        <header className="portal-welcome">
+          <StatusLabel as="p">{tListing("eyebrow")}</StatusLabel>
+          <h1>{tListing("title")}</h1>
+          <p className="portal-welcome-lead">{t("companyEmpty")}</p>
+        </header>
+      </div>
+    );
   }
   const listing = await showcaseRepository.getByCompany(actor, company.id);
+  const field = (name: string) => tListing(`fields.${name}`);
   const labels = {
-    title: t("showcaseListing.formTitle"), slug: t("showcaseListing.fields.slug"), nameEn: t("showcaseListing.fields.nameEn"), nameZhHk: t("showcaseListing.fields.nameZhHk"), taglineEn: t("showcaseListing.fields.taglineEn"), taglineZhHk: t("showcaseListing.fields.taglineZhHk"), descriptionEn: t("showcaseListing.fields.descriptionEn"), descriptionZhHk: t("showcaseListing.fields.descriptionZhHk"), category: t("showcaseListing.fields.category"), useCases: t("showcaseListing.fields.useCases"), deploymentOptions: t("showcaseListing.fields.deploymentOptions"), supportedLanguages: t("showcaseListing.fields.supportedLanguages"), worksWith: t("showcaseListing.fields.worksWith"), videoUrl: t("showcaseListing.fields.videoUrl"), caseStudyUrl: t("showcaseListing.fields.caseStudyUrl"), caseStudySummaryEn: t("showcaseListing.fields.caseStudySummaryEn"), caseStudySummaryZhHk: t("showcaseListing.fields.caseStudySummaryZhHk"), logoReference: t("showcaseListing.fields.logoReference"), saveDraft: t("showcaseListing.saveDraft"), submit: t("showcaseListing.submit"),
+    title: tListing("formTitle"),
+    groups: {
+      basics: tListing("groups.basics"), nameTagline: tListing("groups.nameTagline"), descriptions: tListing("groups.descriptions"),
+      details: tListing("groups.details"), links: tListing("groups.links"),
+    },
+    fields: {
+      slug: field("slug"), nameEn: field("nameEn"), nameZhHk: field("nameZhHk"), taglineEn: field("taglineEn"), taglineZhHk: field("taglineZhHk"),
+      descriptionEn: field("descriptionEn"), descriptionZhHk: field("descriptionZhHk"), category: field("category"), useCases: field("useCases"),
+      deploymentOptions: field("deploymentOptions"), supportedLanguages: field("supportedLanguages"), worksWith: field("worksWith"),
+      videoUrl: field("videoUrl"), caseStudyUrl: field("caseStudyUrl"), caseStudySummaryEn: field("caseStudySummaryEn"),
+      caseStudySummaryZhHk: field("caseStudySummaryZhHk"),
+    },
+    logo: {
+      label: tProfile("fields.logo"), empty: tForms("image.empty"), previewAlt: tForms("image.previewAlt"),
+      external: tForms("image.external"), remove: tForms("image.remove"),
+      upload: {
+        choose: tProfile("logo.choose"), alt: tProfile("logo.alt"), upload: tProfile("logo.upload"),
+        uploading: tProfile("logo.uploading"), done: tProfile("logo.done"), failed: tProfile("logo.failed"),
+      },
+    },
+    commaHelp: tForms("commaHelp"),
+    readOnly: tForms("readOnlyNote"),
+    saveDraft: tListing("saveDraft"),
+    submit: tListing("submit"),
   } as const;
   const value = listing ? {
     slug: listing.slug, nameEn: listing.nameEn, nameZhHk: listing.nameZhHk, taglineEn: listing.taglineEn, taglineZhHk: listing.taglineZhHk, descriptionEn: listing.descriptionEn, descriptionZhHk: listing.descriptionZhHk, category: listing.category, useCases: listing.useCases, deploymentOptions: listing.deploymentOptions, supportedLanguages: listing.supportedLanguages, worksWith: listing.worksWith, videoUrl: listing.videoUrl, caseStudyUrl: listing.caseStudyUrl, caseStudySummaryEn: listing.caseStudySummaryEn, caseStudySummaryZhHk: listing.caseStudySummaryZhHk, logoReference: listing.logoReference,
   } : {};
-  return <div className="mx-auto max-w-4xl space-y-8"><header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("showcaseListing.eyebrow")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight">{t("showcaseListing.title")}</h1><p className="text-muted-foreground">{t("showcaseListing.description")}</p></header><p className="text-sm text-muted-foreground">{listing ? t(`showcaseListing.status.${listing.status}`) : t("showcaseListing.status.draft")}</p><ShowcaseListingForm companyId={company.id} value={value} labels={labels} saveAction={company.canManage ? saveShowcaseDraftAction : undefined} submitAction={company.canManage ? submitShowcaseListingAction : undefined} readOnly={!company.canManage} /></div>;
+  return (
+    <div>
+      <header className="portal-welcome">
+        <StatusLabel as="p">{tListing("eyebrow")}</StatusLabel>
+        <h1>{tListing("title")}</h1>
+        <p className="portal-welcome-lead">{tListing("description")}</p>
+      </header>
+      <p className="portal-form-message" role="status"><StatusLabel>{listing ? tListing(`status.${listing.status}`) : tListing("status.draft")}</StatusLabel></p>
+      <ShowcaseListingForm companyId={company.id} labels={labels} readOnly={!company.canManage} saveAction={company.canManage ? saveShowcaseDraftAction : undefined} submitAction={company.canManage ? submitShowcaseListingAction : undefined} value={value} />
+    </div>
+  );
 }
