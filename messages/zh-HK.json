@@ -2588,9 +2588,12 @@
       "title": "文件及收據",
       "description": "查閱 WTIA 已批准資源及你的付款收據。",
       "empty": "目前沒有可用文件。",
-      "receipt": "收據",
-      "open": "開啟收據",
-      "resource": "資源"
+      "emptyLine": "首次付款後，收據會顯示在這裡。",
+      "emptyAction": "前往帳單",
+      "receiptsHeading": "收據",
+      "resourcesHeading": "WTIA 資源",
+      "openReceipt": "開啟收據",
+      "openDocument": "開啟文件"
     },
     "tools": {
       "eyebrow": "會員工具",

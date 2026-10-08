@@ -2588,9 +2588,12 @@
       "title": "Documents and receipts",
       "description": "Access approved WTIA resources and your billing receipts.",
       "empty": "No documents are available yet.",
-      "receipt": "Receipt",
-      "open": "Open receipt",
-      "resource": "Resource"
+      "emptyLine": "Receipts appear here after your first payment.",
+      "emptyAction": "Go to billing",
+      "receiptsHeading": "Receipts",
+      "resourcesHeading": "WTIA resources",
+      "openReceipt": "Open receipt",
+      "openDocument": "Open document"
     },
     "tools": {
       "eyebrow": "Member tools",
