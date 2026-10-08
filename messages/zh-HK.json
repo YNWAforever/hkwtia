@@ -2251,6 +2251,9 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "common": {
+      "newTab": "（在新分頁開啟）"
+    },
     "forms": {
       "readOnlyNote": "只有公司擁有人及管理員可以編輯這些資料。",
       "image": {"empty": "尚未有標誌", "previewAlt": "目前標誌", "external": "外部連結圖片", "remove": "移除"},

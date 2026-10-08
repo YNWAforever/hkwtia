@@ -2251,6 +2251,9 @@
     "retry": "Try again"
   },
   "Portal": {
+    "common": {
+      "newTab": "(opens in a new tab)"
+    },
     "forms": {
       "readOnlyNote": "Only company owners and admins can edit these details.",
       "image": {"empty": "No logo yet", "previewAlt": "Current logo", "external": "Linked image", "remove": "Remove"},
