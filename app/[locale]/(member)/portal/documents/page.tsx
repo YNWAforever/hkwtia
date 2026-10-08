@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {DocumentList} from "@/components/portal/document-list";
 import {PortalPageHeader} from "@/components/portal/page-header";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {getDocuments} from "@/lib/portal/content";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export default async function DocumentsPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/documents");
   const documents = await getDocuments(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
 

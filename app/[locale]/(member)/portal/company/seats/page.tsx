@@ -7,6 +7,7 @@ import {SeatInviteForm} from "@/components/portal/seat-invite-form";
 import {SeatTable} from "@/components/portal/seat-table";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {changeSeatRole, inviteSeat, revokeInvitation, revokeSeat, type SeatRole} from "@/lib/db/repos/seats";
 import {getSeatOverview} from "@/lib/portal/seats";
 import {localizedPath} from "@/lib/urls";
@@ -100,7 +101,7 @@ export default async function CompanySeatsPage({params, searchParams}: Props) {
   const query = await searchParams;
   const hasError = query.error === "1";
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/company/seats");
   const t = await getTranslations({locale, namespace: "Portal"});
   const dashboard = await import("@/lib/portal/queries").then(({getDashboard}) => getDashboard(actor));
   const company = dashboard.companies[0];

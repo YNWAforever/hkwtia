@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {ShowcaseListingForm} from "@/components/portal/showcase-listing-form";
 import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {getDashboard} from "@/lib/portal/queries";
 import {saveShowcaseDraftAction, submitShowcaseListingAction} from "@/lib/showcase/member-actions";
@@ -14,7 +14,7 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/company/listing");
   const dashboard = await getDashboard(actor);
   const company = dashboard.companies[0];
   const t = await getTranslations({locale, namespace: "Portal"});

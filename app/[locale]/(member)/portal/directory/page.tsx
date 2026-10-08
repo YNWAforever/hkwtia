@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {PortalPageHeader} from "@/components/portal/page-header";
 import {DirectoryResults} from "@/components/portal/directory-results";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {searchDirectory} from "@/lib/portal/content";
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -22,7 +22,7 @@ export default async function DirectoryPage({params, searchParams}: Props) {
   // Trimmed before anything reads it: `?q=%20%20` once rendered 'Showing results for "  "' (final review M9).
   const search = queryValue(query.q).trim();
   const cursor = queryValue(query.cursor) || null;
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/directory");
   const page = await searchDirectory(actor, {search, limit: 20}, cursor);
   const t = await getTranslations({locale, namespace: "Portal"});
 

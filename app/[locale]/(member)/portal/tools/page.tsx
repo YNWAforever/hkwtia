@@ -4,7 +4,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {MEMBER_TOOLS} from "@/config/member-tools";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {isToolAvailable, toolPlanList} from "@/lib/portal/member-tools";
 import {getDashboard} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
@@ -17,7 +17,7 @@ export default async function PortalToolsPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  const actor = await portalPageActor(locale, "/portal/tools");
   const [dashboard, t] = await Promise.all([
     getDashboard(actor),
     getTranslations({locale, namespace: "Portal"}),

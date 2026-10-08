@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
 // HonestEmpty's ActionLink uses the locale-aware Link, which needs an intl provider this page-level render lacks.
 vi.mock("@/i18n/navigation", () => ({Link: ({href, children, ...rest}: {href: string; children: React.ReactNode}) => <a href={href} {...rest}>{children}</a>}));
 vi.mock("@/lib/auth/actor", () => ({
-  requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})),
+  requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})), getActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})),
 }));
 vi.mock("@/lib/portal/queries", () => ({
   getDashboard: vi.fn(async () => ({
