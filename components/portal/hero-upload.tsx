@@ -13,8 +13,13 @@ const inputClass = "mt-2 min-h-11 w-full rounded-md border border-input bg-backg
  * accessible name is refused by the registry. Failures stay generic on
  * purpose — the route answers 400/404/500 without detail, and a member who
  * cannot upload keeps every other field intact.
+ *
+ * `enterUploads`: Enter in the description field would otherwise submit the parent form through its
+ * first submit button, which on the company page is a save that sends a Live page back to review.
+ * With it set, Enter is kept inside the upload (and starts it once a file and description are in).
+ * Opt-in so the event form, which never asked for it, behaves as before.
  */
-export function HeroUpload({labels, onUploaded}: Readonly<{labels: HeroUploadLabels; onUploaded: (id: string) => void}>) {
+export function HeroUpload({labels, onUploaded, enterUploads = false}: Readonly<{labels: HeroUploadLabels; onUploaded: (id: string) => void; enterUploads?: boolean}>) {
   const [file, setFile] = useState<File | null>(null);
   const [alt, setAlt] = useState("");
   const [state, setState] = useState<"idle" | "uploading" | "done" | "failed">("idle");
@@ -46,7 +51,11 @@ export function HeroUpload({labels, onUploaded}: Readonly<{labels: HeroUploadLab
       </label>
       <label className="block font-medium">
         <span>{labels.alt}</span>
-        <input className={inputClass} maxLength={300} onChange={(event) => { setAlt(event.target.value); setState("idle"); }} type="text" value={alt} />
+        <input className={inputClass} maxLength={300} onChange={(event) => { setAlt(event.target.value); setState("idle"); }} onKeyDown={enterUploads ? (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          if (state !== "uploading") void upload();
+        } : undefined} type="text" value={alt} />
       </label>
       <button aria-describedby={statusId} className="inline-flex min-h-11 items-center rounded-md border border-border px-4 font-medium disabled:opacity-60" disabled={state === "uploading" || !ready} onClick={upload} type="button">
         {state === "uploading" ? labels.uploading : labels.upload}

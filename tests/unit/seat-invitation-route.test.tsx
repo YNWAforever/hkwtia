@@ -1,8 +1,12 @@
+import type {ReactNode} from "react";
 import {render, screen} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 const redirect = vi.hoisted(() => vi.fn(() => { throw new Error("NEXT_REDIRECT"); }));
 vi.mock("next/navigation", () => ({redirect}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+}));
 const requireActor = vi.hoisted(() => vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})));
 vi.mock("@/lib/auth/actor", () => ({requireActor}));
 const acceptSeatInvitation = vi.hoisted(() => vi.fn());
@@ -41,7 +45,9 @@ describe("seat invitation acceptance route", () => {
   it("renders a missing-token error without calling the service at all", async () => {
     render(await SeatAcceptPage(props({})));
     expect(acceptSeatInvitation).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.generic");
+    expect(screen.getByRole("status")).toHaveTextContent("seats.errors.generic");
+    // The page title names the task, not the generic "Company" section label.
+    expect(screen.getByRole("heading", {level: 1})).toHaveTextContent("seats.acceptTitle");
   });
 
   it("renders a distinct expired-invitation error without redirecting, without calling requireActor twice or leaking the raw error", async () => {
@@ -49,35 +55,35 @@ describe("seat invitation acceptance route", () => {
     render(await SeatAcceptPage(props({token: "expired-token"})));
     expect(requireActor).toHaveBeenCalledTimes(1);
     expect(redirect).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.invitationExpired");
+    expect(screen.getByRole("status")).toHaveTextContent("seats.errors.invitationExpired");
   });
 
   it("renders a distinct already-accepted error, not the generic fallback", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVITATION_ALREADY_ACCEPTED"));
     render(await SeatAcceptPage(props({token: "used-token"})));
     expect(redirect).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.invitationAlreadyAccepted");
+    expect(screen.getByRole("status")).toHaveTextContent("seats.errors.invitationAlreadyAccepted");
   });
 
   it("renders a distinct email-mismatch error telling the user they're signed in as the wrong account", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVITATION_EMAIL_MISMATCH"));
     render(await SeatAcceptPage(props({token: "wrong-account-token"})));
     expect(redirect).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.invitationEmailMismatch");
+    expect(screen.getByRole("status")).toHaveTextContent("seats.errors.invitationEmailMismatch");
   });
 
   it("falls back to the generic message for a SeatServiceError code with no dedicated copy", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVALID_EMAIL"));
     render(await SeatAcceptPage(props({token: "some-token"})));
     expect(redirect).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.generic");
+    expect(screen.getByRole("status")).toHaveTextContent("seats.errors.generic");
   });
 
   it("renders an error and does not redirect for an unexpected non-SeatServiceError failure", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new Error("unexpected"));
     render(await SeatAcceptPage(props({token: "some-token"})));
     expect(redirect).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.generic");
+    expect(screen.getByRole("status")).toHaveTextContent("seats.errors.generic");
   });
 
   it("does not call acceptSeatInvitation before requireActor resolves an actor", async () => {

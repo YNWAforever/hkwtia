@@ -28,6 +28,18 @@ const otherPages = [
   'events', 'events-new', 'events-edit', 'tools', 'tools-detail', 'billing',
 ] as const;
 
+// The member forms, each rendered in English (-en) and Traditional Chinese (-zh).
+const formPages = [
+  'form-profile', 'form-company-logo', 'form-company', 'form-company-rejected', 'form-company-readonly', 'form-listing-draft',
+  'form-seats-room', 'form-seats-full', 'form-seats-error', 'form-seats-accept-error',
+].flatMap((name) => [`${name}-en`, `${name}-zh`]);
+
+// Events, directory, documents, tools and billing (sub-projects 3 + 4), each in -en and -zh.
+const portalPages = [
+  'events-list-own', 'events-list-plain', 'event-new', 'event-edit-rejected', 'directory-results', 'directory-no-hits', 'directory-page2',
+  'documents-both', 'documents-empty', 'tools-available', 'tools-locked', 'tool-page', 'billing-active', 'billing-ending', 'billing-past-due', 'billing-error',
+].flatMap((name) => [`${name}-en`, `${name}-zh`]);
+
 let css = '';
 
 test.beforeAll(() => {
@@ -129,6 +141,20 @@ async function seriousAxeViolations(page: Page, include?: string) {
     .map((violation) => ({id: violation.id, impact: violation.impact, targets: violation.nodes.map((node) => node.target.join(' '))}));
 }
 
+/**
+ * Visible inputs, selects and textareas with no accessible name: no label[for] pointing at them, no
+ * wrapping label, and no non-empty aria-label / aria-labelledby. Hidden inputs carry form state only.
+ */
+async function unlabelledControls(page: Page) {
+  return page.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('input:not([type="hidden"]), select, textarea')).flatMap((control) => {
+    const byFor = control.id ? Array.from(document.querySelectorAll('label[for]')).some((label) => label.getAttribute('for') === control.id && label.textContent?.trim()) : false;
+    const wrapped = Boolean(control.closest('label')?.textContent?.trim());
+    const ariaLabel = Boolean(control.getAttribute('aria-label')?.trim());
+    const labelledBy = (control.getAttribute('aria-labelledby') ?? '').split(/\s+/).some((id) => id && document.getElementById(id)?.textContent?.trim());
+    return byFor || wrapped || ariaLabel || labelledBy ? [] : [`${control.tagName.toLowerCase()}[name=${control.getAttribute('name')}]#${control.id}`];
+  }));
+}
+
 test.describe('portal dashboard', () => {
   for (const name of dashboardStates) {
     for (const viewport of viewports) {
@@ -168,6 +194,62 @@ test.describe('the thirteen other portal pages', () => {
         await load(page, name, viewport);
         await screenshot(page, name, viewport.width);
         await expectNoHorizontalScroll(page);
+      });
+    }
+  }
+});
+
+test.describe('the member forms, in English and Chinese', () => {
+  for (const name of formPages) {
+    for (const viewport of viewports) {
+      test(`${name} at ${viewport.width}`, async ({page}) => {
+        await load(page, name, viewport);
+        await screenshot(page, name, viewport.width);
+        await expectNoHorizontalScroll(page);
+        expect(await smallText(page), 'text under 11px').toEqual([]);
+        expect(await smallTargets(page), 'targets under 24x24').toEqual([]);
+        // The accept-invitation error has no form; every other fixture must actually render one, or an
+        // empty page would pass the label check vacuously.
+        if (!name.startsWith('form-seats-accept-error')) {
+          const controls = await page.locator('main :is(input:not([type="hidden"]), select, textarea)').count();
+          expect(controls, 'visible form controls in main').toBeGreaterThan(0);
+        }
+        expect(await unlabelledControls(page), 'form controls without a label').toEqual([]);
+        expect(await seriousAxeViolations(page)).toEqual([]);
+      });
+    }
+  }
+});
+
+test.describe('events, directory, documents, tools and billing, in English and Chinese', () => {
+  for (const name of portalPages) {
+    for (const viewport of viewports) {
+      test(`${name} at ${viewport.width}`, async ({page}) => {
+        await load(page, name, viewport);
+        await screenshot(page, name, viewport.width);
+        await expectNoHorizontalScroll(page);
+        expect(await smallText(page), 'text under 11px').toEqual([]);
+        expect(await smallTargets(page), 'targets under 24x24').toEqual([]);
+        // The event form and the directory search are forms; an empty render must not pass the label check vacuously.
+        if (/^(event|directory)-/.test(name)) {
+          const controls = await page.locator('main :is(input:not([type="hidden"]), select, textarea)').count();
+          expect(controls, 'visible form controls in main').toBeGreaterThan(0);
+        }
+        // Both events-list fixtures carry an RSVP event, so the Register button must have painted; an
+        // empty list would otherwise pass the target and axe checks vacuously.
+        if (/^events-list-/.test(name)) {
+          expect(await page.locator('main form button[type="submit"]').count(), 'RSVP buttons in main').toBeGreaterThan(0);
+        }
+        // The framed tool owns the only scrollbar: the page itself must fit the window, whatever the
+        // headers wrap to (final review M16).
+        if (/^tool-page-/.test(name)) {
+          const fit = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+          expect(fit, 'tool page scrolls as well as its frame').toBeLessThanOrEqual(1);
+        }
+        expect(await unlabelledControls(page), 'form controls without a label').toEqual([]);
+        // The fixture writer checks the markup; this checks what actually painted.
+        expect(await page.locator('body').innerText(), 'untranslated message path').not.toMatch(/\bPortal\.[A-Za-z]+\.[A-Za-z]/);
+        expect(await seriousAxeViolations(page)).toEqual([]);
       });
     }
   }

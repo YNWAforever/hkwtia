@@ -1,10 +1,11 @@
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
+import {PortalPageHeader} from "@/components/portal/page-header";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {MEMBER_TOOLS} from "@/config/member-tools";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
-import {isToolAvailable} from "@/lib/portal/member-tools";
+import {isToolAvailable, toolPlanList} from "@/lib/portal/member-tools";
 import {getDashboard} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
@@ -23,28 +24,24 @@ export default async function PortalToolsPage({params}: Props) {
   ]);
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("tools.eyebrow")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("tools.title")}</h1>
-        <p className="text-lg text-muted-foreground">{t("tools.description")}</p>
-      </header>
-      <ul className="grid gap-4 md:grid-cols-2">
+    <div className="portal-tools">
+      <PortalPageHeader eyebrow={t("navGroups.benefits")} lead={t("tools.description")} title={t("tools.title")} />
+      <ul className="portal-card-grid">
         {MEMBER_TOOLS.map((tool) => {
           const available = isToolAvailable(tool, dashboard.memberships);
           return (
-            <li className="glass-card flex flex-col gap-3 p-5" key={tool.key}>
-              <h2 className="font-serif text-2xl font-semibold">{t(tool.titleKey)}</h2>
+            <li className="portal-card portal-tool-card" key={tool.key}>
+              <h2>{t(tool.titleKey)}</h2>
+              <p>{t(tool.descriptionKey)}</p>
               {available ? (
-                <Link className="inline-flex min-h-11 w-fit items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={localizedPath(locale, `/portal/tools/${tool.key}`)}>
+                <Link className="button" href={localizedPath(locale, `/portal/tools/${tool.key}`)}>
                   {t("tools.open")}
                 </Link>
               ) : (
-                <div className="space-y-2">
-                  <p className="font-medium">{t("tools.lockedTitle")}</p>
-                  <p className="text-sm text-muted-foreground">{t("tools.lockedDescription")}</p>
-                  <Link className="text-link" href={localizedPath(locale, "/membership")}>{t("tools.upgrade")}</Link>
-                </div>
+                <>
+                  <p className="portal-tool-locked">{t("tools.includedWith", {plans: toolPlanList(tool, locale, (plan) => t(`plans.${plan}`))})}</p>
+                  <Link className="portal-button-outline" href={localizedPath(locale, "/membership")}>{t("tools.viewPlans")}</Link>
+                </>
               )}
             </li>
           );

@@ -11,7 +11,8 @@ type Bundle = Readonly<{
     filters: Readonly<{search: string; anyTag: string; submit: string}>;
   }>;
   Portal: Readonly<{
-    companyProfile: Readonly<{save: string; saved: string; publish: string; submitted: string}>;
+    companyProfile: Readonly<{saved: string; submitted: string}>;
+    showcaseListing: Readonly<{saveDraft: string; submit: string}>;
   }>;
   Admin: Readonly<{profilesReview: Readonly<{title: string; approve: string}>}>;
 }>;
@@ -114,11 +115,11 @@ test.describe("member publishes a page and staff reviews it", () => {
     await profile.locator("input[name=slug]").fill(slug);
     await profile.locator("input[name=taglineEn]").fill(`Playwright acceptance ${slug}`);
     // Two submit buttons post `intent=save|publish` from the one form; the bundle names them.
-    await profile.getByRole("button", {name: copy.Portal.companyProfile.save}).click();
+    await profile.getByRole("button", {name: copy.Portal.showcaseListing.saveDraft}).click();
     await expect(profile.getByText(copy.Portal.companyProfile.saved)).toBeVisible();
     // Publish is offered only from `hidden` and `rejected` (B-7). A disabled button here means the
     // fixture company's page is already live or already queued — a fixture problem, not a product one.
-    await profile.getByRole("button", {name: copy.Portal.companyProfile.publish}).click();
+    await profile.getByRole("button", {name: copy.Portal.showcaseListing.submit}).click();
     await expect(profile.getByText(copy.Portal.companyProfile.submitted)).toBeVisible();
 
     const staffContext = await browser.newContext();

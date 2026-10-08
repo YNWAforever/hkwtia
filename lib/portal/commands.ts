@@ -2,7 +2,7 @@
 
 import {revalidatePath} from "next/cache";
 
-import {updateCompany, updateProfile} from "@/lib/portal/command-core";
+import {companyDirectoryVisibility, updateCompany, updateProfile} from "@/lib/portal/command-core";
 
 // Only formData wrappers are exported here; each resolves its own actor.
 export type {
@@ -31,6 +31,8 @@ export async function updateProfileAction(formData: FormData): Promise<void> {
 export async function updateCompanyAction(formData: FormData): Promise<void> {
   const {requireActor} = await import("@/lib/auth/actor");
   const actor = await requireActor();
+  // Absent unless the form rendered the switch, so a save can never reset it by omission.
+  const directoryVisible = companyDirectoryVisibility(formData);
   await updateCompany(actor, {
     companyId: String(formData.get("companyId") ?? ""),
     legalName: String(formData.get("legalName") ?? ""),
@@ -39,7 +41,7 @@ export async function updateCompanyAction(formData: FormData): Promise<void> {
     industry: String(formData.get("industry") ?? "").trim() || null,
     sizeBand: String(formData.get("sizeBand") ?? "").trim() || null,
     description: String(formData.get("description") ?? "").trim() || null,
-    directoryVisible: formData.get("directoryVisible") === "on",
+    ...(directoryVisible === undefined ? {} : {directoryVisible}),
   });
   revalidatePath("/portal");
   revalidatePath("/portal/company");

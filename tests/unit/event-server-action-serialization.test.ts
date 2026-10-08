@@ -41,6 +41,6 @@ describe("client-bound event Server Actions", () => {
   });
 
   it("does not capture the next-intl translator in member RSVP", () => {
-    expect(actionSource("app/[locale]/(member)/portal/events/page.tsx", "registerAction", "\n  return <div")).not.toMatch(/\bt\(/);
+    expect(actionSource("app/[locale]/(member)/portal/events/page.tsx", "registerAction", "\n  const upcoming")).not.toMatch(/\bt\(/);
   });
 });
