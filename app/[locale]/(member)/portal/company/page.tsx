@@ -91,6 +91,16 @@ export default async function CompanyPage({params}: Props) {
               <label htmlFor="company-description">{t("fields.description")}</label>
               <textarea defaultValue={company.description ?? ""} disabled={!canManage} id="company-description" name="description" />
             </div>
+            {/* The marker tells `updateCompanyAction` this form rendered the switch; without it a
+                save leaves the stored value alone (see `companyDirectoryVisibility`). */}
+            <input disabled={!canManage} name="directoryVisibleShown" type="hidden" value="1" />
+            <div className="portal-field portal-consent">
+              <label className="portal-consent-row">
+                <input aria-describedby="company-directory-help" defaultChecked={company.directoryVisible ?? false} disabled={!canManage} name="directoryVisible" type="checkbox" />
+                <span>{tSections("details.directoryVisible")}</span>
+              </label>
+              <p className="portal-field-help" id="company-directory-help">{tSections("details.directoryHelp")}</p>
+            </div>
           </fieldset>
           {canManage ? (
             <div className="portal-form-actions">
