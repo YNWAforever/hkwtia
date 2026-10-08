@@ -990,6 +990,7 @@
     "choosePlanContact": "Contact WTIA",
     "profileTitle": "Tell us about yourself",
     "profileDescription": "Your profile helps WTIA support your membership and keep your application moving.",
+    "profileGroups": {"contact": "Contact", "whatsapp": "WhatsApp updates", "directoryHelp": "Lets other members find you in the WTIA directory."},
     "companyTitle": "Confirm your company",
     "companyDescription": "Tell us about your company. We will create its WTIA profile and make you the initial owner.",
     "steps": {

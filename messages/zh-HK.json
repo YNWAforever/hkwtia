@@ -990,6 +990,7 @@
     "choosePlanContact": "聯絡 WTIA",
     "profileTitle": "介紹你的資料",
     "profileDescription": "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
+    "profileGroups": {"contact": "聯絡資料", "whatsapp": "WhatsApp 通知", "directoryHelp": "讓其他會員在 WTIA 名錄中找到你。"},
     "companyTitle": "確認公司資料",
     "companyDescription": "請提供公司資料。我們會建立 WTIA 公司檔案，並將你設為首位擁有人。",
     "steps": {

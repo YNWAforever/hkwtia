@@ -1,5 +1,6 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {getDashboard} from "@/lib/portal/queries";
@@ -19,43 +20,57 @@ export default async function ProfilePage({params}: Props) {
   const profile = dashboard.profile;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("profile")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight">{t("profileTitle")}</h1>
-        <p className="text-muted-foreground">{t("profileDescription")}</p>
+    <div>
+      {/* The dashboard's heading scale and label; the description rides the lead line. */}
+      <header className="portal-welcome">
+        <StatusLabel as="p">{t("profile")}</StatusLabel>
+        <h1>{t("profileTitle")}</h1>
+        <p className="portal-welcome-company">{t("profileDescription")}</p>
       </header>
-      <form action={updateProfileAction} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8">
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.displayName")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.displayName} name="displayName" required />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.phone")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.phone ?? ""} name="phone" type="tel" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.jobTitle")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.jobTitle ?? ""} name="jobTitle" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.whatsappNumber")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.whatsappNumber ?? ""} name="whatsappNumber" type="tel" />
-        </label>
-        <div className="rounded-md border border-border p-4 text-sm sm:col-span-2">
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-primary">{profile.whatsappOptIn ? t("whatsapp.status.on") : t("whatsapp.status.off")}</p>
-          <label className="flex items-start gap-3 font-medium">
-            <input className="mt-1" defaultChecked={profile.whatsappOptIn} name="whatsappOptIn" type="checkbox" />
-            <span>{t("whatsapp.optIn")}</span>
-          </label>
-          <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")}</p>
-        </div>
+      <form action={updateProfileAction} className="portal-form">
+        <fieldset className="portal-fieldset">
+          <legend className="portal-fieldset-title">{t("profileGroups.contact")}</legend>
+          <div className="portal-field">
+            <label htmlFor="profile-displayName">{t("fields.displayName")}</label>
+            <input defaultValue={profile.displayName} id="profile-displayName" name="displayName" required />
+          </div>
+          <div className="portal-pair">
+            <div className="portal-field">
+              <label htmlFor="profile-jobTitle">{t("fields.jobTitle")}</label>
+              <input defaultValue={profile.jobTitle ?? ""} id="profile-jobTitle" name="jobTitle" />
+            </div>
+            <div className="portal-field">
+              <label htmlFor="profile-phone">{t("fields.phone")}</label>
+              <input defaultValue={profile.phone ?? ""} id="profile-phone" name="phone" type="tel" />
+            </div>
+          </div>
+        </fieldset>
+        <fieldset className="portal-fieldset">
+          <legend className="portal-fieldset-title">{t("profileGroups.whatsapp")}</legend>
+          <div className="portal-field">
+            <label htmlFor="profile-whatsappNumber">{t("fields.whatsappNumber")}</label>
+            <input defaultValue={profile.whatsappNumber ?? ""} id="profile-whatsappNumber" name="whatsappNumber" type="tel" />
+          </div>
+          <div className="portal-field portal-consent">
+            <StatusLabel as="p">{profile.whatsappOptIn ? t("whatsapp.status.on") : t("whatsapp.status.off")}</StatusLabel>
+            <label className="portal-consent-row">
+              <input defaultChecked={profile.whatsappOptIn} name="whatsappOptIn" type="checkbox" />
+              <span>{t("whatsapp.optIn")}</span>
+            </label>
+            <p className="portal-field-help">{t("whatsapp.consent")}</p>
+          </div>
+        </fieldset>
         <input name="locale" type="hidden" value={locale} />
-        <label className="flex items-center gap-3 text-sm font-medium sm:col-span-2">
-          <input defaultChecked={profile.directoryVisible} name="directoryVisible" type="checkbox" />
-          <span>{t("fields.directoryVisible")}</span>
-        </label>
-        <button className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:col-span-2 sm:justify-self-start" type="submit">{t("save")}</button>
+        <div className="portal-field portal-consent">
+          <label className="portal-consent-row">
+            <input aria-describedby="profile-directory-help" defaultChecked={profile.directoryVisible} name="directoryVisible" type="checkbox" />
+            <span>{t("fields.directoryVisible")}</span>
+          </label>
+          <p className="portal-field-help" id="profile-directory-help">{t("profileGroups.directoryHelp")}</p>
+        </div>
+        <div className="portal-form-actions">
+          <button className="button" type="submit">{t("save")}</button>
+        </div>
       </form>
     </div>
   );
