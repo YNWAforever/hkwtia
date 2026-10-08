@@ -39,7 +39,7 @@ export default async function AiTransparencyPage({params}: Props) {
       />
       <PolicySections sections={parsePolicySections(t.raw('sections'))} />
       <section className="container mx-auto max-w-3xl px-6 pb-16">
-        <Link className="font-semibold text-primary" href="/ai-ops">{t('aiOpsLink')}</Link>
+        <Link className="inline-flex min-h-6 items-center font-semibold text-primary" href="/ai-ops">{t('aiOpsLink')}</Link>
       </section>
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/ai-transparency', tRoot))} />
     </>

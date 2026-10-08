@@ -439,8 +439,11 @@
 }
 :is(.card-index, .status-label, .inner-card-index, .membership-dimensions span, .mega-column h2,
   .mega-column-title, .footer-links strong, .hero-scroll) { font-size: 11px; }
-.brand-copy small { font-size: 10px; letter-spacing: 0.04em; }
+/* Round 17: the descriptor and the phone route-map labels were the last text under the 11px
+   floor that every other label on the site already meets (10px and 9px). */
+.brand-copy small { font-size: 11px; letter-spacing: 0.04em; }
 @media (max-width: 1120px) { .brand-copy small { display: none; } }
+@media (max-width: 520px) { .route-map span { font-size: 11px; } }
 @media (min-width: 1321px) { .nav-button { font-size: 12px; } }
 
 /* ─── Events: open / past tabs ────────────────────────────────────────────────────────────

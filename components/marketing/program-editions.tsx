@@ -139,7 +139,7 @@ function Winners({
         {offSite}{' '}
         {/* An external microsite, so a bare <a> is correct — localizedPath and
             next-intl's Link are for our own routes only. */}
-        <a className="underline" href={winners.url} rel="noreferrer" target="_blank">
+        <a className="inline-flex min-h-6 items-center underline" href={winners.url} rel="noreferrer" target="_blank">
           {offSiteLink}
         </a>
       </p>

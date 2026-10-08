@@ -461,8 +461,11 @@ describe("complete M4 deterministic acceptance", () => {
     // pinning.
     // T22: page-scoped aiops-metrics class fixes light-page contrast; all privacy invariants above remain.
     // T04 adds a separate unmeasured-impact section; privacy assertions remain above.
+    // Round 17 (2026-10-09): the evidence and build-log links gained `inline-flex min-h-6
+    // items-center` so they meet the 24px target size (they measured 17px). Markup only;
+    // re-verified deterministic across repeated runs before pinning.
     expect(state).toMatchObject({operationsImpact: {netMinutes: null, sampleCount: 0, caseCount: null}});
-    expect(opaque(safeDashboard)).toBe("f0d8b422d67b7130a374d4552401ce98c019abdc193549333111460eab94d16f");
+    expect(opaque(safeDashboard)).toBe("b34330f0a4076b187beec4765193959f8ba3e29abfe87ff92e30541edea31f0f");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();
