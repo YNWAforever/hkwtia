@@ -42,7 +42,7 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
               <tr key={member.id}>
                 <td data-label={labels.member}>{member.userId}</td>
                 <td data-label={labels.role}>{roleLabel(member.role, labels)}</td>
-                <td className="portal-seat-actions">
+                <td><div className="portal-seat-actions">
                   {canManage && (member.role !== "owner" || canGrantOwner) && changeRoleAction ? (
                     <>
                       <form action={changeRoleAction}>
@@ -65,7 +65,7 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
                       ) : null}
                     </>
                   ) : null}
-                </td>
+                </div></td>
               </tr>
             ))}
           </tbody>
@@ -81,7 +81,7 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
                 <tr key={invitation.id}>
                   <td data-label={labels.email}>{invitation.invitedEmail}</td>
                   <td data-label={labels.role}>{roleLabel(invitation.role, labels)}</td>
-                  <td className="portal-seat-actions">
+                  <td><div className="portal-seat-actions">
                     {canManage && revokeInvitationAction ? (
                       <form action={revokeInvitationAction}>
                         <input name="invitationId" type="hidden" value={invitation.id} />
@@ -89,7 +89,7 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
                         <button className="portal-seat-link portal-seat-danger" type="submit">{labels.inviteRevoke}</button>
                       </form>
                     ) : null}
-                  </td>
+                  </div></td>
                 </tr>
               ))}
             </tbody>

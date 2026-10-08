@@ -112,19 +112,19 @@ describe("portal seats page", () => {
 describe("seat invitation acceptance errors", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("a service error renders the inner honest block, one h1, a /portal back link and keeps the alert", async () => {
+  it("a service error renders the inner honest block, one h1, a /portal back link and keeps one status region", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVITATION_EXPIRED" as never));
     const {container} = render(await SeatAcceptPage(acceptProps({token: "t"})));
     expect(container.querySelector(".inner-honest")).not.toBeNull();
     expect(container.querySelectorAll("h1")).toHaveLength(1);
-    expect(screen.getByRole("alert")).toHaveTextContent("This invitation has expired");
+    expect(screen.getByRole("status")).toHaveTextContent("This invitation has expired");
     expect(screen.getByRole("link", {name: /Back to dashboard/})).toHaveAttribute("href", "/portal");
   });
 
   it("a missing token renders the same block with the generic message", async () => {
     const {container} = render(await SeatAcceptPage(acceptProps()));
     expect(container.querySelector(".inner-honest")).not.toBeNull();
-    expect(screen.getByRole("alert")).toHaveTextContent("We could not update company seats");
+    expect(screen.getByRole("status")).toHaveTextContent("We could not update company seats");
     expect(screen.getByRole("link", {name: /Back to dashboard/})).toHaveAttribute("href", "/portal");
   });
 });

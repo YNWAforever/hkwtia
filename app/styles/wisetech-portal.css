@@ -243,6 +243,8 @@
 .portal-root .portal-seat-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 15px; color: var(--wt-ink); }
 .portal-root .portal-seat-table th { padding: 10px 12px; border-bottom: 1px solid var(--wt-line); font-size: 13px; font-weight: 700; color: var(--xp-text-muted); }
 .portal-root .portal-seat-table td { padding: 14px 12px; border-bottom: 1px solid var(--wt-line); vertical-align: middle; overflow-wrap: anywhere; }
+/* On a div inside the cell: a td with display:flex stops being a table cell (anonymous-cell wrapping
+ * breaks row borders and alignment), and on phones the td block rule would outrank it. */
 .portal-root .portal-seat-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px 20px; }
 .portal-root .portal-seat-actions form { display: flex; align-items: center; gap: 10px; margin: 0; }
 .portal-root .portal-seat-actions select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 15px; }

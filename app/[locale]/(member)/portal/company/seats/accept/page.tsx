@@ -11,15 +11,13 @@ import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
 
-// The message stays a role="alert" for assistive tech; the block around it is the shared honest
-// state. HonestEmpty's inner variant renders an h3, so the page's one h1 is the screen-reader title.
-function AcceptError({title, message, back, locale}: {title: string; message: string; back: string; locale: AppLocale}) {
+// The error is server-rendered at load, so HonestEmpty's own polite role="status" is the one live
+// region. Its inner variant renders an h3, so the page's one h1 is the screen-reader page title.
+function AcceptError({pageTitle, title, message, back, locale}: {pageTitle: string; title: string; message: string; back: string; locale: AppLocale}) {
   return (
     <div>
-      <h1 className="sr-only">{title}</h1>
-      <div role="alert">
-        <HonestEmpty copy={message} title={title} variant="inner" />
-      </div>
+      <h1 className="sr-only">{pageTitle}</h1>
+      <HonestEmpty copy={message} title={title} variant="inner" />
       <p className="portal-form-actions">
         <PrivateLink className="text-link" href={localizedPath(locale, "/portal")}>{back}</PrivateLink>
       </p>
@@ -38,7 +36,7 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "Portal"});
   const token = queryValue(query.token);
-  if (!token) return <AcceptError back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
+  if (!token) return <AcceptError pageTitle={t("company")} back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
   try {
     const actor = await requireActor();
     await acceptSeatInvitation(actor, token);
@@ -47,8 +45,8 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     if (error instanceof SeatServiceError) {
       const message = t(`seats.errors.${seatInvitationErrorKey(error.code)}`);
-      return <AcceptError back={t("seats.acceptBack")} locale={locale} message={message} title={t("seats.title")} />;
+      return <AcceptError pageTitle={t("company")} back={t("seats.acceptBack")} locale={locale} message={message} title={t("seats.title")} />;
     }
-    return <AcceptError back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
+    return <AcceptError pageTitle={t("company")} back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
   }
 }
