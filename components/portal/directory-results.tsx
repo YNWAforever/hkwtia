@@ -12,10 +12,12 @@ type Labels = Readonly<{
   clear: string;
   empty: string;
   emptyQuery: string;
+  emptyQueryHint: string;
   emptyNone: string;
   emptyNoneAction: string;
   next: string;
   first: string;
+  pages: string;
   company: string;
   industry: string;
   sizeBand: string;
@@ -37,12 +39,14 @@ function pageHref(locale: AppLocale, params: {q?: string; cursor?: string}): str
   return `${localizedPath(locale, "/portal/directory")}${suffix ? `?${suffix}` : ""}`;
 }
 
-export function DirectoryResults({locale, page, query, cursor = null, labels}: Props) {
+export function DirectoryResults({locale, page, query: rawQuery, cursor = null, labels}: Props) {
+  // Whitespace is not a search: trim here too, so no caller can render a "results for" line for "  ".
+  const query = rawQuery.trim();
   const paging = directoryPaging({query, cursor, nextCursor: page.nextCursor});
 
   return (
     <div className="portal-directory">
-      <form action={localizedPath(locale, "/portal/directory")} className="portal-form portal-directory-search" method="get">
+      <form action={localizedPath(locale, "/portal/directory")} className="portal-form portal-directory-search" method="get" role="search">
         <div className="portal-field">
           <label htmlFor="directory-search">{labels.search}</label>
           <input defaultValue={query} id="directory-search" name="q" type="search" />
@@ -59,7 +63,7 @@ export function DirectoryResults({locale, page, query, cursor = null, labels}: P
 
       {page.items.length === 0 ? (
         <>
-          <HonestEmpty copy={query ? labels.empty : labels.emptyNone} title={query ? labels.emptyQuery : labels.empty} variant="inner" />
+          <HonestEmpty copy={query ? labels.emptyQueryHint : labels.emptyNone} headingLevel={2} title={query ? labels.emptyQuery : labels.empty} variant="inner" />
           {query ? null : (
             <p className="portal-directory-next">
               <Link className="text-link" href={localizedPath(locale, "/portal/profile")}>{labels.emptyNoneAction}</Link>
@@ -83,7 +87,7 @@ export function DirectoryResults({locale, page, query, cursor = null, labels}: P
       )}
 
       {paging.first || paging.next ? (
-        <nav aria-label={labels.search} className="portal-paging">
+        <nav aria-label={labels.pages} className="portal-paging">
           {paging.first ? <Link className="text-link" href={pageHref(locale, paging.first)}>{labels.first}</Link> : <span />}
           {paging.next ? <Link className="text-link" href={pageHref(locale, paging.next)}>{labels.next}</Link> : null}
         </nav>

@@ -306,14 +306,19 @@
  * (it spanned the full main width), and the back link stands clear of it instead of touching it. */
 .portal-root .portal-main .inner-honest { max-width: 880px; }
 .portal-root .inner-honest + .portal-form-actions { margin-top: 24px; }
+/* Directly under a page h1 the block's heading is an h2 (HonestEmpty headingLevel={2}), so the outline
+ * does not skip a level; it keeps the look wisetech.css gives `.inner-honest h3`. */
+.portal-root .inner-honest h2 { margin: 7px 0 6px; font-family: var(--font-serif); font-size: 29px; font-weight: 500; line-height: 1.2; color: var(--wt-ink); }
 
 /* ---- Shared page grammar for events, directory, documents, tools and billing ---- */
 .portal-root .portal-card { padding: 24px; border: 1px solid var(--wt-line); border-radius: 10px; background: var(--wt-paper-bright); color: var(--wt-ink); }
 .portal-root .portal-card-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 @media (min-width: 821px) { .portal-root .portal-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.portal-root .portal-date-block { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; width: 72px; padding: 10px 0; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); text-align: center; }
-.portal-root .portal-date-block > :first-child { font-family: var(--font-serif, Georgia, serif); font-size: 28px; font-weight: 700; line-height: 1; }
-.portal-root .portal-date-block > :last-child { margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.portal-root .portal-date-block { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; width: 72px; padding: 10px 0; border: 1px solid var(--wt-line); border-radius: 8px; background: var(--wt-paper-bright); color: var(--wt-ink); text-align: center; }
+.portal-root .portal-date-day { font-family: var(--font-serif, Georgia, serif); font-size: 28px; font-weight: 700; line-height: 1; }
+.portal-root .portal-date-month { margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+/* Only for a date outside the current year, under the month. */
+.portal-root .portal-date-year { margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--xp-text-muted); }
 .portal-root .portal-record { display: grid; gap: 14px; margin: 0; }
 .portal-root .portal-record dt { margin: 0; font-size: 13px; font-weight: 700; color: var(--xp-text-muted); }
 .portal-root .portal-record dd { margin: 2px 0 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); overflow-wrap: anywhere; }
@@ -352,6 +357,8 @@
 .portal-root .portal-event-body > :last-child:not(:is(h2, h3, :only-child)) { margin-top: auto; }
 .portal-root .portal-event-body > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
 .portal-root .portal-event-body > p { margin: 0; font-size: 15px; color: var(--wt-ink); }
+/* RSVP: the button and the result line under it (was Tailwind space-y-2). */
+.portal-root .portal-registration-form { display: grid; gap: 8px; justify-items: start; }
 
 /* ---- New / edit event ---- */
 .portal-root .portal-event-editor { display: grid; gap: 32px; }
@@ -393,11 +400,23 @@
 .portal-root .portal-tool-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
 .portal-root .portal-tool-head h1 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
 /* The frame fills what is left of the viewport and the page itself does not scroll, so there is one
- * scrollbar (the tool's). 134px = main's top padding (48) + the slim header (~46) + gap (16) + the
- * tool page's bottom padding (24); the old 120px left the page 52px taller than a 1440x900 window. */
+ * scrollbar (the tool's). It was a fixed calc (100dvh - header - 134px), which assumed a one-line
+ * shell header and tool header; a wrapping one put a second scrollbar back (final review M16). Now,
+ * on a page that frames a tool only, the shell is a viewport-tall flex column: the headers take
+ * what they need and the frame flexes into the rest, however many lines they wrap to. */
 .portal-root .portal-main:has(> .portal-tool) { padding-bottom: 24px; }
-.portal-root iframe.portal-tool-frame { display: block; width: 100%; height: calc(100dvh - var(--portal-header-h) - 134px); min-height: 480px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; }
+.portal-root:has(iframe.portal-tool-frame) { display: flex; flex-direction: column; height: 100dvh; min-height: 0; }
+.portal-root:has(iframe.portal-tool-frame) > .portal-frame { flex: 1 1 auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr); align-items: stretch; }
+.portal-root:has(iframe.portal-tool-frame) .portal-main { display: flex; flex-direction: column; min-height: 0; }
+.portal-root .portal-tool:has(> iframe.portal-tool-frame) { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+.portal-root iframe.portal-tool-frame { display: block; flex: 1 1 auto; width: 100%; min-height: 320px; border: 1px solid var(--wt-line); border-radius: 8px; background: var(--wt-paper-bright); }
+@media (min-width: 1121px) {
+  /* One row here: the nav column and main sit side by side. */
+  .portal-root:has(iframe.portal-tool-frame) > .portal-frame { grid-template-rows: minmax(0, 1fr); }
+}
 
+/* Billing page: header, then the cards (was Tailwind space-y-8 on the wrapper). */
+.portal-root .portal-billing { display: grid; gap: 32px; }
 /* Billing cards: plan name, status word, renewal and seats as body text, one primary per card. */
 .portal-root .portal-billing-card { display: grid; gap: 10px; align-content: start; }
 .portal-root .portal-billing-card h2 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.25; color: var(--wt-ink); }
@@ -412,7 +431,5 @@
   .portal-root .portal-card { padding: 20px; }
   .portal-root .portal-event-card { gap: 14px; }
   .portal-root .portal-date-block { width: 60px; padding: 8px 0; }
-  .portal-root .portal-date-block > :first-child { font-size: 24px; }
-  /* Here main's top padding is 24, not 48: 24 + the slim header (~46) + gap (16) + bottom padding (24), plus a few px of slack. */
-  .portal-root iframe.portal-tool-frame { height: calc(100dvh - var(--portal-header-h) - 112px); }
+  .portal-root .portal-date-day { font-size: 24px; }
 }

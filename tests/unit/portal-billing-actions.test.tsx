@@ -50,8 +50,10 @@ describe("BillingActions", () => {
 
   it("explains a past-due membership in an alert and flags an unverified provider", () => {
     const action = vi.fn(async () => {});
-    render(<BillingActions {...base} memberships={[membership("p", "past_due", {providerAvailable: false})]} actions={{p: action}} details={{}} />);
+    render(<BillingActions {...base} memberships={[membership("p", "past_due", {providerAvailable: false})]} actions={{p: action}} details={{p: {period: {kind: "renews", date: new Date("2026-11-12T00:00:00Z")}, seatLimit: null}}} />);
     expect(document.querySelector(".portal-form-alert")).toHaveTextContent("Last payment failed");
+    // The alert explains the failed payment; a "Renews on" line beside it would contradict it.
+    expect(screen.queryByText(/Renews on|Ends on/)).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Provider unavailable");
   });
 

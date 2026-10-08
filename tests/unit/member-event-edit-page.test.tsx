@@ -6,7 +6,7 @@ vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: str
 vi.mock("next/navigation", () => ({redirect: vi.fn(), notFound: vi.fn()}));
 vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => ({kind: "member", userId: "u", profileId: "p"}))}));
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {getForMemberEdit: vi.fn(async () => ({id: "event-id", organiser_company_id: "33333333-3333-4333-8333-333333333333"}))}}));
-vi.mock("@/lib/events/member-contract", () => ({memberEventViewFromRow: vi.fn(() => ({id: "event-id", status: state.status, titleEn: "Event", rejectionReason: state.rejectionReason}))}));
+vi.mock("@/lib/events/member-contract", () => ({memberEventViewFromRow: vi.fn(() => ({id: "event-id", status: state.status, titleEn: "Event", titleZh: "活動", rejectionReason: state.rejectionReason}))}));
 vi.mock("@/lib/events/member-core", () => ({loadMemberEventsContext: vi.fn(async () => {
   if (state.failure) throw state.failure;
   return {canPublish: false, limit: state.limit};
@@ -29,6 +29,18 @@ describe("/portal/events/[id]/edit recovery", () => {
     expect(screen.getByRole("heading", {level: 1, name: "Event"})).toBeVisible();
     expect(screen.getByText("status.rejected")).toHaveClass("status-label");
     expect(screen.getByText("rejectedWith:Add a venue")).toHaveClass("portal-form-alert");
+  });
+
+  it("shows no stale rejection reason once the event has been resubmitted", async () => {
+    state.status = "pending_review";
+    state.rejectionReason = "Add a venue";
+    render(await EditMemberEventPage(props));
+    expect(screen.queryByText("rejectedWith:Add a venue")).toBeNull();
+  });
+
+  it("heads the zh-HK page with the Chinese title", async () => {
+    render(await EditMemberEventPage({...props, params: Promise.resolve({locale: "zh-HK", id: "event-id"})}));
+    expect(screen.getByRole("heading", {level: 1, name: "活動"})).toBeVisible();
   });
 
   it("does not enable resubmission when membership is no longer active", async () => {

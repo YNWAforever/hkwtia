@@ -46,7 +46,7 @@ export default async function NewMemberEventPage({params, searchParams}: Props) 
     return (
       <div className="portal-event-editor">
         <PortalPageHeader eyebrow={t("eyebrow")} title={t("newTitle")} />
-        <HonestEmpty copy={message} title={t("unavailableTitle")} variant="inner" />
+        <HonestEmpty copy={message} headingLevel={2} title={t("unavailableTitle")} variant="inner" />
         <p className="portal-form-actions">
           <PrivateLink className="text-link" href={localizedPath(locale, "/portal/events")}>{t("backToEvents")}</PrivateLink>
         </p>

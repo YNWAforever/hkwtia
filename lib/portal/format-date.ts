@@ -14,11 +14,31 @@ export function formatPortalDate(locale: AppLocale, value: string | Date): strin
   return new Intl.DateTimeFormat(INTL_LOCALE[locale], {day: 'numeric', month: 'long', year: 'numeric', timeZone: TIME_ZONE}).format(toDate(value));
 }
 
-// The big day/month pair on an event card. Month is short ("Jan" / "1月").
-export function portalDateParts(locale: AppLocale, value: string | Date): {day: string; month: string} {
+function hongKongYear(date: Date): string {
+  return new Intl.DateTimeFormat('en-GB', {year: 'numeric', timeZone: TIME_ZONE}).format(date);
+}
+
+// The big day/month pair on an event card. Month is short ("Jan" / "1月"). The year is added only
+// when the date falls outside the current Hong Kong year: "12 Nov" for an event 13 months out was
+// ambiguous (final review M6). `now` is a parameter so tests never depend on the wall clock.
+export function portalDateParts(locale: AppLocale, value: string | Date, now: Date = new Date()): {day: string; month: string; year: string | null} {
   const date = toDate(value);
   return {
     day: new Intl.DateTimeFormat(INTL_LOCALE[locale], {day: 'numeric', timeZone: TIME_ZONE}).format(date),
     month: new Intl.DateTimeFormat(INTL_LOCALE[locale], {month: 'short', timeZone: TIME_ZONE}).format(date),
+    year: hongKongYear(date) === hongKongYear(now) ? null : new Intl.DateTimeFormat(INTL_LOCALE[locale], {year: 'numeric', timeZone: TIME_ZONE}).format(date),
   };
+}
+
+// Stripe amounts are in the currency's minor unit (cents for HKD, whole yen for JPY); Intl knows
+// each currency's exponent, so the divisor comes from it rather than a hard-coded 100.
+export function formatPortalAmount(locale: AppLocale, minorUnits: number, currency: string): string | null {
+  try {
+    const format = new Intl.NumberFormat(INTL_LOCALE[locale], {style: 'currency', currency: currency.toUpperCase()});
+    const exponent = format.resolvedOptions().maximumFractionDigits ?? 2;
+    return format.format(minorUnits / 10 ** exponent);
+  } catch {
+    // An unknown currency code throws a RangeError; the caller then falls back to the plain title.
+    return null;
+  }
 }

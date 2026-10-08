@@ -19,14 +19,15 @@ export default async function DirectoryPage({params, searchParams}: Props) {
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
   const query = await searchParams;
-  const search = queryValue(query.q);
+  // Trimmed before anything reads it: `?q=%20%20` once rendered 'Showing results for "  "' (final review M9).
+  const search = queryValue(query.q).trim();
   const cursor = queryValue(query.cursor) || null;
   const actor = await requireActor();
   const page = await searchDirectory(actor, {search, limit: 20}, cursor);
   const t = await getTranslations({locale, namespace: "Portal"});
 
   return (
-    <div className="portal-directory-page">
+    <div>
       <PortalPageHeader eyebrow={t("navGroups.benefits")} lead={t("directory.description")} title={t("directory.title")} />
       <DirectoryResults
         cursor={cursor}
@@ -36,10 +37,12 @@ export default async function DirectoryPage({params, searchParams}: Props) {
           clear: t("directory.clear"),
           empty: t("directory.empty"),
           emptyQuery: t("directory.emptyQuery", {query: search}),
+          emptyQueryHint: t("directory.emptyQueryHint"),
           emptyNone: t("directory.emptyNone"),
           emptyNoneAction: t("directory.emptyNoneAction"),
           next: t("directory.next"),
           first: t("directory.first"),
+          pages: t("directory.pages"),
           company: t("directory.company"),
           industry: t("directory.industry"),
           sizeBand: t("directory.sizeBand"),

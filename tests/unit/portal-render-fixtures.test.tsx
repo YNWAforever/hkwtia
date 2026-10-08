@@ -334,7 +334,8 @@ describe("portal render fixtures", () => {
   // Sub-projects 3 + 4: events, directory, documents, tools and billing, each in English (-en) and
   // Traditional Chinese (-zh). The setup runs after beforeEach and swaps only the reads it names.
   // The WTIA events come back in the page's locale (getMemberEvents takes it), so the -zh list
-  // carries Chinese titles and venues to wrap; the organisation's own events show titleEn, as the page does.
+  // carries Chinese titles and venues to wrap. The organisation's own events show titleZh on zh-HK and
+  // fall back to titleEn when it is blank, as "Robotics breakfast" does here.
   const wtiaEvents = (locale: Locale) => {
     const zh = locale === "zh-HK";
     return [
@@ -347,9 +348,9 @@ describe("portal render fixtures", () => {
   };
   const ownEvents = [
     memberEventRow,
-    {...memberEventRow, id: "22222222-2222-4222-8222-222222222222", slug: "picker-demo-week", title_en: "Picker demo week for logistics operators", status: "pending_review", starts_at: "2026-12-07T02:00:00.000Z"},
-    {...memberEventRow, id: "33333333-3333-4333-8333-333333333333", slug: "robotics-breakfast", title_en: "Robotics breakfast", status: "published", starts_at: "2026-10-22T00:30:00.000Z"},
-    {...memberEventRow, id: "44444444-4444-4444-8444-444444444444", slug: "free-robot-giveaway", title_en: "Free robot giveaway", status: "rejected", starts_at: "2027-01-09T03:00:00.000Z", rejection_reason: "Events must not offer prizes for registration. Remove the giveaway and resubmit."},
+    {...memberEventRow, id: "22222222-2222-4222-8222-222222222222", slug: "picker-demo-week", title_en: "Picker demo week for logistics operators", title_zh: "物流營運商揀貨機械人示範週", status: "pending_review", starts_at: "2026-12-07T02:00:00.000Z"},
+    {...memberEventRow, id: "33333333-3333-4333-8333-333333333333", slug: "robotics-breakfast", title_en: "Robotics breakfast", title_zh: "", status: "published", starts_at: "2026-10-22T00:30:00.000Z"},
+    {...memberEventRow, id: "44444444-4444-4444-8444-444444444444", slug: "free-robot-giveaway", title_en: "Free robot giveaway", title_zh: "免費送機械人", status: "rejected", starts_at: "2027-01-09T03:00:00.000Z", rejection_reason: "Events must not offer prizes for registration. Remove the giveaway and resubmit."},
   ];
   const rejectedRow = {...memberEventRow, status: "rejected", rejection_reason: "The description does not say who the open day is for. Add the audience and resubmit.", submitted_at: "2026-10-01T02:00:00.000Z"};
   // Long English and Chinese names and companies, to find wrapping problems in the cards.
@@ -383,8 +384,10 @@ describe("portal render fixtures", () => {
       () => { state.overrides.directory = {items: directoryItems.slice(2), nextCursor: "cursor-3"}; }],
     ["documents-both", "/portal/documents", (locale) => DocumentsPage({params: Promise.resolve({locale})}),
       () => { state.overrides.documents = [
-        {id: "r1", title: "Startup membership — April 2026", kind: "receipt", url: "https://invoice.stripe.example/i/acct_1/test_receipt", issuedAt: "2026-04-01T00:00:00.000Z", amount: 880000, currency: "hkd", status: "paid"},
-        {id: "r2", title: "Additional seat", kind: "receipt", url: "https://invoice.stripe.example/i/acct_1/test_seat", issuedAt: "2026-07-14T00:00:00.000Z", amount: 120000, currency: "hkd", status: "paid"},
+        // Receipts are titled with their Stripe invoice id, as lib/portal/content.ts maps them; the list
+        // must never paint it (final review I1), so the screenshots prove the amount title instead.
+        {id: "in_1QfixtureApr2026", title: "in_1QfixtureApr2026", kind: "receipt", url: "https://invoice.stripe.example/i/acct_1/test_receipt", issuedAt: "2026-04-01T00:00:00.000Z", amount: 880000, currency: "hkd", status: "paid"},
+        {id: "in_1QfixtureJul2026", title: "in_1QfixtureJul2026", kind: "receipt", url: "https://invoice.stripe.example/i/acct_1/test_seat", issuedAt: "2026-07-14T00:00:00.000Z", amount: 120000, currency: "hkd", status: "paid"},
         {id: "d1", title: "Member guide 2026", kind: "resource", url: "https://example.org/member-guide-2026.pdf", issuedAt: "2026-09-01T00:00:00.000Z", amount: null, currency: null, status: null},
         {id: "d2", title: "Hong Kong AI governance briefing for small and medium enterprises", kind: "resource", url: "/resources/ai-governance-briefing", issuedAt: "2026-06-18T00:00:00.000Z", amount: null, currency: null, status: null},
       ]; }],
@@ -409,6 +412,36 @@ describe("portal render fixtures", () => {
     expect(html.match(/<main id="main-content"/g)).toHaveLength(1);
     expect(html.match(/<h1/g)).toHaveLength(1);
     expectTranslated(html, locale);
+    // A Stripe invoice id is never a heading or any other painted text.
+    expect(html).not.toMatch(/>in_1Q/);
+  });
+
+  it("titles receipts by amount, not the Stripe invoice id", async () => {
+    const [, pathname, page, setup] = portalPages.find(([name]) => name === "documents-both")!;
+    for (const [locale, title] of [["en", "Receipt — HK$8,800.00"], ["zh-HK", "收據 — HK$8,800.00"]] as const) {
+      setup(locale);
+      state.locale = locale;
+      const html = await writeFixture(`documents-both-${locale === "en" ? "en" : "zh"}`, pathname, () => page(locale));
+      expect(html).toContain(`<h3>${title}</h3>`);
+      expect(html).not.toContain("in_1Qfixture");
+    }
+  });
+
+  it("shows the member's Chinese event titles on zh-HK, falling back to English when blank", async () => {
+    const [, pathname, page, setup] = portalPages.find(([name]) => name === "events-list-own")!;
+    setup("zh-HK");
+    state.locale = "zh-HK";
+    const zh = await writeFixture("events-list-own-zh", pathname, () => page("zh-HK"));
+    expect(zh).toContain("<h3>物流營運商揀貨機械人示範週</h3>");
+    expect(zh).toContain("<h3>Robotics breakfast</h3>");
+    expect(zh).not.toContain("<h3>Picker demo week for logistics operators</h3>");
+    setup("en");
+    state.locale = "en";
+    const en = await writeFixture("events-list-own-en", pathname, () => page("en"));
+    expect(en).toContain("<h3>Picker demo week for logistics operators</h3>");
+    // The date block is a <time> with the full date for screen readers; the tile itself is aria-hidden.
+    expect(en).toMatch(/<time class="portal-date-block" dateTime="2026-12-07T02:00:00.000Z"><span aria-hidden="true" class="portal-date-day">7<\/span>/);
+    expect(en).toContain('<span class="sr-only">7 December 2026</span>');
   });
 });
 

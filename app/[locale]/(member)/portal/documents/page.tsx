@@ -19,12 +19,13 @@ export default async function DocumentsPage({params}: Props) {
   const t = await getTranslations({locale, namespace: "Portal"});
 
   return (
-    <div className="portal-documents-page">
+    <div>
       <PortalPageHeader eyebrow={t("navGroups.benefits")} lead={t("documents.description")} title={t("documents.title")} />
       <DocumentList
         items={documents}
         labels={{
           receiptsHeading: t("documents.receiptsHeading"),
+          receiptTitle: (amount) => (amount ? t("documents.receiptTitle", {amount}) : t("documents.receiptTitleNoAmount")),
           resourcesHeading: t("documents.resourcesHeading"),
           openReceipt: t("documents.openReceipt"),
           openDocument: t("documents.openDocument"),

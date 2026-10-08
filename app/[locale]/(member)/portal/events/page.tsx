@@ -2,6 +2,7 @@ import {revalidatePath} from "next/cache";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
+import {PortalDateBlock} from "@/components/portal/date-block";
 import {EventRegistrationForm} from "@/components/portal/event-registration-form";
 import {PortalPageHeader} from "@/components/portal/page-header";
 import {HonestEmpty} from "@/components/wt/honest-empty";
@@ -12,7 +13,8 @@ import {registerForEvent} from "@/lib/db/repos/events";
 import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {listMyCompanyEvents, loadMemberEventsContext} from "@/lib/events/member-core";
 import type {RegistrationActionState} from "@/lib/events/registration-state";
-import {formatPortalDate, portalDateParts} from "@/lib/portal/format-date";
+import {localizedEventTitle} from "@/lib/portal/event-title";
+import {formatPortalDate} from "@/lib/portal/format-date";
 import {runEventRegistrationAction} from "@/lib/portal/event-action-core";
 import {getMemberEvents} from "@/lib/portal/content";
 import {localizedPath} from "@/lib/urls";
@@ -67,22 +69,19 @@ export default async function MemberEventsPage({params}: Props) {
     });
   }
   const upcoming = rows.length === 0 ? (
-    <HonestEmpty variant="inner" title={t("events.emptyTitle")} copy={t("events.empty")} actions={[{href: "/events", label: t("events.emptyAction")}]}/>
+    <HonestEmpty variant="inner" headingLevel={2} title={t("events.emptyTitle")} copy={t("events.empty")} actions={[{href: "/events", label: t("events.emptyAction")}]}/>
   ) : (
     <div className="portal-card-grid">
-      {rows.map((event) => {
-        const {day, month} = portalDateParts(locale, event.startsAt);
-        return (
-          <article className="portal-card portal-event-card" key={event.slug}>
-            <div className="portal-date-block"><span>{day}</span><span>{month}</span></div>
-            <div className="portal-event-body">
-              <h2>{event.title}</h2>
-              {event.venue ? <p>{event.venue}</p> : null}
-              {registrationControl(event)}
-            </div>
-          </article>
-        );
-      })}
+      {rows.map((event) => (
+        <article className="portal-card portal-event-card" key={event.slug}>
+          <PortalDateBlock locale={locale} value={event.startsAt}/>
+          <div className="portal-event-body">
+            <h2>{event.title}</h2>
+            {event.venue ? <p>{event.venue}</p> : null}
+            {registrationControl(event)}
+          </div>
+        </article>
+      ))}
     </div>
   );
   const quotaLimit = quota ? (Number.isFinite(quota.limit) ? String(quota.limit) : t("memberEvents.unlimited")) : "";
@@ -99,21 +98,18 @@ export default async function MemberEventsPage({params}: Props) {
           {quota ? <p className="portal-status-note">{t("memberEvents.quota", {used: quota.usedThisQuarter, limit: quotaLimit})}</p> : null}
           {mine.events.length === 0 ? <p className="portal-status-note">{t("memberEvents.listEmpty")}</p> : (
             <ul className="portal-card-grid">
-              {mine.events.map((row) => ({event: memberEventViewFromRow(row), startsAt: row.starts_at})).map(({event, startsAt}) => {
-                const {day, month} = portalDateParts(locale, startsAt);
-                return (
-                  <li className="portal-card portal-event-card" key={event.id}>
-                    <div className="portal-date-block"><span>{day}</span><span>{month}</span></div>
-                    <div className="portal-event-body">
-                      <StatusLabel>{t(`memberEvents.status.${event.status}`)}</StatusLabel>
-                      <h3>{event.titleEn}</h3>
-                      <p>{formatPortalDate(locale, startsAt)}</p>
-                      {event.status === "rejected" && event.rejectionReason ? <p className="portal-form-alert">{t("memberEvents.rejectedWith", {reason: event.rejectionReason})}</p> : null}
-                      <Link className="text-link" href={localizedPath(locale, `/portal/events/${event.id}/edit`)}>{t("memberEvents.edit")}</Link>
-                    </div>
-                  </li>
-                );
-              })}
+              {mine.events.map((row) => ({event: memberEventViewFromRow(row), startsAt: row.starts_at})).map(({event, startsAt}) => (
+                <li className="portal-card portal-event-card" key={event.id}>
+                  <PortalDateBlock locale={locale} value={startsAt}/>
+                  <div className="portal-event-body">
+                    <StatusLabel>{t(`memberEvents.status.${event.status}`)}</StatusLabel>
+                    <h3>{localizedEventTitle(locale, event)}</h3>
+                    <p>{formatPortalDate(locale, startsAt)}</p>
+                    {event.status === "rejected" && event.rejectionReason ? <p className="portal-form-alert">{t("memberEvents.rejectedWith", {reason: event.rejectionReason})}</p> : null}
+                    <Link className="text-link" href={localizedPath(locale, `/portal/events/${event.id}/edit`)}>{t("memberEvents.edit")}</Link>
+                  </div>
+                </li>
+              ))}
             </ul>
           )}
         </section>

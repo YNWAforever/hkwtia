@@ -42,6 +42,7 @@ export default async function PortalToolPage({params}: Props) {
         <HonestEmpty
           actions={[{href: "/membership", label: t("tools.viewPlans")}]}
           copy={t("tools.includedWith", {plans: toolPlanList(tool, locale, (plan) => t(`plans.${plan}`))})}
+          headingLevel={2}
           title={t("tools.lockedTitle")}
           variant="inner"
         />
@@ -56,7 +57,7 @@ export default async function PortalToolPage({params}: Props) {
     return (
       <div className="portal-tool">
         {header}
-        <HonestEmpty copy={t("tools.unavailableDescription")} title={t("tools.unavailableTitle")} variant="inner" />
+        <HonestEmpty copy={t("tools.unavailableDescription")} headingLevel={2} title={t("tools.unavailableTitle")} variant="inner" />
       </div>
     );
   }

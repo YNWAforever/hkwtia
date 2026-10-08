@@ -24,7 +24,7 @@ export function BillingActions({memberships, labels, supportHref, membershipHref
     // The link sits beside the block, not in its `actions`: ActionLink localizes its href itself, and ours is already localized.
     return (
       <>
-        <HonestEmpty variant="inner" title={labels.empty} copy={labels.emptyCopy} />
+        <HonestEmpty variant="inner" headingLevel={2} title={labels.empty} copy={labels.emptyCopy} />
         <p><a className="text-link" href={membershipHref}>{labels.emptyAction}</a></p>
       </>
     );
@@ -35,7 +35,9 @@ export function BillingActions({memberships, labels, supportHref, membershipHref
         const action = actions[membership.id];
         const needsSupport = membership.recovery === "support";
         const detail = details[membership.id];
-        const period = detail?.period ?? null;
+        // A past-due card says nothing about renewal: "Renews on …" beside "your last payment did not
+        // go through" contradicted itself, and the alert already says what to do (final review M12).
+        const period = membership.status === "past_due" ? null : detail?.period ?? null;
         const manages = Boolean(action) && !needsSupport && membership.recovery !== "new_checkout";
         return (
           <article className="portal-card portal-billing-card" key={membership.id}>

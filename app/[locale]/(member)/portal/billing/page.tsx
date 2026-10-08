@@ -59,7 +59,7 @@ export default async function BillingPage({params, searchParams}: Props) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="portal-billing">
       <PortalPageHeader eyebrow={t("navGroups.benefits")} title={t("billing.title")} lead={t("billing.description")}>
         {queryValue(query.error) === "1" ? <p className="portal-form-alert" role="alert">{t("billing.error")}</p> : null}
       </PortalPageHeader>
@@ -72,7 +72,9 @@ export default async function BillingPage({params, searchParams}: Props) {
           manage: t("billing.manage"), manageHelp: t("billing.manageHelp"), recover: t("billing.recover"), history: t("billing.history"),
           support: t("billing.support"), supportMessage: t("billing.supportMessage"), providerUnavailable: t("billing.providerUnavailable"),
           pastDue: t("billing.pastDue"), empty: t("billing.empty"), emptyCopy: t("billing.emptyCopy"), emptyAction: t("billing.emptyAction"),
-          plan: (code) => t(`plans.${code}`), status: (value) => t(`status.${value}.label`),
+          // plans.* is shared with the tools page, where 「包含於初創計劃」 reads well; a heading of the bare
+          // 「初創」 does not, so the billing heading wraps it (「初創會籍」) through its own key.
+          plan: (code) => t("billing.planHeading", {plan: t(`plans.${code}`)}), status: (value) => t(`status.${value}.label`),
           renewsOn: (date) => t("billing.renewsOn", {date: formatPortalDate(locale, date)}),
           endsOn: (date) => t("billing.endsOn", {date: formatPortalDate(locale, date)}),
           seats: (count) => t("billing.seats", {count}),
