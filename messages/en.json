@@ -2607,6 +2607,8 @@
       "admin": "Admin",
       "member": "Member",
       "noPending": "No pending invitations.",
+      "full": "All seats are in use. Remove a member or a pending invitation to invite someone else.",
+      "acceptBack": "Back to dashboard",
       "errors": {
         "generic": "We could not update company seats. Please try again.",
         "invitationNotFound": "We could not find this invitation. Check the link, or ask your company admin to send a new one.",

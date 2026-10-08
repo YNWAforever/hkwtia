@@ -227,3 +227,39 @@
 .portal-root .portal-button-outline:hover { background: rgba(114, 155, 181, 0.12); }
 .portal-root .portal-button-outline:disabled,
 .portal-root .portal-form-actions .button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---- Seats ----
+ * Capacity bar, the full-state note and the member / invitation tables. At <=820px each row stacks:
+ * the table keeps its semantics and every cell prints its data-label caption above its value. */
+.portal-root .portal-capacity { display: grid; gap: 10px; max-width: 880px; margin-bottom: 28px; }
+.portal-root .portal-capacity-text { margin: 0; font-size: 15px; font-weight: 700; color: var(--wt-ink); }
+.portal-root .portal-capacity-bar { height: 10px; border-radius: 999px; background: rgba(114, 155, 181, 0.2); overflow: hidden; }
+.portal-root .portal-capacity-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--wt-blue); }
+.portal-root .portal-welcome + .portal-form-message { margin-bottom: 24px; }
+.portal-root .portal-capacity + .portal-readonly-note,
+.portal-root .portal-capacity + .portal-seat-invite { margin-bottom: 40px; max-width: 880px; }
+.portal-root .portal-seat-tables { display: grid; gap: 40px; max-width: 880px; }
+.portal-root .portal-seat-section .portal-section-title { margin-bottom: 16px; }
+.portal-root .portal-seat-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 15px; color: var(--wt-ink); }
+.portal-root .portal-seat-table th { padding: 10px 12px; border-bottom: 1px solid var(--wt-line); font-size: 13px; font-weight: 700; color: var(--xp-text-muted); }
+.portal-root .portal-seat-table td { padding: 14px 12px; border-bottom: 1px solid var(--wt-line); vertical-align: middle; overflow-wrap: anywhere; }
+.portal-root .portal-seat-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px 20px; }
+.portal-root .portal-seat-actions form { display: flex; align-items: center; gap: 10px; margin: 0; }
+.portal-root .portal-seat-actions select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 15px; }
+.portal-root .portal-seat-link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--wt-blue); font: inherit; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.portal-root .portal-seat-danger { color: var(--wt-ink); }
+.portal-root .portal-seat-actions select:focus-visible,
+.portal-root .portal-seat-link:focus-visible { outline: 2px solid var(--wt-blue); outline-offset: 1px; }
+@media (max-width: 820px) {
+  .portal-root .portal-seat-table,
+  .portal-root .portal-seat-table tbody,
+  .portal-root .portal-seat-table tr,
+  .portal-root .portal-seat-table td { display: block; width: 100%; box-sizing: border-box; }
+  /* The header row is replaced by the per-cell captions; it stays in the accessibility tree. */
+  .portal-root .portal-seat-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .portal-root .portal-seat-table tr { padding: 14px 0; border-bottom: 1px solid var(--wt-line); }
+  .portal-root .portal-seat-table td { padding: 6px 0; border: 0; }
+  .portal-root .portal-seat-table td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 2px; font-size: 13px; font-weight: 700; color: var(--xp-text-muted); }
+  .portal-root .portal-seat-actions { justify-content: flex-start; padding-top: 10px; }
+  .portal-root .portal-seat-actions form { flex-wrap: wrap; }
+}

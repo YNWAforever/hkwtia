@@ -1,6 +1,8 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
+import {PrivateLink} from "@/components/internal-shell/private-link";
+import {HonestEmpty} from "@/components/wt/honest-empty";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {acceptSeatInvitation, SeatServiceError} from "@/lib/db/repos/seats";
@@ -8,6 +10,22 @@ import {seatInvitationErrorKey} from "@/lib/portal/seat-invitation-errors";
 import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
+
+// The message stays a role="alert" for assistive tech; the block around it is the shared honest
+// state. HonestEmpty's inner variant renders an h3, so the page's one h1 is the screen-reader title.
+function AcceptError({title, message, back, locale}: {title: string; message: string; back: string; locale: AppLocale}) {
+  return (
+    <div>
+      <h1 className="sr-only">{title}</h1>
+      <div role="alert">
+        <HonestEmpty copy={message} title={title} variant="inner" />
+      </div>
+      <p className="portal-form-actions">
+        <PrivateLink className="text-link" href={localizedPath(locale, "/portal")}>{back}</PrivateLink>
+      </p>
+    </div>
+  );
+}
 
 function queryValue(value: string | string[] | undefined): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
@@ -20,7 +38,7 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "Portal"});
   const token = queryValue(query.token);
-  if (!token) return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-3xl font-semibold">{t("seats.title")}</h1><p className="text-destructive" role="alert">{t("seats.errors.generic")}</p></section>;
+  if (!token) return <AcceptError back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
   try {
     const actor = await requireActor();
     await acceptSeatInvitation(actor, token);
@@ -29,8 +47,8 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     if (error instanceof SeatServiceError) {
       const message = t(`seats.errors.${seatInvitationErrorKey(error.code)}`);
-      return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-3xl font-semibold">{t("seats.title")}</h1><p className="text-destructive" role="alert">{message}</p></section>;
+      return <AcceptError back={t("seats.acceptBack")} locale={locale} message={message} title={t("seats.title")} />;
     }
-    return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-3xl font-semibold">{t("seats.title")}</h1><p className="text-destructive" role="alert">{t("seats.errors.generic")}</p></section>;
+    return <AcceptError back={t("seats.acceptBack")} locale={locale} message={t("seats.errors.generic")} title={t("seats.title")} />;
   }
 }

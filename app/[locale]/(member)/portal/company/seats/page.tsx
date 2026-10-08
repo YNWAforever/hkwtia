@@ -2,6 +2,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {auth} from "@/lib/auth/server";
 import {redirect} from "next/navigation";
 
+import {StatusLabel} from "@/components/wt/status-label";
 import {SeatInviteForm} from "@/components/portal/seat-invite-form";
 import {SeatTable} from "@/components/portal/seat-table";
 import type {AppLocale} from "@/i18n/routing";
@@ -83,6 +84,16 @@ async function changeSeatRoleAction(formData: FormData) {
     redirect(seatErrorPath(locale));
   }
 }
+function PageHeader({eyebrow, title, lead}: {eyebrow: string; title: string; lead?: string}) {
+  return (
+    <header className="portal-welcome">
+      <StatusLabel as="p">{eyebrow}</StatusLabel>
+      <h1>{title}</h1>
+      {lead ? <p className="portal-welcome-lead">{lead}</p> : null}
+    </header>
+  );
+}
+
 export default async function CompanySeatsPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
@@ -93,9 +104,35 @@ export default async function CompanySeatsPage({params, searchParams}: Props) {
   const t = await getTranslations({locale, namespace: "Portal"});
   const dashboard = await import("@/lib/portal/queries").then(({getDashboard}) => getDashboard(actor));
   const company = dashboard.companies[0];
-  if (!company) return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-4xl font-semibold">{t("seats.title")}</h1><p className="text-muted-foreground">{t("seats.empty")}</p></section>;
-  const overview = await getSeatOverview(actor, company.id);
-  if (!overview) return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-4xl font-semibold">{t("seats.title")}</h1><p className="text-muted-foreground">{t("seats.empty")}</p></section>;
+  const overview = company ? await getSeatOverview(actor, company.id) : null;
+  if (!overview) {
+    return (
+      <div>
+        <PageHeader eyebrow={t("company")} title={t("seats.title")} />
+        <p className="portal-field-help">{t("seats.empty")}</p>
+      </div>
+    );
+  }
+  const used = overview.members.length + overview.invitations.length;
+  const isFull = used >= overview.seatLimit;
+  const capacity = t("seats.capacity", {used, limit: overview.seatLimit});
   const labels = {members: t("seats.members"), pending: t("seats.pending"), email: t("seats.email"), role: t("seats.role"), revoke: t("seats.revoke"), inviteRevoke: t("seats.inviteRevoke"), changeRole: t("seats.changeRole"), owner: t("seats.owner"), admin: t("seats.admin"), member: t("seats.member"), noPending: t("seats.noPending")};
-  return <div className="mx-auto max-w-4xl space-y-8"><header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("company")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight">{t("seats.title")}</h1><p className="text-muted-foreground">{t("seats.description")}</p>{hasError ? <p className="text-sm text-destructive" role="alert">{t("seats.errors.generic")}</p> : null}<p className="text-sm text-muted-foreground">{t("seats.capacity", {used: overview.members.length + overview.invitations.length, limit: overview.seatLimit})}</p></header>{overview.canManage ? <SeatInviteForm action={inviteSeatAction} canGrantOwner={overview.canGrantOwner} companyId={overview.companyId} labels={{email: t("seats.email"), invite: t("seats.invite"), inviting: t("seats.inviting"), role: t("seats.role"), member: t("seats.member"), admin: t("seats.admin"), owner: t("seats.owner")}} locale={locale} /> : null}<SeatTable canGrantOwner={overview.canGrantOwner} canManage={overview.canManage} changeRoleAction={overview.canManage ? changeSeatRoleAction : undefined} invitations={overview.invitations} labels={labels} locale={locale} members={overview.members} revokeAction={overview.canManage ? revokeSeatAction : undefined} revokeInvitationAction={overview.canManage ? revokeInvitationAction : undefined} /></div>;
+  // A legacy company above its limit would overflow the track, so the fill is capped at 100%.
+  const fill = overview.seatLimit > 0 ? Math.min(100, Math.round((used / overview.seatLimit) * 100)) : 100;
+  return (
+    <div>
+      <PageHeader eyebrow={t("company")} lead={t("seats.description")} title={t("seats.title")} />
+      {hasError ? <p className="portal-form-message" role="alert"><StatusLabel>{t("seats.errors.generic")}</StatusLabel></p> : null}
+      <section className="portal-capacity">
+        <p className="portal-capacity-text">{capacity}</p>
+        <div aria-label={capacity} aria-valuemax={overview.seatLimit} aria-valuemin={0} aria-valuenow={used} className="portal-capacity-bar" role="progressbar">
+          <span style={{width: `${fill}%`}} />
+        </div>
+      </section>
+      {overview.canManage ? (
+        isFull ? <p className="portal-readonly-note">{t("seats.full")}</p> : <SeatInviteForm action={inviteSeatAction} canGrantOwner={overview.canGrantOwner} companyId={overview.companyId} labels={{email: t("seats.email"), invite: t("seats.invite"), inviting: t("seats.inviting"), role: t("seats.role"), member: t("seats.member"), admin: t("seats.admin"), owner: t("seats.owner")}} locale={locale} />
+      ) : null}
+      <SeatTable canGrantOwner={overview.canGrantOwner} canManage={overview.canManage} changeRoleAction={overview.canManage ? changeSeatRoleAction : undefined} invitations={overview.invitations} labels={labels} locale={locale} members={overview.members} revokeAction={overview.canManage ? revokeSeatAction : undefined} revokeInvitationAction={overview.canManage ? revokeInvitationAction : undefined} />
+    </div>
+  );
 }

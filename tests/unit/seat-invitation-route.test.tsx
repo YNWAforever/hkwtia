@@ -1,8 +1,12 @@
+import type {ReactNode} from "react";
 import {render, screen} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 const redirect = vi.hoisted(() => vi.fn(() => { throw new Error("NEXT_REDIRECT"); }));
 vi.mock("next/navigation", () => ({redirect}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+}));
 const requireActor = vi.hoisted(() => vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})));
 vi.mock("@/lib/auth/actor", () => ({requireActor}));
 const acceptSeatInvitation = vi.hoisted(() => vi.fn());
