@@ -10,6 +10,10 @@ vi.mock("next-intl/server", () => ({
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => { state.redirectUrl = url; throw new Error("NEXT_REDIRECT"); },
 }));
+// The dashboard components import the locale-aware Link; the real one needs next/navigation's full surface.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href}: {children: unknown; href: string}) => <a href={href}>{children as never}</a>,
+}));
 vi.mock("@/lib/auth/actor", () => ({
   getActor: vi.fn(async () => null),
   requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})),

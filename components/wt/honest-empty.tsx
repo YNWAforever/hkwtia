@@ -19,22 +19,24 @@ type HonestEmptyCommon = Readonly<{
   className?: string;
 }>;
 
-// The port only ever styles `.inner-honest h3` (never an h2 in that block), so headingLevel
-// isn't a choice that exists on the 'inner' variant -- only the ink/light section blocks take one.
+// The port only ever styles `.inner-honest h3`, so the inner variant defaults to h3 and every
+// existing caller is unchanged. A portal page that puts the block directly under its h1 passes
+// headingLevel={2} instead, so the outline does not skip a level (portal final review M2);
+// wisetech-portal.css gives `.inner-honest h2` the same look inside .portal-root.
 // The light and inner grids are three-column (pulse ring, copy, one action): a second action
 // would wrap under the ring, so those two variants cap `actions` at a single-element tuple.
 // Only the ink block's flex row (`.open-now-actions`) can hold more than one.
 export type HonestEmptyProps =
   | (HonestEmptyCommon & Readonly<{variant?: 'ink'; headingLevel?: 2 | 3; actions?: readonly WtAction[]}>)
   | (HonestEmptyCommon & Readonly<{variant: 'light'; headingLevel?: 2 | 3; actions?: Readonly<[WtAction]>}>)
-  | (HonestEmptyCommon & Readonly<{variant: 'inner'; actions?: Readonly<[WtAction]>}>);
+  | (HonestEmptyCommon & Readonly<{variant: 'inner'; headingLevel?: 2 | 3; actions?: Readonly<[WtAction]>}>);
 
 // Honest states are a feature (design-fidelity spec §0.3): the region announces itself
 // politely and never fabricates records to look full.
 export function HonestEmpty(props: HonestEmptyProps) {
   const {label, title, copy, actions, id, className} = props;
   const variant = props.variant ?? 'ink';
-  const headingLevel = props.variant === 'inner' ? 3 : props.headingLevel ?? 3;
+  const headingLevel = props.headingLevel ?? 3;
   const Heading = headingLevel === 2 ? 'h2' : 'h3';
 
   // Donor grammar: the ink block's actions sit in a dedicated flex row (`.open-now-actions`).

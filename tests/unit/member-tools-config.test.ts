@@ -46,6 +46,14 @@ describe("member tool registry", () => {
     }
   });
 
+  it.each(MEMBER_TOOLS)("resolves $descriptionKey in both message bundles", (tool) => {
+    for (const [locale, bundle] of [["en", en], ["zh-HK", zh]] as const) {
+      const value = messageAt(bundle, `Portal.${tool.descriptionKey}`);
+      expect(value, `${locale}: Portal.${tool.descriptionKey}`).toBeTypeOf("string");
+      expect(value?.trim(), `${locale}: Portal.${tool.descriptionKey}`).not.toBe("");
+    }
+  });
+
   it.each(MEMBER_TOOLS)("declares a safe, tokenless origin for $key", (tool) => {
     expect(tool.titleKey).toMatch(/\S/);
     expect(tool.tokenParam).toMatch(/^[a-z][a-z0-9_-]*$/);

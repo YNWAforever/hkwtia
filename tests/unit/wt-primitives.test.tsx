@@ -23,7 +23,7 @@ vi.mock("next/image", () => ({
     <img {...props} data-fill={String(Boolean(fill))} data-sizes={sizes} />,
 }));
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
+  Link: ({href, prefetch, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string; prefetch?: boolean}) => <a href={href} data-prefetch={String(prefetch ?? "auto")} {...props} />,
 }));
 
 describe("wt primitives", () => {
@@ -85,6 +85,8 @@ describe("wt primitives", () => {
     render(<><ActionLink href="/events">Find an event</ActionLink><ActionLink href="/membership" variant="text-link-light">Compare</ActionLink></>);
     expect(screen.getByRole("link", {name: "Find an event"})).toHaveClass("button");
     expect(screen.getByRole("link", {name: "Compare"})).toHaveClass("text-link", "light-link");
+    // Public callers keep Next's default prefetch; only a member-portal caller opts out.
+    expect(screen.getByRole("link", {name: "Find an event"})).toHaveAttribute("data-prefetch", "auto");
   });
 
   it("HonestEmpty is a polite status region with a decorative pulse ring and wrapped ink actions", () => {
@@ -118,7 +120,7 @@ describe("wt primitives", () => {
     expect(status.querySelector(".open-now-actions")).toBeNull();
   });
 
-  it("HonestEmpty variants map to the donor classes, and inner has no headingLevel choice", () => {
+  it("HonestEmpty variants map to the donor classes, and inner defaults to an h3", () => {
     const light = render(<HonestEmpty variant="light" label="l" title="t" copy="c" headingLevel={2} />);
     expect(light.container.firstElementChild).toHaveClass("honest-empty", "light-empty");
     expect(light.getByRole("heading", {level: 2})).toHaveTextContent("t");
@@ -129,6 +131,13 @@ describe("wt primitives", () => {
     expect(inner.container.firstElementChild).toHaveAttribute("role", "status");
     expect(inner.getByRole("heading", {level: 3})).toHaveTextContent("t");
     expect(inner.getByRole("link", {name: "Contact us"})).toHaveClass("button", "button-dark");
+  });
+
+  it("HonestEmpty inner takes headingLevel 2 when it sits directly under a page h1", () => {
+    const inner = render(<HonestEmpty variant="inner" title="t" copy="c" headingLevel={2} />);
+    expect(inner.container.firstElementChild).toHaveClass("inner-honest");
+    expect(inner.getByRole("heading", {level: 2})).toHaveTextContent("t");
+    expect(inner.queryByRole("heading", {level: 3})).toBeNull();
   });
 
   it("HonestEmpty light variant omits the label and renders bare action links", () => {

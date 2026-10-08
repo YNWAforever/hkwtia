@@ -21,8 +21,8 @@ vi.mock("@/lib/auth/actor", () => ({requireActor: async () => {
 vi.mock("@/lib/db/repos/profile-identities", () => ({profileIdentityRepository: {getDisplayName: async () => ({name: "Synthetic staff"})}}));
 vi.mock("@/lib/config/env", () => ({publicEnv: () => ({})}));
 vi.mock("@/components/admin/admin-app-shell", () => ({AdminAppShell: ({children}: {children: ReactNode}) => <main>{children}</main>}));
-vi.mock("@/components/internal-shell/app-shell", () => ({InternalAppShell: ({children}: {children: ReactNode}) => <main>{children}</main>}));
-vi.mock("@/components/portal/portal-nav", () => ({PortalNav: () => null}));
+vi.mock("@/components/portal/portal-shell", () => ({PortalShell: ({children}: {children: ReactNode}) => <main>{children}</main>}));
+vi.mock("@/components/portal/portal-navigation", () => ({PortalNavigation: () => null}));
 vi.mock("@/components/ai/deferred-concierge-widget", () => ({DeferredConciergeWidget: () => null}));
 
 import LocaleLayout from "@/app/[locale]/layout";

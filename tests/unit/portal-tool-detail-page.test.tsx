@@ -4,12 +4,17 @@ import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 const state = vi.hoisted(() => ({plans: ["startup"] as string[], statuses: ["active"] as string[], notFound: vi.fn()}));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async () => (key: string) => key),
+  // Interpolated values are appended so a test can see which plans a message was given.
+  getTranslations: vi.fn(async () => (key: string, values?: Record<string, string>) =>
+    values ? `${key}|${Object.values(values).join(",")}` : key,
+  ),
   setRequestLocale: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({
   notFound: () => { state.notFound(); throw new Error("NEXT_NOT_FOUND"); },
 }));
+// HonestEmpty's ActionLink uses the locale-aware Link, which needs an intl provider this page-level render lacks.
+vi.mock("@/i18n/navigation", () => ({Link: ({href, children, ...rest}: {href: string; children: React.ReactNode}) => <a href={href} {...rest}>{children}</a>}));
 vi.mock("@/lib/auth/actor", () => ({
   requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})),
 }));
@@ -41,6 +46,9 @@ describe("/portal/tools/[key]", () => {
     const frame = container.querySelector("iframe");
 
     expect(frame).not.toBeNull();
+    expect(frame!.classList.contains("portal-tool-frame")).toBe(true);
+    expect(screen.getByRole("heading", {level: 1, name: "tools.contentCalendar.title"})).toBeVisible();
+    expect(screen.getByRole("link", {name: "tools.back"})).toHaveAttribute("href", "/portal/tools");
     expect(frame!.getAttribute("title")).toBe("tools.contentCalendar.title");
     expect(frame!.getAttribute("referrerpolicy")).toBe("no-referrer");
     // Deliberate: the page's comment explains that a cross-origin frame is already isolated,
@@ -60,7 +68,8 @@ describe("/portal/tools/[key]", () => {
 
     expect(container.querySelector("iframe")).toBeNull();
     expect(screen.getByText("tools.lockedTitle")).toBeVisible();
-    expect(screen.getByRole("link", {name: "tools.upgrade"})).toHaveAttribute("href", "/membership");
+    expect(screen.getByText("tools.includedWith|plans.startup, plans.corporate and plans.patron")).toBeVisible();
+    expect(screen.getByRole("link", {name: /tools\.viewPlans/})).toHaveAttribute("href", "/membership");
   });
 
   it("does not disclose the shared tool token to a pending paid membership", async () => {

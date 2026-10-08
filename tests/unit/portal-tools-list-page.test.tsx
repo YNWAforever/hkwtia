@@ -6,7 +6,10 @@ import {MEMBER_TOOLS} from "@/config/member-tools";
 const state = vi.hoisted(() => ({plans: ["community"] as string[], statuses: ["active"] as string[]}));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async () => (key: string) => key),
+  // Interpolated values are appended so a test can see which plans a message was given.
+  getTranslations: vi.fn(async () => (key: string, values?: Record<string, string>) =>
+    values ? `${key}|${Object.values(values).join(",")}` : key,
+  ),
   setRequestLocale: vi.fn(),
 }));
 vi.mock("@/lib/auth/actor", () => ({
@@ -45,13 +48,13 @@ describe("/portal/tools", () => {
     expect(screen.getByRole("heading", {level: 1, name: "tools.title"})).toBeVisible();
   });
 
-  it("shows a locked card and the upgrade path for a Community member", async () => {
+  it("shows a locked card naming the plans, with a path to membership", async () => {
     render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
 
     const card = within(toolCard());
-    expect(card.getByText("tools.lockedTitle")).toBeVisible();
+    expect(card.getByText(`tools.includedWith|plans.startup, plans.corporate and plans.patron`)).toBeVisible();
     expect(card.queryByRole("link", {name: "tools.open"})).not.toBeInTheDocument();
-    expect(card.getByRole("link", {name: "tools.upgrade"})).toHaveAttribute("href", "/membership");
+    expect(card.getByRole("link", {name: "tools.viewPlans"})).toHaveAttribute("href", "/membership");
   });
 
   it("keeps a pending paid plan locked even when an active Community plan exists", async () => {
@@ -60,7 +63,7 @@ describe("/portal/tools", () => {
     render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
     const card = within(toolCard());
     expect(card.queryByRole("link", {name: "tools.open"})).not.toBeInTheDocument();
-    expect(card.getByText("tools.lockedTitle")).toBeVisible();
+    expect(card.getByText(/^tools\.includedWith/)).toBeVisible();
   });
   it("links an entitled member through to the tool", async () => {
     state.plans = ["startup"];
@@ -68,6 +71,9 @@ describe("/portal/tools", () => {
 
     const card = within(toolCard());
     expect(card.getByRole("link", {name: "tools.open"})).toHaveAttribute("href", `/portal/tools/${tool.key}`);
-    expect(card.queryByText("tools.lockedTitle")).not.toBeInTheDocument();
+    expect(card.queryByText(/^tools\.includedWith/)).not.toBeInTheDocument();
+    expect(card.getByText(tool.descriptionKey)).toBeVisible();
+    expect(card.getAllByRole("link")).toHaveLength(1);
+    expect(card.getByRole("link", {name: "tools.open"})).toHaveClass("button");
   });
 });

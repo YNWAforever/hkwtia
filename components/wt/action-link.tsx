@@ -14,13 +14,16 @@ const variantClasses: Record<ActionLinkVariant, string> = {
   'text-link-light': 'text-link light-link',
 };
 
-type ActionLinkProps = Readonly<{href: string; variant?: ActionLinkVariant; className?: string; children: ReactNode}>;
+// `prefetch` passes through to the locale-aware Link. Public callers leave it unset and keep
+// Next's default; a member-portal caller passes `false`, because prefetching a private route
+// costs an authenticated render per visible link (the PrivateLink rule, commit 42930d9a).
+type ActionLinkProps = Readonly<{href: string; variant?: ActionLinkVariant; className?: string; prefetch?: boolean; children: ReactNode}>;
 
-export function ActionLink({href, variant = 'button', className, children}: ActionLinkProps) {
+export function ActionLink({href, variant = 'button', className, prefetch, children}: ActionLinkProps) {
   // Donor spacing: the literal space between the label and <Arrow /> is the port's own
   // layout, not a stray character for the string audit to flag.
   return (
-    <Link className={cn(variantClasses[variant], className)} href={href}>
+    <Link className={cn(variantClasses[variant], className)} href={href} {...(prefetch === undefined ? {} : {prefetch})}>
       {children} <Arrow />
     </Link>
   );

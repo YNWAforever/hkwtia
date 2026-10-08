@@ -3,14 +3,16 @@ import Image from "next/image";
 import {Link} from "@/i18n/navigation";
 import {cn} from "@/lib/utils";
 
+export type DualBrandLockupLabels = {
+  homeLabel: string;
+  publicName: string;
+  /** D-10: the association's own description of itself, including the zh legal-name note. */
+  descriptor: string;
+  logoAlt: string;
+};
+
 type DualBrandLockupProps = {
-  labels: {
-    homeLabel: string;
-    publicName: string;
-    /** D-10: the association's own description of itself, including the zh legal-name note. */
-    descriptor: string;
-    logoAlt: string;
-  };
+  labels: DualBrandLockupLabels;
   priority?: boolean;
   className?: string;
 };

@@ -3,7 +3,9 @@
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {useActionState, useState} from "react";
 
-import {HeroUpload, type HeroUploadLabels} from "@/components/portal/hero-upload";
+import {PortalImageField, type PortalImageFieldLabels} from "@/components/portal/forms/image-field";
+import {PortalTagPicker} from "@/components/portal/forms/tag-picker";
+import {StatusLabel} from "@/components/wt/status-label";
 import {INDUSTRY_TAGS, industryTagLabel} from "@/config/industry-tags";
 import type {AppLocale} from "@/i18n/routing";
 import type {CompanyProfileFormState} from "@/lib/portal/company-profile-actions";
@@ -16,13 +18,19 @@ export type CompanyProfileValues = Readonly<{
 }>;
 
 export type CompanyProfileFormLabels = Readonly<{
-  fields: Readonly<{slug: string; taglineEn: string; taglineZhHk: string; descriptionZhHk: string; website: string; tags: string; logoMediaId: string}>;
-  logo: HeroUploadLabels;
-  status: Readonly<Record<CompanyProfileStatus, string>>;
-  statusLabel: string;
+  fields: Readonly<{slug: string; taglineEn: string; taglineZhHk: string; descriptionZhHk: string; website: string; tags: string}>;
+  groups: Readonly<{address: string; tagline: string; description: string}>;
+  logo: PortalImageFieldLabels;
+  /** The raw ICU text ("{count} / {max} selected"); this client component fills it in. */
+  tagCounter: string;
+  statusLabel: Readonly<Record<CompanyProfileStatus, string>>;
   reviewNotice: string;
   rejected: string | null;
-  save: string; publish: string; saved: string; submitted: string; readOnly: string;
+  saveDraft: string; submitForReview: string; saved: string; submitted: string; readOnly: string;
+  /** The single action on a Live / Under review page, and the line under it saying where a save goes. */
+  saveChanges: string; saveSendsForReview: string;
+  /** Why "Submit for review" is unavailable while the page address is empty. */
+  needsAddress: string;
   viewPublic: string;
   errors: Readonly<Record<string, string>>;
 }>;
@@ -30,9 +38,7 @@ export type CompanyProfileFormLabels = Readonly<{
 type Action = (state: CompanyProfileFormState, formData: FormData) => Promise<CompanyProfileFormState>;
 
 const initial: CompanyProfileFormState = {status: "idle"};
-const inputClass = "min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60";
-const textareaClass = "min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 disabled:opacity-60";
-const labelClass = "space-y-2 text-sm font-medium";
+const TAG_LIMIT = 8;
 
 /**
  * Programme B-7. Two submit buttons share one form and one action: the
@@ -41,77 +47,95 @@ const labelClass = "space-y-2 text-sm font-medium";
  * "publish my profile", so there is a single action state and a failed
  * submission can never read as a failed save — the shape `EventForm` uses.
  *
- * Publish is offered only from `hidden` and `rejected`. A live page is not
- * re-submitted from here: editing it demotes it to `pending_review` on its own
- * (`companyProfilesRepository.updateProfile`, and `reviewResetFor` in
- * `lib/db/repos/companies.ts` for the company-details form above), which is
- * what `reviewNotice` tells the member before they touch a field.
+ * Publish is offered only from `hidden` and `rejected`; a live page is demoted
+ * to `pending_review` by editing it (`reviewNotice` says so up front).
  *
- * The logo field is a media id: it stays a visible, editable input so a member
- * can clear it or paste an id from an earlier upload, and `HeroUpload` beneath
- * it fills it in after a successful post to /api/portal/media/upload.
+ * On a Live or Under review page there is nothing to submit, so the form offers one primary
+ * "Save changes" (still `intent=save`) with a line saying the save goes to WTIA review, rather
+ * than a greyed "Submit for review" beside a "Save draft" that would quietly take the page off
+ * the directory (final review, Important 1).
+ *
+ * The logo is a media id the member never sees: `PortalImageField` submits it
+ * as the hidden `logoMediaId` and shows a preview and an upload instead.
  */
 export function CompanyProfileForm({values, labels, action, locale, readOnly, publicHref}: Readonly<{
   values: CompanyProfileValues; labels: CompanyProfileFormLabels; action: Action; locale: AppLocale;
   readOnly: boolean; publicHref: string | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
-  const [logoMediaId, setLogoMediaId] = useState(values.logoMediaId);
   const [slug, setSlug] = useState(values.slug);
-  const canPublish = !readOnly && slug.trim().length > 0 && (values.status === "hidden" || values.status === "rejected");
+  const inReview = values.status === "published" || values.status === "pending_review";
+  const hasAddress = slug.trim().length > 0;
+  const canPublish = !readOnly && hasAddress && !inReview;
+  const tagOptions = INDUSTRY_TAGS.map((tag) => ({value: tag.slug, label: industryTagLabel(tag.slug, locale)}));
   return (
-    <form action={dispatch} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8" noValidate>
-      <div className="space-y-2 sm:col-span-2">
-        <p className="text-sm" role="status">
-          <span className="font-medium">{labels.statusLabel}:</span> {labels.status[values.status]}
+    <form action={dispatch} className="portal-form" noValidate>
+      <div className="portal-form-status">
+        <p className="portal-form-message" role="status">
+          <StatusLabel>{labels.statusLabel[values.status]}</StatusLabel>
           {/* Already localized by the page with `localizedPath`; this component never builds a prefix. */}
-          {publicHref ? <> · <Link className="font-medium underline underline-offset-4" href={publicHref}>{labels.viewPublic}</Link></> : null}
+          {publicHref ? <Link className="text-link" href={publicHref}>{labels.viewPublic}</Link> : null}
         </p>
-        <p className="text-sm text-muted-foreground">{labels.reviewNotice}</p>
-        {labels.rejected ? <p className="text-sm text-destructive" role="alert">{labels.rejected}</p> : null}
+        {/* Only someone who can edit can send the page back to review; a read-only member would read it as a warning about nothing. */}
+        {readOnly ? null : <p className="portal-field-help">{labels.reviewNotice}</p>}
+        {/* Body text, not the 11px eyebrow: the reason is free text the member has to read and act on. */}
+        {labels.rejected ? <p className="portal-form-alert" role="alert">{labels.rejected}</p> : null}
       </div>
-      <label className={labelClass}>
-        <span>{labels.fields.slug}</span>
-        <input className={inputClass} disabled={readOnly} name="slug" onChange={(event) => setSlug(event.target.value)} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" type="text" value={slug} />
-      </label>
-      <label className={labelClass}>
-        <span>{labels.fields.website}</span>
-        <input className={inputClass} defaultValue={values.website} disabled={readOnly} name="website" type="url" />
-      </label>
-      <label className={labelClass}>
-        <span>{labels.fields.taglineEn}</span>
-        <input className={inputClass} defaultValue={values.taglineEn} disabled={readOnly} maxLength={160} name="taglineEn" type="text" />
-      </label>
-      <label className={labelClass}>
-        <span>{labels.fields.taglineZhHk}</span>
-        <input className={inputClass} defaultValue={values.taglineZhHk} disabled={readOnly} maxLength={160} name="taglineZhHk" type="text" />
-      </label>
-      <label className={`${labelClass} sm:col-span-2`}>
-        <span>{labels.fields.descriptionZhHk}</span>
-        <textarea className={textareaClass} defaultValue={values.descriptionZhHk} disabled={readOnly} maxLength={2000} name="descriptionZhHk" />
-      </label>
-      <fieldset className="space-y-3 text-sm sm:col-span-2" disabled={readOnly}>
-        <legend className="font-medium">{labels.fields.tags}</legend>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {INDUSTRY_TAGS.map((tag) => (
-            <label className="flex items-center gap-2 font-normal" key={tag.slug}>
-              <input defaultChecked={values.tags.includes(tag.slug)} name="tags" type="checkbox" value={tag.slug} />
-              <span>{industryTagLabel(tag.slug, locale)}</span>
-            </label>
-          ))}
+      <fieldset className="portal-fieldset">
+        <legend className="portal-fieldset-title">{labels.groups.address}</legend>
+        <div className="portal-pair">
+          <div className="portal-field">
+            <label htmlFor="company-slug">{labels.fields.slug}</label>
+            <input disabled={readOnly} id="company-slug" name="slug" onChange={(event) => setSlug(event.target.value)} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" type="text" value={slug} />
+          </div>
+          <div className="portal-field">
+            <label htmlFor="company-website">{labels.fields.website}</label>
+            <input defaultValue={values.website} disabled={readOnly} id="company-website" name="website" type="url" />
+          </div>
         </div>
       </fieldset>
-      <label className={`${labelClass} sm:col-span-2`}>
-        <span>{labels.fields.logoMediaId}</span>
-        <input className={inputClass} disabled={readOnly} name="logoMediaId" onChange={(event) => setLogoMediaId(event.target.value)} type="text" value={logoMediaId} />
-      </label>
-      {readOnly ? null : <HeroUpload labels={labels.logo} onUploaded={setLogoMediaId} />}
-      {state.status === "error" ? <p className="text-sm text-destructive sm:col-span-2" role="alert">{labels.errors[state.code ?? "INVALID"] ?? labels.errors.INVALID}</p> : null}
-      {state.status === "saved" || state.status === "submitted" ? <p className="text-sm text-muted-foreground sm:col-span-2" role="status">{state.status === "submitted" ? labels.submitted : labels.saved}</p> : null}
-      {readOnly ? <p className="text-sm text-muted-foreground sm:col-span-2">{labels.readOnly}</p> : (
-        <div className="flex flex-wrap gap-3 sm:col-span-2">
-          <button className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-medium disabled:opacity-60" disabled={pending} formAction={dispatch} name="intent" type="submit" value="save">{labels.save}</button>
-          <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || !canPublish} name="intent" type="submit" value="publish">{labels.publish}</button>
+      <fieldset className="portal-fieldset">
+        <legend className="portal-fieldset-title">{labels.groups.tagline}</legend>
+        <div className="portal-pair">
+          <div className="portal-field">
+            <label htmlFor="company-taglineEn">{labels.fields.taglineEn}</label>
+            <input defaultValue={values.taglineEn} disabled={readOnly} id="company-taglineEn" maxLength={160} name="taglineEn" type="text" />
+          </div>
+          <div className="portal-field">
+            <label htmlFor="company-taglineZhHk">{labels.fields.taglineZhHk}</label>
+            <input defaultValue={values.taglineZhHk} disabled={readOnly} id="company-taglineZhHk" maxLength={160} name="taglineZhHk" type="text" />
+          </div>
+        </div>
+      </fieldset>
+      <fieldset className="portal-fieldset">
+        <legend className="portal-fieldset-title">{labels.groups.description}</legend>
+        <div className="portal-field">
+          <label htmlFor="company-descriptionZhHk">{labels.fields.descriptionZhHk}</label>
+          <textarea defaultValue={values.descriptionZhHk} disabled={readOnly} id="company-descriptionZhHk" maxLength={2000} name="descriptionZhHk" />
+        </div>
+      </fieldset>
+      <PortalTagPicker
+        counterLabel={(count, max) => labels.tagCounter.replace("{count}", String(count)).replace("{max}", String(max))}
+        initial={values.tags}
+        legend={labels.fields.tags}
+        max={TAG_LIMIT}
+        name="tags"
+        options={tagOptions}
+        readOnly={readOnly}
+      />
+      <PortalImageField initialValue={values.logoMediaId} labels={labels.logo} name="logoMediaId" readOnly={readOnly} store="id" />
+      {state.status === "error" ? <p className="portal-form-alert" role="alert">{labels.errors[state.code ?? "INVALID"] ?? labels.errors.INVALID}</p> : null}
+      {state.status === "saved" || state.status === "submitted" ? <p className="portal-form-message" role="status"><StatusLabel>{state.status === "submitted" ? labels.submitted : labels.saved}</StatusLabel></p> : null}
+      {readOnly ? <p className="portal-readonly-note">{labels.readOnly}</p> : inReview ? (
+        <div className="portal-form-actions">
+          <p className="portal-field-help portal-actions-note" id="company-save-note">{labels.saveSendsForReview}</p>
+          <button aria-describedby="company-save-note" className="button" disabled={pending} name="intent" type="submit" value="save">{labels.saveChanges}</button>
+        </div>
+      ) : (
+        <div className="portal-form-actions">
+          {hasAddress ? null : <p className="portal-field-help portal-actions-note" id="company-publish-note">{labels.needsAddress}</p>}
+          <button className="portal-button-outline" disabled={pending} formAction={dispatch} name="intent" type="submit" value="save">{labels.saveDraft}</button>
+          <button aria-describedby={hasAddress ? undefined : "company-publish-note"} className="button" disabled={pending || !canPublish} name="intent" type="submit" value="publish">{labels.submitForReview}</button>
         </div>
       )}
     </form>

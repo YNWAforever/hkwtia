@@ -2,6 +2,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {CompanyProfileForm} from "@/components/portal/company-profile-form";
+import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {saveCompanyProfileAction} from "@/lib/portal/company-profile-actions";
@@ -26,15 +27,20 @@ export default async function CompanyPage({params}: Props) {
   const dashboard = await getDashboard(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
   const tProfile = await getTranslations({locale, namespace: "Portal.companyProfile"});
+  const tSections = await getTranslations({locale, namespace: "Portal.companySections"});
+  const tForms = await getTranslations({locale, namespace: "Portal.forms"});
+  const tListing = await getTranslations({locale, namespace: "Portal.showcaseListing"});
   const company = dashboard.companies[0];
 
   if (!company) {
     return (
-      <section className="glass-card space-y-3 p-6 sm:p-10">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("company")}</p>
-        <h1 className="font-serif text-4xl font-semibold">{t("companyTitle")}</h1>
-        <p className="text-muted-foreground">{t("companyEmpty")}</p>
-      </section>
+      <div>
+        <header className="portal-welcome">
+          <StatusLabel as="p">{t("company")}</StatusLabel>
+          <h1>{t("companyTitle")}</h1>
+          <p className="portal-welcome-lead">{t("companyEmpty")}</p>
+        </header>
+      </div>
     );
   }
 
@@ -45,68 +51,100 @@ export default async function CompanyPage({params}: Props) {
   // With nothing managed it falls back to a read-only view of the first.
   const profileCompany = dashboard.companies.find((entry) => entry.canManage) ?? company;
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("company")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight">{t("companyTitle")}</h1>
-        <p className="text-muted-foreground">{t("companyDescription")}</p>
+    <div>
+      <header className="portal-welcome">
+        <StatusLabel as="p">{t("company")}</StatusLabel>
+        <h1>{t("companyTitle")}</h1>
+        <p className="portal-welcome-lead">{t("companyDescription")}</p>
       </header>
-      <form action={canManage ? updateCompanyAction : undefined} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8">
-        <input name="companyId" type="hidden" value={company.id} />
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.legalName")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.legalName} disabled={!canManage} name="legalName" required />
-        </label>
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.displayName")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.displayName} disabled={!canManage} name="displayName" required />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.website")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.website ?? ""} disabled={!canManage} name="website" type="url" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.industry")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.industry ?? ""} disabled={!canManage} name="industry" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.sizeBand")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.sizeBand ?? ""} disabled={!canManage} name="sizeBand" />
-        </label>
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.description")}</span>
-          <textarea className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 disabled:opacity-60" defaultValue={company.description ?? ""} disabled={!canManage} name="description" />
-        </label>
-        {canManage ? <button className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:col-span-2 sm:justify-self-start" type="submit">{t("save")}</button> : <p className="text-sm text-muted-foreground sm:col-span-2">{t("readOnly")}</p>}
-      </form>
-      <section className="space-y-3">
-        <h2 className="font-serif text-3xl font-semibold tracking-tight">{tProfile("title")}</h2>
-        <p className="text-muted-foreground">{tProfile("description")}</p>
+      <section aria-labelledby="company-details-heading" className="portal-form-section">
+        <div className="portal-section-head">
+          <h2 className="portal-section-title" id="company-details-heading">{tSections("details.title")}</h2>
+          <p className="portal-section-purpose">{tSections("details.purpose")}</p>
+        </div>
+        <form action={canManage ? updateCompanyAction : undefined} className="portal-form">
+          <input name="companyId" type="hidden" value={company.id} />
+          <fieldset aria-labelledby="company-details-heading" className="portal-fieldset">
+            <div className="portal-field">
+              <label htmlFor="company-legalName">{t("fields.legalName")}</label>
+              <input defaultValue={company.legalName} disabled={!canManage} id="company-legalName" name="legalName" required />
+            </div>
+            <div className="portal-field">
+              <label htmlFor="company-displayName">{t("fields.displayName")}</label>
+              <input defaultValue={company.displayName} disabled={!canManage} id="company-displayName" name="displayName" required />
+            </div>
+            <div className="portal-pair">
+              <div className="portal-field">
+                <label htmlFor="company-detail-website">{t("fields.website")}</label>
+                <input defaultValue={company.website ?? ""} disabled={!canManage} id="company-detail-website" name="website" type="url" />
+              </div>
+              <div className="portal-field">
+                <label htmlFor="company-industry">{t("fields.industry")}</label>
+                <input defaultValue={company.industry ?? ""} disabled={!canManage} id="company-industry" name="industry" />
+              </div>
+            </div>
+            <div className="portal-field">
+              <label htmlFor="company-sizeBand">{t("fields.sizeBand")}</label>
+              <input defaultValue={company.sizeBand ?? ""} disabled={!canManage} id="company-sizeBand" name="sizeBand" />
+            </div>
+            <div className="portal-field">
+              <label htmlFor="company-description">{t("fields.description")}</label>
+              <textarea defaultValue={company.description ?? ""} disabled={!canManage} id="company-description" name="description" />
+            </div>
+            {/* The marker tells `updateCompanyAction` this form rendered the switch; without it a
+                save leaves the stored value alone (see `companyDirectoryVisibility`). */}
+            <input disabled={!canManage} name="directoryVisibleShown" type="hidden" value="1" />
+            <div className="portal-field portal-consent">
+              <label className="portal-consent-row">
+                <input aria-describedby="company-directory-help" defaultChecked={company.directoryVisible ?? false} disabled={!canManage} name="directoryVisible" type="checkbox" />
+                <span>{tSections("details.directoryVisible")}</span>
+              </label>
+              <p className="portal-field-help" id="company-directory-help">{tSections("details.directoryHelp")}</p>
+            </div>
+          </fieldset>
+          {canManage ? (
+            <div className="portal-form-actions">
+              <button className="button" type="submit">{t("save")}</button>
+            </div>
+          ) : <p className="portal-readonly-note">{tForms("readOnlyNote")}</p>}
+        </form>
+      </section>
+      <section aria-labelledby="company-public-heading" className="portal-form-section">
+        <div className="portal-section-head">
+          <h2 className="portal-section-title" id="company-public-heading">{tSections("public.title")}</h2>
+          <p className="portal-section-purpose">{tSections("public.purpose")}</p>
+        </div>
         <CompanyProfileForm
           action={saveCompanyProfileAction.bind(null, locale)}
           labels={{
             fields: {
               slug: tProfile("fields.slug"), taglineEn: tProfile("fields.taglineEn"), taglineZhHk: tProfile("fields.taglineZhHk"),
               descriptionZhHk: tProfile("fields.descriptionZhHk"), website: tProfile("fields.website"), tags: tProfile("fields.tags"),
-              logoMediaId: tProfile("fields.logoMediaId"),
             },
+            groups: {address: tProfile("groups.address"), tagline: tProfile("groups.tagline"), description: tProfile("groups.description")},
             logo: {
-              choose: tProfile("logo.choose"), alt: tProfile("logo.alt"), upload: tProfile("logo.upload"),
-              uploading: tProfile("logo.uploading"), done: tProfile("logo.done"), failed: tProfile("logo.failed"),
+              label: tProfile("fields.logo"), empty: tForms("image.empty"), previewAlt: tForms("image.previewAlt"),
+              external: tForms("image.external"), remove: tForms("image.remove"),
+              upload: {
+                choose: tProfile("logo.choose"), alt: tProfile("logo.alt"), upload: tProfile("logo.upload"),
+                uploading: tProfile("logo.uploading"), done: tProfile("logo.done"), failed: tProfile("logo.failed"),
+              },
             },
-            status: {
-              hidden: tProfile("status.hidden"), pending_review: tProfile("status.pending_review"),
-              published: tProfile("status.published"), rejected: tProfile("status.rejected"),
+            // Raw ICU text: the form is a client component and fills {count}/{max} as boxes are ticked.
+            tagCounter: tForms.raw("tagCounter") as string,
+            statusLabel: {
+              hidden: tProfile("statusLabel.hidden"), pending_review: tProfile("statusLabel.pending_review"),
+              published: tProfile("statusLabel.published"), rejected: tProfile("statusLabel.rejected"),
             },
-            statusLabel: tProfile("statusLabel"),
             reviewNotice: tProfile("reviewNotice"),
             // Interpolated here: the reason is data, and the client component
             // never carries a message formatter of its own.
             rejected: profileCompany.publicProfileStatus === "rejected" && profileCompany.profileRejectionReason
               ? tProfile("rejectedWith", {reason: profileCompany.profileRejectionReason})
               : null,
-            save: tProfile("save"), publish: tProfile("publish"), saved: tProfile("saved"), submitted: tProfile("submitted"),
-            readOnly: t("readOnly"), viewPublic: tProfile("viewPublic"),
+            saveDraft: tListing("saveDraft"), submitForReview: tListing("submit"), saved: tProfile("saved"), submitted: tProfile("submitted"),
+            saveChanges: t("save"), saveSendsForReview: tProfile("saveSendsForReview"), needsAddress: tProfile("needsAddress"),
+            readOnly: tForms("readOnlyNote"), viewPublic: tProfile("viewPublic"),
             errors: {
               INVALID: tProfile("errors.INVALID"), FORBIDDEN: tProfile("errors.FORBIDDEN"),
               NO_MANAGED_COMPANY: tProfile("errors.NO_MANAGED_COMPANY"),

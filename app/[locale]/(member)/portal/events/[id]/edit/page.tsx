@@ -3,15 +3,17 @@ import {notFound, redirect} from "next/navigation";
 import {ZodError} from "zod";
 
 import {EventForm} from "@/components/portal/event-form";
+import {PortalPageHeader} from "@/components/portal/page-header";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {saveMemberEventAction} from "@/lib/events/member-actions";
 import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {localizedEventTitle} from "@/lib/portal/event-title";
 import {localizedPath} from "@/lib/urls";
 
-import {eventFormLabels} from "../../labels";
+import {eventFormLabels, submitBlockedReason} from "../../labels";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; id: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -28,6 +30,7 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(`/portal/events/${id}/edit`)}`);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
+  const tForms = await getTranslations({locale, namespace: "Portal.forms"});
   // FORBIDDEN (another company's row, or an admin-authored one) and an invalid
   // id (a ZodError from the id schema) both render as not-found: the member
   // learns nothing about rows they cannot edit. Anything else, a database
@@ -46,14 +49,15 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
   const saved = (await searchParams).saved;
   const notice = saved === "submit" ? t("submitted") : saved === "draft" ? t("draftSaved") : null;
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t(`status.${values.status}`)}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight">{values.titleEn}</h1>
-        {values.rejectionReason ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{t("rejectedWith", {reason: values.rejectionReason})}</p> : null}
-      </header>
-      {typeof context === "string" ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive" role="alert">{t(`errors.${context}`)}</p> : null}
-      <EventForm action={saveMemberEventAction.bind(null, locale, row.organiser_company_id)} canSaveDraft={typeof context !== "string"} canUploadHero={typeof context !== "string" && context.limit > 0} canSubmit={typeof context !== "string" && (context.canPublish)} labels={eventFormLabels(t)} notice={notice} values={values} />
+    <div className="portal-event-editor">
+      {/* The status word is the eyebrow; the reason WTIA returned the event is a sentence the member
+          acts on, so it is body text in the alert block, not part of the 11px label. Only while the
+          event is rejected: a resubmitted row can still carry the old reason (final review M10). */}
+      <PortalPageHeader eyebrow={t(`status.${values.status}`)} title={localizedEventTitle(locale, values)}>
+        {values.status === "rejected" && values.rejectionReason ? <p className="portal-form-alert">{t("rejectedWith", {reason: values.rejectionReason})}</p> : null}
+      </PortalPageHeader>
+      {typeof context === "string" ? <p className="portal-form-alert" role="alert">{t(`errors.${context}`)}</p> : null}
+      <EventForm action={saveMemberEventAction.bind(null, locale, row.organiser_company_id)} canSaveDraft={typeof context !== "string"} canUploadHero={typeof context !== "string" && context.limit > 0} canSubmit={typeof context !== "string" && (context.canPublish)} labels={eventFormLabels(t, tForms)} notice={notice} submitBlockedBy={submitBlockedReason(typeof context === "string" ? null : context)} values={values} />
     </div>
   );
 }
