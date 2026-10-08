@@ -2502,10 +2502,13 @@
       }
     },
     "companyProfile": {
-      "title": "Public member page",
-      "description": "Choose what appears on your organisation's page in the WTIA member directory. Pages go live after a short WTIA review.",
       "reviewNotice": "Editing a page that is already live — here, or the company details above — returns it to WTIA review, and it stays off the directory until staff approve it again.",
-      "statusLabel": "Status",
+      "statusLabel": {
+        "hidden": "Hidden",
+        "pending_review": "Under review",
+        "published": "Live",
+        "rejected": "Changes needed"
+      },
       "fields": {
         "slug": "Page address (hkwtia.org/members/…)",
         "taglineEn": "Tagline (English)",
@@ -2513,26 +2516,23 @@
         "descriptionZhHk": "Description (Chinese)",
         "website": "Website",
         "tags": "Industry tags (up to 8)",
-        "logoMediaId": "Logo image id"
+        "logo": "Logo"
+      },
+      "groups": {
+        "address": "Page address and links",
+        "tagline": "Tagline",
+        "description": "Description"
       },
       "logo": {
         "choose": "Choose a logo (PNG, JPEG or WebP, up to 4 MB)",
         "upload": "Upload",
         "uploading": "Uploading…",
-        "done": "Uploaded — the id has been filled in above.",
+        "done": "Uploaded. Save to keep it.",
         "failed": "Upload failed. Check the file type and size.",
         "alt": "Describe the logo"
       },
-      "save": "Save",
-      "publish": "Publish my profile",
       "saved": "Saved.",
       "submitted": "Submitted for review.",
-      "status": {
-        "hidden": "Not published",
-        "pending_review": "Awaiting WTIA review",
-        "published": "Live on /members",
-        "rejected": "Returned by WTIA"
-      },
       "rejectedWith": "Returned by WTIA: {reason}",
       "viewPublic": "View public page",
       "errors": {
@@ -2542,6 +2542,16 @@
         "INVALID_PROFILE_TRANSITION": "Add a page address, then publish.",
         "COMPANY_SLUG_TAKEN": "That page address is already used.",
         "COMPANY_LOGO_INVALID": "That image id is not one you uploaded."
+      }
+    },
+    "companySections": {
+      "details": {
+        "title": "Company details",
+        "purpose": "Used for your membership and seats."
+      },
+      "public": {
+        "title": "Public member page",
+        "purpose": "WTIA reviews this page before it goes live in the member directory."
       }
     },
     "documents": {

@@ -1,0 +1,135 @@
+import {renderToStaticMarkup} from "react-dom/server";
+import {beforeEach, describe, expect, it, vi} from "vitest";
+
+import en from "@/messages/en.json";
+
+// Real English copy, so the assertions read as what a member sees ("Save draft"), not as keys.
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async ({namespace}: {namespace: string}) => {
+    const scope = namespace.split(".").reduce<Record<string, unknown>>((node, part) => node[part] as Record<string, unknown>, en as Record<string, unknown>);
+    const raw = (key: string) => key.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown>)[part], scope);
+    return Object.assign((key: string, values?: Record<string, string>) => String(raw(key)).replace(/\{(\w+)\}/g, (_, name: string) => values?.[name] ?? ""), {raw});
+  }),
+  setRequestLocale: vi.fn(),
+}));
+vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"}))}));
+vi.mock("@/lib/portal/queries", () => ({getDashboard: vi.fn()}));
+// Neither server action runs here; stubs keep the page out of the auth/db graph.
+vi.mock("@/lib/portal/commands", () => ({updateCompanyAction: vi.fn()}));
+vi.mock("@/lib/portal/company-profile-actions", () => ({saveCompanyProfileAction: vi.fn()}));
+
+import CompanyPage from "@/app/[locale]/(member)/portal/company/page";
+import {getDashboard} from "@/lib/portal/queries";
+
+const logoId = "11111111-2222-4333-8444-555555555555";
+
+function company(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "c1", legalName: "Acme Ltd", displayName: "Acme", website: "https://acme.example", industry: "AI", sizeBand: "11-50", description: "About",
+    canManage: true, slug: "acme", taglineEn: "Hello", taglineZhHk: "你好", descriptionZhHk: "簡介", logoMediaId: logoId, tags: ["fintech"],
+    publicProfileStatus: "hidden", profileRejectionReason: null, ...overrides,
+  };
+}
+
+async function render(overrides: Record<string, unknown> = {}) {
+  vi.mocked(getDashboard).mockResolvedValue({companies: [company(overrides)]} as never);
+  return renderToStaticMarkup(await CompanyPage({params: Promise.resolve({locale: "en"})}));
+}
+
+const names = (html: string) => [...html.matchAll(/<(?:input|select|textarea|button)\b[^>]*\bname="([^"]+)"/g)].map((m) => m[1]);
+// React serialises attributes in its own order, so find a control by name and then read its attributes.
+const control = (html: string, name: string) => html.match(new RegExp(String.raw`<input\b[^>]*\bname="${name}"[^>]*>`))?.[0] ?? "";
+function forms(html: string) {
+  const [details, pub] = html.split("<form").slice(1);
+  return {details: details ?? "", pub: pub ?? ""};
+}
+
+describe("portal company page", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("shows two titled sections with their purpose", async () => {
+    const html = await render();
+    expect(html).toContain("Company details");
+    expect(html).toContain("Used for your membership and seats.");
+    expect(html).toContain("Public member page");
+    expect(html).toContain("WTIA reviews this page before it goes live in the member directory.");
+    expect(html.match(/<h1/g)).toHaveLength(1);
+  });
+
+  it("details form submits exactly the fields updateCompanyAction reads, with one primary button", async () => {
+    const {details} = forms(await render());
+    // The action also reads directoryVisible, which this form has never rendered (unchanged).
+    expect(names(details).sort()).toEqual(["companyId", "description", "displayName", "industry", "legalName", "sizeBand", "website"]);
+    expect(details.match(/type="submit"/g)).toHaveLength(1);
+    expect(details.match(/<fieldset/g)).toHaveLength(1);
+  });
+
+  it("public form submits exactly the fields the profile action reads, plus the two intents", async () => {
+    const {pub} = forms(await render());
+    const unique = [...new Set(names(pub))].sort();
+    expect(unique).toEqual(["descriptionZhHk", "intent", "logoMediaId", "slug", "tags", "taglineEn", "taglineZhHk", "website"].sort());
+    // React serialises a function `formAction` button without its `name` (it replays the submitter on
+    // the client), so only the publish button shows `name="intent"` here; both carry the intent value.
+    const intents = [...pub.matchAll(/<button\b[^>]*>/g)].map((m) => m[0]).filter((tag) => /value="(save|publish)"/.test(tag));
+    expect(intents.map((tag) => tag.match(/value="(\w+)"/)?.[1])).toEqual(["save", "publish"]);
+    expect(intents[1]).toContain('name="intent"');
+    expect(pub).toMatch(/<button[^>]*value="save"[^>]*>Save draft</);
+    expect(pub).toMatch(/<button[^>]*value="publish"[^>]*>Submit for review</);
+    const primary = pub.match(/<button\b[^>]*class="(?:[^"]* )?button(?: [^"]*)?"[^>]*>/g) ?? [];
+    expect(primary).toHaveLength(1);
+    expect(primary[0]).toContain('value="publish"');
+  });
+
+  it("groups the public fields and pairs the English and Chinese taglines", async () => {
+    const {pub} = forms(await render());
+    for (const heading of ["Page address and links", "Tagline", "Description"]) expect(pub).toContain(heading);
+    expect(pub).toMatch(/portal-pair[^]*name="taglineEn"[^]*name="taglineZhHk"/);
+  });
+
+  it("keeps the logo id out of sight and the tag limit at 8", async () => {
+    const {pub} = forms(await render());
+    expect(control(pub, "logoMediaId")).toContain('type="hidden"');
+    expect(control(pub, "logoMediaId")).toContain(`value="${logoId}"`);
+    expect(pub).not.toContain("Logo image id");
+    expect(pub).toContain(`src="/api/media/${logoId}"`);
+    expect(pub).toContain("1 / 8 selected");
+  });
+
+  it("shows Changes needed and the reason for a rejected page", async () => {
+    const {pub} = forms(await render({publicProfileStatus: "rejected", profileRejectionReason: "Logo is blurry"}));
+    expect(pub).toContain("Changes needed");
+    expect(pub).toContain("Logo is blurry");
+    expect(pub.match(/<button[^>]*value="publish"[^>]*>/)?.[0]).not.toContain("disabled");
+  });
+
+  it("labels the other statuses", async () => {
+    expect(forms(await render({publicProfileStatus: "pending_review"})).pub).toContain("Under review");
+    const live = forms(await render({publicProfileStatus: "published"})).pub;
+    expect(live).toContain(">Live<");
+    expect(live).toContain('href="/members/acme"');
+  });
+
+  it("disables everything for a read-only member and drops Upload/Remove", async () => {
+    const html = await render({canManage: false});
+    const {details, pub} = forms(html);
+    expect(details).toContain("Only company owners and admins can edit these details.");
+    expect(pub).toContain("Only company owners and admins can edit these details.");
+    for (const part of [details, pub]) {
+      const controls = [...part.matchAll(/<(?:input|textarea)\b[^>]*>/g)].map((m) => m[0]).filter((tag) => !tag.includes('type="hidden"'));
+      expect(controls.length).toBeGreaterThan(0);
+      for (const tag of controls) expect(tag).toContain("disabled");
+    }
+    expect(pub).not.toContain('type="file"');
+    expect(pub).not.toContain("Remove");
+    expect(pub).not.toContain('name="intent"');
+    expect(details).not.toContain('type="submit"');
+  });
+
+  it("submits an empty logoMediaId for a company with no logo", async () => {
+    const {pub} = forms(await render({logoMediaId: null}));
+    expect(control(pub, "logoMediaId")).toContain('type="hidden"');
+    expect(control(pub, "logoMediaId")).toContain('value=""');
+    expect(pub).toContain("No logo yet");
+    expect(pub).not.toContain("<img");
+  });
+});
