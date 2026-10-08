@@ -8,6 +8,7 @@ import {
 
 import {authEnv} from "@/lib/config/env";
 import {allowedAdminDestination} from "@/lib/auth/login-destination";
+import {isPortalContinuation} from "@/lib/portal/continuation";
 import {localizedPath} from "@/lib/urls";
 import {routing} from "./i18n/routing";
 
@@ -129,8 +130,25 @@ export function anonymousAdminLoginRedirect(request: NextRequest): NextResponse 
   return NextResponse.redirect(login, 307);
 }
 
+/**
+ * The member-portal twin of `anonymousAdminLoginRedirect`. The portal layout redirects signed-out
+ * visitors too, but on a direct visit it cannot see the requested path (there is no `next-url`
+ * header), so it always returned the member to `/portal` after sign-in. Only paths already on the
+ * portal continuation allowlist are intercepted; the seat-invitation accept page is not on it.
+ */
+export function anonymousPortalLoginRedirect(request: NextRequest): NextResponse | null {
+  if (request.cookies.has(NEON_AUTH_SESSION_COOKIE_NAME)) return null;
+  const pathname = request.nextUrl.pathname;
+  const locale = pathname === "/zh" || pathname.startsWith("/zh/") ? "zh-HK" : "en";
+  const internalPath = locale === "zh-HK" ? pathname.slice(3) || "/" : pathname;
+  if (!isPortalContinuation(internalPath)) return null;
+  const login = new URL(localizedPath(locale, "/member-login"), request.url);
+  login.searchParams.set("next", internalPath);
+  return NextResponse.redirect(login, 307);
+}
+
 export default async function middleware(request: NextRequest): Promise<NextResponse> {
-  const response=(await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? intlMiddleware(request);
+  const response=(await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? anonymousPortalLoginRedirect(request) ?? intlMiddleware(request);
   if(/(?:^|\/)admin\/cms-preview(?:\/|$)/.test(request.nextUrl.pathname)) {
     response.headers.set("Cache-Control","private, no-store, max-age=0");
     response.headers.set("X-Robots-Tag","noindex, nofollow");
