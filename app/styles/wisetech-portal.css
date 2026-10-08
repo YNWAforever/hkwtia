@@ -237,6 +237,9 @@
 .portal-root .portal-section-purpose { margin: 0; font-size: 15px; color: var(--xp-text-muted); }
 .portal-root .portal-form-status { display: grid; gap: 10px; }
 .portal-root .portal-form-message { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+/* The sentence that explains a status word: body text, never the 11px uppercase eyebrow. */
+.portal-root .portal-status-note { margin: 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
+.portal-root .portal-listing-status { gap: 6px; max-width: 880px; margin-bottom: 32px; }
 /* Tag picker: the counter drops to its own line under the boxes; the legend keeps the field-label
  * weight and the fieldset loses the browser frame. */
 .portal-root fieldset.portal-checks { margin: 0; padding: 0; border: 0; min-width: 0; }

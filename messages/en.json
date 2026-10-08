@@ -2364,11 +2364,12 @@
       "saveDraft": "Save draft",
       "submit": "Submit for review",
       "logoHelp": "Used in search and social previews. WTIA chooses the logo shown on the showcase.",
-      "status": {
-        "draft": "Draft — visible only to your company team.",
-        "pending_review": "Pending review — WTIA staff will review this submission.",
-        "published": "Published — your listing is visible in the Showcase.",
-        "rejected": "Needs changes — update the listing and submit again."
+      "statusLabel": {"draft": "Draft", "pending_review": "Pending review", "published": "Published", "rejected": "Needs changes"},
+      "statusNote": {
+        "draft": "Visible only to your company team.",
+        "pending_review": "WTIA staff will review this submission.",
+        "published": "Your listing is visible in the Showcase.",
+        "rejected": "Update the listing and submit again."
       },
       "fields": {
         "slug": "Public URL slug",

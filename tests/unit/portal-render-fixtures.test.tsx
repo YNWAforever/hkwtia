@@ -325,5 +325,9 @@ describe("portal render fixtures", () => {
     // the per-page unit tests cannot see that, the real catalogues here can.
     expect(html).not.toMatch(/\bPortal\.[A-Za-z]+\.[A-Za-z]/);
     if (locale === "zh-HK") expect(html).toMatch(/[\u4e00-\u9fff]/);
+    // The 11px uppercase status label carries a status word, never a sentence: a sentence there
+    // (an error, a rejection reason, the listing's "Draft — visible only to…") is unreadable.
+    const statusLabels = [...html.matchAll(/class="[^"]*\bstatus-label\b[^"]*"[^>]*>([^<]*)</g)].map((m) => m[1]);
+    for (const text of statusLabels) expect(text, `status label "${text}"`).not.toMatch(/—|[.。]$/);
   });
 });

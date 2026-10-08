@@ -70,7 +70,12 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
         <h1>{tListing("title")}</h1>
         <p className="portal-welcome-lead">{tListing("description")}</p>
       </header>
-      <p className="portal-form-message" role="status"><StatusLabel>{listing ? tListing(`status.${listing.status}`) : tListing("status.draft")}</StatusLabel></p>
+      {/* The status word stays the eyebrow; the sentence after it is body text the member reads
+        * (final review, same defect as Important 2: whole sentences in the 11px uppercase label). */}
+      <div className="portal-form-status portal-listing-status" role="status">
+        <p className="portal-form-message"><StatusLabel>{tListing(`statusLabel.${listing?.status ?? "draft"}`)}</StatusLabel></p>
+        <p className="portal-status-note">{tListing(`statusNote.${listing?.status ?? "draft"}`)}</p>
+      </div>
       <ShowcaseListingForm companyId={company.id} labels={labels} readOnly={!company.canManage} saveAction={company.canManage ? saveShowcaseDraftAction : undefined} submitAction={company.canManage ? submitShowcaseListingAction : undefined} value={value} />
     </div>
   );
