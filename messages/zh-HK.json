@@ -2251,6 +2251,12 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "forms": {
+      "readOnlyNote": "只有公司擁有人及管理員可以編輯這些資料。",
+      "image": {"empty": "尚未有標誌", "previewAlt": "目前標誌", "external": "外部連結圖片", "remove": "移除"},
+      "commaHelp": "以逗號分隔",
+      "tagCounter": "已選 {count} / {max}"
+    },
     "navigation": "會員平台導覽",
     "navGroups": {"me": "我的帳戶", "company": "我的公司", "benefits": "會員權益"},
     "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},

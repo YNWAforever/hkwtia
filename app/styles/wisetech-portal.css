@@ -156,3 +156,46 @@
   .portal-header { padding-right: calc(16px + var(--portal-menu-w) + 8px); }
   .portal-header .brand-logo-wrap { width: 66px; flex-basis: 66px; padding-inline: 5px; }
 }
+
+/* ---- Form grammar (shared by the profile, company, showcase, notification and seat forms) ----
+ * Label 13px bold above the control; a white 52px control with a 1px line border and 8px radius,
+ * 15px text; 24px checkboxes; one primary .button per form. The public site's filter and funding
+ * forms use 10-12px labels on a 48px control, which is too small to work in all day. */
+.portal-root .portal-form { display: grid; gap: 28px; max-width: 880px; }
+.portal-root .portal-fieldset { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 18px; }
+.portal-root .portal-fieldset-title { padding: 0; margin: 0 0 4px; font-size: 18px; font-weight: 800; color: var(--wt-ink); }
+.portal-root .portal-field { display: grid; gap: 8px; min-width: 0; }
+.portal-root .portal-field > label,
+.portal-root .portal-field-label { font-size: 13px; font-weight: 700; color: var(--wt-ink); }
+.portal-root .portal-field-help { margin: 0; font-size: 13px; line-height: 1.45; color: var(--xp-text-muted); }
+.portal-root .portal-form :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), select, textarea) {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 52px; padding: 12px 14px;
+  border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink);
+  font: inherit; font-size: 15px; line-height: 1.4;
+}
+.portal-root .portal-form textarea { min-height: 120px; resize: vertical; }
+.portal-root .portal-form :is(input, select, textarea):focus-visible { outline: 2px solid var(--wt-blue); outline-offset: 1px; }
+.portal-root .portal-form :is(input, select, textarea):disabled { background: rgba(114, 155, 181, 0.08); color: var(--xp-text-muted); cursor: not-allowed; }
+.portal-root .portal-form input[type="checkbox"] { width: 24px; height: 24px; flex: none; margin: 0; accent-color: var(--wt-blue); }
+/* English left, Chinese right on one row; English first when stacked. */
+.portal-root .portal-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.portal-root .portal-checks { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.portal-root .portal-checks label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; }
+.portal-root .portal-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.portal-root .portal-readonly-note { margin: 0; padding: 12px 16px; border-left: 3px solid var(--wt-blue); background: rgba(114, 155, 181, 0.12); font-size: 14px; color: var(--wt-ink); }
+@media (max-width: 820px) { .portal-root .portal-pair { grid-template-columns: minmax(0, 1fr); } }
+
+/* Image field: HeroUpload keeps its logic and Tailwind classes; the wrapper restyles its parts. */
+.portal-root .portal-image-preview { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.portal-root .portal-image-preview img { width: 72px; height: 72px; object-fit: contain; padding: 6px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; }
+.portal-root .portal-image-preview p { margin: 0; font-size: 14px; color: var(--xp-text-muted); }
+.portal-root .portal-image-external code { overflow-wrap: anywhere; font-size: 13px; color: var(--wt-ink); }
+.portal-root .portal-image-remove { min-height: 44px; padding: 0 16px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.portal-root .portal-image-remove:hover { border-color: var(--wt-ink); }
+.portal-root .portal-image-field > div:last-child { display: grid; gap: 14px; padding: 18px; border: 1px dashed var(--wt-line); border-radius: 8px; background: rgba(114, 155, 181, 0.06); font-size: 13px; }
+.portal-root .portal-image-field > div:last-child > label { font-size: 13px; font-weight: 700; }
+.portal-root .portal-image-field input[type="file"] { display: block; width: 100%; min-height: 44px; padding: 10px 0; font: inherit; font-size: 14px; }
+.portal-root .portal-image-field input[type="text"] { margin-top: 8px; }
+.portal-root .portal-image-field > div:last-child > button { justify-self: start; min-height: 48px; padding: 0 22px; border: 1px solid var(--wt-ink); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.portal-root .portal-image-field > div:last-child > button:disabled { opacity: .5; cursor: not-allowed; }
+.portal-root .portal-image-field > div:last-child > p { margin: 0; font-size: 13px; min-height: 1em; }

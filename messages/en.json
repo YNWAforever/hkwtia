@@ -2251,6 +2251,12 @@
     "retry": "Try again"
   },
   "Portal": {
+    "forms": {
+      "readOnlyNote": "Only company owners and admins can edit these details.",
+      "image": {"empty": "No logo yet", "previewAlt": "Current logo", "external": "Linked image", "remove": "Remove"},
+      "commaHelp": "Separate with commas",
+      "tagCounter": "{count} / {max} selected"
+    },
     "navigation": "Member portal navigation",
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
