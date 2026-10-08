@@ -13,7 +13,7 @@
  * directory at the start of every run, which would delete the fixtures before the spec read them.
  * The e2e spec then loads each file with the real stylesheets and measures it.
  */
-import {mkdirSync, writeFileSync} from "node:fs";
+import {mkdirSync, readFileSync, writeFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {fireEvent, render, waitFor} from "@testing-library/react";
@@ -23,14 +23,21 @@ import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {DashboardCompany, DashboardViewModel} from "@/lib/portal/queries";
 
-const state = vi.hoisted(() => ({pathname: "/portal", dashboard: null as unknown}));
+// `locale` drives both catalogues: the -zh form fixtures render the same pages with zh-HK copy to
+// check bilingual pairing and Chinese wrapping. `seatLimit` lets the seats page render with room or full.
+const state = vi.hoisted(() => ({pathname: "/portal", dashboard: null as unknown, locale: "en" as "en" | "zh-HK", seatLimit: 3}));
 
 vi.mock("next-intl/server", async () => {
   const {createTranslator} = await import("next-intl");
   const {default: en} = await import("@/messages/en.json");
+  const {default: zhHK} = await import("@/messages/zh-HK.json");
+  const catalogue = (locale: string) => (locale === "zh-HK" ? zhHK : en) as typeof en;
   return {
-    getTranslations: vi.fn(async (options: {namespace?: string}) => createTranslator({locale: "en", messages: en, namespace: options?.namespace as never})),
-    getMessages: vi.fn(async () => en),
+    getTranslations: vi.fn(async (options?: string | {locale?: string; namespace?: string}) => {
+      const {locale = state.locale, namespace} = typeof options === "string" ? {namespace: options} : options ?? {};
+      return createTranslator({locale, messages: catalogue(locale), namespace: namespace as never});
+    }),
+    getMessages: vi.fn(async (options?: {locale?: string}) => catalogue(options?.locale ?? state.locale)),
     setRequestLocale: vi.fn(),
   };
 });
@@ -38,7 +45,7 @@ vi.mock("next-intl/server", async () => {
 vi.mock("next-intl", async (importOriginal) => {
   const actual = await importOriginal<typeof import("next-intl")>();
   const Provider = actual.NextIntlClientProvider;
-  return {...actual, NextIntlClientProvider: (props: Parameters<typeof Provider>[0]) => <Provider locale="en" timeZone="Asia/Hong_Kong" {...props} />};
+  return {...actual, NextIntlClientProvider: (props: Parameters<typeof Provider>[0]) => <Provider locale={state.locale} timeZone="Asia/Hong_Kong" {...props} />};
 });
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
@@ -131,7 +138,7 @@ vi.mock("@/lib/db/repos/seats", () => ({
 }));
 vi.mock("@/lib/portal/seats", () => ({
   getSeatOverview: vi.fn(async () => ({
-    companyId: "c1", seatLimit: 3, canManage: true, canGrantOwner: true,
+    companyId: "c1", seatLimit: state.seatLimit, canManage: true, canGrantOwner: true,
     members: [{id: "cm1", companyId: "c1", userId: "ada.chan@harbour-robotics.example.hk", role: "owner"}, {id: "cm2", companyId: "c1", userId: "ben.wong@harbour-robotics.example.hk", role: "admin"}],
     invitations: [{id: "inv1", companyId: "c1", invitedEmail: "carmen.lee@harbour-robotics.example.hk", role: "member"}],
   })),
@@ -186,18 +193,22 @@ import PortalToolPage from "@/app/[locale]/(member)/portal/tools/[key]/page";
 const outDir = resolve(process.cwd(), ".tmp/portal-fixtures");
 const params = Promise.resolve({locale: "en"});
 const noQuery = Promise.resolve({});
+// The fixture is loaded with page.setContent and every request is aborted, so a logo preview
+// pointing at /api/media/{id} would paint as a broken image; swap in the WTIA logo inline.
+const LOGO_MEDIA_ID = "3f1c2a4e-8b7d-4c6e-9a1b-2d3e4f5a6b7c";
+const logoDataUri = `data:image/png;base64,${readFileSync(resolve(process.cwd(), "public/images/wtia-logo.png")).toString("base64")}`;
 
 function documentFor(name: string, body: string): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${name}</title></head><body>${body}</body></html>`;
+  return `<!doctype html><html lang="${state.locale}"><head><meta charset="utf-8"><title>${name}</title></head><body>${body}</body></html>`;
 }
 
 async function shell(page: ReactNode): Promise<ReactElement> {
-  return PortalLayout({children: page, params}) as Promise<ReactElement>;
+  return PortalLayout({children: page, params: Promise.resolve({locale: state.locale})}) as Promise<ReactElement>;
 }
 
 async function writeFixture(name: string, pathname: string, page: () => Promise<ReactNode>): Promise<string> {
   state.pathname = pathname;
-  const html = renderToStaticMarkup(await shell(await page()));
+  const html = renderToStaticMarkup(await shell(await page())).replace(/src="\/api\/media\/[0-9a-f-]{36}"/g, `src="${logoDataUri}"`);
   mkdirSync(outDir, {recursive: true});
   writeFileSync(resolve(outDir, `${name}.html`), documentFor(name, html));
   return html;
@@ -214,6 +225,8 @@ function findNavigation(node: unknown): ReactElement | null {
 describe("portal render fixtures", () => {
   beforeEach(() => {
     state.dashboard = dashboard();
+    state.locale = "en";
+    state.seatLimit = 3;
     process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN = "fixture-token";
   });
 
@@ -277,5 +290,35 @@ describe("portal render fixtures", () => {
   it.each(pages)("writes %s", async (name, pathname, page) => {
     const html = await writeFixture(name, pathname, page);
     expect(html.match(/<main id="main-content"/g)).toHaveLength(1);
+  });
+  // The member forms (profile, company, listing, seats), each in English and Traditional Chinese.
+  // Names end -en / -zh; tests/e2e/portal-experience.spec.ts measures them and checks every control
+  // has a label. The setup runs after beforeEach, so each variant starts from the default dashboard.
+  type Locale = "en" | "zh-HK";
+  const formPages: ReadonlyArray<[string, string, (locale: Locale) => Promise<ReactNode>, () => void]> = [
+    ["form-profile", "/portal/profile", (locale) => ProfilePage({params: Promise.resolve({locale})}), () => undefined],
+    ["form-company-logo", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}),
+      () => { state.dashboard = dashboard({companies: [{...company, logoMediaId: LOGO_MEDIA_ID}]}); }],
+    ["form-company", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}), () => undefined],
+    ["form-company-readonly", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}),
+      () => { state.dashboard = dashboard({companies: [{...company, role: "member", canManage: false} as DashboardCompany]}); }],
+    ["form-listing-draft", "/portal/company/listing", (locale) => CompanyShowcaseListingPage({params: Promise.resolve({locale})}), () => undefined],
+    ["form-seats-room", "/portal/company/seats", (locale) => CompanySeatsPage({params: Promise.resolve({locale}), searchParams: noQuery}), () => { state.seatLimit = 5; }],
+    ["form-seats-full", "/portal/company/seats", (locale) => CompanySeatsPage({params: Promise.resolve({locale}), searchParams: noQuery}), () => { state.seatLimit = 3; }],
+    ["form-seats-accept-error", "/portal/company/seats/accept", (locale) => SeatInvitationAcceptancePage({params: Promise.resolve({locale}), searchParams: noQuery}), () => undefined],
+  ];
+  const formCases = formPages.flatMap(([name, pathname, page, setup]) => (
+    [["en", "en"], ["zh", "zh-HK"]] as const
+  ).map(([suffix, locale]) => [`${name}-${suffix}`, pathname, locale, page, setup] as const));
+
+  it.each(formCases)("writes %s", async (name, pathname, locale, page, setup) => {
+    setup();
+    state.locale = locale;
+    const html = await writeFixture(name, pathname, () => page(locale));
+    expect(html.match(/<main id="main-content"/g)).toHaveLength(1);
+    // A missing key renders as its own path ("Portal.profileGroups.contact"); the key-echo mocks in
+    // the per-page unit tests cannot see that, the real catalogues here can.
+    expect(html).not.toMatch(/\bPortal\.[A-Za-z]+\.[A-Za-z]/);
+    if (locale === "zh-HK") expect(html).toMatch(/[\u4e00-\u9fff]/);
   });
 });
