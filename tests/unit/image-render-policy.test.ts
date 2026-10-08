@@ -30,6 +30,8 @@ const revocationAwareConsumers = new Set([
   "components/admin/profile-review-table.tsx",
   "components/admin/showcase-review-table.tsx",
   "components/home/legacy-network.tsx",
+  // The portal logo field previews the member's own upload from the same private-delivery route.
+  "components/portal/forms/image-field.tsx",
   "components/marketing/event-card.tsx",
   "components/marketing/event-detail.tsx",
   "components/marketing/home-highlight-card.tsx",

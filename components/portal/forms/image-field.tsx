@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import {useState} from "react";
 
 import {HeroUpload, type HeroUploadLabels} from "@/components/portal/hero-upload";
+import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 
 export type PortalImageFieldLabels = Readonly<{label: string; empty: string; previewAlt: string; external: string; remove: string; upload: HeroUploadLabels}>;
 
@@ -32,8 +34,9 @@ export function PortalImageField({name, initialValue, store, readOnly, labels}: 
       <input name={name} type="hidden" value={value} />
       <div className="portal-image-preview">
         {id ? (
-          // eslint-disable-next-line @next/next/no-img-element -- member-scoped media route, intrinsic size unknown
-          <img alt={labels.previewAlt} height={72} src={`${MEDIA_PREFIX}${id}`} width={72} />
+          // unoptimized: every request must reach /api/media/[id]'s revocation and integrity checks,
+          // which the optimizer's cache would skip (tests/unit/image-render-policy.test.ts).
+          <Image alt={labels.previewAlt} height={72} src={`${MEDIA_PREFIX}${id}`} unoptimized={isPrivateMediaDeliveryUrl(`${MEDIA_PREFIX}${id}`)} width={72} />
         ) : value ? (
           <p className="portal-image-external"><span>{labels.external}</span> <code>{value}</code></p>
         ) : (

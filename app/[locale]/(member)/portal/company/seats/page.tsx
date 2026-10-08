@@ -116,7 +116,7 @@ export default async function CompanySeatsPage({params, searchParams}: Props) {
   const used = overview.members.length + overview.invitations.length;
   const isFull = used >= overview.seatLimit;
   const capacity = t("seats.capacity", {used, limit: overview.seatLimit});
-  const labels = {members: t("seats.members"), pending: t("seats.pending"), email: t("seats.email"), role: t("seats.role"), revoke: t("seats.revoke"), inviteRevoke: t("seats.inviteRevoke"), changeRole: t("seats.changeRole"), owner: t("seats.owner"), admin: t("seats.admin"), member: t("seats.member"), noPending: t("seats.noPending")};
+  const labels = {members: t("seats.members"), pending: t("seats.pending"), email: t("seats.email"), role: t("seats.role"), revoke: t("seats.revoke"), inviteRevoke: t("seats.inviteRevoke"), changeRole: t("seats.changeRole"), owner: t("seats.owner"), admin: t("seats.admin"), member: t("seats.member"), noPending: t("seats.noPending"), actions: t("seats.actionsColumn")};
   // A legacy company above its limit would overflow the track, so the fill is capped at 100%.
   const fill = overview.seatLimit > 0 ? Math.min(100, Math.round((used / overview.seatLimit) * 100)) : 100;
   return (

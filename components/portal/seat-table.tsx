@@ -12,6 +12,7 @@ export type SeatTableLabels = Readonly<{
   admin: string;
   noPending: string;
   inviteRevoke: string;
+  actions: string;
 }>;
 
 function roleLabel(role: CompanyMember["role"] | SeatInvitation["role"], labels: SeatTableLabels): string {
@@ -36,7 +37,7 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
       <section aria-labelledby="seat-members-heading" className="portal-seat-section">
         <h2 className="portal-section-title" id="seat-members-heading">{labels.members}</h2>
         <table className="portal-seat-table">
-          <thead><tr><th scope="col">{labels.member}</th><th scope="col">{labels.role}</th><th aria-hidden="true" /></tr></thead>
+          <thead><tr><th scope="col">{labels.member}</th><th scope="col">{labels.role}</th><th scope="col"><span className="sr-only">{labels.actions}</span></th></tr></thead>
           <tbody>
             {members.map((member) => (
               <tr key={member.id}>
@@ -75,7 +76,7 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
         <h2 className="portal-section-title" id="seat-pending-heading">{labels.pending}</h2>
         {invitations.length === 0 ? <p className="portal-field-help">{labels.noPending}</p> : (
           <table className="portal-seat-table">
-            <thead><tr><th scope="col">{labels.email}</th><th scope="col">{labels.role}</th><th aria-hidden="true" /></tr></thead>
+            <thead><tr><th scope="col">{labels.email}</th><th scope="col">{labels.role}</th><th scope="col"><span className="sr-only">{labels.actions}</span></th></tr></thead>
             <tbody>
               {invitations.map((invitation) => (
                 <tr key={invitation.id}>

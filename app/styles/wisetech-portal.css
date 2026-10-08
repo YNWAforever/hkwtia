@@ -174,7 +174,9 @@
   border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink);
   font: inherit; font-size: 15px; line-height: 1.4;
 }
-.portal-root .portal-form textarea { min-height: 120px; resize: vertical; }
+/* :not([hidden]) lifts this to (0,3,1): the control rule above takes its :is() weight from
+ * input:not(...), (0,3,1), and its 52px min-height was flattening every textarea to one line. */
+.portal-root .portal-form textarea:not([hidden]) { min-height: 120px; resize: vertical; }
 .portal-root .portal-form :is(input, select, textarea):focus-visible { outline: 2px solid var(--wt-blue); outline-offset: 1px; }
 .portal-root .portal-form :is(input, select, textarea):disabled { background: rgba(114, 155, 181, 0.08); color: var(--xp-text-muted); cursor: not-allowed; }
 .portal-root .portal-form input[type="checkbox"] { width: 24px; height: 24px; flex: none; margin: 0; accent-color: var(--wt-blue); }
@@ -182,6 +184,9 @@
 .portal-root .portal-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .portal-root .portal-checks { display: flex; flex-wrap: wrap; gap: 10px 20px; }
 .portal-root .portal-checks label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; }
+/* A disabled box (read-only page, or the tag limit reached) greys its label too; the ink label beside a
+ * greyed box read as still clickable. */
+.portal-root .portal-checks label:has(input:disabled) { color: var(--xp-text-muted); cursor: not-allowed; }
 .portal-root .portal-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
 .portal-root .portal-readonly-note { margin: 0; padding: 12px 16px; border-left: 3px solid var(--wt-blue); background: rgba(114, 155, 181, 0.12); font-size: 14px; color: var(--wt-ink); }
 /* A checkbox row (the WhatsApp consent, the directory switch): the 24px box sits beside its label
@@ -195,7 +200,10 @@
 /* Image field: HeroUpload keeps its logic and Tailwind classes; .portal-image-upload (a wrapper that
  * only exists when editable) restyles its parts, so the read-only preview is never styled as an upload
  * zone. Its Tailwind space-y-3 / mt-2 margins are zeroed so spacing comes from the grid gap alone. */
-.portal-root .portal-image-upload > div > * { margin: 0; }
+.portal-root .portal-image-upload > div > *,
+/* space-y-3 spaces siblings with '.space-y-3 > :not([hidden]) ~ :not([hidden])', (0,3,0), which beat the
+ * plain reset above and stacked 12px of margin on top of the 14px grid gap. */
+.portal-root .portal-image-upload > div > :not([hidden]) ~ :not([hidden]) { margin: 0; }
 .portal-root .portal-image-preview { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
 .portal-root .portal-image-preview img { width: 72px; height: 72px; object-fit: contain; padding: 6px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; }
 .portal-root .portal-image-preview p { margin: 0; font-size: 14px; color: var(--xp-text-muted); }
@@ -243,12 +251,19 @@
 .portal-root .portal-seat-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 15px; color: var(--wt-ink); }
 .portal-root .portal-seat-table th { padding: 10px 12px; border-bottom: 1px solid var(--wt-line); font-size: 13px; font-weight: 700; color: var(--xp-text-muted); }
 .portal-root .portal-seat-table td { padding: 14px 12px; border-bottom: 1px solid var(--wt-line); vertical-align: middle; overflow-wrap: anywhere; }
+/* Fixed columns so the members and invitations tables line up under each other: auto layout sized
+ * each table's Role column to its own content, and the two sat ~150px apart. The phone block layout
+ * below overrides the display, so these widths only apply on the desktop table. */
+.portal-root .portal-seat-table { table-layout: fixed; }
+.portal-root .portal-seat-table th:nth-child(1) { width: 40%; }
+.portal-root .portal-seat-table th:nth-child(2) { width: 18%; }
 /* On a div inside the cell: a td with display:flex stops being a table cell (anonymous-cell wrapping
  * breaks row borders and alignment), and on phones the td block rule would outrank it. */
 .portal-root .portal-seat-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px 20px; }
 .portal-root .portal-seat-actions form { display: flex; align-items: center; gap: 10px; margin: 0; }
 .portal-root .portal-seat-actions select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 15px; }
-.portal-root .portal-seat-link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--wt-blue); font: inherit; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+/* Ink, not --wt-blue: #729bb5 on the #f6f6f6 page is 2.7:1, under the 4.5:1 AA floor for 14px text. */
+.portal-root .portal-seat-link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--wt-ink); font: inherit; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 .portal-root .portal-seat-danger { color: var(--wt-ink); }
 .portal-root .portal-seat-actions select:focus-visible,
 .portal-root .portal-seat-link:focus-visible { outline: 2px solid var(--wt-blue); outline-offset: 1px; }
@@ -265,3 +280,8 @@
   .portal-root .portal-seat-actions { justify-content: flex-start; padding-top: 10px; }
   .portal-root .portal-seat-actions form { flex-wrap: wrap; }
 }
+
+/* Accept-invitation error: the HonestEmpty card keeps the 880px column the other portal pages use
+ * (it spanned the full main width), and the back link stands clear of it instead of touching it. */
+.portal-root .portal-main .inner-honest { max-width: 880px; }
+.portal-root .inner-honest + .portal-form-actions { margin-top: 24px; }

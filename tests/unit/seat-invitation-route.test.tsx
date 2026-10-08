@@ -46,6 +46,8 @@ describe("seat invitation acceptance route", () => {
     render(await SeatAcceptPage(props({})));
     expect(acceptSeatInvitation).not.toHaveBeenCalled();
     expect(screen.getByRole("status")).toHaveTextContent("seats.errors.generic");
+    // The page title names the task, not the generic "Company" section label.
+    expect(screen.getByRole("heading", {level: 1})).toHaveTextContent("seats.acceptTitle");
   });
 
   it("renders a distinct expired-invitation error without redirecting, without calling requireActor twice or leaking the raw error", async () => {

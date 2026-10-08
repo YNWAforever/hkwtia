@@ -990,7 +990,6 @@
     "choosePlanContact": "聯絡 WTIA",
     "profileTitle": "介紹你的資料",
     "profileDescription": "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
-    "profileGroups": {"contact": "聯絡資料", "whatsapp": "WhatsApp 通知", "directoryHelp": "讓其他會員在 WTIA 名錄中找到你。"},
     "companyTitle": "確認公司資料",
     "companyDescription": "請提供公司資料。我們會建立 WTIA 公司檔案，並將你設為首位擁有人。",
     "steps": {
@@ -2333,6 +2332,7 @@
     },
     "profileTitle": "我的個人資料",
     "profileDescription": "更新你的個人資料及目錄顯示選項。",
+    "profileGroups": {"contact": "聯絡資料", "whatsapp": "WhatsApp 通知", "directoryHelp": "讓其他會員在 WTIA 名錄中找到你。"},
     "whatsapp": {
       "optIn": "透過 WhatsApp 向我發送 WTIA 活動更新及提醒",
       "consent": "WTIA 可就活動、計劃及會籍事宜向此號碼發送訊息。你可隨時回覆「取消」以停止接收。",
@@ -2525,12 +2525,12 @@
         "description": "簡介"
       },
       "logo": {
-        "choose": "選擇商標（PNG、JPEG 或 WebP，最大 4 MB）",
+        "choose": "選擇標誌（PNG、JPEG 或 WebP，最大 4 MB）",
         "upload": "上載",
         "uploading": "上載中…",
-        "done": "已上傳，儲存後即生效。",
+        "done": "已上載，儲存後即生效。",
         "failed": "上載失敗。請檢查檔案類型及大小。",
-        "alt": "描述此商標"
+        "alt": "描述此標誌"
       },
       "saved": "已儲存。",
       "submitted": "已提交審核。",
@@ -2609,6 +2609,8 @@
       "noPending": "沒有待接受邀請。",
       "full": "所有名額已用完。移除一位成員或一個待處理邀請後，便可再邀請。",
       "acceptBack": "返回會員主頁",
+      "acceptTitle": "接受公司邀請",
+      "actionsColumn": "操作",
       "errors": {
         "generic": "未能更新公司席位，請再試一次。",
         "invitationNotFound": "找不到此邀請。請檢查連結，或聯絡你的公司管理員重新發送邀請。",
