@@ -39,10 +39,14 @@ async function render(overrides: Record<string, unknown> = {}) {
 const names = (html: string) => [...html.matchAll(/<(?:input|select|textarea|button)\b[^>]*\bname="([^"]+)"/g)].map((m) => m[1]);
 // React serialises attributes in its own order, so find a control by name and then read its attributes.
 const control = (html: string, name: string) => html.match(new RegExp(String.raw`<input\b[^>]*\bname="${name}"[^>]*>`))?.[0] ?? "";
-function forms(html: string) {
-  const [details, pub] = html.split("<form").slice(1);
-  return {details: details ?? "", pub: pub ?? ""};
+// Each form is found through the section that names it, not by its position on the page.
+function section(html: string, headingId: string) {
+  return html.split("<section").find((part) => part.includes(`aria-labelledby="${headingId}"`)) ?? "";
 }
+function forms(html: string) {
+  return {details: section(html, "company-details-heading"), pub: section(html, "company-public-heading")};
+}
+const primaries = (part: string) => part.match(/<button\b[^>]*class="(?:[^"]* )?button(?: [^"]*)?"[^>]*>/g) ?? [];
 
 describe("portal company page", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -78,7 +82,7 @@ describe("portal company page", () => {
     expect(intents[1]).toContain('name="intent"');
     expect(pub).toMatch(/<button[^>]*value="save"[^>]*>Save draft</);
     expect(pub).toMatch(/<button[^>]*value="publish"[^>]*>Submit for review</);
-    const primary = pub.match(/<button\b[^>]*class="(?:[^"]* )?button(?: [^"]*)?"[^>]*>/g) ?? [];
+    const primary = primaries(pub);
     expect(primary).toHaveLength(1);
     expect(primary[0]).toContain('value="publish"');
   });
@@ -103,6 +107,46 @@ describe("portal company page", () => {
     expect(pub).toContain("Changes needed");
     expect(pub).toContain("Logo is blurry");
     expect(pub.match(/<button[^>]*value="publish"[^>]*>/)?.[0]).not.toContain("disabled");
+  });
+
+  it("renders the rejection reason as readable alert text, not inside the 11px status label", async () => {
+    const {pub} = forms(await render({publicProfileStatus: "rejected", profileRejectionReason: "Logo is blurry"}));
+    const alert = pub.match(/<p\b[^>]*role="alert"[^>]*>(.*?)<\/p>/s);
+    expect(alert?.[0]).toContain('class="portal-form-alert"');
+    expect(alert?.[1]).toBe("Returned by WTIA: Logo is blurry");
+    // The status word itself stays a status label.
+    expect(pub).toMatch(/class="[^"]*status-label[^"]*"[^>]*>Changes needed</);
+  });
+
+  for (const status of ["published", "pending_review"] as const) {
+    it(`a ${status} page offers one primary Save changes (intent=save) with the review note, and no Submit for review`, async () => {
+      const {pub} = forms(await render({publicProfileStatus: status}));
+      expect(pub).not.toContain("Submit for review");
+      expect(pub).not.toContain("Save draft");
+      expect(pub).not.toContain('value="publish"');
+      const primary = primaries(pub);
+      expect(primary).toHaveLength(1);
+      expect(primary[0]).toContain('value="save"');
+      expect(primary[0]).toContain('name="intent"');
+      expect(primary[0]).toContain('aria-describedby="company-save-note"');
+      expect(primary[0]).not.toContain("disabled");
+      expect(pub).toMatch(/<button[^>]*value="save"[^>]*>Save changes</);
+      expect(pub).toMatch(/id="company-save-note"[^>]*>Saving sends your changes to WTIA for review\.</);
+    });
+  }
+
+  it("explains why Submit for review is unavailable while the page address is empty", async () => {
+    const {pub} = forms(await render({slug: null}));
+    const publish = pub.match(/<button[^>]*value="publish"[^>]*>/)?.[0] ?? "";
+    expect(publish).toContain("disabled");
+    expect(publish).toContain('aria-describedby="company-publish-note"');
+    expect(pub).toMatch(/id="company-publish-note"[^>]*>Add a page address to submit for review\.</);
+  });
+
+  it("shows no address note when the page has an address", async () => {
+    const {pub} = forms(await render());
+    expect(pub).not.toContain("company-publish-note");
+    expect(pub.match(/<button[^>]*value="publish"[^>]*>/)?.[0]).not.toContain("aria-describedby");
   });
 
   it("labels the other statuses", async () => {

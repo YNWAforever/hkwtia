@@ -81,8 +81,48 @@ describe("portal seats page", () => {
     expect(bar).toContain('aria-valuenow="3"');
     expect(bar).toContain('aria-valuemin="0"');
     expect(bar).toContain('aria-valuemax="3"');
-    expect(bar).toContain('aria-label="3 of 3 seats reserved"');
-    expect(html).toContain("3 of 3 seats reserved");
+    // Named by the visible sentence, not a duplicate aria-label, so it is announced once.
+    expect(bar).toContain('aria-labelledby="seat-capacity-text"');
+    expect(bar).not.toContain("aria-label=");
+    expect(html).toMatch(/id="seat-capacity-text"[^>]*>3 of 3 seats reserved</);
+  });
+
+  it("clamps aria-valuenow to the limit for a company above it, while the text keeps the real count", async () => {
+    const html = await renderSeats(overview(4, 1));
+    const bar = html.match(/<[^>]*role="progressbar"[^>]*>/)?.[0] ?? "";
+    expect(bar).toContain('aria-valuenow="3"');
+    expect(bar).toContain('aria-valuemax="3"');
+    expect(html).toContain("5 of 3 seats reserved");
+  });
+
+  it("the full note has its own class, not the read-only note", async () => {
+    const html = await renderSeats(overview(2, 1));
+    expect(html).toMatch(/class="portal-seats-full-note"[^>]*>All seats are in use/);
+    expect(html).not.toContain("portal-readonly-note");
+  });
+
+  it("renders the error as readable alert text, not inside a status label", async () => {
+    vi.mocked(getSeatOverview).mockResolvedValue(overview(1, 0) as never);
+    const html = renderToStaticMarkup(await SeatsPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({error: "1"})}));
+    const alert = html.match(/<p\b[^>]*role="alert"[^>]*>(.*?)<\/p>/s);
+    expect(alert?.[0]).toContain('class="portal-form-alert"');
+    expect(alert?.[1]).toBe("We could not update company seats. Please try again.");
+  });
+
+  it("the seat tables carry explicit table roles, so the phone block layout keeps its semantics", async () => {
+    const html = await renderSeats(overview(2, 1));
+    expect(html.match(/<table\b[^>]*role="table"/g)).toHaveLength(2);
+    expect(html.match(/<th\b[^>]*role="columnheader"/g)).toHaveLength(6);
+    expect(html.match(/<tr\b[^>]*role="row"/g)).toHaveLength(2 + 3);
+    expect(html.match(/<td\b[^>]*role="cell"/g)).toHaveLength(3 * 3);
+    expect(html.match(/<t(?:head|body)\b[^>]*role="rowgroup"/g)).toHaveLength(4);
+  });
+
+  it("revoke and cancel controls carry the destructive class; change role does not", async () => {
+    const html = await renderSeats(overview(2, 1));
+    expect(html).toMatch(/class="portal-seat-link portal-seat-danger"[^>]*>Revoke access</);
+    expect(html).toMatch(/class="portal-seat-link portal-seat-danger"[^>]*>Cancel invitation</);
+    expect(html).toMatch(/class="portal-seat-link"[^>]*>Change role</);
   });
 
   it("keeps one h1 with the eyebrow label", async () => {

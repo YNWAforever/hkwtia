@@ -133,6 +133,7 @@ export default async function CompanyPage({params}: Props) {
               ? tProfile("rejectedWith", {reason: profileCompany.profileRejectionReason})
               : null,
             saveDraft: tListing("saveDraft"), submitForReview: tListing("submit"), saved: tProfile("saved"), submitted: tProfile("submitted"),
+            saveChanges: t("save"), saveSendsForReview: tProfile("saveSendsForReview"), needsAddress: tProfile("needsAddress"),
             readOnly: tForms("readOnlyNote"), viewPublic: tProfile("viewPublic"),
             errors: {
               INVALID: tProfile("errors.INVALID"), FORBIDDEN: tProfile("errors.FORBIDDEN"),

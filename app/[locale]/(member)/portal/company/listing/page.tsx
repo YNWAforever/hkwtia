@@ -48,7 +48,7 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
       caseStudySummaryZhHk: field("caseStudySummaryZhHk"),
     },
     logo: {
-      label: tProfile("fields.logo"), empty: tForms("image.empty"), previewAlt: tForms("image.previewAlt"),
+      label: tProfile("fields.logo"), help: tListing("logoHelp"), empty: tForms("image.empty"), previewAlt: tForms("image.previewAlt"),
       external: tForms("image.external"), remove: tForms("image.remove"),
       upload: {
         choose: tProfile("logo.choose"), alt: tProfile("logo.alt"), upload: tProfile("logo.upload"),

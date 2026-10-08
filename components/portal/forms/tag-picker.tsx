@@ -7,7 +7,8 @@ import {useState} from "react";
  * disabled, so the member sees the limit before the server enforces it. Only unchecked boxes are
  * ever disabled by the limit: a company that already stores more than `max` tags (legacy data)
  * keeps every one of them checked, enabled and submitted, and can only remove tags, not add. The
- * counter is announced politely as it changes. Strings arrive translated; this calls no hooks.
+ * counter is announced politely as it changes. Strings arrive translated, so it
+ * calls no translation hooks (only useState).
  */
 export function PortalTagPicker({name, legend, options, initial, max, readOnly, counterLabel}: Readonly<{name: string; legend: string; options: readonly {value: string; label: string}[]; initial: readonly string[]; max: number; readOnly: boolean; counterLabel: (count: number, max: number) => string}>) {
   const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set(initial));

@@ -122,15 +122,19 @@ export default async function CompanySeatsPage({params, searchParams}: Props) {
   return (
     <div>
       <PageHeader eyebrow={t("company")} lead={t("seats.description")} title={t("seats.title")} />
-      {hasError ? <p className="portal-form-message" role="alert"><StatusLabel>{t("seats.errors.generic")}</StatusLabel></p> : null}
+      {/* Body text with an error rule, not the 11px eyebrow: it is a sentence the member has to read. */}
+      {hasError ? <p className="portal-form-alert" role="alert">{t("seats.errors.generic")}</p> : null}
       <section className="portal-capacity">
-        <p className="portal-capacity-text">{capacity}</p>
-        <div aria-label={capacity} aria-valuemax={overview.seatLimit} aria-valuemin={0} aria-valuenow={used} className="portal-capacity-bar" role="progressbar">
+        <p className="portal-capacity-text" id="seat-capacity-text">{capacity}</p>
+        {/* Named by the sentence above rather than a copy of it, so it is announced once. aria-valuenow
+          * may not exceed aria-valuemax, so a legacy company above its limit reports the limit; the
+          * sentence still gives the real count. */}
+        <div aria-labelledby="seat-capacity-text" aria-valuemax={overview.seatLimit} aria-valuemin={0} aria-valuenow={Math.min(used, overview.seatLimit)} className="portal-capacity-bar" role="progressbar">
           <span style={{width: `${fill}%`}} />
         </div>
       </section>
       {overview.canManage ? (
-        isFull ? <p className="portal-readonly-note">{t("seats.full")}</p> : <SeatInviteForm action={inviteSeatAction} canGrantOwner={overview.canGrantOwner} companyId={overview.companyId} labels={{email: t("seats.email"), invite: t("seats.invite"), inviting: t("seats.inviting"), role: t("seats.role"), member: t("seats.member"), admin: t("seats.admin"), owner: t("seats.owner")}} locale={locale} />
+        isFull ? <p className="portal-seats-full-note">{t("seats.full")}</p> : <SeatInviteForm action={inviteSeatAction} canGrantOwner={overview.canGrantOwner} companyId={overview.companyId} labels={{email: t("seats.email"), invite: t("seats.invite"), inviting: t("seats.inviting"), role: t("seats.role"), member: t("seats.member"), admin: t("seats.admin"), owner: t("seats.owner")}} locale={locale} />
       ) : null}
       <SeatTable canGrantOwner={overview.canGrantOwner} canManage={overview.canManage} changeRoleAction={overview.canManage ? changeSeatRoleAction : undefined} invitations={overview.invitations} labels={labels} locale={locale} members={overview.members} revokeAction={overview.canManage ? revokeSeatAction : undefined} revokeInvitationAction={overview.canManage ? revokeInvitationAction : undefined} />
     </div>

@@ -182,12 +182,22 @@
 .portal-root .portal-form input[type="checkbox"] { width: 24px; height: 24px; flex: none; margin: 0; accent-color: var(--wt-blue); }
 /* English left, Chinese right on one row; English first when stacked. */
 .portal-root .portal-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-.portal-root .portal-checks { display: flex; flex-wrap: wrap; gap: 10px 20px; }
-.portal-root .portal-checks label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; }
+/* Spec §1: three columns, so 27 tags read as a list rather than a ragged flex wrap; two on tablets,
+ * one on phones. The fieldset's legend sits outside the grid, so it needs no column rule. */
+.portal-root .portal-checks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 20px; }
+.portal-root .portal-checks label { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; }
+@media (max-width: 820px) { .portal-root .portal-checks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .portal-root .portal-checks { grid-template-columns: minmax(0, 1fr); } }
 /* A disabled box (read-only page, or the tag limit reached) greys its label too; the ink label beside a
  * greyed box read as still clickable. */
 .portal-root .portal-checks label:has(input:disabled) { color: var(--xp-text-muted); cursor: not-allowed; }
 .portal-root .portal-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+/* The one line above the buttons saying where a save goes, or why the primary is unavailable. */
+.portal-root .portal-form-actions > .portal-actions-note { flex-basis: 100%; font-size: 14px; }
+/* An error, or the reason WTIA returned a page: a sentence the member must read and act on, so body
+ * text at 15px in ink with a rule in the destructive token (a 3:1 non-text mark), not the 11px grey
+ * uppercase eyebrow, which made errors and successes look the same. */
+.portal-root .portal-form-alert { margin: 0; max-width: 880px; padding: 12px 16px; border-left: 3px solid hsl(var(--destructive)); background: rgba(220, 58, 58, 0.06); font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
 .portal-root .portal-readonly-note { margin: 0; padding: 12px 16px; border-left: 3px solid var(--wt-blue); background: rgba(114, 155, 181, 0.12); font-size: 14px; color: var(--wt-ink); }
 /* A checkbox row (the WhatsApp consent, the directory switch): the 24px box sits beside its label
  * and the help text hangs under it, aligned to the label rather than the box. */
@@ -210,6 +220,8 @@
 .portal-root .portal-image-external code { overflow-wrap: anywhere; font-size: 13px; color: var(--wt-ink); }
 .portal-root .portal-image-remove { min-height: 44px; padding: 0 16px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 .portal-root .portal-image-remove:hover { border-color: var(--wt-ink); }
+.portal-root .portal-image-remove:focus-visible,
+.portal-root .portal-button-outline:focus-visible { outline: 2px solid var(--wt-blue); outline-offset: 1px; }
 .portal-root .portal-image-upload > div { display: grid; gap: 14px; padding: 18px; border: 1px dashed var(--wt-line); border-radius: 8px; background: rgba(114, 155, 181, 0.06); font-size: 13px; }
 .portal-root .portal-image-upload > div > label { font-size: 13px; font-weight: 700; }
 .portal-root .portal-image-upload input[type="file"] { display: block; width: 100%; min-height: 44px; padding: 10px 0; font: inherit; font-size: 14px; }
@@ -229,7 +241,7 @@
  * weight and the fieldset loses the browser frame. */
 .portal-root fieldset.portal-checks { margin: 0; padding: 0; border: 0; min-width: 0; }
 .portal-root .portal-checks > legend { padding: 0; margin-bottom: 8px; }
-.portal-root .portal-checks-count { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--xp-text-muted); }
+.portal-root .portal-checks-count { grid-column: 1 / -1; margin: 4px 0 0; font-size: 13px; color: var(--xp-text-muted); }
 /* Secondary action beside the one primary .button. */
 .portal-root .portal-button-outline { min-height: 50px; padding: 0 22px; border: 1px solid var(--wt-ink); border-radius: 10px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
 .portal-root .portal-button-outline:hover { background: rgba(114, 155, 181, 0.12); }
@@ -237,14 +249,17 @@
 .portal-root .portal-form-actions .button:disabled { opacity: .5; cursor: not-allowed; }
 
 /* ---- Seats ----
- * Capacity bar, the full-state note and the member / invitation tables. At <=820px each row stacks:
- * the table keeps its semantics and every cell prints its data-label caption above its value. */
+ * Capacity bar, the full-state note and the member / invitation tables. At <=820px each row stacks and
+ * every cell prints its data-label caption above its value. display:block strips the implicit table
+ * roles in some engines (Safari/VoiceOver), so seat-table.tsx sets role="table"/"row"/"cell" itself. */
 .portal-root .portal-capacity { display: grid; gap: 10px; max-width: 880px; margin-bottom: 28px; }
 .portal-root .portal-capacity-text { margin: 0; font-size: 15px; font-weight: 700; color: var(--wt-ink); }
 .portal-root .portal-capacity-bar { height: 10px; border-radius: 999px; background: rgba(114, 155, 181, 0.2); overflow: hidden; }
 .portal-root .portal-capacity-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--wt-blue); }
-.portal-root .portal-welcome + .portal-form-message { margin-bottom: 24px; }
-.portal-root .portal-capacity + .portal-readonly-note,
+.portal-root .portal-welcome + :is(.portal-form-message, .portal-form-alert) { margin-bottom: 24px; }
+/* Its own class, not .portal-readonly-note: a full company is a state of the seats, not a permission. */
+.portal-root .portal-seats-full-note { margin: 0; padding: 12px 16px; border-left: 3px solid var(--xp-ink-deep); background: rgba(114, 155, 181, 0.12); font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
+.portal-root .portal-capacity + .portal-seats-full-note,
 .portal-root .portal-capacity + .portal-seat-invite { margin-bottom: 40px; max-width: 880px; }
 .portal-root .portal-seat-tables { display: grid; gap: 40px; max-width: 880px; }
 .portal-root .portal-seat-section .portal-section-title { margin-bottom: 16px; }
@@ -264,7 +279,10 @@
 .portal-root .portal-seat-actions select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font: inherit; font-size: 15px; }
 /* Ink, not --wt-blue: #729bb5 on the #f6f6f6 page is 2.7:1, under the 4.5:1 AA floor for 14px text. */
 .portal-root .portal-seat-link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--wt-ink); font: inherit; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
-.portal-root .portal-seat-danger { color: var(--wt-ink); }
+/* Destructive actions (revoke, cancel invitation) in the destructive hue, darkened from the
+ * --destructive token (55% lightness, 4.1:1 on the page) to 38%: 6.9:1 on #f6f6f6, 7.4:1 on white. */
+.portal-root .portal-seat-danger { color: hsl(0 72% 38%); text-decoration-color: currentColor; }
+.portal-root .portal-seat-danger:hover { color: hsl(0 72% 30%); }
 .portal-root .portal-seat-actions select:focus-visible,
 .portal-root .portal-seat-link:focus-visible { outline: 2px solid var(--wt-blue); outline-offset: 1px; }
 @media (max-width: 820px) {

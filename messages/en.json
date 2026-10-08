@@ -2354,7 +2354,6 @@
       "description": "Description",
       "directoryVisible": "Show this profile in the WTIA directory"
     },
-    "readOnly": "Only company owners and admins can edit these details.",
     "showcaseListing": {
       "nav": "Showcase listing",
       "eyebrow": "AI Showcase",
@@ -2364,6 +2363,7 @@
       "groups": {"basics": "Basics", "nameTagline": "Name and tagline", "descriptions": "Descriptions", "details": "Details", "links": "Links and media"},
       "saveDraft": "Save draft",
       "submit": "Submit for review",
+      "logoHelp": "Used in search and social previews. WTIA chooses the logo shown on the showcase.",
       "status": {
         "draft": "Draft — visible only to your company team.",
         "pending_review": "Pending review — WTIA staff will review this submission.",
@@ -2535,6 +2535,8 @@
       "saved": "Saved.",
       "submitted": "Submitted for review.",
       "rejectedWith": "Returned by WTIA: {reason}",
+      "saveSendsForReview": "Saving sends your changes to WTIA for review.",
+      "needsAddress": "Add a page address to submit for review.",
       "viewPublic": "View public page",
       "errors": {
         "INVALID": "Check the page address, tags and links.",
@@ -2542,7 +2544,7 @@
         "NO_MANAGED_COMPANY": "You do not manage a company yet.",
         "INVALID_PROFILE_TRANSITION": "Add a page address, then publish.",
         "COMPANY_SLUG_TAKEN": "That page address is already used.",
-        "COMPANY_LOGO_INVALID": "That image id is not one you uploaded."
+        "COMPANY_LOGO_INVALID": "That logo could not be used. Upload it again."
       }
     },
     "companySections": {

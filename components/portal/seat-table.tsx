@@ -31,19 +31,20 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
   locale: string;
 }) {
   // Each cell repeats its column header as data-label: at <=820px CSS stacks the row and prints it
-  // as a caption, so the table keeps its semantics and no control needs a second DOM copy.
+  // as a caption, so no control needs a second DOM copy. display:block on table/tr/td drops the
+  // implicit table roles in Safari/VoiceOver, so every part carries its role explicitly.
   return (
     <div className="portal-seat-tables">
       <section aria-labelledby="seat-members-heading" className="portal-seat-section">
         <h2 className="portal-section-title" id="seat-members-heading">{labels.members}</h2>
-        <table className="portal-seat-table">
-          <thead><tr><th scope="col">{labels.member}</th><th scope="col">{labels.role}</th><th scope="col"><span className="sr-only">{labels.actions}</span></th></tr></thead>
-          <tbody>
+        <table className="portal-seat-table" role="table">
+          <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">{labels.member}</th><th role="columnheader" scope="col">{labels.role}</th><th role="columnheader" scope="col"><span className="sr-only">{labels.actions}</span></th></tr></thead>
+          <tbody role="rowgroup">
             {members.map((member) => (
-              <tr key={member.id}>
-                <td data-label={labels.member}>{member.userId}</td>
-                <td data-label={labels.role}>{roleLabel(member.role, labels)}</td>
-                <td><div className="portal-seat-actions">
+              <tr key={member.id} role="row">
+                <td role="cell" data-label={labels.member}>{member.userId}</td>
+                <td role="cell" data-label={labels.role}>{roleLabel(member.role, labels)}</td>
+                <td role="cell"><div className="portal-seat-actions">
                   {canManage && (member.role !== "owner" || canGrantOwner) && changeRoleAction ? (
                     <>
                       <form action={changeRoleAction}>
@@ -75,14 +76,14 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
       <section aria-labelledby="seat-pending-heading" className="portal-seat-section">
         <h2 className="portal-section-title" id="seat-pending-heading">{labels.pending}</h2>
         {invitations.length === 0 ? <p className="portal-field-help">{labels.noPending}</p> : (
-          <table className="portal-seat-table">
-            <thead><tr><th scope="col">{labels.email}</th><th scope="col">{labels.role}</th><th scope="col"><span className="sr-only">{labels.actions}</span></th></tr></thead>
-            <tbody>
+          <table className="portal-seat-table" role="table">
+            <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">{labels.email}</th><th role="columnheader" scope="col">{labels.role}</th><th role="columnheader" scope="col"><span className="sr-only">{labels.actions}</span></th></tr></thead>
+            <tbody role="rowgroup">
               {invitations.map((invitation) => (
-                <tr key={invitation.id}>
-                  <td data-label={labels.email}>{invitation.invitedEmail}</td>
-                  <td data-label={labels.role}>{roleLabel(invitation.role, labels)}</td>
-                  <td><div className="portal-seat-actions">
+                <tr key={invitation.id} role="row">
+                  <td role="cell" data-label={labels.email}>{invitation.invitedEmail}</td>
+                  <td role="cell" data-label={labels.role}>{roleLabel(invitation.role, labels)}</td>
+                  <td role="cell"><div className="portal-seat-actions">
                     {canManage && revokeInvitationAction ? (
                       <form action={revokeInvitationAction}>
                         <input name="invitationId" type="hidden" value={invitation.id} />

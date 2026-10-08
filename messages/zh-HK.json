@@ -2354,7 +2354,6 @@
       "description": "簡介",
       "directoryVisible": "在 WTIA 會員名錄顯示此資料"
     },
-    "readOnly": "只有公司擁有人及管理員可以編輯這些資料。",
     "showcaseListing": {
       "nav": "展示頁資料",
       "eyebrow": "AI 展示",
@@ -2364,6 +2363,7 @@
       "groups": {"basics": "基本資料", "nameTagline": "名稱及標語", "descriptions": "介紹", "details": "詳細資料", "links": "連結及媒體"},
       "saveDraft": "儲存草稿",
       "submit": "提交審核",
+      "logoHelp": "用於搜尋結果及社交媒體預覽。展示頁上顯示的標誌由 WTIA 選定。",
       "status": {
         "draft": "草稿 — 只有公司團隊可以查看。",
         "pending_review": "等待審核 — WTIA 職員會審閱這份提交。",
@@ -2535,6 +2535,8 @@
       "saved": "已儲存。",
       "submitted": "已提交審核。",
       "rejectedWith": "WTIA 已退回：{reason}",
+      "saveSendsForReview": "儲存後，你的修改會交由 WTIA 審核。",
+      "needsAddress": "請先填寫專頁網址，才可提交審核。",
       "viewPublic": "查看公開專頁",
       "errors": {
         "INVALID": "請檢查專頁網址、標籤及連結。",
@@ -2542,13 +2544,13 @@
         "NO_MANAGED_COMPANY": "你尚未管理任何公司。",
         "INVALID_PROFILE_TRANSITION": "請先填寫專頁網址，然後發布。",
         "COMPANY_SLUG_TAKEN": "此專頁網址已被使用。",
-        "COMPANY_LOGO_INVALID": "此圖片編號並非你上載的圖片。"
+        "COMPANY_LOGO_INVALID": "未能使用此標誌，請重新上載。"
       }
     },
     "companySections": {
       "details": {
         "title": "登記資料",
-        "purpose": "用於會籍及名額。"
+        "purpose": "用於會籍及席位。"
       },
       "public": {
         "title": "公開會員頁",
@@ -2607,7 +2609,7 @@
       "admin": "管理員",
       "member": "成員",
       "noPending": "沒有待接受邀請。",
-      "full": "所有名額已用完。移除一位成員或一個待處理邀請後，便可再邀請。",
+      "full": "所有席位已用完。移除一位成員或一個待處理邀請後，便可再邀請。",
       "acceptBack": "返回會員主頁",
       "acceptTitle": "接受公司邀請",
       "acceptErrorTitle": "此邀請無法使用",

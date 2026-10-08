@@ -16,7 +16,7 @@ const labels: ShowcaseListingFormLabels = {
     caseStudyUrl: "Case study URL", caseStudySummaryEn: "English case study", caseStudySummaryZhHk: "Chinese case study",
   },
   logo: {
-    label: "Logo", empty: "No logo yet", previewAlt: "Current logo", external: "Linked image", remove: "Remove",
+    label: "Logo", help: "WTIA chooses the logo shown on the showcase.", empty: "No logo yet", previewAlt: "Current logo", external: "Linked image", remove: "Remove",
     upload: {choose: "Choose", alt: "Alt", upload: "Upload", uploading: "Uploading", done: "Done", failed: "Failed"},
   },
   commaHelp: "Separate with commas",
@@ -82,6 +82,14 @@ describe("showcase listing form (portal grammar)", () => {
     expect(container.querySelector("img")?.getAttribute("src")).toBe(value.logoReference);
   });
 
+  it("says under the logo that WTIA chooses the logo the showcase displays", () => {
+    const container = mount();
+    const group = container.querySelector<HTMLElement>(".portal-image-field")!;
+    const helpId = group.getAttribute("aria-describedby");
+    expect(helpId).toBeTruthy();
+    expect(container.ownerDocument.getElementById(helpId!)?.textContent).toBe("WTIA chooses the logo shown on the showcase.");
+  });
+
   it("keeps the Save draft and Submit for review buttons and one primary", () => {
     const container = mount();
     const buttons = [...container.querySelectorAll<HTMLButtonElement>(".portal-form-actions button")];
@@ -106,5 +114,10 @@ describe("showcase listing copy", () => {
       expect(listing.fields[key]).not.toMatch(/comma|逗號/i);
     }
     expect(Object.keys(listing.groups)).toEqual(["basics", "nameTagline", "descriptions", "details", "links"]);
+  });
+
+  it.each([["en", en], ["zh-HK", zh]] as const)("%s has logo help that says WTIA chooses the showcase logo", (_name, bundle) => {
+    const listing = bundle.Portal.showcaseListing as unknown as {logoHelp: string};
+    expect(listing.logoHelp).toMatch(/WTIA/);
   });
 });

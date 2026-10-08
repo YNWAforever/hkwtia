@@ -30,8 +30,8 @@ const otherPages = [
 
 // The member forms, each rendered in English (-en) and Traditional Chinese (-zh).
 const formPages = [
-  'form-profile', 'form-company-logo', 'form-company', 'form-company-readonly', 'form-listing-draft',
-  'form-seats-room', 'form-seats-full', 'form-seats-accept-error',
+  'form-profile', 'form-company-logo', 'form-company', 'form-company-rejected', 'form-company-readonly', 'form-listing-draft',
+  'form-seats-room', 'form-seats-full', 'form-seats-error', 'form-seats-accept-error',
 ].flatMap((name) => [`${name}-en`, `${name}-zh`]);
 
 let css = '';

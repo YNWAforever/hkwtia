@@ -299,12 +299,17 @@ describe("portal render fixtures", () => {
     ["form-profile", "/portal/profile", (locale) => ProfilePage({params: Promise.resolve({locale})}), () => undefined],
     ["form-company-logo", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}),
       () => { state.dashboard = dashboard({companies: [{...company, logoMediaId: LOGO_MEDIA_ID}]}); }],
+    // The default company is Live: one primary "Save changes" with the review note (final review, Important 1).
     ["form-company", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}), () => undefined],
+    // Returned by WTIA: the reason renders as alert body text, and Save draft + Submit for review return.
+    ["form-company-rejected", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}),
+      () => { state.dashboard = dashboard({companies: [{...company, publicProfileStatus: "rejected", profileRejectionReason: "The tagline repeats the company name; describe what the product does."} as DashboardCompany]}); }],
     ["form-company-readonly", "/portal/company", (locale) => CompanyPage({params: Promise.resolve({locale})}),
       () => { state.dashboard = dashboard({companies: [{...company, role: "member", canManage: false} as DashboardCompany]}); }],
     ["form-listing-draft", "/portal/company/listing", (locale) => CompanyShowcaseListingPage({params: Promise.resolve({locale})}), () => undefined],
     ["form-seats-room", "/portal/company/seats", (locale) => CompanySeatsPage({params: Promise.resolve({locale}), searchParams: noQuery}), () => { state.seatLimit = 5; }],
     ["form-seats-full", "/portal/company/seats", (locale) => CompanySeatsPage({params: Promise.resolve({locale}), searchParams: noQuery}), () => { state.seatLimit = 3; }],
+    ["form-seats-error", "/portal/company/seats", (locale) => CompanySeatsPage({params: Promise.resolve({locale}), searchParams: Promise.resolve({error: "1"})}), () => { state.seatLimit = 5; }],
     ["form-seats-accept-error", "/portal/company/seats/accept", (locale) => SeatInvitationAcceptancePage({params: Promise.resolve({locale}), searchParams: noQuery}), () => undefined],
   ];
   const formCases = formPages.flatMap(([name, pathname, page, setup]) => (

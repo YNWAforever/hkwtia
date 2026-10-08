@@ -27,6 +27,10 @@ export type CompanyProfileFormLabels = Readonly<{
   reviewNotice: string;
   rejected: string | null;
   saveDraft: string; submitForReview: string; saved: string; submitted: string; readOnly: string;
+  /** The single action on a Live / Under review page, and the line under it saying where a save goes. */
+  saveChanges: string; saveSendsForReview: string;
+  /** Why "Submit for review" is unavailable while the page address is empty. */
+  needsAddress: string;
   viewPublic: string;
   errors: Readonly<Record<string, string>>;
 }>;
@@ -46,6 +50,11 @@ const TAG_LIMIT = 8;
  * Publish is offered only from `hidden` and `rejected`; a live page is demoted
  * to `pending_review` by editing it (`reviewNotice` says so up front).
  *
+ * On a Live or Under review page there is nothing to submit, so the form offers one primary
+ * "Save changes" (still `intent=save`) with a line saying the save goes to WTIA review, rather
+ * than a greyed "Submit for review" beside a "Save draft" that would quietly take the page off
+ * the directory (final review, Important 1).
+ *
  * The logo is a media id the member never sees: `PortalImageField` submits it
  * as the hidden `logoMediaId` and shows a preview and an upload instead.
  */
@@ -55,7 +64,9 @@ export function CompanyProfileForm({values, labels, action, locale, readOnly, pu
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
   const [slug, setSlug] = useState(values.slug);
-  const canPublish = !readOnly && slug.trim().length > 0 && (values.status === "hidden" || values.status === "rejected");
+  const inReview = values.status === "published" || values.status === "pending_review";
+  const hasAddress = slug.trim().length > 0;
+  const canPublish = !readOnly && hasAddress && !inReview;
   const tagOptions = INDUSTRY_TAGS.map((tag) => ({value: tag.slug, label: industryTagLabel(tag.slug, locale)}));
   return (
     <form action={dispatch} className="portal-form" noValidate>
@@ -67,7 +78,8 @@ export function CompanyProfileForm({values, labels, action, locale, readOnly, pu
         </p>
         {/* Only someone who can edit can send the page back to review; a read-only member would read it as a warning about nothing. */}
         {readOnly ? null : <p className="portal-field-help">{labels.reviewNotice}</p>}
-        {labels.rejected ? <p className="portal-form-message" role="alert"><StatusLabel>{labels.rejected}</StatusLabel></p> : null}
+        {/* Body text, not the 11px eyebrow: the reason is free text the member has to read and act on. */}
+        {labels.rejected ? <p className="portal-form-alert" role="alert">{labels.rejected}</p> : null}
       </div>
       <fieldset className="portal-fieldset">
         <legend className="portal-fieldset-title">{labels.groups.address}</legend>
@@ -112,12 +124,18 @@ export function CompanyProfileForm({values, labels, action, locale, readOnly, pu
         readOnly={readOnly}
       />
       <PortalImageField initialValue={values.logoMediaId} labels={labels.logo} name="logoMediaId" readOnly={readOnly} store="id" />
-      {state.status === "error" ? <p className="portal-form-message" role="alert"><StatusLabel>{labels.errors[state.code ?? "INVALID"] ?? labels.errors.INVALID}</StatusLabel></p> : null}
+      {state.status === "error" ? <p className="portal-form-alert" role="alert">{labels.errors[state.code ?? "INVALID"] ?? labels.errors.INVALID}</p> : null}
       {state.status === "saved" || state.status === "submitted" ? <p className="portal-form-message" role="status"><StatusLabel>{state.status === "submitted" ? labels.submitted : labels.saved}</StatusLabel></p> : null}
-      {readOnly ? <p className="portal-readonly-note">{labels.readOnly}</p> : (
+      {readOnly ? <p className="portal-readonly-note">{labels.readOnly}</p> : inReview ? (
         <div className="portal-form-actions">
+          <p className="portal-field-help portal-actions-note" id="company-save-note">{labels.saveSendsForReview}</p>
+          <button aria-describedby="company-save-note" className="button" disabled={pending} name="intent" type="submit" value="save">{labels.saveChanges}</button>
+        </div>
+      ) : (
+        <div className="portal-form-actions">
+          {hasAddress ? null : <p className="portal-field-help portal-actions-note" id="company-publish-note">{labels.needsAddress}</p>}
           <button className="portal-button-outline" disabled={pending} formAction={dispatch} name="intent" type="submit" value="save">{labels.saveDraft}</button>
-          <button className="button" disabled={pending || !canPublish} name="intent" type="submit" value="publish">{labels.submitForReview}</button>
+          <button aria-describedby={hasAddress ? undefined : "company-publish-note"} className="button" disabled={pending || !canPublish} name="intent" type="submit" value="publish">{labels.submitForReview}</button>
         </div>
       )}
     </form>

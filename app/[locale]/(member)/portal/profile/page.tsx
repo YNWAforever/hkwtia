@@ -54,10 +54,10 @@ export default async function ProfilePage({params}: Props) {
           <div className="portal-field portal-consent">
             <StatusLabel as="p">{profile.whatsappOptIn ? t("whatsapp.status.on") : t("whatsapp.status.off")}</StatusLabel>
             <label className="portal-consent-row">
-              <input defaultChecked={profile.whatsappOptIn} name="whatsappOptIn" type="checkbox" />
+              <input aria-describedby="profile-whatsapp-consent" defaultChecked={profile.whatsappOptIn} name="whatsappOptIn" type="checkbox" />
               <span>{t("whatsapp.optIn")}</span>
             </label>
-            <p className="portal-field-help">{t("whatsapp.consent")}</p>
+            <p className="portal-field-help" id="profile-whatsapp-consent">{t("whatsapp.consent")}</p>
           </div>
         </fieldset>
         <input name="locale" type="hidden" value={locale} />

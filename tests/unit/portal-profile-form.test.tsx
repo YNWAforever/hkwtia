@@ -43,6 +43,14 @@ describe("portal profile form", () => {
     expect(html).toContain("whatsapp.consent");
   });
 
+  it("describes the WhatsApp opt-in with its consent text", async () => {
+    const html = await render();
+    const input = html.match(/<input[^>]*name="whatsappOptIn"[^>]*>/)?.[0] ?? "";
+    const id = input.match(/aria-describedby="([^"]+)"/)?.[1];
+    expect(id).toBeTruthy();
+    expect(html).toMatch(new RegExp(`<p[^>]*id="${id}"[^>]*>whatsapp.consent</p>`));
+  });
+
   it("describes the directory checkbox with its help text", async () => {
     const html = await render();
     const input = html.match(/<input[^>]*name="directoryVisible"[^>]*>/)?.[0] ?? "";
