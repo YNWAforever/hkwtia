@@ -1,5 +1,6 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {PortalPageHeader} from "@/components/portal/page-header";
 import {DirectoryResults} from "@/components/portal/directory-results";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
@@ -25,13 +26,28 @@ export default async function DirectoryPage({params, searchParams}: Props) {
   const t = await getTranslations({locale, namespace: "Portal"});
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("directory.title")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("directory.title")}</h1>
-        <p className="text-lg text-muted-foreground">{t("directory.description")}</p>
-      </header>
-      <DirectoryResults locale={locale} labels={{search: t("directory.search"), empty: t("directory.empty"), next: t("directory.next"), previous: t("directory.previous"), company: t("directory.company"), industry: t("directory.industry"), sizeBand: t("directory.sizeBand")}} page={page} query={search} />
+    <div className="portal-directory-page">
+      <PortalPageHeader eyebrow={t("navGroups.benefits")} lead={t("directory.description")} title={t("directory.title")} />
+      <DirectoryResults
+        cursor={cursor}
+        labels={{
+          search: t("directory.search"),
+          showingFor: t("directory.showingFor", {query: search}),
+          clear: t("directory.clear"),
+          empty: t("directory.empty"),
+          emptyQuery: t("directory.emptyQuery", {query: search}),
+          emptyNone: t("directory.emptyNone"),
+          emptyNoneAction: t("directory.emptyNoneAction"),
+          next: t("directory.next"),
+          first: t("directory.first"),
+          company: t("directory.company"),
+          industry: t("directory.industry"),
+          sizeBand: t("directory.sizeBand"),
+        }}
+        locale={locale}
+        page={page}
+        query={search}
+      />
     </div>
   );
 }

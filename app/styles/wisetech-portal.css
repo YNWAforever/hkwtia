@@ -321,6 +321,17 @@
 .portal-root .portal-section-head > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
 .portal-root .portal-paging { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--wt-line); font-size: 14px; color: var(--wt-ink); }
 
+/* ---- Member directory ---- */
+.portal-root .portal-directory { display: grid; gap: 24px; }
+.portal-root .portal-directory-search { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.portal-root .portal-directory-search .portal-field { flex: 1 1 260px; }
+.portal-root .portal-directory-showing { font-size: 14px; }
+.portal-root .portal-directory-list { margin: 0; padding: 0; list-style: none; }
+.portal-root .portal-directory-name { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
+.portal-root .portal-directory-role { margin: 4px 0 0; font-size: 15px; color: var(--xp-text-muted); }
+.portal-root .portal-directory-list .portal-record { margin-top: 16px; }
+.portal-root .portal-directory-next { margin: 0; }
+
 /* ---- Events list ---- */
 .portal-root .portal-events { display: grid; gap: 48px; }
 .portal-root .portal-events-mine { display: grid; gap: 4px; }
