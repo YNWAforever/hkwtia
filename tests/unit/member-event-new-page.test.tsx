@@ -4,6 +4,8 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const state = vi.hoisted(() => ({failure: null as Error | null, context: null as null | Record<string, unknown>, action: null as null | ((state: unknown, data: FormData) => Promise<unknown>), companies: [{id: "11111111-1111-4111-8111-111111111111", canManage: true, displayName: "Acme"}], memberships: [{companyId: "11111111-1111-4111-8111-111111111111", status: "active"}]}));
 vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string, values?: {company?: string}) => values?.company ? `${key}:${values.company}` : key), setRequestLocale: vi.fn()}));
 vi.mock("next/navigation", () => ({redirect: vi.fn()}));
+// HonestEmpty (the no-company / no-membership states) renders the locale-aware Link.
+vi.mock("@/i18n/navigation", () => ({Link: ({href, children}: {href: string; children: React.ReactNode}) => <a href={href}>{children}</a>}));
 vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => ({kind: "member", userId: "u", profileId: "p"}))}));
 vi.mock("@/lib/events/member-core", () => ({loadMemberEventsContext: vi.fn(async () => {if (state.failure) throw state.failure; return state.context;})}));
 vi.mock("@/lib/events/member-actions", () => ({saveMemberEventAction: vi.fn()}));
@@ -35,6 +37,8 @@ describe("/portal/events/new recovery", () => {
     state.failure = new Error("NO_MANAGED_COMPANY");
     render(await NewMemberEventPage(props));
     expect(screen.getByText("noCompany")).toBeVisible();
+    expect(screen.getByRole("status")).toHaveClass("inner-honest");
+    expect(screen.getByRole("link", {name: "backToEvents"})).toHaveAttribute("href", "/portal/events");
   });
 
   it("binds the rendered company into the new-event server action", async () => {

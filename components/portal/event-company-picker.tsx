@@ -1,12 +1,22 @@
 "use client";
 
+import {useId} from "react";
+
+/**
+ * Members who manage several companies choose which one the event is for. A plain GET form, so it
+ * works without JavaScript; with it, switching away from an event that has unsaved details asks
+ * first (the event form marks itself `data-dirty`). The warning is also shown as help text, so the
+ * member knows before choosing rather than only from the confirm dialog.
+ */
 export function EventCompanyPicker({action, companyId, choices, labels}: Readonly<{
   action: string;
   companyId: string;
   choices: readonly Readonly<{id: string; displayName: string}>[];
   labels: Readonly<{choose: string; use: string; changeWarning: string}>;
 }>) {
-  return <form action={action} className="glass-card flex flex-wrap items-end gap-3 p-4" method="get" onSubmit={(event) => {
+  const legendId = useId();
+  const helpId = useId();
+  return <form action={action} className="portal-form portal-company-picker" method="get" onSubmit={(event) => {
     const selected = new FormData(event.currentTarget).get("companyId");
     if (selected === companyId) {
       event.preventDefault();
@@ -19,11 +29,15 @@ export function EventCompanyPicker({action, companyId, choices, labels}: Readonl
       if (picker instanceof HTMLSelectElement) picker.value = companyId;
     }
   }}>
-    <label className="flex min-w-48 flex-1 flex-col gap-2 text-sm font-medium">{labels.choose}
-      <select className="min-h-11 rounded-md border border-input bg-background px-3" defaultValue={companyId} name="companyId">
-        {choices.map((company) => <option key={company.id} value={company.id}>{company.displayName}</option>)}
-      </select>
-    </label>
-    <button className="min-h-11 rounded-md border border-border px-4 text-sm font-medium" type="submit">{labels.use}</button>
+    <fieldset className="portal-fieldset">
+      <legend className="portal-fieldset-title" id={legendId}>{labels.choose}</legend>
+      <div className="portal-company-picker-row">
+        <select aria-describedby={helpId} aria-labelledby={legendId} defaultValue={companyId} name="companyId">
+          {choices.map((company) => <option key={company.id} value={company.id}>{company.displayName}</option>)}
+        </select>
+        <button className="portal-button-outline" type="submit">{labels.use}</button>
+      </div>
+      <p className="portal-field-help" id={helpId}>{labels.changeWarning}</p>
+    </fieldset>
   </form>;
 }

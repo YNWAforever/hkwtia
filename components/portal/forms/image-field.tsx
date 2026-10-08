@@ -31,9 +31,16 @@ function mediaId(value: string, store: "id" | "path"): string | null {
  * third-party URL. A failed upload leaves the value untouched (HeroUpload reports its own status).
  * A stored site path that is not one of our uploads (a seeded `/images/...` logo) is also shown as
  * text, but labelled "Current logo": "Linked image" told the member it pointed off-site.
+ * The event form uses it for `heroMediaId` too. `onChange` lets a parent notice an upload or a
+ * removal: both only set the hidden input's value, which fires no input event on the form, and the
+ * event form's unsaved-changes flag (read by the company picker) has to see them.
  */
-export function PortalImageField({name, initialValue, store, readOnly, labels}: Readonly<{name: "logoMediaId" | "logoReference"; initialValue: string; store: "id" | "path"; readOnly: boolean; labels: PortalImageFieldLabels}>) {
-  const [value, setValue] = useState(initialValue);
+export function PortalImageField({name, initialValue, store, readOnly, labels, onChange}: Readonly<{name: "logoMediaId" | "logoReference" | "heroMediaId"; initialValue: string; store: "id" | "path"; readOnly: boolean; labels: PortalImageFieldLabels; onChange?: (value: string) => void}>) {
+  const [value, setStoredValue] = useState(initialValue);
+  const setValue = (next: string) => {
+    setStoredValue(next);
+    onChange?.(next);
+  };
   const id = mediaId(value, store);
   const labelId = useId();
   const helpId = useId();

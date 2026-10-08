@@ -329,3 +329,16 @@
 .portal-root .portal-event-body { display: grid; gap: 10px; min-width: 0; flex: 1; justify-items: start; }
 .portal-root .portal-event-body > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
 .portal-root .portal-event-body > p { margin: 0; font-size: 15px; color: var(--wt-ink); }
+
+/* ---- New / edit event ---- */
+.portal-root .portal-event-editor { display: grid; gap: 32px; }
+.portal-root .portal-event-editor > .portal-welcome .portal-status-note { margin-top: 8px; }
+.portal-root .portal-event-editor > .portal-welcome .portal-form-alert { margin-top: 16px; }
+/* The online and external-registration links are hidden when they do not apply. .portal-field's
+ * display: grid, (0,2,0), outranks the UA sheet's [hidden] rule, so the field must restate it. */
+.portal-root .portal-field[hidden] { display: none; }
+/* "Your event will be at /events/…": the path wraps anywhere so a long address never scrolls a phone. */
+.portal-root .portal-field-help code { overflow-wrap: anywhere; font-size: 13px; color: var(--wt-ink); }
+/* Company picker: the select and its button share a row, and the button drops under it on phones. */
+.portal-root .portal-company-picker-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.portal-root .portal-company-picker-row > select { flex: 1 1 240px; width: auto; }

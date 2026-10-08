@@ -1,12 +1,12 @@
 import {render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-const state = vi.hoisted(() => ({failure: null as Error | null, status: "pending_review" as string, limit: 2}));
-vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string) => key), setRequestLocale: vi.fn()}));
+const state = vi.hoisted(() => ({failure: null as Error | null, status: "pending_review" as string, limit: 2, rejectionReason: null as string | null}));
+vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string, values?: {reason?: string}) => values?.reason ? `${key}:${values.reason}` : key), setRequestLocale: vi.fn()}));
 vi.mock("next/navigation", () => ({redirect: vi.fn(), notFound: vi.fn()}));
 vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => ({kind: "member", userId: "u", profileId: "p"}))}));
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {getForMemberEdit: vi.fn(async () => ({id: "event-id", organiser_company_id: "33333333-3333-4333-8333-333333333333"}))}}));
-vi.mock("@/lib/events/member-contract", () => ({memberEventViewFromRow: vi.fn(() => ({id: "event-id", status: state.status, titleEn: "Event", rejectionReason: null}))}));
+vi.mock("@/lib/events/member-contract", () => ({memberEventViewFromRow: vi.fn(() => ({id: "event-id", status: state.status, titleEn: "Event", rejectionReason: state.rejectionReason}))}));
 vi.mock("@/lib/events/member-core", () => ({loadMemberEventsContext: vi.fn(async () => {
   if (state.failure) throw state.failure;
   return {canPublish: false, limit: state.limit};
@@ -20,7 +20,16 @@ import {loadMemberEventsContext} from "@/lib/events/member-core";
 const props = {params: Promise.resolve({locale: "en", id: "event-id"}), searchParams: Promise.resolve({})};
 
 describe("/portal/events/[id]/edit recovery", () => {
-  beforeEach(() => {state.failure = null; state.status = "pending_review"; state.limit = 2;});
+  beforeEach(() => {state.failure = null; state.status = "pending_review"; state.limit = 2; state.rejectionReason = null;});
+
+  it("heads the page with the status label, the title and the reason WTIA returned it", async () => {
+    state.status = "rejected";
+    state.rejectionReason = "Add a venue";
+    render(await EditMemberEventPage(props));
+    expect(screen.getByRole("heading", {level: 1, name: "Event"})).toBeVisible();
+    expect(screen.getByText("status.rejected")).toHaveClass("status-label");
+    expect(screen.getByText("rejectedWith:Add a venue")).toHaveClass("portal-form-alert");
+  });
 
   it("does not enable resubmission when membership is no longer active", async () => {
     state.failure = new Error("NO_MEMBERSHIP_FOR_COMPANY");

@@ -9,7 +9,8 @@ const labels = {
   saveDraft: "Save draft", submit: "Submit", saving: "Saving", errors: {},
   formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"},
   visibilities: {public: "Public", members_only: "Members only"},
-  registrationModes: {rsvp: "RSVP", external: "External"}, hero: {},
+  registrationModes: {rsvp: "RSVP", external: "External"}, groups: {}, pageAddressHelp: "At {path}",
+  submitUnavailable: "No reviewed events left", image: {label: "Hero image", upload: {}},
 } as never;
 
 describe("member event form availability", () => {
@@ -27,10 +28,12 @@ describe("member event form availability", () => {
     fireEvent.input(form.querySelector("input[name=slug]")!, {target: {value: "new-event"}});
     expect(form.dataset.dirty).toBe("true");
   });
+  // Submit is not rendered at all when unavailable (one primary per form, with a line saying why).
   it("disables both write actions when membership is inactive", () => {
     render(<EventForm action={async () => ({status: "idle"})} canSaveDraft={false} canSubmit={false} labels={labels} values={null} />);
     expect(screen.getByRole("button", {name: "Save draft"})).toBeDisabled();
-    expect(screen.getByRole("button", {name: "Submit"})).toBeDisabled();
+    expect(screen.queryByRole("button", {name: "Submit"})).toBeNull();
+    expect(screen.getByText("No reviewed events left")).toBeInTheDocument();
     expect(screen.queryByTestId("hero-upload")).toBeNull();
   });
 });
