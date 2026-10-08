@@ -2620,7 +2620,14 @@
       "history": "View billing history",
       "support": "Contact membership support",
       "supportMessage": "Contact WTIA to confirm your renewal or payment record. Viewing billing does not restore membership benefits.",
-      "providerUnavailable": "The payment provider could not be verified. Contact support before making another payment."
+      "providerUnavailable": "The payment provider could not be verified. Contact support before making another payment.",
+      "renewsOn": "Renews on {date}",
+      "endsOn": "Ends on {date}",
+      "seats": "{count} seats",
+      "manageHelp": "Opens Stripe's secure page to update your card, download invoices or cancel.",
+      "pastDue": "Your last payment did not go through. Update your payment method to keep your membership active.",
+      "emptyCopy": "Billing appears here once you have a membership.",
+      "emptyAction": "See membership options"
     },
     "seats": {
       "title": "Company seats",

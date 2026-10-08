@@ -2620,7 +2620,14 @@
       "history": "查看帳單記錄",
       "support": "聯絡會籍支援",
       "supportMessage": "請聯絡 WTIA 核對續會或付款記錄。查看帳單不會恢復會籍權益。",
-      "providerUnavailable": "暫時無法核對付款服務，請先聯絡支援，勿再次付款。"
+      "providerUnavailable": "暫時無法核對付款服務，請先聯絡支援，勿再次付款。",
+      "renewsOn": "{date}續會",
+      "endsOn": "{date}屆滿",
+      "seats": "{count} 個席位",
+      "manageHelp": "會開啟 Stripe 的安全頁面，讓你更新信用卡、下載發票或取消會籍。",
+      "pastDue": "你上一次付款未能完成。請更新付款方式，以保持會籍有效。",
+      "emptyCopy": "取得會籍後，帳單資料會顯示在這裡。",
+      "emptyAction": "查看會籍選項"
     },
     "seats": {
       "title": "公司席位",

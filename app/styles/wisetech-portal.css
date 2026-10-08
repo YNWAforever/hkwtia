@@ -376,3 +376,11 @@
 .portal-root .portal-tool-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
 .portal-root .portal-tool-head h1 { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
 .portal-root iframe.portal-tool-frame { display: block; width: 100%; height: calc(100dvh - var(--portal-header-h) - 120px); min-height: 480px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; }
+
+/* Billing cards: plan name, status word, renewal and seats as body text, one primary per card. */
+.portal-root .portal-billing-card { display: grid; gap: 10px; align-content: start; }
+.portal-root .portal-billing-card h2 { margin: 0; font-size: 22px; line-height: 1.25; color: var(--wt-ink); }
+.portal-root .portal-billing-card p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--wt-ink); }
+.portal-root .portal-billing-card .portal-form-alert { max-width: none; }
+.portal-root .portal-billing-card .portal-billing-muted { color: var(--xp-text-muted); }
+.portal-root .portal-billing-actions { display: grid; gap: 10px; justify-items: start; margin-top: 6px; }
