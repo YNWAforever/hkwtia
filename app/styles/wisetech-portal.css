@@ -320,3 +320,12 @@
 .portal-root .portal-section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin: 0 0 16px; }
 .portal-root .portal-section-head > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1.15; color: var(--wt-ink); }
 .portal-root .portal-paging { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--wt-line); font-size: 14px; color: var(--wt-ink); }
+
+/* ---- Events list ---- */
+.portal-root .portal-events { display: grid; gap: 48px; }
+.portal-root .portal-events-mine { display: grid; gap: 4px; }
+.portal-root .portal-events-mine > ul { margin: 12px 0 0; padding: 0; list-style: none; }
+.portal-root .portal-event-card { display: flex; gap: 20px; align-items: flex-start; }
+.portal-root .portal-event-body { display: grid; gap: 10px; min-width: 0; flex: 1; justify-items: start; }
+.portal-root .portal-event-body > :is(h2, h3) { margin: 0; font-family: var(--font-serif, Georgia, serif); font-size: 22px; line-height: 1.2; color: var(--wt-ink); }
+.portal-root .portal-event-body > p { margin: 0; font-size: 15px; color: var(--wt-ink); }

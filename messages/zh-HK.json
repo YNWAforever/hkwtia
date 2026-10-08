@@ -2407,6 +2407,8 @@
       "markets": "市場"
     },
     "events": {
+      "emptyTitle": "暫時沒有活動",
+      "emptyAction": "瀏覽 WTIA 活動",
       "title": "會員活動",
       "description": "供會員參加的 WTIA 活動。",
       "empty": "目前沒有即將舉行的活動。",

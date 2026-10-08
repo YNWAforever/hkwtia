@@ -2407,6 +2407,8 @@
       "markets": "Markets"
     },
     "events": {
+      "emptyTitle": "No upcoming events yet",
+      "emptyAction": "Browse WTIA events",
       "title": "Member events",
       "description": "Upcoming WTIA events for members.",
       "empty": "No upcoming events are available.",
