@@ -65,10 +65,26 @@ describe("portal company page", () => {
 
   it("details form submits exactly the fields updateCompanyAction reads, with one primary button", async () => {
     const {details} = forms(await render());
-    // The action also reads directoryVisible, which this form has never rendered (unchanged).
-    expect(names(details).sort()).toEqual(["companyId", "description", "displayName", "industry", "legalName", "sizeBand", "website"]);
+    expect(names(details).sort()).toEqual(["companyId", "description", "directoryVisible", "directoryVisibleShown", "displayName", "industry", "legalName", "sizeBand", "website"]);
     expect(details.match(/type="submit"/g)).toHaveLength(1);
     expect(details.match(/<fieldset/g)).toHaveLength(1);
+  });
+
+  // The company switch used to have no control at all, so every save of these details wrote
+  // `directoryVisible: false` and hid the whole company from the member directory.
+  it("renders the company directory switch with its stored value and a marker that it was shown", async () => {
+    const on = forms(await render({directoryVisible: true})).details;
+    expect(control(on, "directoryVisible")).toContain('type="checkbox"');
+    expect(control(on, "directoryVisible")).toContain("checked");
+    expect(control(on, "directoryVisibleShown")).toContain('type="hidden"');
+    expect(on).toContain("List our team in the member directory");
+    const off = forms(await render({directoryVisible: false})).details;
+    expect(control(off, "directoryVisible")).not.toContain("checked");
+  });
+
+  it("disables the directory switch for members who cannot manage the company", async () => {
+    const {details} = forms(await render({canManage: false, directoryVisible: true}));
+    expect(control(details, "directoryVisible")).toContain("disabled");
   });
 
   it("public form submits exactly the fields the profile action reads, plus the two intents", async () => {

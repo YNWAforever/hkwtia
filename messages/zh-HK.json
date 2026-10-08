@@ -2577,7 +2577,9 @@
     "companySections": {
       "details": {
         "title": "登記資料",
-        "purpose": "用於會籍及席位。"
+        "purpose": "用於會籍及席位。",
+        "directoryVisible": "在會員名錄中列出本公司團隊",
+        "directoryHelp": "同事亦須在個人資料中選擇公開，才會出現在會員入口的會員名錄。此設定不影響貴公司的公開會員頁面。"
       },
       "public": {
         "title": "公開會員頁",

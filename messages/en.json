@@ -2577,7 +2577,9 @@
     "companySections": {
       "details": {
         "title": "Registered details",
-        "purpose": "Used for your membership and seats."
+        "purpose": "Used for your membership and seats.",
+        "directoryVisible": "List our team in the member directory",
+        "directoryHelp": "Colleagues appear in the portal member directory only if they also choose to on their own profile. This does not affect your public member page."
       },
       "public": {
         "title": "Public member page",

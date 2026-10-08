@@ -428,6 +428,13 @@
       "when": 1791112074668,
       "tag": "0061_board_work_result",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1791461390167,
+      "tag": "0062_company_directory_visible_backfill",
+      "breakpoints": true
     }
   ]
 }
