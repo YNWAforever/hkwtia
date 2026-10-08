@@ -25,7 +25,7 @@ export default async function ProfilePage({params}: Props) {
       <header className="portal-welcome">
         <StatusLabel as="p">{t("profile")}</StatusLabel>
         <h1>{t("profileTitle")}</h1>
-        <p className="portal-welcome-company">{t("profileDescription")}</p>
+        <p className="portal-welcome-lead">{t("profileDescription")}</p>
       </header>
       <form action={updateProfileAction} className="portal-form">
         <fieldset className="portal-fieldset">

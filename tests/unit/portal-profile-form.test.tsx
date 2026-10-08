@@ -26,7 +26,7 @@ describe("portal profile form", () => {
     expect(html.match(/<fieldset/g)).toHaveLength(2);
     expect(html.indexOf("profileGroups.contact")).toBeGreaterThan(-1);
     expect(html.indexOf("profileGroups.contact")).toBeLessThan(html.indexOf("profileGroups.whatsapp"));
-    expect(html).toContain('class="portal-form"');
+    expect(html).toMatch(/<form[^>]*class="[^"]*portal-form/);
     expect(html.match(/<h1/g)).toHaveLength(1);
   });
 
