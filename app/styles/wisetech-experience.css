@@ -1118,6 +1118,27 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .archive-photo-feature-reverse > .archive-photo-media { order: 2; }
 }
 
+/* Round 23 (owner decision 2026-10-09): stacked on a phone, the four stories were 3,443px of the
+ * 17,712px homepage. Below 760px they are one swipe row — each card 86% wide so the next one's
+ * edge invites the swipe, snapping per card, full text kept. Each card's title is a link, so
+ * keyboard users reach every card and the row scrolls to the focused one. */
+@media (max-width: 760px) {
+  .archive-photo-grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 10px;
+  }
+  /* In one row every card takes the tallest card's height; the feature card's grid then pushed
+     its caption to the bottom, leaving a gap under the photo. Top-down flex keeps photo and text
+     together and lets any spare height fall below the text. */
+  .archive-photo-grid > .archive-photo-card { display: flex; flex-direction: column; scroll-snap-align: start; }
+}
+
 /* ─── Round 11 (2026-10-07): /partners category counts ───────────────────────────────────
  * The homepage partner tabs' counts went to 12px in round 10; the same counts in the
  * /partners category nav (a 38px ring) stayed at the donor's 11px. One size for one idea. */

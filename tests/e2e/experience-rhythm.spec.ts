@@ -312,6 +312,28 @@ test.describe('round 10', () => {
     const caption = (await last.locator('figcaption').boundingBox())!;
     expect(media.x).toBeGreaterThan(caption.x);
   });
+
+  // Round 23 (owner decision 2026-10-09): on phones the four archive stories were 3,443px of the
+  // 17,712px homepage. They become one swipe row — full text kept, the next card's edge showing.
+  test('on phones the archive stories are one swipe row, not a stack', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    const card = (cls: string) => `<figure class="archive-photo-card ${cls}"><div class="archive-photo-media"><img alt="" width="960" height="606" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div><figcaption><span>WTIA event highlights</span><h3><a href="/about/history/x">Title</a></h3><p>Body text that runs a few lines long on a phone.</p></figcaption></figure>`;
+    await render(page, `<div class="shell"><div class="archive-photo-grid">${card('archive-photo-feature')}${card('')}${card('')}${card('archive-photo-feature archive-photo-feature-reverse')}</div></div>`);
+    const grid = page.locator('.archive-photo-grid');
+    const box = (await grid.boundingBox())!;
+    const cards = await page.locator('.archive-photo-card').evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect()).map((r) => ({top: Math.round(r.top), width: r.width})));
+    expect(new Set(cards.map((c) => c.top)).size).toBe(1);
+    for (const c of cards) {
+      expect(c.width / box.width).toBeGreaterThan(0.8);
+      expect(c.width / box.width).toBeLessThan(0.92);
+    }
+    expect(await grid.evaluate((g) => getComputedStyle(g).scrollSnapType)).toContain('x');
+    expect(await grid.evaluate((g) => g.scrollWidth > g.clientWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    // Every card in the row takes the tallest one's height; the caption must stay under its photo.
+    const gaps = await page.locator('.archive-photo-card').evaluateAll((nodes) => nodes.map((n) => Math.round(n.querySelector('figcaption')!.getBoundingClientRect().top - n.querySelector('.archive-photo-media')!.getBoundingClientRect().bottom)));
+    expect(gaps).toEqual([0, 0, 0, 0]);
+  });
 });
 
 // Round 11: /partners category counts match the homepage tabs.
