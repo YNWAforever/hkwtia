@@ -56,7 +56,12 @@ export default async function HistoryPage({params}: Props) {
           {label: t("compass.latestLabel"), value: t("compass.latestValue", {year: facts.latestYear})},
         ]}
       />
-      <MilestoneTimeline locale={locale as AppLocale} readMoreLabel={t("readMore")} milestones={history} />
+      <MilestoneTimeline
+        countLabel={(count) => t("compass.milestonesValue", {count})}
+        locale={locale as AppLocale}
+        milestones={history}
+        readMoreLabel={t("readMore")}
+      />
       <RichRelatedRoutes items={related} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/history", tRoot))} />
     </>

@@ -155,6 +155,31 @@ describe("milestone timeline", () => {
     expect(screen.queryByRole("heading", {level: 2, name: "2004"})).not.toBeInTheDocument();
   });
 
+  // Round 24 (owner decision 2026-10-10): 68 milestones over 17 years made /about/history the
+  // longest page on a phone (17,454px). The three newest years stay open; each older year is one
+  // native <details> row — year and count — whose entries stay in the HTML for search and find.
+  it("keeps the three newest years open and folds each older year behind its year and count", () => {
+    renderWithIntl("en",
+      <MilestoneTimeline locale="en" readMoreLabel="Read more" countLabel={(count) => `${count} milestones`} milestones={[
+        milestone({slug: "y25", year: 2025, titleEn: "In 2025"}), milestone({slug: "y22", year: 2022, titleEn: "In 2022"}),
+        milestone({slug: "y21", year: 2021, titleEn: "In 2021"}), milestone({slug: "y20a", year: 2020, titleEn: "In 2020 A"}),
+        milestone({slug: "y20b", year: 2020, titleEn: "In 2020 B"}), milestone({slug: "y05", year: 2005, titleEn: "In 2005"}),
+      ]} />,
+    );
+
+    for (const year of ["2025", "2022", "2021"]) {
+      expect(screen.getByRole("heading", {level: 2, name: year}).closest("details")).toBeNull();
+    }
+    const folded = [...document.querySelectorAll("details")];
+    expect(folded).toHaveLength(2);
+    expect(folded.every((details) => !details.open)).toBe(true);
+    expect(folded[0].querySelector("summary")?.textContent).toContain("2020");
+    expect(folded[0].querySelector("summary")?.textContent).toContain("2 milestones");
+    expect(folded[1].querySelector("summary")?.textContent).toContain("1 milestones");
+    expect(screen.getByRole("heading", {level: 2, name: "2020"}).closest("summary")).not.toBeNull();
+    for (const title of ["In 2020 A", "In 2020 B", "In 2005"]) expect(screen.getByText(title)).toBeInTheDocument();
+  });
+
   it("pins the current factual count, year order, and six featured destinations", async () => {
     const actual = await vi.importActual<typeof import("@/content/milestones")>("@/content/milestones");
     const history = milestonesOnly(actual.milestones);
