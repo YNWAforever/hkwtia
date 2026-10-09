@@ -11,7 +11,7 @@ import {industryTagLabel} from "@/config/industry-tags";
 import type {AppLocale} from "@/i18n/routing";
 import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {formatEventDate} from "@/lib/home/format-event-date";
-import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
+import {isPrivateMediaDeliveryUrl, mediaDeliverySrc} from "@/lib/media/url";
 import {localeText} from "@/lib/members/public";
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
@@ -77,7 +77,7 @@ export default async function MemberDetailPage({params}: Props) {
       <h2 className="sr-only" id="member-profile-title">{profile.name}</h2>
       {profile.logoUrl ? (
         <div className="partner-record-logo">
-          <Image alt={profile.name} height={202} src={profile.logoUrl} unoptimized={isPrivateMediaDeliveryUrl(profile.logoUrl)} width={320} />
+          <Image alt={profile.name} height={202} src={mediaDeliverySrc(profile.logoUrl, 640)} unoptimized={isPrivateMediaDeliveryUrl(profile.logoUrl)} width={320} />
         </div>
       ) : null}
       <div className="flex flex-wrap gap-2">

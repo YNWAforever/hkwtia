@@ -5,7 +5,7 @@ import {useState} from 'react';
 
 import {Link} from '@/i18n/navigation';
 import type {LegacyNetworkCategory, LegacyNetworkGroup} from '@/lib/home/legacy-network-groups';
-import {isPrivateMediaDeliveryUrl} from '@/lib/media/url';
+import {isPrivateMediaDeliveryUrl, mediaDeliverySrc} from '@/lib/media/url';
 
 type LegacyNetworkProps = Readonly<{
   groups: readonly LegacyNetworkGroup[];
@@ -80,7 +80,7 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
             <article className="legacy-logo-card" key={partner.id}>
               <div className="legacy-logo-image">
                 {partner.logoUrl && partner.logoAlt ? (
-                  <Image alt={partner.logoAlt} height={202} src={partner.logoUrl} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
+                  <Image alt={partner.logoAlt} height={202} src={mediaDeliverySrc(partner.logoUrl, 640)} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
                 ) : null}
               </div>
               <h3>{partner.name}</h3>

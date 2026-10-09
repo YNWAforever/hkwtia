@@ -44,6 +44,22 @@ export function isPrivateMediaDeliveryUrl(value: string): boolean {
 }
 
 /**
+ * The only widths `/api/media/[id]?w=` will resize to. A fixed list keeps the CDN from holding an
+ * entry per arbitrary width and bounds the work each request can ask for (round 22).
+ */
+export const MEDIA_DELIVERY_WIDTHS = [160, 320, 480, 640, 960] as const;
+export type MediaDeliveryWidth = (typeof MEDIA_DELIVERY_WIDTHS)[number];
+
+/**
+ * The src to render for an image at `width` CSS-pixel-ish resolution: uploaded media asks its own
+ * delivery route for a resized copy (still verified and revocable there); anything else is returned
+ * unchanged. Decide `unoptimized` from the original URL, not from this result.
+ */
+export function mediaDeliverySrc(url: string, width: MediaDeliveryWidth): string {
+  return isPrivateMediaDeliveryUrl(url) ? `${url}?w=${width}` : url;
+}
+
+/**
  * A reference the site may render as an image.
  *
  * Own-origin only. An allowlist of third-party hosts cannot be made safe here:

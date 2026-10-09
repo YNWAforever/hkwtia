@@ -10,7 +10,7 @@ import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
 import type {AppLocale} from '@/i18n/routing';
 import {partnersRepository, type PartnerProjection} from '@/lib/db/repos/partners';
-import {isPrivateMediaDeliveryUrl} from '@/lib/media/url';
+import {isPrivateMediaDeliveryUrl, mediaDeliverySrc} from '@/lib/media/url';
 import {buildPageMetadata} from '@/lib/metadata';
 import {sentenceGap} from '@/lib/i18n/sentence-gap';
 import {groupPublishedPartners} from '@/lib/partners/public-groups';
@@ -113,7 +113,7 @@ export default async function PartnersPage({params}: Props) {
                       <article className="partner-record-card partner-tile" key={partner.id}>
                         <div className="partner-record-logo">
                           {partner.logoUrl && partner.logoAlt ? (
-                            <Image alt={partner.logoAlt} height={202} src={partner.logoUrl} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
+                            <Image alt={partner.logoAlt} height={202} src={mediaDeliverySrc(partner.logoUrl, 640)} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
                           ) : null}
                         </div>
                         <div className="partner-record-body">

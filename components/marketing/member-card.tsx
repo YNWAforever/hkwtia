@@ -4,7 +4,7 @@ import Link from "next/link";
 import {industryTagLabel} from "@/config/industry-tags";
 import type {AppLocale} from "@/i18n/routing";
 import type {PublicMemberSummary} from "@/lib/db/repos/company-profiles";
-import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
+import {isPrivateMediaDeliveryUrl, mediaDeliverySrc} from "@/lib/media/url";
 import {localeText} from "@/lib/members/public";
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {localizedPath} from "@/lib/urls";
@@ -23,7 +23,7 @@ export function MemberCard({member, locale, labels}: Readonly<{member: PublicMem
         cannot fetch a signed, short-lived asset, exactly as ShowcaseCard does. */}
     <div className="partner-record-logo">
       {member.logoUrl
-        ? <Image alt={member.name} height={202} src={member.logoUrl} unoptimized={isPrivateMediaDeliveryUrl(member.logoUrl)} width={320} />
+        ? <Image alt={member.name} height={202} src={mediaDeliverySrc(member.logoUrl, 640)} unoptimized={isPrivateMediaDeliveryUrl(member.logoUrl)} width={320} />
         : <span aria-hidden="true">{member.name.slice(0, 1)}</span>}
     </div>
     <div className="partner-record-body">
