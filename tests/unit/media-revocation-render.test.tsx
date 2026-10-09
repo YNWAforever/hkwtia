@@ -31,7 +31,12 @@ const secureUrl = "/api/media/22222222-2222-4222-8222-222222222222";
 const staticUrl = "/images/showcase/static-logo.png";
 
 function expectDirectSecureAndOptimizedStatic() {
-  expect(screen.getByAltText("Secure logo")).toHaveAttribute("src", secureUrl);
+  // Uploaded media must reach /api/media/[id] directly, never /_next/image. Round 22 lets a surface
+  // ask that route for one listed width (?w=); the route resizes only after its own revocation and
+  // integrity checks, so the invariant is "direct to the delivery route", not "no query at all".
+  const secure = screen.getByAltText("Secure logo").getAttribute("src") ?? "";
+  expect(secure).not.toContain("/_next/image");
+  expect(secure).toMatch(new RegExp(`^${secureUrl}(\\?w=(160|320|480|640|960))?$`));
   expect(screen.getByAltText("Static logo").getAttribute("src"))
     .toContain("/_next/image?url=%2Fimages%2Fshowcase%2Fstatic-logo.png");
 }

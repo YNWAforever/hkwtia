@@ -5,7 +5,7 @@ import {describe, expect, it, vi} from "vitest";
 vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
-vi.mock("@/lib/media/url", () => ({isPrivateMediaDeliveryUrl: () => false}));
+vi.mock("@/lib/media/url", () => ({isPrivateMediaDeliveryUrl: () => false, mediaDeliverySrc: (url: string) => url}));
 
 const labels = {
   eyebrow: "Built on real relationships",

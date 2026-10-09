@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type {AppLocale} from "@/i18n/routing";
-import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
+import {isPrivateMediaDeliveryUrl, mediaDeliverySrc} from "@/lib/media/url";
 import type {PublicListing} from "@/lib/showcase/contracts";
 import {localizedPath} from "@/lib/urls";
 
@@ -14,7 +14,7 @@ export function ShowcaseCard({listing, locale, labels}: Readonly<{listing: Publi
   return <article className="partner-record-card">
     {listing.logo ? (
       <div className="partner-record-logo">
-        <Image alt={listing.logo.alt} height={202} src={listing.logo.url} unoptimized={isPrivateMediaDeliveryUrl(listing.logo.url)} width={320} />
+        <Image alt={listing.logo.alt} height={202} src={mediaDeliverySrc(listing.logo.url, 640)} unoptimized={isPrivateMediaDeliveryUrl(listing.logo.url)} width={320} />
       </div>
     ) : null}
     <div className="partner-record-body">

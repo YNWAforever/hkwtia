@@ -45,7 +45,7 @@ vi.mock("next-intl/server", () => ({
 
 const listPublished = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db/repos/partners", () => ({partnersRepository: {listPublished}}));
-vi.mock("@/lib/media/url", () => ({isPrivateMediaDeliveryUrl: () => false}));
+vi.mock("@/lib/media/url", () => ({isPrivateMediaDeliveryUrl: () => false, mediaDeliverySrc: (url: string) => url}));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
