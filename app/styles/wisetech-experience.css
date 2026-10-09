@@ -1021,6 +1021,32 @@ main:has(> .hero) > section:nth-of-type(13) :is(.section-heading > div, .archive
   .partner-record-card dl > div { padding-block: 8px; }
 }
 
+/* Round 18: /partners shows logo tiles. Every card used to repeat its group's badge,
+ * relationship and status, which made the page 30,016px tall on phones and 14,777px on desktop;
+ * that copy is now said once under each group heading (.partner-record-summary) and a tile keeps
+ * only what is its own. Scoped to .partner-tile so the /members and /showcase cards that share
+ * .partner-record-card are untouched. */
+.partner-record-summary { display: grid; gap: 6px; }
+.partner-record-summary p { max-width: 58ch; margin: 0; color: #536267; font-size: 14px; line-height: 1.5; }
+.partner-tile-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1200px) { .partner-tile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.partner-tile { min-height: 0; }
+.partner-tile > .partner-record-logo { aspect-ratio: 16 / 9; padding: 14px 18px; }
+.partner-tile > .partner-record-body { gap: 6px; padding: 14px 16px 16px; }
+.partner-tile h3 { margin: 0; font-size: 20px; line-height: 1.15; overflow-wrap: anywhere; }
+.partner-tile-meta { margin: 0; color: #58676d; font-size: 12px; line-height: 1.4; }
+.partner-tile-link {
+  display: inline-flex; min-height: 24px; max-width: 100%; align-items: center;
+  overflow: hidden; color: var(--wt-blue); font-size: 12px; text-overflow: ellipsis; white-space: nowrap;
+}
+@media (max-width: 900px) { .partner-tile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .partner-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+@media (max-width: 520px) {
+  .partner-tile > .partner-record-logo { height: auto; aspect-ratio: 16 / 9; padding: 10px 12px; }
+  .partner-tile > .partner-record-body { padding: 10px 12px 12px; }
+  .partner-tile h3 { margin: 0; font-size: 16px; }
+}
+
 /* The last text under 11px. The rich-page "related" links (About WTIA, Since 2001, ...) were
  * 9px and the compass labels (Founding year, Track record, ...) 10px on /about, /about/history,
  * /about/chairman, /about/committees and every programme page; the step numerals on

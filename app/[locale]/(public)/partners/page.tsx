@@ -8,7 +8,6 @@ import {Eyebrow} from '@/components/wt/eyebrow';
 import {HonestEmpty} from '@/components/wt/honest-empty';
 import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
-import {StatusLabel} from '@/components/wt/status-label';
 import type {AppLocale} from '@/i18n/routing';
 import {partnersRepository, type PartnerProjection} from '@/lib/db/repos/partners';
 import {isPrivateMediaDeliveryUrl} from '@/lib/media/url';
@@ -52,14 +51,6 @@ export default async function PartnersPage({params}: Props) {
   ]);
   const groups = groupPublishedPartners(partners);
 
-  const status = (partner: PartnerProjection): string => {
-    const start = year(partner.relationshipStartsOn);
-    const end = year(partner.relationshipEndsOn);
-    if (start && end) return t('record.window', {start, end});
-    if (start) return t('record.since', {year: start});
-    return t('record.confirmed');
-  };
-
   return (
     <>
       <PageHero
@@ -102,40 +93,40 @@ export default async function PartnersPage({params}: Props) {
                     <Eyebrow>{t('group.eyebrow')}</Eyebrow>
                     <h2 id={`partners-${group.category}-title`}>{t(`categories.${group.category}`)}</h2>
                   </div>
-                  <p>{t('group.count', {count: group.partners.length})}</p>
+                  <div className="partner-record-summary">
+                    <p>{t('group.count', {count: group.partners.length})}</p>
+                    {/* Said once for the group: every record in it shares this relationship and
+                        WTIA's confirmation. Repeated on each of 79 cards it made /partners
+                        30,016px tall on phones (round 18). */}
+                    <p>{t(`record.relationshipCopy.${group.category}`)} {t('record.confirmed')}</p>
+                  </div>
                 </div>
-                <div className="partner-record-grid">
-                  {group.partners.map((partner) => (
-                    <article className="partner-record-card" key={partner.id}>
-                      <div className="partner-record-logo">
-                        {partner.logoUrl && partner.logoAlt ? (
-                          <Image alt={partner.logoAlt} height={202} src={partner.logoUrl} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
-                        ) : null}
-                      </div>
-                      <div className="partner-record-body">
-                        <StatusLabel as="span" className="partner-status">{t('record.badge')}</StatusLabel>
-                        <h3>{partner.name}</h3>
-                        <dl>
-                          <div>
-                            <dt>{t('record.relationship')}</dt>
-                            <dd>{t(`record.relationshipCopy.${partner.category}`)}</dd>
-                          </div>
-                          {partner.websiteUrl ? (
-                            <div>
-                              <dt>{t('record.website')}</dt>
-                              <dd>
-                                <a href={partner.websiteUrl} rel="noreferrer">{partner.websiteUrl.replace(/^https?:\/\//, '')}</a>
-                              </dd>
-                            </div>
+                <div className="partner-record-grid partner-tile-grid">
+                  {group.partners.map((partner) => {
+                    // Only a recorded start or end year is particular to one partner; a plain
+                    // "Confirmed by WTIA" is already said under the group heading.
+                    const start = year(partner.relationshipStartsOn);
+                    const end = year(partner.relationshipEndsOn);
+                    const years = start && end ? t('record.tileWindow', {start, end}) : start ? t('record.tileSince', {year: start}) : null;
+                    return (
+                      <article className="partner-record-card partner-tile" key={partner.id}>
+                        <div className="partner-record-logo">
+                          {partner.logoUrl && partner.logoAlt ? (
+                            <Image alt={partner.logoAlt} height={202} src={partner.logoUrl} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
                           ) : null}
-                          <div>
-                            <dt>{t('record.status')}</dt>
-                            <dd>{status(partner)}</dd>
-                          </div>
-                        </dl>
-                      </div>
-                    </article>
-                  ))}
+                        </div>
+                        <div className="partner-record-body">
+                          <h3>{partner.name}</h3>
+                          {years ? <p className="partner-tile-meta">{years}</p> : null}
+                          {partner.websiteUrl ? (
+                            <a className="partner-tile-link" href={partner.websiteUrl} rel="noreferrer">
+                              {partner.websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                            </a>
+                          ) : null}
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               </section>
             ))}

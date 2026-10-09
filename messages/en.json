@@ -1269,8 +1269,6 @@
       "count": "{count, plural, one {# published record} other {# published records}}"
     },
     "record": {
-      "badge": "Published record",
-      "relationship": "Relationship",
       "relationshipCopy": {
         "supporting": "Listed by WTIA as a supporting organisation.",
         "regional": "Listed by WTIA as a regional partner.",
@@ -1278,11 +1276,9 @@
         "programme": "Listed by WTIA as a programme partner.",
         "sponsor": "Listed by WTIA as a sponsor."
       },
-      "website": "Website",
-      "status": "Current status",
-      "confirmed": "Confirmed by WTIA",
-      "since": "Confirmed by WTIA, since {year}",
-      "window": "Confirmed by WTIA, {start} to {end}"
+      "confirmed": "Confirmed by WTIA.",
+      "tileSince": "Since {year}",
+      "tileWindow": "{start}–{end}"
     },
     "empty": {
       "label": "Published records",
