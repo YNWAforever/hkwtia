@@ -1269,8 +1269,6 @@
       "count": "{count} 項已發布紀錄"
     },
     "record": {
-      "badge": "已發布紀錄",
-      "relationship": "關係",
       "relationshipCopy": {
         "supporting": "由 WTIA 列為支持機構。",
         "regional": "由 WTIA 列為區域夥伴。",
@@ -1278,11 +1276,9 @@
         "programme": "由 WTIA 列為計劃夥伴。",
         "sponsor": "由 WTIA 列為贊助機構。"
       },
-      "website": "網站",
-      "status": "現時狀態",
-      "confirmed": "已由 WTIA 確認",
-      "since": "已由 WTIA 確認，自 {year} 年起",
-      "window": "已由 WTIA 確認，{start} 至 {end}"
+      "confirmed": "已由 WTIA 確認。",
+      "tileSince": "自 {year} 年起",
+      "tileWindow": "{start} 至 {end}"
     },
     "empty": {
       "label": "已發布紀錄",

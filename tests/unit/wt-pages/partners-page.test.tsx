@@ -83,8 +83,18 @@ describe("PartnersPage", () => {
     expect(first.textContent).toContain("2019");
     expect(first.textContent).not.toMatch(/unconfirmed/i);
 
+    // Round 18: what every record in a group shares is said once, under the group heading, and
+    // each tile carries only what is its own (logo, name, years, website). On phones the page was
+    // 30,016px tall because 79 cards each repeated badge, relationship and status.
     const second = screen.getByRole("heading", {name: "Partner 2"}).closest("article")!;
-    expect(second.textContent).toContain(bundles.en.Partners.record.confirmed);
+    expect(second.textContent).not.toContain("Published record");
+    expect(second.textContent).not.toContain(bundles.en.Partners.record.confirmed);
+    expect(second.textContent).not.toContain(bundles.en.Partners.record.relationshipCopy.supporting);
+    expect(document.querySelectorAll(".partner-tile")).toHaveLength(3);
+    const supporting = document.getElementById("partners-supporting")!;
+    const shared = supporting.textContent!;
+    expect(shared.split(bundles.en.Partners.record.relationshipCopy.supporting)).toHaveLength(2);
+    expect(shared.split(bundles.en.Partners.record.confirmed)).toHaveLength(2);
 
     const third = screen.getByRole("heading", {name: "Partner 3"}).closest("article")!;
     expect(third.textContent).toContain("2021");

@@ -176,16 +176,18 @@ describe("page copy scope", () => {
       AiTransparency: 31,
       // WP-7 Task 3: the /programmes index copy.
       Programmes: 33,
-      // WP-7 Task 5: the /partners page copy.
-      Partners: 38,
+      // WP-7 Task 5: the /partners page copy. Round 18 (logo tiles) removed record.badge,
+      // relationship, website, status, since and window and added tileSince/tileWindow:
+      // 38 - 6 + 2 = 34. Production had no overrides on any Partners.record key.
+      Partners: 34,
       // WP-5 added one editable field: the footer tagline, moved out of the
       // deliberately-excluded structural Footer namespace into this new,
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
     // 577 + the 22 Home strings of the 2026-10 experience pass (see Home above) = 599,
-    // + Membership.breadcrumbCurrent (experience round 12) = 600.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(600);
+    // + Membership.breadcrumbCurrent (experience round 12) = 600, - 4 Partners keys (round 18) = 596.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(596);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
