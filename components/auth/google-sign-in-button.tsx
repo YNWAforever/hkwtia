@@ -2,7 +2,13 @@
 
 import {useState} from "react";
 
-import {authClient} from "@/lib/auth/client";
+/**
+ * The auth client (Better Auth, with its Zod and phone-number code) is ~400KB of decoded script.
+ * Imported at module level it shipped with /join and every sign-in page before anyone clicked, so
+ * it is fetched on demand: warmed when the pointer reaches the button or it gains focus, awaited
+ * on click (round 20).
+ */
+const loadAuthClient = () => import("@/lib/auth/client").then((module) => module.authClient);
 
 type Props = Readonly<{
   callbackURL: string;
@@ -19,6 +25,7 @@ export function GoogleSignInButton({callbackURL, enabled, labels}: Props) {
     setPending(true);
     setError(false);
     try {
+      const authClient = await loadAuthClient();
       const result = await authClient.signIn.social({provider: "google", callbackURL});
       if (result?.error) setError(true);
     } catch {
@@ -29,7 +36,7 @@ export function GoogleSignInButton({callbackURL, enabled, labels}: Props) {
   }
 
   return <>
-    <button className="mt-8 flex min-h-11 w-full items-center justify-center rounded-md border border-input bg-background px-4 font-medium disabled:opacity-50" disabled={!enabled || pending} onClick={() => void startGoogle()} type="button">
+    <button className="mt-8 flex min-h-11 w-full items-center justify-center rounded-md border border-input bg-background px-4 font-medium disabled:opacity-50" disabled={!enabled || pending} onClick={() => void startGoogle()} onFocus={() => { if (enabled) void loadAuthClient(); }} onPointerEnter={() => { if (enabled) void loadAuthClient(); }} type="button">
       {labels.google}
     </button>
     {!enabled ? <p className="mt-2 text-sm text-muted-foreground">{labels.googleUnavailable}</p> : null}
