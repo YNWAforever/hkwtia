@@ -105,6 +105,16 @@ describe("PartnersPage", () => {
     expect(screen.queryByRole("status")).toBeNull();
   });
 
+  // Round 19: joining the two sentences with a literal space left a visible 「。 」 gap in Chinese.
+  it("joins the group's shared sentences without a space after full-width punctuation in Chinese", async () => {
+    listPublished.mockResolvedValue([row("1", "supporting")]);
+    const {default: PartnersPage} = await import("@/app/[locale]/(public)/partners/page");
+    render(await PartnersPage({params: Promise.resolve({locale: "zh-HK"})}));
+    const zh = bundles["zh-HK"].Partners.record;
+    const shared = document.querySelector("#partners-supporting .partner-record-summary p:last-child")!;
+    expect(shared.textContent).toBe(`${zh.relationshipCopy.supporting}${zh.confirmed}`);
+  });
+
   it("renders the honest empty state, and no category nav, when nothing is published", async () => {
     listPublished.mockResolvedValue([]);
     const {default: PartnersPage} = await import("@/app/[locale]/(public)/partners/page");

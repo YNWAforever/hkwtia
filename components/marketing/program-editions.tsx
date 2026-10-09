@@ -1,6 +1,7 @@
 import {MediaGallery} from '@/components/marketing/media-gallery';
 import {StorySection} from '@/components/marketing/story-section';
 import type {ProgramImage, ProgramWinners} from '@/content/schemas';
+import {sentenceGap} from '@/lib/i18n/sentence-gap';
 
 /**
  * One edition, with every string already localised.
@@ -136,7 +137,7 @@ function Winners({
   if (winners.kind === 'off-site') {
     return (
       <p className="text-muted-foreground mt-4">
-        {offSite}{' '}
+        {offSite}{sentenceGap(offSite)}
         {/* An external microsite, so a bare <a> is correct — localizedPath and
             next-intl's Link are for our own routes only. */}
         <a className="inline-flex min-h-6 items-center underline" href={winners.url} rel="noreferrer" target="_blank">

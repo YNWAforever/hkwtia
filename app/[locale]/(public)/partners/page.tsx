@@ -12,6 +12,7 @@ import type {AppLocale} from '@/i18n/routing';
 import {partnersRepository, type PartnerProjection} from '@/lib/db/repos/partners';
 import {isPrivateMediaDeliveryUrl} from '@/lib/media/url';
 import {buildPageMetadata} from '@/lib/metadata';
+import {sentenceGap} from '@/lib/i18n/sentence-gap';
 import {groupPublishedPartners} from '@/lib/partners/public-groups';
 import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
 import {buildBreadcrumbData} from '@/lib/structured-data';
@@ -98,7 +99,7 @@ export default async function PartnersPage({params}: Props) {
                     {/* Said once for the group: every record in it shares this relationship and
                         WTIA's confirmation. Repeated on each of 79 cards it made /partners
                         30,016px tall on phones (round 18). */}
-                    <p>{t(`record.relationshipCopy.${group.category}`)} {t('record.confirmed')}</p>
+                    <p>{t(`record.relationshipCopy.${group.category}`)}{sentenceGap(t(`record.relationshipCopy.${group.category}`))}{t('record.confirmed')}</p>
                   </div>
                 </div>
                 <div className="partner-record-grid partner-tile-grid">
