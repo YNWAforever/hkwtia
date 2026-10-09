@@ -336,6 +336,20 @@ test.describe('round 10', () => {
   });
 });
 
+// Round 25 (owner decision 2026-10-10): on phones the homepage partner strip ran two tiles a row,
+// each at least 258px tall — 1,353px for 12 logos. Three smaller tiles a row keep all 12 in view.
+test('on phones the homepage partner strip shows three compact tiles a row', async ({page}) => {
+  await page.setViewportSize({width: 390, height: 844});
+  const names = ['HBCC Investment', 'The Association of Accredited Advertising Agencies of Hong Kong (HK4As)', 'Hong Kong Computer Society'];
+  const card = (name: string) => `<article class="legacy-logo-card"><div class="legacy-logo-image"><img alt="${name} logo" width="320" height="202" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div><h3>${name}</h3></article>`;
+  await render(page, `<section class="legacy-network"><div class="shell"><div class="legacy-logo-rail">${Array.from({length: 12}, (_, i) => card(names[i % 3])).join('')}</div></div></section>`);
+  const cards = await page.locator('.legacy-logo-card').evaluateAll((nodes) => nodes.map((n) => ({left: Math.round(n.getBoundingClientRect().left), height: n.getBoundingClientRect().height, font: parseFloat(getComputedStyle(n.querySelector('h3')!).fontSize)})));
+  expect(new Set(cards.map((c) => c.left)).size).toBe(3);
+  expect(Math.max(...cards.map((c) => c.height))).toBeLessThan(200);
+  expect(Math.min(...cards.map((c) => c.font))).toBeGreaterThanOrEqual(11);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
+
 // Round 11: /partners category counts match the homepage tabs.
 test('the /partners category counts are 12px, like the homepage partner tabs', async ({page}) => {
   // app/[locale]/(public)/partners/page.tsx: the count in a 38px ring stayed at 11px.
