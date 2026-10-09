@@ -40,8 +40,12 @@ export function createMediaGet(dependencies: Dependencies) {
       if (createHash("sha256").update(bytes).digest("hex") !== row.checksumSha256) {
         return notFoundResponse();
       }
+      // Verified bytes may sit in Vercel's CDN for 5 minutes; browsers always revalidate. no-store
+      // made every partner logo a 1-2.4s function call (round 21). The owner accepted (2026-10-09)
+      // that an archived item can be served for at most those 5 minutes; every not-found answer,
+      // archived media included, stays no-store above.
       return new Response(stream(bytes), {status: 200, headers: {
-        "Cache-Control": "no-store", "Content-Disposition": "inline",
+        "Cache-Control": "public, max-age=0, s-maxage=300, must-revalidate", "Content-Disposition": "inline",
         "Content-Length": String(row.byteSize), "Content-Type": row.contentType,
         ETag: row.storageEtag, "X-Content-Type-Options": "nosniff",
       }});
