@@ -4,7 +4,7 @@ import {sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
-import {auditEvents, contacts, eventGuestRegistrations, joinInvites, leads, membershipApplications, profiles} from "@/lib/db/server-schema";
+import {auditEvents, contacts, eventGuestRegistrations, joinInvites, leads, membershipApplications, memberships, profiles} from "@/lib/db/server-schema";
 import {insertContactActivity} from "@/lib/db/repos/contact-activities";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
@@ -370,6 +370,28 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
           contactId, actorProfileId: null, kind: "applied",
           meta: {inviteId: parsed.inviteId, applicationId: parsed.applicationId},
         });
+        // A free-plan application is already active by the time the action reaches us:
+        // `completeApplication` runs before attribution, and its own member flip found no contact
+        // because this statement is what links one. So the invitee must go straight to `member` here,
+        // forward-only over the funnel stages (never `closed`), with one timeline entry per real move.
+        const active = rowsFrom(await transaction.execute(sql`
+          SELECT 1 AS active FROM ${memberships}
+          WHERE application_id = ${parsed.applicationId} AND status = 'active' LIMIT 1
+        `))[0];
+        if (active) {
+          const moved = rowsFrom(await transaction.execute(sql`
+            UPDATE ${contacts}
+            SET stage = 'member', updated_at = now()
+            WHERE id = ${contactId} AND stage IN ('new', 'contacted', 'qualified', 'applied')
+            RETURNING id
+          `))[0];
+          if (moved) {
+            await insertContactActivity(transaction, {
+              contactId, actorProfileId: null, kind: "became_member",
+              meta: {via: "invite", applicationId: parsed.applicationId},
+            });
+          }
+        }
         await transaction.execute(sql`
           INSERT INTO ${auditEvents}
             (actor_user_id, actor_type, action, target_type, target_id, metadata)

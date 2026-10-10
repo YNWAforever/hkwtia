@@ -322,6 +322,50 @@ describe("joinInvitesRepository.consume", () => {
     expect(texts.some((text) => text.includes("join_invite.consumed"))).toBe(true);
   });
 
+  describe("free-plan invitee (membership already active when consume runs)", () => {
+    function fake(hasActive: boolean, moves: boolean) {
+      return fakeDatabase((text) => {
+        if (text.includes("applicant_user_id") && text.startsWith("SELECT")) return [{id: applicationId}];
+        if (text.startsWith("UPDATE \"join_invites\"")) return [{contact_id: contactId}];
+        if (text.includes("FROM \"memberships\"")) return hasActive ? [{active: 1}] : [];
+        if (text.startsWith("UPDATE \"contacts\"") && text.includes("stage = 'member'")) return moves ? [{id: contactId}] : [];
+        return [];
+      });
+    }
+    const kinds = (statements: readonly Statement[]) => statements
+      .filter((statement) => statement.text.includes("INSERT INTO \"contact_activities\""))
+      .map((statement) => statement.params.find((param) => param === "applied" || param === "became_member"));
+
+    it("moves the contact to member after the applied entry, both activities in order", async () => {
+      const f = fake(true, true);
+      await expect(createJoinInvitesRepository(async () => f.database as never).consume(member, {inviteId, applicationId})).resolves.toBe("consumed");
+      const statements = f.transactions[0]!;
+      const texts = statements.map((statement) => statement.text);
+      const toMember = texts.find((text) => text.includes("stage = 'member'"))!;
+      expect(toMember).toContain("IN ('new', 'contacted', 'qualified', 'applied')");
+      expect(toMember).not.toContain("'closed'");
+      // The link happens before the membership check, so the order problem (flip ran earlier, found
+      // nothing) cannot recur: the contact ends at member whichever action ran first.
+      expect(texts.findIndex((text) => text.includes("profile_id IS NULL"))).toBeLessThan(texts.findIndex((text) => text.includes("stage = 'member'")));
+      expect(kinds(statements)).toEqual(["applied", "became_member"]);
+    });
+
+    it("writes no became_member entry when the contact was already member or closed", async () => {
+      const f = fake(true, false);
+      await createJoinInvitesRepository(async () => f.database as never).consume(member, {inviteId, applicationId});
+      expect(kinds(f.transactions[0]!)).toEqual(["applied"]);
+    });
+
+    it("keeps applied, and never touches the stage to member, without an active membership", async () => {
+      const f = fake(false, true);
+      await createJoinInvitesRepository(async () => f.database as never).consume(member, {inviteId, applicationId});
+      const texts = f.transactions[0]!.map((statement) => statement.text);
+      expect(texts.some((text) => text.includes("stage = 'member'"))).toBe(false);
+      expect(texts.some((text) => text.includes("stage = 'applied'") && text.includes("IN ('new', 'contacted', 'qualified')"))).toBe(true);
+      expect(kinds(f.transactions[0]!)).toEqual(["applied"]);
+    });
+  });
+
   it("does not swallow other errors from the link", async () => {
     const fake = fakeDatabase(
       (text) => (text.includes("applicant_user_id") && text.startsWith("SELECT") ? [{id: applicationId}] : text.startsWith("UPDATE \"join_invites\"") ? [{contact_id: contactId}] : []),
