@@ -247,6 +247,29 @@ describe("contactsRepository", () => {
       await repository.linkProfile(contactWriterActor("import"), input);
       expect(became(statements)).toHaveLength(0);
     });
+
+    /**
+     * Final review C1. The profile save (join profile step, portal profile save) links the
+     * contact BEFORE the application is submitted or paid. With invite prefill the phone match
+     * is near-certain, so an unconditional flip turned every invitee who reached the profile
+     * step into a Member. The claim may only move the stage when the profile already holds an
+     * ACTIVE membership, as owner or as the applicant of the membership's application.
+     */
+    it("gates the member move on an active membership held by the profile (owner or applicant)", async () => {
+      const {statements, database} = linkRecorder([[{id: "c-1", previous_stage: "qualified", stage: "qualified"}]]);
+      const repository = createContactsRepository(async () => database);
+      await expect(repository.linkProfile(contactWriterActor("import"), input))
+        .resolves.toMatchObject({linked: "c-1"});
+      const claim = statements.find((statement) => statement.sql.replace(/\s+/g, " ").trim().toLowerCase().startsWith("update \"contacts\""))!;
+      const text = claim.sql.replace(/\s+/g, " ").toLowerCase();
+      expect(text).toContain("exists (select 1 from \"memberships\" m");
+      expect(text).toContain("m.status = 'active'");
+      expect(text).toContain("m.owner_user_id =");
+      expect(text).toContain("a.applicant_user_id =");
+      expect(claim.params.filter((value) => value === "p-1").length).toBeGreaterThanOrEqual(3);
+      // The invitee who only saved a profile keeps their stage and gets no became_member entry.
+      expect(became(statements)).toHaveLength(0);
+    });
   });
 
   /** Phase E fix F1: the activation-time flip for contacts linked by invite consumption. */

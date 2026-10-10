@@ -16,6 +16,7 @@ import {
   events,
   joinInvites,
   leads,
+  membershipApplications,
   memberships,
   profiles,
   showcaseListings,
@@ -816,10 +817,11 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
 
     /**
      * Phase E fix F1. `linkProfile` flips a prospect to `member` only inside its
-     * `profile_id IS NULL` claim, but an invited contact is linked by
-     * `joinInvitesRepository.consume` (profile_id set directly), so that flip never
-     * ran for them and paying invitees stayed `applied`. This is the second flip,
-     * called where a membership becomes active.
+     * `profile_id IS NULL` claim, and (final review C1) only when the profile
+     * already holds an active membership. An invited contact is linked at the
+     * profile step or by `joinInvitesRepository.consume`, before payment, so the
+     * paying invitee's move to `member` happens here, where a membership becomes
+     * active.
      *
      * Forward-only over the funnel stages: `closed` was a decision somebody made
      * and `member` is already the answer. The UPDATE's own stage predicate is the
@@ -910,8 +912,21 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
               -- A prospect who has become a member is no longer in the funnel.
               -- Only the funnel stages move: 'closed' was a decision somebody
               -- made and 'member' is already the answer.
+              --
+              -- Final review C1: "has become a member" means an ACTIVE membership,
+              -- not a saved profile. This claim runs at the join profile step, before
+              -- the application is submitted or paid, and invite prefill makes the
+              -- phone match near-certain; an unconditional flip showed every invitee
+              -- who abandoned checkout as Member. Owner OR applicant, so a company
+              -- membership the profile applied for counts. Activation itself moves
+              -- the stage later (markMemberForProfile, consume's active check).
               stage = CASE
-                WHEN ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied') THEN 'member'
+                WHEN ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied')
+                  AND EXISTS (SELECT 1 FROM ${memberships} m
+                    LEFT JOIN ${membershipApplications} a ON a.id = m.application_id
+                    WHERE m.status = 'active'
+                      AND (m.owner_user_id = ${parsed.profileId} OR a.applicant_user_id = ${parsed.profileId}))
+                  THEN 'member'
                 ELSE ${contacts.stage}
               END,
               updated_at = now()
