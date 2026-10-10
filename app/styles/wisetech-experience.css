@@ -1139,6 +1139,16 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .archive-photo-grid > .archive-photo-card { display: flex; flex-direction: column; scroll-snap-align: start; }
 }
 
+/* Round 25 (owner decision 2026-10-10): on a phone the homepage partner strip ran two tiles a row,
+ * each at least 258px tall (wisetech.css:782, :883) — 1,353px for 12 logos. Three compact tiles a
+ * row keep all 12 in view in about half that; names stay at the 11px floor and wrap rather than
+ * truncate. */
+@media (max-width: 520px) {
+  .legacy-logo-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .legacy-logo-card { min-height: 0; padding: 8px; }
+  .legacy-logo-card h3 { margin: 8px 0 0; font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+}
+
 /* ─── Round 11 (2026-10-07): /partners category counts ───────────────────────────────────
  * The homepage partner tabs' counts went to 12px in round 10; the same counts in the
  * /partners category nav (a 38px ring) stayed at the donor's 11px. One size for one idea. */
