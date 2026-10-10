@@ -50,10 +50,13 @@ describe("Contact durable journeys and Concierge launcher", () => {
     expect(en).toContain('href="/launchpad"');
     expect(en).not.toMatch(/<form\b/);
 
-    expect(zh).toContain('href="/zh/events"');
-    expect(zh).toContain('href="/zh/membership"');
-    expect(zh).toContain('href="/zh/showcase"');
-    expect(zh).toContain('href="/zh/launchpad"');
+    // The Link is mocked to a plain <a>, so these are the hrefs handed to it. The real Link adds
+    // /zh itself; these assertions once pinned "/zh/events", and production served /zh/zh/events.
+    expect(zh).toContain('href="/events"');
+    expect(zh).toContain('href="/membership"');
+    expect(zh).toContain('href="/showcase"');
+    expect(zh).toContain('href="/launchpad"');
+    expect(zh).not.toContain('href="/zh/zh/');
     expect(zh).not.toMatch(/<form\b/);
   });
 

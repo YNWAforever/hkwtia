@@ -37,9 +37,9 @@ vi.mock("@/i18n/navigation", () => ({
 
 import ContactPage from "@/app/[locale]/(public)/contact/page";
 
-async function renderContact(topic?: string) {
+async function renderContact(topic?: string, locale: "en" | "zh-HK" = "en") {
   return render(await ContactPage({
-    params: Promise.resolve({locale: "en"}),
+    params: Promise.resolve({locale}),
     searchParams: Promise.resolve(topic ? {topic} : {}),
   }));
 }
@@ -51,6 +51,15 @@ describe("Contact page — six-card grid and prepared-email composer", () => {
     expect(cards).toHaveLength(6);
     const hrefs = [...cards].map((card) => card.getAttribute("href"));
     expect(hrefs).toEqual(expect.arrayContaining(["/events", "/membership", "/showcase", "/launchpad", "/about", "/news"]));
+  });
+
+  // Round 27 found all six cards linking to /zh/zh/… on production: InnerCardGrid's Link adds
+  // the locale prefix itself, and the page had already run every href through localizedPath.
+  // The English render could never show it — the en prefix is empty.
+  it("hands the cards unprefixed paths in Chinese too, so the Link prefixes them once", async () => {
+    await renderContact(undefined, "zh-HK");
+    const hrefs = [...document.querySelectorAll("a.inner-card")].map((card) => card.getAttribute("href"));
+    expect(hrefs).toEqual(["/events", "/membership", "/showcase", "/launchpad", "/about", "/news"]);
   });
 
   it("seeds the topic composer from ?topic= and defaults to 'portal'", async () => {

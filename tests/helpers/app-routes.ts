@@ -26,5 +26,9 @@ function appRouteForPage(appRoot: string, file: string): string {
  */
 export function listAppRoutes(root = process.cwd()): string[] {
   const appRoot = resolve(root, "app", "[locale]");
-  return filesNamed(appRoot, "page.tsx").map((file) => appRouteForPage(appRoot, file));
+  return filesNamed(appRoot, "page.tsx")
+    .map((file) => appRouteForPage(appRoot, file))
+    // A catch-all (`app/[locale]/[...rest]`, round 28) only sends unmatched URLs to the branded
+    // 404. It is not a destination: counting it would make every path look like a real page.
+    .filter((route) => !route.split("/").some((segment) => segment.startsWith("[...") || segment.startsWith("[[...")));
 }
