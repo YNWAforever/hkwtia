@@ -100,7 +100,9 @@ export async function createLeadInviteAction(
 ): Promise<LeadInviteCreateState> {
   try {
     const who = await requireAdminActor();
-    const created = await createLeadInvite(who, formData.get("contactId"), formData.get("planCode"));
+    const created = await createLeadInvite(
+      who, formData.get("contactId"), formData.get("planCode"), undefined, formData.get("confirmSupersede") === "on",
+    );
     revalidateAdminPath(path);
     return {status: "created", url: created.url, inviteId: created.inviteId};
   } catch (error) {

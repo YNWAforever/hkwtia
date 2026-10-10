@@ -311,9 +311,10 @@ describe("WiseTech protected route ownership", () => {
     // T17 adds an own-editor private preview under /admin using the public layout.
     // Full remediation T07 adds the authenticated knowledge version workspace.
     // T18 adds the actor-scoped global workspace search read page.
+    // Phase E Task 10 adds /admin/reports/leads: 87 + 1 = 88.
     expect(codeFiles).toContain("app/[locale]/(admin)/admin/ai-review/page.tsx");
-    expect(codeFiles).toHaveLength(86);
-    expect(inventoryFiles).toHaveLength(86);
+    expect(codeFiles).toHaveLength(88);
+    expect(inventoryFiles).toHaveLength(88);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -333,7 +334,8 @@ describe("WiseTech protected route ownership", () => {
     // Phase C2 Task 9 (C-5) added the campaign wizard and its detail page: 32 + 2 = 34.
     // Phase D-4b Task 5 added the scan-reached door check-in page: 34 + 1 = 35.
     // Full fix T18 adds search; T10 adds one role-checked existing draft review page.
-    expect(count("admin-page")).toBe(47);
+    // Phase E Task 10 added the lead conversion report: 47 + 1 = 48.
+    expect(count("admin-page")).toBe(48);
     // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
     // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
     // session, and there is no HMAC in front of it — which is exactly why its
@@ -347,9 +349,10 @@ describe("WiseTech protected route ownership", () => {
     // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
     // Showcase lead recovery and ticket email delivery add two authenticated jobs.
     // Audit remediation adds the cancellation notification job.
-    expect(count("job-handler")).toBe(18);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(47);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(39);
+    // Phase E Task 9 adds the daily lead-reminders digest job.
+    expect(count("job-handler")).toBe(19);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(48);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(40);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

@@ -364,13 +364,92 @@ describe("joinInvitesRepository.consume", () => {
       expect(texts.some((text) => text.includes("stage = 'applied'") && text.includes("IN ('new', 'contacted', 'qualified')"))).toBe(true);
       expect(kinds(f.transactions[0]!)).toEqual(["applied"]);
     });
+
+    it("audits the member move as contact.became_member, like markMemberForProfile", async () => {
+      const moved = fake(true, true);
+      await createJoinInvitesRepository(async () => moved.database as never).consume(member, {inviteId, applicationId});
+      const audits = moved.transactions[0]!.filter((statement) => statement.text.startsWith("INSERT INTO \"audit_events\"") && statement.text.includes("'contact.became_member'"));
+      expect(audits).toHaveLength(1);
+      expect(audits[0]!.params).toEqual(expect.arrayContaining([contactId]));
+      const still = fake(true, false);
+      await createJoinInvitesRepository(async () => still.database as never).consume(member, {inviteId, applicationId});
+      expect(still.transactions[0]!.some((statement) => statement.text.includes("'contact.became_member'"))).toBe(false);
+    });
+  });
+
+  /**
+   * Final review I1. Abandon checkout, staff re-mint, the lead resubmits the SAME application:
+   * without a guard the second consume re-points `invite_id` and both invites claim the
+   * application. The spend refuses when another invite already holds it, and the application
+   * row is locked so two concurrent consumes for one application serialise on it.
+   */
+  it("refuses to spend a second invite on an application another invite already holds", async () => {
+    const fake = fakeDatabase((text) => (text.includes("applicant_user_id") && text.startsWith("SELECT") ? [{id: applicationId}] : []));
+    const result = await createJoinInvitesRepository(async () => fake.database as never).consume(member, {inviteId, applicationId});
+    expect(result).toBe("not_live");
+    const texts = fake.transactions[0]!.map((statement) => statement.text);
+    expect(texts[0]).toContain("FOR UPDATE");
+    const spend = fake.transactions[0]!.find((statement) => statement.text.startsWith("UPDATE \"join_invites\""))!;
+    expect(spend.text).toMatch(/NOT EXISTS \(SELECT 1 FROM "join_invites" other WHERE other\.application_id = \$\d+ AND other\.id <> \$\d+\)/);
+    expect(spend.params).toEqual(expect.arrayContaining([applicationId, inviteId]));
+    expect(texts.filter((text) => /^(UPDATE|INSERT)/.test(text))).toHaveLength(1);
   });
 
   it("does not swallow other errors from the link", async () => {
     const fake = fakeDatabase(
       (text) => (text.includes("applicant_user_id") && text.startsWith("SELECT") ? [{id: applicationId}] : text.startsWith("UPDATE \"join_invites\"") ? [{contact_id: contactId}] : []),
-      (text) => (text.includes("NOT EXISTS") ? new Error("connection lost") : null),
+      (text) => (text.startsWith("UPDATE \"contacts\"") && text.includes("NOT EXISTS") ? new Error("connection lost") : null),
     );
     await expect(createJoinInvitesRepository(async () => fake.database as never).consume(member, {inviteId, applicationId})).rejects.toThrow("connection lost");
+  });
+});
+
+/**
+ * Final review I4. The magic link opened in another browser carries no `wtia_invite` cookie, so
+ * attribution falls back to the newest live invite whose contact's email is the signed-in
+ * profile's own. Member only, read only, and the email comes from the profile row, never input.
+ */
+describe("joinInvitesRepository.liveInviteIdForMember", () => {
+  it("refuses non-member actors before the database loads", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createJoinInvitesRepository(loadDatabase);
+    await expect(repository.liveInviteIdForMember(admin as never)).rejects.toThrow("FORBIDDEN");
+    await expect(repository.liveInviteIdForMember(ANONYMOUS_ACTOR as never)).rejects.toThrow("FORBIDDEN");
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("matches the profile's email case-insensitively against live invites only, newest first, with no write", async () => {
+    const fake = fakeDatabase((text) => (text.startsWith("SELECT") ? [{id: inviteId}] : []));
+    await expect(createJoinInvitesRepository(async () => fake.database as never).liveInviteIdForMember(member)).resolves.toBe(inviteId);
+    expect(fake.transactions).toHaveLength(0);
+    expect(fake.outer).toHaveLength(1);
+    const lookup = fake.outer[0]!;
+    expect(lookup.text).toContain("lower(c.email) = lower(p.email)");
+    expect(lookup.text).toContain("p.id = $");
+    expect(lookup.params).toContain(member.profileId);
+    expect(lookup.text).toContain("i.consumed_at IS NULL AND i.superseded_at IS NULL AND i.expires_at > now()");
+    expect(lookup.text).toContain("ORDER BY i.created_at DESC");
+  });
+
+  it("answers null when nothing matches", async () => {
+    const fake = fakeDatabase(() => []);
+    await expect(createJoinInvitesRepository(async () => fake.database as never).liveInviteIdForMember(member)).resolves.toBeNull();
+  });
+});
+
+/** Final review M3: the emailed link must be the invite and contact the form names. */
+describe("joinInvitesRepository.tokenBelongsTo", () => {
+  it("is admin only, answers false for a malformed token without a query, and binds digest, invite and contact", async () => {
+    const loadDatabase = vi.fn();
+    await expect(createJoinInvitesRepository(loadDatabase).tokenBelongsTo(member as never, {token: validToken, inviteId, contactId})).rejects.toThrow("FORBIDDEN");
+    await expect(createJoinInvitesRepository(loadDatabase).tokenBelongsTo(admin as never, {token: "short", inviteId, contactId})).resolves.toBe(false);
+    expect(loadDatabase).not.toHaveBeenCalled();
+
+    const hit = fakeDatabase(() => [{id: inviteId}]);
+    await expect(createJoinInvitesRepository(async () => hit.database as never).tokenBelongsTo(admin as never, {token: validToken, inviteId, contactId})).resolves.toBe(true);
+    expect(hit.outer[0]!.params).toEqual(expect.arrayContaining([digestInviteToken(validToken), inviteId, contactId]));
+    expect(hit.outer[0]!.params).not.toContain(validToken);
+    const miss = fakeDatabase(() => []);
+    await expect(createJoinInvitesRepository(async () => miss.database as never).tokenBelongsTo(admin as never, {token: validToken, inviteId, contactId})).resolves.toBe(false);
   });
 });

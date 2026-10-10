@@ -33,6 +33,7 @@ export const JOB_HEALTH_SCHEDULE = {
     graceMs: 120000,
     flag: "MEMBER_IMPORT_RETENTION_ENABLED",
   },
+  "lead-reminders": {crons: ["0 0 * * *"], graceMs: 3_600_000},
 } as const;
 export type HealthJobKey = keyof typeof JOB_HEALTH_SCHEDULE;
 export const HEALTH_JOB_KEYS = Object.freeze(

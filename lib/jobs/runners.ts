@@ -29,6 +29,7 @@ import {
 } from "@/lib/ai/board-reporter/service";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {runJourneyBatch} from "@/lib/automation/journey-runner";
+import {runLeadReminders} from "@/lib/automation/lead-reminders";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
 import {
   resolveM4BAcceptanceOwnershipKey,
@@ -118,6 +119,7 @@ const workerAlertSchema = z.object({
     "membership-grant-expiry",
     "rate-limit-cleanup",
     "member-import-retention",
+    "lead-reminders",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -152,6 +154,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runEventNotifications(now: Date): Promise<unknown>;
   runShowcaseLeadEmails(now: Date): Promise<unknown>;
   runTicketEmails(now: Date): Promise<unknown>;
+  runLeadReminders(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -687,6 +690,7 @@ export function createJobRunners(
     ((now: Date) => drainLeadEmailOutbox(now, productionLeadEmailDependencies()));
   const runTicketEmails = overrides.runTicketEmails ??
     ((now: Date) => drainTicketEmailOutbox(now, productionTicketEmailDependencies()));
+  const runLeadRemindersJob = overrides.runLeadReminders ?? ((now: Date) => runLeadReminders(now));
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -732,6 +736,9 @@ export function createJobRunners(
     },
     ticketEmails(now: Date) {
       return runTicketEmails(now);
+    },
+    leadReminders(now: Date) {
+      return runLeadRemindersJob(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

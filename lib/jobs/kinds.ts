@@ -81,6 +81,9 @@ export const PHASE_D_JOB_KINDS = [
 
 export type PhaseDJobKind = typeof PHASE_D_JOB_KINDS[number];
 
+/** Phase E. Separate from the M3 partial-index list, for the reason PHASE_D_JOB_KIND records. */
+export const LEAD_JOB_KIND = {REMINDERS: "lead-reminders"} as const;
+
 /** Kept out of the M3 partial-index kind list. */
 export const ADMIN_BATCH_JOB_KIND = {ADMIN_BATCHES: "admin-batches"} as const;
 

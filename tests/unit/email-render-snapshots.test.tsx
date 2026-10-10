@@ -22,6 +22,14 @@ const fixtureVars = {
   attendees: "Fixture Member, Fixture Attendee",
   refundPolicyUrl: "https://www.hkwtia.org/refund-policy",
   message: "Fixture personal note.",
+  overdueCount: 1,
+  overdue: "Fixture Lead (Call back, 2030-03-01)",
+  dueTodayCount: 0,
+  dueToday: "-",
+  staleCount: 0,
+  stale: "-",
+  unassignedCount: 0,
+  unassigned: "-",
 };
 
 describe("renderEmail", () => {

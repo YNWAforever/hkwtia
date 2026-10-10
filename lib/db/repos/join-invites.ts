@@ -225,6 +225,25 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
     },
 
     /**
+     * Final review M3: does this raw token (from a link the admin's browser posts back) belong to
+     * this invite AND this contact? Digest equality in Postgres, like `open`; a malformed value
+     * answers false without a query. Admin only, read only.
+     */
+    async tokenBelongsTo(actor: Actor, input: Readonly<{token: unknown; inviteId: unknown; contactId: unknown}>): Promise<boolean> {
+      requireAdmin(actor);
+      const inviteId = uuidSchema.parse(input.inviteId);
+      const contactId = uuidSchema.parse(input.contactId);
+      if (!isWellFormedInviteToken(input.token)) return false;
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT id FROM ${joinInvites}
+        WHERE token_digest = ${digestInviteToken(input.token)} AND id = ${inviteId} AND contact_id = ${contactId}
+        LIMIT 1
+      `))[0];
+      return row !== undefined;
+    },
+
+    /**
      * Public: the invitee holds only the link. A value that is not token-shaped
      * returns before any connection is opened. The lookup is digest equality on
      * the unique index inside Postgres, so the raw token is never compared in
@@ -302,6 +321,30 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
     },
 
     /**
+     * Final review I4: the fallback when the submit carries no `wtia_invite` cookie (the magic link
+     * was opened in another browser or app). The newest LIVE invite whose contact's email equals the
+     * signed-in profile's email, case-insensitively. The email is read from the profile row inside
+     * the query, never taken from input, so a member can only ever find an invite addressed to
+     * their own address. Member actor only; read only — `consume` does the spending.
+     */
+    async liveInviteIdForMember(actor: Actor): Promise<string | null> {
+      if (actor.kind !== "member") forbidden();
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT i.id AS id
+        FROM ${joinInvites} i
+        INNER JOIN ${contacts} c ON c.id = i.contact_id
+        INNER JOIN ${profiles} p ON p.id = ${actor.profileId}
+        WHERE p.email IS NOT NULL AND c.email IS NOT NULL
+          AND lower(c.email) = lower(p.email)
+          AND i.consumed_at IS NULL AND i.superseded_at IS NULL AND i.expires_at > now()
+        ORDER BY i.created_at DESC, i.id DESC
+        LIMIT 1
+      `))[0];
+      return row ? String(row.id) : null;
+    },
+
+    /**
      * The invitee's own application spends the invite. The actor must be a member
      * who OWNS the application; anything else is `"not_live"` with no writes,
      * so the answer never says whether an invite or application exists.
@@ -324,17 +367,24 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
       const parsed = consumeInputSchema.parse(input);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
+        // FOR UPDATE: two consumes naming one application (two tabs, two invites) serialise here, so
+        // the NOT EXISTS below sees the first one's write instead of both passing it.
         const owned = rowsFrom(await transaction.execute(sql`
           SELECT id FROM ${membershipApplications}
           WHERE id = ${parsed.applicationId} AND applicant_user_id = ${actor.profileId}
+          FOR UPDATE
         `))[0];
         if (!owned) return "not_live";
 
+        // Final review I1: one application, one invite. Abandon checkout, staff re-mint, the lead
+        // resubmits the same application: without the NOT EXISTS the second invite would also be
+        // spent on it and re-point `invite_id`, so both invites claimed one conversion.
         const spent = rowsFrom(await transaction.execute(sql`
           UPDATE ${joinInvites}
           SET consumed_at = now(), application_id = ${parsed.applicationId}
           WHERE id = ${parsed.inviteId}
             AND consumed_at IS NULL AND superseded_at IS NULL AND expires_at > now()
+            AND NOT EXISTS (SELECT 1 FROM ${joinInvites} other WHERE other.application_id = ${parsed.applicationId} AND other.id <> ${parsed.inviteId})
           RETURNING contact_id
         `))[0];
         if (!spent) return "not_live";
@@ -390,6 +440,15 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
               contactId, actorProfileId: null, kind: "became_member",
               meta: {via: "invite", applicationId: parsed.applicationId},
             });
+            // Parity with markMemberForProfile: every real move to member has its audit row.
+            await transaction.execute(sql`
+              INSERT INTO ${auditEvents}
+                (actor_user_id, actor_type, action, target_type, target_id, metadata)
+              VALUES (
+                ${actor.profileId}, ${actor.kind}, 'contact.became_member', 'contact', ${contactId},
+                ${JSON.stringify({via: "invite", applicationId: parsed.applicationId})}::jsonb
+              )
+            `);
           }
         }
         await transaction.execute(sql`
