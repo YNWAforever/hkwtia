@@ -1,0 +1,266 @@
+import {PgDialect} from "drizzle-orm/pg-core";
+import {describe, expect, it, vi} from "vitest";
+
+import {createJoinInvitesRepository} from "@/lib/db/repos/join-invites";
+import {digestInviteToken} from "@/lib/membership/join-invite-token";
+import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
+
+const dialect = new PgDialect();
+type Row = Record<string, unknown>;
+type Statement = Readonly<{text: string; params: readonly unknown[]}>;
+
+/**
+ * `responder` answers each statement by inspecting its normalised text, so a test
+ * states which statement returns what instead of counting positions.
+ */
+function fakeDatabase(responder: (text: string) => Row[] = () => []) {
+  const outer: Statement[] = [];
+  const transactions: Statement[][] = [];
+  const render = (query: unknown): Statement => {
+    const rendered = dialect.sqlToQuery(query as Parameters<PgDialect["sqlToQuery"]>[0]);
+    return {text: rendered.sql.replace(/\s+/g, " ").trim(), params: rendered.params};
+  };
+  const database = {
+    async execute(query: unknown) {
+      const statement = render(query);
+      outer.push(statement);
+      return {rows: responder(statement.text)};
+    },
+    async transaction<T>(work: (transaction: {execute: (query: unknown) => Promise<unknown>}) => Promise<T>): Promise<T> {
+      const statements: Statement[] = [];
+      transactions.push(statements);
+      return work({
+        async execute(query: unknown) {
+          const statement = render(query);
+          statements.push(statement);
+          return {rows: responder(statement.text)};
+        },
+      });
+    },
+  };
+  return {database, outer, transactions};
+}
+
+const admin = {kind: "staff", userId: "staff-a", profileId: "staff-a"} as const;
+const member = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
+const contactId = "11111111-1111-4111-8111-111111111111";
+const inviteId = "22222222-2222-4222-8222-222222222222";
+const applicationId = "33333333-3333-4333-8333-333333333333";
+const validToken = "A".repeat(43);
+
+function inviteRow(overrides: Row = {}): Row {
+  return {
+    id: inviteId, contact_id: contactId, plan_code: "startup", created_by_profile_id: "staff-a",
+    expires_at: new Date("2026-10-25T00:00:00.000Z"), opened_at: null, consumed_at: null,
+    superseded_at: null, application_id: null, created_at: new Date("2026-10-11T00:00:00.000Z"),
+    ...overrides,
+  };
+}
+
+describe("joinInvitesRepository.create", () => {
+  it("refuses non-admin actors before the database loads", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createJoinInvitesRepository(loadDatabase);
+    for (const forged of [member, ANONYMOUS_ACTOR]) {
+      await expect(repository.create(forged as never, {contactId, planCode: "startup"})).rejects.toThrow("FORBIDDEN");
+    }
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("locks the contact, supersedes live invites, then inserts, all in one transaction", async () => {
+    const fake = fakeDatabase((text) => {
+      if (text.startsWith("SELECT") && text.includes("FOR UPDATE")) return [{id: contactId}];
+      if (text.startsWith("INSERT INTO \"join_invites\"")) return [inviteRow()];
+      return [];
+    });
+    const repository = createJoinInvitesRepository(async () => fake.database as never);
+
+    const result = await repository.create(admin, {contactId, planCode: "startup"});
+
+    expect(fake.outer).toHaveLength(0);
+    expect(fake.transactions).toHaveLength(1);
+    const texts = fake.transactions[0]!.map((statement) => statement.text);
+    const lock = texts.findIndex((text) => text.includes("FROM \"contacts\"") && text.includes("FOR UPDATE"));
+    const supersede = texts.findIndex((text) => text.startsWith("UPDATE \"join_invites\"") && text.includes("superseded_at = now()"));
+    const insert = texts.findIndex((text) => text.startsWith("INSERT INTO \"join_invites\""));
+    const audit = texts.findIndex((text) => text.includes("join_invite.created"));
+    expect(lock).toBe(0);
+    expect(supersede).toBeGreaterThan(lock);
+    expect(insert).toBeGreaterThan(supersede);
+    expect(audit).toBeGreaterThan(insert);
+    expect(texts[insert]).toContain("interval '14 days'");
+    expect(result.invite.id).toBe(inviteId);
+    expect(result.invite.planCode).toBe("startup");
+  });
+
+  it("stores the digest and never the raw token", async () => {
+    const fake = fakeDatabase((text) => {
+      if (text.includes("FOR UPDATE")) return [{id: contactId}];
+      if (text.startsWith("INSERT INTO \"join_invites\"")) return [inviteRow()];
+      return [];
+    });
+    const repository = createJoinInvitesRepository(async () => fake.database as never);
+
+    const {token} = await repository.create(admin, {contactId, planCode: "community"});
+
+    const params = fake.transactions[0]!.flatMap((statement) => [...statement.params]);
+    expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(params).toContain(digestInviteToken(token));
+    expect(params).not.toContain(token);
+    expect(JSON.stringify(params)).not.toContain(token);
+  });
+
+  it("refuses patron and unknown contacts", async () => {
+    const repository = createJoinInvitesRepository(async () => fakeDatabase().database as never);
+    await expect(repository.create(admin, {contactId, planCode: "patron" as never})).rejects.toThrow();
+    await expect(repository.create(admin, {contactId, planCode: "startup"})).rejects.toThrow("CONTACT_NOT_FOUND");
+  });
+});
+
+describe("joinInvitesRepository.open", () => {
+  it("issues no query for a malformed token", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createJoinInvitesRepository(loadDatabase);
+    expect(await repository.open("not-a-token")).toBeNull();
+    expect(await repository.open(42)).toBeNull();
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("looks up by digest equality and returns null for expired, consumed and superseded invites", async () => {
+    // The filter lives in SQL; the fake models a database that matched nothing.
+    const fake = fakeDatabase(() => []);
+    const repository = createJoinInvitesRepository(async () => fake.database as never);
+
+    expect(await repository.open(validToken)).toBeNull();
+
+    const statements = [...fake.outer, ...fake.transactions.flat()];
+    const lookup = statements[0]!;
+    expect(lookup.params).toContain(digestInviteToken(validToken));
+    expect(lookup.params).not.toContain(validToken);
+    expect(lookup.text).toContain("consumed_at IS NULL");
+    expect(lookup.text).toContain("superseded_at IS NULL");
+    expect(lookup.text).toContain("expires_at > now()");
+    expect(statements.some((statement) => statement.text.includes("contact_activities"))).toBe(false);
+  });
+
+  function openRow(overrides: Row = {}): Row {
+    return {
+      invite_id: inviteId, contact_id: contactId, plan_code: "startup", opened_at: null,
+      expires_at: new Date("2026-10-25T00:00:00.000Z"), contact_display_name: "Ada Wong",
+      contact_locale: "zh-HK", inviter_display_name: "Betty Lam", ...overrides,
+    };
+  }
+
+  it("stamps opened_at and writes one activity on the first open only", async () => {
+    const first = fakeDatabase((text) => (text.startsWith("SELECT") ? [openRow()] : [{id: inviteId}]));
+    const opened = await createJoinInvitesRepository(async () => first.database as never).open(validToken);
+    expect(opened).toEqual({
+      inviteId, planCode: "startup", contactDisplayName: "Ada Wong", inviterFirstName: "Betty",
+      locale: "zh-HK", expiresAt: new Date("2026-10-25T00:00:00.000Z"),
+    });
+    const firstTexts = [...first.outer, ...first.transactions.flat()].map((statement) => statement.text);
+    expect(firstTexts.some((text) => text.startsWith("UPDATE \"join_invites\"") && text.includes("opened_at"))).toBe(true);
+    expect(firstTexts.filter((text) => text.includes("contact_activities"))).toHaveLength(1);
+
+    const again = fakeDatabase(() => [openRow({opened_at: new Date("2026-10-12T00:00:00.000Z")})]);
+    expect(await createJoinInvitesRepository(async () => again.database as never).open(validToken)).not.toBeNull();
+    const againTexts = [...again.outer, ...again.transactions.flat()].map((statement) => statement.text);
+    expect(againTexts.some((text) => text.includes("contact_activities"))).toBe(false);
+    expect(againTexts.some((text) => text.startsWith("UPDATE"))).toBe(false);
+  });
+
+  it("returns a null inviter first name when no staff profile created the invite", async () => {
+    const fake = fakeDatabase(() => [openRow({inviter_display_name: null, opened_at: new Date()})]);
+    const opened = await createJoinInvitesRepository(async () => fake.database as never).open(validToken);
+    expect(opened?.inviterFirstName).toBeNull();
+  });
+});
+
+describe("joinInvitesRepository.prefillFor and latestForContact", () => {
+  it("prefillFor returns null for a non-uuid id without a query", async () => {
+    const loadDatabase = vi.fn();
+    expect(await createJoinInvitesRepository(loadDatabase).prefillFor("nope")).toBeNull();
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("prefillFor only reads live invites", async () => {
+    const fake = fakeDatabase(() => []);
+    expect(await createJoinInvitesRepository(async () => fake.database as never).prefillFor(inviteId)).toBeNull();
+    const text = fake.outer[0]!.text;
+    expect(text).toContain("consumed_at IS NULL");
+    expect(text).toContain("superseded_at IS NULL");
+    expect(text).toContain("expires_at > now()");
+  });
+
+  it("latestForContact is admin only and derives the state", async () => {
+    const loadDatabase = vi.fn();
+    await expect(createJoinInvitesRepository(loadDatabase).latestForContact(member as never, contactId)).rejects.toThrow("FORBIDDEN");
+    expect(loadDatabase).not.toHaveBeenCalled();
+
+    const cases: ReadonlyArray<readonly [Row, string]> = [
+      [{}, "live"],
+      [{opened_at: new Date()}, "opened"],
+      [{consumed_at: new Date()}, "consumed"],
+      [{superseded_at: new Date()}, "superseded"],
+      [{expires_at: new Date(Date.now() - 1000)}, "expired"],
+    ];
+    for (const [overrides, state] of cases) {
+      const fake = fakeDatabase(() => [inviteRow({expires_at: new Date(Date.now() + 86_400_000), ...overrides})]);
+      const latest = await createJoinInvitesRepository(async () => fake.database as never).latestForContact(admin, contactId);
+      expect(latest?.state).toBe(state);
+    }
+  });
+});
+
+describe("joinInvitesRepository.consume", () => {
+  it("returns not_live and writes nothing further when the conditional update matches no row", async () => {
+    const fake = fakeDatabase((text) => (text.includes("applicant_user_id") ? [{id: applicationId}] : []));
+    const result = await createJoinInvitesRepository(async () => fake.database as never)
+      .consume(member, {inviteId, applicationId});
+    expect(result).toBe("not_live");
+    const texts = fake.transactions.flat().map((statement) => statement.text);
+    expect(texts.some((text) => text.startsWith("UPDATE \"join_invites\"") && text.includes("consumed_at = now()"))).toBe(true);
+    expect(texts.filter((text) => /^(UPDATE|INSERT)/.test(text))).toHaveLength(1);
+  });
+
+  it("returns not_live without writes when the actor does not own the application", async () => {
+    const fake = fakeDatabase(() => []);
+    const result = await createJoinInvitesRepository(async () => fake.database as never)
+      .consume(member, {inviteId, applicationId});
+    expect(result).toBe("not_live");
+    const all = [...fake.outer, ...fake.transactions.flat()];
+    expect(all.some((statement) => /^(UPDATE|INSERT)/.test(statement.text))).toBe(false);
+  });
+
+  it("refuses non-member actors", async () => {
+    await expect(createJoinInvitesRepository(vi.fn()).consume(ANONYMOUS_ACTOR as never, {inviteId, applicationId}))
+      .rejects.toThrow("FORBIDDEN");
+  });
+
+  function consumeFake() {
+    return fakeDatabase((text) => {
+      if (text.includes("applicant_user_id") && text.startsWith("SELECT")) return [{id: applicationId}];
+      if (text.startsWith("UPDATE \"join_invites\"")) return [{contact_id: contactId}];
+      return [];
+    });
+  }
+
+  it("links, stages forward-only, and records activity and audit in one transaction", async () => {
+    const fake = consumeFake();
+    const result = await createJoinInvitesRepository(async () => fake.database as never)
+      .consume(member, {inviteId, applicationId});
+    expect(result).toBe("consumed");
+    expect(fake.outer).toHaveLength(0);
+    const statements = fake.transactions[0]!;
+    const texts = statements.map((statement) => statement.text);
+    expect(texts.some((text) => text.includes("UPDATE \"membership_applications\"") && text.includes("invite_id"))).toBe(true);
+    const stage = texts.find((text) => text.includes("stage = 'applied'"))!;
+    expect(stage).toContain("IN ('new', 'contacted', 'qualified')");
+    expect(stage).not.toContain("'member'");
+    const link = texts.find((text) => text.includes("profile_id IS NULL") && text.includes("NOT EXISTS"))!;
+    expect(link).toContain("UPDATE \"contacts\"");
+    expect(statements.flatMap((statement) => [...statement.params])).toContain(member.profileId);
+    expect(texts.some((text) => text.includes("contact_activities"))).toBe(true);
+    expect(texts.some((text) => text.includes("join_invite.consumed"))).toBe(true);
+  });
+});
