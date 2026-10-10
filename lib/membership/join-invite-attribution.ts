@@ -44,20 +44,28 @@ export async function inviteDefaults(): Promise<InviteDefaults> {
  * `completeApplication` and `redirectToOutcome`, so it must never throw (a failure here must not turn
  * a saved application into a "could not save" message) and must finish before the redirect.
  *
- * The cookie is cleared after any consume attempt, `consumed` or `not_live`: a spent or superseded
+ * The cookie wins. Without one (final review I4: the magic link was opened in another browser or
+ * app, so the cookie set by the welcome page's Continue is not here) the fallback is the newest live
+ * invite addressed to the signed-in profile's own email; `consume` still checks liveness and that
+ * the actor owns the application, so the fallback can attribute nothing a cookie could not.
+ *
+ * The cookie is cleared after a consume that RETURNED, `consumed` or `not_live`: a spent or superseded
  * invite has nothing left to attribute, and a stale cookie would only re-run this on the next submit.
+ * A consume that THREW decided nothing, so the cookie stays for the next submit to try again.
  * The log line carries the application id only: no token, no invite id, no contact detail.
  */
 export async function attributeJoinInvite(actor: Actor, applicationId: string): Promise<void> {
   if (actor.kind !== "member") return;
   try {
-    const inviteId = await readInviteCookie();
-    if (!inviteId) return;
-    try {
-      await joinInvitesRepository.consume(actor, {inviteId, applicationId});
-    } finally {
+    const fromCookie = await readInviteCookie();
+    if (fromCookie) {
+      await joinInvitesRepository.consume(actor, {inviteId: fromCookie, applicationId});
       (await cookies()).delete({name: INVITE_COOKIE_NAME, path: "/"});
+      return;
     }
+    const byEmail = await joinInvitesRepository.liveInviteIdForMember(actor);
+    if (!byEmail) return;
+    await joinInvitesRepository.consume(actor, {inviteId: byEmail, applicationId});
   } catch {
     console.error("join_invite.attribution_failed", {applicationId});
   }

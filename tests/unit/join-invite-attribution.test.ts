@@ -3,6 +3,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const state = vi.hoisted(() => ({
   cookie: null as string | null,
   consume: vi.fn(),
+  liveInviteIdForMember: vi.fn(),
   prefillFor: vi.fn(),
   remove: vi.fn(),
   deleteThrows: false,
@@ -15,7 +16,7 @@ vi.mock("next/headers", () => ({
     delete: (arg: unknown) => { if (state.deleteThrows) throw new Error("read-only cookies"); state.remove(arg); },
   }),
 }));
-vi.mock("@/lib/db/repos/join-invites", () => ({joinInvitesRepository: {consume: state.consume, prefillFor: state.prefillFor}}));
+vi.mock("@/lib/db/repos/join-invites", () => ({joinInvitesRepository: {consume: state.consume, liveInviteIdForMember: state.liveInviteIdForMember, prefillFor: state.prefillFor}}));
 
 import {attributeJoinInvite, inviteDefaults} from "@/lib/membership/join-invite-attribution";
 
@@ -28,15 +29,45 @@ describe("attributeJoinInvite", () => {
     state.cookie = null;
     state.deleteThrows = false;
     state.consume.mockReset();
+    state.liveInviteIdForMember.mockReset();
+    state.liveInviteIdForMember.mockResolvedValue(null);
     state.prefillFor.mockReset();
     state.remove.mockReset();
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.spyOn(console, "error").mockImplementation(() => undefined).mockClear();
   });
 
-  it("makes no repository call without a cookie", async () => {
+  it("without a cookie and no invite addressed to the profile's email, consumes nothing", async () => {
     await attributeJoinInvite(member, APPLICATION_ID);
+    expect(state.liveInviteIdForMember).toHaveBeenCalledWith(member);
     expect(state.consume).not.toHaveBeenCalled();
     expect(state.remove).not.toHaveBeenCalled();
+  });
+
+  // Final review I4: the magic link opened in another browser, so the submit carries no cookie.
+  it("without a cookie, consumes the live invite whose contact email matches the profile", async () => {
+    state.liveInviteIdForMember.mockResolvedValue(INVITE_ID);
+    state.consume.mockResolvedValue("consumed");
+    await attributeJoinInvite(member, APPLICATION_ID);
+    expect(state.consume).toHaveBeenCalledWith(member, {inviteId: INVITE_ID, applicationId: APPLICATION_ID});
+  });
+
+  it("lets the cookie win over the email fallback", async () => {
+    state.cookie = INVITE_ID;
+    state.liveInviteIdForMember.mockResolvedValue("99999999-9999-4999-8999-999999999999");
+    state.consume.mockResolvedValue("consumed");
+    await attributeJoinInvite(member, APPLICATION_ID);
+    expect(state.liveInviteIdForMember).not.toHaveBeenCalled();
+    expect(state.consume).toHaveBeenCalledTimes(1);
+    expect(state.consume).toHaveBeenCalledWith(member, {inviteId: INVITE_ID, applicationId: APPLICATION_ID});
+  });
+
+  it("never throws, and logs the application id only, when the email fallback read fails", async () => {
+    state.liveInviteIdForMember.mockRejectedValue(new Error("db ada@example.hk"));
+    await expect(attributeJoinInvite(member, APPLICATION_ID)).resolves.toBeUndefined();
+    const logged = JSON.stringify(vi.mocked(console.error).mock.calls);
+    expect(logged).toContain(APPLICATION_ID);
+    expect(logged).not.toContain("ada@example.hk");
+    expect(state.consume).not.toHaveBeenCalled();
   });
 
   it("skips a non-member actor without calling consume", async () => {
@@ -87,7 +118,8 @@ describe("attributeJoinInvite", () => {
     expect(logged).toContain(APPLICATION_ID);
     expect(logged).not.toContain(INVITE_ID);
     expect(logged).not.toContain("ada@example.hk");
-    expect(state.remove).toHaveBeenCalledTimes(1);
+    // A thrown consume decided nothing: the cookie stays so the next submit can still attribute.
+    expect(state.remove).not.toHaveBeenCalled();
   });
 
   it("never throws when the cookie cannot be cleared", async () => {
