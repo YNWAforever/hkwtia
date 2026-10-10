@@ -4,7 +4,7 @@ import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
-import {contacts, joinInvites, memberships, profiles} from "@/lib/db/server-schema";
+import {contactActivities, contacts, joinInvites, membershipPlans, memberships, profiles} from "@/lib/db/server-schema";
 import {
   CONTACT_SOURCES,
   CONTACT_STAGES,
@@ -27,10 +27,17 @@ import type {Actor} from "@/lib/membership/lifecycle";
  * days" means "leads created in 30 days" and "invites sent in 30 days"; an invite
  * sent today to a year-old lead counts as an invite, not as a new lead.
  *
- * PAID. An invite is "paid" when its application has an ACTIVE membership. The
- * schema has no activation timestamp, so the invite-to-paid time runs from
- * `join_invites.created_at` to the earliest active membership's `created_at`
- * (when the membership row was made), which is the nearest recorded proxy.
+ * PAID. An invite is "paid" when its application has an ACTIVE membership on a
+ * plan that is not free. A free (Community) join is active without paying, so it
+ * is reported on its own as "joined (free)" (final review I2). The membership row
+ * is inserted at submit as pending_payment, so its `created_at` measures invite
+ * to APPLICATION; the invite-to-paid time instead runs from
+ * `join_invites.created_at` to the contact's first `became_member` activity at or
+ * after it, which is written where the membership becomes active.
+ *
+ * DISTINCT. "Sent" and "opened" count leads (distinct contacts), so a re-minted
+ * link to the same lead is one lead invited; "applied", "paid" and "joined
+ * (free)" count distinct applications.
  *
  * ESTIMATE (spec E-6). Joined count per plan x that plan's annual list price. It
  * is not reconciled with Stripe, so the page labels it an estimate.
@@ -61,6 +68,8 @@ export type LeadReport = Readonly<{
     opened: number;
     applied: number;
     paid: number;
+    /** Active memberships on a free plan: joined, but not paid. */
+    joinedFree: number;
     medianInviteToPaidHours: number | null;
     invitedVsJoined: readonly {invited: PlanCode; joined: PlanCode; count: number}[];
   };
@@ -79,7 +88,7 @@ const ownerRow = z.object({
   members: count,
 });
 const inviteRow = z.object({
-  sent: count, opened: count, applied: count, paid: count,
+  sent: count, opened: count, applied: count, paid: count, joined_free: count,
   median_hours: z.coerce.number().nullable(),
 });
 const planRow = z.object({
@@ -143,9 +152,9 @@ export function createLeadReportRepository(options: Options = {}) {
           WHERE true ${contactWindow}
           GROUP BY c.owner_profile_id
         ), invite_side AS (
-          SELECT c.owner_profile_id AS owner_id, count(*) AS invites_sent,
-                 count(*) FILTER (WHERE i.opened_at IS NOT NULL) AS invites_opened,
-                 count(*) FILTER (WHERE i.application_id IS NOT NULL) AS applications
+          SELECT c.owner_profile_id AS owner_id, count(DISTINCT i.contact_id) AS invites_sent,
+                 count(DISTINCT i.contact_id) FILTER (WHERE i.opened_at IS NOT NULL) AS invites_opened,
+                 count(DISTINCT i.application_id) AS applications
           FROM ${joinInvites} i
           JOIN ${contacts} c ON c.id = i.contact_id
           WHERE true ${inviteWindow}
@@ -162,21 +171,28 @@ export function createLeadReportRepository(options: Options = {}) {
       `));
 
       // One active membership per application (the earliest), so a re-issued or
-      // duplicated row cannot count one conversion twice.
+      // duplicated row cannot count one conversion twice. `free` marks a plan that
+      // activates without payment.
       const paidApplications = sql`
-        SELECT DISTINCT ON (m.application_id) m.application_id, m.plan_code, m.created_at AS paid_at
+        SELECT DISTINCT ON (m.application_id) m.application_id, m.plan_code,
+               (mp.billing_behavior = 'free') AS free
         FROM ${memberships} m
+        JOIN ${membershipPlans} mp ON mp.code = m.plan_code
         WHERE m.status = 'active' AND m.application_id IS NOT NULL
         ORDER BY m.application_id, m.created_at
       `;
       const inviteRows = rowsFrom(await database.execute(sql`
-        SELECT count(*) AS sent,
-               count(*) FILTER (WHERE i.opened_at IS NOT NULL) AS opened,
-               count(*) FILTER (WHERE i.application_id IS NOT NULL) AS applied,
-               count(*) FILTER (WHERE pa.application_id IS NOT NULL) AS paid,
+        SELECT count(DISTINCT i.contact_id) AS sent,
+               count(DISTINCT i.contact_id) FILTER (WHERE i.opened_at IS NOT NULL) AS opened,
+               count(DISTINCT i.application_id) AS applied,
+               count(DISTINCT pa.application_id) FILTER (WHERE NOT pa.free) AS paid,
+               count(DISTINCT pa.application_id) FILTER (WHERE pa.free) AS joined_free,
                percentile_cont(0.5) WITHIN GROUP (
-                 ORDER BY EXTRACT(EPOCH FROM (pa.paid_at - i.created_at)) / 3600
-               ) FILTER (WHERE pa.application_id IS NOT NULL) AS median_hours
+                 ORDER BY EXTRACT(EPOCH FROM (
+                   (SELECT min(a.created_at) FROM ${contactActivities} a
+                    WHERE a.contact_id = i.contact_id AND a.kind = 'became_member' AND a.created_at >= i.created_at)
+                   - i.created_at)) / 3600
+               ) FILTER (WHERE pa.application_id IS NOT NULL AND NOT pa.free) AS median_hours
         FROM ${joinInvites} i
         LEFT JOIN (${paidApplications}) pa ON pa.application_id = i.application_id
         WHERE true ${inviteWindow}
@@ -197,7 +213,7 @@ export function createLeadReportRepository(options: Options = {}) {
         bySource[row.source][row.stage] += row.n;
       }
 
-      const invite = inviteRow.parse(inviteRows[0] ?? {sent: 0, opened: 0, applied: 0, paid: 0, median_hours: null});
+      const invite = inviteRow.parse(inviteRows[0] ?? {sent: 0, opened: 0, applied: 0, paid: 0, joined_free: 0, median_hours: null});
       const invitedVsJoined = planRows.map((raw) => {
         const row = planRow.parse(raw);
         return {invited: row.invited as PlanCode, joined: row.joined as PlanCode, count: row.n};
@@ -225,6 +241,7 @@ export function createLeadReportRepository(options: Options = {}) {
           opened: invite.opened,
           applied: invite.applied,
           paid: invite.paid,
+          joinedFree: invite.joined_free,
           medianInviteToPaidHours: invite.median_hours,
           invitedVsJoined,
         },

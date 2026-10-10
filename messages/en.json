@@ -4298,6 +4298,7 @@
         "opened": "Opened",
         "applied": "Applied",
         "paid": "Paid",
+        "joinedFree": "Joined (free)",
         "ofSent": "{percent} of sent",
         "median": "Median invite to payment",
         "medianValue": "{hours} hours",

@@ -4327,6 +4327,7 @@
         "opened": "已開啟",
         "applied": "已申請",
         "paid": "已付費",
+        "joinedFree": "已加入（免費）",
         "ofSent": "佔已發出的 {percent}",
         "median": "邀請至付款的中位時間",
         "medianValue": "{hours} 小時",

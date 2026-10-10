@@ -39,7 +39,7 @@ export default async function AdminLeadReportPage({params, searchParams}: Props)
     ownersHeading: t("ownersHeading"), ownersCaption: t("ownersCaption"), ownerColumn: t("ownerColumn"),
     unassigned: t("unassigned"), invitesSentColumn: t("invitesSentColumn"), invitesOpenedColumn: t("invitesOpenedColumn"),
     applicationsColumn: t("applicationsColumn"), membersColumn: t("membersColumn"), emptyOwners: t("emptyOwners"),
-    invitesHeading: t("invitesHeading"), sent: t("sent"), opened: t("opened"), applied: t("applied"), paid: t("paid"),
+    invitesHeading: t("invitesHeading"), sent: t("sent"), opened: t("opened"), applied: t("applied"), paid: t("paid"), joinedFree: t("joinedFree"),
     ofSent: (percent) => t("ofSent", {percent}),
     median: t("median"), medianValue: (hours) => t("medianValue", {hours}), noMedian: t("noMedian"),
     invitedVsJoinedHeading: t("invitedVsJoinedHeading"), invitedColumn: t("invitedColumn"),

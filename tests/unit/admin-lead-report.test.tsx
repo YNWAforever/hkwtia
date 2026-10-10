@@ -53,7 +53,7 @@ function report(overrides: Partial<LeadReport> = {}): LeadReport {
       {ownerProfileId: "o1", ownerName: "Grace Staff", leads: 5, invitesSent: 3, invitesOpened: 2, applications: 1, members: 1},
       {ownerProfileId: null, ownerName: null, leads: 2, invitesSent: 0, invitesOpened: 0, applications: 0, members: 0},
     ],
-    invites: {sent: 3, opened: 2, applied: 2, paid: 1, medianInviteToPaidHours: 36.5, invitedVsJoined: [{invited: "startup", joined: "corporate", count: 1}]},
+    invites: {sent: 3, opened: 2, applied: 2, paid: 1, joinedFree: 4, medianInviteToPaidHours: 36.5, invitedVsJoined: [{invited: "startup", joined: "corporate", count: 1}]},
     estimatedFirstYearHkd: 6200,
     ...overrides,
   };
@@ -108,6 +108,13 @@ describe.each([["en", en.Admin.reports.leads], ["zh-HK", zh.Admin.reports.leads]
     await renderPage(locale);
     expect(screen.getByRole("alert")).toHaveTextContent(text.unavailable);
     expect(screen.queryByTestId("estimated-fees")).toBeNull();
+  });
+
+  it("reports free joins separately from paid", async () => {
+    await renderPage(locale);
+    const free = screen.getByTestId("joined-free");
+    expect(free).toHaveTextContent(text.joinedFree);
+    expect(free).toHaveTextContent("4");
   });
 
   it("says 'none yet' for the median when nobody has paid", async () => {

@@ -31,6 +31,7 @@ export type LeadReportLabels = Readonly<{
   opened: string;
   applied: string;
   paid: string;
+  joinedFree: string;
   ofSent: (percent: string) => string;
   median: string;
   medianValue: (hours: string) => string;
@@ -136,6 +137,10 @@ export function LeadReport({report, labels, locale}: Props) {
           <div><dt className="text-sm text-muted-foreground">{labels.applied}</dt><dd className="text-2xl font-semibold tabular-nums">{number.format(invites.applied)}</dd><dd className="text-sm text-muted-foreground">{labels.ofSent(share(invites.applied, invites.sent))}</dd></div>
           <div><dt className="text-sm text-muted-foreground">{labels.paid}</dt><dd className="text-2xl font-semibold tabular-nums">{number.format(invites.paid)}</dd><dd className="text-sm text-muted-foreground">{labels.ofSent(share(invites.paid, invites.sent))}</dd></div>
         </dl>
+        <p data-testid="joined-free">
+          <span className="text-sm text-muted-foreground">{labels.joinedFree}: </span>
+          <span className="font-semibold tabular-nums">{number.format(invites.joinedFree)}</span>
+        </p>
         <p data-testid="median-hours">
           <span className="text-sm text-muted-foreground">{labels.median}: </span>
           <span className="font-semibold tabular-nums">

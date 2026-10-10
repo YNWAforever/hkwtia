@@ -62,7 +62,7 @@ describe("leadReportRepository.summary", () => {
         {owner_profile_id: "o1", owner_name: "Grace", leads: 5, invites_sent: 3, invites_opened: 2, applications: 1, members: 1},
         {owner_profile_id: null, owner_name: null, leads: 2, invites_sent: 0, invites_opened: 0, applications: 0, members: 0},
       ],
-      [{sent: 3, opened: 2, applied: 2, paid: 2, median_hours: "36.5"}],
+      [{sent: 3, opened: 2, applied: 2, paid: 2, joined_free: "1", median_hours: "36.5"}],
       [{invited: "startup", joined: "startup", n: 1}, {invited: "startup", joined: "corporate", n: 1}],
     ]);
     const repository = createLeadReportRepository({loadDatabase: async () => fake.database as never, loadPlans: plans, now: () => now});
@@ -76,7 +76,7 @@ describe("leadReportRepository.summary", () => {
       {ownerProfileId: null, ownerName: null, leads: 2, invitesSent: 0, invitesOpened: 0, applications: 0, members: 0},
     ]);
     expect(report.invites).toEqual({
-      sent: 3, opened: 2, applied: 2, paid: 2, medianInviteToPaidHours: 36.5,
+      sent: 3, opened: 2, applied: 2, paid: 2, joinedFree: 1, medianInviteToPaidHours: 36.5,
       invitedVsJoined: [{invited: "startup", joined: "startup", count: 1}, {invited: "startup", joined: "corporate", count: 1}],
     });
     // 1 x startup (1,200) + 1 x corporate (5,000); a joined plan with no annual price counts zero.
@@ -84,7 +84,7 @@ describe("leadReportRepository.summary", () => {
   });
 
   it("returns a null median when nobody has paid", async () => {
-    const fake = fakeDatabase([[], [], [{sent: 1, opened: 0, applied: 0, paid: 0, median_hours: null}], []]);
+    const fake = fakeDatabase([[], [], [{sent: 1, opened: 0, applied: 0, paid: 0, joined_free: 0, median_hours: null}], []]);
     const repository = createLeadReportRepository({loadDatabase: async () => fake.database as never, loadPlans: plans, now: () => now});
     const report = await repository.summary(admin, "all");
     expect(report.invites.medianInviteToPaidHours).toBeNull();
@@ -109,5 +109,29 @@ describe("leadReportRepository.summary", () => {
     await createLeadReportRepository({loadDatabase: async () => fake.database as never, loadPlans: plans, now: () => now}).summary(admin, "90");
     const joined = fake.statements.slice(2).map((s) => s.text.toLowerCase()).join(" ");
     expect(joined).toContain("'active'");
+  });
+
+  /**
+   * Final review I2. Memberships are inserted at submit as pending_payment, so the membership's
+   * created_at measures invite-to-APPLICATION; the activation is the contact's became_member
+   * activity. A free Community join is active without paying, so "Paid" excludes free plans and
+   * those joins are their own figure. Counts are distinct: a re-minted invite to the same lead is
+   * one lead sent, and an application is one application however many invites point at it.
+   */
+  it("measures the median to the became_member activity and counts paid without free plans", async () => {
+    const fake = fakeDatabase([[], [], [], []]);
+    await createLeadReportRepository({loadDatabase: async () => fake.database as never, loadPlans: plans, now: () => now}).summary(admin, "90");
+    const invite = fake.statements[2]!.text.replace(/\s+/g, " ").toLowerCase();
+    expect(invite).toContain("\"contact_activities\"");
+    expect(invite).toContain("kind = 'became_member'");
+    expect(invite).not.toContain("m.created_at as paid_at");
+    expect(invite).toContain("billing_behavior");
+    expect(invite).toContain("count(distinct i.contact_id) as sent");
+    expect(invite).toContain("count(distinct i.application_id) as applied");
+    expect(invite).toMatch(/count\(distinct pa\.application_id\) filter \(where not pa\.free\) as paid/);
+    expect(invite).toMatch(/count\(distinct pa\.application_id\) filter \(where pa\.free\) as joined_free/);
+    const owners = fake.statements[1]!.text.replace(/\s+/g, " ").toLowerCase();
+    expect(owners).toContain("count(distinct i.contact_id) as invites_sent");
+    expect(owners).toContain("count(distinct i.application_id) as applications");
   });
 });
