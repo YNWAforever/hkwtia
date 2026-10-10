@@ -2,13 +2,20 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {z} from "zod";
 
+import {LeadJoinLinkPanel} from "@/components/admin/lead-join-link-panel";
 import {LeadNextStepForm} from "@/components/admin/lead-next-step-form";
 import {LeadNoteForm} from "@/components/admin/lead-note-form";
 import {LeadTimeline} from "@/components/admin/lead-timeline";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
-import {addContactNoteAction, updateContactNextStepAction} from "@/lib/admin/contact-actions";
-import {getContact, getContactRelated, listContactActivities} from "@/lib/admin/contacts";
+import {
+  addContactNoteAction,
+  createLeadInviteAction,
+  recordLeadInviteSharedAction,
+  sendLeadInviteEmailAction,
+  updateContactNextStepAction,
+} from "@/lib/admin/contact-actions";
+import {getContact, getContactRelated, getLatestLeadInvite, listContactActivities} from "@/lib/admin/contacts";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {CONTACT_STAGES} from "@/lib/db/repos/contacts";
@@ -59,9 +66,11 @@ export default async function AdminLeadPage({params, searchParams}: Props) {
   }
   if (contact === null) notFound();
 
-  const [activities, related] = await Promise.all([
+  const [activities, related, latestInvite] = await Promise.all([
     listContactActivities(actor, id),
     getContactRelated(actor, id),
+    // The panel is an extra, not the page: an unreadable invite row must not 500 the lead.
+    getLatestLeadInvite(actor, id).catch(() => null),
   ]);
 
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
@@ -125,6 +134,26 @@ export default async function AdminLeadPage({params, searchParams}: Props) {
           />
         </section>
       </div>
+
+      <section className="glass-card p-6">
+        <LeadJoinLinkPanel
+          contactId={id}
+          createAction={createLeadInviteAction.bind(null, path)}
+          emailAction={sendLeadInviteEmailAction.bind(null, path)}
+          hasEmail={contact.email !== null}
+          labels={{
+            title: t("lead.invite.title"), plan: t("lead.invite.plan"),
+            plans: {community: t("lead.invite.plans.community"), startup: t("lead.invite.plans.startup"), corporate: t("lead.invite.plans.corporate")},
+            create: t("lead.invite.create"), linkLabel: t("lead.invite.linkLabel"), copy: t("lead.invite.copy"),
+            copied: t("lead.invite.copied"), messageLabel: t("lead.invite.messageLabel"), email: t("lead.invite.email"),
+            whatsapp: t("lead.invite.whatsapp"), sent: t("lead.invite.sent"), failed: t("lead.invite.failed"),
+            noEmail: t("lead.invite.noEmail"), noPhone: t("lead.invite.noPhone"), error: t("lead.invite.error"),
+          }}
+          latestNote={latestInvite ? t("lead.invite.latest", {state: t(`lead.invite.state.${latestInvite.state}`)}) : t("lead.invite.none")}
+          phoneE164={contact.phoneE164}
+          recordShared={recordLeadInviteSharedAction.bind(null, path)}
+        />
+      </section>
 
       <section className="glass-card space-y-4 p-6">
         <h2 className="font-serif text-xl font-semibold">{t("lead.timeline.title")}</h2>

@@ -102,4 +102,35 @@ describe("contactActivitiesRepository", () => {
     const audit = statements.find((s) => /insert into "audit_events"/i.test(s.text));
     expect(audit?.text).toContain("contact.note_added");
   });
+
+  describe("recordInviteSent", () => {
+    const inviteId = "33333333-3333-4333-8333-333333333333";
+
+    it("refuses a non-admin actor before the database loads", async () => {
+      const loadDatabase = vi.fn();
+      const repository = createContactActivitiesRepository(loadDatabase);
+      await expect(repository.recordInviteSent(member as never, {contactId, inviteId, channel: "copy", status: "sent"})).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    });
+
+    it("writes the touch, the invite_sent activity and a join_invite.sent audit in one transaction, without the link", async () => {
+      const fake = fakeDatabase([[{id: inviteId}], [], [], []]);
+      const repository = createContactActivitiesRepository(async () => fake.database as never);
+      await repository.recordInviteSent(admin, {contactId, inviteId, channel: "email", status: "failed"});
+      const statements = fake.transactions[0]!;
+      expect(statements.some((s) => /update "contacts"/i.test(s.text) && /last_touch_at/i.test(s.text))).toBe(true);
+      const activity = statements.find((s) => /insert into "contact_activities"/i.test(s.text));
+      expect(activity?.params).toContain("invite_sent");
+      expect(activity?.params.some((p) => typeof p === "string" && p.includes("\"status\":\"failed\""))).toBe(true);
+      const audit = statements.find((s) => /insert into "audit_events"/i.test(s.text));
+      expect(audit?.text).toContain("join_invite.sent");
+    });
+
+    it("refuses an invite that does not belong to the contact", async () => {
+      const fake = fakeDatabase([[]]);
+      const repository = createContactActivitiesRepository(async () => fake.database as never);
+      await expect(repository.recordInviteSent(admin, {contactId, inviteId, channel: "copy", status: "sent"})).rejects.toThrow("JOIN_INVITE_NOT_FOUND");
+      expect(fake.transactions[0]!.some((s) => /insert into/i.test(s.text))).toBe(false);
+    });
+  });
 });

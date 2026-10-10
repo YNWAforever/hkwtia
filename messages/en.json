@@ -382,6 +382,13 @@
         "body": "Show this email's pass at the door for {eventTitle} on {eventDate} at {venue}. Each pass admits one person, so please do not forward it.",
         "cta": "Open your pass"
       },
+      "lead_join_invite": {
+        "subject": "Your personal invitation to join WTIA",
+        "preview": "A link made for you, valid for 14 days.",
+        "heading": "You are invited to join WTIA",
+        "body": "{message} This link is personal to you and works once. It opens a short application with your details already filled in.",
+        "cta": "Start your application"
+      },
       "batch_membership_renewal": {
         "subject": "Review your WTIA membership renewal",
         "preview": "Sign in to review your membership and billing options.",
@@ -3024,6 +3031,26 @@
           "title": "Add a note",
           "label": "Note",
           "add": "Add note"
+        },
+        "invite": {
+          "title": "Personal join link",
+          "plan": "Plan",
+          "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate"},
+          "create": "Create a join link",
+          "linkLabel": "Join link (shown once)",
+          "copy": "Copy link",
+          "copied": "Copied.",
+          "messageLabel": "Personal message (optional)",
+          "email": "Send by email",
+          "whatsapp": "Open in WhatsApp",
+          "sent": "Email sent.",
+          "failed": "The email could not be delivered. The link is still valid; try WhatsApp or copy it.",
+          "noEmail": "This contact has no email address.",
+          "noPhone": "This contact has no phone number.",
+          "error": "We could not create the link.",
+          "latest": "Latest link: {state}",
+          "none": "No link created yet.",
+          "state": {"live": "Not opened yet", "opened": "Opened", "consumed": "Used", "expired": "Expired", "superseded": "Replaced by a newer link"}
         },
         "timeline": {
           "title": "Timeline",

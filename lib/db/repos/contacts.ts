@@ -1001,6 +1001,22 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       };
     },
 
+    /**
+     * The language a contact is written to in. Kept off `ContactRow` because only
+     * the send path needs it, and widening the projection would touch every list
+     * read. An unknown locale falls back to English, the platform default.
+     */
+    async localeOf(actor: Actor, id: unknown): Promise<"en" | "zh-HK" | null> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT ${contacts.locale} AS locale FROM ${contacts} WHERE ${contacts.id} = ${contactId} LIMIT 1
+      `))[0];
+      if (!row) return null;
+      return row.locale === "zh-HK" ? "zh-HK" : "en";
+    },
+
     async get(actor: Actor, id: unknown): Promise<ContactRow | null> {
       requireAdmin(actor);
       const contactId = contactIdSchema.parse(id);

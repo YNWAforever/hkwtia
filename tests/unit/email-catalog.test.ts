@@ -40,6 +40,7 @@ const REQUIRED_TEMPLATE_IDS = [
   "event_ticket_refunded",
   "event_ticket_refund_failed",
   "event_ticket_pass",
+  "lead_join_invite",
 ] as const satisfies readonly EmailTemplateId[];
 
 // Every placeholder any template interpolates; a template that needs a new one
@@ -58,15 +59,16 @@ const FIXTURE_VARIABLES = {
   seatCount: 2,
   amount: "1,000.00",
   orderId: "order_fixture",
+  message: "Fixture personal note.",
   attendeeName: "Fixture Attendee",
   attendees: "Fixture Member, Fixture Attendee",
   refundPolicyUrl: "https://www.hkwtia.org/refund-policy",
 } as const;
 
 describe("email catalogue", () => {
-  it("contains exactly the 33 registered template IDs in stable order", () => {
+  it("contains exactly the 34 registered template IDs in stable order", () => {
     expect(EMAIL_TEMPLATE_IDS).toEqual(REQUIRED_TEMPLATE_IDS);
-    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(33);
+    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(34);
   });
 
   it("keeps the guest confirmation transactional and carries the cancel link in its body", () => {

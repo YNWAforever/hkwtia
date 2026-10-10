@@ -382,6 +382,13 @@
         "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
         "cta": "開啟門票"
       },
+      "lead_join_invite": {
+        "subject": "誠邀你加入 WTIA",
+        "preview": "專為你準備的連結，14 天內有效。",
+        "heading": "誠邀你加入 WTIA",
+        "body": "{message} 此連結為你專屬，只可使用一次。連結會開啟簡短的申請表，並已預先填入你的資料。",
+        "cta": "開始申請"
+      },
       "batch_membership_renewal": {
         "subject": "查閱你的 WTIA 會籍續期",
         "preview": "登入查閱會籍及帳單選項。",
@@ -3025,6 +3032,26 @@
           "title": "新增備註",
           "label": "備註",
           "add": "新增備註"
+        },
+        "invite": {
+          "title": "專屬入會連結",
+          "plan": "會籍計劃",
+          "plans": {"community": "社群會員", "startup": "初創會員", "corporate": "企業會員"},
+          "create": "建立入會連結",
+          "linkLabel": "入會連結（只顯示一次）",
+          "copy": "複製連結",
+          "copied": "已複製。",
+          "messageLabel": "個人訊息（選填）",
+          "email": "以電郵發送",
+          "whatsapp": "在 WhatsApp 開啟",
+          "sent": "電郵已發送。",
+          "failed": "電郵未能送達。連結仍然有效，可改用 WhatsApp 或複製連結。",
+          "noEmail": "此聯絡人沒有電郵地址。",
+          "noPhone": "此聯絡人沒有電話號碼。",
+          "error": "未能建立連結。",
+          "latest": "最新連結：{state}",
+          "none": "尚未建立連結。",
+          "state": {"live": "尚未開啟", "opened": "已開啟", "consumed": "已使用", "expired": "已過期", "superseded": "已被新連結取代"}
         },
         "timeline": {
           "title": "時間線",

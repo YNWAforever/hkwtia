@@ -21,6 +21,7 @@ const fixtureVars = {
   attendeeName: "Fixture Attendee",
   attendees: "Fixture Member, Fixture Attendee",
   refundPolicyUrl: "https://www.hkwtia.org/refund-policy",
+  message: "Fixture personal note.",
 };
 
 describe("renderEmail", () => {

@@ -4,7 +4,7 @@ import {sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
-import {auditEvents, contactActivities, contacts, profiles} from "@/lib/db/server-schema";
+import {auditEvents, contactActivities, contacts, joinInvites, profiles} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -38,6 +38,12 @@ export type ContactActivity = Readonly<{
 }>;
 
 const contactIdSchema = z.string().uuid();
+const inviteSentSchema = z.object({
+  contactId: z.string().uuid(),
+  inviteId: z.string().uuid(),
+  channel: z.enum(["copy", "email", "whatsapp"]),
+  status: z.enum(["sent", "failed"]),
+}).strict();
 const noteBodySchema = z.string().trim().min(1).max(2000);
 
 const activityRowSchema = z.object({
@@ -161,6 +167,45 @@ export function createContactActivitiesRepository(loadDatabase: AutomationDataba
           )
         `);
         return toActivity(row);
+      });
+    },
+
+    /**
+     * A staff member handed a join link to the contact (copy, email or
+     * WhatsApp) — or tried to and the email bounced. It records THAT, never the
+     * link: the raw token exists only in the one action response that showed it,
+     * so neither the timeline row nor the audit metadata may carry it. The invite
+     * must belong to this contact, so a forged id cannot hang an entry on the
+     * wrong lead. Touch, activity and audit commit together.
+     */
+    async recordInviteSent(
+      actor: Actor,
+      input: Readonly<{contactId: string; inviteId: string; channel: "copy" | "email" | "whatsapp"; status: "sent" | "failed"}>,
+    ): Promise<void> {
+      requireAdmin(actor);
+      const parsed = inviteSentSchema.parse(input);
+      const database = await loadDatabase();
+      await database.transaction(async (transaction) => {
+        const owned = rowsFrom(await transaction.execute(sql`
+          SELECT ${joinInvites.id} AS id FROM ${joinInvites}
+          WHERE ${joinInvites.id} = ${parsed.inviteId} AND ${joinInvites.contactId} = ${parsed.contactId}
+        `))[0];
+        if (!owned) throw new Error("JOIN_INVITE_NOT_FOUND");
+        await transaction.execute(sql`
+          UPDATE ${contacts} SET last_touch_at = now(), updated_at = now() WHERE ${contacts.id} = ${parsed.contactId}
+        `);
+        await insertContactActivity(transaction, {
+          contactId: parsed.contactId, actorProfileId: actor.profileId, kind: "invite_sent",
+          meta: {inviteId: parsed.inviteId, channel: parsed.channel, status: parsed.status},
+        });
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents}
+            (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (
+            ${actor.profileId}, ${actor.kind}, 'join_invite.sent', 'contact', ${parsed.contactId},
+            ${JSON.stringify({inviteId: parsed.inviteId, channel: parsed.channel, status: parsed.status})}::jsonb
+          )
+        `);
       });
     },
   };

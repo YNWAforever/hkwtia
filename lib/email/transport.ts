@@ -12,6 +12,8 @@ export type EmailSendInput = Readonly<{
   text: string;
   headers: Readonly<Record<string, string>>;
   idempotencyKey: string;
+  /** Staff-initiated sends only: replies reach the person who wrote, not the sending address. */
+  replyTo?: string;
 }>;
 
 export type DeliveryResult = Readonly<{
@@ -55,6 +57,7 @@ type ResendLike = Readonly<{
         html: string;
         text: string;
         headers: Readonly<Record<string, string>>;
+        replyTo?: string;
       }>,
       options: Readonly<{idempotencyKey: string}>,
     ): Promise<ProviderResult>;
@@ -89,6 +92,8 @@ export function createResendTransport(resend: ResendLike): EmailTransport {
           html: input.html,
           text: input.text,
           headers: input.headers,
+          // Spread so a send without a reply-to hands Resend exactly the payload it always did.
+          ...(input.replyTo ? {replyTo: input.replyTo} : {}),
         }, {idempotencyKey: input.idempotencyKey});
       } catch {
         throw new DeliveryFailure("retryable_network");
