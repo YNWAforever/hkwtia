@@ -22,6 +22,11 @@ const PLAN_CODES = ["community", "startup", "corporate"] as const;
  * URL, and "Create a join link" mints a fresh one (superseding the old). Email
  * is disabled without an address and WhatsApp without a number, with the reason
  * written next to the control rather than a silent grey button.
+ *
+ * Final review I3: when the contact's latest link is still live or opened, a new
+ * one silently retired a link the lead may be holding. The panel now says so and
+ * keeps Create disabled until the admin ticks the confirm; the server refuses the
+ * supersede without that field too (`createLeadInvite`).
  */
 export function LeadJoinLinkPanel({
   contactId,
@@ -31,6 +36,7 @@ export function LeadJoinLinkPanel({
   createAction,
   emailAction,
   recordShared,
+  supersedesLiveLink = false,
   labels,
 }: Readonly<{
   contactId: string;
@@ -40,16 +46,20 @@ export function LeadJoinLinkPanel({
   createAction: (previous: CreateState, formData: FormData) => Promise<CreateState>;
   emailAction: (previous: EmailState, formData: FormData) => Promise<EmailState>;
   recordShared: (contactId: string, inviteId: string, channel: "copy" | "whatsapp") => Promise<void>;
+  /** True when the latest link is live or opened, so creating one would retire it. */
+  supersedesLiveLink?: boolean;
   labels: Readonly<{
     title: string; plan: string; plans: Readonly<Record<(typeof PLAN_CODES)[number], string>>;
     create: string; linkLabel: string; copy: string; copied: string; messageLabel: string;
     email: string; whatsapp: string; sent: string; failed: string; noEmail: string; noPhone: string; error: string;
+    supersedeWarning: string; supersedeConfirm: string;
   }>;
 }>) {
   const [created, createFormAction, creating] = useActionState(createAction, {status: "idle"} as CreateState);
   const [emailed, emailFormAction, emailing] = useActionState(emailAction, {status: "idle"} as EmailState);
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const [, startTransition] = useTransition();
 
   const link = created.status === "created" ? created : null;
@@ -85,7 +95,25 @@ export function LeadJoinLinkPanel({
             {PLAN_CODES.map((code) => <option key={code} value={code}>{labels.plans[code]}</option>)}
           </select>
         </label>
-        <button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={creating} type="submit">{labels.create}</button>
+        {supersedesLiveLink ? (
+          <div className="basis-full space-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm">
+            <p id="lead-invite-supersede-warning">{labels.supersedeWarning}</p>
+            <label className="flex min-h-11 items-center gap-2" htmlFor="lead-invite-supersede-confirm">
+              <input
+                aria-describedby="lead-invite-supersede-warning"
+                checked={confirmed}
+                className="h-4 w-4 shrink-0"
+                id="lead-invite-supersede-confirm"
+                name="confirmSupersede"
+                onChange={(event) => setConfirmed(event.target.checked)}
+                required
+                type="checkbox"
+              />
+              <span>{labels.supersedeConfirm}</span>
+            </label>
+          </div>
+        ) : null}
+        <button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={creating || (supersedesLiveLink && !confirmed)} type="submit">{labels.create}</button>
       </form>
       {created.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.error}</p> : null}
 

@@ -3092,6 +3092,8 @@
           "noEmail": "This contact has no email address.",
           "noPhone": "This contact has no phone number.",
           "error": "We could not create the link.",
+          "supersedeWarning": "A link already created for this contact is still active. A new link stops the earlier one working, and if they have opened it they lose its pre-filled details and their application will not be attributed to it.",
+          "supersedeConfirm": "I understand the earlier link will stop working",
           "latest": "Latest link: {state}",
           "none": "No link created yet.",
           "state": {"live": "Not opened yet", "opened": "Opened", "consumed": "Used", "expired": "Expired", "superseded": "Replaced by a newer link"}

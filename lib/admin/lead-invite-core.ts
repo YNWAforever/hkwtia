@@ -27,7 +27,7 @@ export {whatsappInviteHref} from "@/lib/admin/whatsapp-invite-href";
  * Phase E. The actor-taking core behind the lead page's "personal join link".
  *
  * Like `contact-action-core.ts` these take the actor first, so they must never
- * live in a `"use server"` module — see `lib/admin/lead-invite-actions.ts` for
+ * live in a `"use server"` module — see `lib/admin/contact-actions.ts` for
  * the wrappers that resolve the actor from the session.
  *
  * The raw link is secret in the way a password-reset link is: it is returned to
@@ -35,7 +35,7 @@ export {whatsappInviteHref} from "@/lib/admin/whatsapp-invite-href";
  * timeline, the audit metadata, a log line or a thrown message.
  */
 export type LeadInviteDependencies = Readonly<{
-  invites: Pick<JoinInvitesRepository, "create">;
+  invites: Pick<JoinInvitesRepository, "create" | "latestForContact" | "tokenBelongsTo">;
   contacts: Pick<ContactsRepository, "get" | "localeOf">;
   activities: Pick<ContactActivitiesRepository, "recordInviteSent">;
   /** The acting staff member's own address, for Reply-To. Null when the profile has none. */
@@ -64,15 +64,26 @@ const planSchema = z.enum(["community", "startup", "corporate"]);
 const idSchema = z.string().uuid();
 const messageSchema = z.string().trim().max(1000);
 
+/**
+ * Final review I3: minting a link supersedes the contact's live one. When that one is
+ * live or opened the lead may be holding it (an opened link has set the prefill and
+ * attribution cookie), so the supersede needs the admin's explicit confirmation —
+ * the panel's checkbox, re-checked here so a stale page or replayed form cannot skip it.
+ */
 export async function createLeadInvite(
   actor: Actor,
   contactId: unknown,
   planCode: unknown,
   deps: LeadInviteDependencies = defaultDependencies(),
+  confirmSupersede = false,
 ): Promise<{url: string; inviteId: string}> {
   requireAdmin(actor);
   const id = idSchema.parse(contactId);
   const plan = planSchema.parse(planCode);
+  if (!confirmSupersede) {
+    const latest = await deps.invites.latestForContact(actor, id);
+    if (latest && (latest.state === "live" || latest.state === "opened")) throw new Error("INVITE_SUPERSEDE_UNCONFIRMED");
+  }
   const locale: AppLocale = (await deps.contacts.localeOf(actor, id)) ?? "en";
   const {invite, token} = await deps.invites.create(actor, {contactId: id, planCode: plan});
   return {
@@ -112,6 +123,11 @@ export async function sendLeadInviteEmail(
   const inviteUrl = z.string().max(500).parse(input.inviteUrl);
   const message = messageSchema.parse(input.message ?? "");
   assertOwnInviteUrl(inviteUrl);
+  // Final review M3: the URL, the invite id (the idempotency key and the timeline entry) and the
+  // contact (the recipient) must be ONE invite. Otherwise a replayed form could mail contact A
+  // the link minted for contact B, recorded against an unrelated invite.
+  const token = new URL(inviteUrl).pathname.split("/").pop() ?? "";
+  if (!(await deps.invites.tokenBelongsTo(actor, {token, inviteId, contactId}))) throw new Error("INVITE_URL_MISMATCH");
 
   const contact = await deps.contacts.get(actor, contactId);
   if (!contact) throw new Error("CONTACT_NOT_FOUND");

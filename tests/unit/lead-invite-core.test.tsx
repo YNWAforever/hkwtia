@@ -25,11 +25,15 @@ const TOKEN = "tok_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234";
 
 process.env.NEXT_PUBLIC_SITE_URL = "https://wtia.example.test";
 
-function harness(locale: "en" | "zh-HK" = "en", overrides: Partial<{email: string | null; staffEmail: string | null; failWith: DeliveryFailure}> = {}) {
+function harness(locale: "en" | "zh-HK" = "en", overrides: Partial<{email: string | null; staffEmail: string | null; failWith: DeliveryFailure; latestState: string | null; tokenMatches: boolean}> = {}) {
   const sent: EmailSendInput[] = [];
   const recorded: unknown[] = [];
   const deps: LeadInviteDependencies = {
-    invites: {create: vi.fn(async () => ({invite: {id: inviteId} as never, token: TOKEN}))},
+    invites: {
+      create: vi.fn(async () => ({invite: {id: inviteId} as never, token: TOKEN})),
+      latestForContact: vi.fn(async () => (overrides.latestState ? {id: inviteId, state: overrides.latestState} as never : null)),
+      tokenBelongsTo: vi.fn(async () => overrides.tokenMatches ?? true),
+    },
     contacts: {
       get: vi.fn(async () => ({id: contactId, displayName: "Ada Wong", email: "email" in overrides ? overrides.email : "ada@example.hk"}) as never),
       localeOf: vi.fn(async () => locale),
@@ -73,6 +77,20 @@ describe("createLeadInvite", () => {
     const {deps} = harness();
     await expect(createLeadInvite(ANONYMOUS_ACTOR as never, contactId, "community", deps)).rejects.toThrow("FORBIDDEN");
     expect(deps.invites.create).not.toHaveBeenCalled();
+  });
+
+  // Final review I3: a new link silently retired one the lead may already hold.
+  it.each(["live", "opened"])("refuses to supersede a %s link without the explicit confirmation", async (state) => {
+    const {deps} = harness("en", {latestState: state});
+    await expect(createLeadInvite(admin, contactId, "community", deps)).rejects.toThrow("INVITE_SUPERSEDE_UNCONFIRMED");
+    await expect(createLeadInvite(admin, contactId, "community", deps, false)).rejects.toThrow("INVITE_SUPERSEDE_UNCONFIRMED");
+    expect(deps.invites.create).not.toHaveBeenCalled();
+    await expect(createLeadInvite(admin, contactId, "community", deps, true)).resolves.toMatchObject({inviteId});
+  });
+
+  it.each(["consumed", "expired", "superseded"])("needs no confirmation when the latest link is %s", async (state) => {
+    const {deps} = harness("en", {latestState: state});
+    await expect(createLeadInvite(admin, contactId, "community", deps)).resolves.toMatchObject({inviteId});
   });
 });
 
@@ -124,6 +142,18 @@ describe("sendLeadInviteEmail", () => {
     expect(sent).toHaveLength(0);
   });
 
+  // Final review M3: the URL, the invite id and the contact must be one invite.
+  it("checks the link's token belongs to that invite and contact, and refuses a mismatch", async () => {
+    const good = harness("en");
+    await sendLeadInviteEmail(admin, {contactId, inviteId, inviteUrl: url, message: ""}, good.deps);
+    expect(good.deps.invites.tokenBelongsTo).toHaveBeenCalledWith(admin, {token: TOKEN, inviteId, contactId});
+
+    const bad = harness("en", {tokenMatches: false});
+    await expect(sendLeadInviteEmail(admin, {contactId, inviteId, inviteUrl: url, message: ""}, bad.deps)).rejects.toThrow("INVITE_URL_MISMATCH");
+    expect(bad.sent).toHaveLength(0);
+    expect(bad.recorded).toHaveLength(0);
+  });
+
   it("refuses a contact with no email address", async () => {
     const {deps, sent} = harness("en", {email: null});
     await expect(sendLeadInviteEmail(admin, {contactId, inviteId, inviteUrl: url, message: ""}, deps)).rejects.toThrow("CONTACT_EMAIL_MISSING");
@@ -140,7 +170,7 @@ describe("whatsappInviteHref", () => {
 describe("LeadJoinLinkPanel", () => {
   afterEach(cleanup);
 
-  async function panel(props: {hasEmail: boolean; phone: string | null}) {
+  async function panel(props: {hasEmail: boolean; phone: string | null; supersedes?: boolean}) {
     const {LeadJoinLinkPanel} = await import("@/components/admin/lead-join-link-panel");
     const t = en.Admin.contacts.lead.invite;
     render(
@@ -153,11 +183,14 @@ describe("LeadJoinLinkPanel", () => {
           title: t.title, plan: t.plan, plans: t.plans, create: t.create, linkLabel: t.linkLabel, copy: t.copy,
           copied: t.copied, messageLabel: t.messageLabel, email: t.email, whatsapp: t.whatsapp, sent: t.sent,
           failed: t.failed, noEmail: t.noEmail, noPhone: t.noPhone, error: t.error,
+          supersedeWarning: t.supersedeWarning, supersedeConfirm: t.supersedeConfirm,
         }}
         phoneE164={props.phone}
         recordShared={async () => undefined}
+        supersedesLiveLink={props.supersedes ?? false}
       />,
     );
+    if (props.supersedes) fireEvent.click(screen.getByRole("checkbox", {name: t.supersedeConfirm}));
     fireEvent.click(screen.getByRole("button", {name: t.create}));
     expect(await screen.findByLabelText(t.linkLabel)).toHaveValue("https://wtia.example.test/join/invite/abc");
     return t;
@@ -176,5 +209,47 @@ describe("LeadJoinLinkPanel", () => {
     expect(screen.getByRole("button", {name: t.whatsapp})).toBeDisabled();
     expect(screen.getByText(t.noEmail)).toBeInTheDocument();
     expect(screen.getByText(t.noPhone)).toBeInTheDocument();
+  });
+
+  it("warns before superseding a sent or opened link and holds Create until the confirm is ticked", async () => {
+    const {LeadJoinLinkPanel} = await import("@/components/admin/lead-join-link-panel");
+    const t = en.Admin.contacts.lead.invite;
+    const createAction = vi.fn(async () => ({status: "idle"}) as const);
+    render(
+      <LeadJoinLinkPanel
+        contactId={contactId}
+        createAction={createAction}
+        emailAction={async () => ({status: "idle"}) as const}
+        hasEmail
+        labels={{
+          title: t.title, plan: t.plan, plans: t.plans, create: t.create, linkLabel: t.linkLabel, copy: t.copy,
+          copied: t.copied, messageLabel: t.messageLabel, email: t.email, whatsapp: t.whatsapp, sent: t.sent,
+          failed: t.failed, noEmail: t.noEmail, noPhone: t.noPhone, error: t.error,
+          supersedeWarning: t.supersedeWarning, supersedeConfirm: t.supersedeConfirm,
+        }}
+        phoneE164={null}
+        recordShared={async () => undefined}
+        supersedesLiveLink
+      />,
+    );
+    expect(screen.getByText(t.supersedeWarning)).toBeInTheDocument();
+    const create = screen.getByRole("button", {name: t.create});
+    expect(create).toBeDisabled();
+    const confirm = screen.getByRole("checkbox", {name: t.supersedeConfirm});
+    expect(confirm).toBeRequired();
+    expect(confirm).toHaveAttribute("name", "confirmSupersede");
+    fireEvent.click(confirm);
+    expect(create).toBeEnabled();
+  });
+
+  it("shows no warning and no confirm when nothing live would be superseded", async () => {
+    await panel({hasEmail: true, phone: null});
+    const t = en.Admin.contacts.lead.invite;
+    expect(screen.queryByText(t.supersedeWarning)).toBeNull();
+    expect(screen.queryByRole("checkbox", {name: t.supersedeConfirm})).toBeNull();
+  });
+
+  it("creates after the confirm when a live link exists", async () => {
+    await panel({hasEmail: true, phone: null, supersedes: true});
   });
 });

@@ -3093,6 +3093,8 @@
           "noEmail": "此聯絡人沒有電郵地址。",
           "noPhone": "此聯絡人沒有電話號碼。",
           "error": "未能建立連結。",
+          "supersedeWarning": "此聯絡人已有一條仍然有效的連結。建立新連結後，舊連結將會失效；如對方已開啟舊連結，將失去預填資料，其申請亦不會歸屬於該連結。",
+          "supersedeConfirm": "我明白舊連結將會失效",
           "latest": "最新連結：{state}",
           "none": "尚未建立連結。",
           "state": {"live": "尚未開啟", "opened": "已開啟", "consumed": "已使用", "expired": "已過期", "superseded": "已被新連結取代"}

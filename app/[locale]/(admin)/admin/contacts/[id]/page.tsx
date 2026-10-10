@@ -148,10 +148,12 @@ export default async function AdminLeadPage({params, searchParams}: Props) {
             copied: t("lead.invite.copied"), messageLabel: t("lead.invite.messageLabel"), email: t("lead.invite.email"),
             whatsapp: t("lead.invite.whatsapp"), sent: t("lead.invite.sent"), failed: t("lead.invite.failed"),
             noEmail: t("lead.invite.noEmail"), noPhone: t("lead.invite.noPhone"), error: t("lead.invite.error"),
+            supersedeWarning: t("lead.invite.supersedeWarning"), supersedeConfirm: t("lead.invite.supersedeConfirm"),
           }}
           latestNote={latestInvite ? t("lead.invite.latest", {state: t(`lead.invite.state.${latestInvite.state}`)}) : t("lead.invite.none")}
           phoneE164={contact.phoneE164}
           recordShared={recordLeadInviteSharedAction.bind(null, path)}
+          supersedesLiveLink={latestInvite?.state === "live" || latestInvite?.state === "opened"}
         />
       </section>
 

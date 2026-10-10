@@ -225,6 +225,25 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
     },
 
     /**
+     * Final review M3: does this raw token (from a link the admin's browser posts back) belong to
+     * this invite AND this contact? Digest equality in Postgres, like `open`; a malformed value
+     * answers false without a query. Admin only, read only.
+     */
+    async tokenBelongsTo(actor: Actor, input: Readonly<{token: unknown; inviteId: unknown; contactId: unknown}>): Promise<boolean> {
+      requireAdmin(actor);
+      const inviteId = uuidSchema.parse(input.inviteId);
+      const contactId = uuidSchema.parse(input.contactId);
+      if (!isWellFormedInviteToken(input.token)) return false;
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT id FROM ${joinInvites}
+        WHERE token_digest = ${digestInviteToken(input.token)} AND id = ${inviteId} AND contact_id = ${contactId}
+        LIMIT 1
+      `))[0];
+      return row !== undefined;
+    },
+
+    /**
      * Public: the invitee holds only the link. A value that is not token-shaped
      * returns before any connection is opened. The lookup is digest equality on
      * the unique index inside Postgres, so the raw token is never compared in

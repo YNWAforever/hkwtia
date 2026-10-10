@@ -436,3 +436,20 @@ describe("joinInvitesRepository.liveInviteIdForMember", () => {
     await expect(createJoinInvitesRepository(async () => fake.database as never).liveInviteIdForMember(member)).resolves.toBeNull();
   });
 });
+
+/** Final review M3: the emailed link must be the invite and contact the form names. */
+describe("joinInvitesRepository.tokenBelongsTo", () => {
+  it("is admin only, answers false for a malformed token without a query, and binds digest, invite and contact", async () => {
+    const loadDatabase = vi.fn();
+    await expect(createJoinInvitesRepository(loadDatabase).tokenBelongsTo(member as never, {token: validToken, inviteId, contactId})).rejects.toThrow("FORBIDDEN");
+    await expect(createJoinInvitesRepository(loadDatabase).tokenBelongsTo(admin as never, {token: "short", inviteId, contactId})).resolves.toBe(false);
+    expect(loadDatabase).not.toHaveBeenCalled();
+
+    const hit = fakeDatabase(() => [{id: inviteId}]);
+    await expect(createJoinInvitesRepository(async () => hit.database as never).tokenBelongsTo(admin as never, {token: validToken, inviteId, contactId})).resolves.toBe(true);
+    expect(hit.outer[0]!.params).toEqual(expect.arrayContaining([digestInviteToken(validToken), inviteId, contactId]));
+    expect(hit.outer[0]!.params).not.toContain(validToken);
+    const miss = fakeDatabase(() => []);
+    await expect(createJoinInvitesRepository(async () => miss.database as never).tokenBelongsTo(admin as never, {token: validToken, inviteId, contactId})).resolves.toBe(false);
+  });
+});
