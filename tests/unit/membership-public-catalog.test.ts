@@ -108,15 +108,15 @@ describe("public Membership catalog", () => {
 
   it("derives annual then monthly paid options from their persisted fields", () => {
     const [tier] = catalog([startup()]);
-    const money = new Intl.NumberFormat("en", {style: "currency", currency: "HKD"});
 
+    // Round 27: whole-dollar fees read "HK$1,200", not "HK$1,200.00".
     expect(tier).toEqual({
       code: "startup",
       price: {
         kind: "paid",
         options: [
-          {amount: money.format(1200), cadence: "annual"},
-          {amount: money.format(120), cadence: "monthly"},
+          {amount: "HK$1,200", cadence: "annual"},
+          {amount: "HK$120", cadence: "monthly"},
         ],
       },
       cta: {href: "/join?plan=startup", kind: "join"},
@@ -125,7 +125,7 @@ describe("public Membership catalog", () => {
 
   it("uses the requested locale to format persisted paid values", () => {
     const [tier] = catalog([startup({monthlyPriceHkd: null})], "zh-HK");
-    const money = new Intl.NumberFormat("zh-HK", {style: "currency", currency: "HKD"});
+    const money = new Intl.NumberFormat("zh-HK", {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
 
     expect(tier.price).toEqual({
       kind: "paid",

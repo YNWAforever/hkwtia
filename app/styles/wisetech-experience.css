@@ -856,6 +856,12 @@
 .conversion-section .section-heading .eyebrow { color: var(--xp-signal); }
 .conversion-section .section-heading p:not(.eyebrow) { color: rgba(255, 255, 255, 0.76); }
 .conversion-grid { border-color: transparent; background: var(--wt-paper-bright); }
+/* Round 27: the membership card's published fees, one ruled row per plan — name left, fee right
+ * (components/home/conversion-paths.tsx). */
+.conversion-fees { max-width: 62ch; margin: 18px 0 0; border-top: 1px solid var(--wt-line); }
+.conversion-fees > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 1px solid var(--wt-line); padding: 10px 0; }
+.conversion-fees dt { color: var(--wt-ink); font-size: 14px; font-weight: 700; }
+.conversion-fees dd { margin: 0; color: #536267; font-size: 14px; font-variant-numeric: tabular-nums; }
 .site-root:has(.conversion-section) .site-footer { border-top: 1px solid rgba(255, 255, 255, 0.12); }
 
 /* ─── Round 5 (2026-10-06): a chaptered page, one layout that breaks the rhythm ───────────

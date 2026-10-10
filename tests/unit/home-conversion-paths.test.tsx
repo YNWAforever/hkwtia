@@ -54,5 +54,12 @@ describe("ConversionPaths", () => {
     const membership = screen.getByText(bundles.en.Home.conversionPaths.membership.title).closest("article")!;
     expect(within(membership).getByText(/HK\$1,200/)).toBeInTheDocument();
     expect(within(membership).getByText(/Startup/)).toBeInTheDocument();
+    // Round 27: a plan-and-fee list, not paragraphs inside the action row's flex wrapper (which
+    // spaced two one-line fees 50px apart on a phone).
+    const fees = membership.querySelector("dl")!;
+    expect(fees).toHaveAttribute("aria-label", bundles.en.Home.conversionPaths.membership.catalogPricesLabel);
+    expect([...fees.querySelectorAll("dt")].map((n) => n.textContent)).toEqual(["Startup"]);
+    expect([...fees.querySelectorAll("dd")].map((n) => n.textContent)).toEqual(["HK$1,200 per year"]);
+    expect(within(membership).getAllByRole("listitem")).toHaveLength(3);
   });
 });

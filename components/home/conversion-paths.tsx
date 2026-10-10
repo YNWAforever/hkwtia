@@ -27,7 +27,8 @@ export async function ConversionPaths({locale, copyOverrides}: HomeCopyProps) {
   const prices = catalog.flatMap((tier) => tier.price.kind === 'paid'
     ? tier.price.options.map((option) => ({
         key: `${tier.code}-${option.cadence}`,
-        label: `${tMembership(`tiers.${tier.code}.name`)} · ${option.amount} ${tMembership(`cadenceLabels.${option.cadence}`)}`,
+        plan: tMembership(`tiers.${tier.code}.name`),
+        fee: `${option.amount} ${tMembership(`cadenceLabels.${option.cadence}`)}`,
       }))
     : []);
 
@@ -42,9 +43,11 @@ export async function ConversionPaths({locale, copyOverrides}: HomeCopyProps) {
               <StatusLabel>{t(`${panel.key}.label`)}</StatusLabel>
               <h3>{t(`${panel.key}.title`)}</h3>
               <p>{t(`${panel.key}.copy`)}</p>
-              {panel.key === "membership" && prices.length > 0 ? <div aria-label={t("membership.catalogPricesLabel")} className="mt-3 space-y-1">
-                {prices.map((price) => <p key={price.key}>{price.label}</p>)}
-              </div> : null}
+              {/* A <dl>, not a <div>: `.conversion-grid article>div` is the action row's flex
+                  wrapper (22px gap, a column on phones), which spaced two one-line fees 50px apart. */}
+              {panel.key === "membership" && prices.length > 0 ? <dl aria-label={t("membership.catalogPricesLabel")} className="conversion-fees">
+                {prices.map((price) => <div key={price.key}><dt>{price.plan}</dt><dd>{price.fee}</dd></div>)}
+              </dl> : null}
               <ul>{points.map((point) => <li key={point}>{point}</li>)}</ul>
               <div>
                 <ActionLink href={panel.primaryHref} variant="button-dark">{t(`${panel.key}.primaryAction`)}</ActionLink>
