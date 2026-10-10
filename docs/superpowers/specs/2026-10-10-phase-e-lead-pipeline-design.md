@@ -109,11 +109,15 @@ open/consume, bound to the signed-in profile for consume.
    Each send writes an `invite_sent` activity (`meta.channel`: `copy` | `email` | `whatsapp`).
 2. **Open (lead).** `/[locale]/(join)/join/invite/[token]` — `noindex`, rate-limited per IP. The digest is
    looked up in constant time; if unknown, expired, consumed or superseded → a neutral "this link is
-   no longer valid" page with `/join` and `/contact` links and **no contact data**. If valid: stamp
-   `opened_at` once (+ `invite_opened` activity), set an httpOnly, Secure, SameSite=Lax cookie
-   `wtia_invite` holding the invite id (expires with the invite), and render a welcome: the lead's
-   name, the inviting staff member's first name, the plan's benefits and price from the live public
-   catalog, and Continue → `/join?plan=<code>` (signed in) or member-login with `next` back to it.
+   no longer valid" page with `/join` and `/contact` links and **no contact data**. If valid, the
+   page is a **read-only** lookup that renders a welcome: the lead's name, the inviting staff
+   member's first name, the plan's benefits and price from the live public catalog, and Continue.
+   Continue goes to a route handler that re-validates the token, stamps `opened_at` once
+   (+ `invite_opened` activity), sets an httpOnly, Secure, SameSite=Lax cookie `wtia_invite` holding
+   the invite id (expires with the invite), and redirects to `/join?plan=<code>` (signed in) or
+   member-login with `next` back to it. Only this human click marks an invite opened: link
+   previewers and mail scanners fetch the page as soon as staff send the link, and stamping on view
+   would mark every invite "opened" (execution ruling, Task 6).
 3. **Join.** With a valid invite cookie whose invite is unconsumed: prefill only **empty** draft fields
    (name, phone, organisation) from the contact; the email comes from the signed-in account. On
    submit: set `consumed_at` and `application_id`, store `invite_id` on the application, move the contact to `applied` if it is
