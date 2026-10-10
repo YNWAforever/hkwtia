@@ -8,6 +8,8 @@ import {
 } from "@/lib/db/repos/contact-activities";
 import {
   contactsRepository,
+  type BoardFilters,
+  type ContactBoard,
   type ContactPage,
   type ContactRelated,
   type ContactRow,
@@ -82,4 +84,14 @@ export async function getLatestLeadInvite(
 ): Promise<Awaited<ReturnType<JoinInvitesRepository["latestForContact"]>>> {
   requireAdmin(actor);
   return deps.latestForContact(actor, id);
+}
+
+/** Phase E board. The same double `requireAdmin` as the reads above. */
+export async function listContactBoard(
+  actor: Actor,
+  filters: BoardFilters,
+  deps: Pick<ContactsRepository, "listBoard"> = contactsRepository,
+): Promise<ContactBoard> {
+  requireAdmin(actor);
+  return deps.listBoard(actor, filters);
 }

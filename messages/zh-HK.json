@@ -3030,6 +3030,23 @@
       "empty": "沒有符合條件的潛在客戶。",
       "error": "無法載入潛在客戶流程。",
       "saved": "已更新潛在客戶。",
+      "board": {
+        "view": {"label": "檢視", "list": "清單", "board": "看板"},
+        "filters": {"owner": "負責人", "anyone": "所有人", "mine": "我的", "source": "來源", "anySource": "所有來源", "overdueOnly": "只顯示逾期的下一步", "includeClosed": "顯示已結案", "apply": "套用"},
+        "columnCount": "此階段共 {count} 位",
+        "emptyColumn": "此階段沒有人。",
+        "unnamed": "未命名聯絡人",
+        "unassigned": "未指派",
+        "ownedBy": "負責人：{name}",
+        "dueOn": "到期日 {date}",
+        "noNextStep": "尚無下一步",
+        "overdue": "已逾期",
+        "inviteOpened": "已開啟入會連結",
+        "applied": "已申請",
+        "moveTo": "移至階段",
+        "move": "移動",
+        "error": "無法載入流程看板。"
+      },
       "lead": {
         "back": "所有潛在客戶",
         "unnamed": "未命名聯絡人",

@@ -3029,6 +3029,23 @@
       "empty": "No contacts match these filters.",
       "error": "We could not load the contacts pipeline.",
       "saved": "Contact updated.",
+      "board": {
+        "view": {"label": "View", "list": "List", "board": "Board"},
+        "filters": {"owner": "Owner", "anyone": "Everyone", "mine": "Mine", "source": "Source", "anySource": "Any source", "overdueOnly": "Overdue next steps only", "includeClosed": "Show closed", "apply": "Apply"},
+        "columnCount": "{count} in this stage",
+        "emptyColumn": "Nobody in this stage.",
+        "unnamed": "Unnamed contact",
+        "unassigned": "Unassigned",
+        "ownedBy": "Owner: {name}",
+        "dueOn": "Due {date}",
+        "noNextStep": "No next step",
+        "overdue": "Overdue",
+        "inviteOpened": "Join link opened",
+        "applied": "Applied",
+        "moveTo": "Move to stage",
+        "move": "Move",
+        "error": "We could not load the pipeline board."
+      },
       "lead": {
         "back": "All contacts",
         "unnamed": "Unnamed contact",

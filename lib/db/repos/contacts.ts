@@ -10,9 +10,11 @@ import {
   contactSourceEnum,
   contactStageEnum,
   contacts,
+  contactActivities,
   conversations,
   eventGuestRegistrations,
   events,
+  joinInvites,
   leads,
   memberships,
   profiles,
@@ -262,6 +264,33 @@ const showcaseIntroRowSchema = z.object({
 });
 const membershipRowSchema = z.object({plan_code: z.string(), status: z.string()});
 
+/**
+ * Phase E board. One card per contact, the fields a salesperson scans a column
+ * with. `inviteOpened` is "their newest live invite has been opened but not
+ * used"; `applied` is "they are at the applied stage or an invite was consumed".
+ */
+export type BoardCard = Pick<ContactRow, "id" | "displayName" | "organisation" | "source" | "ownerName" | "nextStep" | "nextStepDueAt"> & {
+  inviteOpened: boolean;
+  applied: boolean;
+};
+export type BoardFilters = Readonly<{
+  ownerProfileId?: string | null;
+  source?: ContactSource;
+  overdueOnly?: boolean;
+  includeClosed?: boolean;
+}>;
+export type ContactBoard = Record<ContactStage, readonly BoardCard[]>;
+
+const boardFiltersSchema = z.object({
+  ownerProfileId: z.string().min(1).max(255).nullable().optional().default(null),
+  source: z.enum(CONTACT_SOURCES).optional(),
+  overdueOnly: z.boolean().optional().default(false),
+  includeClosed: z.boolean().optional().default(false),
+}).strict();
+
+/** A board is a working surface, not a report: past this many cards a column stops being scannable. */
+const BOARD_CARD_CAP = 600;
+
 export type ContactPage = Readonly<{
   items: readonly ContactRow[];
   nextCursor: string | null;
@@ -337,6 +366,14 @@ const pipelineRowSchema = z.object({
   duplicate_count: z.coerce.number().int().nonnegative(),
   total_count: z.coerce.number().int().nonnegative(),
   created_at: z.coerce.date(),
+});
+
+const boardRowSchema = pipelineRowSchema.pick({
+  id: true, display_name: true, organisation: true, source: true, stage: true,
+  owner_name: true, next_step: true, next_step_due_at: true,
+}).extend({
+  invite_opened: z.union([z.boolean(), z.string()]).nullable(),
+  applied: z.union([z.boolean(), z.string()]).nullable(),
 });
 
 function toContactRow(row: Record<string, unknown>): ContactRow {
@@ -1059,6 +1096,61 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         nextCursor: hasNext && last !== undefined ? encodeCursor(last) : null,
         total: items.length === 0 ? 0 : Number(rows[0]?.total_count ?? 0),
       };
+    },
+
+    /**
+     * Phase E board. Columns by stage, one query. `member` is a recency window,
+     * not a stock: a stage_change to member or a became_member activity inside
+     * the last 30 days, otherwise the column would fill up forever. `closed`
+     * is read only on request. "Overdue" is the lead page's definition — the due
+     * instant (18:00 Hong Kong on the due day) is already past.
+     */
+    async listBoard(actor: Actor, filters: BoardFilters = {}): Promise<ContactBoard> {
+      requireAdmin(actor);
+      const parsed = boardFiltersSchema.parse(filters ?? {});
+      const terms: SQL[] = [];
+      if (!parsed.includeClosed) terms.push(sql`c.stage <> 'closed'`);
+      if (parsed.ownerProfileId !== null) terms.push(sql`c.owner_profile_id = ${parsed.ownerProfileId}`);
+      if (parsed.source !== undefined) terms.push(sql`c.source = ${parsed.source}`);
+      if (parsed.overdueOnly) terms.push(sql`c.next_step_due_at < now()`);
+      terms.push(sql`(c.stage <> 'member' OR EXISTS (
+        SELECT 1 FROM ${contactActivities} recent
+        WHERE recent.contact_id = c.id
+          AND recent.created_at > now() - interval '30 days'
+          AND ((recent.kind = 'stage_change' AND recent.meta->>'to' = 'member') OR recent.kind = 'became_member')
+      ))`);
+      const database = await loadDatabase();
+      const rows = rowsFrom(await database.execute(sql`
+        SELECT board.*,
+          COALESCE((
+            SELECT i.opened_at IS NOT NULL AND i.consumed_at IS NULL
+            FROM ${joinInvites} i
+            WHERE i.contact_id = board.id AND i.superseded_at IS NULL
+            ORDER BY i.created_at DESC, i.id DESC LIMIT 1
+          ), false) AS invite_opened,
+          (board.stage = 'applied' OR EXISTS (
+            SELECT 1 FROM ${joinInvites} used WHERE used.contact_id = board.id AND used.consumed_at IS NOT NULL
+          )) AS applied
+        FROM (${contactProjection(sql.join(terms, sql` AND `))}) AS board
+        ORDER BY board.next_step_due_at ASC NULLS LAST, board.created_at DESC, board.id DESC
+        LIMIT ${BOARD_CARD_CAP}
+      `));
+      const board: Record<ContactStage, BoardCard[]> = {new: [], contacted: [], qualified: [], applied: [], member: [], closed: []};
+      for (const row of rows) {
+        const card = boardRowSchema.parse(row);
+        board[card.stage].push({
+          id: card.id,
+          displayName: card.display_name,
+          organisation: card.organisation,
+          source: card.source,
+          ownerName: card.owner_name,
+          nextStep: card.next_step,
+          nextStepDueAt: card.next_step_due_at,
+          inviteOpened: isTrue(card.invite_opened),
+          applied: isTrue(card.applied),
+        });
+      }
+      return board;
     },
 
     /**

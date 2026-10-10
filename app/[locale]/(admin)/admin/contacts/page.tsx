@@ -5,8 +5,9 @@ import {
   ContactPipelineTable,
   type ContactPipelineFilterState,
 } from "@/components/admin/contact-pipeline-table";
+import {LeadBoard, type LeadBoardFilterState, type LeadBoardLabels} from "@/components/admin/lead-board";
 import type {AppLocale} from "@/i18n/routing";
-import {listContacts} from "@/lib/admin/contacts";
+import {listContactBoard, listContacts} from "@/lib/admin/contacts";
 import {updateContactPipelineAction} from "@/lib/admin/contact-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {
@@ -44,6 +45,101 @@ function optInFrom(value: string): "" | "yes" | "no" {
   return value === "yes" || value === "no" ? value : "";
 }
 
+type Translator = Awaited<ReturnType<typeof getTranslations<"Admin.contacts">>>;
+
+/**
+ * Phase E board view (`?view=board`). Every filter is untrusted URL input, so
+ * each is narrowed to a known value; "mine" is resolved to the acting admin's
+ * own profile id HERE, never read from a query parameter, so the URL cannot
+ * name somebody else's desk beyond what the list's owner filter already allows.
+ */
+async function renderBoard({actor, locale, query, t}: Readonly<{
+  actor: Awaited<ReturnType<typeof requireAdminPageActor>>;
+  locale: AppLocale;
+  query: Query;
+  t: Translator;
+}>) {
+  const filters: LeadBoardFilterState = {
+    owner: single(query.owner) === "mine" ? "mine" : "",
+    source: sourceFrom(single(query.source)),
+    overdueOnly: single(query.overdue) === "1",
+    includeClosed: single(query.closed) === "1",
+  };
+  const board = await listContactBoard(actor, {
+    ownerProfileId: filters.owner === "mine" ? actor.profileId : null,
+    ...(filters.source === "" ? {} : {source: filters.source}),
+    overdueOnly: filters.overdueOnly,
+    includeClosed: filters.includeClosed,
+  }).catch(() => null);
+
+  const path = `/${locale}/admin/contacts`;
+  const returnParams = new URLSearchParams({view: "board"});
+  if (filters.owner) returnParams.set("owner", filters.owner);
+  if (filters.source) returnParams.set("source", filters.source);
+  if (filters.overdueOnly) returnParams.set("overdue", "1");
+  if (filters.includeClosed) returnParams.set("closed", "1");
+  returnParams.set("saved", "1");
+  const returnTo = `${localizedPath(locale, "/admin/contacts")}?${returnParams.toString()}`;
+
+  const header = (
+    <header className="space-y-3">
+      <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p>
+      <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
+      {single(query.saved) === "1" ? <p className="rounded-md border border-border/70 bg-muted/40 px-4 py-3 text-sm" role="status">{t("saved")}</p> : null}
+    </header>
+  );
+  if (board === null) {
+    return <div className="space-y-8">{header}<p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-destructive" role="alert">{t("board.error")}</p></div>;
+  }
+
+  const labels: LeadBoardLabels = {
+    caption: t("title"),
+    stage: {
+      new: t("stage.new"), contacted: t("stage.contacted"), qualified: t("stage.qualified"),
+      applied: t("stage.applied"), member: t("stage.member"), closed: t("stage.closed"),
+    },
+    source: {
+      whatsapp: t("source.whatsapp"), event_guest: t("source.event_guest"), showcase_intro: t("source.showcase_intro"),
+      join_abandoned: t("source.join_abandoned"), interest_form: t("source.interest_form"), import: t("source.import"),
+    },
+    view: {label: t("board.view.label"), list: t("board.view.list"), board: t("board.view.board")},
+    filters: {
+      owner: t("board.filters.owner"), anyone: t("board.filters.anyone"), mine: t("board.filters.mine"),
+      source: t("board.filters.source"), anySource: t("board.filters.anySource"),
+      overdueOnly: t("board.filters.overdueOnly"), includeClosed: t("board.filters.includeClosed"), apply: t("board.filters.apply"),
+    },
+    columnCount: (count) => t("board.columnCount", {count}),
+    emptyColumn: t("board.emptyColumn"),
+    unnamed: t("board.unnamed"),
+    unassigned: t("board.unassigned"),
+    ownedBy: (name) => t("board.ownedBy", {name}),
+    dueOn: (date) => t("board.dueOn", {date}),
+    noNextStep: t("board.noNextStep"),
+    overdue: t("board.overdue"),
+    inviteOpened: t("board.inviteOpened"),
+    applied: t("board.applied"),
+    moveTo: t("board.moveTo"),
+    move: t("board.move"),
+  };
+
+  return (
+    <div className="space-y-8">
+      {header}
+      <section className="glass-card p-6">
+        <LeadBoard
+          board={board}
+          filters={filters}
+          labels={labels}
+          locale={locale}
+          now={new Date()}
+          returnTo={returnTo}
+          updateAction={updateContactPipelineAction.bind(null, path)}
+        />
+      </section>
+    </div>
+  );
+}
+
 export default async function AdminContactsPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
@@ -51,6 +147,10 @@ export default async function AdminContactsPage({params, searchParams}: Props) {
   const actor = await requireAdminPageActor();
   const query = await searchParams;
   const t = await getTranslations({locale, namespace: "Admin.contacts"});
+
+  if (single(query.view) === "board") {
+    return renderBoard({actor, locale, query, t});
+  }
 
   const filters: ContactPipelineFilterState = {
     stage: stageFrom(single(query.stage)),
@@ -101,6 +201,10 @@ export default async function AdminContactsPage({params, searchParams}: Props) {
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p>
       <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
       <p className="text-lg text-muted-foreground">{t("description")}</p>
+      <nav aria-label={t("board.view.label")} className="flex gap-2 text-sm">
+        <span aria-current="page" className="rounded-md bg-primary px-3 py-2 text-primary-foreground">{t("board.view.list")}</span>
+        <Link className="rounded-md border border-input px-3 py-2" href={`${localizedPath(locale, "/admin/contacts")}?view=board`}>{t("board.view.board")}</Link>
+      </nav>
       {single(query.saved) === "1" ? <p className="rounded-md border border-border/70 bg-muted/40 px-4 py-3 text-sm" role="status">{t("saved")}</p> : null}
     </header>
   );

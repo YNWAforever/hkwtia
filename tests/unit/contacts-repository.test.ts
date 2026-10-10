@@ -300,4 +300,89 @@ describe("contactsRepository", () => {
       await expect(repository.markMemberForProfile({kind: "staff", userId: "s", profileId: "s"} as never, "p-1")).rejects.toThrow("FORBIDDEN");
     });
   });
+
+  /** Phase E board: one query, columns by stage, member as a 30-day window. */
+  describe("listBoard", () => {
+    const admin = {kind: "staff", userId: "s", profileId: "p-admin"} as never;
+    const base = {
+      display_name: "Ada", organisation: null, source: "event_guest", owner_name: null,
+      next_step: null, next_step_due_at: null, invite_opened: false, applied: false,
+      duplicate_count: 1, total_count: 1, created_at: "2026-10-01T00:00:00.000Z",
+    };
+    const row = (id: string, stage: string, extra: Record<string, unknown> = {}) => ({...base, id, stage, ...extra});
+    const statementOf = (statements: {sql: string}[]) => normalized(statements[0]?.sql);
+
+    it("refuses a non-admin", async () => {
+      const {database, execute} = fakeDatabase();
+      const repository = createContactsRepository(async () => database as never);
+      await expect(repository.listBoard({kind: "member", userId: "u", profileId: "p"} as never, {})).rejects.toThrow("FORBIDDEN");
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it("groups rows into one column per stage and reads the invite and applied flags", async () => {
+      const {database} = recordingDatabase([[
+        row("c-1", "new"),
+        row("c-2", "applied", {invite_opened: true, applied: true, next_step: "Call", next_step_due_at: "2026-10-03T10:00:00.000Z"}),
+        row("c-3", "member"),
+      ]]);
+      const repository = createContactsRepository(async () => database);
+      const board = await repository.listBoard(admin, {});
+      expect(Object.keys(board)).toEqual(["new", "contacted", "qualified", "applied", "member", "closed"]);
+      expect(board.new.map((c) => c.id)).toEqual(["c-1"]);
+      expect(board.contacted).toEqual([]);
+      expect(board.applied[0]).toMatchObject({id: "c-2", inviteOpened: true, applied: true, nextStep: "Call"});
+      expect(board.applied[0]!.nextStepDueAt).toEqual(new Date("2026-10-03T10:00:00.000Z"));
+      expect(board.member.map((c) => c.id)).toEqual(["c-3"]);
+      expect(board.closed).toEqual([]);
+    });
+
+    it("leaves closed contacts out unless asked, in one statement", async () => {
+      const first = recordingDatabase([[]]);
+      await createContactsRepository(async () => first.database).listBoard(admin, {});
+      expect(first.statements).toHaveLength(1);
+      expect(statementOf(first.statements)).toContain("c.stage <> 'closed'");
+      const second = recordingDatabase([[row("c-9", "closed")]]);
+      const board = await createContactsRepository(async () => second.database).listBoard(admin, {includeClosed: true});
+      expect(statementOf(second.statements)).not.toContain("c.stage <> 'closed'");
+      expect(board.closed.map((c) => c.id)).toEqual(["c-9"]);
+    });
+
+    it("limits the member column to a stage_change to member or a became_member in the last 30 days", async () => {
+      const {statements, database} = recordingDatabase([[]]);
+      await createContactsRepository(async () => database).listBoard(admin, {});
+      const text = statementOf(statements);
+      expect(text).toContain("c.stage <> 'member' or exists");
+      expect(text).toContain("interval '30 days'");
+      expect(text).toContain("recent.kind = 'stage_change' and recent.meta->>'to' = 'member'");
+      expect(text).toContain("recent.kind = 'became_member'");
+    });
+
+    it("defines inviteOpened on the newest non-superseded invite, opened and not consumed", async () => {
+      const {statements, database} = recordingDatabase([[]]);
+      await createContactsRepository(async () => database).listBoard(admin, {});
+      const text = statementOf(statements);
+      expect(text).toContain("i.opened_at is not null and i.consumed_at is null");
+      expect(text).toContain("i.superseded_at is null order by i.created_at desc");
+      expect(text).toContain("board.stage = 'applied' or exists");
+    });
+
+    it("binds the owner and source, and adds the overdue predicate only on request", async () => {
+      const filtered = recordingDatabase([[]]);
+      await createContactsRepository(async () => filtered.database).listBoard(admin, {ownerProfileId: "p-admin", source: "whatsapp", overdueOnly: true});
+      expect(filtered.statements[0]!.params).toEqual(expect.arrayContaining(["p-admin", "whatsapp"]));
+      expect(statementOf(filtered.statements)).toContain("c.next_step_due_at < now()");
+      const plain = recordingDatabase([[]]);
+      await createContactsRepository(async () => plain.database).listBoard(admin, {});
+      expect(statementOf(plain.statements)).not.toContain("next_step_due_at < now()");
+      expect(statementOf(plain.statements)).not.toContain("c.owner_profile_id =");
+    });
+
+    it("refuses an unknown source or an unknown key before touching the database", async () => {
+      const {database, execute} = fakeDatabase();
+      const repository = createContactsRepository(async () => database as never);
+      await expect(repository.listBoard(admin, {source: "nope"} as never)).rejects.toThrow();
+      await expect(repository.listBoard(admin, {stage: "new"} as never)).rejects.toThrow();
+      expect(execute).not.toHaveBeenCalled();
+    });
+  });
 });
