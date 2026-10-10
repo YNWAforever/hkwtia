@@ -21,6 +21,7 @@ import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinC
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
+import {attributeJoinInvite} from "@/lib/membership/join-invite-attribution";
 import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {createCheckoutSession} from "@/lib/billing/checkout-service";
@@ -192,6 +193,8 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // billingInterval is a real, validated input rather than something the server derives alone.
     const billingInterval = defaultBillingInterval(plan);
     const result = await completeApplication(actor, {plan, applicationId: id, billingInterval, profile: parsed.data, company: null});
+    // After the application is saved and before the redirect throws; never throws itself.
+    await attributeJoinInvite(actor, result.applicationId);
     redirectToOutcome(locale, plan, result);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
@@ -239,6 +242,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
       jobTitle: profile.jobTitle,
       locale: profile.locale,
     }, company: {...parsed.data, id: company.id}});
+    await attributeJoinInvite(actor, result.applicationId);
     redirectToOutcome(locale, plan, result);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;

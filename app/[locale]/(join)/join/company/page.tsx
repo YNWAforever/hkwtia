@@ -1,5 +1,6 @@
 import {PolicyConfirmation} from "@/components/join/policy-confirmation";
 import {getJoinDraft} from "@/lib/membership/join-draft";
+import {inviteDefaults} from "@/lib/membership/join-invite-attribution";
 import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -45,6 +46,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
   if(actor.kind!=="member")notFound();
   const draft=await getJoinDraft(actor,plan,applicationId);
   if(!draft)notFound();
+  const defaults = await inviteDefaults();
   const t = await getTranslations("Join");
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,applicationId,locale);
@@ -57,8 +59,8 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
-          <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={draft.company?.legalName??""} required/>
-          <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" defaultValue={draft.company?.displayName??""} required/>
+          <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={draft.company?.legalName??defaults.legalName??""} required/>
+          <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" defaultValue={draft.company?.displayName??defaults.companyDisplayName??""} required/>
           <Field autoComplete="url" label={t("fields.website")} name="website" defaultValue={draft.company?.website??""} type="url"/>
           <Field label={t("fields.industry")} name="industry" defaultValue={draft.company?.industry??""}/>
           <Field label={t("fields.sizeBand")} name="sizeBand" defaultValue={draft.company?.sizeBand??""}/>

@@ -3,6 +3,8 @@ import "server-only";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {enrollActivatedMembership} from "@/lib/automation/enrollment";
+import {flipContactOnActivation} from "@/lib/membership/contact-member-flip";
+import {contactsRepository} from "@/lib/db/repos/contacts";
 import {journeysRepository, type JourneysRepository} from "@/lib/db/repos/journeys";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
@@ -18,6 +20,8 @@ import {
   type JoinInput,
   type ProfileInput,
 } from "@/lib/membership/join-schema";
+
+type ContactFlipRepository = {markMemberForProfile(actor: Actor, profileId: string): Promise<unknown>};
 
 export type JoinStep = "profile" | "company" | "checkout" | "complete" | "review";
 
@@ -69,6 +73,7 @@ export type JoinDependencies = {
   companies?: CompanyRepository;
   memberships?: MembershipRepository;
   journeys?: Pick<JourneysRepository, "enroll">;
+  contacts?: ContactFlipRepository;
   now?: () => Date;
   repositories?: {
     applications?: ApplicationRepository;
@@ -81,12 +86,13 @@ export type JoinDependencies = {
   readonly [key: string]: unknown;
 };
 
-const defaultDependencies: Required<Pick<JoinDependencies, "applications" | "profiles" | "companies" | "memberships" | "journeys" | "now">> = {
+const defaultDependencies: Required<Pick<JoinDependencies, "applications" | "profiles" | "companies" | "memberships" | "journeys" | "contacts" | "now">> = {
   applications: applicationsRepository as unknown as ApplicationRepository,
   profiles: profilesRepository as unknown as ProfileRepository,
   companies: companiesRepository as unknown as CompanyRepository,
   memberships: membershipsRepository as unknown as MembershipRepository,
   journeys: journeysRepository,
+  contacts: contactsRepository as ContactFlipRepository,
   now: () => new Date(),
 };
 
@@ -116,6 +122,8 @@ function dependencies(input?: JoinDependencies) {
     companies: custom ? input?.companies ?? input?.repositories?.companies : defaultDependencies.companies,
     memberships: input?.memberships ?? input?.repositories?.memberships ?? defaultDependencies.memberships,
     journeys: custom ? input?.journeys ?? input?.repositories?.journeys : defaultDependencies.journeys,
+    // Like journeys: injected deps opt out unless they bring their own.
+    contacts: custom ? input?.contacts : defaultDependencies.contacts,
     now: input?.now ?? defaultDependencies.now,
   };
 }
@@ -283,6 +291,11 @@ export async function completeApplication(
     billingInterval: membershipOption.billingInterval,
   }, deps);
   const result = resultForMembership(application, membership);
+  if (membership.status === "active" && deps.contacts) {
+    // Free tiers go active here, so this is their activation point (paid ones: the Stripe webhook).
+    const contacts = deps.contacts;
+    await flipContactOnActivation(() => contacts.markMemberForProfile(actor, actor.profileId), membership.id);
+  }
   if (membership.status === "active" && deps.journeys) {
     await enrollActivatedMembership(
       actor.profileId,

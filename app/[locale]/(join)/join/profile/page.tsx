@@ -1,5 +1,6 @@
 import {PolicyConfirmation} from "@/components/join/policy-confirmation";
 import {getJoinDraft} from "@/lib/membership/join-draft";
+import {inviteDefaults} from "@/lib/membership/join-invite-attribution";
 import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -44,6 +45,7 @@ export default async function ProfilePage({params, searchParams}: Props) {
   if(actor.kind!=="member")notFound();
   const draft=await getJoinDraft(actor,plan,value(query.application)??null);
   if(!draft)notFound();
+  const defaults = await inviteDefaults();
   const t = await getTranslations("Join");
   const companyPlan = plan === "startup" || plan === "corporate";
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
@@ -57,10 +59,10 @@ export default async function ProfilePage({params, searchParams}: Props) {
       <p className="mt-4 text-muted-foreground">{t("profileDescription")}</p>
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("continue")}>
-          <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" defaultValue={draft.profile?.displayName??""} required/>
+          <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" defaultValue={draft.profile?.displayName??defaults.displayName??""} required/>
           <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" defaultValue={draft.profile?.phone??""} type="tel"/>
           <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle" defaultValue={draft.profile?.jobTitle??""}/>
-          <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" defaultValue={draft.profile?.whatsappNumber??""} type="tel"/>
+          <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" defaultValue={draft.profile?.whatsappNumber??defaults.whatsappNumber??""} type="tel"/>
           <div className="rounded-md border border-border p-4 text-sm">
             <label className="flex items-start gap-3 font-medium" htmlFor="whatsappOptIn">
               <input className="mt-1" id="whatsappOptIn" name="whatsappOptIn" type="checkbox" defaultChecked={draft.profile?.whatsappOptIn===true}/>

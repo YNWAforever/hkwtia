@@ -27,6 +27,7 @@ const state = vi.hoisted(() => ({
   getContact: vi.fn(),
   activities: vi.fn(),
   related: vi.fn(),
+  latestInvite: vi.fn(),
   now: Date.now(),
 }));
 
@@ -58,11 +59,15 @@ vi.mock("@/lib/admin/contacts", () => ({
   getContact: (...args: unknown[]) => state.getContact(...args),
   listContactActivities: (...args: unknown[]) => state.activities(...args),
   getContactRelated: (...args: unknown[]) => state.related(...args),
+  getLatestLeadInvite: (...args: unknown[]) => state.latestInvite(...args),
 }));
 vi.mock("@/lib/admin/contact-actions", () => ({
   addContactNoteAction: vi.fn(),
   updateContactNextStepAction: vi.fn(),
   updateContactPipelineAction: vi.fn(),
+  createLeadInviteAction: vi.fn(),
+  sendLeadInviteEmailAction: vi.fn(),
+  recordLeadInviteSharedAction: vi.fn(),
 }));
 // The real Link reads a next-intl context a bare render does not provide. The
 // stub keeps `href` exactly as passed, which is the property under test: the
@@ -103,6 +108,7 @@ beforeEach(() => {
   state.getContact.mockReset().mockResolvedValue(contact());
   state.activities.mockReset().mockResolvedValue([]);
   state.related.mockReset().mockResolvedValue(emptyRelated);
+  state.latestInvite.mockReset().mockResolvedValue(null);
 });
 
 describe.each([["en", en.Admin.contacts], ["zh-HK", zh.Admin.contacts]] as const)("the lead page in %s", (locale, text) => {

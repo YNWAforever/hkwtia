@@ -1,0 +1,2 @@
+ALTER TABLE "job_health" DROP CONSTRAINT "job_health_registered_key";--> statement-breakpoint
+ALTER TABLE "job_health" ADD CONSTRAINT "job_health_registered_key" CHECK ("job_health"."job_key" IN ('aiops-metrics','journey-runner','approvals-expirer','renewal-runner','engagement-score','chat-retention','retention-analyst','board-reporter','whatsapp-send-queue','event-cancellation-refunds','event-notifications','showcase-lead-emails','ticket-emails','admin-batches','membership-grant-expiry','rate-limit-cleanup','member-import-retention','lead-reminders'));

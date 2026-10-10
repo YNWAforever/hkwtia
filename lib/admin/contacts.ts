@@ -8,11 +8,14 @@ import {
 } from "@/lib/db/repos/contact-activities";
 import {
   contactsRepository,
+  type BoardFilters,
+  type ContactBoard,
   type ContactPage,
   type ContactRelated,
   type ContactRow,
   type ContactsRepository,
 } from "@/lib/db/repos/contacts";
+import {joinInvitesRepository, type JoinInvitesRepository} from "@/lib/db/repos/join-invites";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 /**
@@ -71,4 +74,24 @@ export async function getContactRelated(
 ): Promise<ContactRelated> {
   requireAdmin(actor);
   return deps.related(actor, id);
+}
+
+/** The newest join link made for this contact, with its state - never the link itself, which is not stored. */
+export async function getLatestLeadInvite(
+  actor: Actor,
+  id: unknown,
+  deps: Pick<JoinInvitesRepository, "latestForContact"> = joinInvitesRepository,
+): Promise<Awaited<ReturnType<JoinInvitesRepository["latestForContact"]>>> {
+  requireAdmin(actor);
+  return deps.latestForContact(actor, id);
+}
+
+/** Phase E board. The same double `requireAdmin` as the reads above. */
+export async function listContactBoard(
+  actor: Actor,
+  filters: BoardFilters,
+  deps: Pick<ContactsRepository, "listBoard"> = contactsRepository,
+): Promise<ContactBoard> {
+  requireAdmin(actor);
+  return deps.listBoard(actor, filters);
 }

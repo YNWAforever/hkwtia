@@ -167,6 +167,36 @@ describe("membership join orchestration", () => {
     expect(deps.inspect().enrollmentRows.size).toBe(0);
   });
 
+  describe("contact flip on activation", () => {
+    const community = {plan: "community" as const, billingInterval: "none" as const, profile: {displayName: "Community Member"}, company: null};
+
+    it("flips the applicant's contact once when a free membership goes active", async () => {
+      const markMemberForProfile = vi.fn(async () => "flipped");
+      const deps = {...harness(), contacts: {markMemberForProfile}};
+      const result = await completeApplication(actor, community, deps);
+      expect(markMemberForProfile).toHaveBeenCalledTimes(1);
+      expect(markMemberForProfile).toHaveBeenCalledWith(actor, actor.profileId);
+      expect(result.next).toBe("complete");
+    });
+
+    it("never blocks activation when the flip throws", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => undefined);
+      const markMemberForProfile = vi.fn(async () => { throw new Error("contacts down"); });
+      const deps = {...harness(), contacts: {markMemberForProfile}};
+      const result = await completeApplication(actor, community, deps);
+      expect(result.next).toBe("complete");
+      expect(deps.inspect().memberships).toMatchObject([{status: "active"}]);
+      expect(console.error).toHaveBeenCalledWith("contact.member_flip_failed", {membershipId: result.membershipId});
+    });
+
+    it("does not flip for a paid plan that is still awaiting payment", async () => {
+      const markMemberForProfile = vi.fn(async () => "flipped");
+      const deps = {...harness(), contacts: {markMemberForProfile}};
+      await completeApplication(actor, {plan: "startup", billingInterval: "annual", profile: {displayName: "Founder"}, company: null} as never, deps).catch(() => undefined);
+      expect(markMemberForProfile).not.toHaveBeenCalled();
+    });
+  });
+
   it("activates community without creating a checkout session", async () => {
     const deps = harness();
     const result = await completeApplication(

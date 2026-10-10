@@ -56,3 +56,26 @@ describe("migration 0063 lead pipeline", () => {
     expect(sql).not.toMatch(/^\s*UPDATE\b/im);
   });
 });
+
+// Task 9: job_health_registered_key lists every registered job. 0064 re-creates it and
+// must keep every key 0052 listed, adding only 'lead-reminders'.
+describe("migration 0064 lead-reminders job key", () => {
+  const keysOf = (file: string): string[] => {
+    const text = readFileSync(join(process.cwd(), "drizzle", file), "utf8");
+    const list = text.match(/"job_health_registered_key" CHECK \([^)]*IN \(([^)]*)\)/)?.[1] ?? "";
+    return [...list.matchAll(/'([^']+)'/g)].map((match) => match[1]!);
+  };
+
+  it("keeps every key 0052 listed and adds only lead-reminders", () => {
+    const before = keysOf("0052_verified_worker_health.sql");
+    const after = keysOf("0064_lead_reminders_job.sql");
+    expect(before.length).toBeGreaterThan(10);
+    expect(after).toEqual([...before, "lead-reminders"]);
+  });
+
+  it("drops the old constraint before adding the new one", () => {
+    const text = readFileSync(join(process.cwd(), "drizzle", "0064_lead_reminders_job.sql"), "utf8");
+    expect(text.indexOf('DROP CONSTRAINT "job_health_registered_key"')).toBeGreaterThanOrEqual(0);
+    expect(text.indexOf("DROP CONSTRAINT")).toBeLessThan(text.indexOf("ADD CONSTRAINT"));
+  });
+});

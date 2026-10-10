@@ -129,3 +129,15 @@ describe("email transports", () => {
     expect(() => createConfiguredEmailTransport()).not.toThrow();
   });
 });
+
+describe("reply-to", () => {
+  it("hands Resend a replyTo only when the send carries one", async () => {
+    const providerSend = vi.fn(async () => ({data: {id: "email-provider-2"}, error: null}));
+    const transport = createResendTransport({emails: {send: providerSend}});
+    await transport.send({...input, replyTo: "sam@example.test"});
+    expect(providerSend).toHaveBeenCalledWith(expect.objectContaining({replyTo: "sam@example.test"}), {idempotencyKey: input.idempotencyKey});
+    providerSend.mockClear();
+    await transport.send(input);
+    expect(Object.keys((providerSend.mock.calls[0] as unknown[])[0] as object)).not.toContain("replyTo");
+  });
+});

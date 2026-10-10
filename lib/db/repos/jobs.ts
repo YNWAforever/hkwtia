@@ -13,6 +13,8 @@ import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
 import type {CurrentSubscriptionState} from "@/lib/billing/stripe";
 import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journeyState, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
+import {contactsRepository} from "@/lib/db/repos/contacts";
+import {flipContactOnActivation} from "@/lib/membership/contact-member-flip";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 export type JobClaimResult =
@@ -238,8 +240,12 @@ export const jobsRepository = {
   async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand, currentSubscription?: (subscriptionId: string) => Promise<CurrentSubscriptionState>, manual?: ManualPaymentReconciliation): Promise<"processed" | "duplicate"> {
     requireSystem(actor);
     const db = await getDb();
+    // Set inside the transaction when this delivery is what made the membership active; acted on
+    // only after the commit, so a rolled-back activation never flips a contact.
+    let activatedProfileId: string | null = null;
+    let outcome: "processed" | "duplicate";
     try {
-      return await db.transaction(async (tx) => {
+      outcome = await db.transaction(async (tx) => {
         if (manual) {
           if (manual.actor.kind !== "superadmin" || !/^[a-f0-9-]{36}$/i.test(manual.requestId) || !["paid_not_active", "subscription_mismatch", "webhook_retry"].includes(manual.reasonCode)) throw new Error("FORBIDDEN");
           await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${"billing-reconciliation:" + manual.actor.profileId + ":" + manual.requestId}))`);
@@ -339,6 +345,7 @@ export const jobsRepository = {
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
           }
           await insertWebhookLifecycleEnrollment(actor, tx, transition, membership);
+          if (transition.nextStatus === "active") activatedProfileId = requiredString(membership, "profile_id");
         }
 
         // A stale invoice is an ignored observation, including engagement metrics.
@@ -411,6 +418,11 @@ export const jobsRepository = {
       } catch { /* Preserve the original transient error when failure recording is unavailable. */ }
       throw error;
     }
+    if (outcome === "processed" && activatedProfileId) {
+      const profileId = activatedProfileId;
+      await flipContactOnActivation(() => contactsRepository.markMemberForProfile(actor, profileId), command.membershipId);
+    }
+    return outcome;
   },
 };
 

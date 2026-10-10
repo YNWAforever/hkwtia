@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const authState = vi.hoisted(() => ({input: null as null | {email: string; callbackURL?: string}}));
-const redirectState = vi.hoisted(() => ({url: null as string | null}));
+const redirectState = vi.hoisted(() => ({url: null as string | null, order: [] as string[], attributed: [] as unknown[][]}));
 const billingState = vi.hoisted(() => ({scoped: true, calls: [] as unknown[][], sessionCalls: [] as unknown[][]}));
 const repoState = vi.hoisted(() => ({
   application: {id: "application-a", applicantUserId: "user-a", companyId: null as string | null, planCode: "startup", currentStep: "company", status: "draft"},
@@ -26,7 +26,7 @@ vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": "203.0.113.9"}),
 }));
 vi.mock("next/navigation", () => ({
-  redirect: (url: string) => { redirectState.url = url; throw new Error("NEXT_REDIRECT"); },
+  redirect: (url: string) => { redirectState.url = url; redirectState.order.push("redirect"); throw new Error("NEXT_REDIRECT"); },
 }));
 vi.mock("@/lib/auth/server", () => ({
   auth: {signIn: {magicLink: async (input: {email: string; callbackURL?: string}) => {
@@ -72,6 +72,10 @@ vi.mock("@/lib/membership/join-service", () => ({
   },
 }));
 
+vi.mock("@/lib/membership/join-invite-attribution", () => ({
+  attributeJoinInvite: async (...args: unknown[]) => { redirectState.order.push("attribute"); redirectState.attributed.push(args); },
+}));
+
 import {beginMembershipCheckoutAction, requestMagicLink, resumeJoinAction, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
 
 describe("join Server Actions", () => {
@@ -79,6 +83,8 @@ describe("join Server Actions", () => {
     limiterState.sends = 0;
     authState.input = null;
     redirectState.url = null;
+    redirectState.order = [];
+    redirectState.attributed = [];
     billingState.scoped = true;
     billingState.calls = [];
     billingState.sessionCalls = [];
@@ -220,6 +226,23 @@ describe("join Server Actions", () => {
       applicationId: "application-a",
       company: {id: "company-a", legalName: "Acme Updated Limited", displayName: "Acme Updated"},
     });
+  });
+
+  it("attributes the invite after the application is saved and before the redirect (saveProfile)", async () => {
+    const form = new FormData();
+    form.set("displayName", "Member A");
+    await expect(saveProfile("en", "community", null, {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectState.order).toEqual(["attribute", "redirect"]);
+    expect(redirectState.attributed).toEqual([[{kind: "member", userId: "user-a", profileId: "user-a"}, "application-a"]]);
+  });
+
+  it("attributes the invite after the application is saved and before the redirect (saveCompany)", async () => {
+    const form = new FormData();
+    form.set("legalName", "Acme Limited");
+    form.set("companyDisplayName", "Acme");
+    await expect(saveCompany("en", "startup", "application-a", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectState.order).toEqual(["attribute", "redirect"]);
+    expect(redirectState.attributed).toEqual([[{kind: "member", userId: "user-a", profileId: "user-a"}, "application-a"]]);
   });
 
   /**

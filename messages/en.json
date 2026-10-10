@@ -382,6 +382,20 @@
         "body": "Show this email's pass at the door for {eventTitle} on {eventDate} at {venue}. Each pass admits one person, so please do not forward it.",
         "cta": "Open your pass"
       },
+      "lead_join_invite": {
+        "subject": "Your personal invitation to join WTIA",
+        "preview": "A link made for you, valid for 14 days.",
+        "heading": "You are invited to join WTIA",
+        "body": "{message} This link is personal to you and works until you submit your application. It opens a short application, and some of your details may already be filled in.",
+        "cta": "Start your application"
+      },
+      "lead_digest": {
+        "subject": "Lead follow-ups: {overdueCount} overdue, {dueTodayCount} due today",
+        "preview": "Your WTIA lead follow-ups for today.",
+        "heading": "Your lead follow-ups",
+        "body": "Hello {recipientName}. Overdue ({overdueCount}): {overdue} Due today ({dueTodayCount}): {dueToday} Invite opened over 3 days ago, no application ({staleCount}): {stale} Unassigned leads ({unassignedCount}): {unassigned}",
+        "cta": "Open the lead board"
+      },
       "batch_membership_renewal": {
         "subject": "Review your WTIA membership renewal",
         "preview": "Sign in to review your membership and billing options.",
@@ -964,6 +978,25 @@
     },
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
     "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
+    "invite": {
+      "metaTitle": "Your personal invitation | WiseTech Hong Kong",
+      "welcomeNamed": "Welcome, {name}",
+      "welcome": "Welcome to WTIA",
+      "invitedBy": "{inviter} has invited you to join WTIA as a {plan} member.",
+      "invited": "You have been invited to join WTIA as a {plan} member.",
+      "planLabel": "Membership",
+      "feeLabel": "Fee",
+      "free": "Free",
+      "benefitsLabel": "What membership includes",
+      "continue": "Continue to join",
+      "expires": "This personal link expires on {date}.",
+      "invalid": {
+        "title": "This invitation link is no longer available",
+        "body": "It may have expired or already been used. You can still apply for membership directly.",
+        "action": "Join WTIA",
+        "contact": "Contact WTIA"
+      }
+    },
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
     "metaTitle": "Membership application | WiseTech Hong Kong",
@@ -2764,7 +2797,8 @@
         "admin-batches": "Admin batch processing",
         "membership-grant-expiry": "Finite grant expiry",
         "rate-limit-cleanup": "Rate-limit cleanup",
-        "member-import-retention": "Import retention"
+        "member-import-retention": "Import retention",
+        "lead-reminders": "Lead reminders digest"
       }
     },
     "applicationCase": {
@@ -3003,6 +3037,23 @@
       "empty": "No contacts match these filters.",
       "error": "We could not load the contacts pipeline.",
       "saved": "Contact updated.",
+      "board": {
+        "view": {"label": "View", "list": "List", "board": "Board"},
+        "filters": {"owner": "Owner", "anyone": "Everyone", "mine": "Mine", "source": "Source", "anySource": "Any source", "overdueOnly": "Overdue next steps only", "includeClosed": "Show closed", "apply": "Apply"},
+        "columnCount": "{count} in this stage",
+        "emptyColumn": "Nobody in this stage.",
+        "unnamed": "Unnamed contact",
+        "unassigned": "Unassigned",
+        "ownedBy": "Owner: {name}",
+        "dueOn": "Due {date}",
+        "noNextStep": "No next step",
+        "overdue": "Overdue",
+        "inviteOpened": "Join link opened",
+        "applied": "Applied",
+        "moveTo": "Move to stage",
+        "move": "Move",
+        "error": "We could not load the pipeline board."
+      },
       "lead": {
         "back": "All contacts",
         "unnamed": "Unnamed contact",
@@ -3024,6 +3075,28 @@
           "title": "Add a note",
           "label": "Note",
           "add": "Add note"
+        },
+        "invite": {
+          "title": "Personal join link",
+          "plan": "Plan",
+          "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate"},
+          "create": "Create a join link",
+          "linkLabel": "Join link (shown once)",
+          "copy": "Copy link",
+          "copied": "Copied.",
+          "messageLabel": "Personal message (optional)",
+          "email": "Send by email",
+          "whatsapp": "Open in WhatsApp",
+          "sent": "Email sent.",
+          "failed": "The email could not be delivered. The link is still valid; try WhatsApp or copy it.",
+          "noEmail": "This contact has no email address.",
+          "noPhone": "This contact has no phone number.",
+          "error": "We could not create the link.",
+          "supersedeWarning": "A link already created for this contact is still active. A new link stops the earlier one working, and if they have opened it they lose its pre-filled details and their application will not be attributed to it.",
+          "supersedeConfirm": "I understand the earlier link will stop working",
+          "latest": "Latest link: {state}",
+          "none": "No link created yet.",
+          "state": {"live": "Not opened yet", "opened": "Opened", "consumed": "Used", "expired": "Expired", "superseded": "Replaced by a newer link"}
         },
         "timeline": {
           "title": "Timeline",
@@ -4193,7 +4266,55 @@
           "at_risk_count": "At-risk members"
         }
       },
-      "boardDraftLegacyLanguage": "This historical report has an English body only."
+      "boardDraftLegacyLanguage": "This historical report has an English body only.",
+      "leadReportLink": "Lead conversion report",
+      "leadReportLinkDescription": "Funnel by source, owner results and invite-to-member conversion.",
+      "leads": {
+        "eyebrow": "Management reporting",
+        "title": "Lead conversion report",
+        "description": "How leads move from first contact to paid membership, by source and owner, and how well invitations convert.",
+        "back": "Back to reports",
+        "windowLabel": "Reporting window",
+        "window": {"30": "Last 30 days", "90": "Last 90 days", "180": "Last 180 days", "all": "All time"},
+        "windowNote": "Leads are counted by the date they were created; invites by the date they were sent.",
+        "unavailable": "The lead report is unavailable right now. Nothing below is shown because zeros would be misleading; try again shortly.",
+        "funnelHeading": "Funnel by source",
+        "funnelCaption": "Leads created in the window, by source and current stage",
+        "sourceColumn": "Source",
+        "totalColumn": "Leads",
+        "memberRate": "Became members",
+        "emptyFunnel": "No leads in this window.",
+        "stage": {"new": "New", "contacted": "Contacted", "qualified": "Qualified", "applied": "Applied", "member": "Member", "closed": "Closed"},
+        "source": {"whatsapp": "WhatsApp", "event_guest": "Event guest", "showcase_intro": "Showcase intro", "join_abandoned": "Abandoned join", "interest_form": "Interest form", "import": "Import"},
+        "ownersHeading": "Results by owner",
+        "ownersCaption": "Leads, invitations and conversions per owner",
+        "ownerColumn": "Owner",
+        "unassigned": "Unassigned",
+        "invitesSentColumn": "Invites sent",
+        "invitesOpenedColumn": "Opened",
+        "applicationsColumn": "Applications",
+        "membersColumn": "Members",
+        "emptyOwners": "No owners to show in this window.",
+        "invitesHeading": "Invite effectiveness",
+        "sent": "Sent",
+        "opened": "Opened",
+        "applied": "Applied",
+        "paid": "Paid",
+        "joinedFree": "Joined (free)",
+        "ofSent": "{percent} of sent",
+        "median": "Median invite to payment",
+        "medianValue": "{hours} hours",
+        "noMedian": "None yet",
+        "invitedVsJoinedHeading": "Plan invited vs plan joined",
+        "invitedColumn": "Invited to",
+        "joinedColumn": "Joined",
+        "countColumn": "Members",
+        "emptyPlans": "No paid invitations in this window.",
+        "plan": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
+        "estimateHeading": "Attributed first-year fees",
+        "estimateLabel": "Estimate",
+        "estimateNote": "Joined plans at their annual list price for the first year. Not reconciled with Stripe, so do not read it as booked revenue."
+      }
     },
     "automations": {
       "eyebrow": "Automation operations",
