@@ -4,6 +4,7 @@ import {cookies} from "next/headers";
 import {z} from "zod";
 
 import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
+import {clientIpFromHeaders} from "@/lib/security/request-origin";
 
 /**
  * The invite id is a bearer credential for the attributed join, so it travels only in this
@@ -30,8 +31,10 @@ export async function readInviteCookie(): Promise<string | null> {
 // public page into a free `opened_at` stamper. Process-local, like the other public limiters.
 const limiter = createInMemoryRateLimiter({limit: 20, windowMs: 60_000});
 
-/** True when this caller (first x-forwarded-for address) is still within 20 opens a minute. */
+/**
+ * True when this caller is still within 20 views a minute. Keyed by the platform-set client IP
+ * (`clientIpFromHeaders`), never `x-forwarded-for`, which a client can rotate to dodge the bucket.
+ */
 export function inviteOpenAllowed(headers: Headers): boolean {
-  const key = headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  return limiter.check(key).allowed;
+  return limiter.check(`join-invite:${clientIpFromHeaders(headers) ?? "unknown"}`).allowed;
 }

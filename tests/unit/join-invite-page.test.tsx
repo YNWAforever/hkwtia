@@ -3,22 +3,28 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const state = vi.hoisted(() => ({
   open: vi.fn(),
+  peek: vi.fn(),
   plans: vi.fn(),
   actor: null as {kind: "member"} | null,
   actorThrows: false,
   ip: "203.0.113.1",
+  fwd: "1.1.1.1",
 }));
 
 vi.mock("server-only", () => ({}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
-  getTranslations: async () => (key: string, values?: Record<string, unknown>) => values ? `localized:${key}:${JSON.stringify(values)}` : `localized:${key}`,
+  getTranslations: async () => {
+    const t = (key: string, values?: Record<string, unknown>) => values ? `localized:${key}:${JSON.stringify(values)}` : `localized:${key}`;
+    t.raw = (key: string) => (key.startsWith("tierBenefits.") ? [`benefit-one-${key}`, "benefit-two"] : key);
+    return t;
+  },
 }));
 vi.mock("next/headers", () => ({
-  headers: async () => new Headers({"x-forwarded-for": `${state.ip}, 10.0.0.1`}),
+  headers: async () => new Headers({"x-real-ip": state.ip, "x-forwarded-for": `${state.fwd}, 10.0.0.1`}),
 }));
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => { if (state.actorThrows) throw new Error("AUTH_ENV"); return state.actor; }}));
-vi.mock("@/lib/db/repos/join-invites", () => ({joinInvitesRepository: {open: state.open}}));
+vi.mock("@/lib/db/repos/join-invites", () => ({joinInvitesRepository: {open: state.open, peek: state.peek}}));
 vi.mock("@/lib/db/repos/membership-plans", () => ({membershipPlansRepository: {list: state.plans}}));
 vi.mock("@/lib/membership/public-catalog", () => ({
   publicPriceIds: () => ({startup: "p", corporate: "q"}),
@@ -38,7 +44,7 @@ async function render(token = TOKEN, locale = "en") {
   return renderToStaticMarkup(await InvitePage({params: Promise.resolve({locale, token})}));
 }
 function continueRequest(token = TOKEN, locale = "en", ip = state.ip) {
-  return GET(new Request(`https://hkwtia.test/${locale}/join/invite/${token}/continue`, {headers: {"x-forwarded-for": ip}}), {params: Promise.resolve({locale, token})});
+  return GET(new Request(`https://hkwtia.test/${locale}/join/invite/${token}/continue`, {headers: {"x-real-ip": ip}}), {params: Promise.resolve({locale, token})});
 }
 
 describe("join invite page", () => {
@@ -46,7 +52,7 @@ describe("join invite page", () => {
   beforeEach(() => {
     n += 1;
     state.ip = `203.0.113.${n}`;
-    state.open.mockReset();
+    state.peek.mockReset();
     state.plans.mockReset();
     state.plans.mockResolvedValue([]);
     state.actor = null;
@@ -54,7 +60,7 @@ describe("join invite page", () => {
   });
 
   it("welcomes a valid invite with the lead, inviter, plan and price", async () => {
-    state.open.mockResolvedValue(opened);
+    state.peek.mockResolvedValue(opened);
     const html = await render();
     expect(html).toContain("Chan Tai Man");
     expect(html).toContain("Willy");
@@ -63,6 +69,10 @@ describe("join invite page", () => {
     expect(html).toContain(`href="/join/invite/${TOKEN}/continue"`);
     // The id is a bearer credential: it must never reach the HTML.
     expect(html).not.toContain(INVITE_ID);
+    expect(html).toContain("benefit-one-tierBenefits.startup");
+    expect(html).toContain("benefit-two");
+    // The page is read-only: only the continue route may stamp.
+    expect(state.open).not.toHaveBeenCalled();
   });
 
   it("is noindex", async () => {
@@ -70,7 +80,7 @@ describe("join invite page", () => {
   });
 
   it("renders the plan name alone when the catalogue cannot be read", async () => {
-    state.open.mockResolvedValue(opened);
+    state.peek.mockResolvedValue(opened);
     state.plans.mockRejectedValue(new Error("db down"));
     const html = await render();
     expect(html).toContain("localized:tiers.startup.name");
@@ -78,33 +88,42 @@ describe("join invite page", () => {
   });
 
   it("renders one identical neutral page for unknown, expired, consumed and superseded", async () => {
-    state.open.mockResolvedValue(null);
+    state.peek.mockResolvedValue(null);
     const a = await render(TOKEN);
     const b = await render("B".repeat(43));
     expect(a).toBe(b);
     expect(a).not.toContain("Chan Tai Man");
     expect(a).not.toContain("tiers.startup");
     expect(a).not.toContain("/continue");
+    expect(a).toContain('href="/join"');
+    expect(a).toContain('href="/contact"');
   });
 
   it("degrades to the neutral page when open throws", async () => {
-    state.open.mockResolvedValue(null);
+    state.peek.mockResolvedValue(null);
     const neutral = await render();
-    state.open.mockRejectedValue(new Error("stamp failed"));
+    state.peek.mockRejectedValue(new Error("stamp failed"));
     await expect(render()).resolves.toBe(neutral);
   });
 
   it("never calls open for a malformed token", async () => {
     await render("not-a-token");
-    expect(state.open).not.toHaveBeenCalled();
+    expect(state.peek).not.toHaveBeenCalled();
   });
 
   it("serves the neutral page for the 21st request in a minute from one address", async () => {
-    state.open.mockResolvedValue(opened);
+    state.peek.mockResolvedValue(opened);
     for (let i = 0; i < 20; i += 1) expect(await render()).toContain("Chan Tai Man");
     const limited = await render();
     expect(limited).not.toContain("Chan Tai Man");
-    expect(state.open).toHaveBeenCalledTimes(20);
+    expect(state.peek).toHaveBeenCalledTimes(20);
+  });
+
+  it("does not hand out a fresh bucket when only x-forwarded-for changes", async () => {
+    state.peek.mockResolvedValue(opened);
+    for (let i = 0; i < 20; i += 1) { state.fwd = `9.9.9.${i}`; await render(); }
+    state.fwd = "8.8.8.8";
+    expect(await render()).not.toContain("Chan Tai Man");
   });
 });
 
@@ -122,6 +141,7 @@ describe("join invite continue route", () => {
   it("sets the httpOnly cookie and sends a signed-out visitor to member sign-in with a join continuation", async () => {
     const response = await continueRequest();
     expect(response.status).toBe(303);
+    expect(state.open).toHaveBeenCalledTimes(1);
     expect(response.cookies.get("wtia_invite")?.value).toBe(INVITE_ID);
     const header = response.headers.get("set-cookie") ?? "";
     expect(header).toMatch(/HttpOnly/i);
@@ -167,5 +187,14 @@ describe("join invite continue route", () => {
     const response = await continueRequest("nope");
     expect(response.status).toBe(303);
     expect(state.open).not.toHaveBeenCalled();
+  });
+});
+
+describe("join invite messages", () => {
+  it.each(["en", "zh-HK"])("%s carries the startup benefits and the invite strings the page reads", async (locale) => {
+    const bundle = (await import(`@/messages/${locale}.json`)).default as {Membership: {tierBenefits: {startup: string[]}}; Join: {invite: Record<string, unknown> & {invalid: {contact?: string}}}};
+    expect(bundle.Membership.tierBenefits.startup.length).toBeGreaterThan(0);
+    for (const key of ["benefitsLabel", "continue", "expires", "free"]) expect(bundle.Join.invite[key]).toBeTruthy();
+    expect(bundle.Join.invite.invalid.contact).toBeTruthy();
   });
 });

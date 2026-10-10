@@ -20,12 +20,15 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return {title: t("invite.metaTitle"), robots: {index: false, follow: false}};
 }
 
-/** The invite, or null for every reason it cannot be shown. Reasons are never distinguished. */
+/**
+ * The invite, or null for every reason it cannot be shown. Reasons are never distinguished. This is
+ * `peek`, not `open`: unfurlers and mail scanners fetch this page, so viewing must not stamp. The
+ * continue route is the only caller of `open`.
+ */
 async function openInvite(token: string): Promise<OpenedInvite | null> {
   if (!isWellFormedInviteToken(token)) return null;
   if (!inviteOpenAllowed(await headers())) return null;
-  // `open` stamps opened_at in a transaction that can fail; a public page degrades rather than 500s.
-  return joinInvitesRepository.open(token).catch(() => null);
+  return joinInvitesRepository.peek(token).catch(() => null);
 }
 
 export default async function JoinInvitePage({params}: Props) {
@@ -45,7 +48,10 @@ export default async function JoinInvitePage({params}: Props) {
       <section aria-labelledby="join-invite-title" className="space-y-4">
         <h1 className="text-3xl font-semibold text-primary" id="join-invite-title">{t("invite.invalid.title")}</h1>
         <p className="text-muted-foreground">{t("invite.invalid.body")}</p>
-        <a className="inline-flex min-h-11 items-center text-primary underline underline-offset-4" href={localizedPath(locale, "/join")}>{t("invite.invalid.action")}</a>
+        <p className="flex flex-wrap gap-x-6">
+          <a className="inline-flex min-h-11 items-center text-primary underline underline-offset-4" href={localizedPath(locale, "/join")}>{t("invite.invalid.action")}</a>
+          <a className="inline-flex min-h-11 items-center text-primary underline underline-offset-4" href={localizedPath(locale, "/contact")}>{t("invite.invalid.contact")}</a>
+        </p>
       </section>
     );
   }
@@ -58,6 +64,7 @@ export default async function JoinInvitePage({params}: Props) {
   const fees = tier?.price.kind === "paid"
     ? tier.price.options.map((option) => `${option.amount} ${tMembership(`cadenceLabels.${option.cadence}`)}`)
     : tier?.price.kind === "free" ? [t("invite.free")] : [];
+  const benefits = tMembership.raw(`tierBenefits.${invite.planCode}`) as string[];
   const expires = new Intl.DateTimeFormat(locale, {dateStyle: "long", timeZone: "Asia/Hong_Kong"}).format(invite.expiresAt);
 
   return (
@@ -80,6 +87,12 @@ export default async function JoinInvitePage({params}: Props) {
           </>
         ) : null}
       </dl>
+      {benefits.length > 0 ? (
+        <div>
+          <h2 className="text-lg font-semibold">{t("invite.benefitsLabel")}</h2>
+          <ul className="mt-2 list-disc space-y-1 pl-5">{benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+        </div>
+      ) : null}
       {/* A plain anchor to the handler, not a next/link: a prefetch of it would open the invite and set the cookie. */}
       <a className="inline-flex min-h-11 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground" href={localizedPath(locale, `/join/invite/${token}/continue`)}>{t("invite.continue")}</a>
       <p className="text-sm text-muted-foreground">{t("invite.expires", {date: expires})}</p>

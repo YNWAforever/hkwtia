@@ -877,6 +877,7 @@
     "faqLinks": {"refund": "Read event ticket refund policy", "contact": "Ask WTIA about membership terms"},
     "priceLabels": {
       "free": "Free",
+      "benefitsLabel": "What membership includes",
       "review": "Contact us"
     },
     "cadenceLabels": {
@@ -980,12 +981,14 @@
       "planLabel": "Membership",
       "feeLabel": "Fee",
       "free": "Free",
+      "benefitsLabel": "What membership includes",
       "continue": "Continue to join",
       "expires": "This personal link expires on {date}.",
       "invalid": {
         "title": "This invitation link is no longer available",
         "body": "It may have expired or already been used. You can still apply for membership directly.",
-        "action": "Join WTIA"
+        "action": "Join WTIA",
+        "contact": "Contact WTIA"
       }
     },
     "backToMembership": "Back to membership",

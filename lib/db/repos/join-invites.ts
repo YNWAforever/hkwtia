@@ -130,6 +130,36 @@ async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
 }
 
 export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
+  async function lookupLive(token: unknown) {
+    if (!isWellFormedInviteToken(token)) return null;
+    const digest = digestInviteToken(token);
+    const database = await loadDatabase();
+    const row = rowsFrom(await database.execute(sql`
+      SELECT i.id AS invite_id, i.contact_id, i.plan_code, i.opened_at, i.expires_at,
+             c.display_name AS contact_display_name, c.locale AS contact_locale,
+             inviter.display_name AS inviter_display_name
+      FROM ${joinInvites} i
+      INNER JOIN ${contacts} c ON c.id = i.contact_id
+      LEFT JOIN ${profiles} inviter ON inviter.id = i.created_by_profile_id
+      WHERE i.token_digest = ${digest}
+        AND i.consumed_at IS NULL AND i.superseded_at IS NULL AND i.expires_at > now()
+      LIMIT 1
+    `))[0];
+    if (!row) return null;
+    return {database, parsed: openRowSchema.parse(row)};
+  }
+
+  function toOpenedInvite(parsed: z.infer<typeof openRowSchema>): OpenedInvite {
+    return {
+      inviteId: parsed.invite_id,
+      planCode: parsed.plan_code as PlanCode,
+      contactDisplayName: parsed.contact_display_name,
+      inviterFirstName: firstWord(parsed.inviter_display_name),
+      locale: parsed.contact_locale === "zh-HK" ? "zh-HK" : "en",
+      expiresAt: parsed.expires_at,
+    };
+  }
+
   return {
     /**
      * Issuing a new invite retires the old live one. The contact row is locked
@@ -207,22 +237,9 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
      * concurrent double open still records one.
      */
     async open(token: unknown): Promise<OpenedInvite | null> {
-      if (!isWellFormedInviteToken(token)) return null;
-      const digest = digestInviteToken(token);
-      const database = await loadDatabase();
-      const row = rowsFrom(await database.execute(sql`
-        SELECT i.id AS invite_id, i.contact_id, i.plan_code, i.opened_at, i.expires_at,
-               c.display_name AS contact_display_name, c.locale AS contact_locale,
-               inviter.display_name AS inviter_display_name
-        FROM ${joinInvites} i
-        INNER JOIN ${contacts} c ON c.id = i.contact_id
-        LEFT JOIN ${profiles} inviter ON inviter.id = i.created_by_profile_id
-        WHERE i.token_digest = ${digest}
-          AND i.consumed_at IS NULL AND i.superseded_at IS NULL AND i.expires_at > now()
-        LIMIT 1
-      `))[0];
-      if (!row) return null;
-      const parsed = openRowSchema.parse(row);
+      const found = await lookupLive(token);
+      if (!found) return null;
+      const {database, parsed} = found;
 
       if (parsed.opened_at === null) {
         await database.transaction(async (transaction) => {
@@ -239,14 +256,17 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
         });
       }
 
-      return {
-        inviteId: parsed.invite_id,
-        planCode: parsed.plan_code as PlanCode,
-        contactDisplayName: parsed.contact_display_name,
-        inviterFirstName: firstWord(parsed.inviter_display_name),
-        locale: parsed.contact_locale === "zh-HK" ? "zh-HK" : "en",
-        expiresAt: parsed.expires_at,
-      };
+      return toOpenedInvite(parsed);
+    },
+
+    /**
+     * The same invite as `open`, with no writes. The welcome page uses this: link unfurlers and mail
+     * scanners fetch it the moment staff send the link, and only a deliberate Continue should count
+     * as the lead opening it.
+     */
+    async peek(token: unknown): Promise<OpenedInvite | null> {
+      const found = await lookupLive(token);
+      return found ? toOpenedInvite(found.parsed) : null;
     },
 
     /** Form prefill for the join flow; the same liveness test as `open`, so a spent link prefills nothing. */

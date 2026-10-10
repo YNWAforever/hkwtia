@@ -877,6 +877,7 @@
     "faqLinks": {"refund": "查閱活動門票退款政策", "contact": "向 WTIA 查詢會籍條款"},
     "priceLabels": {
       "free": "免費",
+      "benefitsLabel": "會籍包括",
       "review": "聯絡我們"
     },
     "cadenceLabels": {
@@ -980,12 +981,14 @@
       "planLabel": "會籍",
       "feeLabel": "會費",
       "free": "免費",
+      "benefitsLabel": "會籍包括",
       "continue": "繼續申請",
       "expires": "此專屬連結將於 {date} 失效。",
       "invalid": {
         "title": "此邀請連結已失效",
         "body": "連結可能已過期或已被使用。你仍可直接申請會籍。",
-        "action": "加入 WTIA"
+        "action": "加入 WTIA",
+        "contact": "聯絡 WTIA"
       }
     },
     "backToMembership": "返回會員計劃",

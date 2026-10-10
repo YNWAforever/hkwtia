@@ -176,6 +176,39 @@ describe("joinInvitesRepository.open", () => {
   });
 });
 
+describe("joinInvitesRepository.peek", () => {
+  it("issues no query for a malformed token", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createJoinInvitesRepository(loadDatabase);
+    expect(await repository.peek("not-a-token")).toBeNull();
+    expect(await repository.peek(42)).toBeNull();
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("returns null for dead invites using the same liveness filter as open", async () => {
+    const fake = fakeDatabase(() => []);
+    expect(await createJoinInvitesRepository(async () => fake.database as never).peek(validToken)).toBeNull();
+    const lookup = fake.outer[0]!;
+    expect(lookup.params).toContain(digestInviteToken(validToken));
+    expect(lookup.text).toContain("consumed_at IS NULL");
+    expect(lookup.text).toContain("superseded_at IS NULL");
+    expect(lookup.text).toContain("expires_at > now()");
+  });
+
+  it("returns the invite without any write, even when it was never opened", async () => {
+    const fake = fakeDatabase(() => [{
+      invite_id: inviteId, contact_id: contactId, plan_code: "startup", opened_at: null,
+      expires_at: new Date("2026-10-25T00:00:00.000Z"), contact_display_name: "Ada Wong",
+      contact_locale: "zh-HK", inviter_display_name: "Betty Lam",
+    }]);
+    const peeked = await createJoinInvitesRepository(async () => fake.database as never).peek(validToken);
+    expect(peeked).toMatchObject({inviteId, planCode: "startup", inviterFirstName: "Betty", locale: "zh-HK"});
+    const texts = [...fake.outer, ...fake.transactions.flat()].map((statement) => statement.text);
+    expect(texts).toHaveLength(1);
+    expect(texts.some((text) => /^(UPDATE|INSERT)/.test(text) || text.includes("contact_activities"))).toBe(false);
+  });
+});
+
 describe("joinInvitesRepository.prefillFor and latestForContact", () => {
   it("prefillFor returns null for a non-uuid id without a query", async () => {
     const loadDatabase = vi.fn();
