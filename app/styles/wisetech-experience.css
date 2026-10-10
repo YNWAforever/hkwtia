@@ -1199,6 +1199,23 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   #programmes .programme-card:hover { transform: none; }
 }
 
+/* Round 29 (owner decision 2026-10-10): on a phone the selected route panel was 778px. The rail
+ * indent (34px), card padding and arrow column left the destination copy ~220px, so each card ran
+ * three lines and the equal-height rows took the tallest — 136px apiece. A narrower rail, tighter
+ * cards and a 17px title give the copy two lines: cards 86px, panel 587px. Targets stay ≥48px. */
+@media (max-width: 520px) {
+  .route-origin { padding: 22px 18px 20px; }
+  .route-benefits { margin-bottom: 18px; }
+  .route-destinations { padding: 16px 14px 18px 16px; }
+  .route-lead { margin: 0 0 12px 24px; }
+  .route-destinations ol { gap: 8px; }
+  .route-destinations li { padding-left: 24px; }
+  .route-destinations li::before { width: 24px; }
+  .route-destination { column-gap: 10px; padding: 11px 12px 12px 14px; }
+  .route-destination strong { font-size: 17px; line-height: 1.25; }
+  .route-destination > span:not(.route-node):not([aria-hidden]) { margin-top: 2px; line-height: 1.45; }
+}
+
 /* ─── Round 11 (2026-10-07): /partners category counts ───────────────────────────────────
  * The homepage partner tabs' counts went to 12px in round 10; the same counts in the
  * /partners category nav (a 38px ring) stayed at the donor's 11px. One size for one idea. */
