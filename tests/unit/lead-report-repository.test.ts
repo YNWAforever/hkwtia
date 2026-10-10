@@ -133,5 +133,10 @@ describe("leadReportRepository.summary", () => {
     const owners = fake.statements[1]!.text.replace(/\s+/g, " ").toLowerCase();
     expect(owners).toContain("count(distinct i.contact_id) as invites_sent");
     expect(owners).toContain("count(distinct i.application_id) as applications");
+    // Postgres rejects FULL JOIN on IS NOT DISTINCT FROM; the sides are stacked instead.
+    expect(owners).not.toContain("full join");
+    expect(owners).not.toContain("is not distinct from");
+    expect(owners).toContain("union all");
+    expect(owners).toContain("group by owner_id");
   });
 });

@@ -142,8 +142,12 @@ export function createLeadReportRepository(options: Options = {}) {
       `));
 
       // Leads and members come from the contact cohort; invite columns from the
-      // invite cohort, attributed to the contact's CURRENT owner. A full join keeps
-      // an owner who only has invites (an old lead, a new invite) in the table.
+      // invite cohort, attributed to the contact's CURRENT owner. The two sides are
+      // stacked with UNION ALL and summed per owner, which keeps an owner who only
+      // has invites (an old lead, a new invite) in the table. Not a FULL JOIN:
+      // Postgres rejects FULL JOIN on `IS NOT DISTINCT FROM` (it needs a merge- or
+      // hash-joinable condition), and GROUP BY already folds NULL owners into one
+      // "unassigned" row.
       const ownerRows = rowsFrom(await database.execute(sql`
         WITH lead_side AS (
           SELECT c.owner_profile_id AS owner_id, count(*) AS leads,
@@ -159,15 +163,26 @@ export function createLeadReportRepository(options: Options = {}) {
           JOIN ${contacts} c ON c.id = i.contact_id
           WHERE true ${inviteWindow}
           GROUP BY c.owner_profile_id
+        ), combined AS (
+          SELECT owner_id, leads, members,
+                 0::bigint AS invites_sent, 0::bigint AS invites_opened, 0::bigint AS applications
+          FROM lead_side
+          UNION ALL
+          SELECT owner_id, 0::bigint AS leads, 0::bigint AS members,
+                 invites_sent, invites_opened, applications
+          FROM invite_side
+        ), per_owner AS (
+          SELECT owner_id, sum(leads)::bigint AS leads, sum(invites_sent)::bigint AS invites_sent,
+                 sum(invites_opened)::bigint AS invites_opened, sum(applications)::bigint AS applications,
+                 sum(members)::bigint AS members
+          FROM combined
+          GROUP BY owner_id
         )
-        SELECT COALESCE(l.owner_id, v.owner_id) AS owner_profile_id, p.display_name AS owner_name,
-               COALESCE(l.leads, 0) AS leads, COALESCE(v.invites_sent, 0) AS invites_sent,
-               COALESCE(v.invites_opened, 0) AS invites_opened, COALESCE(v.applications, 0) AS applications,
-               COALESCE(l.members, 0) AS members
-        FROM lead_side l
-        FULL JOIN invite_side v ON v.owner_id IS NOT DISTINCT FROM l.owner_id
-        LEFT JOIN ${profiles} p ON p.id = COALESCE(l.owner_id, v.owner_id)
-        ORDER BY (p.id IS NULL), COALESCE(l.leads, 0) DESC, p.display_name
+        SELECT o.owner_id AS owner_profile_id, p.display_name AS owner_name,
+               o.leads, o.invites_sent, o.invites_opened, o.applications, o.members
+        FROM per_owner o
+        LEFT JOIN ${profiles} p ON p.id = o.owner_id
+        ORDER BY (p.id IS NULL), o.leads DESC, p.display_name
       `));
 
       // One active membership per application (the earliest), so a re-issued or
