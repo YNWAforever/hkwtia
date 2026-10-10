@@ -6,6 +6,11 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   return {...original, getDb: async () => database.current};
 });
 
+const flip = vi.hoisted(() => ({mark: vi.fn()}));
+// The post-commit contact flip goes through its own repository; stubbed so these scripted
+// transactions stay the only database traffic in the file.
+vi.mock("@/lib/db/repos/contacts", () => ({contactsRepository: {markMemberForProfile: flip.mark}}));
+
 import {systemActor} from "@/lib/auth/authorize";
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
 import {jobsRepository, WebhookCorrelationError} from "@/lib/db/repos/jobs";
@@ -64,7 +69,7 @@ const audited = {rows: [{audit_id: "audit-1"}]};
 const completed = {rows: [{job_id: "job-1"}]};
 
 describe("sequential production webhook transaction", () => {
-  beforeEach(() => { database.current = null; });
+  beforeEach(() => { database.current = null; flip.mark.mockReset(); flip.mark.mockResolvedValue("flipped"); });
 
   it("uses fresh READ COMMITTED statements after membership and exact-attempt row locks", async () => {
     const script = scriptedDatabase([claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated, journeyInserted, audited, completed]);
@@ -84,6 +89,30 @@ describe("sequential production webhook transaction", () => {
     expect(script.statements[7]).toContain("stripe.webhook.processed");
     expect(script.statements[8]).toMatch(/update[\s\S]*completed/);
     expect(script.committed()).toBe(true);
+  });
+
+  it("flips the applicant's contact to member once, after the activation commits", async () => {
+    const script = scriptedDatabase([claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated, journeyInserted, audited, completed]);
+    database.current = script.db;
+    const actor = systemActor("stripe-webhook");
+    await expect(jobsRepository.processWebhookLifecycle(actor, command)).resolves.toBe("processed");
+    expect(flip.mark).toHaveBeenCalledTimes(1);
+    expect(flip.mark).toHaveBeenCalledWith(actor, "profile-1");
+  });
+
+  it("still returns processed when the contact flip throws", async () => {
+    flip.mark.mockRejectedValue(new Error("contacts down"));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const script = scriptedDatabase([claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated, journeyInserted, audited, completed]);
+    database.current = script.db;
+    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), command)).resolves.toBe("processed");
+    expect(console.error).toHaveBeenCalledWith("contact.member_flip_failed", {membershipId});
+  });
+
+  it("does not flip for a duplicate delivery", async () => {
+    database.current = scriptedDatabase([{rows: []}]).db;
+    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), command)).resolves.toBe("duplicate");
+    expect(flip.mark).not.toHaveBeenCalled();
   });
 
   it("claims the original Checkout attempt on delayed payment success", async () => {

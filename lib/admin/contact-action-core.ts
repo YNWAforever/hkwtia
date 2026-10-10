@@ -2,6 +2,11 @@ import "server-only";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {
+  contactActivitiesRepository,
+  type ContactActivitiesRepository,
+  type ContactActivity,
+} from "@/lib/db/repos/contact-activities";
+import {
   contactsRepository,
   type ContactRow,
   type ContactsRepository,
@@ -66,7 +71,11 @@ export function contactPipelineInput(formData: FormData): Readonly<{
 // urlencoded serializer's safe set is alphanumerics plus `*-._`, with space as
 // `+`), so a staff search for `ada*` would otherwise fail the allowlist and
 // silently cost the operator their confirmation.
-const CONTACT_RETURN_PATH = /^\/(?:en\/|zh\/)?admin\/contacts(?:\?[A-Za-z0-9=&%_.+*-]*)?$/;
+//
+// Phase E adds the lead page, `/admin/contacts/<uuid>`. The id is matched as a
+// uuid rather than "any path segment", so `..`, a trailing segment or another
+// route can never ride on the allowlist.
+const CONTACT_RETURN_PATH = /^\/(?:en\/|zh\/)?admin\/contacts(?:\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})?(?:\?[A-Za-z0-9=&%_.+*-]*)?$/;
 
 export function contactReturnPath(value: unknown): string | null {
   if (typeof value !== "string" || value.length === 0 || value.length > 500) return null;
@@ -81,4 +90,42 @@ export async function updateContactPipeline(
 ): Promise<ContactRow> {
   requireAdmin(actor);
   return deps.updatePipeline(actor, contactId, input);
+}
+
+export type ContactNoteWriter = Pick<ContactActivitiesRepository, "addNote">;
+export type ContactNextStepWriter = Pick<ContactsRepository, "updateNextStep">;
+
+/**
+ * The next-step form posts two fields. An empty step clears it (the repository
+ * turns `""` into null), and an empty date means "no due date" — a `<input
+ * type="date">` submits `""`, which the repository's date schema would refuse,
+ * so it becomes null here.
+ */
+export function contactNextStepInput(formData: FormData): Readonly<{nextStep: string; dueAt: string | null}> {
+  const step = formData.get("nextStep");
+  const due = formData.get("dueAt");
+  return {
+    nextStep: typeof step === "string" ? step : "",
+    dueAt: typeof due === "string" && due.length > 0 ? due : null,
+  };
+}
+
+export async function addContactNote(
+  actor: Actor,
+  contactId: unknown,
+  body: unknown,
+  deps: ContactNoteWriter = contactActivitiesRepository,
+): Promise<ContactActivity> {
+  requireAdmin(actor);
+  return deps.addNote(actor, contactId, body);
+}
+
+export async function updateContactNextStep(
+  actor: Actor,
+  contactId: unknown,
+  input: unknown,
+  deps: ContactNextStepWriter = contactsRepository,
+): Promise<ContactRow> {
+  requireAdmin(actor);
+  return deps.updateNextStep(actor, contactId, input);
 }

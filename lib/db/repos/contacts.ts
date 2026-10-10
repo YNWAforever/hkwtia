@@ -10,12 +10,21 @@ import {
   contactSourceEnum,
   contactStageEnum,
   contacts,
+  contactActivities,
   conversations,
+  eventGuestRegistrations,
+  events,
+  joinInvites,
+  leads,
+  membershipApplications,
+  memberships,
   profiles,
+  showcaseListings,
   staffTasks,
 } from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
+import {insertContactActivity} from "@/lib/db/repos/contact-activities";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
 import {WOZTELL_MAX_MEMBER_ID_CHARS} from "@/lib/whatsapp/provider-field-limits";
@@ -218,8 +227,70 @@ export type ContactRow = Readonly<{
   conversationId: string | null;
   /** How many rows in the WHOLE table share this email, this one included. */
   duplicateCount: number;
+  /** Phase E: the one thing staff will do next, and when (18:00 Hong Kong on the due day). */
+  nextStep: string | null;
+  nextStepDueAt: Date | null;
+  lastTouchAt: Date | null;
+  /** Newest non-empty organisation from the contact's event RSVPs or leads. */
+  organisation: string | null;
   createdAt: Date;
 }>;
+
+/**
+ * Phase E: what else the platform knows about a contact, for the lead page's
+ * Related block. Each list is empty (and membership null) when there is nothing,
+ * which the page renders as an absent section rather than an empty heading.
+ */
+export type ContactRelated = Readonly<{
+  guestEvents: readonly Readonly<{
+    registrationId: string; eventId: string; slug: string;
+    titleEn: string; titleZh: string | null; startsAt: Date;
+    status: string; checkedInAt: Date | null;
+  }>[];
+  showcaseIntros: readonly Readonly<{
+    leadId: string; listingId: string; slug: string;
+    nameEn: string; nameZh: string; createdAt: Date;
+  }>[];
+  membership: Readonly<{planCode: string; status: string}> | null;
+}>;
+
+const guestEventRowSchema = z.object({
+  registration_id: z.string(), event_id: z.string(), slug: z.string(),
+  title_en: z.string(), title_zh: z.string().nullable(), starts_at: z.coerce.date(),
+  status: z.string(), checked_in_at: z.coerce.date().nullable(),
+});
+const showcaseIntroRowSchema = z.object({
+  lead_id: z.string(), listing_id: z.string(), slug: z.string(),
+  name_en: z.string(), name_zh: z.string(), created_at: z.coerce.date(),
+});
+const membershipRowSchema = z.object({plan_code: z.string(), status: z.string()});
+
+/**
+ * Phase E board. One card per contact, the fields a salesperson scans a column
+ * with. `inviteOpened` is "their newest live invite has been opened but not
+ * used"; `applied` is "they are at the applied stage or an invite was consumed".
+ */
+export type BoardCard = Pick<ContactRow, "id" | "displayName" | "organisation" | "source" | "ownerName" | "nextStep" | "nextStepDueAt"> & {
+  inviteOpened: boolean;
+  applied: boolean;
+};
+export type BoardFilters = Readonly<{
+  ownerProfileId?: string | null;
+  source?: ContactSource;
+  overdueOnly?: boolean;
+  includeClosed?: boolean;
+}>;
+export type ContactBoard = Record<ContactStage, readonly BoardCard[]>;
+
+const boardFiltersSchema = z.object({
+  ownerProfileId: z.string().min(1).max(255).nullable().optional().default(null),
+  source: z.enum(CONTACT_SOURCES).optional(),
+  overdueOnly: z.boolean().optional().default(false),
+  includeClosed: z.boolean().optional().default(false),
+}).strict();
+
+/** A board is a working surface, not a report: past this many cards a column stops being scannable. */
+const BOARD_CARD_CAP = 600;
 
 export type ContactPage = Readonly<{
   items: readonly ContactRow[];
@@ -248,6 +319,28 @@ const updatePipelineSchema = z.object({
   tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
 }).strict();
 
+const updateNextStepSchema = z.object({
+  // `""` means "clear it": the form posts an empty field rather than null.
+  nextStep: z.string().trim().max(200).nullable().transform((value) => (value ? value : null)),
+  dueAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().refine(
+    (value) => {
+      if (value === null) return true;
+      const instant = new Date(`${value}T00:00:00.000Z`);
+      // Date.parse rolls 2026-02-31 into March; the round trip refuses it.
+      return !Number.isNaN(instant.getTime()) && instant.toISOString().startsWith(value);
+    },
+    "dueAt must be a real calendar date",
+  ),
+}).strict();
+
+/**
+ * A due DAY is stored as the end of that Hong Kong working day. Hong Kong has no
+ * DST, so 18:00 HKT is always 10:00Z and the conversion needs no zone database.
+ */
+function dueAtInstant(dueAt: string | null): Date | null {
+  return dueAt === null ? null : new Date(`${dueAt}T10:00:00.000Z`);
+}
+
 const cursorSchema = z.object({createdAt: z.string(), id: z.string().uuid()}).strict();
 
 const pipelineRowSchema = z.object({
@@ -266,10 +359,22 @@ const pipelineRowSchema = z.object({
   whatsapp_opted_out_at: z.coerce.date().nullable(),
   last_inbound_at: z.coerce.date().nullable(),
   conversation_id: z.string().nullable(),
+  next_step: z.string().nullable().optional().transform((value) => value ?? null),
+  next_step_due_at: z.coerce.date().nullable().optional().transform((value) => value ?? null),
+  last_touch_at: z.coerce.date().nullable().optional().transform((value) => value ?? null),
+  organisation: z.string().nullable().optional().transform((value) => value ?? null),
   // `count(*)` is bigint, which both drivers hand back as a string.
   duplicate_count: z.coerce.number().int().nonnegative(),
   total_count: z.coerce.number().int().nonnegative(),
   created_at: z.coerce.date(),
+});
+
+const boardRowSchema = pipelineRowSchema.pick({
+  id: true, display_name: true, organisation: true, source: true, stage: true,
+  owner_name: true, next_step: true, next_step_due_at: true,
+}).extend({
+  invite_opened: z.union([z.boolean(), z.string()]).nullable(),
+  applied: z.union([z.boolean(), z.string()]).nullable(),
 });
 
 function toContactRow(row: Record<string, unknown>): ContactRow {
@@ -291,6 +396,10 @@ function toContactRow(row: Record<string, unknown>): ContactRow {
     lastInboundAt: parsed.last_inbound_at,
     conversationId: parsed.conversation_id,
     duplicateCount: parsed.duplicate_count,
+    nextStep: parsed.next_step,
+    nextStepDueAt: parsed.next_step_due_at,
+    lastTouchAt: parsed.last_touch_at,
+    organisation: parsed.organisation,
     createdAt: parsed.created_at,
   };
 }
@@ -353,6 +462,11 @@ function listPredicates(filters: ContactListFilters): SQL {
  * nullable LINK, not an owner arm, because `conversations_owner_check` stays
  * two-armed with the HMAC as the owner key (spec D-6). Do not reach for the
  * owner columns here.
+ *
+ * `organisation` is the newest non-empty value across the contact's event RSVPs
+ * (matched by `contact_id`, or by email for RSVPs taken before the contact row
+ * existed) and its leads. It is a correlated scalar subquery like
+ * `conversation_id`, so the projection stays one statement per page.
  */
 function contactProjection(where: SQL): SQL {
   return sql`
@@ -369,7 +483,22 @@ function contactProjection(where: SQL): SQL {
         c.owner_profile_id, owner_profile.display_name AS owner_name,
         c.profile_id, c.company_id, c.tags, c.whatsapp_opt_in,
         c.whatsapp_opted_out_at, c.last_inbound_at, c.created_at,
+        c.next_step, c.next_step_due_at, c.last_touch_at,
         email_groups.duplicate_count,
+        (
+          SELECT org.name FROM (
+            SELECT nullif(btrim(g.organisation), '') AS name, g.created_at
+            FROM ${eventGuestRegistrations} g
+            WHERE g.contact_id = c.id OR (c.email IS NOT NULL AND lower(g.email) = lower(c.email))
+            UNION ALL
+            SELECT nullif(btrim(l.organization), ''), l.created_at
+            FROM ${leads} l
+            WHERE l.contact_id = c.id
+          ) org
+          WHERE org.name IS NOT NULL
+          ORDER BY org.created_at DESC
+          LIMIT 1
+        ) AS organisation,
         (
           SELECT thread.id FROM ${conversations} thread
           WHERE thread.contact_id = c.id AND thread.status <> 'deleted'
@@ -687,6 +816,54 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
     },
 
     /**
+     * Phase E fix F1. `linkProfile` flips a prospect to `member` only inside its
+     * `profile_id IS NULL` claim, and (final review C1) only when the profile
+     * already holds an active membership. An invited contact is linked at the
+     * profile step or by `joinInvitesRepository.consume`, before payment, so the
+     * paying invitee's move to `member` happens here, where a membership becomes
+     * active.
+     *
+     * Forward-only over the funnel stages: `closed` was a decision somebody made
+     * and `member` is already the answer. The UPDATE's own stage predicate is the
+     * idempotency guard (a concurrent or repeat call matches nothing), and the
+     * timeline entry and audit row commit with it only when a row actually moved.
+     * Authorised for the Stripe webhook system actor and for the member whose own
+     * profile it is, nobody else.
+     */
+    async markMemberForProfile(actor: Actor, profileId: unknown): Promise<"flipped" | "unchanged"> {
+      const id = z.string().min(1).parse(profileId);
+      const allowed = (actor.kind === "system" && actor.source === "stripe-webhook")
+        || (actor.kind === "member" && actor.profileId === id);
+      if (!allowed) throw new Error("FORBIDDEN");
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const moved = rowsFrom(await transaction.execute(sql`
+          UPDATE ${contacts}
+          SET stage = 'member', updated_at = now()
+          FROM (SELECT id, stage FROM ${contacts} WHERE profile_id = ${id}) AS prior
+          WHERE ${contacts.id} = prior.id
+            AND ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied')
+          RETURNING ${contacts.id} AS id, prior.stage AS previous_stage
+        `))[0];
+        if (!moved) return "unchanged";
+        const contactId = String(moved.id);
+        await insertContactActivity(transaction, {
+          contactId, actorProfileId: null, kind: "became_member",
+          meta: {from: String(moved.previous_stage), via: "activation"},
+        });
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents}
+            (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (
+            ${actor.kind === "member" ? actor.profileId : null}, ${actor.kind}, 'contact.became_member', 'contact', ${contactId},
+            ${JSON.stringify({from: String(moved.previous_stage)})}::jsonb
+          )
+        `);
+        return "flipped";
+      });
+    },
+
+    /**
      * Programme C-4, plan S-16. Set `contacts.profile_id` when the identity that
      * would match it is WRITTEN — the portal profile save and the join profile
      * step — rather than "on login" as the spec line reads. `getActor()` fires
@@ -735,16 +912,42 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
               -- A prospect who has become a member is no longer in the funnel.
               -- Only the funnel stages move: 'closed' was a decision somebody
               -- made and 'member' is already the answer.
+              --
+              -- Final review C1: "has become a member" means an ACTIVE membership,
+              -- not a saved profile. This claim runs at the join profile step, before
+              -- the application is submitted or paid, and invite prefill makes the
+              -- phone match near-certain; an unconditional flip showed every invitee
+              -- who abandoned checkout as Member. Owner OR applicant, so a company
+              -- membership the profile applied for counts. Activation itself moves
+              -- the stage later (markMemberForProfile, consume's active check).
               stage = CASE
-                WHEN ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied') THEN 'member'
+                WHEN ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied')
+                  AND EXISTS (SELECT 1 FROM ${memberships} m
+                    LEFT JOIN ${membershipApplications} a ON a.id = m.application_id
+                    WHERE m.status = 'active'
+                      AND (m.owner_user_id = ${parsed.profileId} OR a.applicant_user_id = ${parsed.profileId}))
+                  THEN 'member'
                 ELSE ${contacts.stage}
               END,
               updated_at = now()
-            WHERE ${contacts.id} = ${matched.id} AND ${contacts.profileId} IS NULL
-            RETURNING ${contacts.id} AS id
+            -- The stage as it stood before this statement: RETURNING only sees the new
+            -- row, and 'did the stage actually change' is what gates the timeline entry.
+            -- The row is already locked by matchContactIdentity, so this read cannot race.
+            FROM (SELECT id, stage FROM ${contacts} WHERE id = ${matched.id}) AS prior
+            WHERE ${contacts.id} = ${matched.id} AND prior.id = ${contacts.id} AND ${contacts.profileId} IS NULL
+            RETURNING ${contacts.id} AS id, prior.stage AS previous_stage, ${contacts.stage} AS stage
           `))[0];
           if (!claimed) return NO_CONTACT_LINK;
           const id = String(claimed.id);
+          // One `became_member` per real transition. A claim that left the stage alone
+          // ('member' already, or 'closed') writes nothing, and a repeat call never reaches
+          // here at all because the claim above is guarded by `profile_id IS NULL`.
+          if (claimed.previous_stage !== undefined && claimed.stage === "member" && claimed.previous_stage !== "member") {
+            await insertContactActivity(transaction, {
+              contactId: id, actorProfileId: null, kind: "became_member",
+              meta: {from: String(claimed.previous_stage), matchedBy: matched.matchedBy},
+            });
+          }
           const candidates = await tagMergeCandidates(transaction, parsed, id);
           if (candidates.length > 0) {
             // The direct INSERT shape `campaign-recipient-delivery.ts`,
@@ -910,6 +1113,77 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       };
     },
 
+    /**
+     * Phase E board. Columns by stage, one query. `member` is a recency window,
+     * not a stock: a stage_change to member or a became_member activity inside
+     * the last 30 days, otherwise the column would fill up forever. `closed`
+     * is read only on request. "Overdue" is the lead page's definition — the due
+     * instant (18:00 Hong Kong on the due day) is already past.
+     */
+    async listBoard(actor: Actor, filters: BoardFilters = {}): Promise<ContactBoard> {
+      requireAdmin(actor);
+      const parsed = boardFiltersSchema.parse(filters ?? {});
+      const terms: SQL[] = [];
+      if (!parsed.includeClosed) terms.push(sql`c.stage <> 'closed'`);
+      if (parsed.ownerProfileId !== null) terms.push(sql`c.owner_profile_id = ${parsed.ownerProfileId}`);
+      if (parsed.source !== undefined) terms.push(sql`c.source = ${parsed.source}`);
+      if (parsed.overdueOnly) terms.push(sql`c.next_step_due_at < now()`);
+      terms.push(sql`(c.stage <> 'member' OR EXISTS (
+        SELECT 1 FROM ${contactActivities} recent
+        WHERE recent.contact_id = c.id
+          AND recent.created_at > now() - interval '30 days'
+          AND ((recent.kind = 'stage_change' AND recent.meta->>'to' = 'member') OR recent.kind = 'became_member')
+      ))`);
+      const database = await loadDatabase();
+      const rows = rowsFrom(await database.execute(sql`
+        SELECT board.*,
+          COALESCE((
+            SELECT i.opened_at IS NOT NULL AND i.consumed_at IS NULL
+            FROM ${joinInvites} i
+            WHERE i.contact_id = board.id AND i.superseded_at IS NULL
+            ORDER BY i.created_at DESC, i.id DESC LIMIT 1
+          ), false) AS invite_opened,
+          (board.stage = 'applied' OR EXISTS (
+            SELECT 1 FROM ${joinInvites} used WHERE used.contact_id = board.id AND used.consumed_at IS NOT NULL
+          )) AS applied
+        FROM (${contactProjection(sql.join(terms, sql` AND `))}) AS board
+        ORDER BY board.next_step_due_at ASC NULLS LAST, board.created_at DESC, board.id DESC
+        LIMIT ${BOARD_CARD_CAP}
+      `));
+      const board: Record<ContactStage, BoardCard[]> = {new: [], contacted: [], qualified: [], applied: [], member: [], closed: []};
+      for (const row of rows) {
+        const card = boardRowSchema.parse(row);
+        board[card.stage].push({
+          id: card.id,
+          displayName: card.display_name,
+          organisation: card.organisation,
+          source: card.source,
+          ownerName: card.owner_name,
+          nextStep: card.next_step,
+          nextStepDueAt: card.next_step_due_at,
+          inviteOpened: isTrue(card.invite_opened),
+          applied: isTrue(card.applied),
+        });
+      }
+      return board;
+    },
+
+    /**
+     * The language a contact is written to in. Kept off `ContactRow` because only
+     * the send path needs it, and widening the projection would touch every list
+     * read. An unknown locale falls back to English, the platform default.
+     */
+    async localeOf(actor: Actor, id: unknown): Promise<"en" | "zh-HK" | null> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT ${contacts.locale} AS locale FROM ${contacts} WHERE ${contacts.id} = ${contactId} LIMIT 1
+      `))[0];
+      if (!row) return null;
+      return row.locale === "zh-HK" ? "zh-HK" : "en";
+    },
+
     async get(actor: Actor, id: unknown): Promise<ContactRow | null> {
       requireAdmin(actor);
       const contactId = contactIdSchema.parse(id);
@@ -979,6 +1253,21 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
               ${JSON.stringify(changed)}::jsonb
             )
           `);
+          // The timeline rides the same transition test as the audit row, so an
+          // unchanged resubmit adds neither, and in the same transaction so the
+          // history an admin reads can never describe a move that rolled back.
+          if (changed.stage !== undefined) {
+            await insertContactActivity(transaction, {
+              contactId, actorProfileId: actor.profileId, kind: "stage_change",
+              meta: {from: prior.stage, to: parsed.stage},
+            });
+          }
+          if (changed.ownerProfileId !== undefined) {
+            await insertContactActivity(transaction, {
+              contactId, actorProfileId: actor.profileId, kind: "owner_change",
+              meta: {from: priorOwner, to: parsed.ownerProfileId},
+            });
+          }
         }
 
         const row = rowsFrom(await transaction.execute(sql`
@@ -987,6 +1276,116 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         if (!row) throw new Error("CONTACT_NOT_FOUND");
         return toContactRow(row);
       });
+    },
+
+    /**
+     * Phase E: the single "what happens next" a salesperson keeps on a contact.
+     * Same discipline as `updatePipeline`: lock the prior row, write and audit
+     * only a real change, so re-saving the same step is silent. Setting a step is
+     * a touch, so `last_touch_at` moves with it.
+     */
+    async updateNextStep(actor: Actor, id: unknown, input: unknown): Promise<ContactRow> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const parsed = updateNextStepSchema.parse(input ?? {});
+      const due = dueAtInstant(parsed.dueAt);
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const prior = rowsFrom(await transaction.execute(sql`
+          SELECT ${contacts.id} AS id, ${contacts.nextStep} AS next_step,
+                 ${contacts.nextStepDueAt} AS next_step_due_at
+          FROM ${contacts} WHERE ${contacts.id} = ${contactId} FOR UPDATE
+        `))[0];
+        if (!prior) throw new Error("CONTACT_NOT_FOUND");
+
+        const priorStep = typeof prior.next_step === "string" ? prior.next_step : null;
+        const priorDue = prior.next_step_due_at ? new Date(prior.next_step_due_at as string | Date) : null;
+        const changed = parsed.nextStep !== priorStep || (due?.getTime() ?? null) !== (priorDue?.getTime() ?? null);
+
+        if (changed) {
+          await transaction.execute(sql`
+            UPDATE ${contacts}
+            SET next_step = ${parsed.nextStep}, next_step_due_at = ${due ? due.toISOString() : null},
+                last_touch_at = now(), updated_at = now()
+            WHERE ${contacts.id} = ${contactId}
+          `);
+          await transaction.execute(sql`
+            INSERT INTO ${auditEvents}
+              (actor_user_id, actor_type, action, target_type, target_id, metadata)
+            VALUES (
+              ${actor.profileId}, ${actor.kind}, 'contact.next_step_updated', 'contact', ${contactId},
+              ${JSON.stringify({nextStep: parsed.nextStep, dueAt: parsed.dueAt})}::jsonb
+            )
+          `);
+          await insertContactActivity(transaction, {
+            contactId, actorProfileId: actor.profileId, kind: "next_step",
+            body: parsed.nextStep, meta: {dueAt: parsed.dueAt},
+          });
+        }
+
+        const row = rowsFrom(await transaction.execute(sql`
+          SELECT * FROM (${contactProjection(sql`c.id = ${contactId}`)}) AS one LIMIT 1
+        `))[0];
+        if (!row) throw new Error("CONTACT_NOT_FOUND");
+        return toContactRow(row);
+      });
+    },
+
+    /**
+     * Phase E: the lead page's Related block. Three small reads, every one keyed
+     * by the contact id and nothing else: the events they RSVP'd to as a guest,
+     * the showcase listings they asked to be introduced to, and the membership of
+     * the profile the contact is linked to, as owner or applicant (none when unlinked). Capped, because
+     * a page that must stay readable gains nothing from a 400-row RSVP history.
+     */
+    async related(actor: Actor, id: unknown): Promise<ContactRelated> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const database = await loadDatabase();
+      const guestEvents = rowsFrom(await database.execute(sql`
+        SELECT r.id AS registration_id, e.id AS event_id, e.slug AS slug,
+               e.title_en AS title_en, e.title_zh AS title_zh, e.starts_at AS starts_at,
+               r.status AS status, r.checked_in_at AS checked_in_at
+        FROM ${eventGuestRegistrations} r
+        JOIN ${events} e ON e.id = r.event_id
+        WHERE r.contact_id = ${contactId}
+        ORDER BY e.starts_at DESC
+        LIMIT 20
+      `)).map((row) => guestEventRowSchema.parse(row));
+      const showcaseIntros = rowsFrom(await database.execute(sql`
+        SELECT l.id AS lead_id, s.id AS listing_id, s.slug AS slug,
+               s.name_en AS name_en, s.name_zh_hk AS name_zh, l.created_at AS created_at
+        FROM ${leads} l
+        JOIN ${showcaseListings} s ON s.id = l.listing_id
+        WHERE l.contact_id = ${contactId}
+        ORDER BY l.created_at DESC
+        LIMIT 20
+      `)).map((row) => showcaseIntroRowSchema.parse(row));
+      const membershipRow = rowsFrom(await database.execute(sql`
+        SELECT m.plan_code AS plan_code, m.status AS status
+        FROM ${contacts} c
+        -- Final review M5: a company membership is owned by the company, so the person shows up
+        -- as the applicant of the membership's application rather than as its owner.
+        JOIN ${memberships} m ON true
+        LEFT JOIN ${membershipApplications} a ON a.id = m.application_id
+        WHERE c.id = ${contactId}
+          AND (m.owner_user_id = c.profile_id OR a.applicant_user_id = c.profile_id)
+        ORDER BY m.created_at DESC
+        LIMIT 1
+      `))[0];
+      const membership = membershipRow ? membershipRowSchema.parse(membershipRow) : null;
+      return {
+        guestEvents: guestEvents.map((row) => ({
+          registrationId: row.registration_id, eventId: row.event_id, slug: row.slug,
+          titleEn: row.title_en, titleZh: row.title_zh, startsAt: row.starts_at,
+          status: row.status, checkedInAt: row.checked_in_at,
+        })),
+        showcaseIntros: showcaseIntros.map((row) => ({
+          leadId: row.lead_id, listingId: row.listing_id, slug: row.slug,
+          nameEn: row.name_en, nameZh: row.name_zh, createdAt: row.created_at,
+        })),
+        membership: membership ? {planCode: membership.plan_code, status: membership.status} : null,
+      };
     },
   };
 }

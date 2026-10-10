@@ -26,6 +26,7 @@ export const WORKER_JOBS = [
   "membership-grant-expiry",
   "rate-limit-cleanup",
   "member-import-retention",
+  "lead-reminders",
 ] as const;
 
 export type WorkerJob = typeof WORKER_JOBS[number];
@@ -123,6 +124,7 @@ export const JOBS_BY_CRON = {
   "0 3 * * *": ["chat-retention"],
   "15 18 * * *": ["retention-analyst"],
   "30 0 1 * *": ["board-reporter"],
+  "0 0 * * *": ["lead-reminders"],
   "*/10 * * * *": ["whatsapp-send-queue", "showcase-lead-emails", "event-notifications", "rate-limit-cleanup", "member-import-retention"],
   "* * * * *": ["ticket-emails", "admin-batches", "membership-grant-expiry"],
 } as const satisfies Readonly<
@@ -147,6 +149,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "membership-grant-expiry": REQUEST_TIMEOUT_MS,
   "rate-limit-cleanup": REQUEST_TIMEOUT_MS,
   "member-import-retention": QUEUE_REQUEST_TIMEOUT_MS,
+  "lead-reminders": REQUEST_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {

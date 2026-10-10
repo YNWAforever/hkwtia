@@ -3,10 +3,20 @@
 import {notFound, redirect} from "next/navigation";
 
 import {
+  addContactNote,
+  contactNextStepInput,
   contactPipelineInput,
   contactReturnPath,
+  updateContactNextStep,
   updateContactPipeline,
 } from "@/lib/admin/contact-action-core";
+import {
+  createLeadInvite,
+  recordLeadInviteShared,
+  sendLeadInviteEmail,
+  type LeadInviteCreateState,
+  type LeadInviteEmailState,
+} from "@/lib/admin/lead-invite-core";
 import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
@@ -50,4 +60,90 @@ export async function updateContactPipelineAction(path: string, formData: FormDa
   // catch block that inspected it first would be one refactor away from
   // swallowing the navigation and leaving the save silently unconfirmed.
   if (back !== null) redirect(back);
+}
+
+export async function addContactNoteAction(path: string, formData: FormData): Promise<void> {
+  let back: string | null = null;
+  try {
+    const who = await requireAdminActor();
+    await addContactNote(who, formData.get("contactId"), formData.get("body"));
+    revalidateAdminPath(path);
+    back = contactReturnPath(formData.get("returnTo"));
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
+  if (back !== null) redirect(back);
+}
+
+export async function updateContactNextStepAction(path: string, formData: FormData): Promise<void> {
+  let back: string | null = null;
+  try {
+    const who = await requireAdminActor();
+    await updateContactNextStep(who, formData.get("contactId"), contactNextStepInput(formData));
+    revalidateAdminPath(path);
+    back = contactReturnPath(formData.get("returnTo"));
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
+  if (back !== null) redirect(back);
+}
+
+// Phase E join links. A failure is reported as a state, never as a thrown message,
+// because a thrown error can carry the invite URL into logs and the client.
+
+export async function createLeadInviteAction(
+  path: string,
+  _previous: LeadInviteCreateState,
+  formData: FormData,
+): Promise<LeadInviteCreateState> {
+  try {
+    const who = await requireAdminActor();
+    const created = await createLeadInvite(
+      who, formData.get("contactId"), formData.get("planCode"), undefined, formData.get("confirmSupersede") === "on",
+    );
+    revalidateAdminPath(path);
+    return {status: "created", url: created.url, inviteId: created.inviteId};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    return {status: "error"};
+  }
+}
+
+export async function sendLeadInviteEmailAction(
+  path: string,
+  _previous: LeadInviteEmailState,
+  formData: FormData,
+): Promise<LeadInviteEmailState> {
+  try {
+    const who = await requireAdminActor();
+    const status = await sendLeadInviteEmail(who, {
+      contactId: formData.get("contactId"),
+      inviteId: formData.get("inviteId"),
+      inviteUrl: formData.get("inviteUrl"),
+      message: formData.get("message"),
+    });
+    revalidateAdminPath(path);
+    return {status};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    return {status: "error"};
+  }
+}
+
+export async function recordLeadInviteSharedAction(
+  path: string,
+  contactId: string,
+  inviteId: string,
+  channel: "copy" | "whatsapp",
+): Promise<void> {
+  try {
+    const who = await requireAdminActor();
+    await recordLeadInviteShared(who, {contactId, inviteId, channel});
+    revalidateAdminPath(path);
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
 }

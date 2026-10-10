@@ -382,6 +382,20 @@
         "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
         "cta": "開啟門票"
       },
+      "lead_join_invite": {
+        "subject": "誠邀你加入 WTIA",
+        "preview": "專為你準備的連結，14 天內有效。",
+        "heading": "誠邀你加入 WTIA",
+        "body": "{message} 此連結為你專屬，在你提交申請前均可使用。連結會開啟簡短的申請表，部分資料或已預先填入。",
+        "cta": "開始申請"
+      },
+      "lead_digest": {
+        "subject": "潛在會員跟進：{overdueCount} 項已逾期，{dueTodayCount} 項今日到期",
+        "preview": "你今日需要跟進的 WTIA 潛在會員。",
+        "heading": "你的潛在會員跟進事項",
+        "body": "{recipientName}，你好。已逾期（{overdueCount}）：{overdue} 今日到期（{dueTodayCount}）：{dueToday} 邀請連結已開啟超過 3 日但未申請（{staleCount}）：{stale} 未指派的潛在會員（{unassignedCount}）：{unassigned}",
+        "cta": "開啟潛在會員看板"
+      },
       "batch_membership_renewal": {
         "subject": "查閱你的 WTIA 會籍續期",
         "preview": "登入查閱會籍及帳單選項。",
@@ -964,6 +978,25 @@
     },
     "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
     "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
+    "invite": {
+      "metaTitle": "你的專屬邀請｜WiseTech Hong Kong",
+      "welcomeNamed": "歡迎你，{name}",
+      "welcome": "歡迎加入 WTIA",
+      "invitedBy": "{inviter} 邀請你成為 WTIA {plan}會員。",
+      "invited": "你獲邀成為 WTIA {plan}會員。",
+      "planLabel": "會籍",
+      "feeLabel": "會費",
+      "free": "免費",
+      "benefitsLabel": "會籍包括",
+      "continue": "繼續申請",
+      "expires": "此專屬連結將於 {date} 失效。",
+      "invalid": {
+        "title": "此邀請連結已失效",
+        "body": "連結可能已過期或已被使用。你仍可直接申請會籍。",
+        "action": "加入 WTIA",
+        "contact": "聯絡 WTIA"
+      }
+    },
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
     "metaTitle": "會籍申請｜WiseTech Hong Kong",
@@ -2765,7 +2798,8 @@
         "admin-batches": "後台批次處理",
         "membership-grant-expiry": "有限期權益到期",
         "rate-limit-cleanup": "流量限制清理",
-        "member-import-retention": "匯入資料保留"
+        "member-import-retention": "匯入資料保留",
+        "lead-reminders": "潛在會員跟進摘要"
       }
     },
     "applicationCase": {
@@ -3003,7 +3037,91 @@
       "duplicates": "有 {count} 筆記錄使用此電郵",
       "empty": "沒有符合條件的潛在客戶。",
       "error": "無法載入潛在客戶流程。",
-      "saved": "已更新潛在客戶。"
+      "saved": "已更新潛在客戶。",
+      "board": {
+        "view": {"label": "檢視", "list": "清單", "board": "看板"},
+        "filters": {"owner": "負責人", "anyone": "所有人", "mine": "我的", "source": "來源", "anySource": "所有來源", "overdueOnly": "只顯示逾期的下一步", "includeClosed": "顯示已結案", "apply": "套用"},
+        "columnCount": "此階段共 {count} 位",
+        "emptyColumn": "此階段沒有人。",
+        "unnamed": "未命名聯絡人",
+        "unassigned": "未指派",
+        "ownedBy": "負責人：{name}",
+        "dueOn": "到期日 {date}",
+        "noNextStep": "尚無下一步",
+        "overdue": "已逾期",
+        "inviteOpened": "已開啟入會連結",
+        "applied": "已申請",
+        "moveTo": "移至階段",
+        "move": "移動",
+        "error": "無法載入流程看板。"
+      },
+      "lead": {
+        "back": "所有潛在客戶",
+        "unnamed": "未命名聯絡人",
+        "organisation": "機構",
+        "owner": "負責人",
+        "source": "來源",
+        "stage": "階段",
+        "consent": "WhatsApp 同意",
+        "saved": "已儲存。",
+        "nextStep": {
+          "title": "下一步",
+          "label": "下一步行動",
+          "due": "到期日",
+          "save": "儲存下一步",
+          "overdue": "已逾期",
+          "none": "尚未設定下一步。"
+        },
+        "notes": {
+          "title": "新增備註",
+          "label": "備註",
+          "add": "新增備註"
+        },
+        "invite": {
+          "title": "專屬入會連結",
+          "plan": "會籍計劃",
+          "plans": {"community": "社群會員", "startup": "初創會員", "corporate": "企業會員"},
+          "create": "建立入會連結",
+          "linkLabel": "入會連結（只顯示一次）",
+          "copy": "複製連結",
+          "copied": "已複製。",
+          "messageLabel": "個人訊息（選填）",
+          "email": "以電郵發送",
+          "whatsapp": "在 WhatsApp 開啟",
+          "sent": "電郵已發送。",
+          "failed": "電郵未能送達。連結仍然有效，可改用 WhatsApp 或複製連結。",
+          "noEmail": "此聯絡人沒有電郵地址。",
+          "noPhone": "此聯絡人沒有電話號碼。",
+          "error": "未能建立連結。",
+          "supersedeWarning": "此聯絡人已有一條仍然有效的連結。建立新連結後，舊連結將會失效；如對方已開啟舊連結，將失去預填資料，其申請亦不會歸屬於該連結。",
+          "supersedeConfirm": "我明白舊連結將會失效",
+          "latest": "最新連結：{state}",
+          "none": "尚未建立連結。",
+          "state": {"live": "尚未開啟", "opened": "已開啟", "consumed": "已使用", "expired": "已過期", "superseded": "已被新連結取代"}
+        },
+        "timeline": {
+          "title": "時間線",
+          "empty": "暫無記錄。",
+          "system": "系統",
+          "by": "由 {name}",
+          "note": "備註",
+          "stage_change": "階段由 {from} 移至 {to}",
+          "owner_change": "負責人已更改",
+          "next_step": "已設定下一步",
+          "invite_sent": "已發送入會邀請",
+          "invite_opened": "已開啟入會邀請",
+          "applied": "已申請入會",
+          "became_member": "已成為會員"
+        },
+        "related": {
+          "title": "相關資料",
+          "events": "曾以嘉賓身份參加的活動",
+          "intros": "展示平台引薦",
+          "membership": "會籍",
+          "membershipLine": "{plan}（{status}）",
+          "conversation": "WhatsApp 對話"
+        }
+      }
     },
     "campaigns": {
       "reviewContent": "訊息內容",
@@ -4177,7 +4295,55 @@
           "at_risk_count": "需跟進會員"
         }
       },
-      "boardDraftLegacyLanguage": "這份歷史報告只有英文正文。"
+      "boardDraftLegacyLanguage": "這份歷史報告只有英文正文。",
+      "leadReportLink": "潛在會員轉化報告",
+      "leadReportLinkDescription": "按來源劃分的漏斗、各負責人成績及邀請轉化為會員的情況。",
+      "leads": {
+        "eyebrow": "管理報告",
+        "title": "潛在會員轉化報告",
+        "description": "查看潛在會員由首次接觸到付費入會的進展（按來源及負責人），以及邀請的轉化成效。",
+        "back": "返回報告",
+        "windowLabel": "報告期間",
+        "window": {"30": "過去 30 日", "90": "過去 90 日", "180": "過去 180 日", "all": "全部時間"},
+        "windowNote": "潛在會員按建立日期計算，邀請按發出日期計算。",
+        "unavailable": "暫時未能載入潛在會員報告。為免零數字造成誤導，以下內容不予顯示，請稍後再試。",
+        "funnelHeading": "按來源劃分的漏斗",
+        "funnelCaption": "期間內建立的潛在會員，按來源及現時階段",
+        "sourceColumn": "來源",
+        "totalColumn": "潛在會員",
+        "memberRate": "成為會員",
+        "emptyFunnel": "此期間沒有潛在會員。",
+        "stage": {"new": "新增", "contacted": "已聯絡", "qualified": "已評估", "applied": "已申請", "member": "已入會", "closed": "已結束"},
+        "source": {"whatsapp": "WhatsApp", "event_guest": "活動賓客", "showcase_intro": "方案展示查詢", "join_abandoned": "未完成入會", "interest_form": "興趣表格", "import": "匯入"},
+        "ownersHeading": "各負責人成績",
+        "ownersCaption": "每位負責人的潛在會員、邀請及轉化",
+        "ownerColumn": "負責人",
+        "unassigned": "未分配",
+        "invitesSentColumn": "已發邀請",
+        "invitesOpenedColumn": "已開啟",
+        "applicationsColumn": "申請",
+        "membersColumn": "會員",
+        "emptyOwners": "此期間沒有負責人資料。",
+        "invitesHeading": "邀請成效",
+        "sent": "已發出",
+        "opened": "已開啟",
+        "applied": "已申請",
+        "paid": "已付費",
+        "joinedFree": "已加入（免費）",
+        "ofSent": "佔已發出的 {percent}",
+        "median": "邀請至付款的中位時間",
+        "medianValue": "{hours} 小時",
+        "noMedian": "暫無",
+        "invitedVsJoinedHeading": "受邀方案與實際加入方案",
+        "invitedColumn": "受邀方案",
+        "joinedColumn": "實際加入",
+        "countColumn": "會員",
+        "emptyPlans": "此期間沒有已付費的邀請。",
+        "plan": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助"},
+        "estimateHeading": "歸因首年會費",
+        "estimateLabel": "估算",
+        "estimateNote": "按已加入方案的首年年費標價計算，未與 Stripe 對賬，請勿視為已入賬收入。"
+      }
     },
     "automations": {
       "eyebrow": "自動化營運",
