@@ -72,7 +72,10 @@ describe("public directory availability", () => {
     const html = await renderDirectory("zh-HK", {q: "harbour", tag: "ai", plan: "invalid"});
     expect(html).toContain(bundles["zh-HK"].Members.unavailableTitle);
     expect(html).not.toContain(bundles["zh-HK"].Members.noPublishedTitle);
-    expect(html).toContain('href="/zh/members?q=harbour&amp;tag=ai"');
+    // The retry renders through HonestEmpty -> ActionLink -> @/i18n/navigation's Link (mocked to a
+    // plain <a> here), which adds /zh itself; handing it "/zh/members…" served /zh/zh/members.
+    expect(html).toContain('href="/members?q=harbour&amp;tag=ai"');
+    expect(html).not.toContain('href="/zh/members?q=harbour');
     expect(html).toContain(bundles["zh-HK"].Members.retry);
     expect(log).toHaveBeenCalledTimes(1);
     const record = JSON.parse(String(log.mock.calls[0]?.[0])) as Record<string, unknown>;

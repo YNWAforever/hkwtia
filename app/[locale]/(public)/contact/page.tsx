@@ -14,7 +14,6 @@ import {CONTACT_TOPICS} from '@/lib/contact/topics';
 import {buildPageMetadata} from '@/lib/metadata';
 import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
 import {buildBreadcrumbData} from '@/lib/structured-data';
-import {localizedPath} from '@/lib/urls';
 
 type Props = {params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>};
 
@@ -38,6 +37,9 @@ export default async function ContactPage({params, searchParams = Promise.resolv
   const rawTopic = query.topic;
   const initialTopic = typeof rawTopic === 'string' ? rawTopic : undefined;
 
+  // Unprefixed on purpose: InnerCardGrid renders @/i18n/navigation's Link, which adds the locale
+  // itself. These once went through localizedPath too, and every card on /zh/contact pointed at
+  // /zh/zh/… (404) until round 28.
   const routeCards = [
     {href: '/events', title: t('routes.events.title'), copy: t('routes.events.description')},
     {href: '/membership', title: t('routes.membership.title'), copy: t('routes.membership.description')},
@@ -45,7 +47,7 @@ export default async function ContactPage({params, searchParams = Promise.resolv
     {href: '/launchpad', title: t('routes.launchpad.title'), copy: t('routes.launchpad.description')},
     {href: '/about', title: t('routes.about.title'), copy: t('routes.about.description')},
     {href: '/news', title: t('routes.news.title'), copy: t('routes.news.description')},
-  ].map((route) => ({...route, href: localizedPath(appLocale, route.href)}));
+  ];
 
   const emailLabels = {
     topicLabel: t('emailTopics.topicLabel'),

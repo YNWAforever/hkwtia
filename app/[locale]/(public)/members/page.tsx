@@ -57,7 +57,9 @@ export default async function MembersPage({params, searchParams}: Props) {
   const nextParams = memberFilterQuery(filters);
   if (directory.nextCursor) nextParams.set("cursor", directory.nextCursor);
   const nextHref = localizedPath(locale, `/members?${nextParams.toString()}`);
-  const retryHref = localizedPath(locale, `/members${retryQuery ? `?${retryQuery}` : ""}`);
+  // Unprefixed, unlike nextHref (a plain <a>): the retry renders through HonestEmpty's ActionLink,
+  // whose @/i18n/navigation Link adds the locale itself — localizedPath here served /zh/zh/members.
+  const retryHref = `/members${retryQuery ? `?${retryQuery}` : ""}`;
   const plans = Object.fromEntries(
     MEMBERSHIP_PLAN_CODES.map((plan) => [plan, t(`plans.${plan}`)]),
   ) as Record<MembershipPlanCode, string>;
