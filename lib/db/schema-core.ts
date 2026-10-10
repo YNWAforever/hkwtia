@@ -129,6 +129,9 @@ export const contactSourceEnum = pgEnum("contact_source", [
 export const contactStageEnum = pgEnum("contact_stage", [
   "new", "contacted", "qualified", "applied", "member", "closed",
 ]);
+export const contactActivityKindEnum = pgEnum("contact_activity_kind", [
+  "note", "stage_change", "owner_change", "next_step", "invite_sent", "invite_opened", "applied", "became_member",
+]);
 export const eventStatusEnum = pgEnum("event_status", [
   "draft", "pending_review", "published", "rejected", "cancelled",
 ]);
@@ -297,6 +300,9 @@ export const membershipApplications = pgTable(
     companyId: uuid("company_id").references(() => companies.id, {onDelete: "set null"}),
     currentStep: membershipApplicationStepEnum("current_step").default("profile").notNull(),
     status: membershipApplicationStatusEnum("status").default("draft").notNull(),
+    // Phase E: written when the application is submitted (the invite is consumed), not at
+    // draft creation. Callback form because join_invites.application_id points back here.
+    inviteId: uuid("invite_id").references((): AnyPgColumn => joinInvites.id, {onDelete: "set null"}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
@@ -1704,6 +1710,10 @@ export const contacts = pgTable(
     whatsappConsentTextVersion: text("whatsapp_consent_text_version"),
     whatsappOptedOutAt: timestamp("whatsapp_opted_out_at", {withTimezone: true}),
     lastInboundAt: timestamp("last_inbound_at", {withTimezone: true}),
+    // Phase E follow-up: one next step per lead, and the last time staff touched it.
+    nextStep: text("next_step"),
+    nextStepDueAt: timestamp("next_step_due_at", {withTimezone: true}),
+    lastTouchAt: timestamp("last_touch_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
@@ -1714,6 +1724,54 @@ export const contacts = pgTable(
     index("contacts_stage_owner_idx").on(table.stage, table.ownerProfileId),
     index("contacts_email_idx").on(table.email),
     check("contacts_identity_check", sql`${table.email} IS NOT NULL OR ${table.phoneE164} IS NOT NULL OR ${table.whatsappMemberId} IS NOT NULL`),
+  ],
+);
+
+/**
+ * Phase E lead timeline. Append-only: the application never edits or deletes a
+ * row, so the feed is a faithful history. A null actor means a system event.
+ */
+export const contactActivities = pgTable(
+  "contact_activities",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    contactId: uuid("contact_id").notNull().references(() => contacts.id, {onDelete: "cascade"}),
+    actorProfileId: text("actor_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    kind: contactActivityKindEnum("kind").notNull(),
+    body: text("body"),
+    meta: jsonb("meta").$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: createdAt("created_at"),
+  },
+  (table) => [
+    index("contact_activities_contact_created_idx").on(table.contactId, table.createdAt.desc()),
+  ],
+);
+
+/**
+ * Phase E join invites. Only the SHA-256 digest of the token is stored, so a
+ * database read cannot mint a working link. `application_id` and
+ * `membership_applications.invite_id` reference each other, hence the callback.
+ */
+export const joinInvites = pgTable(
+  "join_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    contactId: uuid("contact_id").notNull().references(() => contacts.id, {onDelete: "cascade"}),
+    planCode: membershipPlanCodeEnum("plan_code")
+      .notNull()
+      .references(() => membershipPlans.code, {onDelete: "restrict"}),
+    createdByProfileId: text("created_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    tokenDigest: text("token_digest").notNull(),
+    expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    openedAt: timestamp("opened_at", {withTimezone: true}),
+    consumedAt: timestamp("consumed_at", {withTimezone: true}),
+    supersededAt: timestamp("superseded_at", {withTimezone: true}),
+    applicationId: uuid("application_id").references((): AnyPgColumn => membershipApplications.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+  },
+  (table) => [
+    unique("join_invites_token_digest_unique").on(table.tokenDigest),
+    index("join_invites_contact_idx").on(table.contactId),
   ],
 );
 

@@ -435,6 +435,13 @@
       "when": 1791461390167,
       "tag": "0062_company_directory_visible_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1791646018042,
+      "tag": "0063_lead_pipeline",
+      "breakpoints": true
     }
   ]
 }
