@@ -349,12 +349,23 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
           SET stage = 'applied', updated_at = now()
           WHERE id = ${contactId} AND stage IN ('new', 'contacted', 'qualified')
         `);
-        await transaction.execute(sql`
-          UPDATE ${contacts}
-          SET profile_id = ${actor.profileId}, updated_at = now()
-          WHERE id = ${contactId} AND profile_id IS NULL
-            AND NOT EXISTS (SELECT 1 FROM ${contacts} other WHERE other.profile_id = ${actor.profileId})
-        `);
+        // The link runs in a savepoint. `contacts_profile_unique` can still refuse it when another
+        // contact claims this profile between the NOT EXISTS check and the write (23505); without the
+        // savepoint that error aborts the whole transaction and the attribution is silently lost.
+        // Skipping only the link keeps the consume, application, stage and audit writes.
+        try {
+          await (transaction as unknown as AutomationDatabase).transaction(async (savepoint) => {
+            await savepoint.execute(sql`
+              UPDATE ${contacts}
+              SET profile_id = ${actor.profileId}, updated_at = now()
+              WHERE id = ${contactId} AND profile_id IS NULL
+                AND NOT EXISTS (SELECT 1 FROM ${contacts} other WHERE other.profile_id = ${actor.profileId})
+            `);
+          });
+        } catch (error) {
+          const code = (error as {code?: unknown; cause?: {code?: unknown}} | null);
+          if (code?.code !== "23505" && code?.cause?.code !== "23505") throw error;
+        }
         await insertContactActivity(transaction, {
           contactId, actorProfileId: null, kind: "applied",
           meta: {inviteId: parsed.inviteId, applicationId: parsed.applicationId},

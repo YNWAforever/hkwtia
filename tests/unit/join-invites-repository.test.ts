@@ -13,7 +13,7 @@ type Statement = Readonly<{text: string; params: readonly unknown[]}>;
  * `responder` answers each statement by inspecting its normalised text, so a test
  * states which statement returns what instead of counting positions.
  */
-function fakeDatabase(responder: (text: string) => Row[] = () => []) {
+function fakeDatabase(responder: (text: string) => Row[] = () => [], failing: (text: string) => Error | null = () => null) {
   const outer: Statement[] = [];
   const transactions: Statement[][] = [];
   const render = (query: unknown): Statement => {
@@ -29,13 +29,20 @@ function fakeDatabase(responder: (text: string) => Row[] = () => []) {
     async transaction<T>(work: (transaction: {execute: (query: unknown) => Promise<unknown>}) => Promise<T>): Promise<T> {
       const statements: Statement[] = [];
       transactions.push(statements);
-      return work({
+      type Executor = {execute: (query: unknown) => Promise<unknown>; transaction: <U>(inner: (transaction: Executor) => Promise<U>) => Promise<U>};
+      const executor: Executor = {
         async execute(query: unknown) {
           const statement = render(query);
           statements.push(statement);
+          const failure = failing(statement.text);
+          if (failure) throw failure;
           return {rows: responder(statement.text)};
         },
-      });
+        // A savepoint: same statement log, and a thrown error propagates to the caller of it
+        // (the real driver rolls back to the savepoint and rethrows).
+        transaction: (inner) => inner(executor),
+      };
+      return work(executor);
     },
   };
   return {database, outer, transactions};
@@ -295,5 +302,31 @@ describe("joinInvitesRepository.consume", () => {
     expect(statements.flatMap((statement) => [...statement.params])).toContain(member.profileId);
     expect(texts.some((text) => text.includes("contact_activities"))).toBe(true);
     expect(texts.some((text) => text.includes("join_invite.consumed"))).toBe(true);
+  });
+
+  it("still consumes when the profile link hits a unique violation (23505)", async () => {
+    const duplicate = Object.assign(new Error("duplicate key value violates unique constraint"), {code: "23505"});
+    const fake = fakeDatabase(
+      (text) => {
+        if (text.includes("applicant_user_id") && text.startsWith("SELECT")) return [{id: applicationId}];
+        if (text.startsWith("UPDATE \"join_invites\"")) return [{contact_id: contactId}];
+        return [];
+      },
+      (text) => (text.includes("profile_id IS NULL") && text.includes("NOT EXISTS") ? duplicate : null),
+    );
+    const result = await createJoinInvitesRepository(async () => fake.database as never).consume(member, {inviteId, applicationId});
+    expect(result).toBe("consumed");
+    const texts = fake.transactions[0]!.map((statement) => statement.text);
+    expect(texts.some((text) => text.includes("UPDATE \"membership_applications\"") && text.includes("invite_id"))).toBe(true);
+    expect(texts.some((text) => text.includes("stage = 'applied'"))).toBe(true);
+    expect(texts.some((text) => text.includes("join_invite.consumed"))).toBe(true);
+  });
+
+  it("does not swallow other errors from the link", async () => {
+    const fake = fakeDatabase(
+      (text) => (text.includes("applicant_user_id") && text.startsWith("SELECT") ? [{id: applicationId}] : text.startsWith("UPDATE \"join_invites\"") ? [{contact_id: contactId}] : []),
+      (text) => (text.includes("NOT EXISTS") ? new Error("connection lost") : null),
+    );
+    await expect(createJoinInvitesRepository(async () => fake.database as never).consume(member, {inviteId, applicationId})).rejects.toThrow("connection lost");
   });
 });

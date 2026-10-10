@@ -60,7 +60,7 @@ describe("attributeJoinInvite", () => {
     expect(state.remove).toHaveBeenCalledTimes(1);
   });
 
-  it("makes a second submit after consumption a no-op", async () => {
+  it("does not call consume again once the first attempt has cleared the cookie", async () => {
     state.cookie = INVITE_ID;
     state.consume.mockResolvedValue("consumed");
     await attributeJoinInvite(member, APPLICATION_ID);
@@ -71,7 +71,7 @@ describe("attributeJoinInvite", () => {
     expect(state.consume).not.toHaveBeenCalled();
   });
 
-  it("survives a stale tab that still sends the spent cookie (not_live, no throw)", async () => {
+  it("tolerates a stale tab that still sends the spent cookie (the repository answers not_live; one-shot consumption itself is join-invites-repository's guard)", async () => {
     state.cookie = INVITE_ID;
     state.consume.mockResolvedValue("not_live");
     await expect(attributeJoinInvite(member, APPLICATION_ID)).resolves.toBeUndefined();

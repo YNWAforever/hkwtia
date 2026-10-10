@@ -778,6 +778,53 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
     },
 
     /**
+     * Phase E fix F1. `linkProfile` flips a prospect to `member` only inside its
+     * `profile_id IS NULL` claim, but an invited contact is linked by
+     * `joinInvitesRepository.consume` (profile_id set directly), so that flip never
+     * ran for them and paying invitees stayed `applied`. This is the second flip,
+     * called where a membership becomes active.
+     *
+     * Forward-only over the funnel stages: `closed` was a decision somebody made
+     * and `member` is already the answer. The UPDATE's own stage predicate is the
+     * idempotency guard (a concurrent or repeat call matches nothing), and the
+     * timeline entry and audit row commit with it only when a row actually moved.
+     * Authorised for the Stripe webhook system actor and for the member whose own
+     * profile it is, nobody else.
+     */
+    async markMemberForProfile(actor: Actor, profileId: unknown): Promise<"flipped" | "unchanged"> {
+      const id = z.string().min(1).parse(profileId);
+      const allowed = (actor.kind === "system" && actor.source === "stripe-webhook")
+        || (actor.kind === "member" && actor.profileId === id);
+      if (!allowed) throw new Error("FORBIDDEN");
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const moved = rowsFrom(await transaction.execute(sql`
+          UPDATE ${contacts}
+          SET stage = 'member', updated_at = now()
+          FROM (SELECT id, stage FROM ${contacts} WHERE profile_id = ${id}) AS prior
+          WHERE ${contacts.id} = prior.id
+            AND ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied')
+          RETURNING ${contacts.id} AS id, prior.stage AS previous_stage
+        `))[0];
+        if (!moved) return "unchanged";
+        const contactId = String(moved.id);
+        await insertContactActivity(transaction, {
+          contactId, actorProfileId: null, kind: "became_member",
+          meta: {from: String(moved.previous_stage), via: "activation"},
+        });
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents}
+            (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (
+            ${actor.kind === "member" ? actor.profileId : null}, ${actor.kind}, 'contact.became_member', 'contact', ${contactId},
+            ${JSON.stringify({from: String(moved.previous_stage)})}::jsonb
+          )
+        `);
+        return "flipped";
+      });
+    },
+
+    /**
      * Programme C-4, plan S-16. Set `contacts.profile_id` when the identity that
      * would match it is WRITTEN — the portal profile save and the join profile
      * step — rather than "on login" as the spec line reads. `getActor()` fires

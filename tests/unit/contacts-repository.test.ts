@@ -229,6 +229,12 @@ describe("contactsRepository", () => {
       await repository.linkProfile(contactWriterActor("import"), input);
       await repository.linkProfile(contactWriterActor("import"), input);
       expect(became(statements)).toHaveLength(1);
+      // The mechanism, not only the count: the previous stage is captured in the claim and the claim
+      // stays guarded by `profile_id IS NULL`, which is what stops a repeat from matching at all.
+      const claim = statements.find((statement) => statement.sql.replace(/\s+/g, " ").trim().toLowerCase().startsWith("update \"contacts\""))!;
+      const text = claim.sql.replace(/\s+/g, " ").toLowerCase();
+      expect(text).toContain("prior.stage as previous_stage");
+      expect(text).toContain("\"contacts\".\"profile_id\" is null");
     });
 
     it("writes nothing for a contact that was already a member or closed", async () => {
@@ -240,6 +246,58 @@ describe("contactsRepository", () => {
       await repository.linkProfile(contactWriterActor("import"), input);
       await repository.linkProfile(contactWriterActor("import"), input);
       expect(became(statements)).toHaveLength(0);
+    });
+  });
+
+  /** Phase E fix F1: the activation-time flip for contacts linked by invite consumption. */
+  describe("markMemberForProfile", () => {
+    const webhook = {kind: "system", userId: null, source: "stripe-webhook"} as never;
+    const self = {kind: "member", userId: "u-1", profileId: "p-1"} as never;
+
+    function flipRecorder(updates: Record<string, unknown>[][]) {
+      const statements: ReturnType<PgDialect["sqlToQuery"]>[] = [];
+      const queue = [...updates];
+      const execute = vi.fn(async (query: never) => {
+        const compiled = dialect.sqlToQuery(query);
+        statements.push(compiled);
+        return compiled.sql.replace(/\s+/g, " ").trim().toLowerCase().startsWith("update \"contacts\"") ? queue.shift() ?? [] : [];
+      });
+      const database = {execute, transaction: async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute})};
+      return {statements, database: database as never};
+    }
+    const textOf = (statement: {sql: string}) => statement.sql.replace(/\s+/g, " ").trim().toLowerCase();
+
+    it("moves a funnel contact to member once, with one timeline entry and one audit row", async () => {
+      const {statements, database} = flipRecorder([[{id: "c-1", previous_stage: "applied"}], []]);
+      const repository = createContactsRepository(async () => database);
+      await expect(repository.markMemberForProfile(webhook, "p-1")).resolves.toBe("flipped");
+      await expect(repository.markMemberForProfile(webhook, "p-1")).resolves.toBe("unchanged");
+      const activities = statements.filter((s) => textOf(s).includes("insert into \"contact_activities\"") && s.params.includes("became_member"));
+      const audits = statements.filter((s) => textOf(s).includes("insert into \"audit_events\"") && textOf(s).includes("'contact.became_member'"));
+      expect(activities).toHaveLength(1);
+      expect(audits).toHaveLength(1);
+    });
+
+    it("is forward-only: the UPDATE only matches funnel stages, never closed or member", async () => {
+      const {statements, database} = flipRecorder([[]]);
+      const repository = createContactsRepository(async () => database);
+      await expect(repository.markMemberForProfile(self, "p-1")).resolves.toBe("unchanged");
+      const update = textOf(statements[0]!);
+      expect(update).toContain("in ('new', 'contacted', 'qualified', 'applied')");
+      expect(update).toContain("profile_id =");
+      expect(update).not.toContain("'closed'");
+      expect(statements).toHaveLength(1);
+    });
+
+    it("authorises the webhook system actor and the member whose profile it is, and nobody else", async () => {
+      const {database} = flipRecorder([[], [], [], [], []]);
+      const repository = createContactsRepository(async () => database);
+      await expect(repository.markMemberForProfile(webhook, "p-1")).resolves.toBe("unchanged");
+      await expect(repository.markMemberForProfile(self, "p-1")).resolves.toBe("unchanged");
+      await expect(repository.markMemberForProfile({kind: "member", userId: "u-2", profileId: "p-2"} as never, "p-1")).rejects.toThrow("FORBIDDEN");
+      await expect(repository.markMemberForProfile({kind: "system", userId: null, source: "event-cancellation"} as never, "p-1")).rejects.toThrow("FORBIDDEN");
+      await expect(repository.markMemberForProfile({kind: "anonymous", userId: null} as never, "p-1")).rejects.toThrow("FORBIDDEN");
+      await expect(repository.markMemberForProfile({kind: "staff", userId: "s", profileId: "s"} as never, "p-1")).rejects.toThrow("FORBIDDEN");
     });
   });
 });
