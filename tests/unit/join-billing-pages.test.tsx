@@ -58,10 +58,10 @@ describe("join billing pages", () => {
 
   it("uses the validated catalog amount only when a resumed attempt has the same price", async () => {
     let markup = renderToStaticMarkup(await CheckoutPage(props()));
-    expect(markup).toContain("HK$1,200.00");
+    expect(markup).toContain("HK$1,200");
     state.activeAttemptPrice = "price_old_attempt";
     markup = renderToStaticMarkup(await CheckoutPage(props()));
-    expect(markup).not.toContain("HK$1,200.00");
+    expect(markup).not.toContain("HK$1,200");
     expect(markup).toContain("localized:checkoutSummary.feeAtProvider");
   });
 

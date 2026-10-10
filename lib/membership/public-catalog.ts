@@ -80,7 +80,9 @@ export function buildPublicMembershipCatalog(input: Readonly<{
   rows: readonly PersistedMembershipPlan[];
   priceIds: Readonly<{startup: string; corporate: string}>;
 }>): readonly PublicMembershipTier[] {
-  const money = new Intl.NumberFormat(input.locale, {style: "currency", currency: "HKD"});
+  // Persisted fees are whole Hong Kong dollars (structurallyMatches rejects anything but a
+  // Postgres integer), so the currency default of two decimals only ever printed ".00".
+  const money = new Intl.NumberFormat(input.locale, {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
   const tiers: PublicMembershipTier[] = [];
 
   for (const code of PLAN_CODES) {
