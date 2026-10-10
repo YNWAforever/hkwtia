@@ -312,8 +312,8 @@ describe("WiseTech protected route ownership", () => {
     // Full remediation T07 adds the authenticated knowledge version workspace.
     // T18 adds the actor-scoped global workspace search read page.
     expect(codeFiles).toContain("app/[locale]/(admin)/admin/ai-review/page.tsx");
-    expect(codeFiles).toHaveLength(85);
-    expect(inventoryFiles).toHaveLength(85);
+    expect(codeFiles).toHaveLength(86);
+    expect(inventoryFiles).toHaveLength(86);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -333,7 +333,7 @@ describe("WiseTech protected route ownership", () => {
     // Phase C2 Task 9 (C-5) added the campaign wizard and its detail page: 32 + 2 = 34.
     // Phase D-4b Task 5 added the scan-reached door check-in page: 34 + 1 = 35.
     // Full fix T18 adds search; T10 adds one role-checked existing draft review page.
-    expect(count("admin-page")).toBe(46);
+    expect(count("admin-page")).toBe(47);
     // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
     // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
     // session, and there is no HMAC in front of it — which is exactly why its
@@ -348,7 +348,7 @@ describe("WiseTech protected route ownership", () => {
     // Showcase lead recovery and ticket email delivery add two authenticated jobs.
     // Audit remediation adds the cancellation notification job.
     expect(count("job-handler")).toBe(18);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(46);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(47);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(39);
   });
 

@@ -293,3 +293,140 @@ describe("the /admin/contacts action boundary", () => {
     }
   });
 });
+
+describe("contactsRepository activity writes", () => {
+  const activityInserts = (statements: readonly {text: string; params: readonly unknown[]}[]) =>
+    statements.filter((statement) => /insert into "contact_activities"/i.test(statement.text));
+
+  it("writes a stage_change activity with from/to when the stage changes", async () => {
+    const fake = fakeDatabase([
+      [{id: contactId, stage: "new", owner_profile_id: null, tags: []}],
+      [], [], [],
+      [contactRow({stage: "contacted"})],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    await repository.updatePipeline(admin, contactId, {stage: "contacted"});
+
+    const inserts = activityInserts(fake.transactions[0]!);
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0]!.params).toContain("stage_change");
+    expect(inserts[0]!.params).toContain(JSON.stringify({from: "new", to: "contacted"}));
+  });
+
+  it("writes an owner_change activity when the owner changes", async () => {
+    const fake = fakeDatabase([
+      [{id: contactId, stage: "new", owner_profile_id: "staff-b", tags: []}],
+      [], [], [],
+      [contactRow({owner_profile_id: "staff-a"})],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    await repository.updatePipeline(admin, contactId, {ownerProfileId: "staff-a"});
+
+    const inserts = activityInserts(fake.transactions[0]!);
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0]!.params).toContain("owner_change");
+    expect(inserts[0]!.params).toContain(JSON.stringify({from: "staff-b", to: "staff-a"}));
+  });
+
+  it("writes no activity when nothing changed", async () => {
+    const fake = fakeDatabase([
+      [{id: contactId, stage: "contacted", owner_profile_id: null, tags: []}],
+      [contactRow({stage: "contacted"})],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    await repository.updatePipeline(admin, contactId, {stage: "contacted", ownerProfileId: null});
+
+    expect(activityInserts(fake.transactions[0]!)).toHaveLength(0);
+  });
+});
+
+describe("contactsRepository.updateNextStep", () => {
+  it("refuses a member before the database loads", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createContactsRepository(loadDatabase);
+    await expect(repository.updateNextStep(member as never, contactId, {nextStep: "x", dueAt: null})).rejects.toThrow("FORBIDDEN");
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("stores the due date as 18:00 Hong Kong time and writes one next_step activity", async () => {
+    const fake = fakeDatabase([
+      [{id: contactId, next_step: null, next_step_due_at: null}],
+      [], [], [],
+      [contactRow({next_step: "Call Ada", next_step_due_at: new Date("2026-10-20T10:00:00.000Z")})],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    const row = await repository.updateNextStep(admin, contactId, {nextStep: "  Call Ada ", dueAt: "2026-10-20"});
+
+    expect(row.nextStep).toBe("Call Ada");
+    expect(row.nextStepDueAt?.toISOString()).toBe("2026-10-20T10:00:00.000Z");
+    const statements = fake.transactions[0]!;
+    const update = statements.find((s) => /update "contacts"/i.test(s.text));
+    expect(update?.params).toContain("2026-10-20T10:00:00.000Z");
+    expect(update?.params).toContain("Call Ada");
+    expect(update?.text).toMatch(/last_touch_at/);
+    const inserts = statements.filter((s) => /insert into "contact_activities"/i.test(s.text));
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0]!.params).toContain("next_step");
+    expect(statements.find((s) => /insert into "audit_events"/i.test(s.text))?.text).toContain("contact.next_step_updated");
+  });
+
+  it("writes nothing when the next step is unchanged, and turns an empty string into null", async () => {
+    const fake = fakeDatabase([
+      [{id: contactId, next_step: null, next_step_due_at: null}],
+      [contactRow()],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    await repository.updateNextStep(admin, contactId, {nextStep: "", dueAt: null});
+
+    const statements = fake.transactions[0]!;
+    expect(statements.some((s) => /update "contacts"/i.test(s.text))).toBe(false);
+    expect(statements.some((s) => /insert into "contact_activities"/i.test(s.text))).toBe(false);
+  });
+
+  it("rejects a 201-character step and a malformed date before the database loads", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createContactsRepository(loadDatabase);
+    await expect(repository.updateNextStep(admin, contactId, {nextStep: "x".repeat(201), dueAt: null})).rejects.toThrow(ZodError);
+    await expect(repository.updateNextStep(admin, contactId, {nextStep: "x", dueAt: "20/10/2026"})).rejects.toThrow(ZodError);
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+});
+
+describe("contactsRepository.related", () => {
+  it("refuses a member and a malformed id before the database loads", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createContactsRepository(loadDatabase);
+    await expect(repository.related(member as never, contactId)).rejects.toThrow("FORBIDDEN");
+    await expect(repository.related(admin, "../x")).rejects.toThrow(ZodError);
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("projects guest events, showcase intros and the linked profile's membership", async () => {
+    const fake = fakeDatabase([
+      [{registration_id: "r1", event_id: "e1", slug: "mixer", title_en: "Mixer", title_zh: null, starts_at: new Date("2026-09-20T10:00:00.000Z"), status: "registered", checked_in_at: null}],
+      [{lead_id: "l1", listing_id: "s1", slug: "acme", name_en: "Acme", name_zh: "Acme 貨運", created_at: new Date("2026-09-25T00:00:00.000Z")}],
+      [{plan_code: "community", status: "active"}],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    const related = await repository.related(admin, contactId);
+
+    expect(related.guestEvents).toEqual([expect.objectContaining({registrationId: "r1", slug: "mixer", titleEn: "Mixer", titleZh: null})]);
+    expect(related.showcaseIntros).toEqual([expect.objectContaining({leadId: "l1", listingId: "s1", nameZh: "Acme 貨運"})]);
+    expect(related.membership).toEqual({planCode: "community", status: "active"});
+    // Every statement is scoped to this contact; nothing is read by a client-supplied filter.
+    expect(fake.outer).toHaveLength(3);
+    for (const statement of fake.outer) expect(statement.params).toContain(contactId);
+  });
+
+  it("returns empty sections, and a null membership, for a contact with nothing attached", async () => {
+    const fake = fakeDatabase([[]]);
+    const repository = createContactsRepository(async () => fake.database as never);
+    expect(await repository.related(admin, contactId)).toEqual({guestEvents: [], showcaseIntros: [], membership: null});
+  });
+});

@@ -11,11 +11,17 @@ import {
   contactStageEnum,
   contacts,
   conversations,
+  eventGuestRegistrations,
+  events,
+  leads,
+  memberships,
   profiles,
+  showcaseListings,
   staffTasks,
 } from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
+import {insertContactActivity} from "@/lib/db/repos/contact-activities";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
 import {WOZTELL_MAX_MEMBER_ID_CHARS} from "@/lib/whatsapp/provider-field-limits";
@@ -218,8 +224,43 @@ export type ContactRow = Readonly<{
   conversationId: string | null;
   /** How many rows in the WHOLE table share this email, this one included. */
   duplicateCount: number;
+  /** Phase E: the one thing staff will do next, and when (18:00 Hong Kong on the due day). */
+  nextStep: string | null;
+  nextStepDueAt: Date | null;
+  lastTouchAt: Date | null;
+  /** Newest non-empty organisation from the contact's event RSVPs or leads. */
+  organisation: string | null;
   createdAt: Date;
 }>;
+
+/**
+ * Phase E: what else the platform knows about a contact, for the lead page's
+ * Related block. Each list is empty (and membership null) when there is nothing,
+ * which the page renders as an absent section rather than an empty heading.
+ */
+export type ContactRelated = Readonly<{
+  guestEvents: readonly Readonly<{
+    registrationId: string; eventId: string; slug: string;
+    titleEn: string; titleZh: string | null; startsAt: Date;
+    status: string; checkedInAt: Date | null;
+  }>[];
+  showcaseIntros: readonly Readonly<{
+    leadId: string; listingId: string; slug: string;
+    nameEn: string; nameZh: string; createdAt: Date;
+  }>[];
+  membership: Readonly<{planCode: string; status: string}> | null;
+}>;
+
+const guestEventRowSchema = z.object({
+  registration_id: z.string(), event_id: z.string(), slug: z.string(),
+  title_en: z.string(), title_zh: z.string().nullable(), starts_at: z.coerce.date(),
+  status: z.string(), checked_in_at: z.coerce.date().nullable(),
+});
+const showcaseIntroRowSchema = z.object({
+  lead_id: z.string(), listing_id: z.string(), slug: z.string(),
+  name_en: z.string(), name_zh: z.string(), created_at: z.coerce.date(),
+});
+const membershipRowSchema = z.object({plan_code: z.string(), status: z.string()});
 
 export type ContactPage = Readonly<{
   items: readonly ContactRow[];
@@ -248,6 +289,28 @@ const updatePipelineSchema = z.object({
   tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
 }).strict();
 
+const updateNextStepSchema = z.object({
+  // `""` means "clear it": the form posts an empty field rather than null.
+  nextStep: z.string().trim().max(200).nullable().transform((value) => (value ? value : null)),
+  dueAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().refine(
+    (value) => {
+      if (value === null) return true;
+      const instant = new Date(`${value}T00:00:00.000Z`);
+      // Date.parse rolls 2026-02-31 into March; the round trip refuses it.
+      return !Number.isNaN(instant.getTime()) && instant.toISOString().startsWith(value);
+    },
+    "dueAt must be a real calendar date",
+  ),
+}).strict();
+
+/**
+ * A due DAY is stored as the end of that Hong Kong working day. Hong Kong has no
+ * DST, so 18:00 HKT is always 10:00Z and the conversion needs no zone database.
+ */
+function dueAtInstant(dueAt: string | null): Date | null {
+  return dueAt === null ? null : new Date(`${dueAt}T10:00:00.000Z`);
+}
+
 const cursorSchema = z.object({createdAt: z.string(), id: z.string().uuid()}).strict();
 
 const pipelineRowSchema = z.object({
@@ -266,6 +329,10 @@ const pipelineRowSchema = z.object({
   whatsapp_opted_out_at: z.coerce.date().nullable(),
   last_inbound_at: z.coerce.date().nullable(),
   conversation_id: z.string().nullable(),
+  next_step: z.string().nullable().optional().transform((value) => value ?? null),
+  next_step_due_at: z.coerce.date().nullable().optional().transform((value) => value ?? null),
+  last_touch_at: z.coerce.date().nullable().optional().transform((value) => value ?? null),
+  organisation: z.string().nullable().optional().transform((value) => value ?? null),
   // `count(*)` is bigint, which both drivers hand back as a string.
   duplicate_count: z.coerce.number().int().nonnegative(),
   total_count: z.coerce.number().int().nonnegative(),
@@ -291,6 +358,10 @@ function toContactRow(row: Record<string, unknown>): ContactRow {
     lastInboundAt: parsed.last_inbound_at,
     conversationId: parsed.conversation_id,
     duplicateCount: parsed.duplicate_count,
+    nextStep: parsed.next_step,
+    nextStepDueAt: parsed.next_step_due_at,
+    lastTouchAt: parsed.last_touch_at,
+    organisation: parsed.organisation,
     createdAt: parsed.created_at,
   };
 }
@@ -353,6 +424,11 @@ function listPredicates(filters: ContactListFilters): SQL {
  * nullable LINK, not an owner arm, because `conversations_owner_check` stays
  * two-armed with the HMAC as the owner key (spec D-6). Do not reach for the
  * owner columns here.
+ *
+ * `organisation` is the newest non-empty value across the contact's event RSVPs
+ * (matched by `contact_id`, or by email for RSVPs taken before the contact row
+ * existed) and its leads. It is a correlated scalar subquery like
+ * `conversation_id`, so the projection stays one statement per page.
  */
 function contactProjection(where: SQL): SQL {
   return sql`
@@ -369,7 +445,22 @@ function contactProjection(where: SQL): SQL {
         c.owner_profile_id, owner_profile.display_name AS owner_name,
         c.profile_id, c.company_id, c.tags, c.whatsapp_opt_in,
         c.whatsapp_opted_out_at, c.last_inbound_at, c.created_at,
+        c.next_step, c.next_step_due_at, c.last_touch_at,
         email_groups.duplicate_count,
+        (
+          SELECT org.name FROM (
+            SELECT nullif(btrim(g.organisation), '') AS name, g.created_at
+            FROM ${eventGuestRegistrations} g
+            WHERE g.contact_id = c.id OR (c.email IS NOT NULL AND lower(g.email) = lower(c.email))
+            UNION ALL
+            SELECT nullif(btrim(l.organization), ''), l.created_at
+            FROM ${leads} l
+            WHERE l.contact_id = c.id
+          ) org
+          WHERE org.name IS NOT NULL
+          ORDER BY org.created_at DESC
+          LIMIT 1
+        ) AS organisation,
         (
           SELECT thread.id FROM ${conversations} thread
           WHERE thread.contact_id = c.id AND thread.status <> 'deleted'
@@ -979,6 +1070,21 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
               ${JSON.stringify(changed)}::jsonb
             )
           `);
+          // The timeline rides the same transition test as the audit row, so an
+          // unchanged resubmit adds neither, and in the same transaction so the
+          // history an admin reads can never describe a move that rolled back.
+          if (changed.stage !== undefined) {
+            await insertContactActivity(transaction, {
+              contactId, actorProfileId: actor.profileId, kind: "stage_change",
+              meta: {from: prior.stage, to: parsed.stage},
+            });
+          }
+          if (changed.ownerProfileId !== undefined) {
+            await insertContactActivity(transaction, {
+              contactId, actorProfileId: actor.profileId, kind: "owner_change",
+              meta: {from: priorOwner, to: parsed.ownerProfileId},
+            });
+          }
         }
 
         const row = rowsFrom(await transaction.execute(sql`
@@ -987,6 +1093,112 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         if (!row) throw new Error("CONTACT_NOT_FOUND");
         return toContactRow(row);
       });
+    },
+
+    /**
+     * Phase E: the single "what happens next" a salesperson keeps on a contact.
+     * Same discipline as `updatePipeline`: lock the prior row, write and audit
+     * only a real change, so re-saving the same step is silent. Setting a step is
+     * a touch, so `last_touch_at` moves with it.
+     */
+    async updateNextStep(actor: Actor, id: unknown, input: unknown): Promise<ContactRow> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const parsed = updateNextStepSchema.parse(input ?? {});
+      const due = dueAtInstant(parsed.dueAt);
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const prior = rowsFrom(await transaction.execute(sql`
+          SELECT ${contacts.id} AS id, ${contacts.nextStep} AS next_step,
+                 ${contacts.nextStepDueAt} AS next_step_due_at
+          FROM ${contacts} WHERE ${contacts.id} = ${contactId} FOR UPDATE
+        `))[0];
+        if (!prior) throw new Error("CONTACT_NOT_FOUND");
+
+        const priorStep = typeof prior.next_step === "string" ? prior.next_step : null;
+        const priorDue = prior.next_step_due_at ? new Date(prior.next_step_due_at as string | Date) : null;
+        const changed = parsed.nextStep !== priorStep || (due?.getTime() ?? null) !== (priorDue?.getTime() ?? null);
+
+        if (changed) {
+          await transaction.execute(sql`
+            UPDATE ${contacts}
+            SET next_step = ${parsed.nextStep}, next_step_due_at = ${due ? due.toISOString() : null},
+                last_touch_at = now(), updated_at = now()
+            WHERE ${contacts.id} = ${contactId}
+          `);
+          await transaction.execute(sql`
+            INSERT INTO ${auditEvents}
+              (actor_user_id, actor_type, action, target_type, target_id, metadata)
+            VALUES (
+              ${actor.profileId}, ${actor.kind}, 'contact.next_step_updated', 'contact', ${contactId},
+              ${JSON.stringify({nextStep: parsed.nextStep, dueAt: parsed.dueAt})}::jsonb
+            )
+          `);
+          await insertContactActivity(transaction, {
+            contactId, actorProfileId: actor.profileId, kind: "next_step",
+            body: parsed.nextStep, meta: {dueAt: parsed.dueAt},
+          });
+        }
+
+        const row = rowsFrom(await transaction.execute(sql`
+          SELECT * FROM (${contactProjection(sql`c.id = ${contactId}`)}) AS one LIMIT 1
+        `))[0];
+        if (!row) throw new Error("CONTACT_NOT_FOUND");
+        return toContactRow(row);
+      });
+    },
+
+    /**
+     * Phase E: the lead page's Related block. Three small reads, every one keyed
+     * by the contact id and nothing else: the events they RSVP'd to as a guest,
+     * the showcase listings they asked to be introduced to, and the membership of
+     * the profile the contact is linked to (none when unlinked). Capped, because
+     * a page that must stay readable gains nothing from a 400-row RSVP history.
+     */
+    async related(actor: Actor, id: unknown): Promise<ContactRelated> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const database = await loadDatabase();
+      const guestEvents = rowsFrom(await database.execute(sql`
+        SELECT r.id AS registration_id, e.id AS event_id, e.slug AS slug,
+               e.title_en AS title_en, e.title_zh AS title_zh, e.starts_at AS starts_at,
+               r.status AS status, r.checked_in_at AS checked_in_at
+        FROM ${eventGuestRegistrations} r
+        JOIN ${events} e ON e.id = r.event_id
+        WHERE r.contact_id = ${contactId}
+        ORDER BY e.starts_at DESC
+        LIMIT 20
+      `)).map((row) => guestEventRowSchema.parse(row));
+      const showcaseIntros = rowsFrom(await database.execute(sql`
+        SELECT l.id AS lead_id, s.id AS listing_id, s.slug AS slug,
+               s.name_en AS name_en, s.name_zh_hk AS name_zh, l.created_at AS created_at
+        FROM ${leads} l
+        JOIN ${showcaseListings} s ON s.id = l.listing_id
+        WHERE l.contact_id = ${contactId}
+        ORDER BY l.created_at DESC
+        LIMIT 20
+      `)).map((row) => showcaseIntroRowSchema.parse(row));
+      const membershipRow = rowsFrom(await database.execute(sql`
+        SELECT m.plan_code AS plan_code, m.status AS status
+        FROM ${contacts} c
+        JOIN ${memberships} m ON m.owner_user_id = c.profile_id
+        WHERE c.id = ${contactId}
+        ORDER BY m.created_at DESC
+        LIMIT 1
+      `))[0];
+      const membership = membershipRow ? membershipRowSchema.parse(membershipRow) : null;
+      return {
+        guestEvents: guestEvents.map((row) => ({
+          registrationId: row.registration_id, eventId: row.event_id, slug: row.slug,
+          titleEn: row.title_en, titleZh: row.title_zh, startsAt: row.starts_at,
+          status: row.status, checkedInAt: row.checked_in_at,
+        })),
+        showcaseIntros: showcaseIntros.map((row) => ({
+          leadId: row.lead_id, listingId: row.listing_id, slug: row.slug,
+          nameEn: row.name_en, nameZh: row.name_zh, createdAt: row.created_at,
+        })),
+        membership: membership ? {planCode: membership.plan_code, status: membership.status} : null,
+      };
     },
   };
 }
