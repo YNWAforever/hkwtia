@@ -272,6 +272,30 @@ describe("contactsRepository", () => {
     });
   });
 
+  /**
+   * Final review M5. A company membership (Startup, Corporate) is owned by the company, not the
+   * person, so `owner_user_id = profile` alone showed "no membership" for a lead whose company
+   * joined. The applicant of the membership's application is the person too.
+   */
+  describe("related membership lookup", () => {
+    it("finds the membership the linked profile owns OR applied for", async () => {
+      const statements: ReturnType<PgDialect["sqlToQuery"]>[] = [];
+      const execute = vi.fn(async (query: never) => {
+        const compiled = dialect.sqlToQuery(query);
+        statements.push(compiled);
+        return compiled.sql.includes("\"memberships\"") ? [{plan_code: "startup", status: "active"}] : [];
+      });
+      const repository = createContactsRepository(async () => ({execute}) as never);
+      const admin = {kind: "staff", userId: "s", profileId: "s", role: "superadmin"} as never;
+      const related = await repository.related(admin, "11111111-1111-4111-8111-111111111111");
+      expect(related.membership).toEqual({planCode: "startup", status: "active"});
+      const lookup = statements.find((statement) => statement.sql.includes("\"memberships\""))!;
+      const text = lookup.sql.replace(/\s+/g, " ").toLowerCase();
+      expect(text).toContain("left join \"membership_applications\" a on a.id = m.application_id");
+      expect(text).toContain("m.owner_user_id = c.profile_id or a.applicant_user_id = c.profile_id");
+    });
+  });
+
   /** Phase E fix F1: the activation-time flip for contacts linked by invite consumption. */
   describe("markMemberForProfile", () => {
     const webhook = {kind: "system", userId: null, source: "stripe-webhook"} as never;

@@ -23,8 +23,11 @@ export async function GET(request: Request, {params}: Context) {
   const invite = await joinInvitesRepository.open(token).catch(() => null);
   if (!invite) return back();
 
-  // A session that cannot be resolved (auth env missing, Neon Auth down) is signed out here: the
-  // member-login page it lands on can recover, and an invite page must never 500 over it.
+  // A session that cannot be resolved at request time (Neon Auth down, a bad session cookie) is
+  // signed out here: the member-login page it lands on can recover. This catch does NOT cover a
+  // deployment without the Neon Auth env pair: `@/lib/auth/actor` calls `authEnv()` at module scope
+  // (CLAUDE.md rule 4), so this route fails at import before reaching it. That is acceptable only
+  // because the join flow it leads to needs auth anyway.
   const actor = await getActor().catch(() => null);
   const plan = encodeURIComponent(invite.planCode);
   const destination = actor

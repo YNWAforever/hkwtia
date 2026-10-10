@@ -105,15 +105,26 @@ describe.each([["en", en.Admin.contacts], ["zh-HK", zh.Admin.contacts]] as const
   });
 
   it("marks an overdue card with the bundle overdue text, and leaves a future one unmarked", async () => {
-    state.listBoard.mockResolvedValue(board({contacted: [
-      card({id: "a", displayName: "Late Lee", nextStepDueAt: new Date(Date.now() - 86_400_000)}),
-      card({id: "b", displayName: "Early Eve", nextStepDueAt: new Date(Date.now() + 5 * 86_400_000)}),
-    ]}));
-    await renderBoard(locale);
-    const late = screen.getByRole("link", {name: "Late Lee"}).closest("li")!;
-    const early = screen.getByRole("link", {name: "Early Eve"}).closest("li")!;
-    expect(within(late).getByText(text.board.overdue)).toBeInTheDocument();
-    expect(within(early).queryByText(text.board.overdue)).toBeNull();
+    // A fixed clock (only Date is faked, so the async render still resolves). Overdue means the
+    // due instant has passed: a card due exactly now is not overdue yet.
+    vi.useFakeTimers({toFake: ["Date"]});
+    vi.setSystemTime(new Date("2026-10-20T10:00:00.000Z"));
+    try {
+      state.listBoard.mockResolvedValue(board({contacted: [
+        card({id: "a", displayName: "Late Lee", nextStepDueAt: new Date("2026-10-19T10:00:00.000Z")}),
+        card({id: "b", displayName: "Early Eve", nextStepDueAt: new Date("2026-10-25T10:00:00.000Z")}),
+        card({id: "c", displayName: "Now Nat", nextStepDueAt: new Date("2026-10-20T10:00:00.000Z")}),
+      ]}));
+      await renderBoard(locale);
+      const late = screen.getByRole("link", {name: "Late Lee"}).closest("li")!;
+      const early = screen.getByRole("link", {name: "Early Eve"}).closest("li")!;
+      const now = screen.getByRole("link", {name: "Now Nat"}).closest("li")!;
+      expect(within(late).getByText(text.board.overdue)).toBeInTheDocument();
+      expect(within(early).queryByText(text.board.overdue)).toBeNull();
+      expect(within(now).queryByText(text.board.overdue)).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("shows the invite-opened and applied signals only when they hold", async () => {

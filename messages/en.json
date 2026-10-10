@@ -386,7 +386,7 @@
         "subject": "Your personal invitation to join WTIA",
         "preview": "A link made for you, valid for 14 days.",
         "heading": "You are invited to join WTIA",
-        "body": "{message} This link is personal to you and works once. It opens a short application with your details already filled in.",
+        "body": "{message} This link is personal to you and works until you submit your application. It opens a short application, and some of your details may already be filled in.",
         "cta": "Start your application"
       },
       "lead_digest": {

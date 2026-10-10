@@ -1335,7 +1335,7 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
      * Phase E: the lead page's Related block. Three small reads, every one keyed
      * by the contact id and nothing else: the events they RSVP'd to as a guest,
      * the showcase listings they asked to be introduced to, and the membership of
-     * the profile the contact is linked to (none when unlinked). Capped, because
+     * the profile the contact is linked to, as owner or applicant (none when unlinked). Capped, because
      * a page that must stay readable gains nothing from a 400-row RSVP history.
      */
     async related(actor: Actor, id: unknown): Promise<ContactRelated> {
@@ -1364,8 +1364,12 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       const membershipRow = rowsFrom(await database.execute(sql`
         SELECT m.plan_code AS plan_code, m.status AS status
         FROM ${contacts} c
-        JOIN ${memberships} m ON m.owner_user_id = c.profile_id
+        -- Final review M5: a company membership is owned by the company, so the person shows up
+        -- as the applicant of the membership's application rather than as its owner.
+        JOIN ${memberships} m ON true
+        LEFT JOIN ${membershipApplications} a ON a.id = m.application_id
         WHERE c.id = ${contactId}
+          AND (m.owner_user_id = c.profile_id OR a.applicant_user_id = c.profile_id)
         ORDER BY m.created_at DESC
         LIMIT 1
       `))[0];
