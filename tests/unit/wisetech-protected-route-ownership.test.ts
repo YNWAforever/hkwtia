@@ -312,8 +312,8 @@ describe("WiseTech protected route ownership", () => {
     // Full remediation T07 adds the authenticated knowledge version workspace.
     // T18 adds the actor-scoped global workspace search read page.
     expect(codeFiles).toContain("app/[locale]/(admin)/admin/ai-review/page.tsx");
-    expect(codeFiles).toHaveLength(86);
-    expect(inventoryFiles).toHaveLength(86);
+    expect(codeFiles).toHaveLength(87);
+    expect(inventoryFiles).toHaveLength(87);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -347,9 +347,10 @@ describe("WiseTech protected route ownership", () => {
     // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
     // Showcase lead recovery and ticket email delivery add two authenticated jobs.
     // Audit remediation adds the cancellation notification job.
-    expect(count("job-handler")).toBe(18);
+    // Phase E Task 9 adds the daily lead-reminders digest job.
+    expect(count("job-handler")).toBe(19);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(47);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(39);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(40);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

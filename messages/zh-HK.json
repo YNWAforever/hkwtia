@@ -389,6 +389,13 @@
         "body": "{message} 此連結為你專屬，只可使用一次。連結會開啟簡短的申請表，並已預先填入你的資料。",
         "cta": "開始申請"
       },
+      "lead_digest": {
+        "subject": "潛在會員跟進：{overdueCount} 項已逾期，{dueTodayCount} 項今日到期",
+        "preview": "你今日需要跟進的 WTIA 潛在會員。",
+        "heading": "你的潛在會員跟進事項",
+        "body": "{recipientName}，你好。已逾期（{overdueCount}）：{overdue} 今日到期（{dueTodayCount}）：{dueToday} 邀請連結已開啟超過 3 日但未申請（{staleCount}）：{stale} 未指派的潛在會員（{unassignedCount}）：{unassigned}",
+        "cta": "開啟潛在會員看板"
+      },
       "batch_membership_renewal": {
         "subject": "查閱你的 WTIA 會籍續期",
         "preview": "登入查閱會籍及帳單選項。",
@@ -2791,7 +2798,8 @@
         "admin-batches": "後台批次處理",
         "membership-grant-expiry": "有限期權益到期",
         "rate-limit-cleanup": "流量限制清理",
-        "member-import-retention": "匯入資料保留"
+        "member-import-retention": "匯入資料保留",
+        "lead-reminders": "潛在會員跟進摘要"
       }
     },
     "applicationCase": {

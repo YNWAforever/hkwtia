@@ -389,6 +389,13 @@
         "body": "{message} This link is personal to you and works once. It opens a short application with your details already filled in.",
         "cta": "Start your application"
       },
+      "lead_digest": {
+        "subject": "Lead follow-ups: {overdueCount} overdue, {dueTodayCount} due today",
+        "preview": "Your WTIA lead follow-ups for today.",
+        "heading": "Your lead follow-ups",
+        "body": "Hello {recipientName}. Overdue ({overdueCount}): {overdue} Due today ({dueTodayCount}): {dueToday} Invite opened over 3 days ago, no application ({staleCount}): {stale} Unassigned leads ({unassignedCount}): {unassigned}",
+        "cta": "Open the lead board"
+      },
       "batch_membership_renewal": {
         "subject": "Review your WTIA membership renewal",
         "preview": "Sign in to review your membership and billing options.",
@@ -2790,7 +2797,8 @@
         "admin-batches": "Admin batch processing",
         "membership-grant-expiry": "Finite grant expiry",
         "rate-limit-cleanup": "Rate-limit cleanup",
-        "member-import-retention": "Import retention"
+        "member-import-retention": "Import retention",
+        "lead-reminders": "Lead reminders digest"
       }
     },
     "applicationCase": {
