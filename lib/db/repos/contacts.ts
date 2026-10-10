@@ -831,11 +831,24 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
                 ELSE ${contacts.stage}
               END,
               updated_at = now()
-            WHERE ${contacts.id} = ${matched.id} AND ${contacts.profileId} IS NULL
-            RETURNING ${contacts.id} AS id
+            -- The stage as it stood before this statement: RETURNING only sees the new
+            -- row, and 'did the stage actually change' is what gates the timeline entry.
+            -- The row is already locked by matchContactIdentity, so this read cannot race.
+            FROM (SELECT id, stage FROM ${contacts} WHERE id = ${matched.id}) AS prior
+            WHERE ${contacts.id} = ${matched.id} AND prior.id = ${contacts.id} AND ${contacts.profileId} IS NULL
+            RETURNING ${contacts.id} AS id, prior.stage AS previous_stage, ${contacts.stage} AS stage
           `))[0];
           if (!claimed) return NO_CONTACT_LINK;
           const id = String(claimed.id);
+          // One `became_member` per real transition. A claim that left the stage alone
+          // ('member' already, or 'closed') writes nothing, and a repeat call never reaches
+          // here at all because the claim above is guarded by `profile_id IS NULL`.
+          if (claimed.previous_stage !== undefined && claimed.stage === "member" && claimed.previous_stage !== "member") {
+            await insertContactActivity(transaction, {
+              contactId: id, actorProfileId: null, kind: "became_member",
+              meta: {from: String(claimed.previous_stage), matchedBy: matched.matchedBy},
+            });
+          }
           const candidates = await tagMergeCandidates(transaction, parsed, id);
           if (candidates.length > 0) {
             // The direct INSERT shape `campaign-recipient-delivery.ts`,

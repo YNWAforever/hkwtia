@@ -199,4 +199,47 @@ describe("contactsRepository", () => {
     await expect(repository.markWhatsAppOptedOut(contactWriterActor("whatsapp"), "+85291234567")).resolves.toBe("revoked");
     expect(execute).toHaveBeenCalledTimes(2);
   });
+
+  /**
+   * Phase E Task 7 (Review Focus 4). The auto-`member` flip on a profile link writes one
+   * `became_member` timeline entry per real transition and none when the stage did not move.
+   */
+  describe("linkProfile became_member activity", () => {
+    function linkRecorder(claims: Record<string, unknown>[][]) {
+      const statements: ReturnType<PgDialect["sqlToQuery"]>[] = [];
+      const queue = [...claims];
+      const execute = vi.fn(async (query: never) => {
+        const compiled = dialect.sqlToQuery(query);
+        statements.push(compiled);
+        const text = compiled.sql.replace(/\s+/g, " ").trim().toLowerCase();
+        if (text.startsWith("select")) return [{id: "c-1"}];
+        if (text.startsWith("update \"contacts\"")) return queue.shift() ?? [];
+        return [];
+      });
+      const database = {execute, transaction: async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute})};
+      return {statements, database: database as never};
+    }
+    const became = (statements: ReturnType<PgDialect["sqlToQuery"]>[]) =>
+      statements.filter((statement) => statement.sql.toLowerCase().includes("insert into \"contact_activities\"") && statement.params.includes("became_member"));
+    const input = {profileId: "p-1", email: null, phoneE164: "+85291234567"};
+
+    it("writes one entry when the stage actually changes, and none on the repeat", async () => {
+      const {statements, database} = linkRecorder([[{id: "c-1", previous_stage: "qualified", stage: "member"}], []]);
+      const repository = createContactsRepository(async () => database);
+      await repository.linkProfile(contactWriterActor("import"), input);
+      await repository.linkProfile(contactWriterActor("import"), input);
+      expect(became(statements)).toHaveLength(1);
+    });
+
+    it("writes nothing for a contact that was already a member or closed", async () => {
+      const {statements, database} = linkRecorder([
+        [{id: "c-1", previous_stage: "member", stage: "member"}],
+        [{id: "c-1", previous_stage: "closed", stage: "closed"}],
+      ]);
+      const repository = createContactsRepository(async () => database);
+      await repository.linkProfile(contactWriterActor("import"), input);
+      await repository.linkProfile(contactWriterActor("import"), input);
+      expect(became(statements)).toHaveLength(0);
+    });
+  });
 });
