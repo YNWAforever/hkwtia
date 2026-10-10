@@ -350,6 +350,70 @@ test('on phones the homepage partner strip shows three compact tiles a row', asy
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
+// Round 26 (owner decision 2026-10-10): on phones the six industry rows took 492px before the
+// panel they control, and the four programme cards stacked to 1,390px.
+test.describe('round 26', () => {
+  const industries = ['Commerce + Professional Services', 'Manufacturing + Robotics', 'Health + Life Sciences',
+    'Responsible AI + Cybersecurity', 'Retail + Creative Industries', 'Education + Future of Work'];
+  const board = `<section class="section"><div class="shell"><div class="ecosystem-board"><div class="industry-list" role="group">
+    ${industries.map((name, i) => `<button type="button" class="industry-button${i === 0 ? ' active' : ''}"><span>0${i + 1}</span><b>${name}</b><span aria-hidden="true">↗</span></button>`).join('')}
+    </div><div class="industry-focus"><p class="eyebrow">Selected industry pathway</p><h3>${industries[0]}</h3><p>Trusted automation.</p><ul><li>Industry challenges</li></ul><a class="text-link" href="#">Enter this ecosystem</a></div></div></div></section>`;
+
+  test('on phones the industry picker is a two-column grid of compact tiles', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, board);
+    const buttons = await page.locator('.industry-button').evaluateAll((nodes) => nodes.map((n) => {
+      const r = n.getBoundingClientRect();
+      return {left: Math.round(r.left), height: r.height, name: parseFloat(getComputedStyle(n.querySelector('b')!).fontSize), index: parseFloat(getComputedStyle(n.querySelector('span')!).fontSize)};
+    }));
+    expect(new Set(buttons.map((b) => b.left)).size).toBe(2);
+    expect(Math.min(...buttons.map((b) => b.height))).toBeGreaterThanOrEqual(44);
+    expect(Math.min(...buttons.map((b) => b.name))).toBeGreaterThanOrEqual(14);
+    expect(Math.min(...buttons.map((b) => b.index))).toBeGreaterThanOrEqual(11);
+    expect((await page.locator('.industry-list').boundingBox())!.height).toBeLessThan(300);
+    // The tiles switch the panel below; a navigation arrow on each would promise a new page.
+    expect(await page.locator('.industry-button > span[aria-hidden="true"]').first().isVisible()).toBe(false);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  });
+
+  test('on a wide screen the industry picker keeps its list beside the panel', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, board);
+    const lefts = await page.locator('.industry-button').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().left)));
+    expect(new Set(lefts).size).toBe(1);
+  });
+
+  const grid = (wrapperId: string) => `<section class="section" id="${wrapperId}"><div class="shell"><div class="programme-grid">
+    ${programmeCard(true, 'CPAI')}${programmeCard(false, 'HKICT Awards')}${programmeCard(false, 'TCT')}${programmeCard(false, 'Asia Smart App Awards')}
+    </div></div></section>`;
+
+  test('on phones the homepage programme cards are one swipe row', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, grid('programmes'));
+    const row = page.locator('.programme-grid');
+    const box = (await row.boundingBox())!;
+    const cards = await page.locator('.programme-card').evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect()).map((r) => ({top: Math.round(r.top), width: r.width})));
+    expect(new Set(cards.map((c) => c.top)).size).toBe(1);
+    for (const c of cards) {
+      expect(c.width / box.width).toBeGreaterThan(0.8);
+      expect(c.width / box.width).toBeLessThan(0.92);
+    }
+    expect(await row.evaluate((g) => getComputedStyle(g).scrollSnapType)).toContain('x');
+    expect(box.height).toBeLessThan(560);
+    // Cards share the tallest one's height; their links line up along the bottom edge.
+    const linkBottoms = await page.locator('.programme-card > a').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().bottom)));
+    expect(new Set(linkBottoms).size).toBe(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  });
+
+  test('the /programmes index keeps its stacked cards on phones', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, grid('programme-index'));
+    const tops = await page.locator('.programme-card').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
+    expect(new Set(tops).size).toBe(4);
+  });
+});
+
 // Round 11: /partners category counts match the homepage tabs.
 test('the /partners category counts are 12px, like the homepage partner tabs', async ({page}) => {
   // app/[locale]/(public)/partners/page.tsx: the count in a 38px ring stayed at 11px.
