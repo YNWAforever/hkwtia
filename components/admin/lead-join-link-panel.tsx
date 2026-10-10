@@ -59,7 +59,12 @@ export function LeadJoinLinkPanel({
   const [emailed, emailFormAction, emailing] = useActionState(emailAction, {status: "idle"} as EmailState);
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  // The confirmation belongs to the link state it was given against: once a new link is created,
+  // `createdKey` changes and the box reads unticked again, so superseding THAT link (perhaps already
+  // emailed) needs its own explicit confirmation (round 30).
+  const createdKey = created.status === "created" ? created.inviteId : "none";
+  const [confirmedFor, setConfirmedFor] = useState<string | null>(null);
+  const confirmed = confirmedFor === createdKey;
   const [, startTransition] = useTransition();
 
   const link = created.status === "created" ? created : null;
@@ -105,7 +110,7 @@ export function LeadJoinLinkPanel({
                 className="h-4 w-4 shrink-0"
                 id="lead-invite-supersede-confirm"
                 name="confirmSupersede"
-                onChange={(event) => setConfirmed(event.target.checked)}
+                onChange={(event) => setConfirmedFor(event.target.checked ? createdKey : null)}
                 required
                 type="checkbox"
               />

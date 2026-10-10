@@ -836,31 +836,9 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         || (actor.kind === "member" && actor.profileId === id);
       if (!allowed) throw new Error("FORBIDDEN");
       const database = await loadDatabase();
-      return database.transaction(async (transaction) => {
-        const moved = rowsFrom(await transaction.execute(sql`
-          UPDATE ${contacts}
-          SET stage = 'member', updated_at = now()
-          FROM (SELECT id, stage FROM ${contacts} WHERE profile_id = ${id}) AS prior
-          WHERE ${contacts.id} = prior.id
-            AND ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied')
-          RETURNING ${contacts.id} AS id, prior.stage AS previous_stage
-        `))[0];
-        if (!moved) return "unchanged";
-        const contactId = String(moved.id);
-        await insertContactActivity(transaction, {
-          contactId, actorProfileId: null, kind: "became_member",
-          meta: {from: String(moved.previous_stage), via: "activation"},
-        });
-        await transaction.execute(sql`
-          INSERT INTO ${auditEvents}
-            (actor_user_id, actor_type, action, target_type, target_id, metadata)
-          VALUES (
-            ${actor.kind === "member" ? actor.profileId : null}, ${actor.kind}, 'contact.became_member', 'contact', ${contactId},
-            ${JSON.stringify({from: String(moved.previous_stage)})}::jsonb
-          )
-        `);
-        return "flipped";
-      });
+      return database.transaction((transaction) => flipContactToMember(transaction, id, {
+        actorProfileId: actor.kind === "member" ? actor.profileId : null, actorType: actor.kind, via: "activation",
+      }));
     },
 
     /**
@@ -1522,6 +1500,43 @@ async function tagMergeCandidates(
     RETURNING ${contacts.id} AS id
   `));
   return rows.map((row) => String(row.id));
+}
+
+/**
+ * The one forward-only move of a profile's contact to `member` (new|contacted|qualified|applied —
+ * never closed, never backwards), with its `became_member` activity and audit row written only
+ * when a row actually moved. Runs inside the CALLER's transaction: `markMemberForProfile` (Stripe
+ * webhook, free onboarding) and, since round 30, every membership grant, so an admin-granted
+ * membership no longer leaves its lead in the funnel. Authorization belongs to the caller.
+ */
+export async function flipContactToMember(
+  transaction: AutomationSqlExecutor,
+  profileId: string,
+  audit: Readonly<{actorProfileId: string | null; actorType: string; via: "activation" | "grant"}>,
+): Promise<"flipped" | "unchanged"> {
+  const moved = rowsFrom(await transaction.execute(sql`
+    UPDATE ${contacts}
+    SET stage = 'member', updated_at = now()
+    FROM (SELECT id, stage FROM ${contacts} WHERE profile_id = ${profileId}) AS prior
+    WHERE ${contacts.id} = prior.id
+      AND ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied')
+    RETURNING ${contacts.id} AS id, prior.stage AS previous_stage
+  `))[0];
+  if (!moved) return "unchanged";
+  const contactId = String(moved.id);
+  await insertContactActivity(transaction, {
+    contactId, actorProfileId: null, kind: "became_member",
+    meta: {from: String(moved.previous_stage), via: audit.via},
+  });
+  await transaction.execute(sql`
+    INSERT INTO ${auditEvents}
+      (actor_user_id, actor_type, action, target_type, target_id, metadata)
+    VALUES (
+      ${audit.actorProfileId}, ${audit.actorType}, 'contact.became_member', 'contact', ${contactId},
+      ${JSON.stringify({from: String(moved.previous_stage)})}::jsonb
+    )
+  `);
+  return "flipped";
 }
 
 export type ContactsRepository = ReturnType<typeof createContactsRepository>;
