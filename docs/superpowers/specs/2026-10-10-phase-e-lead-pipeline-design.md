@@ -89,6 +89,8 @@ update and its `auditEvents` row. Activities are never edited or deleted by the 
 | `created_at` | timestamptz | |
 
 **`membership_applications` — new column** `invite_id` uuid, nullable → `join_invites.id` on delete set null.
+It is written when the application is **submitted** (when the invite is consumed), not when the draft
+is created: unsubmitted drafts carry no attribution value (plan ruling R-1).
 
 All reads and writes live in `lib/db/repos/` (`contact-activities.ts`, `join-invites.ts`, extensions to
 `contacts.ts`); every admin path calls `requireAdmin(actor)`. The only non-admin path is invite
@@ -113,8 +115,8 @@ open/consume, bound to the signed-in profile for consume.
    name, the inviting staff member's first name, the plan's benefits and price from the live public
    catalog, and Continue → `/join?plan=<code>` (signed in) or member-login with `next` back to it.
 3. **Join.** With a valid invite cookie whose invite is unconsumed: prefill only **empty** draft fields
-   (name, email, organisation) from the contact; store `invite_id` on the application when it is
-   created. On submit: set `consumed_at` and `application_id`, move the contact to `applied` if it is
+   (name, phone, organisation) from the contact; the email comes from the signed-in account. On
+   submit: set `consumed_at` and `application_id`, store `invite_id` on the application, move the contact to `applied` if it is
    earlier in the pipeline, write an `applied` activity, link the contact to the profile via the
    existing `linkProfile`. Payment runs unchanged; the existing hook moves the contact to `member`,
    now also writing a `became_member` activity.
@@ -138,9 +140,9 @@ invite state and expiry. Related: events attended as a guest, showcase intros, W
 
 **Reminders** — job `lead-reminders` (`app/api/jobs/lead-reminders`), daily 08:00 Asia/Hong_Kong
 (`0 0 * * *` UTC added to `workers/wrangler.toml` and the worker's job map).
-- Each overdue next step → one `staff_tasks` row, `kind: lead_next_step`, `dedupeKey`
-  `lead_next_step:<contactId>:<dueAt>`; auto-resolved when the step changes, is cleared, or the
-  contact reaches `member`/`closed`.
+- No `staff_tasks` rows (plan ruling R-2): `staff_tasks` is keyed to a member profile and writable
+  only by the automation and agent actors, and most leads have no profile. The board's overdue filter
+  and the digest carry the signal at this scale.
 - One digest email per owner: overdue steps, steps due today, and invites opened more than 3 days ago
   with no application. Unowned leads appear in an "Unassigned" block in every staff digest. Nothing
   is sent when a digest is empty. Re-running the job on the same day sends nothing new.
@@ -186,9 +188,11 @@ Three stacked PRs, each independently mergeable and behind its own gates:
 1. **E-a** — migration `0063_lead_pipeline`, `contact_activities`, next step fields, lead page with
    timeline and notes.
 2. **E-b** — `join_invites` end to end (create / send / open / prefill / attribute / stage moves).
-3. **E-c** — board view, `lead-reminders` job and digest, conversion report.
+3. **E-c** — board view, `lead-reminders` job and digest, conversion report, plus migration
+   `0064_lead_reminders_job`, which adds `lead-reminders` to the `job_health_registered_key` check
+   constraint (plan ruling R-3), and a worker deploy for the new `0 0 * * *` cron.
 
-The migration is additive (no backfill); rehearse it on a Neon branch before production, as with
+Both migrations are additive (no backfill); rehearse each on a Neon branch before production, as with
 0052–0062. **Owner gate:** create a real invite for a test contact, open it on a phone, sign up, and
 see the attribution in the report.
 
