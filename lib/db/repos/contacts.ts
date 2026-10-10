@@ -12,8 +12,11 @@ import {
   contacts,
   conversations,
   eventGuestRegistrations,
+  events,
   leads,
+  memberships,
   profiles,
+  showcaseListings,
   staffTasks,
 } from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
@@ -229,6 +232,35 @@ export type ContactRow = Readonly<{
   organisation: string | null;
   createdAt: Date;
 }>;
+
+/**
+ * Phase E: what else the platform knows about a contact, for the lead page's
+ * Related block. Each list is empty (and membership null) when there is nothing,
+ * which the page renders as an absent section rather than an empty heading.
+ */
+export type ContactRelated = Readonly<{
+  guestEvents: readonly Readonly<{
+    registrationId: string; eventId: string; slug: string;
+    titleEn: string; titleZh: string | null; startsAt: Date;
+    status: string; checkedInAt: Date | null;
+  }>[];
+  showcaseIntros: readonly Readonly<{
+    leadId: string; listingId: string; slug: string;
+    nameEn: string; nameZh: string; createdAt: Date;
+  }>[];
+  membership: Readonly<{planCode: string; status: string}> | null;
+}>;
+
+const guestEventRowSchema = z.object({
+  registration_id: z.string(), event_id: z.string(), slug: z.string(),
+  title_en: z.string(), title_zh: z.string().nullable(), starts_at: z.coerce.date(),
+  status: z.string(), checked_in_at: z.coerce.date().nullable(),
+});
+const showcaseIntroRowSchema = z.object({
+  lead_id: z.string(), listing_id: z.string(), slug: z.string(),
+  name_en: z.string(), name_zh: z.string(), created_at: z.coerce.date(),
+});
+const membershipRowSchema = z.object({plan_code: z.string(), status: z.string()});
 
 export type ContactPage = Readonly<{
   items: readonly ContactRow[];
@@ -1114,6 +1146,59 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         if (!row) throw new Error("CONTACT_NOT_FOUND");
         return toContactRow(row);
       });
+    },
+
+    /**
+     * Phase E: the lead page's Related block. Three small reads, every one keyed
+     * by the contact id and nothing else: the events they RSVP'd to as a guest,
+     * the showcase listings they asked to be introduced to, and the membership of
+     * the profile the contact is linked to (none when unlinked). Capped, because
+     * a page that must stay readable gains nothing from a 400-row RSVP history.
+     */
+    async related(actor: Actor, id: unknown): Promise<ContactRelated> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const database = await loadDatabase();
+      const guestEvents = rowsFrom(await database.execute(sql`
+        SELECT r.id AS registration_id, e.id AS event_id, e.slug AS slug,
+               e.title_en AS title_en, e.title_zh AS title_zh, e.starts_at AS starts_at,
+               r.status AS status, r.checked_in_at AS checked_in_at
+        FROM ${eventGuestRegistrations} r
+        JOIN ${events} e ON e.id = r.event_id
+        WHERE r.contact_id = ${contactId}
+        ORDER BY e.starts_at DESC
+        LIMIT 20
+      `)).map((row) => guestEventRowSchema.parse(row));
+      const showcaseIntros = rowsFrom(await database.execute(sql`
+        SELECT l.id AS lead_id, s.id AS listing_id, s.slug AS slug,
+               s.name_en AS name_en, s.name_zh_hk AS name_zh, l.created_at AS created_at
+        FROM ${leads} l
+        JOIN ${showcaseListings} s ON s.id = l.listing_id
+        WHERE l.contact_id = ${contactId}
+        ORDER BY l.created_at DESC
+        LIMIT 20
+      `)).map((row) => showcaseIntroRowSchema.parse(row));
+      const membershipRow = rowsFrom(await database.execute(sql`
+        SELECT m.plan_code AS plan_code, m.status AS status
+        FROM ${contacts} c
+        JOIN ${memberships} m ON m.owner_user_id = c.profile_id
+        WHERE c.id = ${contactId}
+        ORDER BY m.created_at DESC
+        LIMIT 1
+      `))[0];
+      const membership = membershipRow ? membershipRowSchema.parse(membershipRow) : null;
+      return {
+        guestEvents: guestEvents.map((row) => ({
+          registrationId: row.registration_id, eventId: row.event_id, slug: row.slug,
+          titleEn: row.title_en, titleZh: row.title_zh, startsAt: row.starts_at,
+          status: row.status, checkedInAt: row.checked_in_at,
+        })),
+        showcaseIntros: showcaseIntros.map((row) => ({
+          leadId: row.lead_id, listingId: row.listing_id, slug: row.slug,
+          nameEn: row.name_en, nameZh: row.name_zh, createdAt: row.created_at,
+        })),
+        membership: membership ? {planCode: membership.plan_code, status: membership.status} : null,
+      };
     },
   };
 }

@@ -2,8 +2,14 @@ import "server-only";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {
+  contactActivitiesRepository,
+  type ContactActivitiesRepository,
+  type ContactActivity,
+} from "@/lib/db/repos/contact-activities";
+import {
   contactsRepository,
   type ContactPage,
+  type ContactRelated,
   type ContactRow,
   type ContactsRepository,
 } from "@/lib/db/repos/contacts";
@@ -42,4 +48,27 @@ export async function getContact(
 ): Promise<ContactRow | null> {
   requireAdmin(actor);
   return deps.get(actor, id);
+}
+
+/**
+ * Phase E lead page reads. Same discipline as `getContact`: `requireAdmin` here
+ * as well as in the repository, so a non-admin learns nothing from the shape of
+ * a failure.
+ */
+export async function listContactActivities(
+  actor: Actor,
+  id: unknown,
+  deps: Pick<ContactActivitiesRepository, "list"> = contactActivitiesRepository,
+): Promise<readonly ContactActivity[]> {
+  requireAdmin(actor);
+  return deps.list(actor, id);
+}
+
+export async function getContactRelated(
+  actor: Actor,
+  id: unknown,
+  deps: Pick<ContactsRepository, "related"> = contactsRepository,
+): Promise<ContactRelated> {
+  requireAdmin(actor);
+  return deps.related(actor, id);
 }

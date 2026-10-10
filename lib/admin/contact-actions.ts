@@ -3,8 +3,11 @@
 import {notFound, redirect} from "next/navigation";
 
 import {
+  addContactNote,
+  contactNextStepInput,
   contactPipelineInput,
   contactReturnPath,
+  updateContactNextStep,
   updateContactPipeline,
 } from "@/lib/admin/contact-action-core";
 import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
@@ -49,5 +52,33 @@ export async function updateContactPipelineAction(path: string, formData: FormDa
   // Outside the `try`: `redirect` signals by throwing NEXT_REDIRECT, and a
   // catch block that inspected it first would be one refactor away from
   // swallowing the navigation and leaving the save silently unconfirmed.
+  if (back !== null) redirect(back);
+}
+
+export async function addContactNoteAction(path: string, formData: FormData): Promise<void> {
+  let back: string | null = null;
+  try {
+    const who = await requireAdminActor();
+    await addContactNote(who, formData.get("contactId"), formData.get("body"));
+    revalidateAdminPath(path);
+    back = contactReturnPath(formData.get("returnTo"));
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
+  if (back !== null) redirect(back);
+}
+
+export async function updateContactNextStepAction(path: string, formData: FormData): Promise<void> {
+  let back: string | null = null;
+  try {
+    const who = await requireAdminActor();
+    await updateContactNextStep(who, formData.get("contactId"), contactNextStepInput(formData));
+    revalidateAdminPath(path);
+    back = contactReturnPath(formData.get("returnTo"));
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
   if (back !== null) redirect(back);
 }

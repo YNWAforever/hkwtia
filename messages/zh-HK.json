@@ -3003,7 +3003,52 @@
       "duplicates": "有 {count} 筆記錄使用此電郵",
       "empty": "沒有符合條件的潛在客戶。",
       "error": "無法載入潛在客戶流程。",
-      "saved": "已更新潛在客戶。"
+      "saved": "已更新潛在客戶。",
+      "lead": {
+        "back": "所有潛在客戶",
+        "unnamed": "未命名聯絡人",
+        "organisation": "機構",
+        "owner": "負責人",
+        "source": "來源",
+        "stage": "階段",
+        "consent": "WhatsApp 同意",
+        "saved": "已儲存。",
+        "nextStep": {
+          "title": "下一步",
+          "label": "下一步行動",
+          "due": "到期日",
+          "save": "儲存下一步",
+          "overdue": "已逾期",
+          "none": "尚未設定下一步。"
+        },
+        "notes": {
+          "title": "新增備註",
+          "label": "備註",
+          "add": "新增備註"
+        },
+        "timeline": {
+          "title": "時間線",
+          "empty": "暫無記錄。",
+          "system": "系統",
+          "by": "由 {name}",
+          "note": "備註",
+          "stage_change": "階段由 {from} 移至 {to}",
+          "owner_change": "負責人已更改",
+          "next_step": "已設定下一步",
+          "invite_sent": "已發送入會邀請",
+          "invite_opened": "已開啟入會邀請",
+          "applied": "已申請入會",
+          "became_member": "已成為會員"
+        },
+        "related": {
+          "title": "相關資料",
+          "events": "曾以嘉賓身份參加的活動",
+          "intros": "展示平台引薦",
+          "membership": "會籍",
+          "membershipLine": "{plan}（{status}）",
+          "conversation": "WhatsApp 對話"
+        }
+      }
     },
     "campaigns": {
       "reviewContent": "訊息內容",

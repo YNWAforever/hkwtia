@@ -167,3 +167,4 @@ export function createContactActivitiesRepository(loadDatabase: AutomationDataba
 }
 
 export const contactActivitiesRepository = createContactActivitiesRepository();
+export type ContactActivitiesRepository = ReturnType<typeof createContactActivitiesRepository>;

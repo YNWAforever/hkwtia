@@ -1,5 +1,6 @@
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
+import {Link as LocaleLink} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import type {ContactRow, ContactSource, ContactStage} from "@/lib/db/repos/contacts";
 import {localizedPath} from "@/lib/urls";
@@ -155,7 +156,9 @@ export function ContactPipelineTable({
               {rows.map((row) => (
                 <tr className="border-b border-border/50 align-top" key={row.id}>
                   <th className="px-3 py-4 font-medium text-foreground" scope="row">
-                    <span className="block">{row.displayName ?? row.email ?? row.phoneE164 ?? row.id}</span>
+                    {/* The i18n Link takes an UNPREFIXED path and adds the locale itself;
+                        handing it `localizedPath` output would double the prefix. */}
+                    <LocaleLink className="block text-primary underline" href={`/admin/contacts/${row.id}`} prefetch={false}>{row.displayName ?? row.email ?? row.phoneE164 ?? row.id}</LocaleLink>
                     {row.email ? <span className="block text-xs text-muted-foreground">{row.email}</span> : null}
                     {row.phoneE164 ? <span className="block text-xs text-muted-foreground">{row.phoneE164}</span> : null}
                     {/* `contacts_email_idx` is deliberately not unique, so two

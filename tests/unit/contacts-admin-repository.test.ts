@@ -396,3 +396,37 @@ describe("contactsRepository.updateNextStep", () => {
     expect(loadDatabase).not.toHaveBeenCalled();
   });
 });
+
+describe("contactsRepository.related", () => {
+  it("refuses a member and a malformed id before the database loads", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createContactsRepository(loadDatabase);
+    await expect(repository.related(member as never, contactId)).rejects.toThrow("FORBIDDEN");
+    await expect(repository.related(admin, "../x")).rejects.toThrow(ZodError);
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("projects guest events, showcase intros and the linked profile's membership", async () => {
+    const fake = fakeDatabase([
+      [{registration_id: "r1", event_id: "e1", slug: "mixer", title_en: "Mixer", title_zh: null, starts_at: new Date("2026-09-20T10:00:00.000Z"), status: "registered", checked_in_at: null}],
+      [{lead_id: "l1", listing_id: "s1", slug: "acme", name_en: "Acme", name_zh: "Acme 貨運", created_at: new Date("2026-09-25T00:00:00.000Z")}],
+      [{plan_code: "community", status: "active"}],
+    ]);
+    const repository = createContactsRepository(async () => fake.database as never);
+
+    const related = await repository.related(admin, contactId);
+
+    expect(related.guestEvents).toEqual([expect.objectContaining({registrationId: "r1", slug: "mixer", titleEn: "Mixer", titleZh: null})]);
+    expect(related.showcaseIntros).toEqual([expect.objectContaining({leadId: "l1", listingId: "s1", nameZh: "Acme 貨運"})]);
+    expect(related.membership).toEqual({planCode: "community", status: "active"});
+    // Every statement is scoped to this contact; nothing is read by a client-supplied filter.
+    expect(fake.outer).toHaveLength(3);
+    for (const statement of fake.outer) expect(statement.params).toContain(contactId);
+  });
+
+  it("returns empty sections, and a null membership, for a contact with nothing attached", async () => {
+    const fake = fakeDatabase([[]]);
+    const repository = createContactsRepository(async () => fake.database as never);
+    expect(await repository.related(admin, contactId)).toEqual({guestEvents: [], showcaseIntros: [], membership: null});
+  });
+});

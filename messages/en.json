@@ -3002,7 +3002,52 @@
       "duplicates": "{count} rows share this email",
       "empty": "No contacts match these filters.",
       "error": "We could not load the contacts pipeline.",
-      "saved": "Contact updated."
+      "saved": "Contact updated.",
+      "lead": {
+        "back": "All contacts",
+        "unnamed": "Unnamed contact",
+        "organisation": "Organisation",
+        "owner": "Owner",
+        "source": "Source",
+        "stage": "Stage",
+        "consent": "WhatsApp consent",
+        "saved": "Saved.",
+        "nextStep": {
+          "title": "Next step",
+          "label": "What happens next",
+          "due": "Due date",
+          "save": "Save next step",
+          "overdue": "Overdue",
+          "none": "No next step set yet."
+        },
+        "notes": {
+          "title": "Add a note",
+          "label": "Note",
+          "add": "Add note"
+        },
+        "timeline": {
+          "title": "Timeline",
+          "empty": "No history yet.",
+          "system": "System",
+          "by": "by {name}",
+          "note": "Note",
+          "stage_change": "Stage moved from {from} to {to}",
+          "owner_change": "Owner changed",
+          "next_step": "Next step set",
+          "invite_sent": "Join invite sent",
+          "invite_opened": "Join invite opened",
+          "applied": "Applied for membership",
+          "became_member": "Became a member"
+        },
+        "related": {
+          "title": "Related",
+          "events": "Events attended as a guest",
+          "intros": "Showcase introductions",
+          "membership": "Membership",
+          "membershipLine": "{plan} ({status})",
+          "conversation": "WhatsApp conversation"
+        }
+      }
     },
     "campaigns": {
       "reviewContent": "Message content",
