@@ -9,7 +9,7 @@ import {
 } from "@/lib/auth/automation-actor";
 import {forbidden, getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
-import {contacts, joinInvites, profiles} from "@/lib/db/server-schema";
+import {contactActivities, contacts, joinInvites, profiles} from "@/lib/db/server-schema";
 
 /**
  * Phase E, Task 9. What the daily digest reads, in one place.
@@ -49,6 +49,8 @@ export type LeadReminderInputs = Readonly<{
 
 /** A bound on one run, not a product limit: far above any real pipeline, so a runaway table cannot exhaust the job. */
 const READ_CAP = 2000;
+/** How far back an unowned lead still counts as one to pick up (final review I5). */
+const UNASSIGNED_WINDOW_DAYS = 14;
 
 const recipientRow = z.object({
   profile_id: z.string(),
@@ -94,6 +96,7 @@ export function createLeadRemindersRepository(loadDatabase: AutomationDatabaseLo
       if (!Number.isFinite(now.getTime())) throw new Error("INVALID_REMINDER_CLOCK");
       const database = await loadDatabase();
       const staleBefore = new Date(now.getTime() - 3 * 86_400_000);
+      const recentSince = new Date(now.getTime() - UNASSIGNED_WINDOW_DAYS * 86_400_000);
 
       const recipients = rowsFrom(await database.execute(sql`
         SELECT p.id AS profile_id, lower(trim(p.email)) AS email, p.display_name, p.locale
@@ -116,11 +119,22 @@ export function createLeadRemindersRepository(loadDatabase: AutomationDatabaseLo
       // Open leads only: a member or a closed lead has no next step worth chasing.
       // Owned leads need a dated step to matter; unowned ones are listed whatever
       // their step, because "nobody owns this" is itself what the digest flags.
+      //
+      // Final review I5: but only RECENT unowned ones. The Unassigned block goes to
+      // every staff, exco and superadmin profile every day, and the WhatsApp, event
+      // and import paths create unowned contacts by the hundred; years of them would
+      // bury the leads somebody should pick up now. Recent = created, or touched (an
+      // activity) or invited, in the last 14 days. Older ones stay on the board.
       const leads = rowsFrom(await database.execute(sql`
         SELECT c.id, c.display_name, c.owner_profile_id, c.next_step, c.next_step_due_at
         FROM ${contacts} c
         WHERE c.stage NOT IN ('member', 'closed')
-          AND (c.owner_profile_id IS NULL OR c.next_step_due_at IS NOT NULL)
+          AND (
+            (c.owner_profile_id IS NOT NULL AND c.next_step_due_at IS NOT NULL)
+            OR (c.owner_profile_id IS NULL AND (c.created_at >= ${recentSince}
+              OR EXISTS (SELECT 1 FROM ${contactActivities} a WHERE a.contact_id = c.id AND a.created_at >= ${recentSince})
+              OR EXISTS (SELECT 1 FROM ${joinInvites} ji WHERE ji.contact_id = c.id AND ji.created_at >= ${recentSince})))
+          )
         ORDER BY c.next_step_due_at ASC NULLS LAST, c.created_at ASC, c.id ASC
         LIMIT ${READ_CAP}
       `)).map((row) => {

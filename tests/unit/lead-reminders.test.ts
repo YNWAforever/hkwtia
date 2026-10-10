@@ -71,6 +71,14 @@ describe("lead reminder classification", () => {
     expect([early.overdue, early.dueToday, early.stale]).toEqual([[], [], []]);
   });
 
+  // Final review M2: one definition with the board and the lead page — overdue once the due
+  // instant has PASSED (due < now). At the instant itself the step is still due today.
+  it("keeps a step due today, not overdue, at exactly its due instant", () => {
+    const [digest] = buildLeadDigests([sam], [lead("a", {nextStepDueAt: due})], [], new Date(due.getTime()));
+    expect(digest!.overdue).toEqual([]);
+    expect(digest!.dueToday.map((item) => item.id)).toEqual(["a"]);
+  });
+
   it("lists an opened invite older than 3 days with no application, once per lead", () => {
     const now = new Date("2026-10-20T00:00:00Z");
     const [digest] = buildLeadDigests([sam], [lead("a")], [

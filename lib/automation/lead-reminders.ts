@@ -25,7 +25,7 @@ import {absoluteUrl, localizedPath} from "@/lib/urls";
  * Time is Hong Kong time throughout. A next-step due DAY is stored as 18:00 HKT
  * (10:00Z), so:
  *   overdue   — the stored instant has passed;
- *   due today — the instant is still ahead but falls on today's Hong Kong date.
+ *   due today — the instant has not passed yet and falls on today's Hong Kong date.
  * That is the definition the lead page and the board already use. The clock is
  * always a parameter, never read here.
  */
@@ -97,10 +97,12 @@ export function buildLeadDigests(
   return recipients.map((recipient) => {
     const own = leads.filter((lead) => lead.ownerProfileId === recipient.profileId && lead.nextStepDueAt !== null);
     const overdue = own
-      .filter((lead) => lead.nextStepDueAt!.getTime() <= now.getTime())
+      // Final review M2: `<`, the board's and the lead page's definition — overdue once the
+      // instant has passed; at the instant itself the step is still due today.
+      .filter((lead) => lead.nextStepDueAt!.getTime() < now.getTime())
       .map((lead) => item(lead.id, lead.displayName, describeStep(lead)));
     const dueToday = own
-      .filter((lead) => lead.nextStepDueAt!.getTime() > now.getTime() && hktDate(lead.nextStepDueAt!) === today)
+      .filter((lead) => lead.nextStepDueAt!.getTime() >= now.getTime() && hktDate(lead.nextStepDueAt!) === today)
       .map((lead) => item(lead.id, lead.displayName, describeStep(lead)));
     const stale = [...staleLeads.values()]
       .filter((invite) => invite.ownerProfileId === recipient.profileId)
