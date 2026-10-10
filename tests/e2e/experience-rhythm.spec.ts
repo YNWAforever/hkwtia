@@ -414,6 +414,45 @@ test.describe('round 26', () => {
   });
 });
 
+// Round 29 (owner decision 2026-10-10): on a phone the selected route panel was 778px, its three
+// destination cards 136px each — the rail indent, card padding and arrow column left the copy
+// ~220px, so every line wrapped to three.
+test.describe('round 29', () => {
+  const destination = (label: string, copy: string) => `<li><a class="route-destination" href="#"><span class="route-node" aria-hidden="true"></span><strong>${label}</strong><span>${copy}</span><span aria-hidden="true">↗</span></a></li>`;
+  // The checked radio is what shows a panel (`.route-finder:has(#route-corporates:checked)`).
+  const panel = `<section class="section route-section"><div class="shell"><div class="route-finder">
+    <fieldset class="route-picker"><div class="route-choice accent-cyan"><input class="route-input" type="radio" name="route" id="route-corporates" checked><label class="route-option" for="route-corporates"><span class="route-option-title">For Corporates</span></label></div></fieldset>
+    <div class="route-panels">
+    <article class="route-panel accent-cyan" data-route="corporates"><div class="route-origin"><span class="route-signal" aria-hidden="true"><i></i><i></i><i></i></span>
+    <p class="route-eyebrow">Your route</p><h3>For Corporates</h3><p class="route-benefits">Buyer challenges · Executive briefings · Industry councils</p>
+    <a class="route-primary" href="#"><span>Start here</span>Explore membership <span aria-hidden="true">↗</span></a></div>
+    <div class="route-destinations"><p class="route-lead">Three places to start — each one a page you can act on today.</p><ol>
+    ${destination('Membership', 'Compare plans and annual fees, from free Community to Corporate.')}
+    ${destination('Member &amp; solution showcase', 'Browse reviewed member solutions by use case and deployment approach.')}
+    ${destination('Partner network', 'Published partner records, and how to start a partnership with a defined purpose.')}
+    </ol></div></article></div></div></div></section>`;
+
+  test('on phones the route destinations are compact rows that keep their targets', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, panel);
+    const cards = await page.locator('.route-destination').evaluateAll((nodes) => nodes.map((n) => ({
+      height: n.getBoundingClientRect().height,
+      title: parseFloat(getComputedStyle(n.querySelector('strong')!).fontSize),
+    })));
+    expect(Math.max(...cards.map((c) => c.height))).toBeLessThan(100);
+    expect(Math.min(...cards.map((c) => c.height))).toBeGreaterThanOrEqual(44);
+    expect(Math.min(...cards.map((c) => c.title))).toBeGreaterThanOrEqual(16);
+    expect((await page.locator('.route-destinations').boundingBox())!.height).toBeLessThan(400);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  });
+
+  test('on a wide screen the route destinations keep their display size', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, panel);
+    expect(await page.locator('.route-destination strong').first().evaluate((e) => parseFloat(getComputedStyle(e).fontSize))).toBe(21);
+  });
+});
+
 // Round 11: /partners category counts match the homepage tabs.
 test('the /partners category counts are 12px, like the homepage partner tabs', async ({page}) => {
   // app/[locale]/(public)/partners/page.tsx: the count in a 38px ring stayed at 11px.
