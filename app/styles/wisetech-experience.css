@@ -1216,6 +1216,29 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .route-destination > span:not(.route-node):not([aria-hidden]) { margin-top: 2px; line-height: 1.45; }
 }
 
+/* Round 31 (owner decision 2026-10-11): on a phone the Member Directory and AI Solutions
+ * Marketplace panels stacked inside one bordered box — 691px. Like the programmes (round 26) and
+ * archive stories (round 23) they become one swipe row: each panel its own bordered card, 86% wide
+ * so the next card's edge invites the swipe, links aligned along the bottom. Panels 355px. */
+@media (max-width: 520px) {
+  .ecosystem-entry .product-split {
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    border: 0;
+    border-radius: 0;
+    padding-bottom: 10px;
+  }
+  .ecosystem-entry .product-panel { scroll-snap-align: start; border: 1px solid var(--wt-line); border-radius: 14px; padding: 22px 20px; }
+  .ecosystem-entry .product-panel + .product-panel { border: 1px solid var(--wt-line); }
+  .ecosystem-entry .product-panel-head { margin-bottom: 20px; }
+  .ecosystem-entry .product-panel > a { margin-top: auto; }
+}
+
 /* ─── Round 11 (2026-10-07): /partners category counts ───────────────────────────────────
  * The homepage partner tabs' counts went to 12px in round 10; the same counts in the
  * /partners category nav (a 38px ring) stayed at the donor's 11px. One size for one idea. */

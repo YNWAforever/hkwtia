@@ -453,6 +453,51 @@ test.describe('round 29', () => {
   });
 });
 
+// Round 31 (owner decision 2026-10-11): on a phone the homepage's Member Directory and AI Solutions
+// Marketplace panels stacked inside one bordered box, 691px. Like the programmes and archive rows,
+// they become one swipe row of self-contained cards.
+test.describe('round 31', () => {
+  const panel = (key: string, index: string, label: string, title: string) => `<article class="product-panel ${key}-panel">
+    <div class="product-panel-head"><span>${index}</span><span class="status-label">${label}</span></div>
+    <h4>${title}</h4><p>Explore the member directory. Organisations decide whether to submit a public profile for WTIA review.</p>
+    <a class="text-link" href="#">Discover members <span aria-hidden="true">↗</span></a></article>`;
+  const entry = `<section class="section"><div class="shell"><div class="ecosystem-entry" id="market-products">
+    <div class="ecosystem-entry-head"><p class="eyebrow">Demand + Supply</p><h3>Connections built for implementation</h3></div>
+    <div class="product-split">${panel('directory', '01', 'Member Directory', 'Meet the people shaping what comes next.')}${panel('marketplace', '02', 'AI Solutions Marketplace', 'Find AI ready for the real world.')}</div>
+    </div></div></section>`;
+
+  test('on phones the product panels are one swipe row of separate cards', async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await render(page, entry);
+    const row = page.locator('.product-split');
+    const box = (await row.boundingBox())!;
+    const cards = await page.locator('.product-panel').evaluateAll((nodes) => nodes.map((n) => {
+      const r = n.getBoundingClientRect(); const cs = getComputedStyle(n);
+      return {top: Math.round(r.top), width: r.width, radius: parseFloat(cs.borderTopLeftRadius), border: cs.borderTopStyle};
+    }));
+    expect(new Set(cards.map((c) => c.top)).size).toBe(1);
+    for (const c of cards) {
+      expect(c.width / box.width).toBeGreaterThan(0.8);
+      expect(c.width / box.width).toBeLessThan(0.92);
+      expect(c.radius).toBeGreaterThan(0);
+      expect(c.border).toBe('solid');
+    }
+    expect(await row.evaluate((g) => getComputedStyle(g).scrollSnapType)).toContain('x');
+    expect(box.height).toBeLessThan(420);
+    const linkBottoms = await page.locator('.product-panel > a').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().bottom)));
+    expect(new Set(linkBottoms).size).toBe(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  });
+
+  test('on a wide screen the product panels keep their side-by-side split', async ({page}) => {
+    await page.setViewportSize({width: 1440, height: 900});
+    await render(page, entry);
+    const tops = await page.locator('.product-panel').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
+    expect(new Set(tops).size).toBe(1);
+    expect(await page.locator('.product-split').evaluate((g) => getComputedStyle(g).overflowX)).not.toBe('auto');
+  });
+});
+
 // Round 11: /partners category counts match the homepage tabs.
 test('the /partners category counts are 12px, like the homepage partner tabs', async ({page}) => {
   // app/[locale]/(public)/partners/page.tsx: the count in a 38px ring stayed at 11px.
