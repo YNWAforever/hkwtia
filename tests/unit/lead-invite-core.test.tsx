@@ -196,6 +196,14 @@ describe("LeadJoinLinkPanel", () => {
     return t;
   }
 
+  // Round 30: the confirm used to stay ticked after a confirmed Create, so a second Create could
+  // supersede the link just minted (perhaps already emailed) without a fresh confirmation.
+  it("asks again for confirmation after each link it creates", async () => {
+    const t = await panel({hasEmail: true, phone: null, supersedes: true});
+    expect(screen.getByRole("checkbox", {name: t.supersedeConfirm})).not.toBeChecked();
+    expect(screen.getByRole("button", {name: t.create})).toBeDisabled();
+  });
+
   it("offers Email and WhatsApp when the contact has both", async () => {
     const t = await panel({hasEmail: true, phone: "+85291234567"});
     expect(screen.getByRole("button", {name: t.email})).toBeEnabled();

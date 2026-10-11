@@ -6,6 +6,7 @@ import {z} from "zod";
 
 import {auditEvents, companies, membershipPlans, memberships, profiles} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
+import {flipContactToMember} from "@/lib/db/repos/contacts";
 import {grantInputSchema, type MembershipGrantInput} from "@/lib/membership/grants";
 import {forbidden, type Actor} from "@/lib/membership/lifecycle";
 
@@ -41,6 +42,22 @@ export async function insertFiniteGrant(tx: GrantExecutor, actor: Actor, input: 
   const companyId = input.target.kind === "company" ? input.target.companyId : null;
   const grant = idRow.parse(rows(await tx.execute(sql`INSERT INTO ${memberships} (owner_user_id, company_id, plan_code, status, seat_limit, grant_effective_at, grant_expires_at, grant_reason, grant_actor_profile_id) VALUES (${profileId}, ${companyId}::uuid, ${input.planCode}, 'active', ${seatLimit}, ${new Date(input.effectiveAt)}, ${new Date(input.expiresAt)}, ${input.reason}, ${actor.profileId}) RETURNING ${memberships.id} AS id`))[0]);
   await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'membership.grant.created', 'membership', ${grant.id}, jsonb_build_object('targetKind',${input.target.kind}::text,'targetId',${targetId}::text,'planCode',${input.planCode}::text,'effectiveAt',${input.effectiveAt}::text,'expiresAt',${input.expiresAt}::text) || ${JSON.stringify(receipt ?? {})}::jsonb)`);
+  // Round 30: a granted membership is active at once, so the lead linked to the profile leaves the
+  // funnel here, as the Stripe webhook and free onboarding already do. Inside the grant's own
+  // transaction (single and batch grants both arrive here) so the stage commits or rolls back with
+  // the grant; under a savepoint so a failed flip is logged and never blocks the grant. A company
+  // grant has no single profile to match, so it moves no contact.
+  if (profileId) {
+    await tx.execute(sql`SAVEPOINT grant_contact_flip`);
+    try {
+      await flipContactToMember(tx as never, profileId, {actorProfileId: actor.profileId, actorType: actor.kind, via: "grant"});
+      await tx.execute(sql`RELEASE SAVEPOINT grant_contact_flip`);
+    } catch {
+      await tx.execute(sql`ROLLBACK TO SAVEPOINT grant_contact_flip`);
+      await tx.execute(sql`RELEASE SAVEPOINT grant_contact_flip`);
+      console.error("contact.member_flip_failed", {membershipId: grant.id});
+    }
+  }
   return grant.id;
 }
 
