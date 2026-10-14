@@ -1,3 +1,5 @@
+import {portalAccessNotice} from "@/components/portal/access-notice";
+import {classifyPortalAccess, readPortalPage} from "@/lib/portal/access-state";
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -22,10 +24,14 @@ export default async function PortalToolPage({params}: Props) {
   const actor = await portalPageActor(locale, "/portal/tools");
   const tool = MEMBER_TOOLS.find((candidate) => candidate.key === key);
   if (!tool) notFound();
-  const [dashboard, t] = await Promise.all([
-    getDashboard(actor),
+  const [result, t] = await Promise.all([
+    readPortalPage(() => getDashboard(actor)),
     getTranslations({locale, namespace: "Portal"}),
   ]);
+  if (!result.ok) return portalAccessNotice(locale, result.access);
+  const dashboard = result.value;
+  const access = classifyPortalAccess(dashboard.memberships);
+  if (access.status !== "ready") return portalAccessNotice(locale, {status: access.status});
   const available = isToolAvailable(tool, dashboard.memberships);
 
   const header = (

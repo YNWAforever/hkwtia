@@ -3,8 +3,8 @@ import {fireEvent, render, screen, waitFor, within} from "@testing-library/react
 import type {ReactNode} from "react";
 import {describe, expect, it, vi} from "vitest";
 
-const state = vi.hoisted(() => ({pathname: "/portal/company/listing"}));
-vi.mock("next/navigation", () => ({usePathname: () => state.pathname}));
+const state = vi.hoisted(() => ({pathname: "/portal/company/listing", query: ""}));
+vi.mock("next/navigation", () => ({usePathname: () => state.pathname, useSearchParams: () => new URLSearchParams(state.query)}));
 // jsdom cannot navigate; the click must still reach the component's onClick, so this stub only
 // swallows the default action.
 vi.mock("@/components/internal-shell/private-link", () => ({
@@ -51,6 +51,26 @@ const groups: readonly PortalNavGroup[] = [
 const labels = {navigationLabel: "Member portal navigation", openMenu: "Open menu", closeMenu: "Close menu"};
 
 describe("PortalNavigation", () => {
+  it("keeps an explicit company selection across company navigation links", () => {
+    state.query = "companyId=company-b";
+    try {
+      render(<PortalNavigation groups={groups} labels={labels} />);
+      expect(screen.getByRole("link", {name: "Company"})).toHaveAttribute("href", "/portal/company?companyId=company-b");
+      expect(screen.getByRole("link", {name: "Seats"})).toHaveAttribute("href", "/portal/company/seats?companyId=company-b");
+      expect(screen.getByRole("link", {name: "Billing"})).toHaveAttribute("href", "/portal/billing");
+      expect(screen.getByRole("link", {name: "Showcase listing"})).toHaveAttribute("aria-current", "page");
+    } finally { state.query = ""; }
+  });
+  it("shows recovery guidance beside benefit links in the desktop and phone menus", async () => {
+    const withGuidance = groups.map((group) => group.id === "benefits" ? {...group, description: "Check billing to continue your membership payment."} : group);
+    render(<PortalNavigation groups={withGuidance} labels={labels} />);
+    expect(screen.getByText("Check billing to continue your membership payment.")).toBeVisible();
+    expect(screen.getByRole("link", {name: "My profile"})).toHaveAttribute("href", "/portal/profile");
+    fireEvent.click(screen.getByRole("button", {name: "Open menu"}));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Check billing to continue your membership payment.")).toBeVisible();
+    expect(within(dialog).getByRole("link", {name: "Directory"})).toHaveAttribute("href", "/portal/directory");
+  });
   it("renders the three groups in order with their own labels and ten links", () => {
     render(<PortalNavigation groups={groups} labels={labels} />);
     const nav = screen.getByRole("navigation", {name: "Member portal navigation"});

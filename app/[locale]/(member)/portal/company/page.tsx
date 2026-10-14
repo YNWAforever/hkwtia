@@ -1,10 +1,17 @@
+import {PortalForm, PortalInput, PortalTextarea, PortalSubmit} from "@/components/portal/forms/portal-form";
+import {portalFormLabels} from "@/lib/portal/form-state";
+import {CompanyFormScope, CompanySelector} from "@/components/portal/company-selector";
+import {companySelectionNotice} from "@/components/portal/company-selection-notice";
+import {selectPortalCompany} from "@/lib/portal/company-context";
+import {portalAccessNotice} from "@/components/portal/access-notice";
+import {readPortalPage} from "@/lib/portal/access-state";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {redirect} from "next/navigation";
 
 import {CompanyProfileForm} from "@/components/portal/company-profile-form";
 import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
-import {getActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
+import {companyContinuation} from "@/lib/portal/continuation";
 import {saveCompanyProfileAction} from "@/lib/portal/company-profile-actions";
 import {updateCompanyAction} from "@/lib/portal/commands";
 import {getDashboard} from "@/lib/portal/queries";
@@ -12,25 +19,24 @@ import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 
-type Props = Readonly<{params: Promise<{locale: string}>}>;
+type Props = Readonly<{params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>}>;
 
-export default async function CompanyPage({params}: Props) {
+export default async function CompanyPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  // The layout redirects anonymous visitors too, but Next renders layout and
-  // page in parallel, so a page-level requireActor() would throw UNAUTHORIZED
-  // into the runtime log on every anonymous hit (audit F21). `/portal/company`
-  // is already in the continuation allowlist, so sign-in returns here.
-  const actor = await getActor();
-  if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal/company")}`);
-  const dashboard = await getDashboard(actor);
+  const actor = await portalPageActor(locale, companyContinuation("/portal/company", (await searchParams)?.companyId));
+  const result = await readPortalPage(() => getDashboard(actor));
+  if (!result.ok) return portalAccessNotice(locale, result.access);
+  const dashboard = result.value;
   const t = await getTranslations({locale, namespace: "Portal"});
   const tProfile = await getTranslations({locale, namespace: "Portal.companyProfile"});
   const tSections = await getTranslations({locale, namespace: "Portal.companySections"});
   const tForms = await getTranslations({locale, namespace: "Portal.forms"});
   const tListing = await getTranslations({locale, namespace: "Portal.showcaseListing"});
-  const company = dashboard.companies[0];
+  const selection = selectPortalCompany(dashboard.companies, (await searchParams)?.companyId);
+  if (!selection.ok) return companySelectionNotice(locale, dashboard.companies, "/portal/company");
+  const company = selection.company;
 
   if (!company) {
     return (
@@ -45,13 +51,10 @@ export default async function CompanyPage({params}: Props) {
   }
 
   const canManage = company.canManage;
-  // The profile form has no companyId field: `saveCompanyProfile` resolves the
-  // first company the member *manages*. Show that same row's copy, or this
-  // page would render one company's page while the Save button wrote another's.
-  // With nothing managed it falls back to a read-only view of the first.
-  const profileCompany = dashboard.companies.find((entry) => entry.canManage) ?? company;
   return (
-    <div>
+    <CompanyFormScope key={company.id}>
+      {dashboard.companies.length > 1 ? <CompanySelector action={localizedPath(locale, "/portal/company")} companyId={company.id} choices={dashboard.companies} labels={{choose: t("companySelection.choose"), use: t("companySelection.use"), changeWarning: t("companySelection.changeWarning")}} /> : null}
+      <p className="portal-status-note">{t("companySelection.selected", {company: company.displayName})}</p>
       <header className="portal-welcome">
         <StatusLabel as="p">{t("company")}</StatusLabel>
         <h1>{t("companyTitle")}</h1>
@@ -62,41 +65,41 @@ export default async function CompanyPage({params}: Props) {
           <h2 className="portal-section-title" id="company-details-heading">{tSections("details.title")}</h2>
           <p className="portal-section-purpose">{tSections("details.purpose")}</p>
         </div>
-        <form action={canManage ? updateCompanyAction : undefined} className="portal-form">
-          <input name="companyId" type="hidden" value={company.id} />
+        <PortalForm action={updateCompanyAction} labels={portalFormLabels(t)} readOnly={!canManage}>
+          <PortalInput name="companyId" type="hidden" value={company.id} />
           <fieldset aria-labelledby="company-details-heading" className="portal-fieldset">
             <div className="portal-field">
               <label htmlFor="company-legalName">{t("fields.legalName")}</label>
-              <input defaultValue={company.legalName} disabled={!canManage} id="company-legalName" name="legalName" required />
+              <PortalInput defaultValue={company.legalName} disabled={!canManage} id="company-legalName" name="legalName" required />
             </div>
             <div className="portal-field">
               <label htmlFor="company-displayName">{t("fields.displayName")}</label>
-              <input defaultValue={company.displayName} disabled={!canManage} id="company-displayName" name="displayName" required />
+              <PortalInput defaultValue={company.displayName} disabled={!canManage} id="company-displayName" name="displayName" required />
             </div>
             <div className="portal-pair">
               <div className="portal-field">
                 <label htmlFor="company-detail-website">{t("fields.website")}</label>
-                <input defaultValue={company.website ?? ""} disabled={!canManage} id="company-detail-website" name="website" type="url" />
+                <PortalInput defaultValue={company.website ?? ""} disabled={!canManage} id="company-detail-website" name="website" type="url" />
               </div>
               <div className="portal-field">
                 <label htmlFor="company-industry">{t("fields.industry")}</label>
-                <input defaultValue={company.industry ?? ""} disabled={!canManage} id="company-industry" name="industry" />
+                <PortalInput defaultValue={company.industry ?? ""} disabled={!canManage} id="company-industry" name="industry" />
               </div>
             </div>
             <div className="portal-field">
               <label htmlFor="company-sizeBand">{t("fields.sizeBand")}</label>
-              <input defaultValue={company.sizeBand ?? ""} disabled={!canManage} id="company-sizeBand" name="sizeBand" />
+              <PortalInput defaultValue={company.sizeBand ?? ""} disabled={!canManage} id="company-sizeBand" name="sizeBand" />
             </div>
             <div className="portal-field">
               <label htmlFor="company-description">{t("fields.description")}</label>
-              <textarea defaultValue={company.description ?? ""} disabled={!canManage} id="company-description" name="description" />
+              <PortalTextarea defaultValue={company.description ?? ""} disabled={!canManage} id="company-description" name="description" />
             </div>
             {/* The marker tells `updateCompanyAction` this form rendered the switch; without it a
                 save leaves the stored value alone (see `companyDirectoryVisibility`). */}
-            <input disabled={!canManage} name="directoryVisibleShown" type="hidden" value="1" />
+            <PortalInput disabled={!canManage} name="directoryVisibleShown" type="hidden" value="1" />
             <div className="portal-field portal-consent">
               <label className="portal-consent-row">
-                <input aria-describedby="company-directory-help" defaultChecked={company.directoryVisible ?? false} disabled={!canManage} name="directoryVisible" type="checkbox" />
+                <PortalInput aria-describedby="company-directory-help" defaultChecked={company.directoryVisible ?? false} disabled={!canManage} name="directoryVisible" type="checkbox" />
                 <span>{tSections("details.directoryVisible")}</span>
               </label>
               <p className="portal-field-help" id="company-directory-help">{tSections("details.directoryHelp")}</p>
@@ -104,10 +107,10 @@ export default async function CompanyPage({params}: Props) {
           </fieldset>
           {canManage ? (
             <div className="portal-form-actions">
-              <button className="button" type="submit">{t("save")}</button>
+              <PortalSubmit />
             </div>
           ) : <p className="portal-readonly-note">{tForms("readOnlyNote")}</p>}
-        </form>
+        </PortalForm>
       </section>
       <section aria-labelledby="company-public-heading" className="portal-form-section">
         <div className="portal-section-head">
@@ -115,6 +118,7 @@ export default async function CompanyPage({params}: Props) {
           <p className="portal-section-purpose">{tSections("public.purpose")}</p>
         </div>
         <CompanyProfileForm
+          companyId={company.id}
           action={saveCompanyProfileAction.bind(null, locale)}
           labels={{
             fields: {
@@ -139,8 +143,8 @@ export default async function CompanyPage({params}: Props) {
             reviewNotice: tProfile("reviewNotice"),
             // Interpolated here: the reason is data, and the client component
             // never carries a message formatter of its own.
-            rejected: profileCompany.publicProfileStatus === "rejected" && profileCompany.profileRejectionReason
-              ? tProfile("rejectedWith", {reason: profileCompany.profileRejectionReason})
+            rejected: company.publicProfileStatus === "rejected" && company.profileRejectionReason
+              ? tProfile("rejectedWith", {reason: company.profileRejectionReason})
               : null,
             saveDraft: tListing("saveDraft"), submitForReview: tListing("submit"), saved: tProfile("saved"), submitted: tProfile("submitted"),
             saveChanges: t("save"), saveSendsForReview: tProfile("saveSendsForReview"), needsAddress: tProfile("needsAddress"),
@@ -154,15 +158,15 @@ export default async function CompanyPage({params}: Props) {
             },
           }}
           locale={locale}
-          publicHref={profileCompany.publicProfileStatus === "published" && profileCompany.slug ? localizedPath(locale, `/members/${profileCompany.slug}`) : null}
-          readOnly={!profileCompany.canManage}
+          publicHref={company.publicProfileStatus === "published" && company.slug ? localizedPath(locale, `/members/${company.slug}`) : null}
+          readOnly={!company.canManage}
           values={{
-            slug: profileCompany.slug ?? "", taglineEn: profileCompany.taglineEn ?? "", taglineZhHk: profileCompany.taglineZhHk ?? "",
-            descriptionZhHk: profileCompany.descriptionZhHk ?? "", website: profileCompany.website ?? "", logoMediaId: profileCompany.logoMediaId ?? "",
-            tags: profileCompany.tags, status: profileCompany.publicProfileStatus, rejectionReason: profileCompany.profileRejectionReason,
+            slug: company.slug ?? "", taglineEn: company.taglineEn ?? "", taglineZhHk: company.taglineZhHk ?? "",
+            descriptionZhHk: company.descriptionZhHk ?? "", website: company.website ?? "", logoMediaId: company.logoMediaId ?? "",
+            tags: company.tags, status: company.publicProfileStatus, rejectionReason: company.profileRejectionReason,
           }}
         />
       </section>
-    </div>
+    </CompanyFormScope>
   );
 }

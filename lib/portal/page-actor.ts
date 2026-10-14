@@ -2,7 +2,8 @@ import {redirect} from "next/navigation";
 
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
-import type {PortalContinuation} from "@/lib/portal/continuation";
+import {isAdminActor} from "@/lib/auth/authorize";
+import type {PortalContinuation, CompanyContinuation} from "@/lib/portal/continuation";
 import {localizedPath} from "@/lib/urls";
 
 /** The dedicated member sign-in path for a signed-out Portal visitor, returning to `continuation`. */
@@ -20,8 +21,9 @@ export function memberLoginPath(locale: AppLocale, continuation: string): string
  * always returned the member to `/portal`. Each page therefore names its own continuation.
  * Server actions keep `requireActor()`: they have no layout to redirect for them.
  */
-export async function portalPageActor(locale: AppLocale, continuation: PortalContinuation) {
+export async function portalPageActor(locale: AppLocale, continuation: PortalContinuation | CompanyContinuation) {
   const actor = await getActor();
   if (!actor) redirect(memberLoginPath(locale, continuation));
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
   return actor;
 }

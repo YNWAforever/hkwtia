@@ -19,6 +19,7 @@ import {portalNavigationGroups} from "@/config/internal-navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {memberLoginPath} from "@/lib/portal/page-actor";
+import {getPortalNavigationAccess} from "@/lib/portal/navigation-access";
 import {isAdminActor} from "@/lib/auth/authorize";
 import {localizeConcierge} from "@/lib/ai/concierge-labels";
 import {publicEnv} from "@/lib/config/env";
@@ -31,6 +32,7 @@ type PortalNavLinkId = (typeof portalNavigationGroups)[number]["links"][number][
 const linkLabelKeys = {
   dashboard: "dashboard",
   profile: "profile",
+  "my-events": "myEvents.title",
   company: "company",
   "showcase-listing": "showcaseListing.nav",
   seats: "seats.title",
@@ -72,18 +74,20 @@ export default async function PortalLayout({children, params}: Props) {
   // file to keep an admin from flashing member-portal chrome.
   if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
 
-  const [concierge, commonT, portalT, navigationT, messages] = await Promise.all([
+  const [concierge, commonT, portalT, navigationT, messages, access] = await Promise.all([
     getTranslations({locale, namespace: "Concierge"}),
     getTranslations({locale, namespace: "Common"}),
     getTranslations({locale, namespace: "Portal"}),
     getTranslations({locale, namespace: "Navigation"}),
     getMessages(),
+    getPortalNavigationAccess(actor),
   ]);
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
   const groups: readonly PortalNavGroup[] = portalNavigationGroups.map((group) => ({
     id: group.id,
     label: portalT(`navGroups.${group.id}`),
+    ...(group.id === "benefits" && access.status !== "ready" ? {description: portalT(`access.${access.status}.body`)} : {}),
     links: group.links.map((link) => ({
       id: link.id,
       href: localizedPath(locale, link.href),
@@ -92,7 +96,7 @@ export default async function PortalLayout({children, params}: Props) {
   }));
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider messages={{Error: messages.Error}}>
       <PortalShell
         locale={locale}
         skipLabel={commonT("skipToContent")}

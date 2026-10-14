@@ -10,6 +10,7 @@ export const portalNavigationGroups = [
     links: [
       {id: "dashboard", href: "/portal"},
       {id: "profile", href: "/portal/profile"},
+      {id: "my-events", href: "/portal/events/my"},
     ],
   },
   {

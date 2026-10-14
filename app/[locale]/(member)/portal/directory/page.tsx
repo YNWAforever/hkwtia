@@ -1,3 +1,5 @@
+import {portalAccessNotice} from "@/components/portal/access-notice";
+import {readPortalPage} from "@/lib/portal/access-state";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {PortalPageHeader} from "@/components/portal/page-header";
@@ -23,12 +25,15 @@ export default async function DirectoryPage({params, searchParams}: Props) {
   const search = queryValue(query.q).trim();
   const cursor = queryValue(query.cursor) || null;
   const actor = await portalPageActor(locale, "/portal/directory");
-  const page = await searchDirectory(actor, {search, limit: 20}, cursor);
+  const result = await readPortalPage(() => searchDirectory(actor, {search, limit: 20}, cursor));
+  if (!result.ok) return portalAccessNotice(locale, result.access);
+  const page = result.value;
   const t = await getTranslations({locale, namespace: "Portal"});
 
   return (
     <div>
       <PortalPageHeader eyebrow={t("navGroups.benefits")} lead={t("directory.description")} title={t("directory.title")} />
+      {page.cursorReset ? <p role="status">{t("paging.cursorReset")}</p> : null}
       <DirectoryResults
         cursor={cursor}
         labels={{

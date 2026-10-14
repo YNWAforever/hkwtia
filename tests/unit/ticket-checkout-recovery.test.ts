@@ -21,6 +21,11 @@ function deps(row: typeof ORDER | null = ORDER) {
 }
 
 describe("ticket checkout recovery capability", () => {
+  it("does not resume a different order from a cookie for another purchase of the same event", async () => {
+    const services = deps();
+    await expect(resumeTicketRecovery({token: TOKEN, eventId: "event-1", orderId: "other-order", actor}, services)).resolves.toEqual({status: "error", code: "NOT_FOUND"});
+    expect(services.stripe.ticketSessionStatus).not.toHaveBeenCalled();
+  });
   it("uses a digest without retaining the raw token", () => {
     expect(recoveryDigest(TOKEN)).toMatch(/^[a-f0-9]{64}$/);
     expect(recoveryDigest(TOKEN)).not.toContain(TOKEN);

@@ -117,12 +117,14 @@ export async function submitTicketCheckoutAction(_previous: TicketCheckoutState,
 export async function resumeTicketCheckoutAction(_previous: TicketCheckoutState, formData: FormData): Promise<TicketCheckoutState> {
   const eventId = z.string().uuid().safeParse(formData.get("eventId"));
   if (!eventId.success) return {status: "error", code: "INVALID"};
+  const orderId = formData.has("orderId") ? z.string().uuid().safeParse(formData.get("orderId")) : null;
+  if (orderId && !orderId.success) return {status: "error", code: "INVALID"};
   const jar = await cookies();
   const capability = parseTicketRecoveryCookie(jar.get(TICKET_RECOVERY_COOKIE)?.value);
   if (!capability || capability.eventId !== eventId.data) return {status: "error", code: "UNAVAILABLE"};
   const actor = await getActor().catch(() => null);
   try {
-    const result = await resumeTicketRecovery({token: capability.token, eventId: eventId.data,
+    const result = await resumeTicketRecovery({token: capability.token, eventId: eventId.data, ...(orderId?.success ? {orderId: orderId.data} : {}),
       actor: actor ?? ANONYMOUS_ACTOR}, {
       store: eventCheckoutRecoveriesRepository, stripe: stripeBillingAdapter(), orders: eventOrdersRepository,
       now: () => new Date(),

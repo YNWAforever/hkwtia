@@ -1,5 +1,6 @@
 import {ActionLink} from '@/components/wt/action-link';
 import type {AppLocale} from '@/i18n/routing';
+import {portalCompanyPath} from '@/lib/portal/company-context';
 
 type MembershipGlanceProps = Readonly<{
   locale: AppLocale;
@@ -7,10 +8,11 @@ type MembershipGlanceProps = Readonly<{
   periodEnd: Date | null;
   endsAtPeriodEnd: boolean;
   seatsValue: string;
+  companyId?: string | null;
   labels: Readonly<{title: string; plan: string; renews: string; ends: string; seats: string; manageSeats: string}>;
 }>;
 
-export function MembershipGlance({locale, planLabel, periodEnd, endsAtPeriodEnd, seatsValue, labels}: MembershipGlanceProps) {
+export function MembershipGlance({locale, planLabel, periodEnd, endsAtPeriodEnd, seatsValue, companyId, labels}: MembershipGlanceProps) {
   // The date is omitted when the period end is unknown: a missing value must never render as
   // "Invalid Date" or an empty term.
   const date = periodEnd
@@ -35,7 +37,7 @@ export function MembershipGlance({locale, planLabel, periodEnd, endsAtPeriodEnd,
           <dt>{labels.seats}</dt>
           <dd>
             {seatsValue}
-            <ActionLink href="/portal/company/seats" variant="text-link" prefetch={false}>{labels.manageSeats}</ActionLink>
+            {companyId ? <ActionLink href={portalCompanyPath("/portal/company/seats", companyId)} variant="text-link" prefetch={false}>{labels.manageSeats}</ActionLink> : null}
           </dd>
         </div>
       </dl>

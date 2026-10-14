@@ -27,6 +27,7 @@ vi.mock("@/components/ai/deferred-concierge-widget", () => ({DeferredConciergeWi
 
 import LocaleLayout from "@/app/[locale]/layout";
 import AdminLayout from "@/app/[locale]/(admin)/admin/layout";
+vi.mock("@/lib/portal/navigation-access", () => ({getPortalNavigationAccess: async () => ({status: "ready"})}));
 import PortalLayout from "@/app/[locale]/(member)/portal/layout";
 import ErrorPage from "@/app/[locale]/error";
 
@@ -56,11 +57,11 @@ describe("client translation payload boundaries", () => {
     expect(screen.getByRole("button")).toHaveTextContent(String(catalog(locale).Error.retry));
   });
 
-  it.each(["en", "zh-HK"])("preserves the full %s client catalog within authorized private layouts", async (locale) => {
+  it.each(["en", "zh-HK"])("keeps only each authorized layout’s needed %s client catalog", async (locale) => {
     for (const Layout of [AdminLayout, PortalLayout]) {
       const tree = await Layout({children: <p>Private content</p>, params: Promise.resolve({locale})});
       expect(tree.type).toBe(NextIntlClientProvider);
-      expect((tree as ProviderTree).props.messages).toEqual(catalog(locale));
+      expect((tree as ProviderTree).props.messages).toEqual(Layout === PortalLayout ? {Error: catalog(locale).Error} : catalog(locale));
     }
   });
 

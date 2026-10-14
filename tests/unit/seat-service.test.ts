@@ -34,6 +34,27 @@ function makeDependencies(overrides: Record<string, unknown> = {}) {
 }
 
 describe("transactional company seat service", () => {
+  it.each(["revoke", "role", "cancelInvite"])("rechecks current entitlement under the lock before %s", async (operation) => {
+    let eligible = true;
+    let withdrawing = false;
+    const deps = makeDependencies({
+      getCompany: async (_actor: Actor, _companyId: string, transaction?: unknown) => eligible ? {id: "company-a", seatLimit: 5} : (expect(transaction).toBeTruthy(), null),
+      withCompanyTransaction: async (_companyId: string, work: (transaction: unknown) => Promise<unknown>) => {if (withdrawing) eligible = false; return work({locked: true});},
+    });
+    const service = createSeatService(deps);
+    const invite = await service.inviteSeat(actor("owner"), "company-a", {email: "member@example.com"});
+    if (operation !== "cancelInvite") await service.acceptSeatInvitation(actor("member"), invite.token);
+    const target = (await deps.listMembers("company-a")).find((row) => row.userId === "member");
+    // Equivalent to the page/target preflight succeeding before cancellation wins the lock.
+    expect(await deps.getCompany(actor("owner"), "company-a")).not.toBeNull();
+    withdrawing = true;
+    const mutation = operation === "revoke" ? service.revokeSeat(actor("owner"), target!.id)
+      : operation === "role" ? service.changeSeatRole(actor("owner"), target!.id, "owner")
+      : service.revokeInvitation(actor("owner"), invite.id);
+    await expect(mutation).rejects.toThrow("FORBIDDEN");
+    if (target) {expect(target.revokedAt).toBeNull(); expect(target.role).toBe("member");}
+    else expect((await deps.getInvitation!(invite.id))?.revokedAt).toBeNull();
+  });
   it("rejects invites when active members plus pending invitations reach the seat limit", async () => {
     const deps = makeDependencies({getCompany: async () => ({id: "company-a", seatLimit: 2}), listMembers: async () => [{id: "m-owner", companyId: "company-a", userId: "owner", role: "owner", revokedAt: null}], listPendingInvitations: async () => [{id: "pending", companyId: "company-a"}]});
     await expect(createSeatService(deps).inviteSeat(actor("owner"), "company-a", {email: "new@example.com"})).rejects.toThrow("SEAT_LIMIT_REACHED");
@@ -79,6 +100,18 @@ describe("transactional company seat service", () => {
     const second = await service.inviteSeat(actor("owner"), "company-a", {email: " same@example.com "});
     expect(second.id).toBe(first.id);
     expect(second.token).toBe("");
+  });
+  it("does not reserve another seat or replace a pending invitation when only the requested role changes", async () => {
+    const service = createSeatService(makeDependencies());
+    const first = await service.inviteSeat(actor("owner"), "company-a", {email: "same@example.com", role: "member"});
+    const second = await service.inviteSeat(actor("owner"), "company-a", {email: "SAME@example.com", role: "admin"});
+    expect(second.id).toBe(first.id);
+    expect(second.role).toBe("member");
+    expect(second.token).toBe("");
+  });
+  it("rejects a new invitation for an existing active company member", async () => {
+    const service = createSeatService(makeDependencies({hasMemberEmail: async () => true}));
+    await expect(service.inviteSeat(actor("owner"), "company-a", {email: "owner@example.com"})).rejects.toThrow("MEMBERSHIP_EXISTS");
   });
   it("rechecks the target role inside the transaction before an admin mutation", async () => {
     let reads = 0;

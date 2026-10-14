@@ -1,15 +1,11 @@
 "use client";
 
-import {useFormStatus} from "react-dom";
+import {SeatOperationForm} from "@/components/portal/seat-operation-form";
+import type {SeatAction, SeatFeedbackLabels} from "@/lib/portal/seat-action-state";
 
-function SubmitButton({label, pendingLabel}: {label: string; pendingLabel: string}) {
-  const {pending} = useFormStatus();
-  return <button className="button" disabled={pending} type="submit">{pending ? pendingLabel : label}</button>;
-}
-
-export function SeatInviteForm({action, labels, locale, companyId, canGrantOwner = false}: {action: (formData: FormData) => void | Promise<void>; labels: {email: string; invite: string; inviting: string; role: string; member: string; admin: string; owner: string}; locale: string; companyId: string; canGrantOwner?: boolean}) {
+export function SeatInviteForm({action, labels, feedback, locale, companyId, canGrantOwner = false}: {action: SeatAction; feedback: SeatFeedbackLabels; labels: {email: string; invite: string; inviting: string; role: string; member: string; admin: string; owner: string}; locale: string; companyId: string; canGrantOwner?: boolean}) {
   return (
-    <form action={action} className="portal-form portal-seat-invite">
+    <SeatOperationForm action={action} className="portal-form portal-seat-invite" labels={feedback} submitLabel={labels.invite} clearOnSuccess>
       <input name="companyId" type="hidden" value={companyId} />
       <input name="locale" type="hidden" value={locale} />
       <div className="portal-pair">
@@ -26,7 +22,6 @@ export function SeatInviteForm({action, labels, locale, companyId, canGrantOwner
           </select>
         </div>
       </div>
-      <div className="portal-form-actions"><SubmitButton label={labels.invite} pendingLabel={labels.inviting} /></div>
-    </form>
+    </SeatOperationForm>
   );
 }

@@ -49,7 +49,7 @@ export function DirectoryResults({locale, page, query: rawQuery, cursor = null, 
       <form action={localizedPath(locale, "/portal/directory")} className="portal-form portal-directory-search" method="get" role="search">
         <div className="portal-field">
           <label htmlFor="directory-search">{labels.search}</label>
-          <input defaultValue={query} id="directory-search" name="q" type="search" />
+          <input defaultValue={query} id="directory-search" name="q" maxLength={120} type="search" />
         </div>
         <button className="button" type="submit">{labels.search}</button>
       </form>

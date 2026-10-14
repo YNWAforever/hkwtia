@@ -29,6 +29,7 @@ vi.mock("@/lib/auth/actor", () => ({
 }));
 
 import {requireActor} from "@/lib/auth/actor";
+vi.mock("@/lib/portal/navigation-access", () => ({getPortalNavigationAccess: async () => ({status: "ready"})}));
 import PortalLayout from "@/app/[locale]/(member)/portal/layout";
 
 describe("portal layout admin redirect", () => {

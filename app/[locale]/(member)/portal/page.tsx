@@ -1,3 +1,4 @@
+import {PrivateLink} from "@/components/internal-shell/private-link";
 import type {ComponentProps} from "react";
 
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -13,6 +14,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {isAdminActor} from "@/lib/auth/authorize";
 import {pickNextStep} from "@/lib/portal/next-step";
+import {getMembershipIssues} from "@/lib/portal/membership-selection";
 import {getDashboard, type DashboardViewModel} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
@@ -45,6 +47,8 @@ export default async function PortalPage({params}: Props) {
       <h1 className="sr-only">{t("dashboard")}</h1>
       <HonestEmpty variant="inner" title={t("membershipUnavailableTitle")} copy={t("membershipUnavailableDescription")} />
       <div className="flex flex-wrap items-center gap-3">
+        <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/profile")}>{t("profile")}</PrivateLink>
+        <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/billing")}>{t("billing.title")}</PrivateLink>
         <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />
         <a className="min-h-11 content-center underline underline-offset-4" href={localizedPath(locale, "/membership")}>
           {t("membershipOptions")}
@@ -53,8 +57,13 @@ export default async function PortalPage({params}: Props) {
     </div>;
   }
   const t = await getTranslations({locale, namespace: "Portal"});
-  const {primaryStatus, onboarding, memberships, companies, profile} = dashboard;
-  const membership = memberships[0];
+  const {primaryStatus, primaryMembership: membership, onboarding, companies, profile} = dashboard;
+  const company = companies.find((row) => row.id === membership.companyId);
+  const issues = getMembershipIssues(dashboard.memberships);
+  const issueContext = (issue: (typeof issues)[number]) => [
+    companies.find((row) => row.id === issue.companyId)?.displayName,
+    t(`plans.${issue.planCode}`),
+  ].filter(Boolean).join(" · ");
   const step = pickNextStep(dashboard);
 
   // The step -> copy/href mapping lives here, not in NextStep: the component stays presentational
@@ -67,6 +76,13 @@ export default async function PortalPage({params}: Props) {
       label: t("nextStep.label"),
       title: t(`nextStep.${key}.title`),
       body: t(`nextStep.${key}.body`),
+      ...(issues[0] ? {context: issueContext(issues[0])} : {}),
+      ...(issues.length > 1 ? {additional: {
+        label: t("nextStep.otherMemberships"),
+        items: issues.slice(1).map((issue) => ({
+          id: issue.id, context: issueContext(issue), title: t(`nextStep.${issue.status}.title`),
+        })),
+      }} : {}),
       // The cast is sound: href is non-null exactly for the billing and onboarding keys, and each
       // of those has an `action` string; pending_review has neither, so it never reaches t() here.
       ...(href ? {action: {href, label: t(`nextStep.${key}.action` as "nextStep.company.action")}} : {}),
@@ -83,10 +99,11 @@ export default async function PortalPage({params}: Props) {
 
   return (
     <div className="space-y-8">
-      <WelcomeBand greeting={t("welcome", {name: profile.displayName})} companyName={companies[0]?.displayName} planLabel={planLabel} statusLabel={t(`status.${primaryStatus}.label`)} />
+      <WelcomeBand greeting={t("welcome", {name: profile.displayName})} companyName={company?.displayName} planLabel={planLabel} statusLabel={t(`status.${primaryStatus}.label`)} />
       {nextStep ? <NextStep {...nextStep} /> : null}
       <MembershipGlance
         locale={locale}
+        companyId={membership.companyId}
         planLabel={planLabel}
         periodEnd={membership.billingPeriodEnd}
         endsAtPeriodEnd={membership.cancelAtPeriodEnd}

@@ -6,10 +6,8 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 vi.mock("@/lib/auth/actor", () => ({requireActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"})), getActor: vi.fn(async () => ({kind: "member", userId: "u1", profileId: "p1"}))}));
-vi.mock("@/lib/portal/queries", () => ({
-  getDashboard: vi.fn(async () => ({
-    profile: {id: "p1", displayName: "Ada", phone: "123", jobTitle: "CTO", locale: "en", directoryVisible: true, whatsappNumber: null, whatsappOptIn: true},
-  })),
+vi.mock("@/lib/portal/self-profile", () => ({
+  getSelfProfile: vi.fn(async () => ({id: "p1", displayName: "Ada", phone: "123", jobTitle: "CTO", locale: "en", onboardingState: "complete", directoryVisible: true, whatsappNumber: null, whatsappOptIn: true})),
 }));
 // The server action is never invoked here; a stub keeps the page free of the auth/db graph.
 vi.mock("@/lib/portal/commands", () => ({updateProfileAction: vi.fn()}));

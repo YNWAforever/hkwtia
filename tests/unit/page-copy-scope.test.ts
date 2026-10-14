@@ -16,6 +16,10 @@ import {
 } from "@/lib/i18n/page-copy-scope";
 
 describe("page copy scope", () => {
+  it.each(["selfService.title", "selfService.copy", "selfService.billing", "selfService.support"])("keeps structural membership recovery guidance out of CMS: %s", (keyPath) => {
+    expect(pageCopyCatalog("Membership").some(leaf => leaf.keyPath === keyPath)).toBe(false);
+    expect(pageCopyEnglishRejection({namespace: "Membership", keyPath, value: "Unsupported account promise"})).toBe("KEY_PATH_UNKNOWN");
+  });
   it.each(["openNow.loading", "openNow.unavailable.title", "openNow.unavailable.copy"])("keeps runtime recovery copy out of CMS: %s", (keyPath) => {
     expect(pageCopyCatalog("Home").some(leaf => leaf.keyPath === keyPath)).toBe(false);
     expect(pageCopyEnglishRejection({namespace:"Home",keyPath,value:"False success"})).toBe("KEY_PATH_UNKNOWN");

@@ -36,10 +36,10 @@ describe("MembershipGlance", () => {
   });
 
   it("renders a zero seat count and links the seats row to seat management", () => {
-    render(<MembershipGlance locale="en" planLabel="Community" periodEnd={new Date("2026-12-01T00:00:00Z")} endsAtPeriodEnd={false} seatsValue="0 seats" labels={glanceLabels} />);
+    render(<MembershipGlance locale="en" companyId="company-a" planLabel="Community" periodEnd={new Date("2026-12-01T00:00:00Z")} endsAtPeriodEnd={false} seatsValue="0 seats" labels={glanceLabels} />);
     expect(screen.getByText("0 seats")).toBeTruthy();
     expect(screen.getByText("Renews on")).toBeTruthy();
-    expect(screen.getByRole("link", {name: /Manage seats/}).getAttribute("href")).toBe("/portal/company/seats");
+    expect(screen.getByRole("link", {name: /Manage seats/}).getAttribute("href")).toBe("/portal/company/seats?companyId=company-a");
     expect(screen.getByRole("link", {name: /Manage seats/})).toHaveAttribute("data-prefetch", "false");
   });
 });
