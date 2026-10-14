@@ -7,7 +7,7 @@ import {
 } from "@/lib/portal/continuation";
 
 describe("PORTAL_CONTINUATIONS", () => {
-  it("lists exactly the Portal's 10 real destinations", () => {
+  it("lists exactly the Portal's 11 static destinations", () => {
     expect(PORTAL_CONTINUATIONS).toEqual([
       "/portal",
       "/portal/profile",
@@ -17,6 +17,7 @@ describe("PORTAL_CONTINUATIONS", () => {
       "/portal/billing",
       "/portal/documents",
       "/portal/events",
+      "/portal/events/my",
       "/portal/directory",
       "/portal/tools",
     ]);
@@ -28,6 +29,17 @@ describe("PORTAL_CONTINUATIONS", () => {
 });
 
 describe("isPortalContinuation", () => {
+  it("preserves only validated company and seat-batch context across sign-in", () => {
+    const company = "11111111-1111-4111-8111-111111111111", batch = "22222222-2222-4222-8222-222222222222";
+    for (const path of ["/portal/company", "/portal/company/listing", "/portal/company/seats"]) {
+      expect(parsePortalContinuation(`${path}?companyId=${company}`)).toBe(`${path}?companyId=${company}`);
+    }
+    const target = `/portal/company/seats?companyId=${company}&batchId=${batch}`;
+    expect(parsePortalContinuation(target)).toBe(target);
+    for (const invalid of [`${target}&next=/admin`, `${target}&companyId=${company}`, `/portal/profile?companyId=${company}`, `/portal/company?companyId=${company}&batchId=${batch}`, "/portal/company?companyId=https://evil.test"]) {
+      expect(parsePortalContinuation(invalid)).toBe("/portal");
+    }
+  });
   it("accepts every listed destination", () => {
     for (const path of PORTAL_CONTINUATIONS) {
       expect(isPortalContinuation(path)).toBe(true);
@@ -77,9 +89,14 @@ describe("member event deep links", () => {
     expect(isPortalContinuation(`/portal/events/${EVENT.toUpperCase()}/edit`)).toBe(true);
   });
 
-  it("rejects anything under /portal/events that is not new or a v4 uuid edit", () => {
+  it("preserves private event and own-order destinations while rejecting unrelated query strings", () => {
+    expect(isPortalContinuation(`/portal/events/${EVENT}`)).toBe(true);
+    expect(isPortalContinuation(`/portal/orders/${EVENT}`)).toBe(true);
+    expect(isPortalContinuation(`/portal/orders/${EVENT}?ticket=received`)).toBe(false);
+    expect(isPortalContinuation("/portal/orders/https://evil.test")).toBe(false);
+  });
+  it("rejects malformed member event destinations", () => {
     expect(parsePortalContinuation("/portal/events/not-a-uuid/edit")).toBe("/portal");
-    expect(isPortalContinuation(`/portal/events/${EVENT}`)).toBe(false);
     expect(isPortalContinuation(`/portal/events/${EVENT}/edit/`)).toBe(false);
     expect(isPortalContinuation(`/portal/events/${EVENT}/edit?x=1`)).toBe(false);
     expect(isPortalContinuation("/portal/events/new/../../admin")).toBe(false);

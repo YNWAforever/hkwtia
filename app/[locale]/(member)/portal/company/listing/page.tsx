@@ -1,22 +1,33 @@
+import {localizedPath} from "@/lib/urls";
+import {CompanyFormScope, CompanySelector} from "@/components/portal/company-selector";
+import {companySelectionNotice} from "@/components/portal/company-selection-notice";
+import {selectPortalCompany} from "@/lib/portal/company-context";
+import {portalAccessNotice} from "@/components/portal/access-notice";
+import {readPortalPage} from "@/lib/portal/access-state";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {ShowcaseListingForm} from "@/components/portal/showcase-listing-form";
 import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
 import {portalPageActor} from "@/lib/portal/page-actor";
+import {companyContinuation} from "@/lib/portal/continuation";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {getDashboard} from "@/lib/portal/queries";
 import {saveShowcaseDraftAction, submitShowcaseListingAction} from "@/lib/showcase/member-actions";
 
-type Props = Readonly<{params: Promise<{locale: string}>}>;
+type Props = Readonly<{params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>}>;
 
-export default async function CompanyShowcaseListingPage({params}: Props) {
+export default async function CompanyShowcaseListingPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await portalPageActor(locale, "/portal/company/listing");
-  const dashboard = await getDashboard(actor);
-  const company = dashboard.companies[0];
+  const actor = await portalPageActor(locale, companyContinuation("/portal/company/listing", (await searchParams)?.companyId));
+  const result = await readPortalPage(() => getDashboard(actor));
+  if (!result.ok) return portalAccessNotice(locale, result.access);
+  const dashboard = result.value;
+  const selection = selectPortalCompany(dashboard.companies, (await searchParams)?.companyId);
+  if (!selection.ok) return companySelectionNotice(locale, dashboard.companies, "/portal/company/listing");
+  const company = selection.company;
   const t = await getTranslations({locale, namespace: "Portal"});
   const tListing = await getTranslations({locale, namespace: "Portal.showcaseListing"});
   const tForms = await getTranslations({locale, namespace: "Portal.forms"});
@@ -64,7 +75,9 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
     slug: listing.slug, nameEn: listing.nameEn, nameZhHk: listing.nameZhHk, taglineEn: listing.taglineEn, taglineZhHk: listing.taglineZhHk, descriptionEn: listing.descriptionEn, descriptionZhHk: listing.descriptionZhHk, category: listing.category, useCases: listing.useCases, deploymentOptions: listing.deploymentOptions, supportedLanguages: listing.supportedLanguages, worksWith: listing.worksWith, videoUrl: listing.videoUrl, caseStudyUrl: listing.caseStudyUrl, caseStudySummaryEn: listing.caseStudySummaryEn, caseStudySummaryZhHk: listing.caseStudySummaryZhHk, logoReference: listing.logoReference,
   } : {};
   return (
-    <div>
+    <CompanyFormScope key={company.id}>
+      {dashboard.companies.length > 1 ? <CompanySelector action={localizedPath(locale, "/portal/company/listing")} companyId={company.id} choices={dashboard.companies} labels={{choose: t("companySelection.choose"), use: t("companySelection.use"), changeWarning: t("companySelection.changeWarning")}} /> : null}
+      <p className="portal-status-note">{t("companySelection.selected", {company: company.displayName})}</p>
       <header className="portal-welcome">
         <StatusLabel as="p">{tListing("eyebrow")}</StatusLabel>
         <h1>{tListing("title")}</h1>
@@ -77,6 +90,6 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
         <p className="portal-status-note">{tListing(`statusNote.${listing?.status ?? "draft"}`)}</p>
       </div>
       <ShowcaseListingForm companyId={company.id} labels={labels} readOnly={!company.canManage} saveAction={company.canManage ? saveShowcaseDraftAction : undefined} submitAction={company.canManage ? submitShowcaseListingAction : undefined} value={value} />
-    </div>
+    </CompanyFormScope>
   );
 }

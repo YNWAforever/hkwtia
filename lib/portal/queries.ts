@@ -1,11 +1,14 @@
 import "server-only";
+import {cache} from "react";
 
 import {forbidden, requireMember, type Actor} from "@/lib/membership/lifecycle";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {type Company, type Membership, type Profile} from "@/lib/db/server-schema";
-import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {requestMemberships} from "@/lib/portal/request-context";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import {choosePrimaryMembership} from "@/lib/portal/membership-selection";
+import {PortalAccessDenied} from "@/lib/portal/access-state";
 
 export const portalMembershipStatuses = [
   "pending_payment",
@@ -58,6 +61,8 @@ export type DashboardViewModel = Readonly<{
   >;
   memberships: readonly DashboardMembership[];
   companies: readonly DashboardCompany[];
+  primaryMembershipId: DashboardMembership["id"];
+  primaryMembership: DashboardMembership;
   primaryStatus: PortalMembershipStatus;
   onboarding: Readonly<{
     completedSteps: number;
@@ -87,7 +92,7 @@ export type PortalQueryDependencies = Readonly<{
 
 export const defaultPortalQueryDependencies: PortalQueryDependencies = {
   profiles: profilesRepository,
-  memberships: membershipsRepository,
+  memberships: {list: requestMemberships},
   companies: companiesRepository,
   getCompanyRole: portalContentRepository.getCompanyRole,
 };
@@ -100,19 +105,8 @@ export function isPortalMembershipStatus(status: Membership["status"]): status i
   return (portalMembershipStatuses as readonly string[]).includes(status);
 }
 
-function primaryMembership(memberships: readonly DashboardMembership[]): DashboardMembership {
-  const rank: Record<DashboardMembership["status"], number> = {
-    active: 5,
-    past_due: 4,
-    cancel_at_period_end: 3,
-    pending_review: 2,
-    pending_payment: 1,
-  };
-  return [...memberships].sort((a, b) => rank[b.status] - rank[a.status])[0];
-}
-
 /** Read the member dashboard only after an actor and a recoverable membership are verified. */
-export async function getDashboard(
+async function readDashboard(
   actor: Actor,
   inputDependencies?: Partial<PortalQueryDependencies>,
 ): Promise<DashboardViewModel> {
@@ -124,7 +118,8 @@ export async function getDashboard(
   const memberships = (await deps.memberships.list(actor))
     .filter((membership): membership is PortalMembershipRecord & {status: PortalMembershipStatus} => isPortalMembershipStatus(membership.status))
     .map((membership) => ({...membership, applicationId: membership.applicationId ?? null, cancelAtPeriodEnd: membership.cancelAtPeriodEnd ?? false, billingPeriodStart: membership.billingPeriodStart ?? null, billingPeriodEnd: membership.billingPeriodEnd ?? null} satisfies DashboardMembership));
-  if (memberships.length === 0) throw new Error("MEMBERSHIP_INACTIVE");
+  const primaryMembership = choosePrimaryMembership(memberships);
+  if (!primaryMembership) throw new PortalAccessDenied({status: "inactive"});
 
   const profile = await deps.profiles.getById(actor, actor.profileId);
   if (!profile) throw new Error("PROFILE_NOT_FOUND");
@@ -176,7 +171,9 @@ export async function getDashboard(
     },
     memberships,
     companies,
-    primaryStatus: primaryMembership(memberships).status,
+    primaryMembershipId: primaryMembership.id,
+    primaryMembership,
+    primaryStatus: primaryMembership.status,
     onboarding: {
       completedSteps: Number(profileComplete) + Number(companyComplete),
       totalSteps: 2,
@@ -186,6 +183,12 @@ export async function getDashboard(
     },
     privateDataAvailable: true,
   };
+}
+
+const requestDashboard = cache((actor: Actor) => readDashboard(actor));
+
+export async function getDashboard(actor: Actor, inputDependencies?: Partial<PortalQueryDependencies>): Promise<DashboardViewModel> {
+  return inputDependencies ? readDashboard(actor, inputDependencies) : requestDashboard(actor);
 }
 
 export function requirePortalMember(actor: Actor): asserts actor is Extract<Actor, {kind: "member"}> {

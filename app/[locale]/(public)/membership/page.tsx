@@ -185,6 +185,14 @@ export default async function MembershipPage({ params }: Props) {
         lead={t("summary")}
         title={t("title")}
       />
+      <Section labelledBy="membership-self-service-title">
+        <h2 id="membership-self-service-title">{t("selfService.title")}</h2>
+        <p>{t("selfService.copy")}</p>
+        <div className="mt-6 flex flex-wrap gap-5">
+          <ActionLink href="/portal/billing" prefetch={false} variant="text-link">{t("selfService.billing")}</ActionLink>
+          <ActionLink href="/contact" variant="text-link">{t("selfService.support")}</ActionLink>
+        </div>
+      </Section>
       <Suspense
         fallback={
           <div className="min-h-screen">

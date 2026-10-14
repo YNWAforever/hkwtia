@@ -51,6 +51,34 @@ const primaries = (part: string) => part.match(/<button\b[^>]*class="(?:[^"]* )?
 describe("portal company page", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it("uses the requested company for both forms when several companies are manageable", async () => {
+    vi.mocked(getDashboard).mockResolvedValue({companies: [company({id: "b", displayName: "Bravo", slug: "bravo"}), company({id: "a", displayName: "Alpha", slug: "alpha"})]} as never);
+    const html = renderToStaticMarkup(await CompanyPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({companyId: "a"})}));
+    const {details, pub} = forms(html);
+    expect(control(details, "companyId")).toContain('value="a"');
+    expect(control(pub, "companyId")).toContain('value="a"');
+    expect(control(details, "displayName")).toContain('value="Alpha"');
+    expect(control(pub, "slug")).toContain('value="alpha"');
+  });
+
+  it("shows both sections read-only when the explicitly selected company is not manageable", async () => {
+    vi.mocked(getDashboard).mockResolvedValue({companies: [company({id: "a", canManage: false}), company({id: "b", slug: "bravo"})]} as never);
+    const html = renderToStaticMarkup(await CompanyPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({companyId: "a"})}));
+    const {details, pub} = forms(html);
+    expect(control(details, "companyId")).toContain('value="a"');
+    expect(control(pub, "companyId")).toContain('value="a"');
+    expect(pub).not.toContain('value="bravo"');
+    expect(pub).not.toContain('name="intent"');
+  });
+
+  it("does not render another company's editable data for an invalid requested company", async () => {
+    vi.mocked(getDashboard).mockResolvedValue({companies: [company()]} as never);
+    const html = renderToStaticMarkup(await CompanyPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({companyId: "unrelated"})}));
+    expect(html).not.toContain('name="legalName"');
+    expect(html).not.toContain('name="slug"');
+    expect(html).toContain("Choose a company you can access");
+  });
+
   it("shows two titled sections with their purpose", async () => {
     const html = await render();
     expect(html).toContain("Registered details");
@@ -90,7 +118,7 @@ describe("portal company page", () => {
   it("public form submits exactly the fields the profile action reads, plus the two intents", async () => {
     const {pub} = forms(await render());
     const unique = [...new Set(names(pub))].sort();
-    expect(unique).toEqual(["descriptionZhHk", "intent", "logoMediaId", "slug", "tags", "taglineEn", "taglineZhHk", "website"].sort());
+    expect(unique).toEqual(["companyId", "descriptionZhHk", "intent", "logoMediaId", "slug", "tags", "taglineEn", "taglineZhHk", "website"].sort());
     // React serialises a function `formAction` button without its `name` (it replays the submitter on
     // the client), so only the publish button shows `name="intent"` here; both carry the intent value.
     const intents = [...pub.matchAll(/<button\b[^>]*>/g)].map((m) => m[0]).filter((tag) => /value="(save|publish)"/.test(tag));

@@ -98,20 +98,25 @@ const company = {
   role: "owner", canManage: true,
 } as unknown as DashboardCompany;
 
-function dashboard(overrides: Partial<DashboardViewModel> & {status?: string} = {}): DashboardViewModel {
+function dashboard(overrides: Partial<DashboardViewModel> & {status?: DashboardViewModel["primaryStatus"]} = {}): DashboardViewModel {
   const {status = "active", ...rest} = overrides;
+  const memberships: DashboardViewModel["memberships"] = rest.memberships ?? [{id: "m1", ownerUserId: "u1", companyId: "c1", planCode: "startup", status, seatLimit: 3, applicationId: null, cancelAtPeriodEnd: false, billingPeriodStart: new Date("2026-04-01T00:00:00.000Z"), billingPeriodEnd: new Date("2027-03-31T00:00:00.000Z")}];
+  const primaryMembership = rest.primaryMembership ?? memberships[0];
   return {
     profile: {id: "p1", displayName: "Ada Chan", phone: "+852 5123 4567", jobTitle: "Chief Executive", locale: "en", onboardingState: "complete", directoryVisible: true, whatsappNumber: null, whatsappOptIn: false},
-    memberships: [{id: "m1", ownerUserId: "u1", companyId: "c1", planCode: "startup", status, seatLimit: 3, applicationId: null, cancelAtPeriodEnd: false, billingPeriodStart: new Date("2026-04-01T00:00:00.000Z"), billingPeriodEnd: new Date("2027-03-31T00:00:00.000Z")}],
+    memberships,
+    primaryMembership,
+    primaryMembershipId: primaryMembership.id,
     companies: [company],
-    primaryStatus: status,
+    primaryStatus: primaryMembership.status,
     onboarding: {completedSteps: 2, totalSteps: 2, nextAction: "none", profileComplete: true, companyComplete: true},
     privateDataAvailable: true,
     ...rest,
-  } as DashboardViewModel;
+  };
 }
 
 vi.mock("@/lib/portal/queries", () => ({getDashboard: vi.fn(async () => state.dashboard)}));
+vi.mock("@/lib/portal/self-profile", () => ({getSelfProfile: vi.fn(async () => (state.dashboard as DashboardViewModel).profile)}));
 vi.mock("@/lib/portal/billing-summary", () => ({
   getBillingSummary: vi.fn(async () => state.overrides.billing ?? ({
     membershipId: "m1", status: "active", canManageBilling: true, recovery: "resume", subscriptionRef: "sub_fixture",
@@ -139,6 +144,7 @@ vi.mock("@/lib/db/repos/seats", () => ({
   acceptSeatInvitation: vi.fn(), changeSeatRole: vi.fn(), inviteSeat: vi.fn(), revokeInvitation: vi.fn(), revokeSeat: vi.fn(),
 }));
 vi.mock("@/lib/portal/seats", () => ({
+  getRecentSeatInviteBatches: async () => [],
   getSeatOverview: vi.fn(async () => ({
     companyId: "c1", seatLimit: state.seatLimit, canManage: true, canGrantOwner: true,
     members: [{id: "cm1", companyId: "c1", userId: "ada.chan@harbour-robotics.example.hk", role: "owner"}, {id: "cm2", companyId: "c1", userId: "ben.wong@harbour-robotics.example.hk", role: "admin"}],
@@ -156,10 +162,10 @@ vi.mock("@/lib/portal/content", () => ({
   getDocuments: vi.fn(async () => state.overrides.documents ?? [
     {id: "d1", title: "Member guide 2026", kind: "resource", url: "https://example.org/member-guide-2026.pdf", issuedAt: "2026-09-01T00:00:00.000Z", amount: null, currency: null, status: null},
   ]),
-  getMemberEvents: vi.fn(async () => state.overrides.events ?? [
+  getMemberEventPage: vi.fn(async () => ({items: state.overrides.events ?? [
     {id: "e1", slug: "ai-in-logistics-roundtable", title: "AI in logistics roundtable", description: "", startsAt: "2026-11-12T10:00:00.000Z", endsAt: null, venue: "Cyberport, Pok Fu Lam", capacity: 40, memberOnly: true, published: true, registrationMode: "rsvp", visibility: "members_only", externalRegistrationUrl: null},
     {id: "e2", slug: "smart-city-summit", title: "Smart City Summit 2026", description: "", startsAt: "2026-12-03T01:00:00.000Z", endsAt: null, venue: "Hong Kong Convention and Exhibition Centre", capacity: null, memberOnly: false, published: true, registrationMode: "external", visibility: "public", externalRegistrationUrl: "https://example.org/smart-city-summit"},
-  ]),
+  ], nextCursor: null})),
 }));
 const memberEventRow = {
   id: "11111111-1111-4111-8111-111111111111", slug: "warehouse-robotics-open-day", title_en: "Warehouse robotics open day", title_zh: "倉庫機械人開放日",
@@ -176,6 +182,7 @@ vi.mock("@/lib/events/member-actions", () => ({saveMemberEventAction: vi.fn()}))
 vi.mock("@/lib/db/repos/events", () => ({registerForEvent: vi.fn(), eventsRepository: {getForMemberEdit: vi.fn(async () => state.overrides.editRow ?? memberEventRow)}}));
 vi.mock("@/lib/portal/event-action-core", () => ({runEventRegistrationAction: vi.fn()}));
 
+vi.mock("@/lib/portal/navigation-access", () => ({getPortalNavigationAccess: async () => ({status: "ready"})}));
 import PortalLayout from "@/app/[locale]/(member)/portal/layout";
 import PortalPage from "@/app/[locale]/(member)/portal/page";
 import BillingPage from "@/app/[locale]/(member)/portal/billing/page";

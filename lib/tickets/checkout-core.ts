@@ -7,7 +7,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
 import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
 import {eventOrdersRepository, ticketEventFor, ticketSeatsSchema, type EventOrdersRepository, type SeatInput, type TicketEvent} from "@/lib/db/repos/event-orders";
-import {localizedPath} from "@/lib/urls";
+import {ticketReturnPaths} from "@/lib/tickets/return-paths";
 
 export type {TicketEvent};
 
@@ -88,7 +88,6 @@ export async function createTicketCheckout(
   // whole hold window and then error. Nothing between the row write and the
   // session call reads configuration, so this is the only place that can.
   const origin = appOrigin(dependencies.appUrl);
-  const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
   const created = await dependencies.orders.createOrder({
     actor: input.actor,
     eventId: event.id,
@@ -163,6 +162,7 @@ export async function createTicketCheckout(
   }
 
   try {
+    const returnPaths = ticketReturnPaths(event, created.order.id, input.locale);
     const session = await dependencies.stripe.createEventTicketSession({
       eventTitle: input.locale === "zh-HK" ? event.titleZh : event.titleEn,
       // The PER-SEAT price: Stripe multiplies it by `seats`. The order's own
@@ -171,8 +171,8 @@ export async function createTicketCheckout(
       unitAmountHkdCents: event.ticketPriceHkdCents,
       seats: parsedSeats.data.length,
       orderId: created.order.id,
-      successUrl: `${origin}${eventPath}?ticket=received`,
-      cancelUrl: `${origin}${eventPath}?ticket=cancelled`,
+      successUrl: `${origin}${returnPaths.successPath}`,
+      cancelUrl: `${origin}${returnPaths.cancelPath}`,
       idempotencyKey: created.order.idempotencyKey,
       expiresAt: sessionExpiresAt,
     });

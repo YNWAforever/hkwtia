@@ -154,6 +154,21 @@ describe("protected member portal", () => {
     await expect(updateProfile({...member, profileId: "user-b"}, {displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
   });
 
+  it.each(["expired", "cancelled"] as const)("keeps own profile preferences writable for a %s member", async (status) => {
+    const deps = dependencies({memberships: {list: async () => [{id: "inactive", status, ownerUserId: "user-a", companyId: null, planCode: "community", seatLimit: 1}]}});
+    await expect(updateProfile(member, {displayName: "Updated Ada", locale: "zh-HK", directoryVisible: false, whatsappOptIn: false}, deps))
+      .resolves.toMatchObject({id: "user-a", displayName: "Updated Ada", locale: "zh-HK", directoryVisible: false, whatsappOptIn: false});
+    await expect(updateProfile({...member, profileId: "user-b"}, {displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
+  });
+
+  it.each(["expired", "cancelled"] as const)("keeps company-private writes blocked for a %s membership", async (status) => {
+    const deps = dependencies({
+      memberships: {list: async () => [{id: "inactive", status, companyId: "company-a", ownerUserId: null, planCode: "corporate", seatLimit: 25}]},
+      companies: {getById: async () => { throw new Error("PRIVATE_READ"); }, update: async () => { throw new Error("PRIVATE_WRITE"); }},
+    });
+    await expect(updateCompany(member, {companyId: "company-a", displayName: "Nope"}, deps)).rejects.toThrow("MEMBERSHIP_INACTIVE");
+  });
+
   it("allows company updates only for an owner or admin", async () => {
     const deps = dependencies({
       memberships: {

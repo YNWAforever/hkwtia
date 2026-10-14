@@ -1,3 +1,6 @@
+import {SeatOperationForm} from "@/components/portal/seat-operation-form";
+import type {SeatAction, SeatFeedbackLabels} from "@/lib/portal/seat-action-state";
+import type {SeatMember} from "@/lib/db/repos/portal-content";
 import type {CompanyMember, SeatInvitation} from "@/lib/db/server-schema";
 
 export type SeatTableLabels = Readonly<{
@@ -13,20 +16,25 @@ export type SeatTableLabels = Readonly<{
   noPending: string;
   inviteRevoke: string;
   actions: string;
+  details: string;
+  unknownName: string;
+  revokeConfirm: string;
+  invitationConfirm: string;
 }>;
 
 function roleLabel(role: CompanyMember["role"] | SeatInvitation["role"], labels: SeatTableLabels): string {
   return labels[role];
 }
 
-export function SeatTable({members, invitations, labels, canManage, revokeAction, changeRoleAction, revokeInvitationAction, canGrantOwner = false, locale}: {
-  members: CompanyMember[];
+export function SeatTable({members, invitations, labels, feedback, canManage, revokeAction, changeRoleAction, revokeInvitationAction, canGrantOwner = false, locale}: {
+  members: SeatMember[];
   invitations: SeatInvitation[];
   labels: SeatTableLabels;
+  feedback: SeatFeedbackLabels;
   canManage: boolean;
-  revokeAction?: (formData: FormData) => void | Promise<void>;
-  changeRoleAction?: (formData: FormData) => void | Promise<void>;
-  revokeInvitationAction?: (formData: FormData) => void | Promise<void>;
+  revokeAction?: SeatAction;
+  changeRoleAction?: SeatAction;
+  revokeInvitationAction?: SeatAction;
   canGrantOwner?: boolean;
   locale: string;
 }) {
@@ -42,13 +50,14 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
           <tbody role="rowgroup">
             {members.map((member) => (
               <tr key={member.id} role="row">
-                <td role="cell" data-label={labels.member}>{member.userId}</td>
+                <td role="cell" data-label={labels.member}><span>{member.displayName || labels.unknownName}</span>{canManage && member.email ? <span className="block">{member.email}</span> : null}<details><summary>{labels.details}</summary>{member.userId}</details></td>
                 <td role="cell" data-label={labels.role}>{roleLabel(member.role, labels)}</td>
                 <td role="cell"><div className="portal-seat-actions">
                   {canManage && (member.role !== "owner" || canGrantOwner) && changeRoleAction ? (
                     <>
-                      <form action={changeRoleAction}>
+                      <SeatOperationForm action={changeRoleAction} labels={feedback} submitLabel={labels.changeRole} buttonClassName="portal-seat-link">
                         <input name="memberId" type="hidden" value={member.id} />
+                        <input name="companyId" type="hidden" value={member.companyId} />
                         <input name="locale" type="hidden" value={locale} />
                         <label className="sr-only" htmlFor={`role-${member.id}`}>{labels.changeRole}</label>
                         <select defaultValue={member.role} id={`role-${member.id}`} name="role">
@@ -56,14 +65,15 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
                           <option value="admin">{labels.admin}</option>
                           {canGrantOwner ? <option value="owner">{labels.owner}</option> : null}
                         </select>
-                        <button className="portal-seat-link" type="submit">{labels.changeRole}</button>
-                      </form>
+
+                      </SeatOperationForm>
                       {revokeAction ? (
-                        <form action={revokeAction}>
+                        <SeatOperationForm action={revokeAction} labels={feedback} submitLabel={labels.revoke} buttonClassName="portal-seat-link portal-seat-danger" confirmation={labels.revokeConfirm.replace("{member}", member.displayName || member.email || labels.unknownName)}>
                           <input name="memberId" type="hidden" value={member.id} />
+                        <input name="companyId" type="hidden" value={member.companyId} />
                           <input name="locale" type="hidden" value={locale} />
-                          <button className="portal-seat-link portal-seat-danger" type="submit">{labels.revoke}</button>
-                        </form>
+
+                        </SeatOperationForm>
                       ) : null}
                     </>
                   ) : null}
@@ -85,11 +95,12 @@ export function SeatTable({members, invitations, labels, canManage, revokeAction
                   <td role="cell" data-label={labels.role}>{roleLabel(invitation.role, labels)}</td>
                   <td role="cell"><div className="portal-seat-actions">
                     {canManage && revokeInvitationAction ? (
-                      <form action={revokeInvitationAction}>
+                      <SeatOperationForm action={revokeInvitationAction} labels={feedback} submitLabel={labels.inviteRevoke} buttonClassName="portal-seat-link portal-seat-danger" confirmation={labels.invitationConfirm.replace("{email}", invitation.invitedEmail)}>
                         <input name="invitationId" type="hidden" value={invitation.id} />
+                        <input name="companyId" type="hidden" value={invitation.companyId} />
                         <input name="locale" type="hidden" value={locale} />
-                        <button className="portal-seat-link portal-seat-danger" type="submit">{labels.inviteRevoke}</button>
-                      </form>
+
+                      </SeatOperationForm>
                     ) : null}
                   </div></td>
                 </tr>

@@ -76,7 +76,9 @@ describe("/portal/tools/[key]", () => {
     state.statuses = ["pending_payment"];
     const {container} = render(await PortalToolPage({params: params("content-calendar")}));
     expect(container.querySelector("iframe")).toBeNull();
-    expect(screen.getByText("tools.lockedTitle")).toBeVisible();
+    expect(screen.getByText("access.needs_payment.title")).toBeVisible();
+    expect(screen.getByRole("link", {name: "billing.title"})).toHaveAttribute("href", "/portal/billing");
+    expect(container.innerHTML).not.toContain("fixture-token");
   });
   it("fails closed when the token is not configured", async () => {
     delete process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN;

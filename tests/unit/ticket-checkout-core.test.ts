@@ -30,6 +30,11 @@ function dependencies(overrides: Partial<TicketCheckoutDependencies> = {}): Tick
 }
 
 describe("ticket purchase eligibility", () => {
+  it.each([["en", ""], ["zh-HK", "/zh"]] as const)("passes private order return URLs to the actual session adapter in %s", async (locale, prefix) => {
+    const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "private", titleEn: "Private", titleZh: "Private", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "members_only", memberOnly: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}))});
+    await createTicketCheckout({actor: {kind: "member", userId: "auth", profileId: "profile"}, eventId: "ev-1", buyer: {profileId: "profile", name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale}, deps);
+    expect(deps.stripe.createEventTicketSession).toHaveBeenCalledWith(expect.objectContaining({successUrl: `https://w.test${prefix}/portal/orders/order-1?ticket=received`, cancelUrl: `https://w.test${prefix}/portal/orders/order-1?ticket=cancelled`}));
+  });
   it("refuses an anonymous buyer before order creation or Stripe for a members-only event", async () => {
     const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "private", titleEn: "Private", titleZh: "Private", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "members_only", memberOnly: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}))});
     await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))

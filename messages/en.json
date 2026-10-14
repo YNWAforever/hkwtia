@@ -804,6 +804,7 @@
     }
   },
   "Membership": {
+    "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
     "metaTitle": "Membership | WiseTech Hong Kong",
     "metaDescription": "Compare WTIA membership tiers and benefits.",
     "eyebrow": "Membership",
@@ -904,7 +905,7 @@
     },
     "pricing": {
       "readyLabel": "Current pricing",
-      "readyCopy": "The fees above reflect the current site catalog and configured checkout price references. Confirm the total and subscription terms at secure checkout.",
+      "readyCopy": "Review the total and subscription terms at secure checkout before confirming payment.",
       "fallbackLabel": "Pricing",
       "fallbackCopy": "Some fees are unavailable on this page. Contact the membership team to confirm the current rate before applying."
     },
@@ -2280,6 +2281,92 @@
     "retry": "Try again"
   },
   "Portal": {
+    "paging": {"cursorReset": "The page link is no longer valid for this search. Showing the first page."},
+    "myEvents": {
+      "title": "My registrations and orders",
+      "description": "Your recorded registrations and ticket purchases, including past events.",
+      "passes": "Attendee passes are delivered separately by email. Use the pass email for entry; contact WTIA if you need help recovering it. This list shows purchases recorded against your account.",
+      "cursorReset": "This page link is no longer valid. Showing the first page.",
+      "empty": "You have no recorded registrations or ticket purchases.",
+      "source": {
+        "rsvp": "Registration",
+        "ticket": "Ticket purchase"
+      },
+      "rsvpStatus": {
+        "registered": "Registered",
+        "waitlist": "Waitlisted",
+        "cancelled": "Registration cancelled",
+        "attended": "Attended",
+        "no_show": "Did not attend"
+      },
+      "eventCancelled": "This event has been cancelled.",
+      "viewOrder": "View order",
+      "viewEvent": "View event",
+      "first": "First page",
+      "next": "Next page"
+    },
+    "orders": {
+      "title": "My ticket order",
+      "amount": "Order total: {amount}",
+      "processing": "Payment is not confirmed yet. Refresh to check the latest order status. Returning from checkout does not confirm payment.",
+      "resume": "Resume existing checkout",
+      "checking": "Checking checkout…",
+      "recoveryUnavailable": "This checkout cannot be resumed from this browser. Use the browser that started the purchase or contact support with this order page.",
+      "recoveryExpired": "This checkout has expired. Contact support if you believe a payment was taken.",
+      "refresh": "Refresh order status",
+      "support": "Contact support",
+      "status": {
+        "pending": "Awaiting payment confirmation",
+        "paid": "Payment confirmed",
+        "expired": "Checkout expired",
+        "failed": "Payment failed",
+        "refunded": "Refund completed",
+        "refund_failed": "Refund needs attention",
+        "refund_pending": "Refund in progress"
+      }
+    },
+    "formFeedback": {
+      "saving": "Saving…",
+      "success": "Your changes have been saved.",
+      "validation_error": "Check the highlighted details and try again.",
+      "forbidden": "Your access has changed. Reload this page before trying again.",
+      "conflict": "These details have changed. Reload the page before saving again.",
+      "unavailable": "We could not save your changes. Your input is still here; please try again.",
+      "fields": {
+        "invalid": "Check this value.",
+        "required": "Enter a WhatsApp number to receive updates.",
+        "invalid_number": "Enter a valid WhatsApp number, including its country code."
+      }
+    },
+    "companySelection": {
+      "choose": "Choose company",
+      "use": "Use this company",
+      "changeWarning": "Switching companies will discard unsaved changes. Continue?",
+      "selected": "Company: {company}",
+      "unavailableTitle": "Choose a company you can access",
+      "unavailableBody": "This company selection is no longer available to your account. Choose an accessible company to continue; your changes have not been sent to another company."
+    },
+    "access": {
+      "needs_payment": {
+        "title": "Complete your membership payment",
+        "body": "Member benefits will be available when your membership is ready. Open billing to check your existing payment and continue from there. You can still update your own profile."
+      },
+      "under_review": {
+        "title": "Your membership is under review",
+        "body": "Your application is awaiting review. You can update your own profile and view your billing history while you wait."
+      },
+      "inactive": {
+        "title": "Your member benefits are unavailable",
+        "body": "You can still update your own profile and view your billing history. View membership options to find your next step."
+      },
+      "no_company": {
+        "title": "No company is linked to your membership",
+        "body": "Company services require a linked company and the appropriate company role. You can still manage your own profile and billing."
+      },
+      "unavailable": {
+        "body": "Membership status is temporarily unavailable. You can still open your profile and billing; benefit pages will check access when opened."
+      }
+    },
     "common": {
       "newTab": "(opens in a new tab)"
     },
@@ -2294,6 +2381,7 @@
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "dashboard": "Dashboard",
     "nextStep": {
+      "otherMemberships": "Other memberships needing attention",
       "label": "Your next step",
       "past_due": {"title": "Update your payment details", "body": "Your last payment did not go through. Update billing to keep your membership active.", "action": "Go to billing"},
       "pending_payment": {"title": "Complete your payment", "body": "Your membership activates once payment is complete.", "action": "Go to billing"},
@@ -2443,6 +2531,7 @@
       "markets": "Markets"
     },
     "events": {
+      "pages": "Event pages",
       "emptyTitle": "No upcoming events yet",
       "emptyAction": "Browse WTIA events",
       "title": "Member events",
@@ -2694,8 +2783,81 @@
         "invitationExpired": "This invitation has expired. Ask your company admin to send a new one.",
         "invitationEmailMismatch": "This invitation was sent to a different email address. Sign in with that account, or ask your company admin to invite this one instead.",
         "membershipExists": "You are already a member of this company.",
-        "seatLimitReached": "This company has reached its seat limit. Ask your company admin to free up a seat."
-      }
+        "seatLimitReached": "This company has reached its seat limit. Ask your company admin to free up a seat.",
+        "invalidInput": "Check the email address, company and role, then try again.",
+        "forbidden": "Your access has changed. Reload the page and choose a company you can manage.",
+        "lastOwner": "Keep at least one owner. Assign another owner before removing this access.",
+        "rolePolicy": "Only an owner can grant or change owner access.",
+        "notFound": "This seat or invitation has changed. Reload the list.",
+        "alreadyPending": "An invitation is already pending for this address. No new email was sent.",
+        "alreadyMember": "This person already has a seat in this company.",
+        "deliveryUncertain": "The invitation was saved, but email delivery is unconfirmed. Do not resend; contact WTIA to check the result."
+      },
+      "saving": "Updating…",
+      "saved": "The seat update has been saved.",
+      "details": "Technical details",
+      "unknownName": "Name unavailable",
+      "revokeConfirm": "Revoke access for {member}?",
+      "invitationConfirm": "Cancel the invitation for {email}?",
+      "bulk": {
+        "title": "Invite several people",
+        "help": "Paste up to 50 lines, one email address per line. Add a comma and member, admin or owner to choose a role; the default is member. Preview and select recipients before sending.",
+        "rows": "People to invite",
+        "preview": "Preview invitations",
+        "commit": "Confirm selected invitations",
+        "continue": "Continue pending invitations",
+        "retry": "Retry eligible failed items",
+        "refresh": "Refresh results",
+        "pending": "Working…",
+        "selection": "Select the people to invite. Review each role and any issues.",
+        "capacity": "Seats currently available: {count}",
+        "confirmElevated": "I have reviewed the admin or owner roles selected above.",
+        "reference": "Batch reference: {id}",
+        "creatorOnly": "Only the original inviter with current management access can operate this batch. An expired preview needs a new preview.",
+        "uncertainty": "Email delivery is unconfirmed for some invitations. Do not resend them. Contact WTIA with this batch reference to check the result.",
+        "support": "Get help with invitations",
+        "roles": {
+          "member": "Member",
+          "admin": "Admin",
+          "owner": "Owner"
+        },
+        "states": {
+          "preview": "Ready for selection",
+          "blocked": "Needs correction",
+          "pending": "Waiting to reserve a seat",
+          "delivery_pending": "Invitation saved; waiting to send",
+          "sending": "Send in progress",
+          "succeeded": "Invitation email accepted by the sign-in service",
+          "skipped": "Not sent",
+          "failed": "Could not reserve a seat",
+          "uncertain": "Delivery unconfirmed"
+        },
+        "codes": {
+          "INVALID_EMAIL": "Check the email address.",
+          "INVALID_ROLE": "Use member, admin or owner.",
+          "DUPLICATE": "Repeated email address in this list.",
+          "ROLE_POLICY": "Only an owner can invite another owner.",
+          "MEMBERSHIP_EXISTS": "This person already has a company seat.",
+          "ALREADY_PENDING": "An invitation is already pending. No new email was sent.",
+          "SEAT_LIMIT_REACHED": "No seat is available. Free capacity before retrying this item.",
+          "NOT_SELECTED": "Not selected in the confirmed preview.",
+          "INVITATION_UNAVAILABLE": "The invitation or permission changed before sending.",
+          "DELIVERY_UNCERTAIN": "Check the result with WTIA before taking further action.",
+          "CANCELLED_BEFORE_SEND": "Cancelled before sending."
+        },
+        "errors": {
+          "invalid": "Check the pasted rows and selected recipients. A batch supports up to 50 rows.",
+          "forbidden": "Your management access has changed. Reload this page.",
+          "expired": "This preview is unavailable or expired. Prepare a new preview.",
+          "capacity": "The selected people exceed available seats. Reduce the selection or free capacity.",
+          "confirmation": "Confirm that you have reviewed the elevated roles.",
+          "unavailable": "We could not finish this request. Refresh the saved batch results before continuing."
+        },
+        "cancel": "Cancel unstarted invitations",
+        "cancelConfirm": "Cancel invitations that have not started sending? A send already in progress may still complete.",
+        "recent": "10 most recent confirmed invitation batches"
+      },
+      "unavailableForCompany": "Seat access is unavailable for this company. Review membership or choose a company you can access."
     }
   },
   "Concierge": {

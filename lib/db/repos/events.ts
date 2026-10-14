@@ -1,4 +1,5 @@
 import "server-only";
+import {memberUpcomingPredicate} from "@/lib/db/repos/portal-paging";
 
 import {and, asc, count, desc, eq, gte, inArray, isNull, lt, notInArray, or, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
@@ -10,6 +11,7 @@ import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
+import {memberBenefitScopeSql} from "@/lib/db/repos/member-benefit-sql";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventCancellationIntents, eventCancellationNotifications, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
@@ -375,17 +377,32 @@ const defaultMemberEligibility: MemberEventEligibility = {hasEligibleMembership:
 export async function listMemberEvents(actor: Actor, source?: EventRows, eligibility: MemberEventEligibility = defaultMemberEligibility): Promise<Event[]> {
   requireMember(actor);
   if (!await eligibility.hasEligibleMembership(actor)) throw new Error("MEMBERSHIP_INACTIVE");
-  return sorted((await rowsFrom(source)).filter(isMemberVisible));
+  if (source) return sorted((await rowsFrom(source)).filter(isMemberVisible));
+  const db = await getDb();
+  return (await db.select().from(events).where(memberUpcomingPredicate(actor.profileId))
+    .orderBy(asc(events.startsAt), asc(events.id)).limit(21)).slice(0, 20);
+}
+
+/** A protected detail read: current entitlement and event visibility are both SQL predicates. */
+export async function getMemberEventById(actor: Actor, eventId: string): Promise<Event | null> {
+  requireMember(actor);
+  if (!eventIdSchema.safeParse(eventId).success) return null;
+  const db = await getDb();
+  const rows = await db.select().from(events).where(and(
+    eq(events.id, eventId), eq(events.status, "published"), eq(events.published, true),
+    inArray(events.visibility, ["public", "members_only"]),
+    notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS]), memberBenefitScopeSql(actor.profileId),
+  )).limit(1);
+  return rows[0] ?? null;
 }
 
 // Members see every published event that is not invite-only. The default
-// source lists the whole table; the in-memory branch applies the same rule
-// so tests exercise the filter the database query would.
+// compatibility source is test-only; runtime upcoming reads are SQL-bounded.
 function isMemberVisible(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
   return event.status === "published" && event.visibility !== "invite_only" && !isAuditDemoEventSlug(event.slug);
 }
 
-export function localizeEvent(event: Event, locale: string): LocalizedEvent {
+export function localizeEvent(event: Pick<Event, "id" | "slug" | "titleEn" | "titleZh" | "descriptionEn" | "descriptionZh" | "startsAt" | "endsAt" | "venue" | "capacity" | "memberOnly" | "published" | "registrationMode" | "visibility" | "externalRegistrationUrl">, locale: string): LocalizedEvent {
   const useChinese = locale === "zh-HK";
   return {
     id: event.id,

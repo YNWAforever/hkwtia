@@ -21,7 +21,7 @@ export type TicketRecoveryDependencies = TicketRecoveryReadDependencies & Readon
   stripe: Readonly<{ticketSessionStatus: (sessionId: string) => Promise<"open" | "complete" | "expired">}>;
   orders: Readonly<{expireBySession: (sessionId: string, expectedOrderId: string) => Promise<boolean>; expireUnattachedOrder: (orderId: string) => Promise<boolean>}>;
 }>;
-export type TicketRecoveryInput = Readonly<{token: string; eventId: string; actor: Actor}>;
+export type TicketRecoveryInput = Readonly<{token: string; eventId: string; orderId?: string; actor: Actor}>;
 export type TicketRecoveryResumeResult =
   | Readonly<{status: "redirect"; url: string}>
   | Readonly<{status: "error"; code: "NOT_FOUND" | "UNAVAILABLE" | "RETRY_EXPIRED" | "ALREADY_COMPLETED"}>;
@@ -41,6 +41,7 @@ async function verifiedRecord(input: TicketRecoveryInput, deps: TicketRecoveryRe
   if (!/^[A-Za-z0-9_-]{43}$/.test(input.token)) return null;
   const now = deps.now();
   const record = await deps.store.read(recoveryDigest(input.token), now);
+  if (input.orderId !== undefined && record?.orderId !== input.orderId) return null;
   return record && authorized(record, input.actor, input.eventId, now) ? record : null;
 }
 export async function readTicketRecovery(input: TicketRecoveryInput, deps: TicketRecoveryReadDependencies): Promise<TicketRecoverySummary | null> {

@@ -1,5 +1,5 @@
 import type {ReactNode} from "react";
-import {render, screen} from "@testing-library/react";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -31,19 +31,22 @@ vi.mock("@/lib/db/repos/seats", () => ({
   },
 }));
 vi.mock("@/lib/portal/queries", () => ({getDashboard: vi.fn(async () => ({companies: [{id: "c1"}]}))}));
-vi.mock("@/lib/portal/seats", () => ({getSeatOverview: vi.fn()}));
+vi.mock("@/lib/portal/seats", () => ({getSeatOverview: vi.fn(), getRecentSeatInviteBatches: async () => []}));
+const batchMocks = vi.hoisted(() => ({read: vi.fn(), action: vi.fn()}));
+vi.mock("@/lib/portal/seat-bulk-core", () => ({getSeatInviteBatch: batchMocks.read}));
+vi.mock("@/lib/portal/seat-bulk-actions", () => ({seatBulkAction: batchMocks.action}));
 
 import SeatAcceptPage from "@/app/[locale]/(member)/portal/company/seats/accept/page";
 import SeatsPage from "@/app/[locale]/(member)/portal/company/seats/page";
 import {SeatServiceError} from "@/lib/db/repos/seats";
 import {getSeatOverview} from "@/lib/portal/seats";
 
-const member = (id: string, role: string) => ({id, userId: `user-${id}@example.test`, role});
+const member = (id: string, role: string) => ({id, companyId: "c1", userId: `opaque-${id}`, displayName: `Member ${id}`, email: `user-${id}@example.test`, role});
 function overview(members: number, invitations: number, overrides: Record<string, unknown> = {}) {
   return {
     companyId: "c1", seatLimit: 3, canManage: true, canGrantOwner: false,
     members: Array.from({length: members}, (_, i) => member(`m${i}`, i === 0 ? "owner" : "member")),
-    invitations: Array.from({length: invitations}, (_, i) => ({id: `i${i}`, invitedEmail: `invitee${i}@example.test`, role: "member"})),
+    invitations: Array.from({length: invitations}, (_, i) => ({id: `i${i}`, companyId: "c1", invitedEmail: `invitee${i}@example.test`, role: "member"})),
     ...overrides,
   };
 }
@@ -56,23 +59,56 @@ const acceptProps = (searchParams: Record<string, string | undefined> = {}) => (
 describe("portal seats page", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it("switches same-company batch selection and submits only the newly selected batch", async () => {
+    const a = {companyId: "c1", batchId: "11111111-1111-4111-8111-111111111111", state: "committed", available: 2, canCommit: true, expiresAt: "2099-01-01", items: [{itemId: "item-a", position: 1, email: "batch-a@example.test", role: "member", state: "pending", code: null, retryable: false}]};
+    const b = {...a, batchId: "22222222-2222-4222-8222-222222222222", items: [{...a.items[0], itemId: "item-b", email: "batch-b@example.test"}]};
+    batchMocks.read.mockImplementation(async (_actor, input) => input.batchId === a.batchId ? a : b);
+    batchMocks.action.mockResolvedValueOnce({status: "ready", view: a}).mockResolvedValueOnce({status: "ready", view: b});
+    vi.mocked(getSeatOverview).mockResolvedValue(overview(1,0) as never);
+    const page = (batchId: string) => SeatsPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({batchId})});
+    const rendered = render(await page(a.batchId));
+    const submit = (button: HTMLElement) => {const event = new Event("submit", {bubbles: true, cancelable: true}); Object.defineProperty(event, "submitter", {value: button}); fireEvent(button.closest("form")!, event);};
+    submit(screen.getByRole("button", {name: en.Portal.seats.bulk.refresh}));
+    await waitFor(() => expect(batchMocks.action).toHaveBeenCalledTimes(1));
+    rendered.rerender(await page(b.batchId));
+    expect(screen.getByText(/batch-b@example.test/)).toBeInTheDocument();
+    expect(screen.queryByText(/batch-a@example.test/)).toBeNull();
+    submit(screen.getByRole("button", {name: en.Portal.seats.bulk.continue}));
+    await waitFor(() => expect(batchMocks.action).toHaveBeenCalledTimes(2));
+    expect((batchMocks.action.mock.calls[1][1] as FormData).get("batchId")).toBe(b.batchId);
+  });
+
   it("at the limit (2 members + 1 invitation of 3) shows the full note and no invite form", async () => {
     const html = await renderSeats(overview(2, 1));
     expect(html).toContain("All seats are in use. Remove a member or a pending invitation to invite someone else.");
     expect(html).not.toContain('name="email"');
-    expect(html).not.toContain('name="companyId"');
+    expect(html).not.toContain('name="email"');
+  });
+  it("shows names and scoped email with internal IDs tucked into details", async () => {
+    const html = await renderSeats(overview(2, 0));
+    expect(html).toContain("Member m1");
+    expect(html).toContain("user-m1@example.test");
+    expect(html).toMatch(/<details[^>]*>.*opaque-m1.*<\/details>/s);
   });
 
   it("one under the limit (2 members + 0 invitations of 3) shows the invite form and no note", async () => {
     const html = await renderSeats(overview(2, 0));
     expect(html).not.toContain("All seats are in use");
     for (const field of ["email", "role", "companyId", "locale"]) expect(html).toMatch(new RegExp(String.raw`<(?:input|select)\b[^>]*\bname="${field}"`));
+    expect(html).toContain('name="rows"');
   });
 
   it("a read-only viewer sees neither the form nor the full note", async () => {
     const html = await renderSeats(overview(2, 1, {canManage: false}));
     expect(html).not.toContain("All seats are in use");
     expect(html).not.toContain('name="email"');
+  });
+  it("offers membership recovery when the selected company's seat access is unavailable", async () => {
+    vi.mocked(getSeatOverview).mockRejectedValueOnce(new Error("FORBIDDEN"));
+    const html = renderToStaticMarkup(await SeatsPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
+    expect(html).toContain('href="/portal/billing"');
+    expect(html).toContain("Seat access is unavailable for this company");
+    expect(html).not.toContain('name="rows"');
   });
 
   it("the capacity line carries a progressbar named by the capacity text", async () => {

@@ -14,6 +14,11 @@ import {memberLoginPath, portalPageActor} from "@/lib/portal/page-actor";
 
 describe("portalPageActor", () => {
   beforeEach(() => vi.clearAllMocks());
+  it("redirects staff before a member page can start its private reads", async () => {
+    getActor.mockResolvedValue({kind: "staff", userId: "staff-auth", profileId: "staff-profile"});
+    await expect(portalPageActor("zh-HK", "/portal/events")).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirect).toHaveBeenCalledWith("/zh/admin");
+  });
 
   it("returns the signed-in actor without redirecting", async () => {
     const actor = {kind: "member", userId: "u", profileId: "p"};

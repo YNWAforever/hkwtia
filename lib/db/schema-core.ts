@@ -274,6 +274,46 @@ export const seatInvitations = pgTable(
   ],
 );
 
+export const portalSeatBatches = pgTable("portal_seat_batches", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id").notNull().references(() => companies.id, {onDelete: "cascade"}),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  actorAuthUserId: text("actor_auth_user_id").notNull(),
+  locale: text("locale").$type<"en" | "zh-HK">().notNull(),
+  state: text("state").$type<"preview" | "committed">().default("preview").notNull(),
+  requestId: uuid("request_id"),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("portal_seat_batches_request_unique").on(table.actorProfileId, table.requestId),
+  index("portal_seat_batches_company_idx").on(table.companyId, table.createdAt),
+  check("portal_seat_batches_state_check", sql`${table.state} IN ('preview', 'committed')`),
+  check("portal_seat_batches_locale_check", sql`${table.locale} IN ('en', 'zh-HK')`),
+]);
+
+export const portalSeatBatchItems = pgTable("portal_seat_batch_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  batchId: uuid("batch_id").notNull().references(() => portalSeatBatches.id, {onDelete: "cascade"}),
+  position: integer("position").notNull(),
+  email: varchar("email", {length: 254}).notNull(),
+  role: companyMemberRoleEnum("role").notNull(),
+  state: text("state").$type<"preview" | "blocked" | "pending" | "delivery_pending" | "sending" | "succeeded" | "skipped" | "failed" | "uncertain">().notNull(),
+  errorCode: text("error_code"),
+  invitationId: uuid("invitation_id").references(() => seatInvitations.id, {onDelete: "set null"}),
+  // Private delivery outbox payload. Never selected into a member-facing DTO or log.
+  deliveryToken: text("delivery_token"),
+  claimId: uuid("claim_id"),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  finishedAt: timestamp("finished_at", {withTimezone: true}),
+}, (table) => [
+  uniqueIndex("portal_seat_batch_items_position_unique").on(table.batchId, table.position),
+  index("portal_seat_batch_items_state_idx").on(table.batchId, table.state, table.position),
+  check("portal_seat_batch_items_state_check", sql`${table.state} IN ('preview', 'blocked', 'pending', 'delivery_pending', 'sending', 'succeeded', 'skipped', 'failed', 'uncertain')`),
+  check("portal_seat_batch_items_position_check", sql`${table.position} BETWEEN 1 AND 50`),
+  check("portal_seat_batch_items_attempt_check", sql`${table.attemptCount} BETWEEN 0 AND 5`),
+]);
+
 export const membershipPlans = pgTable("membership_plans", {
   code: membershipPlanCodeEnum("code").primaryKey(),
   audience: text("audience").notNull(),

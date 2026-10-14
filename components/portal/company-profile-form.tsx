@@ -1,7 +1,7 @@
 "use client";
 
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
-import {useActionState, useState} from "react";
+import {useActionState, useState, useRef, useEffect} from "react";
 
 import {PortalImageField, type PortalImageFieldLabels} from "@/components/portal/forms/image-field";
 import {PortalTagPicker} from "@/components/portal/forms/tag-picker";
@@ -58,18 +58,24 @@ const TAG_LIMIT = 8;
  * The logo is a media id the member never sees: `PortalImageField` submits it
  * as the hidden `logoMediaId` and shows a preview and an upload instead.
  */
-export function CompanyProfileForm({values, labels, action, locale, readOnly, publicHref}: Readonly<{
+export function CompanyProfileForm({companyId, values, labels, action, locale, readOnly, publicHref}: Readonly<{
+  companyId: string;
   values: CompanyProfileValues; labels: CompanyProfileFormLabels; action: Action; locale: AppLocale;
   readOnly: boolean; publicHref: string | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if ((state.status === "saved" || state.status === "submitted") && formRef.current) formRef.current.dataset.dirty = "false";
+  }, [state]);
   const [slug, setSlug] = useState(values.slug);
   const inReview = values.status === "published" || values.status === "pending_review";
   const hasAddress = slug.trim().length > 0;
   const canPublish = !readOnly && hasAddress && !inReview;
   const tagOptions = INDUSTRY_TAGS.map((tag) => ({value: tag.slug, label: industryTagLabel(tag.slug, locale)}));
   return (
-    <form action={dispatch} className="portal-form" noValidate>
+    <form ref={formRef} action={dispatch} className="portal-form" noValidate>
+      <input type="hidden" name="companyId" value={companyId} />
       <div className="portal-form-status">
         <p className="portal-form-message" role="status">
           <StatusLabel>{labels.statusLabel[values.status]}</StatusLabel>

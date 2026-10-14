@@ -21,9 +21,9 @@ vi.mock("next-intl/server", () => ({
 // ActionLink (inside HonestEmpty) uses the locale-aware Link, which needs an intl provider.
 vi.mock("@/i18n/navigation", () => ({Link: ({href, children, ...rest}: {href: string; children: React.ReactNode}) => <a href={href} {...rest}>{children}</a>}));
 vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "u", profileId: "p"}), getActor: async () => ({kind: "member", userId: "u", profileId: "p"})}));
-vi.mock("@/lib/portal/content", () => ({getMemberEvents: async () => state.events}));
+vi.mock("@/lib/portal/content", () => ({getMemberEventPage: async () => ({items: state.events, nextCursor: null})}));
 vi.mock("@/lib/events/member-core", () => ({
-  listMyCompanyEvents: async () => state.mine,
+  listMyCompanyEvents: async () => state.mine ? {...state.mine, context: await state.context!().catch(() => null)} : null,
   loadMemberEventsContext: () => state.context!(),
 }));
 vi.mock("@/components/portal/event-registration-form", () => ({
@@ -66,7 +66,7 @@ describe("member portal events list", () => {
     expect(html).toContain("(opens in a new tab)");
     expect(html).toContain('href="/events/paid"');
     expect(html).not.toContain('href="/events/closed"');
-    expect(html).toContain(en.Portal.events.registrationUnavailable);
+    expect(html).toContain('href="/portal/events/closed"');
   });
 
   it("lists the organisation's events with quota, status labels and the rejection reason only when rejected", async () => {

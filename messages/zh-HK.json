@@ -804,6 +804,7 @@
     }
   },
   "Membership": {
+    "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
     "metaTitle": "會員計劃｜WiseTech Hong Kong",
     "metaDescription": "比較 WTIA 會員級別及權益。",
     "eyebrow": "會員計劃",
@@ -904,7 +905,7 @@
     },
     "pricing": {
       "readyLabel": "現行收費",
-      "readyCopy": "上方會費根據現行網站目錄及已設定的結帳價格編號顯示。請在安全結帳頁確認總額及訂閱條款。",
+      "readyCopy": "請在安全結帳頁核對總額及訂閱條款，再確認付款。",
       "fallbackLabel": "收費",
       "fallbackCopy": "本頁有部分會費暫時無法顯示。申請前請向會員團隊確認現行價格。"
     },
@@ -2280,6 +2281,92 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "paging": {"cursorReset": "此分頁連結已不適用於目前搜尋，現顯示第一頁。"},
+    "myEvents": {
+      "title": "我的報名及訂單",
+      "description": "查看已記錄的活動報名及購票，包括過往活動。",
+      "passes": "參加者入場證會分別以電郵寄出，入場時請使用入場證電郵。如需協助尋回，請聯絡 WTIA。此列表顯示記錄於你帳戶的購票。",
+      "cursorReset": "此分頁連結已失效，現顯示第一頁。",
+      "empty": "你尚未有已記錄的報名或購票。",
+      "source": {
+        "rsvp": "活動報名",
+        "ticket": "購票訂單"
+      },
+      "rsvpStatus": {
+        "registered": "已報名",
+        "waitlist": "候補中",
+        "cancelled": "已取消報名",
+        "attended": "已出席",
+        "no_show": "未出席"
+      },
+      "eventCancelled": "此活動已取消。",
+      "viewOrder": "查看訂單",
+      "viewEvent": "查看活動",
+      "first": "第一頁",
+      "next": "下一頁"
+    },
+    "orders": {
+      "title": "我的門票訂單",
+      "amount": "訂單總額：{amount}",
+      "processing": "付款尚未確認。請重新整理以查看最新訂單狀態；從付款頁返回並不代表付款成功。",
+      "resume": "繼續現有付款",
+      "checking": "正在核對付款…",
+      "recoveryUnavailable": "此瀏覽器未能恢復這次付款。請使用開始購買時的瀏覽器，或向支援提供此訂單頁。",
+      "recoveryExpired": "這次付款已過期。如你認為已被扣款，請聯絡支援。",
+      "refresh": "重新整理訂單狀態",
+      "support": "聯絡支援",
+      "status": {
+        "pending": "等候付款確認",
+        "paid": "付款已確認",
+        "expired": "付款程序已過期",
+        "failed": "付款未成功",
+        "refunded": "退款已完成",
+        "refund_failed": "退款需要跟進",
+        "refund_pending": "退款處理中"
+      }
+    },
+    "formFeedback": {
+      "saving": "儲存中…",
+      "success": "你的變更已儲存。",
+      "validation_error": "請檢查已標示的資料，然後再試。",
+      "forbidden": "你的存取權限已變更。請重新載入頁面後再試。",
+      "conflict": "這些資料已變更。請重新載入頁面後再儲存。",
+      "unavailable": "未能儲存變更。你輸入的資料仍在，請再試一次。",
+      "fields": {
+        "invalid": "請檢查此項資料。",
+        "required": "如要接收更新，請輸入 WhatsApp 號碼。",
+        "invalid_number": "請輸入有效的 WhatsApp 號碼，包括國家或地區代碼。"
+      }
+    },
+    "companySelection": {
+      "choose": "選擇公司",
+      "use": "使用這家公司",
+      "changeWarning": "切換公司將捨棄尚未儲存的變更。是否繼續？",
+      "selected": "公司：{company}",
+      "unavailableTitle": "請選擇你有權存取的公司",
+      "unavailableBody": "你的帳戶目前無法使用所選公司。請選擇有權存取的公司繼續；你的變更並未提交至其他公司。"
+    },
+    "access": {
+      "needs_payment": {
+        "title": "請完成會籍付款",
+        "body": "會籍準備就緒後即可使用會員權益。請到帳單查看現有付款並繼續處理；你仍可更新本人的個人資料。"
+      },
+      "under_review": {
+        "title": "你的會籍正待審批",
+        "body": "我們正在審核你的申請。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
+      },
+      "inactive": {
+        "title": "目前未能使用會員權益",
+        "body": "你仍可更新本人的個人資料及查看帳單記錄。請查看會籍選項，了解下一步。"
+      },
+      "no_company": {
+        "title": "你的會籍尚未連結公司",
+        "body": "公司服務需要已連結的公司及相應的公司角色。你仍可管理本人的個人資料及帳單。"
+      },
+      "unavailable": {
+        "body": "暫時未能讀取會籍狀態。你仍可開啟個人資料及帳單；會員權益會在開啟相關頁面時核實。"
+      }
+    },
     "common": {
       "newTab": "（在新分頁開啟）"
     },
@@ -2294,6 +2381,7 @@
     "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},
     "dashboard": "控制台",
     "nextStep": {
+      "otherMemberships": "其他需要處理的會籍",
       "label": "下一步",
       "past_due": {"title": "請更新付款資料", "body": "上次付款未能完成。請更新付款資料，以保持會籍有效。", "action": "前往帳單"},
       "pending_payment": {"title": "完成付款", "body": "完成付款後，會籍即會生效。", "action": "前往帳單"},
@@ -2443,6 +2531,7 @@
       "markets": "市場"
     },
     "events": {
+      "pages": "活動分頁",
       "emptyTitle": "暫時沒有活動",
       "emptyAction": "瀏覽 WTIA 活動",
       "title": "會員活動",
@@ -2694,8 +2783,81 @@
         "invitationExpired": "此邀請已過期。請聯絡你的公司管理員重新發送邀請。",
         "invitationEmailMismatch": "此邀請是發送至另一個電郵地址。請使用該帳戶登入，或聯絡你的公司管理員改為邀請此帳戶。",
         "membershipExists": "你已經是此公司的成員。",
-        "seatLimitReached": "此公司的席位已達上限。請聯絡你的公司管理員騰出席位。"
-      }
+        "seatLimitReached": "此公司的席位已達上限。請聯絡你的公司管理員騰出席位。",
+        "invalidInput": "請檢查電郵地址、公司及角色，然後再試。",
+        "forbidden": "你的權限已變更。請重新載入並選擇你可管理的公司。",
+        "lastOwner": "公司須保留至少一位擁有人，請先委任另一位擁有人。",
+        "rolePolicy": "只有擁有人可授予或變更擁有人權限。",
+        "notFound": "此席位或邀請已變更，請重新載入列表。",
+        "alreadyPending": "此電郵地址已有待接受邀請，未有另發電郵。",
+        "alreadyMember": "此人已持有這家公司的席位。",
+        "deliveryUncertain": "邀請已儲存，但未能確認電郵是否送達。請勿重寄；請聯絡 WTIA 核對結果。"
+      },
+      "saving": "更新中…",
+      "saved": "席位變更已儲存。",
+      "details": "技術資料",
+      "unknownName": "未有姓名",
+      "revokeConfirm": "要撤銷 {member} 的存取權嗎？",
+      "invitationConfirm": "要取消寄給 {email} 的邀請嗎？",
+      "bulk": {
+        "title": "批量邀請成員",
+        "help": "每行貼上一個電郵地址，最多 50 行。可在逗號後填寫 member、admin 或 owner 指定角色；預設為一般成員。寄出前請預覽及選取收件人。",
+        "rows": "待邀請名單",
+        "preview": "預覽邀請",
+        "commit": "確認所選邀請",
+        "continue": "繼續待處理邀請",
+        "retry": "重試可重試的失敗項目",
+        "refresh": "更新結果",
+        "pending": "處理中…",
+        "selection": "請選取要邀請的人，逐項核對角色及問題。",
+        "capacity": "目前可用席位：{count}",
+        "confirmElevated": "我已核對以上選取的管理員或擁有人角色。",
+        "reference": "批次參考編號：{id}",
+        "creatorOnly": "只有仍具管理權限的原邀請人可操作此批次。已過期的預覽須重新建立。",
+        "uncertainty": "部分邀請未能確認是否送達，請勿重寄。請向 WTIA 提供此批次參考編號以核對結果。",
+        "support": "取得邀請支援",
+        "roles": {
+          "member": "一般成員",
+          "admin": "管理員",
+          "owner": "擁有人"
+        },
+        "states": {
+          "preview": "可供選取",
+          "blocked": "需要修正",
+          "pending": "等候預留席位",
+          "delivery_pending": "邀請已儲存，等候寄出",
+          "sending": "正在寄出",
+          "succeeded": "登入服務已接受邀請電郵",
+          "skipped": "未有寄出",
+          "failed": "未能預留席位",
+          "uncertain": "送達結果未確認"
+        },
+        "codes": {
+          "INVALID_EMAIL": "請檢查電郵地址。",
+          "INVALID_ROLE": "請填寫 member、admin 或 owner。",
+          "DUPLICATE": "此名單內有重複電郵地址。",
+          "ROLE_POLICY": "只有擁有人可邀請另一位擁有人。",
+          "MEMBERSHIP_EXISTS": "此人已持有公司席位。",
+          "ALREADY_PENDING": "已有待接受邀請，未有另發電郵。",
+          "SEAT_LIMIT_REACHED": "目前沒有可用席位，請釋出容量後再試此項目。",
+          "NOT_SELECTED": "未有在確認的預覽中選取。",
+          "INVITATION_UNAVAILABLE": "寄出前邀請或權限已變更。",
+          "DELIVERY_UNCERTAIN": "請先向 WTIA 核對結果，再作下一步處理。",
+          "CANCELLED_BEFORE_SEND": "已於寄出前取消。"
+        },
+        "errors": {
+          "invalid": "請檢查貼上的名單及所選收件人，每批最多 50 行。",
+          "forbidden": "你的管理權限已變更，請重新載入此頁。",
+          "expired": "此預覽不存在或已過期，請重新預覽。",
+          "capacity": "所選人數超過可用席位，請減少選取人數或釋出容量。",
+          "confirmation": "請確認已核對較高權限的角色。",
+          "unavailable": "未能完成此要求。請先更新已儲存的批次結果，再繼續。"
+        },
+        "cancel": "取消未開始的邀請",
+        "cancelConfirm": "要取消尚未開始寄出的邀請嗎？正在寄出的邀請仍可能完成。",
+        "recent": "最近 10 個已確認的邀請批次"
+      },
+      "unavailableForCompany": "此公司暫時未能存取席位，請查看會籍狀態或選擇你可存取的公司。"
     }
   },
   "Concierge": {

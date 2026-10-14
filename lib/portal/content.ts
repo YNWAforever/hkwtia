@@ -2,39 +2,16 @@ import "server-only";
 
 import type {EventRecord} from "@/content/schemas";
 import {listReceipts, type Receipt} from "@/lib/billing/receipt-service";
-import {portalContentRepository, type DirectoryCandidate} from "@/lib/db/repos/portal-content";
-import {eventsRepository, localizeEvent, type LocalizedEvent} from "@/lib/db/repos/events";
+import {listDirectoryPage, listMemberEventPage, type DirectoryQuery, type DirectoryPage, type MemberEventPage, type PageInput} from "@/lib/db/repos/portal-paging";
+export type {DirectoryQuery, DirectoryRecord, DirectoryPage} from "@/lib/db/repos/portal-paging";
+import {localizeEvent, type LocalizedEvent} from "@/lib/db/repos/events";
 import type {Event} from "@/lib/db/server-schema";
-import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {requestMemberships} from "@/lib/portal/request-context";
 import {requireMember, type Actor, type MembershipRecord} from "@/lib/membership/lifecycle";
 import {isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
+import {classifyPortalAccess, PortalAccessDenied} from "@/lib/portal/access-state";
 
 type MemberActor = Extract<Actor, {kind: "member"}>;
-
-const defaultPageSize = 20;
-const maxPageSize = 50;
-
-export type DirectoryQuery = string | Readonly<{
-  search?: string;
-  industry?: string;
-  sizeBand?: string;
-  limit?: number;
-}>;
-
-export type DirectoryRecord = Readonly<{
-  userId: string;
-  displayName: string;
-  jobTitle: string | null;
-  companyId: string | null;
-  companyDisplayName: string | null;
-  industry: string | null;
-  sizeBand: string | null;
-}>;
-
-export type DirectoryPage = Readonly<{
-  items: readonly DirectoryRecord[];
-  nextCursor: string | null;
-}>;
 
 export type DocumentItem = Readonly<{
   id: string;
@@ -52,11 +29,11 @@ type MembershipReader = Readonly<{
 }>;
 
 type DirectoryReader = Readonly<{
-  list: (actor: MemberActor) => Promise<DirectoryCandidate[]>;
+  page: (actor: MemberActor, query?: DirectoryQuery | null, cursor?: string | null) => Promise<DirectoryPage>;
 }>;
 
 type EventReader = Readonly<{
-  list: (actor: MemberActor) => Promise<readonly (EventRecord | Event)[]>;
+  page: (actor: MemberActor, input?: PageInput) => Promise<Omit<MemberEventPage, "items"> & {items: readonly (EventRecord | Event | MemberEventPage["items"][number])[]}>;
 }>;
 
 type ReceiptLike = Pick<Receipt, "id" | "date" | "amount" | "currency" | "status" | "hostedInvoiceUrl">;
@@ -73,92 +50,6 @@ export type PortalContentDependencies = Readonly<{
   documents: DocumentReader;
 }>;
 
-function normalizeSearch(query: DirectoryQuery | null | undefined): Readonly<{text: string; industry: string; sizeBand: string; limit: number}> {
-  if (typeof query !== "object" || query === null) {
-    return {text: typeof query === "string" ? query.trim().toLocaleLowerCase() : "", industry: "", sizeBand: "", limit: defaultPageSize};
-  }
-  const limit = Number.isFinite(query.limit) ? Math.min(maxPageSize, Math.max(1, Math.trunc(query.limit!))) : defaultPageSize;
-  return {
-    text: (query.search ?? "").trim().toLocaleLowerCase(),
-    industry: (query.industry ?? "").trim().toLocaleLowerCase(),
-    sizeBand: (query.sizeBand ?? "").trim().toLocaleLowerCase(),
-    limit,
-  };
-}
-
-type CursorPayload = Readonly<{displayName: string; userId: string; companyId: string}>;
-
-function encodeCursor(record: DirectoryRecord): string {
-  const payload: CursorPayload = {
-    displayName: record.displayName.toLocaleLowerCase(),
-    userId: record.userId,
-    companyId: record.companyId ?? "",
-  };
-  return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
-}
-
-function decodeCursor(cursor: string | null | undefined): CursorPayload | null {
-  if (!cursor) return null;
-  try {
-    const parsed: unknown = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8"));
-    if (!parsed || typeof parsed !== "object") throw new Error("INVALID_CURSOR");
-    const value = parsed as Record<string, unknown>;
-    if (typeof value.displayName !== "string" || typeof value.userId !== "string" || typeof value.companyId !== "string") {
-      throw new Error("INVALID_CURSOR");
-    }
-    return {displayName: value.displayName, userId: value.userId, companyId: value.companyId};
-  } catch {
-    throw new Error("INVALID_CURSOR");
-  }
-}
-
-function compareDirectoryRecords(left: DirectoryRecord, right: DirectoryRecord): number {
-  const nameOrder = left.displayName.toLocaleLowerCase().localeCompare(right.displayName.toLocaleLowerCase(), "en");
-  if (nameOrder !== 0) return nameOrder;
-  const userOrder = left.userId.localeCompare(right.userId, "en");
-  if (userOrder !== 0) return userOrder;
-  return (left.companyId ?? "").localeCompare(right.companyId ?? "", "en");
-}
-
-function isAfterCursor(record: DirectoryRecord, cursor: CursorPayload): boolean {
-  const name = record.displayName.toLocaleLowerCase();
-  if (name !== cursor.displayName) return name.localeCompare(cursor.displayName, "en") > 0;
-  const userOrder = record.userId.localeCompare(cursor.userId, "en");
-  if (userOrder !== 0) return userOrder > 0;
-  return (record.companyId ?? "").localeCompare(cursor.companyId, "en") > 0;
-}
-
-function matchesDirectoryQuery(record: DirectoryRecord, query: Readonly<{text: string; industry: string; sizeBand: string}>): boolean {
-  if (query.industry && !(record.industry ?? "").toLocaleLowerCase().includes(query.industry)) return false;
-  if (query.sizeBand && !(record.sizeBand ?? "").toLocaleLowerCase().includes(query.sizeBand)) return false;
-  if (!query.text) return true;
-  return [record.displayName, record.jobTitle, record.companyDisplayName, record.industry, record.sizeBand]
-    .some((value) => (value ?? "").toLocaleLowerCase().includes(query.text));
-}
-
-function visibleDirectoryRecords(rows: readonly DirectoryCandidate[], query: Readonly<{text: string; industry: string; sizeBand: string}>): DirectoryRecord[] {
-  const seen = new Set<string>();
-  return rows
-    .filter((row) => row.active && row.profileDirectoryVisible && (row.companyId === null || row.companyDirectoryVisible))
-    .filter((row) => matchesDirectoryQuery(row, query))
-    .map((row) => ({
-      userId: row.userId,
-      displayName: row.displayName,
-      jobTitle: row.jobTitle,
-      companyId: row.companyId,
-      companyDisplayName: row.companyDisplayName,
-      industry: row.industry,
-      sizeBand: row.sizeBand,
-    }))
-    .filter((record) => {
-      const key = `${record.userId}:${record.companyId ?? ""}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .sort(compareDirectoryRecords);
-}
-
 function membershipIsDirectoryEligible(membership: MembershipRecord): boolean {
   return isBenefitEligibleMembershipStatus(membership.status);
 }
@@ -166,14 +57,15 @@ function membershipIsDirectoryEligible(membership: MembershipRecord): boolean {
 async function requirePortalEntitlement(actor: Actor, dependencies: PortalContentDependencies): Promise<MemberActor> {
   requireMember(actor);
   const membershipsForActor = await dependencies.memberships.list(actor);
-  if (!membershipsForActor.some(membershipIsDirectoryEligible)) throw new Error("MEMBERSHIP_INACTIVE");
+  const access = classifyPortalAccess(membershipsForActor);
+  if (access.status !== "ready") throw new PortalAccessDenied({status: access.status});
   return actor;
 }
 
 const defaultPortalContentDependencies: PortalContentDependencies = {
-  memberships: membershipsRepository,
-  directory: {list: portalContentRepository.listDirectory},
-  events: {list: eventsRepository.listForMember},
+  memberships: {list: requestMemberships},
+  directory: {page: listDirectoryPage},
+  events: {page: listMemberEventPage},
   documents: {
     listApproved: async () => [],
     listReceipts: async (actor, membership) => {
@@ -202,30 +94,22 @@ export async function searchDirectory(
 ): Promise<DirectoryPage> {
   const deps = dependencies(inputDependencies);
   const member = await requirePortalEntitlement(actor, deps);
-  const parsedQuery = normalizeSearch(query);
-  const decodedCursor = decodeCursor(cursor);
-  const records = visibleDirectoryRecords(await deps.directory.list(member), parsedQuery);
-  const afterCursor = decodedCursor ? records.filter((record) => isAfterCursor(record, decodedCursor)) : records;
-  const page = afterCursor.slice(0, parsedQuery.limit);
-  return {
-    items: page,
-    nextCursor: afterCursor.length > parsedQuery.limit && page.length > 0 ? encodeCursor(page[page.length - 1]) : null,
-  };
+  return deps.directory.page(member, query, cursor);
 }
 
-/** Return typed public event records for an entitled member; locale is resolved by the caller via `namespace`. */
-export async function getMemberEvents(
-  actor: Actor,
-  inputDependencies?: Partial<PortalContentDependencies>,
-  locale = "en",
-): Promise<Array<EventRecord | LocalizedEvent>> {
+export async function getMemberEventPage(actor: Actor, page: PageInput = {}, inputDependencies?: Partial<PortalContentDependencies>, locale = "en") {
   const deps = dependencies(inputDependencies);
   const member = await requirePortalEntitlement(actor, deps);
-  const records = await deps.events.list(member);
-  return records
-    .filter((event) => new Date(event.startsAt).getTime() >= Date.now())
-    .map((event) => "titleEn" in event ? localizeEvent(event, locale) : event)
-    .sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime() || left.slug.localeCompare(right.slug));
+  const result = await deps.events.page(member, page);
+  return {...result, items: result.items.map((event): EventRecord | LocalizedEvent => {
+    if (!("titleEn" in event)) return event;
+    return localizeEvent({...event, startsAt: new Date(event.startsAt), endsAt: event.endsAt ? new Date(event.endsAt) : null}, locale);
+  })};
+}
+
+/** Compatibility for consumers of the bounded first page. */
+export async function getMemberEvents(actor: Actor, inputDependencies?: Partial<PortalContentDependencies>, locale = "en"): Promise<Array<EventRecord | LocalizedEvent>> {
+  return (await getMemberEventPage(actor, {}, inputDependencies, locale)).items;
 }
 
 function documentFromReceipt(receipt: ReceiptLike): DocumentItem {

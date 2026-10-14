@@ -1,16 +1,17 @@
 "use client";
 
-import {usePathname} from "next/navigation";
+import {usePathname, useSearchParams} from "next/navigation";
 import {useId, useState} from "react";
 
 import {findCurrentLink, type InternalNavGroup} from "@/components/internal-shell/navigation";
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {Sheet, SheetContent, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
+import {portalCompanyPath} from "@/lib/portal/company-context";
 
-export type PortalNavGroup = InternalNavGroup & Readonly<{label: string}>;
+export type PortalNavGroup = InternalNavGroup & Readonly<{label: string; description?: string}>;
 export type PortalNavigationLabels = Readonly<{navigationLabel: string; openMenu: string; closeMenu: string}>;
 
-function GroupList({groups, currentHref, onNavigate}: Readonly<{groups: readonly PortalNavGroup[]; currentHref: string | undefined; onNavigate?: () => void}>) {
+function GroupList({groups, currentHref, onNavigate, companyId}: Readonly<{groups: readonly PortalNavGroup[]; currentHref: string | undefined; onNavigate?: () => void; companyId: string | null}>) {
   // The desktop column and the phone sheet render the same groups, so the label ids need a
   // per-instance prefix or the two aria-labelledby targets would collide.
   const prefix = useId();
@@ -21,11 +22,12 @@ function GroupList({groups, currentHref, onNavigate}: Readonly<{groups: readonly
         return (
           <div key={group.id} className="portal-nav-group">
             <p id={labelId} className="portal-nav-group-label">{group.label}</p>
+            {group.description ? <p className="portal-field-help">{group.description}</p> : null}
             <ul aria-labelledby={labelId}>
               {group.links.map((link) => (
                 <li key={link.id}>
                   <Link
-                    href={link.href}
+                    href={companyId && ["company", "showcase-listing", "seats"].includes(link.id) ? portalCompanyPath(link.href, companyId) : link.href}
                     className="portal-nav-link"
                     aria-current={link.href === currentHref ? "page" : undefined}
                     onClick={onNavigate}
@@ -50,13 +52,14 @@ function GroupList({groups, currentHref, onNavigate}: Readonly<{groups: readonly
  */
 export function PortalNavigation({groups, labels}: Readonly<{groups: readonly PortalNavGroup[]; labels: PortalNavigationLabels}>) {
   const pathname = usePathname();
+  const companyId = useSearchParams()?.get("companyId") ?? null;
   const [open, setOpen] = useState(false);
   const currentHref = findCurrentLink(groups, pathname);
 
   return (
     <nav aria-label={labels.navigationLabel} className="portal-nav">
       <div className="portal-nav-column">
-        <GroupList groups={groups} currentHref={currentHref} />
+        <GroupList groups={groups} currentHref={currentHref} companyId={companyId} />
       </div>
       <div className="portal-nav-menu">
         <Sheet open={open} onOpenChange={setOpen}>
@@ -66,7 +69,7 @@ export function PortalNavigation({groups, labels}: Readonly<{groups: readonly Po
           <SheetContent aria-label={labels.navigationLabel} side="left" closeLabel={labels.closeMenu}>
             <SheetTitle className="sr-only">{labels.navigationLabel}</SheetTitle>
             <div className="portal-nav-sheet">
-              <GroupList groups={groups} currentHref={currentHref} onNavigate={() => setOpen(false)} />
+              <GroupList groups={groups} currentHref={currentHref} companyId={companyId} onNavigate={() => setOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>

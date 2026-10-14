@@ -31,16 +31,16 @@ describe("updateCompanyAction", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("leaves directoryVisible out of the update when the form has no switch", async () => {
-    await updateCompanyAction(details());
+    await updateCompanyAction({status: "idle"}, details());
     const input = vi.mocked(updateCompany).mock.calls[0]?.[1];
     expect(input).toBeDefined();
     expect(input).not.toHaveProperty("directoryVisible");
   });
 
   it("sends the switch's value when the form has it", async () => {
-    await updateCompanyAction(details({directoryVisibleShown: "1", directoryVisible: "on"}));
+    await updateCompanyAction({status: "idle"}, details({directoryVisibleShown: "1", directoryVisible: "on"}));
     expect(vi.mocked(updateCompany).mock.calls[0]?.[1]).toMatchObject({directoryVisible: true});
-    await updateCompanyAction(details({directoryVisibleShown: "1"}));
+    await updateCompanyAction({status: "idle"}, details({directoryVisibleShown: "1"}));
     expect(vi.mocked(updateCompany).mock.calls[1]?.[1]).toMatchObject({directoryVisible: false});
   });
 });

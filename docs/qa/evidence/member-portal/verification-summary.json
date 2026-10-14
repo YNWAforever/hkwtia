@@ -1,0 +1,59 @@
+{
+  "testedCommit": "5a7600640dc522cb2df278631f0755bc777072b6",
+  "baseline": "e8254bab79cff5945da4abe995a7c075d0ce3d57",
+  "unitAndIntegrationDiscovery": {
+    "command": "npm test -- --maxWorkers=4 --reporter=default --reporter=json --outputFile.json=.superpowers/sdd/2026-10-14-member-portal-remediation/final-results.json",
+    "passedFiles": 873,
+    "skippedFiles": 110,
+    "passedTests": 7636,
+    "skippedTests": 618,
+    "failedTests": 0,
+    "success": true,
+    "durationSeconds": 240.77
+  },
+  "typecheck": {
+    "command": "NODE_OPTIONS=--max-old-space-size=4096 npm run typecheck",
+    "result": "passed"
+  },
+  "lint": {
+    "command": "npm run lint",
+    "errors": 0,
+    "warnings": 72
+  },
+  "strings": {
+    "command": "npm run audit:strings",
+    "result": "passed",
+    "tsxFilesScanned": 353
+  },
+  "build": {
+    "command": "NODE_OPTIONS=--max-old-space-size=4096 npm run build",
+    "result": "passed",
+    "generatedPages": 278
+  },
+  "review": {
+    "model": "gpt-6-astra",
+    "range": "e8254ba..a319284",
+    "critical": 0,
+    "important": 2,
+    "minor": 1,
+    "minorRegradedImportant": 1,
+    "allFindingsFixedIn": "5a7600640dc522cb2df278631f0755bc777072b6",
+    "fixRegressionPassedTests": 87
+  },
+  "notExecuted": [
+    "real PostgreSQL/migration/concurrency/EXPLAIN",
+    "browser visual/keyboard/mobile acceptance",
+    "signed-in cross-device/user-role matrix",
+    "test Stripe and Auth/provider delivery",
+    "repeated Lighthouse measurements",
+    "five-person policy wayfinding"
+  ],
+  "evidenceHashes": {
+    "final-results.json": "2f677f44c1d16022893e04bd2deb3b8ca52763d312b2f3a1d8f465ace292bc6c",
+    "final-green-suite.log": "00631f4f0845e8cd309c99c5871408231a7b9c5ec2a070d489467378da686e05",
+    "final-green-typecheck.log": "f9f458dd1f7b7d907d5561fb5a63e24453d89d28ee3ad7d67014317e82c251c9",
+    "final-green-lint.log": "57e30d6d82a3081cec0af7d8fdbba8cea201e283a473a15e830f60bb90b1e939",
+    "final-green-strings.log": "df6e7143d79015e03b749e10c1e670a2402bf59b992f961e0a90824e0da8707f",
+    "final-green-build.log": "5c076f4a63dda1df7d101cba712f81cc372e89518f7e8d70b52634e55d5b2035"
+  }
+}

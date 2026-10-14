@@ -110,7 +110,8 @@ export async function updateProfile(
   requireMember(actor);
   const input = profileUpdateSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
-  await requireRecoverableMembership(actor, deps);
+  // Consent and own contact preferences are self-service rights, independent
+  // of paid benefits. The repository still scopes this write to actor.profileId.
   const {whatsappOptIn, ...profileInput} = input;
   const result = await deps.profiles.update(actor, actor.profileId, {
     ...profileInput,

@@ -12,6 +12,7 @@ describe("portal navigation groups", () => {
     expect(groups.flatMap((group) => group.links.map((link) => link.id))).toEqual([
       "dashboard",
       "profile",
+      "my-events",
       "company",
       "showcase-listing",
       "seats",

@@ -1,5 +1,7 @@
 import "server-only";
 
+import {z} from "zod";
+
 import {companyProfilesRepository, type CompanyProfileRow} from "@/lib/db/repos/company-profiles";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {requireMember} from "@/lib/membership/lifecycle";
@@ -30,15 +32,17 @@ const defaultDependencies: MemberCompanyProfileDependencies = {profiles: company
 
 export type CompanyProfileContext = Readonly<{companyId: string; companyName: string}>;
 
-/** The first company the member manages. Membership alone is not enough: only owners and admins edit the page. */
+/** A POST always names its target. Membership alone is not enough: only owners and admins edit the page. */
 export async function loadCompanyProfileContext(
   actor: Actor,
+  companyId: string,
   deps: MemberCompanyProfileDependencies = defaultDependencies,
 ): Promise<CompanyProfileContext> {
   requireMember(actor);
+  if (typeof companyId !== "string" || !companyId.trim()) throw new Error("FORBIDDEN");
   const dashboard = await deps.dashboard(actor);
-  const company = dashboard.companies.find((entry) => entry.canManage);
-  if (!company) throw new Error("NO_MANAGED_COMPANY");
+  const company = dashboard.companies.find((entry) => entry.id === companyId && entry.canManage);
+  if (!company) throw new Error("FORBIDDEN");
   return {companyId: company.id, companyName: company.displayName};
 }
 
@@ -48,15 +52,18 @@ export async function saveCompanyProfile(
   input: unknown,
   deps: MemberCompanyProfileDependencies = defaultDependencies,
 ): Promise<CompanyProfileRow> {
-  const context = await loadCompanyProfileContext(actor, deps);
-  return deps.profiles.updateProfile(actor, context.companyId, input);
+  requireMember(actor);
+  const parsed = z.object({companyId: z.string().trim().min(1).max(100), profile: z.unknown()}).parse(input);
+  const context = await loadCompanyProfileContext(actor, parsed.companyId, deps);
+  return deps.profiles.updateProfile(actor, context.companyId, parsed.profile);
 }
 
 /** "Publish my profile": `hidden`/`rejected` → `pending_review`. Staff decide whether it goes live (Task 4). */
 export async function submitCompanyProfile(
   actor: Actor,
+  companyId: string,
   deps: MemberCompanyProfileDependencies = defaultDependencies,
 ): Promise<CompanyProfileRow> {
-  const context = await loadCompanyProfileContext(actor, deps);
+  const context = await loadCompanyProfileContext(actor, companyId, deps);
   return deps.profiles.submitForReview(actor, context.companyId);
 }

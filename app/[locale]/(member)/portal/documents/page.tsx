@@ -1,3 +1,5 @@
+import {portalAccessNotice} from "@/components/portal/access-notice";
+import {readPortalPage} from "@/lib/portal/access-state";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DocumentList} from "@/components/portal/document-list";
@@ -15,7 +17,9 @@ export default async function DocumentsPage({params}: Props) {
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
   const actor = await portalPageActor(locale, "/portal/documents");
-  const documents = await getDocuments(actor);
+  const result = await readPortalPage(() => getDocuments(actor));
+  if (!result.ok) return portalAccessNotice(locale, result.access);
+  const documents = result.value;
   const t = await getTranslations({locale, namespace: "Portal"});
 
   return (

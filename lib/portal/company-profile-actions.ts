@@ -70,9 +70,10 @@ export async function saveCompanyProfileAction(
   const {requireActor} = await import("@/lib/auth/actor");
   const actor = await requireActor();
   const publish = formData.get("intent") === "publish";
+  const companyId = text(formData, "companyId");
   try {
-    await saveCompanyProfile(actor, companyProfileInputFromFormData(formData));
-    if (publish) await submitCompanyProfile(actor);
+    await saveCompanyProfile(actor, {companyId, profile: companyProfileInputFromFormData(formData)});
+    if (publish) await submitCompanyProfile(actor, companyId);
   } catch (error) {
     return {status: "error", code: errorCode(error)};
   }
