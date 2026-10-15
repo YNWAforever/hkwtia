@@ -1,13 +1,11 @@
 import "server-only";
 import {createHash} from "node:crypto";
 import {and, eq, inArray, notInArray, sql} from "drizzle-orm";
-import {alias} from "drizzle-orm/pg-core";
 import {z} from "zod";
 import {AUDIT_DEMO_EVENT_SLUGS} from "@/config/demo-events";
 import {getDb} from "@/lib/db/repos/common";
 import {memberBenefitScopeSql} from "@/lib/db/repos/member-benefit-sql";
-import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
-import {companies, companyMembers, events, memberships, profiles} from "@/lib/db/server-schema";
+import {companies, companyMembers, events, profiles} from "@/lib/db/server-schema";
 import {requireMember, type Actor} from "@/lib/membership/lifecycle";
 
 export type DirectoryQuery = string | Readonly<{search?: string; industry?: string; sizeBand?: string; limit?: number}>;
@@ -45,16 +43,7 @@ export async function listDirectoryPage(actor: Actor, query?: DirectoryQuery | n
   const name = sql`lower(${profiles.displayName}) COLLATE "C"`;
   const userId = sql`${profiles.id}::text COLLATE "C"`;
   const companyId = sql`coalesce(${companyMembers.companyId}::text, '') COLLATE "C"`;
-  const eligibleTarget = sql`EXISTS (
-    SELECT 1 FROM ${memberships} AS directory_membership
-    WHERE directory_membership.status IN ('active', 'past_due', 'cancel_at_period_end')
-      AND ${membershipGrantValiditySql(undefined, alias(memberships, "directory_membership"))}
-      AND (directory_membership.owner_user_id = ${profiles.id} OR EXISTS (
-        SELECT 1 FROM ${companyMembers} AS directory_seat
-        WHERE directory_seat.company_id = directory_membership.company_id
-          AND directory_seat.user_id = ${profiles.id} AND directory_seat.revoked_at IS NULL
-      ))
-  )`;
+  const eligibleTarget = memberBenefitScopeSql(profiles.id);
   // position treats % and _ literally; lower() is applied by the same database on both operands.
   const contains = (field: ReturnType<typeof sql>, value: string) => sql`position(lower(${value}) in lower(coalesce(${field}, ''))) > 0`;
   const search = filters.text ? sql`(${sql.join([profiles.displayName, profiles.jobTitle, companies.displayName, companies.industry, companies.sizeBand]

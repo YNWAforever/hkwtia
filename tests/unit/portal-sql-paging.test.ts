@@ -18,8 +18,8 @@ describe("SQL directory page contract", () => {
     expect(query().sql).toMatch(/position\(lower/);
     expect(query().sql).toContain('"profiles"."directory_visible" = TRUE');
     expect(query().sql).toContain('"companies"."directory_visible" = TRUE');
-    expect(query().sql).toContain("directory_seat.revoked_at IS NULL");
-    expect(query().sql).toContain('"directory_membership"."grant_expires_at" > now()');
+    expect(query().sql).toContain("portal_company_seat.revoked_at IS NULL");
+    expect(query().sql).toContain('"portal_seat_membership"."grant_expires_at" > now()');
     expect(query().params.filter((v) => v === actor.profileId)).toHaveLength(2);
   });
   it("uses the database sort value and same C tuple; omits private fields", async () => {

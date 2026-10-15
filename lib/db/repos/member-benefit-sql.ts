@@ -1,4 +1,4 @@
-import {sql} from "drizzle-orm";
+import {sql, type SQLWrapper} from "drizzle-orm";
 import {alias} from "drizzle-orm/pg-core";
 import {companyMembers, memberships} from "@/lib/db/server-schema";
 import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
@@ -9,15 +9,21 @@ export function benefitMembershipOrderSql() {
 }
 
 /** Apply current entitlement, grant validity and seat revocation in the same read snapshot. */
-export function memberBenefitScopeSql(profileId: string) {
-  return sql`EXISTS (
-    SELECT 1 FROM ${memberships} AS portal_viewer_membership
-    WHERE portal_viewer_membership.status IN ('active', 'past_due', 'cancel_at_period_end')
-      AND ${membershipGrantValiditySql(undefined, alias(memberships, "portal_viewer_membership"))}
-      AND (portal_viewer_membership.owner_user_id = ${profileId} OR EXISTS (
-        SELECT 1 FROM ${companyMembers} AS portal_viewer_seat
-        WHERE portal_viewer_seat.company_id = portal_viewer_membership.company_id
-          AND portal_viewer_seat.user_id = ${profileId} AND portal_viewer_seat.revoked_at IS NULL
-      ))
+export function memberBenefitScopeSql(profileId: string | SQLWrapper) {
+  return sql`(
+    EXISTS (
+      SELECT 1 FROM ${memberships} AS portal_owner_membership
+      WHERE portal_owner_membership.status IN ('active', 'past_due', 'cancel_at_period_end')
+        AND ${membershipGrantValiditySql(undefined, alias(memberships, "portal_owner_membership"))}
+        AND portal_owner_membership.owner_user_id = ${profileId}
+    )
+    OR EXISTS (
+      SELECT 1 FROM ${memberships} AS portal_seat_membership
+      INNER JOIN ${companyMembers} AS portal_company_seat
+        ON portal_company_seat.company_id = portal_seat_membership.company_id
+        AND portal_company_seat.user_id = ${profileId} AND portal_company_seat.revoked_at IS NULL
+      WHERE portal_seat_membership.status IN ('active', 'past_due', 'cancel_at_period_end')
+        AND ${membershipGrantValiditySql(undefined, alias(memberships, "portal_seat_membership"))}
+    )
   )`;
 }
