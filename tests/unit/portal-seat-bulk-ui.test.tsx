@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import en from "@/messages/en.json";
 import type {SeatBatchView, SeatBulkState} from "@/lib/portal/seat-bulk-contract";
@@ -26,12 +26,12 @@ describe("seat invitation batch preview and results", () => {
     render(<SeatBulkInvite companyId={companyId} locale="en" initialView={view} labels={labels} supportHref="/contact"/>);
     expect(screen.getAllByRole("checkbox")[1]).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", {name: labels.confirmElevated}));
-    submitButton(screen.getByRole("button", {name: labels.commit}));
+    await act(async () => {submitButton(screen.getByRole("button", {name: labels.commit}));});
     await screen.findByRole("alert");
     const form = action.mock.calls[0][1] as FormData;
     expect(form.get("operation")).toBe("commit"); expect(form.getAll("itemId")).toEqual([itemId]);
     expect(form.get("confirmElevated")).toBe("on"); expect(form.get("requestId")).toBe(batchId);
-    submitButton(screen.getByRole("button", {name: labels.commit}));
+    await act(async () => {submitButton(screen.getByRole("button", {name: labels.commit}));});
     await waitFor(() => expect(action).toHaveBeenCalledTimes(2));
     expect((action.mock.calls[1][1] as FormData).get("requestId")).toBe(batchId);
     expect(new URL(window.location.href).searchParams.get("batchId")).toBe(batchId);

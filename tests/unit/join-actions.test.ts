@@ -8,6 +8,7 @@ const repoState = vi.hoisted(() => ({
   company: {id: "company-a", legalName: "Acme Limited", displayName: "Acme"},
   profile: {id: "user-a", displayName: "Member A", phone: null, jobTitle: null, locale: "en", email: "member-a@example.test"},
   linkedContactInput: null as null | Record<string, unknown>,
+  profileWrite: null as null | Record<string, unknown>,
   createdCompanyInput: null as null | Record<string, unknown>,
   updatedCompanyInput: null as null | Record<string, unknown>,
   completedInput: null as null | Record<string, unknown>,
@@ -42,7 +43,7 @@ vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   getById: async () => repoState.company,
   update: async (_actor: unknown, _companyId: string, input: Record<string, unknown>) => {repoState.updatedCompanyInput = input; return repoState.company;},
 }}));
-vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {getById: async () => repoState.profile, update: async () => repoState.profile, ensure: async () => repoState.profile}}));
+vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {getById: async () => repoState.profile, update: async (_actor: unknown, _id: string, input: Record<string, unknown>) => {repoState.profileWrite = input; return repoState.profile;}, ensure: async () => repoState.profile}}));
 // Phase C2 Task 5. The join profile step is one of the two writes that can
 // change a member's matchable identity (S-16), so it now fires the contact
 // merge. Mocked rather than left to the real repository: the merge is
@@ -91,6 +92,7 @@ describe("join Server Actions", () => {
     repoState.createdCompanyInput = null;
     repoState.updatedCompanyInput = null;
     repoState.linkedContactInput = null;
+    repoState.profileWrite = null;
     repoState.completedInput = null;
     repoState.startInput = null;
     repoState.startResult = {applicationId: "application-a", next: "profile"};
@@ -190,6 +192,25 @@ describe("join Server Actions", () => {
     });
     expect(redirectState.url).toBe("/join/checkout?membership_id=membership-a");
   });
+  it.each([null, "", "   "])("uses the legal name when an optional company display name is %s", async (name) => {
+    const form = new FormData();
+    form.set("legalName", "  Acme Limited  ");
+    if (name !== null) form.set("companyDisplayName", name);
+    await expect(saveCompany("en", "startup", "application-a", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(repoState.createdCompanyInput).toMatchObject({legalName: "Acme Limited", displayName: "Acme Limited"});
+    expect(repoState.completedInput).toMatchObject({company: {displayName: "Acme Limited"}});
+  });
+
+  it("still rejects an empty legal name when the optional display name is absent", async () => {
+    const form = new FormData();
+    form.set("legalName", "  ");
+    await expect(saveCompany("en", "startup", "application-a", {}, form)).resolves.toMatchObject({
+      fieldErrors: {legalName: "localized:errors.required"},
+    });
+    expect(repoState.createdCompanyInput).toBeNull();
+    expect(repoState.completedInput).toBeNull();
+  });
+
   it("denies a non-applicant company member before mutating an existing company", async () => {
     repoState.application = {
       ...repoState.application,
@@ -226,6 +247,13 @@ describe("join Server Actions", () => {
       applicationId: "application-a",
       company: {id: "company-a", legalName: "Acme Updated Limited", displayName: "Acme Updated"},
     });
+  });
+
+  it.each(["community", "startup", "corporate", "patron"] as const)("marks the validated profile step complete for %s without requiring optional contact details", async (plan) => {
+    const form = new FormData();
+    form.set("displayName", "New member");
+    await expect(saveProfile("en", plan, null, {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(repoState.profileWrite).toMatchObject({displayName: "New member", onboardingState: "complete", whatsappOptIn: false});
   });
 
   it("attributes the invite after the application is saved and before the redirect (saveProfile)", async () => {

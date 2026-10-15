@@ -4,6 +4,10 @@ import type {ComponentProps} from "react";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
+import {FirstResult, type FirstMemberResult} from "@/components/portal/dashboard/first-result";
+import {recordFirstResultReadFailure} from "@/lib/portal/first-result-diagnostic";
+import {classifyPortalAccess} from "@/lib/portal/access-state";
+import {getMemberEventPage, searchDirectory} from "@/lib/portal/content";
 import {BenefitCards} from "@/components/portal/dashboard/benefit-cards";
 import {MembershipGlance} from "@/components/portal/dashboard/membership-glance";
 import {NextStep} from "@/components/portal/dashboard/next-step";
@@ -17,6 +21,7 @@ import {pickNextStep} from "@/lib/portal/next-step";
 import {getMembershipIssues} from "@/lib/portal/membership-selection";
 import {getDashboard, type DashboardViewModel} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
+import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
 
 export const dynamic = "force-dynamic";
 
@@ -96,11 +101,44 @@ export default async function PortalPage({params}: Props) {
     };
   }
   const planLabel = t(`plans.${membership.planCode}`);
+  let firstResult: FirstMemberResult | null = null;
+  if (!step && classifyPortalAccess(dashboard.memberships).status === "ready") {
+    try {
+      const event = (await getMemberEventPage(actor, {limit: 1}, undefined, locale)).items[0];
+      if (event) {
+        const legacyCopy = "namespace" in event ? await getTranslations({locale, namespace: event.namespace}) : null;
+        firstResult = {
+          kind: "event",
+          title: "title" in event ? event.title : legacyCopy!("title"),
+          description: "description" in event ? event.description : "",
+          startsAt: event.startsAt, venue: event.venue,
+          href: "namespace" in event ? `/events/${encodeURIComponent(event.slug)}`
+            : event.registrationMode !== "ticketed" ? `/portal/events#event-${event.id}`
+            : ticketPurchaseAudience(event) === "public" ? `/events/${encodeURIComponent(event.slug)}`
+            : `/portal/events/${event.id}`,
+        };
+      } else {
+        const member = (await searchDirectory(actor, {limit: 1})).items[0];
+        firstResult = member ? {
+          kind: "member", name: member.displayName, jobTitle: member.jobTitle, company: member.companyDisplayName,
+          href: `/portal/directory?${new URLSearchParams({q: member.displayName})}`,
+        } : {kind: "empty"};
+      }
+    } catch (error) {
+      firstResult = {kind: "unavailable", reference: recordFirstResultReadFailure(error)};
+    }
+  }
 
   return (
     <div className="space-y-8">
       <WelcomeBand greeting={t("welcome", {name: profile.displayName})} companyName={company?.displayName} planLabel={planLabel} statusLabel={t(`status.${primaryStatus}.label`)} />
       {nextStep ? <NextStep {...nextStep} /> : null}
+      {firstResult ? <FirstResult result={firstResult} locale={locale} labels={{
+        title: t("firstResult.title"), event: t("firstResult.event"), member: t("firstResult.member"),
+        viewEvent: t("firstResult.viewEvent"), viewMember: t("firstResult.viewMember"),
+        empty: t("firstResult.empty"), unavailable: t("firstResult.unavailable", {reference: firstResult.kind === "unavailable" ? firstResult.reference : ""}),
+        browseEvents: t("firstResult.browseEvents"), retry: t("firstResult.retry"),
+      }}/> : null}
       <MembershipGlance
         locale={locale}
         companyId={membership.companyId}

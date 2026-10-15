@@ -1022,10 +1022,15 @@
     },
     "choosePlanAction": "Continue with {plan}",
     "choosePlanContact": "Contact WTIA",
+    "optionalProfileTitle": "Contact details (optional)",
+    "optionalProfileHint": "Add these now if you like, or continue with just your name. WhatsApp updates require your explicit consent.",
+    "optionalCompanyTitle": "Company details (optional)",
+    "optionalCompanyHint": "Add a display name and company details now, or update them later in the portal.",
+    "companyDisplayNameHint": "Leave blank to use the registered company name.",
     "profileTitle": "Tell us about yourself",
-    "profileDescription": "Your profile helps WTIA support your membership and keep your application moving.",
+    "profileDescription": "Start with your name. Contact details are optional and can be added later in your profile.",
     "companyTitle": "Confirm your company",
-    "companyDescription": "Tell us about your company. We will create its WTIA profile and make you the initial owner.",
+    "companyDescription": "Enter your company's registered name to continue. You can add its public details later.",
     "steps": {
       "plan": "Choose plan",
       "auth": "Sign in",
@@ -2281,6 +2286,17 @@
     "retry": "Try again"
   },
   "Portal": {
+    "firstResult": {
+      "title": "Put your membership to work",
+      "event": "Your next event",
+      "member": "Meet the community",
+      "viewEvent": "View event and registration options",
+      "viewMember": "Find this member in the directory",
+      "empty": "There are no upcoming events or visible directory members to show yet. Your setup is saved; check the events page for new opportunities.",
+      "unavailable": "We couldn't load your membership opportunities. Your setup is saved. Try again in a moment. Reference: {reference}.",
+      "browseEvents": "Browse events",
+      "retry": "Try again"
+    },
     "paging": {"cursorReset": "The page link is no longer valid for this search. Showing the first page."},
     "myEvents": {
       "title": "My registrations and orders",

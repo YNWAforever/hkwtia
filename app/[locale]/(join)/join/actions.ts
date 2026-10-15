@@ -159,7 +159,8 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // Programme D-7: the join step is the consent source; provenance is stamped
     // here, and completeApplication() only forwards name/locale afterwards.
     const consent = whatsappConsentFields({optIn: parsed.data.whatsappOptIn, source: "join"});
-    const profileWrite = {...parsed.data, ...consent, onboardingState: "profile" as const};
+    // This marker tracks the validated profile step; membership/payment gates remain separate.
+    const profileWrite = {...parsed.data, ...consent, onboardingState: "complete" as const};
     const saved = existing
       ? await profilesRepository.update(actor, actor.profileId, profileWrite)
       : await profilesRepository.ensure(actor, {id: actor.profileId, ...profileWrite});
@@ -205,9 +206,11 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
 
 export async function saveCompany(locale: AppLocale, plan: PlanCode, applicationId: string, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
   if (!["startup", "corporate"].includes(plan)) return formError(locale, "legalName", "errors.companyNotAllowed");
+  const displayName = formData.get("companyDisplayName");
   const parsed = companySchema.safeParse({
     legalName: formData.get("legalName"),
-    displayName: formData.get("companyDisplayName"),
+    displayName: displayName === null || (typeof displayName === "string" && !displayName.trim())
+      ? formData.get("legalName") : displayName,
     website: formData.get("website") || null,
     industry: formData.get("industry") || null,
     sizeBand: formData.get("sizeBand") || null,
