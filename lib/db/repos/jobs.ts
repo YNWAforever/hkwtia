@@ -345,7 +345,16 @@ export const jobsRepository = {
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
           }
           await insertWebhookLifecycleEnrollment(actor, tx, transition, membership);
-          if (transition.nextStatus === "active") activatedProfileId = requiredString(membership, "profile_id");
+          if (transition.nextStatus === "active") {
+            // Application completion commits with the verified entitlement, never
+            // through a later browser resubmission or a separate best-effort write.
+            await tx.execute(sql`UPDATE ${membershipApplications}
+              SET "status" = 'completed', "current_step" = 'complete', "updated_at" = now()
+              WHERE ${membershipApplications.id} = ${command.applicationId}
+                AND ${membershipApplications.planCode} = ${command.planCode}
+                AND ${membershipApplications.status} = 'pending_payment'`);
+            activatedProfileId = requiredString(membership, "profile_id");
+          }
         }
 
         // A stale invoice is an ignored observation, including engagement metrics.

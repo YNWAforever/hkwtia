@@ -228,7 +228,20 @@ export const applicationsRepository = {
     const db = await getDb();
     const rows = await db
       .update(membershipApplicationsTable)
-      .set({ ...input, updatedAt: new Date() })
+      .set({
+        ...input,
+        // A browser save prepared before payment can arrive after activation.
+        // Preserve completion using the committed row inside this UPDATE.
+        ...(input.status !== undefined ? {
+          status: sql`CASE WHEN ${membershipApplicationsTable.status} = 'completed'
+            THEN ${membershipApplicationsTable.status} ELSE ${input.status} END`,
+        } : {}),
+        ...(input.currentStep !== undefined ? {
+          currentStep: sql`CASE WHEN ${membershipApplicationsTable.status} = 'completed'
+            THEN ${membershipApplicationsTable.currentStep} ELSE ${input.currentStep} END`,
+        } : {}),
+        updatedAt: new Date(),
+      })
       .where(applicationScope(actor, applicationId))
       .returning();
     if (!rows[0]) forbidden();
