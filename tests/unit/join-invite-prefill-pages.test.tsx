@@ -29,8 +29,8 @@ const APPLICATION_ID = "8a1c2d3e-4f50-4a61-8b72-93a4b5c6d7e8";
 function profileHtml() {
   return ProfilePage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({plan: "community"})}).then(renderToStaticMarkup);
 }
-function companyHtml() {
-  return CompanyPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({plan: "startup", application: APPLICATION_ID})}).then(renderToStaticMarkup);
+function companyHtml(locale = "en") {
+  return CompanyPage({params: Promise.resolve({locale}), searchParams: Promise.resolve({plan: "startup", application: APPLICATION_ID})}).then(renderToStaticMarkup);
 }
 function valueOf(html: string, name: string) {
   const tag = html.match(new RegExp(`<input[^>]*name="${name}"[^>]*>`))?.[0] ?? "";
@@ -38,6 +38,25 @@ function valueOf(html: string, name: string) {
 }
 
 describe("join pages with an invite prefill", () => {
+  it.each(["en", "zh-HK"])("shows an existing equal company name for confirmation in %s", async (locale) => {
+    state.defaults = {};
+    state.draft = {profile: null, company: {legalName: "Original Limited", displayName: "Original Limited"}};
+    const doc = new DOMParser().parseFromString(await companyHtml(locale), "text/html");
+    const display = doc.querySelector<HTMLInputElement>('[name="companyDisplayName"]')!;
+    expect(display.value).toBe("Original Limited");
+    expect(display.closest("details")?.open).toBe(true);
+    expect(display.required).toBe(false);
+  });
+
+  it("preserves a custom brand and shows it when resuming", async () => {
+    state.defaults = {};
+    state.draft = {profile: null, company: {legalName: "Original Limited", displayName: "My Brand"}};
+    const doc = new DOMParser().parseFromString(await companyHtml(), "text/html");
+    const display = doc.querySelector<HTMLInputElement>('[name="companyDisplayName"]')!;
+    expect(display.value).toBe("My Brand");
+    expect(display.closest("details")?.open).toBe(true);
+  });
+
   beforeEach(() => {
     state.draft = {profile: null, company: null};
     state.defaults = {displayName: "Chan Tai Man", whatsappNumber: "+85291234567", legalName: "Acme Ltd", companyDisplayName: "Acme"};

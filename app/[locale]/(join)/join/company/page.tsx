@@ -53,7 +53,8 @@ export default async function CompanyPage({params, searchParams}: Props) {
   const action = saveCompany.bind(null, locale, plan, applicationId);
   const legalName = draft.company?.legalName ?? defaults.legalName ?? "";
   const displayName = draft.company?.displayName ?? defaults.companyDisplayName ?? "";
-  const showOptional = Boolean((displayName && displayName !== legalName) || draft.company?.website ||
+  // Existing presentation names need confirmation even when they originally matched the legal name.
+  const showOptional = Boolean(displayName || draft.company?.website ||
     draft.company?.industry || draft.company?.sizeBand || draft.company?.description);
 
   return (

@@ -124,7 +124,7 @@ describe("portal dashboard page", () => {
     expect(result?.textContent).toContain("Public Company");
     expect(result?.innerHTML).not.toContain("private");
     expect(result?.querySelector("a")?.getAttribute("href")).toBe("/portal/directory?q=Ada+Member");
-    expect(content.directory).toHaveBeenCalledWith(expect.objectContaining({profileId: "p1"}), {limit: 1});
+    expect(content.directory).toHaveBeenCalledWith(expect.objectContaining({profileId: "p1"}), {limit: 1, excludeSelf: true});
   });
 
   it.each(["pending_payment", "pending_review", "past_due"] as const)("does not read member benefits for %s membership", async (status) => {

@@ -57,6 +57,33 @@ describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== "1")("real PostgreSQL d
     } while (cursor);
     expect(seen.size).toBe(size);
   }, 120_000);
+  it("recommends another eligible member before LIMIT even when the viewer has multiple first-sorting company rows", async () => {
+    const a = randomUUID(), b = randomUUID();
+    await pool.query("UPDATE profiles SET display_name='A Viewer',directory_visible=TRUE WHERE id='viewer'");
+    await pool.query("INSERT INTO companies(id,display_name) VALUES ($1,'A'),($2,'B')", [a,b]);
+    await pool.query("INSERT INTO company_members VALUES ($1,$2,'viewer',NULL),($3,$4,'viewer',NULL)", [randomUUID(),a,randomUUID(),b]);
+    await pool.query("INSERT INTO profiles VALUES ('other','Z Other',NULL,TRUE),('hidden','B Hidden',NULL,FALSE),('inactive','C Inactive',NULL,TRUE)");
+    await pool.query("INSERT INTO memberships(id,owner_user_id,status) VALUES ($1,'other','active'),($2,'hidden','active'),($3,'inactive','pending_payment')", [randomUUID(),randomUUID(),randomUUID()]);
+    expect((await listDirectoryPage(actor, {limit: 1})).items[0].userId).toBe('viewer');
+    expect((await listDirectoryPage(actor, {limit: 1, excludeSelf: true})).items.map(row => row.userId)).toEqual(['other']);
+    await pool.query("UPDATE profiles SET directory_visible=FALSE WHERE id='other'");
+    expect((await listDirectoryPage(actor, {limit: 1, excludeSelf: true})).items).toEqual([]);
+  });
+
+  it("retains company consent and viewer eligibility in recommendation mode", async () => {
+    const company = randomUUID();
+    await pool.query("INSERT INTO profiles VALUES ('other','Other',NULL,TRUE)");
+    await pool.query("INSERT INTO companies(id,display_name,directory_visible) VALUES ($1,'Hidden Company',FALSE)", [company]);
+    await pool.query("INSERT INTO company_members VALUES ($1,$2,'other',NULL)", [randomUUID(),company]);
+    await pool.query("INSERT INTO memberships(id,owner_user_id,status) VALUES ($1,'other','active')", [randomUUID()]);
+    expect((await listDirectoryPage(actor, {excludeSelf: true})).items).toEqual([]);
+    await pool.query("UPDATE companies SET directory_visible=TRUE WHERE id=$1", [company]);
+    expect((await listDirectoryPage(actor, {excludeSelf: true})).items.map(row => row.userId)).toEqual(['other']);
+    for (const status of ['pending_payment','pending_review']) {
+      await pool.query("UPDATE memberships SET status=$1 WHERE owner_user_id='viewer'", [status]);
+      expect((await listDirectoryPage(actor, {excludeSelf: true})).items).toEqual([]);
+    }
+  });
   it("keeps multiple company projections, removes withdrawn consent and revoked/grant-expired targets on the next read", async () => {
     const a = randomUUID(), b = randomUUID();
     await pool.query("INSERT INTO profiles VALUES ('person','Same',NULL,TRUE), ('seat-only','Seat',NULL,TRUE), ('expired-grant','Expired',NULL,TRUE)");

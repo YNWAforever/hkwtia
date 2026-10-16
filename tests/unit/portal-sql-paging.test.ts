@@ -11,6 +11,33 @@ const dialect = new PgDialect();
 function query(index = -1) {return dialect.sqlToQuery(state.execute.mock.calls.at(index)![0]);}
 beforeEach(() => {vi.clearAllMocks(); state.execute.mockResolvedValue({rows: []});});
 describe("SQL directory page contract", () => {
+  it("excludes the viewer in SQL before limiting recommendation candidates", async () => {
+    await listDirectoryPage(actor, {limit: 1, excludeSelf: true});
+    const compiled = query();
+    const exclusion = compiled.sql.match(/"profiles"\."id" <> \$(\d+)/);
+    expect(exclusion).not.toBeNull();
+    expect(compiled.params[Number(exclusion![1]) - 1]).toBe(actor.profileId);
+    expect(compiled.sql.indexOf(exclusion![0])).toBeLessThan(compiled.sql.indexOf("ORDER BY"));
+    expect(compiled.sql.indexOf("ORDER BY")).toBeLessThan(compiled.sql.indexOf("LIMIT"));
+    expect(compiled.params.at(-1)).toBe(2);
+    expect(compiled.sql).toContain('"profiles"."directory_visible" = TRUE');
+    expect(compiled.sql).toContain('"companies"."directory_visible" = TRUE');
+    expect(compiled.sql).toContain("portal_company_seat.revoked_at IS NULL");
+  });
+
+  it("does not exclude the viewer from ordinary directory browsing", async () => {
+    await listDirectoryPage(actor, {limit: 1});
+    expect(query().sql).not.toMatch(/"profiles"\."id" <>/);
+  });
+
+  it("resets a cursor when recommendation exclusion changes", async () => {
+    state.execute.mockResolvedValueOnce({rows: [directoryRow, {...directoryRow, userId: "profile-two"}]});
+    const first = await listDirectoryPage(actor, {limit: 1});
+    const result = await listDirectoryPage(actor, {limit: 1, excludeSelf: true}, first.nextCursor);
+    expect(result.cursorReset).toBe(true);
+    expect(query().params).not.toContain("profile-one");
+  });
+
   it.each([[undefined, 21], [10000, 51], [0, 2], [NaN, 21]])("bounds returned candidates for requested limit %s", async (limit, bound) => {
     await listDirectoryPage(actor, {search: "  100%_  ", limit});
     expect(query().params.at(-1)).toBe(bound);
