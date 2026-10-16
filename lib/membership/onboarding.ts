@@ -252,7 +252,10 @@ export async function completeApplication(
   // Validate (planCode, billingInterval) against the membership catalog before touching
   // profile, company, application, or membership state -- a missing, duplicated, or
   // unsupported interval must fail closed before any write.
-  const membershipOption = resolveMembershipOption(plan.code, input.billingInterval, billingEnv());
+  const catalogEnvironment = plan.billingBehavior === "checkout"
+    ? billingEnv()
+    : {stripeStartupPriceId: "", stripeCorporatePriceId: ""};
+  const membershipOption = resolveMembershipOption(plan.code, input.billingInterval, catalogEnvironment);
   if (!membershipOption.available) throw new Error("UNSUPPORTED_BILLING_INTERVAL");
   await ensureProfile(actor, input.profile, deps);
   const companyId = await validateCompanyTarget(actor, plan.code, input.company, deps);
