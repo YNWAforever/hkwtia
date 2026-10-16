@@ -20,7 +20,8 @@ describe("portal form feedback", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("Edited Ada");
     expect(screen.getByLabelText("Number")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText("Number")).toHaveAccessibleDescription("Enter a number");
-    expect(screen.getByLabelText("Number")).toHaveFocus();
+    // The validation message can commit before the passive focus effect runs.
+    await waitFor(() => expect(screen.getByLabelText("Number")).toHaveFocus());
   });
   it("prevents duplicate writes and announces success only after the action resolves", async () => {
     let resolve!: (state: PortalFormState) => void;

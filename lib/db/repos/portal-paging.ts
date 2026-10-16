@@ -8,7 +8,7 @@ import {memberBenefitScopeSql} from "@/lib/db/repos/member-benefit-sql";
 import {companies, companyMembers, events, profiles} from "@/lib/db/server-schema";
 import {requireMember, type Actor} from "@/lib/membership/lifecycle";
 
-export type DirectoryQuery = string | Readonly<{search?: string; industry?: string; sizeBand?: string; limit?: number}>;
+export type DirectoryQuery = string | Readonly<{search?: string; industry?: string; sizeBand?: string; limit?: number; excludeSelf?: boolean}>;
 const directoryRow = z.object({userId: z.string(), displayName: z.string(), jobTitle: z.string().nullable(),
   companyId: z.string().nullable(), companyDisplayName: z.string().nullable(), industry: z.string().nullable(), sizeBand: z.string().nullable()});
 export type DirectoryRecord = z.infer<typeof directoryRow>;
@@ -21,7 +21,7 @@ export function portalPageLimit(limit?: number): number {
 export function normalizeDirectoryQuery(query?: DirectoryQuery | null) {
   const input = typeof query === "string" ? {search: query} : query;
   return {text: (input?.search ?? "").trim().slice(0, 120), industry: (input?.industry ?? "").trim().slice(0, 120),
-    sizeBand: (input?.sizeBand ?? "").trim().slice(0, 120), limit: portalPageLimit(input?.limit)};
+    sizeBand: (input?.sizeBand ?? "").trim().slice(0, 120), limit: portalPageLimit(input?.limit), excludeSelf: input?.excludeSelf === true};
 }
 function scopeFor(profileId: string, filters: readonly string[]) {
   return createHash("sha256").update(JSON.stringify([profileId, ...filters])).digest("hex");
@@ -37,7 +37,7 @@ const directoryCursor = z.object({v: z.literal(2), scope: z.string(), name: z.st
 export async function listDirectoryPage(actor: Actor, query?: DirectoryQuery | null, cursor?: string | null): Promise<DirectoryPage> {
   requireMember(actor);
   const filters = normalizeDirectoryQuery(query);
-  const scope = scopeFor(actor.profileId, [filters.text, filters.industry, filters.sizeBand]);
+  const scope = scopeFor(actor.profileId, [filters.text, filters.industry, filters.sizeBand, ...(filters.excludeSelf ? ["exclude-self"] : [])]);
   const parsed = decode(cursor, directoryCursor);
   const after = parsed?.scope === scope ? parsed : null;
   const name = sql`lower(${profiles.displayName}) COLLATE "C"`;
@@ -57,6 +57,7 @@ export async function listDirectoryPage(actor: Actor, query?: DirectoryQuery | n
     LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
     LEFT JOIN ${companies} ON ${companies.id} = ${companyMembers.companyId}
     WHERE ${memberBenefitScopeSql(actor.profileId)} AND ${eligibleTarget}
+      AND ${filters.excludeSelf ? sql`${profiles.id} <> ${actor.profileId}` : sql`TRUE`}
       AND ${profiles.directoryVisible} = TRUE
       AND (${companyMembers.id} IS NULL OR ${companies.directoryVisible} = TRUE)
       AND ${search}

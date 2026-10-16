@@ -118,7 +118,7 @@ export default async function PortalPage({params}: Props) {
             : `/portal/events/${event.id}`,
         };
       } else {
-        const member = (await searchDirectory(actor, {limit: 1})).items[0];
+        const member = (await searchDirectory(actor, {limit: 1, excludeSelf: true})).items[0];
         firstResult = member ? {
           kind: "member", name: member.displayName, jobTitle: member.jobTitle, company: member.companyDisplayName,
           href: `/portal/directory?${new URLSearchParams({q: member.displayName})}`,
