@@ -69,6 +69,38 @@ describe("join pages with an invite prefill", () => {
     expect(valueOf(html, "companyDisplayName")).toBe("Acme");
   });
 
+  it("shows only the required name before optional profile details for a new member", async () => {
+    state.defaults = {};
+    const doc = new DOMParser().parseFromString(await profileHtml(), "text/html");
+    expect(doc.querySelector('input[name="displayName"]')?.closest("details")).toBeNull();
+    expect(doc.querySelector('input[name="displayName"]')?.hasAttribute("required")).toBe(true);
+    for (const name of ["phone", "jobTitle", "whatsappNumber", "whatsappOptIn"]) {
+      const disclosure = doc.querySelector(`[name="${name}"]`)?.closest("details");
+      expect(disclosure).not.toBeNull();
+      expect(disclosure?.hasAttribute("open")).toBe(false);
+      expect(disclosure?.querySelector("summary")?.textContent).toContain("localized:optionalProfileTitle");
+    }
+  });
+
+  it("keeps saved contact details and explicit consent visible when resuming", async () => {
+    state.defaults = {};
+    state.draft = {profile: {phone: "+85291234567", whatsappOptIn: true}, company: null};
+    const doc = new DOMParser().parseFromString(await profileHtml(), "text/html");
+    expect(doc.querySelector('[name="phone"]')?.closest("details")?.hasAttribute("open")).toBe(true);
+    expect(doc.querySelector('[name="whatsappOptIn"]')?.hasAttribute("checked")).toBe(true);
+  });
+
+  it("requires one company name and keeps its optional presentation details collapsed", async () => {
+    state.defaults = {};
+    const doc = new DOMParser().parseFromString(await companyHtml(), "text/html");
+    expect(doc.querySelector('[name="legalName"]')?.hasAttribute("required")).toBe(true);
+    const displayName = doc.querySelector('[name="companyDisplayName"]');
+    expect(displayName?.hasAttribute("required")).toBe(false);
+    expect(displayName?.closest("details")).not.toBeNull();
+    expect(displayName?.closest("details")?.hasAttribute("open")).toBe(false);
+    expect(doc.body.textContent).toContain("localized:companyDisplayNameHint");
+  });
+
   it("renders blank fields when there is no invite", async () => {
     state.defaults = {};
     const html = await profileHtml();

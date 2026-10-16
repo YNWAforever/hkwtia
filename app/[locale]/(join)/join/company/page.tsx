@@ -51,6 +51,10 @@ export default async function CompanyPage({params, searchParams}: Props) {
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,applicationId,locale);
   const action = saveCompany.bind(null, locale, plan, applicationId);
+  const legalName = draft.company?.legalName ?? defaults.legalName ?? "";
+  const displayName = draft.company?.displayName ?? defaults.companyDisplayName ?? "";
+  const showOptional = Boolean((displayName && displayName !== legalName) || draft.company?.website ||
+    draft.company?.industry || draft.company?.sizeBand || draft.company?.description);
 
   return (
     <section className="glass-card p-6 sm:p-10">
@@ -59,12 +63,19 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
-          <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={draft.company?.legalName??defaults.legalName??""} required/>
-          <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" defaultValue={draft.company?.displayName??defaults.companyDisplayName??""} required/>
-          <Field autoComplete="url" label={t("fields.website")} name="website" defaultValue={draft.company?.website??""} type="url"/>
-          <Field label={t("fields.industry")} name="industry" defaultValue={draft.company?.industry??""}/>
-          <Field label={t("fields.sizeBand")} name="sizeBand" defaultValue={draft.company?.sizeBand??""}/>
-          <div><label className="mb-2 block text-sm font-medium" htmlFor="description">{t("fields.description")}</label><textarea aria-describedby="description-error" className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2" id="description" name="description" defaultValue={draft.company?.description??""}/></div>
+          <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={legalName} required/>
+          <details className="rounded-md border border-border p-4" open={showOptional}>
+            <summary className="min-h-11 cursor-pointer content-center font-medium">{t("optionalCompanyTitle")}</summary>
+            <p className="mb-5 text-sm text-muted-foreground">{t("optionalCompanyHint")}</p>
+            <div className="space-y-5">
+              <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" defaultValue={displayName}/>
+              <p className="text-sm text-muted-foreground">{t("companyDisplayNameHint")}</p>
+              <Field autoComplete="url" label={t("fields.website")} name="website" defaultValue={draft.company?.website??""} type="url"/>
+              <Field label={t("fields.industry")} name="industry" defaultValue={draft.company?.industry??""}/>
+              <Field label={t("fields.sizeBand")} name="sizeBand" defaultValue={draft.company?.sizeBand??""}/>
+              <div><label className="mb-2 block text-sm font-medium" htmlFor="description">{t("fields.description")}</label><textarea aria-describedby="description-error" className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2" id="description" name="description" defaultValue={draft.company?.description??""}/></div>
+            </div>
+          </details>
           <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>

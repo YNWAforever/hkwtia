@@ -1022,10 +1022,15 @@
     },
     "choosePlanAction": "以{plan}繼續",
     "choosePlanContact": "聯絡 WTIA",
+    "optionalProfileTitle": "聯絡資料（選填）",
+    "optionalProfileHint": "你可以現在填寫，亦可只填姓名後繼續。如要接收 WhatsApp 消息，須另行明確同意。",
+    "optionalCompanyTitle": "公司資料（選填）",
+    "optionalCompanyHint": "你可以現在填寫顯示名稱及公司資料，或稍後在會員專區更新。",
+    "companyDisplayNameHint": "留空即使用公司註冊名稱。",
     "profileTitle": "介紹你的資料",
-    "profileDescription": "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
+    "profileDescription": "先填寫你的姓名。聯絡資料屬選填，可稍後在個人檔案補充。",
     "companyTitle": "確認公司資料",
-    "companyDescription": "請提供公司資料。我們會建立 WTIA 公司檔案，並將你設為首位擁有人。",
+    "companyDescription": "填寫公司的註冊名稱即可繼續。公司公開資料可稍後補充。",
     "steps": {
       "plan": "選擇計劃",
       "auth": "登入",
@@ -2281,6 +2286,17 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "firstResult": {
+      "title": "開始使用你的會員權益",
+      "event": "下一個活動",
+      "member": "認識會員社群",
+      "viewEvent": "查看活動及報名選項",
+      "viewMember": "在會員目錄尋找這位會員",
+      "empty": "暫時沒有即將舉行的活動或可見的目錄會員。你的設定已儲存，可到活動頁查看日後的機會。",
+      "unavailable": "暫時未能載入會員機會。你的設定已儲存，請稍後再試。參考編號：{reference}。",
+      "browseEvents": "瀏覽活動",
+      "retry": "重試"
+    },
     "paging": {"cursorReset": "此分頁連結已不適用於目前搜尋，現顯示第一頁。"},
     "myEvents": {
       "title": "我的報名及訂單",

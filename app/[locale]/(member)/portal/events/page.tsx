@@ -89,7 +89,7 @@ export default async function MemberEventsPage({params, searchParams}: Props) {
   ) : (
     <div className="portal-card-grid">
       {rows.map((event) => (
-        <article className="portal-card portal-event-card" key={event.slug}>
+        <article className="portal-card portal-event-card scroll-mt-6" id={`event-${event.id}`} key={event.slug}>
           <PortalDateBlock locale={locale} value={event.startsAt}/>
           <div className="portal-event-body">
             <h2>{event.title}</h2>

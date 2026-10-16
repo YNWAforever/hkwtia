@@ -1,10 +1,19 @@
 import type {ReactNode} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {DashboardCompany, DashboardMembership, DashboardViewModel} from "@/lib/portal/queries";
 
-const state = vi.hoisted(() => ({dashboard: null as unknown, error: null as string | null}));
+const state = vi.hoisted(() => ({
+  dashboard: null as unknown, error: null as string | null,
+  eventFailure: false, directoryFailure: false,
+  events: [] as unknown[], members: [] as unknown[],
+}));
+const content = vi.hoisted(() => ({events: vi.fn(), directory: vi.fn()}));
+vi.mock("@/lib/portal/content", () => ({
+  getMemberEventPage: content.events,
+  searchDirectory: content.directory,
+}));
 
 vi.mock("next-intl/server", () => ({
   // Values are echoed so ICU arguments (seat count, welcome name) are observable without a catalogue.
@@ -55,12 +64,120 @@ function dashboard(overrides: Partial<DashboardFixture> = {}): DashboardFixture 
   };
 }
 
-async function render() {
-  return renderToStaticMarkup(await PortalPage({params: Promise.resolve({locale: "en"})}));
+async function render(locale = "en") {
+  return renderToStaticMarkup(await PortalPage({params: Promise.resolve({locale})}));
 }
 
 describe("portal dashboard page", () => {
-  beforeEach(() => { state.error = null; state.dashboard = dashboard(); });
+  beforeEach(() => {
+    state.error = null;
+    state.dashboard = dashboard();
+    state.events = [];
+    state.members = [];
+    state.eventFailure = false;
+    state.directoryFailure = false;
+    content.events.mockReset().mockImplementation(async () => {
+      if (state.eventFailure) throw new Error("DATABASE_UNAVAILABLE");
+      return {items: state.events, nextCursor: null};
+    });
+    content.directory.mockReset().mockImplementation(async () => {
+      if (state.directoryFailure) throw new Error("DATABASE_UNAVAILABLE");
+      return {items: state.members, nextCursor: null};
+    });
+  });
+
+  function setupComplete() {
+    state.dashboard = dashboard({
+      onboarding: {completedSteps: 2, totalSteps: 2, nextAction: "none", profileComplete: true, companyComplete: true},
+    });
+  }
+
+  it.each(["en", "zh-HK"])("shows a real upcoming event as the first useful result after setup in %s", async (locale) => {
+    setupComplete();
+    state.events = [{id: "event-a", title: "Meet Hong Kong founders", description: "Learn from founders.", startsAt: "2026-11-18T10:00:00Z", venue: "Cyberport", registrationMode: "rsvp"}];
+    const doc = new DOMParser().parseFromString(await render(locale), "text/html");
+    const result = doc.querySelector('[aria-labelledby="first-result-title"]');
+    expect(result).not.toBeNull();
+    expect(result?.textContent).toContain("Meet Hong Kong founders");
+    expect(result?.textContent).toContain("Cyberport");
+    expect(result?.querySelector("time")?.getAttribute("datetime")).toBe("2026-11-18T10:00:00Z");
+    expect(result?.querySelector("a")?.getAttribute("href")).toBe(`${locale === "zh-HK" ? "/zh" : ""}/portal/events#event-event-a`);
+    expect(content.events).toHaveBeenCalledWith(expect.objectContaining({profileId: "p1"}), {limit: 1}, undefined, locale);
+    expect(content.directory).not.toHaveBeenCalled();
+  });
+
+  it("routes public ticketed events to their public checkout page", async () => {
+    setupComplete();
+    state.events = [{id: "event-a", slug: "public-workshop", title: "Workshop", description: "Learn",
+      startsAt: "2026-11-18T10:00:00Z", venue: "Cyberport", registrationMode: "ticketed", visibility: "public", memberOnly: false}];
+    const doc = new DOMParser().parseFromString(await render(), "text/html");
+    expect(doc.querySelector('[aria-labelledby="first-result-title"] a')?.getAttribute("href")).toBe("/events/public-workshop");
+  });
+
+  it("shows only the visible directory projection when there are no upcoming events", async () => {
+    setupComplete();
+    state.members = [{userId: "visible", displayName: "Ada Member", jobTitle: "Founder", companyDisplayName: "Public Company",
+      email: "private@example.test", phone: "private-phone"}];
+    const doc = new DOMParser().parseFromString(await render(), "text/html");
+    const result = doc.querySelector('[aria-labelledby="first-result-title"]');
+    expect(result?.textContent).toContain("Ada Member");
+    expect(result?.textContent).toContain("Public Company");
+    expect(result?.innerHTML).not.toContain("private");
+    expect(result?.querySelector("a")?.getAttribute("href")).toBe("/portal/directory?q=Ada+Member");
+    expect(content.directory).toHaveBeenCalledWith(expect.objectContaining({profileId: "p1"}), {limit: 1});
+  });
+
+  it.each(["pending_payment", "pending_review", "past_due"] as const)("does not read member benefits for %s membership", async (status) => {
+    state.dashboard = dashboard({primaryStatus: status, onboarding: {completedSteps: 2, totalSteps: 2, nextAction: "none", profileComplete: true, companyComplete: true}});
+    expect(await render()).not.toContain('aria-labelledby="first-result-title"');
+    expect(content.events).not.toHaveBeenCalled();
+    expect(content.directory).not.toHaveBeenCalled();
+  });
+
+  it("keeps incomplete setup ahead of benefit discovery", async () => {
+    await render();
+    expect(content.events).not.toHaveBeenCalled();
+    expect(content.directory).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes an empty first result from an event read failure", async () => {
+    setupComplete();
+    expect(await render()).toContain("firstResult.empty");
+    state.eventFailure = true;
+    content.directory.mockClear();
+    const html = await render();
+    expect(html).toContain("firstResult.unavailable");
+    expect(html).not.toContain("firstResult.empty");
+    expect(content.directory).not.toHaveBeenCalled();
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each([
+    ["42P01", "schema_missing"], ["42501", "permission_denied"], ["08006", "db_connection"], ["unknown", "read_failed"],
+  ])("records a safe %s diagnostic and a matching visible reference", async (sqlstate, code) => {
+    setupComplete();
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    content.events.mockRejectedValueOnce(new Error("PRIVATE_CONNECTION_TEXT", {cause: {code: sqlstate}}));
+    const html = await render();
+    expect(log).toHaveBeenCalledTimes(1);
+    const serialized = String(log.mock.calls[0][0]);
+    const diagnostic = JSON.parse(serialized);
+    expect(diagnostic).toMatchObject({event: "portal_first_result_read_failed", code});
+    expect(diagnostic.reference).toMatch(/^[a-f0-9-]{36}$/);
+    expect(html).toContain(diagnostic.reference);
+    expect(serialized).not.toContain("PRIVATE_CONNECTION_TEXT");
+    expect(serialized).not.toContain("profileId");
+    expect(content.directory).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes a directory read failure from an empty directory", async () => {
+    setupComplete();
+    state.directoryFailure = true;
+    const html = await render();
+    expect(html).toContain("firstResult.unavailable");
+    expect(html).not.toContain("firstResult.empty");
+  });
 
   it("leads with one h1, the company next step, the glance and three benefit links", async () => {
     const html = await render();

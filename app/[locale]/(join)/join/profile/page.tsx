@@ -51,6 +51,8 @@ export default async function ProfilePage({params, searchParams}: Props) {
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,value(query.application),locale);
   const action = saveProfile.bind(null, locale, plan, value(query.application) ?? null);
+  const showOptional = Boolean(draft.profile?.phone || draft.profile?.jobTitle ||
+    draft.profile?.whatsappNumber || defaults.whatsappNumber || draft.profile?.whatsappOptIn);
 
   return (
     <section className="glass-card p-6 sm:p-10">
@@ -60,16 +62,22 @@ export default async function ProfilePage({params, searchParams}: Props) {
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("continue")}>
           <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" defaultValue={draft.profile?.displayName??defaults.displayName??""} required/>
-          <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" defaultValue={draft.profile?.phone??""} type="tel"/>
-          <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle" defaultValue={draft.profile?.jobTitle??""}/>
-          <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" defaultValue={draft.profile?.whatsappNumber??defaults.whatsappNumber??""} type="tel"/>
-          <div className="rounded-md border border-border p-4 text-sm">
-            <label className="flex items-start gap-3 font-medium" htmlFor="whatsappOptIn">
-              <input className="mt-1" id="whatsappOptIn" name="whatsappOptIn" type="checkbox" defaultChecked={draft.profile?.whatsappOptIn===true}/>
-              <span>{t("whatsapp.optIn")}</span>
-            </label>
-            <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")} <span className="sr-only">{t("whatsapp.textVersion")}</span></p>
-          </div>
+          <details className="rounded-md border border-border p-4" open={showOptional}>
+            <summary className="min-h-11 cursor-pointer content-center font-medium">{t("optionalProfileTitle")}</summary>
+            <p className="mb-5 text-sm text-muted-foreground">{t("optionalProfileHint")}</p>
+            <div className="space-y-5">
+              <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" defaultValue={draft.profile?.phone??""} type="tel"/>
+              <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle" defaultValue={draft.profile?.jobTitle??""}/>
+              <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" defaultValue={draft.profile?.whatsappNumber??defaults.whatsappNumber??""} type="tel"/>
+              <div className="rounded-md border border-border p-4 text-sm">
+                <label className="flex items-start gap-3 font-medium" htmlFor="whatsappOptIn">
+                  <input className="mt-1" id="whatsappOptIn" name="whatsappOptIn" type="checkbox" defaultChecked={draft.profile?.whatsappOptIn===true}/>
+                  <span>{t("whatsapp.optIn")}</span>
+                </label>
+                <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")} <span className="sr-only">{t("whatsapp.textVersion")}</span></p>
+              </div>
+            </div>
+          </details>
           <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>
