@@ -1,0 +1,55 @@
+{
+  "observedAt": "2026-10-04T01:25:16.278Z",
+  "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+  "deploymentId": "dpl_9m5BHcTshdDpN1jwcuzwLaWDwbDw",
+  "origin": "https://hkwtia-membership-lifecycle-20261003.vercel.app",
+  "succeeded": true,
+  "failedStage": null,
+  "checks": [
+    {
+      "case": "real provider account and configured recurring price",
+      "testMode": true,
+      "currency": "hkd",
+      "cadence": "annual",
+      "priceRef": "61c2867f51fbb401"
+    },
+    {
+      "case": "unpaid return resumes same real checkout",
+      "attempts": 1,
+      "checkoutRef": "6853512bdffbe1d1",
+      "entitlement": "pending_payment",
+      "providerSessionExpired": false
+    },
+    {
+      "case": "actual hosted payment and provider event duplicate",
+      "paymentStatus": "paid",
+      "status": "active",
+      "amountTotalHkdCents": 1200000,
+      "eventRef": "bdd306364622cd45",
+      "eventReplayResults": [
+        "processed",
+        "duplicate"
+      ],
+      "attempts": 1,
+      "actualProviderPayload": true,
+      "automaticRemoteWebhookVerified": false
+    },
+    {
+      "case": "owned test subscription cancelled and reconciled",
+      "provider": "canceled",
+      "app": "cancelled",
+      "refundsRequested": 0,
+      "messagesBudgetDelta": 0
+    }
+  ],
+  "applicationRef": "f21597a28d9947e3",
+  "membershipRef": "3e459a92179edfdc",
+  "production": false,
+  "trueHostedCheckout": true,
+  "automaticRemoteWebhookVerified": false,
+  "renewalProviderVerified": false,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "secretsLogged": false,
+  "rawProviderPayloadLogged": false
+}

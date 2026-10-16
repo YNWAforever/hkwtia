@@ -1,13 +1,18 @@
 import "server-only";
 
 import {JOURNEYS} from "@/config/journeys";
-import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
+import {
+  LOCALIZED_WHATSAPP_TEMPLATES,
+  WHATSAPP_TEMPLATES,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
 import {evaluateStep, shouldCreateStaffTask} from "@/lib/automation/conditions";
 import {
   authorizedProviderFailureCode,
   providerFailureCode,
 } from "@/lib/automation/delivery-retry-authorization";
 import {classifyDeliveryFailure} from "@/lib/automation/retry";
+import { providerEffectIsUncertain, providerEffectFailureCode, type DeliveryEffectFailureCode } from "@/lib/automation/delivery-retry-authorization";
 import {scheduleJourney} from "@/lib/automation/schedule";
 import type {
   JourneyContext,
@@ -38,7 +43,6 @@ import {
 } from "@/lib/email/catalog";
 import type {
   EmailTransport,
-  DeliveryFailureCode,
 } from "@/lib/email/transport";
 import type {
   RenderEmailInput,
@@ -46,6 +50,7 @@ import type {
 } from "@/lib/email/render";
 import type {AppLocale} from "@/i18n/routing";
 import type {MembershipStatus} from "@/lib/membership/lifecycle";
+import {resolveTemplateBody} from "@/lib/whatsapp/template-body";
 
 const LEASE_MS = 5 * 60_000;
 const emailTemplates = new Set<string>(EMAIL_TEMPLATE_IDS);
@@ -62,6 +67,13 @@ export type RunnerSummary = Readonly<{
 }>;
 
 export type JourneyRunnerContext = JourneyContext & Readonly<{
+  /**
+   * The recorded WhatsApp withdrawal, from the store `whatsappOptIn` cannot
+   * see. REQUIRED rather than optional on purpose: a wiring that forgets it
+   * must fail to compile, because the failure it silences is a template sent to
+   * somebody who replied STOP. `sendWhatsapp` is the only reader.
+   */
+  whatsappOptedOutAt: Date | null;
   email: string | null;
   recipientName: string;
   locale: AppLocale;
@@ -107,7 +119,7 @@ type RunnerDeliveryReservation = Readonly<{
 
 type RunnerDeliveryRetryResult = Readonly<{
   record: RunnerDeliveryRecord;
-  failureCode: DeliveryFailureCode;
+  failureCode: DeliveryEffectFailureCode;
 }>;
 
 type DeliveryMutations = Readonly<{
@@ -160,6 +172,18 @@ export type JourneyRunnerDependencies = Readonly<{
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
   emailTransport: EmailTransport;
   whatsappTransport: Pick<ChannelAdapter, "sendTemplateMessage">;
+  /**
+   * C-7 (C2 Task 2). Which template keys the `whatsapp_templates` registry has
+   * approved, resolved by the caller — `lib/jobs/runners.ts` is the only one
+   * that passes it. The runner must not read `process.env` or open a database
+   * of its own.
+   *
+   * OPTIONAL, and absent means "no gate", which is this runner's behaviour up to
+   * and including Phase C1. The gate is a production concern; a unit test that
+   * had to enumerate approved templates in order to exercise dunning would be
+   * testing the wrong thing, and eight fixtures construct this bag.
+   */
+  approvedTemplateKeys?: ReadonlySet<WhatsAppTemplateKey>;
   emailFrom: string;
 }>;
 
@@ -179,7 +203,7 @@ type MutableSummary = {
 };
 
 class RunnerFailure extends Error {
-  constructor(readonly code: DeliveryFailureCode) {
+  constructor(readonly code: DeliveryEffectFailureCode) {
     super(code);
     this.name = "RunnerFailure";
   }
@@ -199,7 +223,8 @@ function emailTemplate(template: string): EmailTemplateId {
   return template as EmailTemplateId;
 }
 
-function failureCode(error: unknown): DeliveryFailureCode {
+function failureCode(error: unknown): DeliveryEffectFailureCode {
+  if (error && typeof error === "object" && "code" in error && error.code === "provider_acceptance_uncertain") return "provider_acceptance_uncertain";
   const code = error
     && typeof error === "object"
     && "code" in error
@@ -209,7 +234,7 @@ function failureCode(error: unknown): DeliveryFailureCode {
   return code ?? "provider_unclassified_failure";
 }
 
-function retryStatus(code: DeliveryFailureCode): number | null {
+function retryStatus(code: DeliveryEffectFailureCode): number | null {
   switch (code) {
     case "retryable_network":
       return null;
@@ -220,12 +245,13 @@ function retryStatus(code: DeliveryFailureCode): number | null {
     case "provider_client_error":
       return 400;
     case "provider_unclassified_failure":
+    case "provider_acceptance_uncertain":
       return 200;
   }
 }
 
 type PersistedFailureDisposition = Readonly<{
-  failureCode: DeliveryFailureCode;
+  failureCode: DeliveryEffectFailureCode;
   expectedErrorCode: string;
   authorized: boolean;
 }>;
@@ -235,6 +261,7 @@ function persistedFailureDisposition(
 ): PersistedFailureDisposition {
   const expectedErrorCode = delivery.errorCode;
   const authorized = authorizedProviderFailureCode(expectedErrorCode);
+  if (providerEffectIsUncertain(authorized ?? expectedErrorCode)) return { failureCode: "provider_acceptance_uncertain", expectedErrorCode: expectedErrorCode ?? "provider_acceptance_uncertain", authorized: false };
   if (authorized && expectedErrorCode) {
     return {
       failureCode: authorized,
@@ -255,6 +282,7 @@ function shouldReplayPersistedFailure(
   claim: JourneyClaim,
   disposition: PersistedFailureDisposition,
 ): boolean {
+  if (providerEffectIsUncertain(disposition.failureCode)) return true;
   if (disposition.authorized) return false;
   const code = disposition.failureCode;
   return claim.claimSource === "stale"
@@ -287,12 +315,14 @@ async function createTask(
 async function settleFailure(
   dependencies: JourneyRunnerDependencies,
   claim: JourneyClaim,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
   now: Date,
   summary: MutableSummary,
 ): Promise<void> {
   const token = claimToken(claim);
-  const decision = classifyDeliveryFailure(retryStatus(code), claim.attemptCount);
+  const decision = code === "provider_acceptance_uncertain"
+    ? { action: "permanent" as const, code }
+    : classifyDeliveryFailure(retryStatus(code), claim.attemptCount);
   if (decision.action === "retry") {
     const retryAt = new Date(now.getTime() + decision.delayMinutes * 60_000);
     await dependencies.journeys.reschedule(
@@ -327,7 +357,7 @@ async function settleFailure(
 async function completeFailedEmail(
   dependencies: JourneyRunnerDependencies,
   delivery: RunnerDeliveryRecord,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
 ): Promise<never> {
   try {
     await dependencies.deliveries.completeEmail(runnerActor, delivery.id, {
@@ -335,9 +365,15 @@ async function completeFailedEmail(
       errorCode: code,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   throw new RunnerFailure(code);
+}
+
+function sameSendFacts(left: JourneyRunnerContext, right: JourneyRunnerContext): boolean {
+  const variables = (context: JourneyRunnerContext) => JSON.stringify(Object.entries(context.variables).sort(([a], [b]) => a.localeCompare(b)));
+  return left.recipientName === right.recipientName && variables(left) === variables(right)
+    && left.unsubscribeUrl === right.unsubscribeUrl && left.unsubscribeOneClickUrl === right.unsubscribeOneClickUrl;
 }
 
 async function sendEmail(
@@ -385,6 +421,7 @@ async function sendEmail(
   }
   let delivery = reservation.record;
   if (delivery.status === "sent") return true;
+  if (reservation.disposition === "existing" && delivery.status === "processing") throw new RunnerFailure("provider_acceptance_uncertain");
   if (delivery.status === "failed") {
     const disposition = persistedFailureDisposition(delivery);
     if (
@@ -408,6 +445,13 @@ async function sendEmail(
     delivery = retryResult.record;
   }
 
+  const current = await dependencies.loadContext(runnerActor, claim);
+  if (!sameSendFacts(context, current) || evaluateStep(step, current) !== "send" || current.email?.trim() !== email
+    || current.locale !== context.locale
+    || (step.classification === "marketing" && (!current.marketingConsent || current.emailSuppressed))) {
+    await dependencies.deliveries.completeEmail(runnerActor, delivery.id, { status: "failed", errorCode: "pre_send_blocked" });
+    return false;
+  }
   let provider;
   try {
     provider = await dependencies.emailTransport.send({
@@ -420,7 +464,7 @@ async function sendEmail(
       idempotencyKey: claim.deliveryKey,
     });
   } catch (error) {
-    return completeFailedEmail(dependencies, delivery, failureCode(error));
+    return completeFailedEmail(dependencies, delivery, providerEffectFailureCode(failureCode(error)));
   }
 
   try {
@@ -429,7 +473,7 @@ async function sendEmail(
       providerId: provider.providerId,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   return true;
 }
@@ -442,16 +486,56 @@ function whatsappVariables(
   );
 }
 
-function whatsappTemplate(step: JourneyStep): WhatsAppTemplateKey | null {
-  return Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)
-    ? step.template as WhatsAppTemplateKey
+/**
+ * Two gates, reconciled 2026-09-12. **B-5:** the member's own language decides
+ * the template, not the step. A step whose template is registered as a
+ * per-locale pair (LOCALIZED_WHATSAPP_TEMPLATES) resolves through that pair;
+ * every other step keeps the identity mapping it has always had, so
+ * renewal_14 and dunning_3 are untouched. `context.locale` was already loaded
+ * for the email leg — the email has always rendered in the member's language —
+ * so nothing new has to reach here for the two legs to agree.
+ *
+ * **C-7 (C2 Task 2):** closed the hole `config/whatsapp-templates.ts` claimed
+ * was already closed — this used to accept any own property of
+ * `WHATSAPP_TEMPLATES` with no allowlist check at all. The resolved,
+ * locale-correct key is what gets checked against the registry, so an
+ * unapproved Chinese template cannot fall back to sending the English one
+ * live; it falls back to no WhatsApp at all, same as any other unapproved key.
+ *
+ * `null` is the deliberate answer for an unresolved or unapproved key, not a
+ * failure: `sendWhatsapp` already reads `null` as "no WhatsApp channel for
+ * this step" and returns `false`, so the step delivers by email alone. Raising
+ * instead would turn a working dunning email into a permanent delivery
+ * failure plus a staff task per member the first time Meta paused a template —
+ * the exact regression a fail-closed gate makes available.
+ */
+function whatsappTemplate(
+  step: JourneyStep,
+  locale: AppLocale,
+  approved: ReadonlySet<WhatsAppTemplateKey> | undefined,
+): WhatsAppTemplateKey | null {
+  const pair = Object.prototype.hasOwnProperty.call(
+    LOCALIZED_WHATSAPP_TEMPLATES,
+    step.template,
+  )
+    ? LOCALIZED_WHATSAPP_TEMPLATES[
+      step.template as keyof typeof LOCALIZED_WHATSAPP_TEMPLATES
+    ]
     : null;
+  const resolved = pair
+    ? pair[locale]
+    : Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)
+      ? step.template as WhatsAppTemplateKey
+      : null;
+  if (resolved === null) return null;
+  // `undefined` means the caller supplied no registry answer: today's behaviour.
+  return approved === undefined || approved.has(resolved) ? resolved : null;
 }
 
 async function completeFailedWhatsapp(
   dependencies: JourneyRunnerDependencies,
   delivery: RunnerDeliveryRecord,
-  code: DeliveryFailureCode,
+  code: DeliveryEffectFailureCode,
 ): Promise<never> {
   try {
     await dependencies.deliveries.completeWhatsapp(runnerActor, delivery.id, {
@@ -459,7 +543,7 @@ async function completeFailedWhatsapp(
       errorCode: code,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   throw new RunnerFailure(code);
 }
@@ -470,16 +554,57 @@ async function sendWhatsapp(
   step: JourneyStep,
   context: JourneyRunnerContext,
 ): Promise<boolean> {
-  const template = whatsappTemplate(step);
+  const template = whatsappTemplate(step, context.locale, dependencies.approvedTemplateKeys);
+  // C-9 review, and it is computed BEFORE the reservation on purpose. Every
+  // declared BODY parameter, resolved, or nothing: `lib/channels/woztell.ts`
+  // fills a parameter it was not given with `""`, Meta rejects an empty BODY
+  // parameter, and S-15 makes the resulting 4xx permanent — so an unresolved
+  // variable is not a degraded message, it is a guaranteed failed step and a
+  // staff task per member. The blast lane has refused this since C2 Task 8;
+  // this lane went to the adapter directly and passed through neither gate,
+  // which is how renewal_14 and dunning_3 came to be one flag flip away from
+  // sending empty parameters to every member with a step due.
+  //
+  // Refusing here reads as "no WhatsApp channel for this step", exactly as an
+  // unapproved template does — so the email leg still delivers and no staff task
+  // is raised. Failing instead would turn a working dunning email into a
+  // permanent delivery failure plus a task per member the first time a variable
+  // went missing, which is the regression a fail-closed gate makes available.
+  const body = template === null
+    ? null
+    : resolveTemplateBody(template, context.variables);
   const whatsappNumber = context.whatsappNumber?.trim();
   if (
     !step.channels.includes("whatsapp")
     || !template
+    || !body
     || !context.whatsappOptIn
+    // C-9 review. `whatsappOptIn` alone is half the consent fact, and this lane
+    // is the second send path the `RUN_LIVE_WOZTELL` flip turns on. A STOP from
+    // a handset two profiles share resolves no profile
+    // (`woztell-profile-resolver`: `matches.length !== 1`), so it stamps
+    // `contacts.whatsapp_opted_out_at` and leaves the profile flag true with no
+    // `message_suppressions` row — and every later tick kept sending. Together
+    // these two tests are `decideWhatsApp`'s rule 1 for a member recipient
+    // (`lib/db/repos/message-eligibility.ts`), which is the precedence the
+    // blast and the inbox already use. A withdrawal removes the WhatsApp
+    // channel only: returning false here leaves the email leg to send, which is
+    // right — a WhatsApp STOP is not an email unsubscribe.
+    || context.whatsappOptedOutAt !== null
     || !whatsappNumber
   ) {
     return false;
   }
+  // B-5: when the member's own language has no approved template, `template`
+  // above is already `null` — `whatsappTemplate` resolves the locale-correct
+  // key and checks it against the registry in one place, so there is nothing
+  // left to gate here. The rejected alternative is sending the other
+  // language's template: that would make "which language a member is written
+  // to in" a function of which half of a pair ops got approved first, which is
+  // the exact defect this pair was registered to fix, and it would happen
+  // silently on a channel the email already covers. Returning false above is
+  // not a failure: `processClaim` marks the step sent on the email leg alone,
+  // and `recipient_ineligible` only when neither leg delivers.
 
   const idempotencyKey = `${claim.deliveryKey}:whatsapp`;
   let reservation: Awaited<ReturnType<DeliveryMutations["reserveWhatsapp"]>>;
@@ -497,6 +622,7 @@ async function sendWhatsapp(
   }
   let delivery = reservation.record;
   if (delivery.status === "sent") return true;
+  if (reservation.disposition === "existing" && delivery.status === "processing") throw new RunnerFailure("provider_acceptance_uncertain");
   if (delivery.status === "failed") {
     const disposition = persistedFailureDisposition(delivery);
     if (
@@ -520,20 +646,31 @@ async function sendWhatsapp(
     delivery = retryResult.record;
   }
 
+  const current = await dependencies.loadContext(runnerActor, claim);
+  if (!sameSendFacts(context, current) || evaluateStep(step, current) !== "send" || !current.whatsappOptIn
+    || current.whatsappOptedOutAt !== null || current.whatsappNumber?.trim() !== whatsappNumber
+    || current.locale !== context.locale
+    || whatsappTemplate(step, current.locale, dependencies.approvedTemplateKeys) !== template) {
+    await dependencies.deliveries.completeWhatsapp(runnerActor, delivery.id, { status: "failed", errorCode: "pre_send_blocked" });
+    return false;
+  }
   let provider;
   try {
     provider = await dependencies.whatsappTransport.sendTemplateMessage({
       whatsappOptIn: context.whatsappOptIn,
       whatsappNumber,
       template,
-      variables: whatsappVariables(context.variables),
+      // The resolved body, not the whole context bag: the adapter only reads the
+      // declared keys, and handing it exactly those is what makes the refusal
+      // above the single place a blank can be caught.
+      variables: body,
       idempotencyKey,
     });
   } catch (error) {
     return completeFailedWhatsapp(
       dependencies,
       delivery,
-      failureCode(error),
+      providerEffectFailureCode(failureCode(error)),
     );
   }
   if (provider.status === "skipped") {
@@ -550,7 +687,7 @@ async function sendWhatsapp(
       providerId: provider.providerId,
     });
   } catch {
-    throw new RunnerFailure("retryable_network");
+    throw new RunnerFailure("provider_acceptance_uncertain");
   }
   return true;
 }

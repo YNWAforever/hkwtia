@@ -2,7 +2,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import type {
   BoardFactPack,
-  BoardNarrative,
+  BilingualBoardNarrative,
 } from "@/lib/ai/board-reporter/contracts";
 import {runScheduledJson, type AgentConfig} from "@/lib/ai/scheduled-runtime";
 import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
@@ -31,12 +31,12 @@ const factPack: BoardFactPack = {
   ],
 };
 
-const narrative: BoardNarrative = {
-  executiveSummary: "Stable month.",
-  highlights: ["Three applications activated."],
-  risks: ["Two members require attention."],
+const narrative: BilingualBoardNarrative = {en: {
+  executiveSummary: "Review the reporting window.",
+  highlights: ["{{facts.funnelActivated}}"],
+  risks: ["{{facts.atRiskCount}}"],
   recommendedActions: ["Review the retention queue."],
-};
+}, zhHK:{executiveSummary:"請檢視報告期間。",highlights:["{{facts.funnelActivated}}"],risks:["{{facts.atRiskCount}}"],recommendedActions:["請檢視跟進佇列。"]}};
 
 const agentConfig = {
   enabled: true,
@@ -131,7 +131,7 @@ describe("Board Reporter service", () => {
         sourceKey: "board-report:2026-06:board-reporter-v1",
         slug: "board-report-2026-06",
         titleEn: "Board report: 2026-06",
-        titleZh: "Board report: 2026-06",
+        titleZh: "理事會報告: 2026-06",
         bodyMdx: expect.stringContaining("| ARR | HKD 3,240 |"),
       }),
     );

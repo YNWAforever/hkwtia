@@ -22,7 +22,19 @@ export type ScheduledAgentActor = {
   trigger: "scheduled";
 };
 
-export type AgentRunActor = ConciergeAgentActor | ScheduledAgentActor;
+export type WriterAgentActor = {
+  kind: "agent";
+  agent: "writer";
+  runId: string;
+  conversationId: null;
+  profileId: string;
+  trigger: "portal";
+};
+
+export type AgentRunActor =
+  | ConciergeAgentActor
+  | ScheduledAgentActor
+  | WriterAgentActor;
 export type Actor = SessionActor | AgentRunActor;
 
 function hasRunId(actor: AgentRunActor): boolean {
@@ -48,14 +60,31 @@ function isScheduledAgent(actor: Actor): actor is ScheduledAgentActor {
     && actor.trigger === "scheduled";
 }
 
+function isWriterAgent(actor: Actor): actor is WriterAgentActor {
+  return actor.kind === "agent"
+    && actor.agent === "writer"
+    && hasRunId(actor)
+    && actor.conversationId === null
+    && typeof actor.profileId === "string"
+    && actor.profileId.length > 0
+    && actor.trigger === "portal";
+}
+
 export function requireConciergeAgent(actor: Actor): ConciergeAgentActor {
   if (!isConciergeAgent(actor)) forbidden();
   return actor;
 }
 
 export function requireAgentRunActor(actor: Actor): AgentRunActor {
-  if (isConciergeAgent(actor) || isScheduledAgent(actor)) return actor;
+  if (isConciergeAgent(actor) || isScheduledAgent(actor) || isWriterAgent(actor)) {
+    return actor;
+  }
   return forbidden();
+}
+
+export function requireWriterAgent(actor: Actor): WriterAgentActor {
+  if (!isWriterAgent(actor)) forbidden();
+  return actor;
 }
 
 export function requireScheduledAgent(

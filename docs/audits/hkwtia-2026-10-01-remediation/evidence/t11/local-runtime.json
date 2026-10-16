@@ -1,0 +1,64 @@
+{
+  "environment": "confirmed isolated Neon; actual Wrangler/Miniflare local scheduled HTTP; no cloud invocation",
+  "sourceBase": "01eda2808c79217cd82cc03429505b711910bcf9",
+  "workerSourceSha256": "2da9e04b2a2e9911fe1aeb77aced5b23307ac90243f78c43339b5e26c60ebab3",
+  "bindingRevision": "synthetic fixture, not a deployed SHA",
+  "scope": [
+    "rate-limit-cleanup"
+  ],
+  "receipts": [
+    {
+      "mode": "cleanup",
+      "browserVerified": true,
+      "scheduledAcknowledgedHttp": 200,
+      "jobState": "completed",
+      "attemptCount": 1,
+      "healthOutcome": "completed",
+      "lastSuccessPresent": true,
+      "counts": {
+        "removed": 0
+      },
+      "runner": "existing createJobPost and SQL repositories; explicit hanging/failure fault injection",
+      "providerTest": false
+    },
+    {
+      "mode": "hang",
+      "browserVerified": true,
+      "scheduledAcknowledgedHttp": 200,
+      "jobState": "processing",
+      "attemptCount": 1,
+      "healthOutcome": "uncertain",
+      "lastSuccessPresent": false,
+      "counts": {},
+      "runner": "existing createJobPost and SQL repositories; explicit hanging/failure fault injection",
+      "providerTest": false
+    },
+    {
+      "mode": "crash",
+      "browserVerified": false,
+      "scheduledAcknowledgedHttp": 200,
+      "jobState": "processing",
+      "attemptCount": 1,
+      "healthOutcome": "processing",
+      "lastSuccessPresent": false,
+      "counts": {},
+      "runner": "existing createJobPost and SQL repositories; explicit hanging/failure fault injection",
+      "providerTest": false
+    },
+    {
+      "mode": "fail",
+      "browserVerified": false,
+      "scheduledAcknowledgedHttp": 200,
+      "jobState": "failed",
+      "attemptCount": 3,
+      "healthOutcome": "failed",
+      "lastSuccessPresent": false,
+      "counts": {},
+      "runner": "existing createJobPost and SQL repositories; explicit hanging/failure fault injection",
+      "providerTest": false
+    }
+  ],
+  "cloudDeploymentVerified": false,
+  "production": false,
+  "command": "node --env-file=.env.local --import tsx scripts/verify-job-health-runtime.mts"
+}

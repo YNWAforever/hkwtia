@@ -1,0 +1,10 @@
+{
+  "observedAt": "2026-10-04T21:13:04.061887+00:00",
+  "textFilesScanned": 470,
+  "sensitiveMatches": [],
+  "knownSecretValuesPrinted": false,
+  "maintainerContactsMasked": 3,
+  "privateEnvCookiesHeadersRawDumpsExcluded": true,
+  "screenshots": "owned synthetic identities/data only; provider challenge not fabricated",
+  "productionEffects": false
+}

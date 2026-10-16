@@ -1,0 +1,128 @@
+{
+  "sourceCommitPending": false,
+  "productionDeployment": false,
+  "migrationRequired": false,
+  "mathRed": {
+    "failed": 9,
+    "passed": 1,
+    "command": "npx vitest run tests/unit/ai-operations-metrics.test.ts"
+  },
+  "collectionRed": {
+    "failed": 18,
+    "passed": 2,
+    "behavior": "invalid timing/content, reopened receipt dedupe, measured math were absent"
+  },
+  "dashboardRed": {
+    "failed": 1,
+    "passed": 14,
+    "behavior": "legacy estimate had no distinct unmeasured status"
+  },
+  "repositoryRed": {
+    "failed": 2,
+    "passed": 1,
+    "behavior": "no persisted audit receipt or source validation"
+  },
+  "overlapRed": {
+    "failed": 1,
+    "passed": 3,
+    "behavior": "overlapping work was double-counted"
+  },
+  "actionRed": {
+    "failed": 3,
+    "behavior": "unimplemented persistence/input/outage response"
+  },
+  "focusedGreen": {
+    "passed": 154,
+    "files": 8,
+    "skipped": 0,
+    "command": "npx vitest run tests/unit/ai-operations-metrics.test.ts tests/unit/operations-baseline.test.ts tests/unit/operations-metrics-action.test.ts tests/unit/operations-timing-form.test.tsx tests/unit/aiops-dashboard.test.ts tests/unit/aiops-components.test.tsx tests/unit/aiops-page.test.tsx tests/unit/server-action-actor-boundary.test.ts"
+  },
+  "actualDatabaseGreen": {
+    "passed": 9,
+    "files": 2,
+    "skipped": 0,
+    "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/operations-baseline.test.ts tests/integration/ai-operations-metrics.test.ts",
+    "projectId": "solitary-wave-52860119",
+    "branchId": "br-lingering-unit-azxl75s5",
+    "ledger": 56,
+    "ownedSyntheticRowsOnly": true
+  },
+  "nativeBrowser": {
+    "passed": 5,
+    "skipped": 0,
+    "runtime": "next start / NODE_ENV=production; fixture process NODE_ENV=test",
+    "locales": [
+      "en",
+      "zh-HK"
+    ],
+    "widths": [
+      1440,
+      390
+    ],
+    "formSeriousCriticalAxe": 0,
+    "command": "node --env-file=.env.local .playwright/full-fix-t04-browser.mjs",
+    "receipt": "browser-receipt-final.json",
+    "buildManifest": "build-inputs-final.json",
+    "windowFrozenFormActuallyPersisted": true
+  },
+  "earlierBrowserFailures": [
+    {
+      "kind": "fixture guard rejected inherited production mode",
+      "businessWrites": 0
+    },
+    {
+      "kind": "exact native select label included option text",
+      "fixedBy": "explicit label/id association",
+      "abortReason": "same diagnosed wait repeated",
+      "ownedSourceCleanupReceipt": "aborted-cleanup.json"
+    }
+  ],
+  "remainingEngineering": [
+    "Automatic complete population coverage for non-support operational workflows is still pending their T09-T12/T18 integrations; the report explicitly scopes current denominator to all support plus observed other cases."
+  ],
+  "operationalGate": "Operations owner + QA: two weeks of actual human observations, agreed comparison coverage, and T16 capability-specific pilot/release authorization; synthetic isolated receipts are not operating ROI.",
+  "frozenComparison": {
+    "unitRed": 4,
+    "unitGreen": 4,
+    "actualRepositoryRed": 3,
+    "actualRepositoryGreen": 3,
+    "actionRed": 1,
+    "actionGreen": 4,
+    "immutableReceipt": true,
+    "serverDerivedMeansAndSha256Digest": true,
+    "lateBaselineWritesBlocked": true,
+    "weightedPerKindActualSamples": true,
+    "negativeDifferencePreserved": true,
+    "noMigrationRequired": true
+  },
+  "completionState": {
+    "red": 1,
+    "green": 1,
+    "behavior": "A second pending submission clears the old saved status; browser waits for the submit control to be enabled after both requests."
+  },
+  "observationPeriod": {
+    "red": 2,
+    "green": 6,
+    "behavior": "Report attribution uses actual observation endedAt, not later audit insertion time."
+  },
+  "gates": {
+    "typecheckExit": 0,
+    "stringsExit": 0,
+    "tsxFilesScanned": 311,
+    "lintExit": 0,
+    "lintWarnings": 82,
+    "buildExit": 0,
+    "fullSuite": {
+      "exitCode": 0,
+      "filesPassed": 765,
+      "filesSkipped": 87,
+      "testsPassed": 6421,
+      "testsSkipped": 338,
+      "testsFailed": 0,
+      "durationSeconds": 638.99,
+      "command": "npm test -- --maxWorkers=2",
+      "limits": "Skipped isolated/provider suites remain unverified by this gate; T04 DB/native and T03 SQL are separately run."
+    }
+  },
+  "verifiedRuntimeCommit": "2c992618c5c737b98d911c086195db312a21de6f"
+}

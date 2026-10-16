@@ -4,10 +4,13 @@ import {z} from "zod";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companiesRepository} from "@/lib/db/repos/companies";
+import {contactWriterActor, contactsRepository} from "@/lib/db/repos/contacts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {forbidden, requireMember} from "@/lib/membership/lifecycle";
 import {isPortalMembershipStatus} from "@/lib/portal/queries";
+import {whatsappConsentFields} from "@/lib/whatsapp/consent";
+import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
 
 /**
  * Actor-taking cores, deliberately outside the `"use server"` module. That
@@ -22,6 +25,18 @@ const profileUpdateSchema = z.object({
   jobTitle: z.string().trim().max(120).nullable().optional(),
   locale: z.enum(["en", "zh-HK"]).optional(),
   directoryVisible: z.boolean().optional(),
+  whatsappNumber: z.string().trim().max(32).nullable().optional()
+    .transform((value, context) => {
+      if (!value) return null;
+      const normalized = normalizeWhatsAppNumber(value);
+      if (!normalized) context.addIssue({code: z.ZodIssueCode.custom, message: "INVALID_WHATSAPP_NUMBER"});
+      return normalized;
+    }),
+  whatsappOptIn: z.boolean().optional().default(false),
+}).superRefine((input, context) => {
+  if (input.whatsappOptIn && !input.whatsappNumber) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["whatsappNumber"], message: "WHATSAPP_NUMBER_REQUIRED"});
+  }
 });
 
 const companyUpdateSchema = z.object({
@@ -35,24 +50,41 @@ const companyUpdateSchema = z.object({
   directoryVisible: z.boolean().optional(),
 });
 
-export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+/**
+ * The company's directory switch, read only when the posting form actually rendered it.
+ *
+ * `companies.directory_visible` gates every colleague in the member directory
+ * (`lib/db/repos/portal-content.ts`). For a long time no form rendered it, yet
+ * `updateCompanyAction` sent `formData.get("directoryVisible") === "on"` — always `false` —
+ * so saving company details silently hid the whole company. A form now opts in with a hidden
+ * `directoryVisibleShown` field; without it the value is `undefined` and the stored one stands.
+ */
+export function companyDirectoryVisibility(formData: FormData): boolean | undefined {
+  if (!formData.has("directoryVisibleShown")) return undefined;
+  return formData.get("directoryVisible") === "on";
+}
+
+export type ProfileUpdateInput = z.input<typeof profileUpdateSchema>;
 export type CompanyUpdateInput = z.infer<typeof companyUpdateSchema>;
 export type PortalActionState = Readonly<{ok: boolean; message?: string}>;
 
 type ProfileWriter = Pick<typeof profilesRepository, "update">;
 type CompanyWriter = Pick<typeof companiesRepository, "getById" | "update">;
 type MembershipReader = Pick<typeof membershipsRepository, "list">;
+type ContactLinker = Pick<typeof contactsRepository, "linkProfile">;
 
 export type PortalCommandDependencies = Readonly<{
   profiles: ProfileWriter;
   companies: CompanyWriter;
   memberships: MembershipReader;
+  contacts: ContactLinker;
 }>;
 
 const defaultDependencies: PortalCommandDependencies = {
   profiles: profilesRepository,
   companies: companiesRepository,
   memberships: membershipsRepository,
+  contacts: contactsRepository,
 };
 
 function dependencies(input?: Partial<PortalCommandDependencies>): PortalCommandDependencies {
@@ -78,14 +110,37 @@ export async function updateProfile(
   requireMember(actor);
   const input = profileUpdateSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
-  await requireRecoverableMembership(actor, deps);
+  // Consent and own contact preferences are self-service rights, independent
+  // of paid benefits. The repository still scopes this write to actor.profileId.
+  const {whatsappOptIn, ...profileInput} = input;
   const result = await deps.profiles.update(actor, actor.profileId, {
-    ...input,
+    ...profileInput,
+    // Programme D-7: the portal is a consent source of its own; opting out
+    // clears the provenance rather than leaving a stale timestamp behind.
+    ...whatsappConsentFields({optIn: whatsappOptIn, source: "portal"}),
     // Profile completion is derived by the portal from this explicit state;
     // callers cannot set an arbitrary onboarding percentage.
     onboardingState: "complete",
   });
   if (!result) throw new Error("PROFILE_NOT_FOUND");
+  // Programme C-4 / plan S-16. The spec says "merge on login"; `getActor()`
+  // calls `touchLastLogin` on *every* authenticated request rather than at
+  // login, so hooking the merge there would put a two-table lookup on every
+  // page render. The identity it matches on only changes when it is written, so
+  // the merge runs here and in the join profile step instead.
+  //
+  // Fire-and-forget, for the same reason `lib/auth/actor.ts` treats
+  // `touchLastLogin` that way: a prospect row we failed to link must not undo a
+  // profile the member has already saved. The repository swallows the
+  // `contacts_profile_unique` race itself; this `catch` covers the rest.
+  void deps.contacts.linkProfile(contactWriterActor("import"), {
+    profileId: actor.profileId,
+    email: result.email,
+    // Already normalised by `profileUpdateSchema`; `normalizeWhatsAppNumber`
+    // again so that a row written before that transform existed cannot reach
+    // the merge in a shape the repository would silently skip.
+    phoneE164: normalizeWhatsAppNumber(result.whatsappNumber ?? ""),
+  }).catch(() => undefined);
   return result;
 }
 

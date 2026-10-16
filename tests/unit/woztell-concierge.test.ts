@@ -38,6 +38,11 @@ function acceptedClaim(
     locale: "en",
     memberName: "Member",
     whatsappOptIn: true,
+    // C-1 Task 3: the claim now reports the conversation's handling state and
+    // window clock. 'bot' is the pre-Phase-C behaviour this fixture pins.
+    handling: "bot",
+    assignedToProfileId: null,
+    lastInboundAt: null,
     ...overrides,
   };
 }
@@ -90,6 +95,7 @@ describe("WOZTELL Concierge adapter", () => {
         intent: null,
         providerMessageId: "wamid.inbound.1",
         receivedAt: RECEIVED_AT,
+        whatsappMemberId: null,
       });
   });
 
@@ -134,7 +140,11 @@ describe("WOZTELL Concierge adapter", () => {
     const dependencies = processorDependencies();
     await expect(createWoztellWebhookProcessor(dependencies).process(
       inbound({type: "IMAGE"}),
-    )).resolves.toEqual({status: "ignored"});
+      // C-1 Task 4 replaced the bare `{status: "ignored"}` arm with one that says
+      // WHY. An unrecognised event and an unreadable sender used to be the same
+      // answer, and since the route returns this object as the 202 body, the
+      // reason is the only observability this subsystem has at C-9.
+    )).resolves.toEqual({status: "ignored", reason: "unsupported_event"});
     expect(dependencies.claimInbound).not.toHaveBeenCalled();
     expect(dependencies.concierge.startTurn).not.toHaveBeenCalled();
   });

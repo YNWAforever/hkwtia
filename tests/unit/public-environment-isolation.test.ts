@@ -7,18 +7,29 @@ describe("public environment boundaries", () => {
     vi.stubEnv("NODE_ENV", "production");
   });
 
+  // Every case below carries an explicit timeout, and that is contention
+  // insurance rather than a hang budget. `vi.resetModules()` throws the module
+  // registry away before each one, so each import compiles a cold transitive
+  // graph — a repository drags in Drizzle, the schema and the rest of
+  // `lib/db`. Run alone the slowest costs about a second, but the suite runs
+  // ~510 files in parallel and that graph grows with every phase: at Phase B2
+  // a 91ms import blew past Vitest's 5s default under load and failed the gate
+  // for scheduling reasons rather than for anything it asserts. CI's 2-vCPU
+  // runner is tighter still. Judge these on what they assert; the timeout is
+  // only here to catch a module that never resolves at all.
+
   it("imports the database client with only DATABASE_URL configured", async () => {
     vi.stubEnv("DATABASE_URL", "postgres://db.example.test/hkwtia");
     const {db} = await import("@/lib/db/client");
     expect(db).toBeDefined();
-  });
+  }, 30_000);
 
   it("imports auth without unrelated email, Stripe, cron, or Concierge values", async () => {
     vi.stubEnv("NEON_AUTH_BASE_URL", "https://auth.example.test");
     vi.stubEnv("NEON_AUTH_COOKIE_SECRET", "neon-cookie-secret");
     const {auth} = await import("@/lib/auth/server");
     expect(auth).toBeDefined();
-  });
+  }, 30_000);
 
   // `lib/auth/server` is reachable from `lib/auth/actor`, which `events` and
   // `showcase` import for `requireAdmin`. While it read `authEnv()` at module
@@ -40,7 +51,7 @@ describe("public environment boundaries", () => {
   ])("imports %s without the Neon Auth pair configured", async (specifier) => {
     vi.stubEnv("DATABASE_URL", "postgres://db.example.test/hkwtia");
     await expect(import(specifier)).resolves.toBeDefined();
-  });
+  }, 30_000);
 
   it("builds the sitemap without the Neon Auth pair configured", async () => {
     // A closed loopback port rather than a `.test` hostname: this is the only
@@ -51,11 +62,10 @@ describe("public environment boundaries", () => {
     // beats unresolvable, and it exercises the same degrade path.
     vi.stubEnv("DATABASE_URL", "postgres://user:pw@127.0.0.1:1/hkwtia");
     const {default: sitemap} = await import("@/app/sitemap");
-    // Every database read is individually caught, so an unreachable database
-    // degrades to the static public routes rather than failing the document.
-    const entries = await sitemap();
-    expect(entries.length).toBeGreaterThan(0);
-    expect(entries.some(({url}) => url.endsWith("/privacy"))).toBe(true);
+    // Import must remain independent of Neon Auth; a later database outage
+    // rejects the dynamic sitemap instead of presenting incomplete URLs as a 200.
+    await expect(sitemap()).rejects.toThrow();
+
   }, 20_000);
 
   // The split must not soften the boundary it was carved out of: importing the

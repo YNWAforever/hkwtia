@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {resolve} from "node:path";
 
 import {describe, expect, it, vi} from "vitest";
@@ -85,6 +86,7 @@ describe("authorized Concierge live evaluation", () => {
 
     const report = await runAuthorizedLiveEvaluation({
       env: authorizedEnv,
+      budget: syntheticAiBudget(),
       createProviderFactories,
       createJudge,
     });
@@ -120,6 +122,7 @@ describe("authorized Concierge live evaluation", () => {
 
     const report = await runAuthorizedLiveEvaluation({
       env: authorizedEnv,
+      budget: syntheticAiBudget(),
       cases,
       createProviderFactories: () => ({
         openai: providerFactory,

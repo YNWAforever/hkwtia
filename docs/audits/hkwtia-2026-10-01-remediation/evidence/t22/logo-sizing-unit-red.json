@@ -1,0 +1,33 @@
+{
+  "sourceSha": "42930d9a",
+  "startTime": 1790964735487,
+  "passed": 2,
+  "failed": 1,
+  "skipped": 0,
+  "total": 3,
+  "failedFiles": [
+    "tests/unit/dual-brand-lockup.test.tsx"
+  ],
+  "success": false,
+  "cases": [
+    {
+      "file": "tests/unit/dual-brand-lockup.test.tsx",
+      "test": "DualBrandLockup renders the donor tile with the WTIA logo and the D-10 descriptor",
+      "status": "passed",
+      "durationMs": 150.47060000000056
+    },
+    {
+      "file": "tests/unit/dual-brand-lockup.test.tsx",
+      "test": "DualBrandLockup requests a logo sized for the mobile and desktop tile",
+      "status": "failed",
+      "durationMs": 201.68769999999859
+    },
+    {
+      "file": "tests/unit/dual-brand-lockup.test.tsx",
+      "test": "DualBrandLockup keeps the tap-floor classes and the 44px height with long localized labels",
+      "status": "passed",
+      "durationMs": 49.40769999999975
+    }
+  ],
+  "sourceRelation": "Working private-link implementation and new logo test; original logo sizing before 8119b7f3"
+}

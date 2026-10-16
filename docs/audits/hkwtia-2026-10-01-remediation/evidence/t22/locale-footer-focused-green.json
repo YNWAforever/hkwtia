@@ -1,0 +1,6 @@
+{
+  "pass": 31,
+  "fail": 0,
+  "skip": 0,
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/locale-switcher.test.tsx tests/unit/public-shell.test.tsx tests/unit/site-header-streaming.test.tsx tests/unit/admin-member-view.test.tsx"
+}

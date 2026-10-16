@@ -1,0 +1,213 @@
+
+> hkwtia-platform@0.0.0 lint
+> eslint .
+
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-input-20261003\audit\repro-usage.mjs
+  14:18  warning  'chunk' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t06-uc34.ts
+  43:19  warning  '_chunk' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t08-preview-capture.mjs
+   3:8    warning  'AxeBuilder' is defined but never used           @typescript-eslint/no-unused-vars
+   4:22   warning  'writeFileSync' is defined but never used        @typescript-eslint/no-unused-vars
+   9:135  warning  'checks' is assigned a value but never used      @typescript-eslint/no-unused-vars
+   9:149  warning  'stage' is assigned a value but never used       @typescript-eslint/no-unused-vars
+   9:167  warning  'activePage' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  10:66   warning  'invalid' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  14:16   warning  'waitVersion' is defined but never used          @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t15-profile-after.mjs
+  2:10  warning  'createServer' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t15-profile.mjs
+  2:10  warning  'createServer' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t17-public-extra.mjs
+  26:8  warning  'en' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t17-signoff.mjs
+  4:62  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t22-boundary-diagnosis.mjs
+  2:124  warning  'key' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t22-lhci.config.js
+  5:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t22-paced-final.mjs
+  1:22  warning  'existsSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t22-post-paced-final.mjs
+  1:22  warning  'existsSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t22-release-final-sequence.mjs
+  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t22-release-paced-sequence.mjs
+  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\t23-session-stdin.mjs
+  1:9  warning  'createInterface' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\components\admin\inbox-composer.tsx
+  163:38  warning  The ref value 'sequence.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'sequence.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\components\layout\footer-newsletter.tsx
+  123:5  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\docs\audits\hkwtia-2026-10-01-remediation\evidence\t22\reproduction\lighthouse-config.js
+  5:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\docs\audits\hkwtia-2026-10-01-remediation\evidence\t22\reproduction\lighthouse.config.js
+  5:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\docs\audits\hkwtia-2026-10-01-remediation\evidence\t22\reproduction\sequential-final-gates.mjs
+  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\docs\audits\hkwtia-2026-10-01-remediation\evidence\t22\reproduction\sequential-paced-gates.mjs
+  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\docs\audits\hkwtia-2026-10-01-remediation\evidence\t22\reproduction\sequential-unpaced-gates.mjs
+  2:9  warning  'readFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\lib\admin\event-actions.ts
+  7:31  warning  'runCheckInAction' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\lib\ai\knowledge\policy.ts
+  6:9  warning  'knowledgeRefSchema' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\lib\automation\journey-runner.ts
+  481:10  warning  'whatsappVariables' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\lib\og\renderers.tsx
+  51:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  64:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\helpers\fakes.ts
+  79:33  warning  '_sessionId' is defined but never used       @typescript-eslint/no-unused-vars
+  85:54  warning  '_idempotencyKey' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\admin-login-page.test.tsx
+  17:249  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\admin-presentational.test.tsx
+  40:1  warning  Unused eslint-disable directive (no problems were reported from 'import/first')
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\attendee-table-seat-check-in.test.tsx
+   59:38  warning  '_state' is defined but never used     @typescript-eslint/no-unused-vars
+   59:64  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+  113:44  warning  '_state' is defined but never used     @typescript-eslint/no-unused-vars
+  113:70  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\campaign-wizard.test.ts
+   77:37  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+   78:39  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+   79:34  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+   80:51  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+  201:35  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+  202:31  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+  203:36  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+  204:38  warning  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\cancelled-event-page.test.tsx
+  17:118  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  17:118  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\d4b-seed-guard.test.ts
+  66:31  warning  '_databaseUrl' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\dual-brand-lockup.test.tsx
+  7:24  warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  8:5   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  8:5   warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\event-private-media-render.test.tsx
+  6:90  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  6:90  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\event-public-detail-review.test.tsx
+  17:118  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  17:118  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\guest-cancel-route.test.ts
+  10:9  warning  'cancelTokenDigest' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\home-archive-stories.test.tsx
+  33:66  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\login-pages-resolution.test.tsx
+  9:94  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\m2-session-reuse.test.ts
+  6:28  warning  '_path' is defined but never used     @typescript-eslint/no-unused-vars
+  6:43  warning  '_options' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\m5-leads.test.ts
+  107:65  warning  '_actor' is defined but never used  @typescript-eslint/no-unused-vars
+  107:82  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\member-detail-page.test.tsx
+  42:90  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  42:90  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\member-event-form-disabled.test.tsx
+  17:33  warning  '_state' is defined but never used    @typescript-eslint/no-unused-vars
+  17:50  warning  'formData' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\member-login-page.test.tsx
+  16:249  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\mobile-navigation.test.tsx
+  24:24   warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  24:115  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  24:115  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\partner-confirmation-provenance.test.ts
+  54:31  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\public-directory-availability.test.tsx
+  28:76  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  28:76  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\public-shell.test.tsx
+  43:12  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  43:12  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\shared-rate-limit.test.ts
+  10:43  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+  23:43  warning  '_input' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\site-footer.test.tsx
+  45:24   warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  45:115  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  45:115  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\stripe-ticket-adapter.test.ts
+    9:31  warning  '_params' is defined but never used   @typescript-eslint/no-unused-vars
+    9:49  warning  '_options' is defined but never used  @typescript-eslint/no-unused-vars
+   10:33  warning  '_id' is defined but never used       @typescript-eslint/no-unused-vars
+  184:33  warning  '_input' is defined but never used    @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\wisetech-partner-import.test.ts
+  38:27  warning  'row' is defined but never used  @typescript-eslint/no-unused-vars
+  39:29  warning  'row' is defined but never used  @typescript-eslint/no-unused-vars
+  40:27  warning  'row' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\wt-pages\event-detail-page.test.tsx
+  28:118  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  28:118  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\wt-pages\members-page.test.tsx
+  34:90  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  34:90  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\unit\wt-primitives.test.tsx
+  22:30  warning  '_priority' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  23:5   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  23:5   warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+✖ 97 problems (0 errors, 97 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

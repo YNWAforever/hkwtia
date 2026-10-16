@@ -1,6 +1,9 @@
 import {createHmac} from "node:crypto";
 
-import type {WhatsAppTemplateKey} from "@/config/whatsapp-templates";
+import {
+  WHATSAPP_TEMPLATES,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
 
 export const WOZTELL_ACCEPTANCE_AUTHORIZATION =
   "I_ACCEPT_WOZTELL_ACCEPTANCE_SIDE_EFFECTS";
@@ -16,6 +19,29 @@ function required(
 ): string | null {
   const value = environment[key]?.trim();
   return value ? value : null;
+}
+
+/**
+ * Every BODY parameter of one template, resolved to a non-empty value.
+ *
+ * C-9 (C2 Task 13 Step 2). Meta rejects a template send whose body parameters
+ * are empty, and `lib/channels/woztell.ts` builds the body as
+ * `variables[key] ?? ""` — so a blast leg that left one blank would fail at the
+ * provider during the go-live walk and read exactly like a credential problem.
+ * The harness now resolves whichever template the operator approved, rather
+ * than carrying one hand-written pair for the two concierge keys.
+ */
+export function acceptanceTemplateVariables(
+  key: WhatsAppTemplateKey,
+): Record<string, string> {
+  return Object.fromEntries(
+    WHATSAPP_TEMPLATES[key].variables.map((name: string) => [
+      name,
+      name.toLowerCase().endsWith("url")
+        ? "https://www.hkwtia.org/en/contact"
+        : "Acceptance",
+    ]),
+  );
 }
 
 export function isWoztellAcceptanceEnabled(
@@ -81,16 +107,30 @@ export function requireWoztellAcceptanceAuthorization(
     throw new Error("WOZTELL_ACCEPTANCE_RECIPIENT_INVALID");
   }
 
+  // C-9 (C2 Task 13 Step 2). This filter used to accept the two concierge
+  // follow-ups and nothing else, and then REQUIRED `concierge_follow_up_en` — so
+  // the harness could exercise the human reply lane and could not exercise a
+  // template blast at all, which is half of what §6 gates go-live on. The
+  // ceiling is now the config: any key it declares may be named, and the only
+  // requirement is that the operator named at least one.
+  //
+  // `Object.hasOwn`, not `in`: `"constructor" in WHATSAPP_TEMPLATES` is true
+  // through the prototype chain, and this predicate is the type assertion that
+  // decides which element name a live acceptance run may put on the wire.
   const approvedTemplateKeys = new Set<WhatsAppTemplateKey>(
     (environment.WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS ?? "")
       .split(",")
       .map((value) => value.trim())
       .filter((value): value is WhatsAppTemplateKey =>
-        value === "concierge_follow_up_en"
-        || value === "concierge_follow_up_zh_hk"
+        Object.hasOwn(WHATSAPP_TEMPLATES, value)
       ),
   );
-  if (!approvedTemplateKeys.has("concierge_follow_up_en")) {
+  // Still fail-closed, and deliberately still the same error string: an
+  // acceptance run that names no approved template would send an element name
+  // Meta has not approved, which is a provider 4xx, a permanent failure and a
+  // staff task per recipient (S-14). "At least one" is the widening; "none is
+  // an error" is not negotiable.
+  if (approvedTemplateKeys.size === 0) {
     throw new Error("WOZTELL_ACCEPTANCE_TEMPLATE_APPROVAL_REQUIRED");
   }
 

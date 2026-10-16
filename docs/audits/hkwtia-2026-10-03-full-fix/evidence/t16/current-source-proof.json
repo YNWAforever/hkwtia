@@ -1,0 +1,13 @@
+{
+  "baseMainSha": "899c61a0801d9999c1f1d43c27e34957f02839f3",
+  "migrationTestBytesMatchExecutedReceipt": {
+    "tests/integration/audit-full-migration-recovery.test.ts": true,
+    "tests/integration/audit-database-fixture.ts": true
+  },
+  "appRuntimeGitDiffEmpty": false,
+  "previewActualSourceSha": "145443b69df74ad2f70af172c310d10e05803220",
+  "productionUnchanged": true,
+  "historicalAppEquivalenceProof": "145443b6..899c empty before laterT04 correction",
+  "latestAppBuildSourceSha": "586fd6ede8f9b4533d48ca8109ad14671c00e399",
+  "latestHarnessSha": "e42f323d74ae8f7bb28dce5f1e0c55df4fdf03e3"
+}

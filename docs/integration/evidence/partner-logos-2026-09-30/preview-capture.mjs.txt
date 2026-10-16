@@ -1,0 +1,17 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {chromium,expect} from '@playwright/test';
+const deployment=JSON.parse(await readFile('.playwright/partner-r2-preview-deploy.json','utf8'));
+if(deployment.origin!=='https://hkwtia-partner-logos-20260930.vercel.app'||deployment.deploymentId!=='dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg')throw Error('PREVIEW_CAPTURE_GUARD');
+const browser=await chromium.launch({headless:true});const captures=[];
+try{
+ for(const item of [{locale:'en',path:'/',width:1440,height:1000},{locale:'zh',path:'/zh',width:390,height:844}]){
+  const context=await browser.newContext({storageState:'.playwright/partner-r2-preview-state.json',viewport:{width:item.width,height:item.height}});const page=await context.newPage();
+  await page.goto(deployment.origin+item.path,{waitUntil:'domcontentloaded',timeout:90000});const network=page.locator('.legacy-network');await expect(network).toBeVisible();
+  const top=await network.evaluate(e=>e.getBoundingClientRect().top+window.scrollY);await page.evaluate(y=>window.scrollTo({top:Math.max(0,y-120),behavior:'instant'}),top);
+  await expect(network.locator('.legacy-tabs button').first().locator('b')).toHaveText('58');
+  await page.waitForFunction(()=>[...document.querySelectorAll('.legacy-network img[src^="/api/media/"]')].filter(e=>e.getBoundingClientRect().top<innerHeight).every(i=>i.complete&&i.naturalWidth>0));
+  const filename=`home-${item.locale}-${item.width===1440?'desktop':'mobile'}-viewport.png`;await page.screenshot({path:'.playwright/partner-r2-preview-browser/'+filename,animations:'disabled'});
+  captures.push({filename,viewport:{width:item.width,height:item.height},path:item.path,origin:deployment.origin});await context.close();
+ }
+ await writeFile('.playwright/partner-r2-preview-browser/viewport-captures.json',JSON.stringify({recordedAt:new Date().toISOString(),captures},null,2)+'\n');console.log(JSON.stringify({normalViewportCaptures:captures.length}));
+}catch(error){console.error(JSON.stringify({error:error.name,code:'PREVIEW_CAPTURE_FAILED'}));process.exitCode=1}finally{await browser.close()}

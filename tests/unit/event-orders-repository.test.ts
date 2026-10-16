@@ -1,0 +1,335 @@
+import {describe, expect, it, vi} from "vitest";
+
+import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
+import {createEventOrdersRepository, type EventOrdersTransaction, type LockedEvent, type OrderRecord} from "@/lib/db/repos/event-orders";
+
+const now = new Date("2026-09-14T04:00:00Z");
+const event: LockedEvent = {id: "ev-1", slug: "real-event", capacity: 2, published: true, startsAt: new Date("2026-10-01T10:00:00Z"), endsAt: null, registrationMode: "ticketed", ticketPriceHkdCents: 25_000, visibility: "public", memberOnly: false};
+
+function order(overrides: Partial<OrderRecord> = {}): OrderRecord {
+  return {id: "order-1", eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", amountHkdCents: 25_000, currency: "hkd", status: "pending", stripeCheckoutSessionId: null, stripeCheckoutUrl: null, idempotencyKey: "idem-1", expiresAt: new Date(now.getTime() + 1_800_000), paidAt: null, refundedAt: null, refundReason: null, ...overrides};
+}
+
+function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrdersTransaction {
+  return {
+    lockEvent: vi.fn(async () => event),
+    hasEligibleMembership: vi.fn(async () => false),
+    orderByIdempotencyKey: vi.fn(async () => null),
+    orderBySessionId: vi.fn(async () => null),
+    seatsOfOrder: vi.fn(async () => 1),
+    orderSeats: vi.fn(async () => []),
+    seatForPass: vi.fn(async () => null),
+    resendEligible: vi.fn(async () => true),
+    heldSeats: vi.fn(async () => 0),
+    paidSeats: vi.fn(async () => 0),
+    insertOrder: vi.fn(async () => order()),
+    insertSeats: vi.fn(async () => undefined),
+    attachSession: vi.fn(async () => true),
+    expireUnattachedOrder: vi.fn(async () => true),
+    markStatus: vi.fn(async () => undefined),
+    orderById: vi.fn(async () => null),
+    listEventOrders: vi.fn(async () => []),
+    ordersAwaitingCancellationRefund: vi.fn(async () => []),
+    deferUnsettledCancellationRefund: vi.fn(async () => undefined),
+    refundPaidOrder: vi.fn(async () => false),
+    reconcileRefundedOrder: vi.fn(async () => false),
+    markRefundFailed: vi.fn(async () => false),
+    insertAudit: vi.fn(async () => undefined),
+    enqueueTicketNotice: vi.fn(async () => undefined),
+    eventSummary: vi.fn(async () => []),
+    ...overrides,
+  };
+}
+
+const seats = [{name: "Ada", email: "ada@example.test"}];
+
+describe("eventOrdersRepository.createOrder", () => {
+  it("refuses a direct paid order for the audited demo event before reading or reusing an attempt", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, slug: "wtia-global-growth-demo-briefing-2026"}))});
+    const input = {eventId: "ev-1", actor: ANONYMOUS_ACTOR, buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now} as const;
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder(input))
+      .resolves.toEqual({ok: false, reason: "EVENT_NOT_FOUND"});
+    expect(tx.orderByIdempotencyKey).not.toHaveBeenCalled();
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuses a direct anonymous write to a locked members-only event", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, visibility: "members_only", memberOnly: true}))});
+    const input = {eventId: "ev-1", actor: {kind: "anonymous", userId: null}, buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now} as const;
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder(input))
+      .resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuses a direct invite-only write, even for a member", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, visibility: "invite_only", memberOnly: true}))});
+    const input = {eventId: "ev-1", actor: {kind: "member", userId: "auth-1", profileId: "profile-1"}, buyerProfileId: "profile-1", buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now} as const;
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder(input))
+      .resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+  it("accepts a current member inside the locked transaction", async () => {
+    const member = {kind: "member", userId: "auth-1", profileId: "profile-1"} as const;
+    const tx = transaction({
+      lockEvent: vi.fn(async () => ({...event, visibility: "members_only", memberOnly: true})),
+      hasEligibleMembership: vi.fn(async () => true),
+    });
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      actor: member, eventId: "ev-1", buyerProfileId: member.profileId, buyerName: "Ada",
+      buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1",
+      seats, amountHkdCents: 25_000, now,
+    })).resolves.toMatchObject({ok: true});
+    expect(tx.hasEligibleMembership).toHaveBeenCalledWith(member.profileId);
+    expect(tx.insertOrder).toHaveBeenCalledOnce();
+  });
+
+  it("refuses an expired member before an existing payable session can be returned", async () => {
+    const member = {kind: "member", userId: "auth-1", profileId: "profile-1"} as const;
+    const tx = transaction({
+      lockEvent: vi.fn(async () => ({...event, visibility: "members_only", memberOnly: true})),
+      hasEligibleMembership: vi.fn(async () => false),
+      orderByIdempotencyKey: vi.fn(async () => order({buyerProfileId: member.profileId, stripeCheckoutSessionId: "cs_open", stripeCheckoutUrl: "https://checkout.stripe.test/open"})),
+    });
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      actor: member, eventId: "ev-1", buyerProfileId: member.profileId, buyerName: "Ada",
+      buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1",
+      seats, amountHkdCents: 25_000, now,
+    })).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
+    expect(tx.orderByIdempotencyKey).not.toHaveBeenCalled();
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("rejects a forged buyer profile even on a public event", async () => {
+    const tx = transaction();
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: "other-profile", buyerName: "Ada",
+      buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1",
+      seats, amountHkdCents: 25_000, now,
+    })).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("honours the stricter legacy memberOnly flag when visibility says public", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, visibility: "public", memberOnly: true}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada",
+      buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1",
+      seats, amountHkdCents: 25_000, now,
+    })).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("writes a pending order and its seats when capacity allows", async () => {
+    const tx = transaction();
+    const result = await createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now});
+
+    expect(result).toMatchObject({ok: true, reused: false});
+    expect(tx.insertOrder).toHaveBeenCalledOnce();
+    expect(tx.insertSeats).toHaveBeenCalledWith("order-1", seats);
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.created", targetId: "order-1"}));
+  });
+
+  it("refuses an event that does not sell tickets", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, registrationMode: "rsvp"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toEqual({ok: false, reason: "EVENT_NOT_TICKETED"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuses a cancelled event after the caller's earlier publication check", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, published: false}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toEqual({ok: false, reason: "EVENT_CLOSED"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuses an event whose start time passed before the locked write", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, startsAt: now}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toEqual({ok: false, reason: "EVENT_CLOSED"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+  it("refuses an amount the event's own price does not derive", async () => {
+    const tx = transaction();
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 99_000, now}))
+      .resolves.toEqual({ok: false, reason: "AMOUNT_MISMATCH"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the held seats plus this order exceed capacity", async () => {
+    const tx = transaction({heldSeats: vi.fn(async () => 2)});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toEqual({ok: false, reason: "SOLD_OUT"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("treats an unlimited event as never sold out", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, capacity: null})), heldSeats: vi.fn(async () => 999)});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toMatchObject({ok: true});
+  });
+
+  it.each([
+    ["expired", {expiresAt: now}, "ATTEMPT_EXPIRED"],
+    ["already paid", {status: "paid" as const}, "ATTEMPT_COMPLETED"],
+  ])("does not reopen a %s purchase attempt", async (_label, overrides, reason) => {
+    const tx = transaction({
+      orderByIdempotencyKey: vi.fn(async () => order(overrides)),
+      orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}]),
+    });
+    const result = await createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test",
+      buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now,
+    });
+    expect(result).toEqual({ok: false, reason});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+  it("keeps an attached pending session on the same key after the seat hold ends", async () => {
+    const existing = order({
+      expiresAt: now,
+      stripeCheckoutSessionId: "cs_existing",
+      stripeCheckoutUrl: "https://checkout.stripe.test/existing",
+    });
+    const tx = transaction({
+      orderByIdempotencyKey: vi.fn(async () => existing),
+      orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}]),
+    });
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test",
+      buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now,
+    })).resolves.toEqual({ok: true, order: existing, reused: true});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+  it("reuses the order a repeated idempotency key names", async () => {
+    const tx = transaction({orderByIdempotencyKey: vi.fn(async () => order()), orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}])});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toMatchObject({ok: true, reused: true});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+});
+
+describe("eventOrdersRepository.createOrder changed attempts", () => {
+  it("rejects a reused key when the amount, buyer, or seats changed", async () => {
+    const oldSeats = [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}];
+    const tx = transaction({
+      orderByIdempotencyKey: vi.fn(async () => order()),
+      orderSeats: vi.fn(async () => oldSeats),
+    });
+    const repository = createEventOrdersRepository(async (work) => work(tx));
+    const input = {actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test",
+      buyerLocale: "en" as const, idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now};
+
+    await expect(repository.createOrder({...input, amountHkdCents: 50_000, seats: [...seats, {name: "Bob", email: "bob@example.test"}]}))
+      .resolves.toEqual({ok: false, reason: "ATTEMPT_CHANGED"});
+    await expect(repository.createOrder({...input, buyerEmail: "other@example.test"}))
+      .resolves.toEqual({ok: false, reason: "ATTEMPT_CHANGED"});
+    await expect(repository.createOrder({...input, seats: [{name: "Other", email: "ada@example.test"}]}))
+      .resolves.toEqual({ok: false, reason: "ATTEMPT_CHANGED"});
+  });
+});
+describe("eventOrdersRepository.settlePaid", () => {
+  it("records the receipt and every pass inside the paid transaction", async () => {
+    const enqueueTicketNotice = vi.fn(async () => undefined);
+    const tx = transaction({
+      orderBySessionId: vi.fn(async () => order()),
+      orderSeats: vi.fn(async () => [
+        {seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"},
+        {seatId: "seat-2", position: 2, attendeeName: "Bob", attendeeEmail: "bob@example.test"},
+      ]),
+      enqueueTicketNotice,
+    } as Partial<EventOrdersTransaction>);
+
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
+      .resolves.toMatchObject({status: "paid"});
+    expect(enqueueTicketNotice).toHaveBeenCalledTimes(3);
+    expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "confirmation", eventKey: "ticket-confirmation:order-1"});
+    expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: "seat-1", kind: "pass", eventKey: "ticket-pass:seat-1:2026-09-14T04:00:00.000Z"});
+    expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: "seat-2", kind: "pass", eventKey: "ticket-pass:seat-2:2026-09-14T04:00:00.000Z"});
+  });
+
+  it("marks a pending order paid", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order())});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
+      .resolves.toMatchObject({status: "paid"});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "paid", expect.objectContaining({paidAt: now}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.paid", targetId: "order-1"}));
+  });
+
+  it("refunds a pending payment when the event was cancelled before settlement", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order()), lockEvent: vi.fn(async () => ({...event, published: false}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refund_pending", refundReason: "cancelled"})});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "cancelled"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", metadata: {reason: "event_closed"}}));
+    expect(tx.enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "refund", eventKey: "ticket-refund:order-1:pending"});
+  });
+  it("refunds a payment that arrives after the order expired locally", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refund_pending", refundReason: "cancelled"})});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "cancelled"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", targetId: "order-1", metadata: {reason: "late_payment"}}));
+  });
+
+  it("is a no-op for an order already paid", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "paid"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).resolves.toMatchObject({status: "duplicate"});
+    expect(tx.markStatus).not.toHaveBeenCalled();
+  });
+
+  it.each(["oversold", "cancelled"] as const)("re-issues a refund committed as %s but not finished", async (refundReason) => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "refunded", refundReason}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"}))
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason})});
+    expect(tx.markStatus).not.toHaveBeenCalled();
+  });
+
+  it("leaves a staff refund to the staff lane", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "refunded", refundReason: "staff"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).resolves.toMatchObject({status: "ignored"});
+    expect(tx.markStatus).not.toHaveBeenCalled();
+  });
+
+  it("refunds an order that lost the race for the last seat", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 2)});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"})).resolves.toMatchObject({status: "oversold"});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refund_pending", expect.objectContaining({refundReason: "oversold"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refund_due", targetId: "order-1", metadata: {reason: "oversold"}}));
+  });
+
+  it("does not count the order's own seats against it", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 0)});
+    await createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now, {orderId: "order-1", amountHkdCents: 25_000, currency: "hkd"});
+    expect(tx.heldSeats).toHaveBeenCalledWith("ev-1", now, "order-1");
+  });
+});
+
+describe("eventOrdersRepository.paidSeats", () => {
+  it("counts the paid seats of one event", async () => {
+    const tx = transaction({paidSeats: vi.fn(async () => 3)});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).paidSeats("ev-1")).resolves.toBe(3);
+    expect(tx.paidSeats).toHaveBeenCalledWith("ev-1");
+  });
+});
+
+describe("eventOrdersRepository.expireBySession", () => {
+  it("expires a pending order and writes the audit row", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order())});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1", "order-1")).resolves.toBe(true);
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "expired", {});
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.expired", targetId: "order-1"}));
+  });
+
+  it("allows a new key after the expired webhook already released the hold", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1", "order-1")).resolves.toBe(true);
+    expect(tx.markStatus).not.toHaveBeenCalled();
+    expect(tx.insertAudit).not.toHaveBeenCalled();
+  });
+  it("leaves an order that is no longer pending alone", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "paid"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1", "order-1")).resolves.toBe(false);
+    expect(tx.markStatus).not.toHaveBeenCalled();
+    expect(tx.insertAudit).not.toHaveBeenCalled();
+  });
+});

@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {createConciergeService} from "@/lib/ai/agents/concierge";
@@ -28,7 +29,7 @@ function lifecycleHarness() {
     escalate: vi.fn(async () => ({id: RUN_ID})),
     disable: vi.fn(async () => ({id: RUN_ID})),
   };
-  const runtime = createAgentRuntime({
+  const runtime = createAgentRuntime({budget: syntheticAiBudget(),
     agentRuns,
     providerFactories: {
       openai: () => ({

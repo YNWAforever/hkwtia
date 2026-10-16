@@ -1,0 +1,53 @@
+{
+  "applicationSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "stats": {
+    "startTime": "2026-10-02T21:34:59.403Z",
+    "duration": 251103.767,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 23,
+      "title": "en public login, partner assets and publication scope",
+      "status": "expected"
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 23,
+      "title": "zh public login, partner assets and publication scope",
+      "status": "expected"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 65,
+      "title": "en: /admin/inbox and /admin/tasks render for staff",
+      "status": "expected"
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 65,
+      "title": "zh-HK: /admin/inbox and /admin/tasks render for staff",
+      "status": "expected"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 149,
+      "title": "en: a submitted event reaches /events with its organiser once staff approve it",
+      "status": "expected"
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 149,
+      "title": "zh-HK: a submitted event reaches /events with its organiser once staff approve it",
+      "status": "expected"
+    }
+  ],
+  "command": "node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs phase-a-funnel.spec.ts:65 phase-b1-member-events.spec.ts:149 full-public-content.spec.ts:23 --workers=1",
+  "providerResponsesReal": true,
+  "authPacingMs": 5000,
+  "production": false
+}

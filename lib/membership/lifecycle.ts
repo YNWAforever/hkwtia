@@ -6,6 +6,7 @@ import {
   type MembershipPlanCode,
   type MembershipStatus,
 } from "@/lib/membership/constants";
+import type {BillingInterval} from "@/lib/membership/catalog";
 
 export {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES};
 export type {MembershipPlanCode, MembershipStatus};
@@ -24,7 +25,12 @@ export type AdminActor = Extract<AuthenticatedActor, {kind: "staff" | "exco" | "
 export type Actor =
   | Readonly<{kind: "anonymous"; userId: null}>
   | AuthenticatedActor
-  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook"}>;
+  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook" | "event-cancellation"}>;
+
+// The one shared `Actor` value for reads made on behalf of an unauthenticated visitor (public
+// homepage sections, marketing pages). Previously copy-pasted as a local
+// `const anonymous = {kind: 'anonymous', userId: null} as const;` in four separate files.
+export const ANONYMOUS_ACTOR: Readonly<{kind: "anonymous"; userId: null}> = {kind: "anonymous", userId: null};
 
 export class AuthorizationError extends Error {
   readonly code = "FORBIDDEN";
@@ -54,6 +60,7 @@ export interface MembershipRecord {
   readonly applicationId?: string | null;
   readonly planCode: MembershipPlanCode;
   readonly status: MembershipStatus;
+  readonly billingInterval: BillingInterval;
   readonly seatLimit: number;
   readonly stripeCustomerId?: string | null;
   readonly stripeSubscriptionId?: string | null;

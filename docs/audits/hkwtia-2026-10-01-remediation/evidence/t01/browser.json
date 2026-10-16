@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-01T07:47:27.979Z",
+  "environment": "local confirmed isolated DB/Auth",
+  "baseSha": "60a272b68c334d256d578ade36d8e24ca3be5485",
+  "syntheticPasswordLogin": true,
+  "googleAcceptance": false,
+  "magicLinkAcceptance": false,
+  "home": {
+    "status": 200,
+    "meaningfulContent": true,
+    "errorOverlay": false
+  },
+  "receipts": [
+    {
+      "locale": "zh-HK",
+      "route": "/zh/admin/segments",
+      "status": 200,
+      "readableTitle": true,
+      "corruptPlaceholder": false
+    },
+    {
+      "locale": "en",
+      "route": "/admin/segments",
+      "status": 200,
+      "readableTitle": true,
+      "corruptPlaceholder": false
+    }
+  ],
+  "pageErrorNames": []
+}

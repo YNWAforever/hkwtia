@@ -1,0 +1,29 @@
+{
+  "environment": "Windows loopback PostgreSQL16; not HK/SG",
+  "before": {
+    "candidates": 1000,
+    "maximumTransferredRows": 1000,
+    "result": "behavioral RED against101"
+  },
+  "after": [
+    {
+      "candidates": 1000,
+      "pages": 10,
+      "pageSize": 100,
+      "maximumTransferredRows": 101,
+      "uniqueComplete": true
+    },
+    {
+      "candidates": 10000,
+      "pages": 100,
+      "pageSize": 100,
+      "maximumTransferredRows": 101,
+      "uniqueComplete": true
+    }
+  ],
+  "actualExplainAnalyzeBuffers": true,
+  "before10000Timing": "NOT_TESTED",
+  "regionalBeforeAfter": "BLOCKED_CONTROLLED_HK_SG_PROBES",
+  "speedupClaim": false,
+  "sourceTest": "tests/integration/ai-retention-batch.test.ts"
+}

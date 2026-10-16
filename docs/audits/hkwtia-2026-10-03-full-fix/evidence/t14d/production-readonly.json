@@ -1,0 +1,14 @@
+{
+  "observedAt": "2026-10-04T05:56:52.360Z",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "productionGitBranch": "release",
+  "production": {
+    "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+    "state": "READY",
+    "target": "production",
+    "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "gitRef": "main"
+  },
+  "readOnly": true,
+  "productionChanged": false
+}

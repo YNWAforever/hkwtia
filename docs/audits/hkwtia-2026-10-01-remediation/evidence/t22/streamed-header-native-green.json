@@ -1,0 +1,20 @@
+{
+  "sourceBaseSha": "f7599e89",
+  "sourceRelation": "owned rebuilt inert-header working tree before root catalog change",
+  "command": "node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs tests/e2e/public-performance.spec.ts --grep \"pending announcement header\" --workers=1",
+  "stats": {
+    "startTime": "2026-10-02T19:36:29.875Z",
+    "duration": 4528.273999999999,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "realIsolatedDatabaseLock": "site_announcements",
+  "locales": [
+    "en",
+    "zh-HK"
+  ],
+  "testCorrection": "table-name collection setup error excluded; label reads actual UTF-8 catalog rather than shell-encoded literal",
+  "production": false
+}

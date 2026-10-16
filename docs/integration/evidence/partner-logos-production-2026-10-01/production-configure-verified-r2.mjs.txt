@@ -1,0 +1,27 @@
+import {readFile,writeFile,copyFile,access} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {execFileSync} from 'node:child_process';
+const cli='C:/Users/laich/AppData/Roaming/npm/node_modules/vercel/dist/index.js';
+const endpoint='/v9/projects/prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n/env';const team='team_qvzlsFmfCsLkgItSypqHjw3z';
+const project=JSON.parse(await readFile('.vercel/project.json','utf8'));
+if(project.projectId!=='prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n'||project.orgId!==team)throw Error('PRODUCTION_R2_PROJECT_GUARD');
+const values=parseEnv(await readFile('C:/Users/laich/Documents/hkwtia/.playwright/r2-isolated.env','utf8'));
+if(values.R2_BUCKET!=='hkwtia-partner-acceptance-20260930'||values.R2_JURISDICTION!=='default'||!/^([0-9a-f]{32})$/.test(values.R2_ACCOUNT_ID)||!values.R2_ACCESS_KEY_ID||!values.R2_SECRET_ACCESS_KEY)throw Error('PRODUCTION_R2_SOURCE_GUARD');
+const api=(args)=>JSON.parse(execFileSync(process.execPath,[cli,'api',...args,'--raw','--scope','ynwaforevers-projects','--no-color'],{encoding:'utf8',stdio:['ignore','pipe','pipe'],windowsHide:true}));
+const envs=api([endpoint+'?teamId='+team,'--method','GET']).envs;
+const expected={R2_ACCOUNT_ID:'4IBenggu3g8qpFgz',R2_ACCESS_KEY_ID:'GRVN5bBwM4LqtVAS',R2_SECRET_ACCESS_KEY:'qZhfVyTOSAW1ZkPZ'};
+for(const [key,id] of Object.entries(expected))if(!envs.some(e=>e.key===key&&e.id===id&&e.type==='sensitive'&&e.target.length===1&&e.target[0]==='production'))throw Error('PRODUCTION_R2_EXACT_ENV_GUARD');
+const evidence={recordedAt:new Date().toISOString(),authorization:'Requester explicitly authorized existing three R2 values to hkwtia Vercel Production and redeployment',scope:'three exact existing Sensitive Production R2 values only',bucket:values.R2_BUCKET,jurisdiction:values.R2_JURISDICTION,keysUpdated:[],priorValuesReadable:false,priorDeploymentRetained:'dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ',applicationSourceChanged:false,databaseAuthStripeChanged:false,productionDataChanged:false,phase:'updating'};
+const exists=async(p)=>{try{await access(p);return true}catch{return false}};
+if(!await exists('.playwright/partner-production-first-deploy.json'))await copyFile('.playwright/partner-production-deploy.json','.playwright/partner-production-first-deploy.json');
+if(!await exists('.playwright/partner-production-deployed-media-initial404.json'))await copyFile('.playwright/partner-production-deployed-media.json','.playwright/partner-production-deployed-media-initial404.json');
+try{
+ for(const [key,id] of Object.entries(expected)){
+  api([endpoint+'/'+id+'?teamId='+team,'--method','PATCH','--raw-field','value='+values[key]]);
+  evidence.keysUpdated.push(key);
+  await writeFile('.playwright/partner-production-r2-verified-config.json',JSON.stringify(evidence,null,2)+'\n');
+ }
+ evidence.phase='updated';evidence.completedAt=new Date().toISOString();
+ await writeFile('.playwright/partner-production-r2-verified-config.json',JSON.stringify(evidence,null,2)+'\n');
+ console.log(JSON.stringify(evidence));
+}catch{evidence.phase='failed';await writeFile('.playwright/partner-production-r2-verified-config.json',JSON.stringify(evidence,null,2)+'\n');console.error('PRODUCTION_R2_VALUE_PATCH_FAILED');process.exitCode=1}

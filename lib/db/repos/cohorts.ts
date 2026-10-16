@@ -12,6 +12,7 @@ import {
   cohorts,
   companyMembers,
   companies,
+  memberships,
   showcaseListings,
   type Cohort,
   type CohortApplication,
@@ -100,7 +101,7 @@ export type CohortStore = Readonly<{
   findActiveCompanyId: (actor: Extract<Actor, {kind: "member"}>) => Promise<string | null>;
   getApplication: (cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   getCohort: (cohortId: string) => Promise<Cohort | null>;
-  createApplication: (input: Readonly<{cohortId: string; companyId: string; readiness: Record<string, unknown>}>) => Promise<CohortApplication>;
+  createApplication: (input: Readonly<{cohortId: string; companyId: string; managerProfileId: string; readiness: Record<string, unknown>}>) => Promise<CohortApplication>;
   listForAdmin: () => Promise<readonly AdminCohortApplication[]>;
   moveApplication: (input: CohortMoveInput) => Promise<CohortApplication | null>;
 }>;
@@ -230,6 +231,18 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Co
     async createApplication(input) {
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
+        // Seat changes lock membership before company_members. Recheck the
+        // preflight role in that order, inside the insert transaction.
+        await transaction.select({companyId: memberships.companyId}).from(memberships)
+          .where(eq(memberships.companyId, input.companyId)).limit(1).for("update");
+        const manager = (await transaction.select({role: companyMembers.role}).from(companyMembers)
+          .where(and(
+            eq(companyMembers.companyId, input.companyId),
+            eq(companyMembers.userId, input.managerProfileId),
+            isNull(companyMembers.revokedAt),
+            inArray(companyMembers.role, ["owner", "admin"]),
+          )).limit(1).for("update"))[0];
+        if (manager?.role !== "owner" && manager?.role !== "admin") throw new Error("FORBIDDEN");
         const selectedCohort = (await transaction.select({status: cohorts.status}).from(cohorts)
           .where(eq(cohorts.id, input.cohortId)).limit(1).for("update"))[0];
         if (!selectedCohort || selectedCohort.status !== "open") throw new Error("COHORT_NOT_OPEN");
@@ -345,7 +358,7 @@ export function createCohortRepository(
       if (current) return current;
       const selectedCohort = await store.getCohort(parsedCohortId);
       if (!selectedCohort || selectedCohort.status !== "open") throw new Error("COHORT_NOT_OPEN");
-      return store.createApplication({cohortId: parsedCohortId, companyId, readiness: parsedInput.readiness});
+      return store.createApplication({cohortId: parsedCohortId, companyId, managerProfileId: actor.profileId, readiness: parsedInput.readiness});
     },
     async listForAdmin(actor) {
       requireAdmin(actor);

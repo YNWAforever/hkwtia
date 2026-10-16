@@ -1,0 +1,20 @@
+{
+  "scope": "confirmed isolated Neon/Auth; synthetic identities; actual built Next/browser/repository",
+  "production": false,
+  "run": "Synthetic CMS 95417631-18b2-4014-a05d-d3fab9702250",
+  "draftReference": "ecdb5c9e8dd2a28b",
+  "results": {
+    "privateSave": true,
+    "crossDevice": true,
+    "anonymousAndOtherEditorDenied": true,
+    "realLayoutEnZh": true,
+    "privateNoStore": true,
+    "explicitKeyboardPublish": true,
+    "secondEditorConflict": true,
+    "privateRestoreBeforePublish": true,
+    "publishedRevert": true,
+    "publicCopyRestored": true,
+    "publishedAudits": 2,
+    "syntheticOtherDraftRetired": true
+  }
+}

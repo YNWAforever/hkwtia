@@ -1,0 +1,25 @@
+{
+  "recordedAt": "2026-09-30T16:31:18.814Z",
+  "node": "v24.18.0",
+  "command": "npm test -- --maxWorkers=2 --reporter=json --outputFile=.playwright/partner-r2-dependency-unit.json",
+  "success": true,
+  "files": {
+    "total": 781,
+    "passed": 716,
+    "skipped": 65,
+    "failed": 0
+  },
+  "tests": {
+    "total": 6268,
+    "passed": 6097,
+    "failed": 0,
+    "pending": 171,
+    "todo": 0
+  },
+  "durationSeconds": 690,
+  "dependencyVersions": [
+    "1.1.21",
+    "2.1.7",
+    "5.0.12"
+  ]
+}

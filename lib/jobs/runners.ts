@@ -1,3 +1,4 @@
+import {recheckBatchCommunication} from "@/lib/db/repos/batch-handlers/communication";
 import "server-only";
 
 import {createHash} from "node:crypto";
@@ -7,6 +8,8 @@ import {z} from "zod";
 import {
   createCampaignEmailRenderer,
   runCampaignBatch,
+  runWhatsAppCampaignBatch,
+  WHATSAPP_QUEUE_BATCH_LIMIT,
 } from "@/lib/automation/campaign-runner";
 import {
   BOARD_REPORTER_AGENT_CONFIG,
@@ -26,13 +29,15 @@ import {
 } from "@/lib/ai/board-reporter/service";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {runJourneyBatch} from "@/lib/automation/journey-runner";
+import {runLeadReminders} from "@/lib/automation/lead-reminders";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
 import {
   resolveM4BAcceptanceOwnershipKey,
 } from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import {eventCancellationNoticesEnabled, productionEventNotificationDependencies, runEventCancellationNotifications} from "@/lib/jobs/event-notification-runner";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
-import {aiEnv, appEnv, emailEnv, unsubscribeEnv} from "@/lib/config/env";
+import {aiEnv, appEnv, emailEnv} from "@/lib/config/env";
 import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
@@ -45,18 +50,56 @@ import {
   type StaffAlertRecipientsRepository,
 } from "@/lib/db/repos/staff-alert-recipients";
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
+import {
+  createProductionNotificationDependencies,
+  dispatchNotification,
+} from "@/lib/notifications/dispatch";
 import {renderEmail, type RenderedEmail} from "@/lib/email/render";
 import {
   createConfiguredEmailTransport,
   type EmailTransport,
 } from "@/lib/email/transport";
-import {signUnsubscribeToken} from "@/lib/email/unsubscribe-token";
+import {unsubscribeUrls} from "@/lib/email/unsubscribe-urls";
+import {
+  eventIdFromInstanceKey,
+  eventReminderVariables,
+} from "@/lib/events/reminder-enrollment";
+import type {AppLocale} from "@/i18n/routing";
+import {runEventCancellationRefunds, type EventCancellationRefundSummary} from "@/lib/jobs/event-cancellation-refunds";
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
+import {RUNNER_BATCH_LIMIT} from "@/lib/jobs/limits";
+import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
+import {drainLeadEmailOutbox, productionLeadEmailDependencies} from "@/lib/showcase/lead-email-runner";
+import {drainTicketEmailOutbox, productionTicketEmailDependencies} from "@/lib/billing/ticket-email-runner";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
-const RUNNER_BATCH_LIMIT = 100;
-const UNSUBSCRIBE_TTL_SECONDS = 30 * 24 * 60 * 60;
 
+/**
+ * Re-exported, not defined here, since Phase D-4d. The batch bound moved to
+ * `lib/jobs/limits.ts` so `lib/jobs/event-cancellation-refunds.ts` can read it
+ * without importing this module — this module imports that runner, so the old
+ * location would have closed an import cycle. The name stays exported here so
+ * existing callers keep working.
+ */
+export {RUNNER_BATCH_LIMIT};
+
+/**
+ * Every member of the Worker's own `WorkerJob` union, and Phase C2 Task 10 is
+ * where that stopped being a subset.
+ *
+ * `aiops-metrics` and `chat-retention` were missing, so three failed runs of
+ * either produced a 400 `INVALID_WORKER_ALERT` and nobody was paged — the one
+ * code path whose entire purpose is to be noticed. `whatsapp-send-queue` would
+ * have been the ninth member of the same gap. Phase D-4d scheduled the
+ * `event-cancellation-refunds` sweep, so it joins the vocabulary too: a
+ * scheduled job whose final failure the alert route refuses is a job nobody is
+ * paged about.
+ *
+ * Still an enum and never `z.string()`: the run key is a digest of this payload,
+ * so an unbounded `job` is an unbounded set of claimable run keys.
+ * `tests/unit/worker-alert-contract.test.ts` reads `WORKER_JOBS` out of
+ * `workers/src/index.ts` and asserts this list covers it.
+ */
 const workerAlertSchema = z.object({
   job: z.enum([
     "journey-runner",
@@ -65,6 +108,18 @@ const workerAlertSchema = z.object({
     "approvals-expirer",
     "retention-analyst",
     "board-reporter",
+    "aiops-metrics",
+    "chat-retention",
+    "whatsapp-send-queue",
+    "event-cancellation-refunds",
+    "event-notifications",
+    "showcase-lead-emails",
+    "ticket-emails",
+    "admin-batches",
+    "membership-grant-expiry",
+    "rate-limit-cleanup",
+    "member-import-retention",
+    "lead-reminders",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -75,18 +130,7 @@ const workerAlertSchema = z.object({
   ]),
 }).strict();
 
-export type WorkerAlertPayload = Readonly<{
-  job:
-    | "journey-runner"
-    | "renewal-runner"
-    | "engagement-score"
-    | "approvals-expirer"
-    | "retention-analyst"
-    | "board-reporter";
-  scheduledTime: string;
-  attemptCount: number;
-  errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
-}>;
+export type WorkerAlertPayload = Readonly<z.infer<typeof workerAlertSchema>>;
 
 type WorkerAlertDependencies = Readonly<{
   recipients?: StaffAlertRecipientsRepository;
@@ -104,6 +148,13 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runRetentionAnalyst(now: Date): Promise<unknown>;
   runBoardReporter(now: Date): Promise<unknown>;
   runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
+  runWhatsAppSendQueue(now: Date): Promise<unknown>;
+  /** No clock: the refund primitive reads its own when it commits. */
+  runEventCancellationRefunds(): Promise<unknown>;
+  runEventNotifications(now: Date): Promise<unknown>;
+  runShowcaseLeadEmails(now: Date): Promise<unknown>;
+  runTicketEmails(now: Date): Promise<unknown>;
+  runLeadReminders(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -216,6 +267,13 @@ export async function renderWorkerAlert(
   payload: WorkerAlertPayload,
 ): Promise<RenderedEmail> {
   const subject = "WTIA automation alert";
+  const earlyFailure = payload.attemptCount < 3;
+  const summary = earlyFailure
+    ? "A scheduled automation failed on its first attempt. The Worker will continue its retries."
+    : "A scheduled automation did not succeed after its bounded retries.";
+  const guidance = earlyFailure
+    ? "Review the affected work in the automation dashboard; the Worker is still retrying."
+    : "Review the automation dashboard before retrying manually.";
   const details = [
     ["Job", payload.job],
     ["Scheduled time", payload.scheduledTime],
@@ -231,9 +289,10 @@ export async function renderWorkerAlert(
   const text = [
     subject,
     "",
+    summary,
     ...details.map(([label, value]) => `${label}: ${value}`),
     "",
-    "Review the automation dashboard before retrying manually.",
+    guidance,
   ].join("\n");
   return {
     subject,
@@ -242,9 +301,9 @@ export async function renderWorkerAlert(
       '<main style="max-width:640px;margin:32px auto;padding:32px;background:#fff;border:1px solid #e2e8f0">',
       '<p style="color:#2563eb;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">WTIA</p>',
       `<h1 style="color:#0f172a">${subject}</h1>`,
-      '<p style="color:#475569">A scheduled automation did not succeed after its bounded retries.</p>',
+      `<p style="color:#475569">${summary}</p>`,
       `<table role="presentation" style="border-collapse:collapse;width:100%">${rows}</table>`,
-      '<p style="color:#475569">Review the automation dashboard before retrying manually.</p>',
+      `<p style="color:#475569">${guidance}</p>`,
       "</main></body></html>",
     ].join(""),
     text,
@@ -291,37 +350,36 @@ export async function sendWorkerAlert(
 }
 
 /**
- * The two unsubscribe URLs a marketing send needs, sharing one signed token so
- * both routes accept the same link for the same window.
- *
- * `pageUrl` is the localized confirmation page a recipient clicks in the
- * footer. `oneClickUrl` is the route handler named by `List-Unsubscribe`, which
- * must answer POST because the accompanying `List-Unsubscribe-Post` header
- * makes the recipient's mail provider post to it directly. Pointing the header
- * at the page silently dropped every provider-issued unsubscribe: the page
- * exports no POST handler, so those requests took a 405 and no suppression row
- * was ever written.
+ * Re-exported, not defined here, since Phase C2 Task 11. The body moved to
+ * `lib/email/unsubscribe-urls.ts` so `lib/notifications/dispatch.ts` can mint
+ * the same pair for a marketing email without importing this module — Task 10
+ * makes `runners.ts → campaign-runner.ts → dispatch.ts` a real path, and an
+ * import back this way would close it into a cycle. The name stays exported
+ * here because every existing caller and `tests/unit/unsubscribe-one-click.test.ts`
+ * already import it from this module.
  */
-export function unsubscribeUrls(
-  profileId: string,
-  locale: "en" | "zh-HK",
-  now: Date,
-): Readonly<{pageUrl: string; oneClickUrl: string}> {
-  const {unsubscribeTokenSecret} = unsubscribeEnv();
-  const {appUrl} = appEnv();
-  const token = signUnsubscribeToken({
-    profileId,
-    locale,
-    exp: Math.floor(now.getTime() / 1000) + UNSUBSCRIBE_TTL_SECONDS,
-  }, unsubscribeTokenSecret);
-  const path = locale === "zh-HK" ? "/zh/unsubscribe" : "/unsubscribe";
-  const pageUrl = new URL(path, appUrl);
-  pageUrl.searchParams.set("token", token);
-  // Not locale-prefixed: /api is excluded from the proxy matcher, and the
-  // token already carries the locale the confirmation redirect uses.
-  const oneClickUrl = new URL("/api/unsubscribe", appUrl);
-  oneClickUrl.searchParams.set("token", token);
-  return {pageUrl: pageUrl.toString(), oneClickUrl: oneClickUrl.toString()};
+export {unsubscribeUrls};
+
+/**
+ * `dunning_3`'s `amountDue` BODY parameter, or `""` when there is no honest
+ * figure (C-9 review).
+ *
+ * Formatted as currency rather than passed as a bare integer: the member reads
+ * this parameter inside a sentence about money they owe, and "1800" is ambiguous
+ * about the currency in a city that has three of them in daily use. Same
+ * `Intl.NumberFormat` shape as the public plan catalogue
+ * (`lib/membership/public-catalog.ts`), so the figure a member is chased for is
+ * spelled the way the figure they signed up for was.
+ *
+ * The empty string is the refusal, and it is `resolveTemplateBody` in
+ * `sendWhatsapp` that acts on it — not a default here. A plan with no price for
+ * its interval has no amount outstanding, and "HK$0.00" in a dunning message is
+ * a worse message than none.
+ */
+function amountDue(amountHkd: number | null, locale: AppLocale): string {
+  if (amountHkd === null) return "";
+  return new Intl.NumberFormat(locale, {style: "currency", currency: "HKD"})
+    .format(amountHkd);
 }
 
 async function runProductionJourneys(now: Date): Promise<unknown> {
@@ -347,29 +405,83 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
         context.locale,
         now,
       );
-      return {
+      const base = {
         hasLoggedIn: context.lastLoginAt !== null,
         profileCompleteness: context.profileComplete ? 100 : 0,
         marketingConsent: context.marketingConsent,
         emailSuppressed: context.emailSuppressed,
         whatsappOptIn: context.whatsappOptIn,
         whatsappNumber: context.whatsappNumber,
+        // C-9 review: the contact-side STOP the profile flag cannot see. The
+        // repository reads both stores; the runner refuses on either.
+        whatsappOptedOutAt: context.whatsappOptedOutAt,
         engagementScore: context.engagementScore,
         email: context.email,
         recipientName: context.displayName,
         locale: context.locale,
         variables: {
           displayName: context.displayName,
+          // C-9 review, and it belongs in the BASE bag rather than in one
+          // branch. `memberName` is a declared BODY parameter of all three
+          // WhatsApp journey templates (renewal_14, dunning_3,
+          // event_reminder_24h) and it used to be added only inside the
+          // event_reminder branch below — so renewal_14 and dunning_3 reached
+          // the adapter with parameter 1 unresolved, and
+          // `lib/channels/woztell.ts` fills a missing parameter with "". Meta
+          // rejects that, the adapter maps the 4xx to provider_client_error and
+          // S-15 makes it permanent: one failed step and one staff task per
+          // member with a step due, and nobody receiving either message. The
+          // email leg never showed it, because `interpolate` throws on a missing
+          // variable while the WhatsApp leg substitutes silently.
+          memberName: context.displayName,
           ctaUrl: portalUrl,
           profileUrl: portalUrl,
           renewalUrl: portalUrl,
           paymentUrl: portalUrl,
           renewalDate,
+          // dunning_3's second BODY parameter. Empty when the membership's plan
+          // records no price for its interval, which `resolveTemplateBody` then
+          // refuses in `sendWhatsapp` — deliberately, because a fabricated
+          // "HK$0.00 outstanding" chasing a payment is worse than the WhatsApp
+          // leg staying quiet while the email still goes out.
+          amountDue: amountDue(context.amountDueHkd, context.locale),
           membershipStatus: context.membershipStatus ?? "",
         },
         unsubscribeUrl: unsubscribe.pageUrl,
         unsubscribeOneClickUrl: unsubscribe.oneClickUrl,
         membershipStatus: context.membershipStatus,
+      };
+      if (claim.journey !== "event_reminder") return base;
+      // Programme B-5: the instance key is `event:<id>`; the event itself
+      // supplies the title, start and venue, and the CTA points at its page.
+      const eventId = eventIdFromInstanceKey(claim.instanceKey);
+      const reminder = eventId === null
+        ? null
+        : await jobRunnerContextRepository.loadEventReminder(
+          actor,
+          context.profileId,
+          eventId,
+        );
+      if (!reminder || !reminder.deliverable) {
+        // An event cancelled or unpublished since the member booked, or a seat
+        // the member has since given up, must not produce a "see you tomorrow".
+        // Handing the runner no reachable channel makes it record the step as
+        // `recipient_ineligible` instead of retrying or raising a staff task.
+        return {...base, email: null, whatsappNumber: null};
+      }
+      return {
+        ...base,
+        variables: {
+          ...base.variables,
+          // `memberName` is no longer re-stated here: the base bag carries it
+          // for every journey since the C-9 review, and a second copy is a
+          // second thing to keep in step.
+          ...eventReminderVariables({
+            locale: context.locale,
+            appUrl,
+            event: reminder,
+          }),
+        },
       };
     },
     renderEmail,
@@ -390,8 +502,19 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       // building, and a member in dunning never got the reminder the log says
       // they did. The inbound reply path in lib/api/woztell-webhook-route.ts
       // has always passed it; this outbound path is the one that omitted it.
-      RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
+      // C-9 (O-8) moved the read from bare `process.env` onto the parsed
+      // `aiEnv()` field, so `RUN_LIVE_WOZTELL=true` fails at startup rather than
+      // repeating the incident above with a spelling mistake.
+      RUN_LIVE_WOZTELL: ai.runLiveWoztell,
     }),
+    // C-7 (C2 Task 2). The registry is read HERE, once per batch, and handed to
+    // the runner as a resolved set: the runner must not read `process.env` or
+    // open a database of its own, and an unawaited promise parked on this key
+    // would answer `has(…) === false` for every template with no type error —
+    // silently demoting every journey WhatsApp send to email. The runner
+    // resolves the member's locale-correct key (B-5) before checking it
+    // against this set, so a per-locale pair is gated as one answer, not two.
+    approvedTemplateKeys: await approvedTemplateKeys(),
     emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }
@@ -399,7 +522,16 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
 async function runProductionCampaigns(now: Date): Promise<unknown> {
   const {emailFrom} = emailEnv();
   const {appUrl} = appEnv();
+  // Phase C2 Task 10 Step 4c, the email leg. `runCampaignBatch`'s claim only
+  // reaches campaigns in ('queued', 'processing') and S-6 forbids widening it,
+  // so an email campaign written as `scheduled` would sit there for ever with
+  // no error anywhere. `/admin/campaigns` refuses a send time on the email
+  // channel today (`approveCampaign` queues it outright), which makes this the
+  // belt to that braces rather than the live path — and it is here so that
+  // offering an email schedule later is a screen change, not a silent outage.
+  await campaignsRepository.promoteScheduledCampaigns(automationCronActor(), now, "email");
   return runCampaignBatch({
+    recheckCommunication: recheckBatchCommunication,
     campaigns: campaignsRepository,
     deliveries: deliveriesRepository,
     staffTasks: staffTasksRepository,
@@ -423,8 +555,39 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }
 
+/**
+ * Programme C-5 / D-10. The ten-minute WhatsApp blast drain.
+ *
+ * The dependency bag is built ONCE per batch, not once per recipient:
+ * `dispatchNotification`'s default argument calls
+ * `createProductionNotificationDependencies()`, which reads `emailEnv()` and
+ * constructs both transports. Leaving it to the default would construct a
+ * WOZTELL adapter and a Resend transport twenty times a tick.
+ *
+ * No `createWoztellAdapter(` call here on purpose: the dispatcher owns the one
+ * construction for this path and passes `RUN_LIVE_WOZTELL` (S-13), which
+ * `tests/unit/woztell-adapter-live-flag.test.ts` discovers rather than trusts.
+ */
+export async function runProductionWhatsAppSendQueue(now: Date): Promise<unknown> {
+  const notifications = createProductionNotificationDependencies();
+  return runWhatsAppCampaignBatch({
+    recheckCommunication: recheckBatchCommunication,
+    campaigns: campaignsRepository,
+    dispatch: (actor, request) => dispatchNotification(actor, request, notifications),
+  }, {now, limit: WHATSAPP_QUEUE_BATCH_LIMIT});
+}
+
 export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
+}
+
+export async function runProductionEventNotifications(now: Date): Promise<unknown> {
+  if (!eventCancellationNoticesEnabled()) return {disabled: true};
+  return runEventCancellationNotifications(now, productionEventNotificationDependencies());
+}
+
+export function runProductionEventCancellationRefunds(): Promise<EventCancellationRefundSummary> {
+  return runEventCancellationRefunds();
 }
 
 async function runProductionEngagement(now: Date): Promise<unknown> {
@@ -438,6 +601,7 @@ async function runProductionApprovals(now: Date): Promise<unknown> {
 export async function runProductionRetentionAnalyst(
   now: Date,
 ): Promise<unknown> {
+  if(process.env.ADMIN_AI_RETENTION_DRAFTS_ENABLED!=="true")return {considered:0,drafted:0,skippedPending:0,deduplicated:0,failed:0};
   const acceptanceOwnershipKey =
     resolveM4BAcceptanceOwnershipKey(process.env);
   const ai = aiEnv();
@@ -467,6 +631,7 @@ export async function runProductionRetentionAnalyst(
 export async function runProductionBoardReporter(
   now: Date,
 ): Promise<unknown> {
+  if(process.env.ADMIN_AI_BOARD_DRAFTS_ENABLED!=="true")return null;
   const acceptanceOwnershipKey =
     resolveM4BAcceptanceOwnershipKey(process.env);
   const ai = aiEnv();
@@ -516,6 +681,16 @@ export function createJobRunners(
     overrides.runBoardReporter ?? runProductionBoardReporter;
   const runAiOpsMetrics =
     overrides.runAiOpsMetrics ?? runProductionAiOpsMetrics;
+  const runWhatsAppSendQueue =
+    overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
+  const runEventCancellationRefunds =
+    overrides.runEventCancellationRefunds ?? runProductionEventCancellationRefunds;
+  const runEventNotifications = overrides.runEventNotifications ?? runProductionEventNotifications;
+  const runShowcaseLeadEmails = overrides.runShowcaseLeadEmails ??
+    ((now: Date) => drainLeadEmailOutbox(now, productionLeadEmailDependencies()));
+  const runTicketEmails = overrides.runTicketEmails ??
+    ((now: Date) => drainTicketEmailOutbox(now, productionTicketEmailDependencies()));
+  const runLeadRemindersJob = overrides.runLeadReminders ?? ((now: Date) => runLeadReminders(now));
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -546,6 +721,24 @@ export function createJobRunners(
     },
     aiOpsMetrics(now: Date) {
       return runAiOpsMetrics(now);
+    },
+    whatsappSendQueue(now: Date) {
+      return runWhatsAppSendQueue(now);
+    },
+    eventCancellationRefunds() {
+      return runEventCancellationRefunds();
+    },
+    eventNotifications(now: Date) {
+      return runEventNotifications(now);
+    },
+    showcaseLeadEmails(now: Date) {
+      return runShowcaseLeadEmails(now);
+    },
+    ticketEmails(now: Date) {
+      return runTicketEmails(now);
+    },
+    leadReminders(now: Date) {
+      return runLeadRemindersJob(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

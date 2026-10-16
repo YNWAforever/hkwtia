@@ -1,14 +1,20 @@
 import "server-only";
 
-import {and, asc, desc, eq, getTableColumns, ilike, or, sql} from "drizzle-orm";
+import {and, asc, desc, eq, getTableColumns, gt, ilike, inArray, isNull, lt, or, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+import {decodeScopedCursor, encodeScopedCursor, type CursorPage} from "@/lib/admin/pagination";
 import {getDb, type Database} from "@/lib/db/repos/common";
+import {requireContactWriterSource, type ContactWriterActor} from "@/lib/db/repos/contacts";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {
+  companyMembers,
+  contacts,
   leads,
   media,
+  memberships,
+  showcaseLeadEmailOutbox,
   showcaseListings,
   type Lead,
   type NewLead,
@@ -29,6 +35,9 @@ import {
  * optional so every existing in-memory test double stays valid.
  */
 export type PublicShowcaseRow = ShowcaseListing & PublicLogoJoin;
+// PostgreSQL xmin changes on every UPDATE, including same-status resubmissions.
+// The staff form carries this snapshot token into the guarded review write.
+export type ReviewShowcaseRow = PublicShowcaseRow & Readonly<{reviewVersion: string}>;
 export type PublicReadOptions = Readonly<{limit?: number}>;
 
 const publicLogoColumns = {
@@ -43,15 +52,16 @@ const publicReadLimitSchema = z.number().int().min(1).max(12);
 const readLimit = (options: PublicReadOptions = {}) =>
   options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
 // An empty select clears the logo; anything else must be a real registry id.
+const reviewVersionSchema = z.string().regex(/^\d{1,10}$/);
 const mediaIdSchema = z.union([z.literal(""), z.null()]).transform(() => null)
   .or(z.string().uuid());
 
 export type ShowcaseStore = Readonly<{
   getByCompany: (companyId: string) => Promise<ShowcaseListing | null>;
   getById: (id: string) => Promise<ShowcaseListing | null>;
-  upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review") => Promise<ShowcaseListing>;
-  listForReview: () => Promise<readonly PublicShowcaseRow[]>;
-  setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
+  upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review", managerProfileId: string) => Promise<ShowcaseListing>;
+  listForReview: (status?: "pending_review", cursor?: string) => Promise<CursorPage<ReviewShowcaseRow>>;
+  setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, reviewVersion: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (id: string, mediaId: string | null) => Promise<ShowcaseListing | null>;
   listPublished: (filters: ShowcaseFilters, options?: PublicReadOptions) => Promise<readonly PublicShowcaseRow[]>;
@@ -70,16 +80,16 @@ export type ShowcaseRepository = Readonly<{
   getByCompany: (actor: Actor, companyId: string) => Promise<ShowcaseListing | null>;
   upsertDraft: (actor: Actor, companyId: string, input: unknown, status?: "draft" | "pending_review") => Promise<ShowcaseListing>;
   submitForReview: (actor: Actor, companyId: string, input: unknown) => Promise<ShowcaseListing>;
-  listForReview: (actor: AdminActor) => Promise<readonly PublicShowcaseRow[]>;
-  publish: (actor: AdminActor, id: string) => Promise<ShowcaseListing | null>;
-  reject: (actor: AdminActor, id: string, reason: string) => Promise<ShowcaseListing | null>;
+  listForReview: (actor: AdminActor, status?: "pending_review", cursor?: string) => Promise<CursorPage<ReviewShowcaseRow>>;
+  publish: (actor: AdminActor, id: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
+  reject: (actor: AdminActor, id: string, reason: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
   setPremium: (actor: AdminActor, id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (actor: AdminActor, id: string, mediaId: unknown) => Promise<ShowcaseListing | null>;
   listPublished: (filters: ShowcaseFilters | Readonly<Record<string, unknown>>, options?: PublicReadOptions) => Promise<readonly PublicShowcaseRow[]>;
   getPublishedBySlug: (slug: string) => Promise<PublicShowcaseRow | null>;
   listPublishedSlugs: () => Promise<readonly string[]>;
   recordView: (slug: string) => Promise<void>;
-  createLead: (input: NewLead) => Promise<Lead | null>;
+  createLead: (actor: ContactWriterActor, input: NewLead) => Promise<Lead | null>;
 }>;
 
 function publicSort<T extends ShowcaseListing>(rows: readonly T[]): T[] {
@@ -100,7 +110,7 @@ function arrayContains(column: unknown, value: string) {
   return sql`${column} @> ARRAY[${value}]::text[]`;
 }
 
-function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseStore {
+export function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseStore {
   return {
     async getByCompany(companyId) {
       const database = await loadDatabase();
@@ -110,40 +120,29 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
       const database = await loadDatabase();
       return (await database.select().from(showcaseListings).where(eq(showcaseListings.id, id)).limit(1))[0] ?? null;
     },
-    async upsert(companyId, input, status) {
+    async upsert(companyId, input, status, managerProfileId) {
       const database = await loadDatabase();
-      const current = (await database.select({memberSince: showcaseListings.memberSince}).from(showcaseListings).where(eq(showcaseListings.companyId, companyId)).limit(1))[0];
-      const [row] = await database.insert(showcaseListings).values({
-        companyId,
-        slug: input.slug,
-        status,
-        premium: false,
-        views: 0,
-        memberSince: current?.memberSince ?? new Date().toISOString().slice(0, 10),
-        nameEn: input.nameEn,
-        nameZhHk: input.nameZhHk,
-        taglineEn: input.taglineEn,
-        taglineZhHk: input.taglineZhHk,
-        descriptionEn: input.descriptionEn,
-        descriptionZhHk: input.descriptionZhHk,
-        category: input.category,
-        useCases: input.useCases,
-        deploymentOptions: input.deploymentOptions,
-        supportedLanguages: input.supportedLanguages,
-        worksWith: input.worksWith,
-        videoUrl: input.videoUrl,
-        caseStudyUrl: input.caseStudyUrl,
-        caseStudySummaryEn: input.caseStudySummaryEn,
-        caseStudySummaryZhHk: input.caseStudySummaryZhHk,
-        logoReference: input.logoReference,
-        reviewedAt: null,
-        reviewedByProfileId: null,
-        rejectionReason: null,
-      }).onConflictDoUpdate({
-        target: [showcaseListings.companyId],
-        set: {
+      return database.transaction(async (transaction) => {
+        // Seat revocation locks membership before company_members. Recheck the
+        // manager role under those locks before inserting or replacing copy.
+        await transaction.select({companyId: memberships.companyId}).from(memberships)
+          .where(eq(memberships.companyId, companyId)).limit(1).for("update");
+        const manager = (await transaction.select({role: companyMembers.role}).from(companyMembers)
+          .where(and(
+            eq(companyMembers.companyId, companyId),
+            eq(companyMembers.userId, managerProfileId),
+            isNull(companyMembers.revokedAt),
+            inArray(companyMembers.role, ["owner", "admin"]),
+          )).limit(1).for("update"))[0];
+        if (manager?.role !== "owner" && manager?.role !== "admin") throw new Error("FORBIDDEN");
+        const current = (await transaction.select({memberSince: showcaseListings.memberSince}).from(showcaseListings).where(eq(showcaseListings.companyId, companyId)).limit(1))[0];
+        const [row] = await transaction.insert(showcaseListings).values({
+          companyId,
           slug: input.slug,
           status,
+          premium: false,
+          views: 0,
+          memberSince: current?.memberSince ?? new Date().toISOString().slice(0, 10),
           nameEn: input.nameEn,
           nameZhHk: input.nameZhHk,
           taglineEn: input.taglineEn,
@@ -163,23 +162,62 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
           reviewedAt: null,
           reviewedByProfileId: null,
           rejectionReason: null,
-          updatedAt: new Date(),
-        },
-      }).returning();
-      if (!row) throw new Error("SHOWCASE_LISTING_WRITE_FAILED");
-      return row;
+        }).onConflictDoUpdate({
+          target: [showcaseListings.companyId],
+          set: {
+            slug: input.slug,
+            status,
+            nameEn: input.nameEn,
+            nameZhHk: input.nameZhHk,
+            taglineEn: input.taglineEn,
+            taglineZhHk: input.taglineZhHk,
+            descriptionEn: input.descriptionEn,
+            descriptionZhHk: input.descriptionZhHk,
+            category: input.category,
+            useCases: input.useCases,
+            deploymentOptions: input.deploymentOptions,
+            supportedLanguages: input.supportedLanguages,
+            worksWith: input.worksWith,
+            videoUrl: input.videoUrl,
+            caseStudyUrl: input.caseStudyUrl,
+            caseStudySummaryEn: input.caseStudySummaryEn,
+            caseStudySummaryZhHk: input.caseStudySummaryZhHk,
+            logoReference: input.logoReference,
+            reviewedAt: null,
+            reviewedByProfileId: null,
+            rejectionReason: null,
+            updatedAt: new Date(),
+          },
+        }).returning();
+        if (!row) throw new Error("SHOWCASE_LISTING_WRITE_FAILED");
+        return row;
+      });
     },
-    async listForReview() {
+    async listForReview(status, cursor) {
       const database = await loadDatabase();
+      const scope = `showcase-review:${status ?? "all"}`;
+      const key = cursor ? decodeScopedCursor(scope, cursor) : null;
+      if (key && (!z.string().datetime({offset: true}).safeParse(key[0]).success || !z.string().min(1).max(100).safeParse(key[1]).success || !z.string().uuid().safeParse(key[2]).success)) throw new Error("INVALID_CURSOR");
+      const cursorAt = key ? new Date(key[0]) : null;
+      const after = key && cursorAt ? or(
+        lt(showcaseListings.updatedAt, cursorAt),
+        and(eq(showcaseListings.updatedAt, cursorAt), gt(showcaseListings.slug, key[1])),
+        and(eq(showcaseListings.updatedAt, cursorAt), eq(showcaseListings.slug, key[1]), gt(showcaseListings.id, key[2])),
+      ) : undefined;
       // Joined so staff can see the picture they are publishing, not just its
       // slug — the logo goes out under the association's brand.
-      return database
-        .select({...getTableColumns(showcaseListings), ...publicLogoColumns})
+      const data = await database
+        .select({...getTableColumns(showcaseListings), ...publicLogoColumns, reviewVersion: sql<string>`${showcaseListings}.xmin::text`})
         .from(showcaseListings)
         .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
-        .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug));
+        .where(and(status ? eq(showcaseListings.status, status) : undefined, after))
+        .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug), asc(showcaseListings.id))
+        .limit(51);
+      const items = data.slice(0, 50);
+      const last = items.at(-1);
+      return {items, nextCursor: data.length > 50 && last ? encodeScopedCursor(scope, [last.updatedAt.toISOString(), last.slug, last.id]) : null};
     },
-    async setStatus(id, status, reviewerId, rejectionReason = null) {
+    async setStatus(id, status, reviewerId, reviewVersion, rejectionReason = null) {
       const database = await loadDatabase();
       return (await database.update(showcaseListings).set({
         status,
@@ -187,7 +225,7 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
         reviewedByProfileId: reviewerId,
         rejectionReason,
         updatedAt: new Date(),
-      }).where(eq(showcaseListings.id, id)).returning())[0] ?? null;
+      }).where(and(eq(showcaseListings.id, id), eq(showcaseListings.status, "pending_review"), sql`${showcaseListings}.xmin::text = ${reviewVersion}`)).returning())[0] ?? null;
     },
     async setPremium(id, premium) {
       const database = await loadDatabase();
@@ -255,7 +293,44 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
     },
     async insertLead(input) {
       const database = await loadDatabase();
-      return (await database.insert(leads).values(input).onConflictDoNothing({target: leads.idempotencyKey}).returning())[0] ?? null;
+      return database.transaction(async (transaction) => {
+        // Insert first: an idempotent replay must not create an orphan contact.
+        // The lead and prospect are committed together, so staff never see one
+        // without the other when contact capture fails.
+        const lead = (await transaction.insert(leads)
+          .values({...input, contactId: null})
+          .onConflictDoNothing({target: leads.idempotencyKey})
+          .returning())[0] ?? null;
+        if (!lead) return null;
+        const contact = (await transaction.insert(contacts).values({
+          displayName: lead.contactName,
+          email: lead.email,
+          locale: lead.locale,
+          source: "showcase_intro",
+        }).returning({id: contacts.id}))[0];
+        if (!contact) throw new Error("SHOWCASE_LEAD_CONTACT_CAPTURE_FAILED");
+        const linked = (await transaction.update(leads)
+          .set({contactId: contact.id, updatedAt: new Date()})
+          .where(eq(leads.id, lead.id))
+          .returning())[0];
+        if (!linked) throw new Error("SHOWCASE_LEAD_CONTACT_LINK_FAILED");
+        // Both notices are recoverable even if the request process or provider
+        // dies immediately after this transaction commits.
+        const queued = await transaction.insert(showcaseLeadEmailOutbox).values([
+          {
+            leadId: linked.id,
+            kind: "ack",
+            idempotencyKey: `showcase-lead:${linked.idempotencyKey}:ack`,
+          },
+          {
+            leadId: linked.id,
+            kind: "staff",
+            idempotencyKey: `showcase-lead:${linked.idempotencyKey}:staff`,
+          },
+        ]).returning({id: showcaseLeadEmailOutbox.id});
+        if (queued.length !== 2) throw new Error("SHOWCASE_LEAD_EMAIL_ENQUEUE_FAILED");
+        return linked;
+      });
     },
   };
 }
@@ -292,35 +367,41 @@ export function createShowcaseRepository(
       return store.getByCompany(companyId);
     },
     async upsertDraft(actor, companyId, input, status = "draft") {
-      await ensureCompanyManager(actor, companyId, dependencies.getCompanyRole);
+      const manager = await ensureCompanyManager(actor, companyId, dependencies.getCompanyRole);
       const parsed = listingInputSchema.parse(input);
       const current = await store.getByCompany(companyId);
       if (current && !transitionListingStatus(current.status, status)) throw new Error("INVALID_SHOWCASE_TRANSITION");
-      return store.upsert(companyId, parsed, status);
+      return store.upsert(companyId, parsed, status, manager.profileId);
     },
     async submitForReview(actor, companyId, input) {
       return this.upsertDraft(actor, companyId, input, "pending_review");
     },
-    async listForReview(actor) {
+    async listForReview(actor, status, cursor) {
       requireAdmin(actor);
-      return store.listForReview();
+      return store.listForReview(status, cursor);
     },
-    async publish(actor, id) {
+    async publish(actor, id, reviewVersion) {
       requireAdmin(actor);
       const parsedId = listingIdSchema.parse(id);
+      const parsedVersion = reviewVersionSchema.parse(reviewVersion);
       const current = await store.getById(parsedId);
       if (!current) return null;
       if (!transitionListingStatus(current.status, "published")) throw new Error("INVALID_SHOWCASE_TRANSITION");
-      return store.setStatus(parsedId, "published", actor.profileId, null);
+      const published = await store.setStatus(parsedId, "published", actor.profileId, parsedVersion, null);
+      if (!published) throw new Error("INVALID_SHOWCASE_TRANSITION");
+      return published;
     },
-    async reject(actor, id, reason) {
+    async reject(actor, id, reason, reviewVersion) {
       requireAdmin(actor);
       const parsedId = listingIdSchema.parse(id);
+      const parsedVersion = reviewVersionSchema.parse(reviewVersion);
       const parsedReason = z.string().trim().min(1).max(1_000).parse(reason);
       const current = await store.getById(parsedId);
       if (!current) return null;
       if (!transitionListingStatus(current.status, "rejected")) throw new Error("INVALID_SHOWCASE_TRANSITION");
-      return store.setStatus(parsedId, "rejected", actor.profileId, parsedReason);
+      const rejected = await store.setStatus(parsedId, "rejected", actor.profileId, parsedVersion, parsedReason);
+      if (!rejected) throw new Error("INVALID_SHOWCASE_TRANSITION");
+      return rejected;
     },
     async setPremium(actor, id, premium) {
       requireAdmin(actor);
@@ -351,7 +432,8 @@ export function createShowcaseRepository(
     async recordView(slug) {
       await store.incrementViews(slugSchema.parse(slug));
     },
-    async createLead(input) {
+    async createLead(actor, input) {
+      requireContactWriterSource(actor, "showcase_intro");
       return store.insertLead(input);
     },
   };

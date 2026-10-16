@@ -1,0 +1,15 @@
+{
+  "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+  "command": "npm test -- --maxWorkers=1",
+  "startedAt": "2026-10-03T17:01:12.655Z",
+  "finishedAt": "2026-10-03T17:58:40.448Z",
+  "exitCode": 0,
+  "log": ".playwright/full-fix-t07-full-serial.log",
+  "summary": [
+    " Test Files  775 passed | 90 skipped (865)",
+    "      Tests  6514 passed | 386 skipped (6900)",
+    "   Duration  3440.48s (transform 164.98s, setup 240.85s, collect 1085.83s, tests 168.66s, environment 1112.27s, prepare 183.40s)"
+  ],
+  "production": false,
+  "timeoutChanged": false
+}

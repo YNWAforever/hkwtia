@@ -1,7 +1,9 @@
+// Relative, not `@/`: next.config.ts imports config/wisetech-redirects.ts, which imports this
+// file, and Next's config loader does not apply tsconfig paths.
 import {
   authoritativeSourceInventory,
   reportedArchiveIdentity,
-} from "@/config/wisetech-authoritative-source-inventory";
+} from "./wisetech-authoritative-source-inventory";
 
 export const integrationKinds = ["route", "cta", "form", "locale", "asset"] as const;
 export const integrationDispositions = ["retain", "merge", "redirect", "retire"] as const;
@@ -61,6 +63,58 @@ export const wisetechIntegrationProvenance = Object.freeze({
         width: 2001,
         height: 721,
       }),
+      // Donor photographs ported into public/ on the owner's 2026-09-07 instruction. They keep
+      // the donor's own paths so the byte-pinned CSS port resolves them unchanged, and each is
+      // sha256-pinned by tests/unit/wisetech-asset-provenance.test.ts exactly like the logo.
+      // The asset inventory's rows for these files stay `retire` on purpose: they describe the
+      // donor checkout as evidence, while `confirmation` records who cleared each port and when.
+      photos: Object.freeze([
+        Object.freeze({
+          sourcePath: "public/archive/tech-connect-ai-leaders.webp",
+          canonicalPath: "public/archive/tech-connect-ai-leaders.webp",
+          sha256: "90DE344357A757A9CBAE1B6DF4F92959476FC9CCD125B2FFEB676B29B901FD75",
+          width: 1800,
+          height: 1013,
+          usedBy: "components/home/hero.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/archive/tech-connect-community.webp",
+          canonicalPath: "public/archive/tech-connect-community.webp",
+          sha256: "595B6BECBF0EA051C44C87E554279EF5EF7E6CB64BDD8D2BE3C4F841ADBE23C1",
+          width: 1800,
+          height: 1350,
+          usedBy: "app/[locale]/(public)/events/page.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/archive/asia-smart-summit.webp",
+          canonicalPath: "public/archive/asia-smart-summit.webp",
+          sha256: "DD4F885D79A1F2C37A6B356BAA6A534FD0EA2C9A17B20BCD21789CC711FB14D0",
+          width: 1800,
+          height: 1200,
+          usedBy: "app/[locale]/(public)/about/page.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/archive/asia-smart-shanghai.webp",
+          canonicalPath: "public/archive/asia-smart-shanghai.webp",
+          sha256: "967826188F4F6BC2DF3BF714216797B3F4785656393309826FB11FF2FBB4F664",
+          width: 1800,
+          height: 1200,
+          usedBy: "app/styles/wisetech.css .gba-section",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/editorial/events-community.webp",
+          canonicalPath: "public/editorial/events-community.webp",
+          sha256: "20B1602282438AEB4B47526A406AF0DFF276D3B5DF7427CBD8712EAFE24AA7C3",
+          width: 1586,
+          height: 992,
+          usedBy: "app/[locale]/(public)/events/[slug]/page.tsx, components/marketing/event-card.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+      ]),
     }),
   }),
 });
@@ -116,8 +170,15 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
   ["route-portal-events", "/portal/events", "Member event registrations."],
   ["route-portal-documents", "/portal/documents", "Approved member document surface."],
   ["route-portal-billing", "/portal/billing", "Server-owned billing portal journey."],
+  ["route-member-login", "/member-login", "Neon Auth magic-link sign-in scoped to the typed Portal continuation allowlist."],
   ["route-admin", "/admin", "Staff-authorised CMS and CRM entry point."],
   ["route-concierge-api", "/api/ai/concierge", "Existing guarded Concierge API action."],
+  // WP-7 un-retired both (master plan §5 WP-7; docs/superpowers/specs/2026-09-06-wisetech-wp7-routes-seo-design.md
+  // §4.2): the retire rationales named a missing authority, and PR4/WP-5 (published partners) and
+  // the four typed programme records now provide one. The ids keep their route-design- prefix so
+  // every existing reference resolves.
+  ["route-design-programmes", "/programmes", "Typed programme index over content/programs/index.ts and the four typed records."],
+  ["route-design-partners", "/partners", "Published partner records (partners repository; both confirmations and bilingual logo alt required)."],
 ].map(([id, path, dataOwner]) => entry({
   id,
   kind: "route",
@@ -132,8 +193,6 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
 const redirectRoutes: readonly IntegrationManifestEntry[] = [
   ["route-legacy-projects", "/projects", "/programs/asa", "The explicit permanent redirect preserves the legacy project entry."],
   ["route-legacy-history", "/history", "/about", "The explicit permanent redirect preserves the legacy history entry."],
-  ["route-design-members", "/members", "/showcase", "The explicit redirect consolidates public discovery under showcase."],
-  ["route-legacy-member-detail", "/members/:id", "/showcase", "The explicit redirect avoids presenting an unverified member profile."],
 ].map(([id, source, canonicalPath, rationale]) => entry({
   id,
   kind: "route",
@@ -141,6 +200,32 @@ const redirectRoutes: readonly IntegrationManifestEntry[] = [
   canonicalPath,
   disposition: "redirect",
   dataOwner: "next.config.ts redirects and the destination App Router page.",
+  rationale,
+  evidence: "hkwtia-repository",
+}));
+
+/**
+ * Phase B2 / D-11 un-redirected all three: the earlier rationales named a missing authority
+ * ("an unverified member profile"), and the reviewed public company profile — opt-in, staff
+ * approved, `public_profile_status = 'published'` — now provides one. The two temporary
+ * `/members` 307s to `/showcase` are gone from next.config.ts, so these entries must not stay
+ * `redirect`: route parity checks a redirect disposition against the real next.config rules.
+ * The ids keep their original prefixes so every existing reference resolves, exactly as WP-7
+ * did for `/programmes` and `/partners`.
+ */
+const memberDirectoryRoutes: readonly IntegrationManifestEntry[] = [
+  ["route-design-members", "/members", "/members", "The reviewed member directory is now a real hkwtia route over published company profiles."],
+  ["route-design-member-detail", "/members/[slug]", "/members/[slug]", "Reviewed public organisation detail is owned by the published company profile keyed by slug."],
+  // The legacy hkwtia.org detail shape. `/members/[slug]` serves it directly now, so it needs no
+  // rule of its own: a `/members/:id` redirect would shadow every real member page.
+  ["route-legacy-member-detail", "/members/:id", "/members/[slug]", "The legacy member detail url resolves against the reviewed member page instead of a redirect."],
+].map(([id, source, canonicalPath, rationale]) => entry({
+  id,
+  kind: "route",
+  source,
+  canonicalPath,
+  disposition: "retain",
+  dataOwner: "Published company public profiles (company-profiles repository) and their staff review state.",
   rationale,
   evidence: "hkwtia-repository",
 }));
@@ -159,7 +244,6 @@ const designRouteMerges: readonly IntegrationManifestEntry[] = [
   ["route-design-ai-plus-retail", "/ai-plus/retail-creative-industries", "/showcase", "No separate verified sector dataset exists; use reviewed solutions."],
   ["route-design-ai-plus-education", "/ai-plus/education-future-of-work", "/events", "No training catalogue exists; only published events are current opportunities."],
   ["route-design-ai-plus-responsible", "/ai-plus/responsible-ai-data-cybersecurity", "/ai-transparency", "Responsible-AI claims belong to the existing trust surface."],
-  ["route-design-member-detail", "/members/[slug]", "/showcase/[slug]", "Reviewed public organisation detail is owned by showcase listings."],
   ["route-design-solutions", "/solutions", "/showcase", "Reviewed solutions are already the public showcase."],
   ["route-design-solution-detail", "/solutions/[slug]", "/showcase/[slug]", "Reviewed solution detail is already the showcase detail."],
   ["route-design-submit-challenge", "/submit-challenge", "/contact", "No challenge record exists; Contact may explain channels without pretending submission persistence."],
@@ -212,10 +296,8 @@ const designRouteMerges: readonly IntegrationManifestEntry[] = [
 }));
 
 const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
-  ["route-design-programmes", "/programmes", "No generic programme index exists; four verified typed routes must not be flattened into one arbitrary destination."],
   ["route-design-program-detail", "/programmes/[slug]", "No generic programme repository or dynamic route exists."],
   ["route-design-program-edition", "/programmes/[slug]/[edition]", "No generic edition repository or dynamic route exists."],
-  ["route-design-partners", "/partners", "No verified published partner model exists, so a logo wall would risk misrepresentation."],
   ["route-design-search", "/search", "No repository-backed public search surface exists."],
   ["route-design-accessibility", "/accessibility", "No reviewed standalone accessibility page exists."],
   ["route-design-terms", "/terms", "No reviewed standalone terms page exists."],
@@ -236,7 +318,11 @@ const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
 }));
 
 const authoritativeDonorRouteAliases: readonly IntegrationManifestEntry[] = [
+  // The generated redirect (config/wisetech-redirects.ts, D-7) sends this slug to /events, so it
+  // shadows /events/[slug] and cannot be used for a real hkwtia event. Pinned by
+  // KNOWN_DYNAMIC_ROUTE_SHADOWS in tests/unit/wisetech-redirects.test.ts.
   entry({id: "route-source-event-asia-smart-innovation-awards-summit-2025", kind: "route", source: "/events/asia-smart-innovation-awards-summit-2025", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  // Same reservation as the row above: this slug redirects to /events and is not usable for a real event.
   entry({id: "route-source-event-smart-innovation-meets-genai", kind: "route", source: "/events/smart-innovation-meets-genai", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
   entry({id: "route-source-program-tech-connect", kind: "route", source: "/programmes/tech-connect", canonicalPath: "/programs/tct", disposition: "merge", dataOwner: "Verified typed Tech to Connect programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
   entry({id: "route-source-program-asia-smart-innovation-awards", kind: "route", source: "/programmes/asia-smart-innovation-awards", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
@@ -279,6 +365,7 @@ const assetEntries: readonly IntegrationManifestEntry[] = [
 export const wisetechIntegrationManifest: readonly IntegrationManifestEntry[] = Object.freeze([
   ...repositoryRoutes,
   ...redirectRoutes,
+  ...memberDirectoryRoutes,
   ...designRouteMerges,
   ...retiredDesignRoutes,
   ...authoritativeDonorRouteAliases,

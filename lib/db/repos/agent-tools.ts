@@ -12,6 +12,7 @@ import {approvalsRepository} from "@/lib/db/repos/approvals";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {kbDocumentsRepository} from "@/lib/db/repos/kb-documents";
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {
   companies,
   companyMembers,
@@ -23,6 +24,10 @@ import {
 export type ConciergeLocale = "en" | "zh-HK";
 
 export type AgentKnowledgeRecord = Readonly<{
+  structuredFacts?: Readonly<Record<string,string|number|boolean|null>>;
+  ref?: import("@/lib/ai/knowledge/policy").KnowledgeRef;
+  offsetStart?: number;
+  offsetEnd?: number;
   title: string;
   url: string;
   excerpt: string;
@@ -323,6 +328,7 @@ export function createAgentToolsRepository(
                     'past_due',
                     'cancel_at_period_end'
                   )
+                  AND ${membershipGrantValiditySql()}
               )
             )
           )        ORDER BY ${events.startsAt}, ${events.slug}, ${events.id}

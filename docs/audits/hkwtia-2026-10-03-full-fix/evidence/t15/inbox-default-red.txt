@@ -1,0 +1,75 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/admin-workflow-performance.test.ts (27 tests | 2 failed | 25 skipped) 23610ms
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 synthetic profiles: seed and measure search, keyset and aggregate report
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-0 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-1 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-2 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-3 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-4 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-5 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-6 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: descending keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: renewal keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 synthetic drafts: bounded queue, filters, current actor and keyset coverage
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 synthetic profiles: seed and measure search, keyset and aggregate report
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-0 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-1 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-2 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-3 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-4 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-5 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: renewal keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 synthetic drafts: bounded queue, filters, current actor and keyset coverage
+   × T15 actual full-schema synthetic administrative scale > 50-row defaults and 100-row inbox cap are enforced by actual repositories 50ms
+     → expected [ …(20) ] to have a length of 50 but got 20
+   ↓ T15 actual full-schema synthetic administrative scale > default draft review queue returns50 of55 actual drafts
+   × T15 actual full-schema synthetic administrative scale > inbox UI defaults to50 actual conversations 38ms
+     → expected [ { dueAt: null, …(18) }, …(54) ] to have a length of 50 but got 55
+   ↓ T15 actual full-schema synthetic administrative scale > inbox refuses a request above100 rows before querying
+   ↓ T15 actual full-schema synthetic administrative scale > set visibility preserves owned overlap, active seats, revoked-seat exclusion and matching membership IDs
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 50-row defaults and 100-row inbox cap are enforced by actual repositories
+AssertionError: expected [ …(20) ] to have a length of 50 but got 20
+
+- Expected
++ Received
+
+- 50
++ 20
+
+ ❯ tests/integration/admin-workflow-performance.test.ts:384:119
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > inbox UI defaults to50 actual conversations
+AssertionError: expected [ { dueAt: null, …(18) }, …(54) ] to have a length of 50 but got 55
+
+- Expected
++ Received
+
+- 50
++ 55
+
+ ❯ tests/integration/admin-workflow-performance.test.ts:394:44
+    392|     it("inbox UI defaults to50 actual conversations",async()=>{
+    393|       await f.pool.query("INSERT INTO conversations(profile_id,expires…
+    394|       expect(await listInbox(actor,'all')).toHaveLength(50);
+       |                                            ^
+    395|     });
+    396|     it("inbox refuses a request above100 rows before querying",async()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 25 skipped (27)
+   Start at  23:06:13
+   Duration  33.73s (transform 5.89s, setup 367ms, collect 7.45s, tests 23.61s, environment 0ms, prepare 214ms)
+

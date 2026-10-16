@@ -1,4 +1,6 @@
 import "server-only";
+import {benefitMembershipOrderSql} from "@/lib/db/repos/member-benefit-sql";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 
 import {createHash, randomBytes} from "node:crypto";
 import {and, eq, gt, inArray, isNull, sql} from "drizzle-orm";
@@ -31,6 +33,7 @@ export type SeatServiceDependencies = {
   getCompanyById?(companyId: string, transaction?: unknown): Promise<CompanyContext | null>;
   listMembers(companyId: string, transaction?: unknown): Promise<CompanyMember[]>;
   listPendingInvitations(companyId: string, transaction?: unknown): Promise<DatabaseSeatInvitation[]>;
+  hasMemberEmail?(companyId: string, email: string, transaction?: unknown): Promise<boolean>;
   getProfileByUserId(actor: Actor, userId: string): Promise<SeatProfile | null>;
   getUserEmail?(actor: Actor): Promise<string | null>;
   ensureProfile?(actor: Actor, userId: string, displayName: string, transaction?: unknown): Promise<void>;
@@ -90,8 +93,9 @@ export function createSeatService(deps: SeatServiceDependencies) {
         const members = await deps.listMembers(companyId, transaction);
         const manager = managerFor(actor, members, companyId);
         if (role === "owner" && manager.role !== "owner") throw new SeatServiceError("ROLE_POLICY");
+        if (await deps.hasMemberEmail?.(companyId, email, transaction)) throw new SeatServiceError("MEMBERSHIP_EXISTS");
         const pending = await deps.listPendingInvitations(companyId, transaction);
-        const existing = pending.find((invitation) => invitation.invitedEmail === email && invitation.role === role);
+        const existing = pending.find((invitation) => invitation.invitedEmail?.trim().toLowerCase() === email);
         if (existing) return {...existing, token: ""};
         if (activeMembers(members).length + pending.length >= company.seatLimit) throw new SeatServiceError("SEAT_LIMIT_REACHED");
         const row = await deps.insertInvitation({
@@ -148,6 +152,7 @@ export function createSeatService(deps: SeatServiceDependencies) {
       const member = await findMember(deps, memberId);
       if (!member) throw new SeatServiceError("MEMBER_NOT_FOUND");
       return deps.withCompanyTransaction(member.companyId, async (transaction) => {
+        if (!await deps.getCompany(actor, member.companyId, transaction)) forbidden();
         const members = await deps.listMembers(member.companyId, transaction);
         const currentMember = (await findMember(deps, memberId, transaction)) ?? member;
         if (currentMember.revokedAt !== null) throw new SeatServiceError("MEMBER_NOT_FOUND");
@@ -164,6 +169,7 @@ export function createSeatService(deps: SeatServiceDependencies) {
       const member = await findMember(deps, memberId);
       if (!member) throw new SeatServiceError("MEMBER_NOT_FOUND");
       return deps.withCompanyTransaction(member.companyId, async (transaction) => {
+        if (!await deps.getCompany(actor, member.companyId, transaction)) forbidden();
         const members = await deps.listMembers(member.companyId, transaction);
         const currentMember = (await findMember(deps, memberId, transaction)) ?? member;
         if (currentMember.revokedAt !== null) throw new SeatServiceError("MEMBER_NOT_FOUND");
@@ -180,6 +186,7 @@ export function createSeatService(deps: SeatServiceDependencies) {
       const invitation = await deps.getInvitation(invitationId);
       if (!invitation || invitation.revokedAt !== null || invitation.acceptedAt !== null) throw new SeatServiceError("INVITATION_NOT_FOUND");
       return deps.withCompanyTransaction(invitation.companyId, async (transaction) => {
+        if (!await deps.getCompany(actor, invitation.companyId, transaction)) forbidden();
         const current = await deps.getInvitation?.(invitationId, transaction);
         if (!current || current.revokedAt !== null || current.acceptedAt !== null) throw new SeatServiceError("INVITATION_NOT_FOUND");
         const members = await deps.listMembers(invitation.companyId, transaction);
@@ -190,7 +197,8 @@ export function createSeatService(deps: SeatServiceDependencies) {
   };
 }
 
-async function productionDependencies(): Promise<SeatServiceDependencies> {
+/** Shared only by server repositories that hold the same company lock. */
+export async function seatServiceDependencies(): Promise<SeatServiceDependencies> {
   const db = await getDb();
   const getCompany = async (actor: Actor, companyId: string, transaction?: unknown): Promise<CompanyContext | null> => {
     if (actor.kind !== "member") return null;
@@ -200,7 +208,8 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
       .from(companies)
       .innerJoin(memberships, eq(memberships.companyId, companies.id))
       .innerJoin(companyMembers, eq(companyMembers.companyId, companies.id))
-      .where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"])))
+      .where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"]), membershipGrantValiditySql()))
+      .orderBy(...benefitMembershipOrderSql())
       .limit(1);
     return rows[0] ?? null;
   };
@@ -210,7 +219,8 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
       .select({id: companies.id, seatLimit: memberships.seatLimit})
       .from(companies)
       .innerJoin(memberships, eq(memberships.companyId, companies.id))
-      .where(and(eq(companies.id, companyId), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"])))
+      .where(and(eq(companies.id, companyId), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"]), membershipGrantValiditySql()))
+      .orderBy(...benefitMembershipOrderSql())
       .limit(1);
     return rows[0] ?? null;
   };
@@ -218,6 +228,9 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
     getCompany,
     getCompanyById,
     listMembers: async (companyId, transaction) => ((transaction ?? db) as typeof db).select().from(companyMembers).where(and(eq(companyMembers.companyId, companyId), isNull(companyMembers.revokedAt))),
+    hasMemberEmail: async (companyId, email, transaction) => Boolean((await ((transaction ?? db) as typeof db)
+      .select({id: companyMembers.id}).from(companyMembers).innerJoin(profiles, eq(profiles.id, companyMembers.userId))
+      .where(and(eq(companyMembers.companyId, companyId), isNull(companyMembers.revokedAt), sql`lower(${profiles.email}) = ${email}`)).limit(1))[0]),
     listPendingInvitations: async (companyId, transaction) => ((transaction ?? db) as typeof db).select().from(seatInvitations).where(and(eq(seatInvitations.companyId, companyId), isNull(seatInvitations.acceptedAt), isNull(seatInvitations.revokedAt), gt(seatInvitations.expiresAt, new Date()))),
     getProfileByUserId: async (actor, userId) => {
       if (actor.kind !== "member" || actor.profileId !== userId) forbidden();
@@ -277,23 +290,23 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
 }
 
 export async function inviteSeat(actor: Actor, companyId: string, input: SeatInvitationInput): Promise<SeatInvitation> {
-  return (await createSeatService(await productionDependencies()).inviteSeat(actor, companyId, input));
+  return (await createSeatService(await seatServiceDependencies()).inviteSeat(actor, companyId, input));
 }
 
 export async function acceptSeatInvitation(actor: Actor, token: string): Promise<CompanyMember> {
-  return (await createSeatService(await productionDependencies()).acceptSeatInvitation(actor, token));
+  return (await createSeatService(await seatServiceDependencies()).acceptSeatInvitation(actor, token));
 }
 
 export async function revokeSeat(actor: Actor, memberId: string): Promise<void> {
-  return createSeatService(await productionDependencies()).revokeSeat(actor, memberId);
+  return createSeatService(await seatServiceDependencies()).revokeSeat(actor, memberId);
 }
 
 export async function changeSeatRole(actor: Actor, memberId: string, role: SeatRole): Promise<void> {
-  return createSeatService(await productionDependencies()).changeSeatRole(actor, memberId, role);
+  return createSeatService(await seatServiceDependencies()).changeSeatRole(actor, memberId, role);
 }
 
 export async function revokeInvitation(actor: Actor, invitationId: string): Promise<void> {
-  return createSeatService(await productionDependencies()).revokeInvitation(actor, invitationId);
+  return createSeatService(await seatServiceDependencies()).revokeInvitation(actor, invitationId);
 }
 
 export {normalizeEmail};

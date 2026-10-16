@@ -1,0 +1,549 @@
+{
+  "sourceSha": "ae6ce0facf8ad63bf64d4e2ac359ad1f2961a259",
+  "runId": 37226217354,
+  "files": [
+    {
+      "file": "tests/integration/automation-runners-postgres.test.ts",
+      "skipped": 5
+    },
+    {
+      "file": "tests/integration/audit-full-renewal-window.test.ts",
+      "skipped": 11
+    },
+    {
+      "file": "tests/integration/m2-acceptance.test.ts",
+      "skipped": 10
+    },
+    {
+      "file": "tests/integration/m4b-acceptance.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/m4c-seed-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/bulk-communication-eligibility.test.ts",
+      "skipped": 6
+    },
+    {
+      "file": "tests/integration/aiops-materialized-view.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/admin-audit-load.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/ticket-eligibility-postgres.test.ts",
+      "skipped": 5
+    },
+    {
+      "file": "tests/integration/showcase-review-transition-postgres.test.ts",
+      "skipped": 4
+    },
+    {
+      "file": "tests/integration/admin-batch-snapshot.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/event-attendee-batch-export.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/admin-pagination.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/membership-grant.test.ts",
+      "skipped": 6
+    },
+    {
+      "file": "tests/integration/showcase-lead-contact-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/member-event-review-version-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/cohort-role-revocation-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/admin-batch-history.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/join-resume.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/company-profile-review-version-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/admin-batch-ticket-resend.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/public-directory-pagination.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/member-360-purchases.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/member-import-audit-load.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/admin-batch-profile-cleanup.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/public-directory-availability-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/auth-shared-rate-limit.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/journey-claim-concurrency.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/writer-quota-postgres.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/admin-batch-export.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/communication-audit-load.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/admin-batch-concurrency.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/admin-batch-browser-fixture.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/auth-last-login.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/woztell-live.acceptance.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/audit-migration-upgrade.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/ai-application-triage.test.ts",
+      "skipped": 13
+    },
+    {
+      "file": "tests/integration/ai-retention-batch.test.ts",
+      "skipped": 15
+    },
+    {
+      "file": "tests/integration/audit-full-batch-failures.test.ts",
+      "skipped": 13
+    },
+    {
+      "file": "tests/integration/full-fix-membership-lifecycle.test.ts",
+      "skipped": 13
+    },
+    {
+      "file": "tests/integration/audit-full-batch-scale-matrix.test.ts",
+      "skipped": 24
+    },
+    {
+      "file": "tests/integration/ai-knowledge-retrieval.test.ts",
+      "skipped": 31
+    },
+    {
+      "file": "tests/integration/audit-full-workspace.test.ts",
+      "skipped": 7
+    },
+    {
+      "file": "tests/integration/ai-admin-content-facts.test.ts",
+      "skipped": 4
+    },
+    {
+      "file": "tests/integration/full-fix-workspace-search.test.ts",
+      "skipped": 13
+    },
+    {
+      "file": "tests/integration/wisetech-partner-import-neon.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/audit-full-policy-acceptance.test.ts",
+      "skipped": 5
+    },
+    {
+      "file": "tests/integration/ai-operations-metrics.test.ts",
+      "skipped": 6
+    },
+    {
+      "file": "tests/integration/operations-baseline.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/audit-full-auth-identity.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/audit-full-grant-boundary.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/audit-full-segment-pagination.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/audit-full-company-search.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/full-remediation-fixture.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/migration.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/m3-acceptance.test.ts",
+      "skipped": 5
+    },
+    {
+      "file": "tests/integration/m4a-acceptance.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+      "skipped": 4
+    },
+    {
+      "file": "tests/integration/ticket-email-outbox-postgres.test.ts",
+      "skipped": 5
+    },
+    {
+      "file": "tests/unit/task7-postgres-integration.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/unit/task10-postgres-integration.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/unit/task9-postgres-integration.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/company-profile-role-revocation-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/event-cancellation-notices.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/showcase-manager-revocation-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/member-import-commit.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/membership-grant-batch.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/unit/woztell-normalizer-captured.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/event-edit-version-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/task8-automations-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/page-copy-edit-concurrency-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/m4b-cross-window-cleanup.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/ticket-email-capacity.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/unit/webhook-postgres-concurrency.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/news-edit-version-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/member-filter-selection.test.ts",
+      "skipped": 4
+    },
+    {
+      "file": "tests/integration/company-review-demotion-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/membership-grant-benefits.test.ts",
+      "skipped": 4
+    },
+    {
+      "file": "tests/integration/login-profile-provision-postgres.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/member-event-role-revocation-postgres.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/member-application-queues.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/guest-check-in.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/refund-actor-postgres.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/member-import-retention.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/unit/task8-postgres-integration.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/admin-dashboard-counts.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/shared-rate-limit.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/login-profile-provision-neon.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/audit-full-support-handoff.test.ts",
+      "skipped": 18
+    },
+    {
+      "file": "tests/integration/ai-draft-review.test.ts",
+      "skipped": 30
+    },
+    {
+      "file": "tests/integration/full-fix-delivery-recovery.test.ts",
+      "skipped": 48
+    },
+    {
+      "file": "tests/integration/ai-budget-concurrency.test.ts",
+      "skipped": 16
+    },
+    {
+      "file": "tests/integration/admin-workflow-performance.test.ts",
+      "skipped": 27
+    },
+    {
+      "file": "tests/integration/full-fix-support-drafts.test.ts",
+      "skipped": 21
+    },
+    {
+      "file": "tests/integration/audit-full-batch-snapshot.test.ts",
+      "skipped": 7
+    },
+    {
+      "file": "tests/integration/audit-full-ticket-lifecycle.test.ts",
+      "skipped": 7
+    },
+    {
+      "file": "tests/integration/audit-full-campaign-entry.test.ts",
+      "skipped": 13
+    },
+    {
+      "file": "tests/integration/audit-full-migration-recovery.test.ts",
+      "skipped": 2
+    },
+    {
+      "file": "tests/integration/audit-full-import-export.test.ts",
+      "skipped": 6
+    },
+    {
+      "file": "tests/integration/audit-full-application-case.test.ts",
+      "skipped": 8
+    },
+    {
+      "file": "tests/integration/audit-full-cms-workspace.test.ts",
+      "skipped": 9
+    },
+    {
+      "file": "tests/integration/audit-full-job-health.test.ts",
+      "skipped": 7
+    },
+    {
+      "file": "tests/integration/audit-full-billing-scope.test.ts",
+      "skipped": 9
+    },
+    {
+      "file": "tests/integration/full-fix-event-payment.test.ts",
+      "skipped": 11
+    },
+    {
+      "file": "tests/integration/ai-board-draft-work.test.ts",
+      "skipped": 3
+    },
+    {
+      "file": "tests/integration/full-fix-batch-snapshot-100.test.ts",
+      "skipped": 1
+    },
+    {
+      "file": "tests/integration/full-fix-cms-visibility.test.ts",
+      "skipped": 5
+    }
+  ],
+  "reason": "CI does not provide approved isolated DB/Auth/provider credentials or opt-in integration flags; these are guarded skips, not successful acceptance. Actual isolated receipts are recorded task by task and never summed into CI pass.",
+  "skipsArePass": false,
+  "latestSourceSha": "145443b69df74ad2f70af172c310d10e05803220",
+  "latestFullSuiteSkipped": 590,
+  "latestActualSkippedFiles": [
+    "tests/integration/admin-audit-load.test.ts",
+    "tests/integration/admin-batch-browser-fixture.test.ts",
+    "tests/integration/admin-batch-concurrency.test.ts",
+    "tests/integration/admin-batch-export.test.ts",
+    "tests/integration/admin-batch-history.test.ts",
+    "tests/integration/admin-batch-profile-cleanup.test.ts",
+    "tests/integration/admin-batch-snapshot.test.ts",
+    "tests/integration/admin-batch-ticket-resend.test.ts",
+    "tests/integration/admin-pagination.test.ts",
+    "tests/integration/admin-workflow-performance.test.ts",
+    "tests/integration/ai-admin-content-facts.test.ts",
+    "tests/integration/ai-application-triage.test.ts",
+    "tests/integration/ai-board-draft-work.test.ts",
+    "tests/integration/ai-budget-concurrency.test.ts",
+    "tests/integration/ai-draft-review.test.ts",
+    "tests/integration/ai-knowledge-retrieval.test.ts",
+    "tests/integration/ai-operations-metrics.test.ts",
+    "tests/integration/ai-retention-batch.test.ts",
+    "tests/integration/aiops-materialized-view.test.ts",
+    "tests/integration/audit-full-application-case.test.ts",
+    "tests/integration/audit-full-auth-identity.test.ts",
+    "tests/integration/audit-full-batch-failures.test.ts",
+    "tests/integration/audit-full-batch-scale-matrix.test.ts",
+    "tests/integration/audit-full-batch-snapshot.test.ts",
+    "tests/integration/audit-full-billing-scope.test.ts",
+    "tests/integration/audit-full-campaign-entry.test.ts",
+    "tests/integration/audit-full-cms-workspace.test.ts",
+    "tests/integration/audit-full-company-search.test.ts",
+    "tests/integration/audit-full-grant-boundary.test.ts",
+    "tests/integration/audit-full-import-export.test.ts",
+    "tests/integration/audit-full-job-health.test.ts",
+    "tests/integration/audit-full-migration-recovery.test.ts",
+    "tests/integration/audit-full-policy-acceptance.test.ts",
+    "tests/integration/audit-full-renewal-window.test.ts",
+    "tests/integration/audit-full-segment-pagination.test.ts",
+    "tests/integration/audit-full-support-handoff.test.ts",
+    "tests/integration/audit-full-ticket-lifecycle.test.ts",
+    "tests/integration/audit-full-workspace.test.ts",
+    "tests/integration/audit-migration-upgrade.test.ts",
+    "tests/integration/auth-last-login.test.ts",
+    "tests/integration/auth-shared-rate-limit.test.ts",
+    "tests/integration/automation-runners-postgres.test.ts",
+    "tests/integration/bulk-communication-eligibility.test.ts",
+    "tests/integration/cohort-role-revocation-postgres.test.ts",
+    "tests/integration/communication-audit-load.test.ts",
+    "tests/integration/company-profile-review-version-postgres.test.ts",
+    "tests/integration/company-profile-role-revocation-postgres.test.ts",
+    "tests/integration/company-review-demotion-postgres.test.ts",
+    "tests/integration/event-attendee-batch-export.test.ts",
+    "tests/integration/event-cancellation-notices.test.ts",
+    "tests/integration/event-edit-version-postgres.test.ts",
+    "tests/integration/full-fix-batch-snapshot-100.test.ts",
+    "tests/integration/full-fix-cms-visibility.test.ts",
+    "tests/integration/full-fix-delivery-recovery.test.ts",
+    "tests/integration/full-fix-event-payment.test.ts",
+    "tests/integration/full-fix-membership-lifecycle.test.ts",
+    "tests/integration/full-fix-support-drafts.test.ts",
+    "tests/integration/full-fix-workspace-search.test.ts",
+    "tests/integration/full-remediation-fixture.test.ts",
+    "tests/integration/guest-check-in.test.ts",
+    "tests/integration/join-resume.test.ts",
+    "tests/integration/journey-claim-concurrency.test.ts",
+    "tests/integration/login-profile-provision-neon.test.ts",
+    "tests/integration/login-profile-provision-postgres.test.ts",
+    "tests/integration/m2-acceptance.test.ts",
+    "tests/integration/m3-acceptance.test.ts",
+    "tests/integration/m4b-cross-window-cleanup.test.ts",
+    "tests/integration/m4c-seed-postgres.test.ts",
+    "tests/integration/member-360-purchases.test.ts",
+    "tests/integration/member-application-queues.test.ts",
+    "tests/integration/member-event-review-version-postgres.test.ts",
+    "tests/integration/member-event-role-revocation-postgres.test.ts",
+    "tests/integration/member-filter-selection.test.ts",
+    "tests/integration/member-import-audit-load.test.ts",
+    "tests/integration/member-import-commit.test.ts",
+    "tests/integration/membership-grant-batch.test.ts",
+    "tests/integration/membership-grant-benefits.test.ts",
+    "tests/integration/membership-grant.test.ts",
+    "tests/integration/migration.test.ts",
+    "tests/integration/news-edit-version-postgres.test.ts",
+    "tests/integration/operations-baseline.test.ts",
+    "tests/integration/page-copy-edit-concurrency-postgres.test.ts",
+    "tests/integration/public-directory-availability-postgres.test.ts",
+    "tests/integration/public-directory-pagination.test.ts",
+    "tests/integration/public-event-pagination.test.ts",
+    "tests/integration/refund-actor-postgres.test.ts",
+    "tests/integration/shared-rate-limit.test.ts",
+    "tests/integration/showcase-lead-contact-postgres.test.ts",
+    "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+    "tests/integration/showcase-manager-revocation-postgres.test.ts",
+    "tests/integration/showcase-review-transition-postgres.test.ts",
+    "tests/integration/task8-automations-postgres.test.ts",
+    "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+    "tests/integration/ticket-eligibility-postgres.test.ts",
+    "tests/integration/ticket-email-capacity.test.ts",
+    "tests/integration/ticket-email-outbox-postgres.test.ts",
+    "tests/integration/woztell-live.acceptance.test.ts",
+    "tests/integration/writer-quota-postgres.test.ts",
+    "tests/unit/task10-postgres-integration.test.ts",
+    "tests/unit/task7-postgres-integration.test.ts",
+    "tests/unit/task8-postgres-integration.test.ts",
+    "tests/unit/task9-postgres-integration.test.ts",
+    "tests/unit/webhook-postgres-concurrency.test.ts"
+  ],
+  "newGuardedPublicPaginationFile": "tests/integration/public-event-pagination.test.ts",
+  "meaning": "Guarded integration/provider/isolation tests are not acceptance passes; real PostgreSQL public pagination was separately run and passed"
+}

@@ -1,0 +1,76 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "command": "T22_SOURCE_SHA=99d5b11974644c06318da4f91d20bf39a8615b9a; T22_AUTH_PROVIDER_MIN_INTERVAL_MS=2000; T22_REPORT_PATH=.playwright/t22-browser-99-targeted.json; node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs tests/e2e/cms-publish.spec.ts tests/e2e/m2-admin-crm.spec.ts tests/e2e/phase-c2-campaigns-and-contacts.spec.ts tests/e2e/phase-d4a-ticket-checkout.spec.ts --grep 'private bilingual|anonymous, member|the wizard refuses|Stripe Checkout \\(en\\)$' --workers=1",
+  "stats": {
+    "startTime": "2026-10-02T23:04:16.448Z",
+    "duration": 208203.289,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 13,
+      "title": "private bilingual CMS draft, real layout, second editor conflict and explicit publication revert",
+      "status": "expected",
+      "attempts": [
+        {
+          "status": "passed",
+          "durationMs": 62435,
+          "startTime": "2026-10-02T23:04:17.346Z"
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 237,
+      "title": "anonymous, member, and company-admin identities require login or receive access denied on every admin route",
+      "status": "expected",
+      "attempts": [
+        {
+          "status": "passed",
+          "durationMs": 95997,
+          "startTime": "2026-10-02T23:05:21.185Z"
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 240,
+      "title": "the wizard refuses a blank template variable and previews a real eligibility partition",
+      "status": "expected",
+      "attempts": [
+        {
+          "status": "passed",
+          "durationMs": 28402,
+          "startTime": "2026-10-02T23:07:05.084Z"
+        }
+      ]
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "line": 40,
+      "title": "staff price a ticketed event and a buyer reaches Stripe Checkout (en)",
+      "status": "expected",
+      "attempts": [
+        {
+          "status": "passed",
+          "durationMs": 11045,
+          "startTime": "2026-10-02T23:07:33.519Z"
+        }
+      ]
+    }
+  ],
+  "environment": "confirmed G0 DB/Auth ledger56; native built Chromium; real Stripe TEST; email sink; original full negative role matrix and180-second timeouts",
+  "getSessionStatuses": {
+    "200": 90
+  },
+  "pacingMs": 2000,
+  "providerStubbed": false,
+  "providerQuotaKnown": false,
+  "fullCollectionGreen": false,
+  "production": false,
+  "rawResponsesCookiesLogged": false
+}

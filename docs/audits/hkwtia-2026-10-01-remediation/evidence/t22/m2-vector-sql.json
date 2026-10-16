@@ -1,0 +1,59 @@
+{
+  "environment": "owned local PG16 with pgvector; actual migrate/seed",
+  "pass": 10,
+  "fail": 0,
+  "skip": 0,
+  "failedFiles": [],
+  "cases": [
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "creates the ten required M2 tables and exact fixture counts idempotently",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "preserves mapped auth identities while restoring every other mutable seeded profile field",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "enforces note replacement SET NULL and indexes renewal windows in PostgreSQL",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "returns exactly the engineered canonical segment and production at-risk order",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "proves production member search matching, nonmatching, and stable cursor semantics",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "correlates suppression to each outer campaign candidate",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "composes a non-empty production Member 360 fixture",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "seeds one supported pending approval for the browser decision flow",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "matches committed hand-calculated Task 10 report values",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "contains no personal or production-looking email domain",
+      "status": "passed"
+    }
+  ]
+}

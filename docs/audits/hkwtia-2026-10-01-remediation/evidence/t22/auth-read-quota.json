@@ -1,0 +1,11 @@
+{
+  "sourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "environment": "confirmed isolated Auth; full native sequential browser collection",
+  "knownError": "Too many requests",
+  "occurrences": 7,
+  "matchingGetSessionChunkFrames": 7,
+  "authDisabled": false,
+  "rateLimitDisabled": false,
+  "credentialsLogged": false,
+  "production": false
+}

@@ -1,0 +1,14 @@
+{
+  "tasks.csv": {
+    "rows": 22,
+    "originalFieldsPreserved": true
+  },
+  "status.csv": {
+    "rows": 28,
+    "originalFieldsPreserved": true
+  },
+  "acceptance.csv": {
+    "rows": 64,
+    "originalFieldsPreserved": true
+  }
+}

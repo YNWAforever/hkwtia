@@ -1,0 +1,28 @@
+{
+  "sourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "runtime": "next start / NODE_ENV=production",
+  "observedAt": "2026-10-04T21:08:04.963Z",
+  "productionDeployment": false,
+  "realProviderAcceptance": false,
+  "checks": [
+    {
+      "mode": "timing",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Agents disabled; test provider keys absent; no AI request made"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-04T21:08:37.848Z",
+    "duration": 45368.537,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "buildId": "bmjmd2lTxxPgXy-kO2uK1",
+  "buildSourceSha": "946bad06a41f09939c779709d7e31951617ffce6",
+  "scopeLabelsActuallyVisible": true
+}

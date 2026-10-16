@@ -1,0 +1,14 @@
+{
+  "environment": "confirmed isolated Neon/Auth; built Next; synthetic registry fixtures; existing real static pixels",
+  "production": false,
+  "fixtureCount": 79,
+  "locales": [
+    "en",
+    "zh-HK"
+  ],
+  "keyboardFocus": true,
+  "selection": "native select Home, ArrowDown, Tab",
+  "realThumbnail": true,
+  "eventWrites": 0,
+  "providerUploads": 0
+}

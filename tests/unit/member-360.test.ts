@@ -9,12 +9,14 @@ import type {AdminActor, Actor} from "@/lib/membership/lifecycle";
 const staffActor = (): AdminActor => ({kind: "staff", userId: "staff-1", profileId: "staff-1"});
 const memberActor = (): Extract<Actor, {kind: "member"}> => ({kind: "member", userId: "member-1", profileId: "member-1"});
 
-function fakeReader(overrides: Partial<Awaited<ReturnType<Member360Reader["get360"]>>> = {}): Member360Reader {
+function fakeReader(overrides: Partial<NonNullable<Awaited<ReturnType<Member360Reader["get360"]>>>> = {}): Member360Reader {
   return {
     get360: async () => ({
       profile: {id: "member-1", displayName: "Member One", email: "member@example.test", phone: null, role: "member"},
       companies: [],
       membership: null,
+      memberships: [],
+      purchases: [],
       engagement: {score: null, trend: null, events: []},
       emails: [],
       events: [],

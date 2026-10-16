@@ -13,11 +13,12 @@ import {
 const resolvableDestinations = new Set([
   "/", "/about", "/about/chairman", "/about/committees", "/about/history", "/ai-ops",
   "/ai-transparency", "/contact", "/events", "/events/[slug]", "/join", "/join/complete",
-  "/launchpad", "/membership", "/news", "/news/[slug]", "/portal", "/portal/billing",
+  "/launchpad", "/members", "/members/[slug]", "/membership", "/news", "/news/[slug]",
+  "/partners", "/portal", "/portal/billing",
   "/portal/company", "/portal/company/listing", "/portal/company/seats", "/portal/directory",
-  "/portal/documents", "/portal/events", "/portal/profile", "/privacy", "/programs/asa",
-  "/programs/cpai", "/programs/hkict", "/programs/tct", "/showcase", "/showcase/[slug]",
-  "/unsubscribe",
+  "/portal/documents", "/portal/events", "/portal/profile", "/privacy", "/programmes",
+  "/programs/asa", "/programs/cpai", "/programs/hkict", "/programs/tct",
+  "/showcase", "/showcase/[slug]", "/unsubscribe",
 ]);
 
 const expectedSitemapPaths = [
@@ -48,7 +49,9 @@ const expectedDispatcherRows = [
   ["/search", "retire", null],
   ["/join/success", "merge", "/join/complete"],
   ["/events/[slug]", "merge", "/events/[slug]"],
-  ["/members/[slug]", "merge", "/showcase/[slug]"],
+  // Phase B2 / D-11: the donor's member detail dispatcher row is served by hkwtia's own
+  // reviewed member page instead of being folded into the showcase.
+  ["/members/[slug]", "retain", "/members/[slug]"],
   ["/solutions/[slug]", "merge", "/showcase/[slug]"],
   ["/insights/[slug]", "merge", "/news/[slug]"],
   ["/ai-plus/[slug]", "retire", null],
@@ -82,12 +85,12 @@ const expectedNavigationRows = [
   ["events-activities", "column", "activities/industry-councils", "merge", "/events"],
   ["events-activities", "column", "activities", "merge", "/events"],
   ["events-activities", "feature", "events#interest", "merge", "/events"],
-  ["members-solutions", "root", "members", "redirect", "/showcase"],
-  ["members-solutions", "column", "members", "redirect", "/showcase"],
+  ["members-solutions", "root", "members", "retain", "/members"],
+  ["members-solutions", "column", "members", "retain", "/members"],
   ["members-solutions", "column", "solutions", "merge", "/showcase"],
   ["members-solutions", "column", "request-introduction", "merge", "/showcase/[slug]"],
   ["members-solutions", "column", "submit-challenge", "merge", "/contact"],
-  ["members-solutions", "column", "members", "redirect", "/showcase"],
+  ["members-solutions", "column", "members", "retain", "/members"],
   ["members-solutions", "feature", "submit-challenge", "merge", "/contact"],
   ["ai-plus", "root", "ai-plus", "merge", "/ai-transparency"],
   ["ai-plus", "column", "ai-plus", "merge", "/ai-transparency"],
@@ -96,12 +99,12 @@ const expectedNavigationRows = [
   ["ai-plus", "column", "ai-plus/responsible-ai-data-cybersecurity", "merge", "/ai-transparency"],
   ["ai-plus", "column", "ai-plus", "merge", "/ai-transparency"],
   ["ai-plus", "feature", "ai-plus", "merge", "/ai-transparency"],
-  ["programmes-gba", "root", "programmes", "retire", null],
-  ["programmes-gba", "column", "programmes", "retire", null],
+  ["programmes-gba", "root", "programmes", "retain", "/programmes"],
+  ["programmes-gba", "column", "programmes", "retain", "/programmes"],
   ["programmes-gba", "column", "programmes/launchpad", "merge", "/launchpad"],
   ["programmes-gba", "column", "gba/market-entry", "merge", "/launchpad"],
   ["programmes-gba", "column", "activities/gba-delegations", "merge", "/launchpad"],
-  ["programmes-gba", "column", "programmes", "retire", null],
+  ["programmes-gba", "column", "programmes", "retain", "/programmes"],
   ["programmes-gba", "feature", "gba/market-entry", "merge", "/launchpad"],
   ["insights-about", "root", "insights", "merge", "/news"],
   ["insights-about", "column", "insights/case-studies", "merge", "/showcase"],
@@ -114,7 +117,7 @@ const expectedNavigationRows = [
 
 const expectedFormFlows = [
   ["event-filter", "event-filter-form", "/events", "merge", "/events"],
-  ["directory-search", "directory-search-form", "/members", "redirect", "/showcase"],
+  ["directory-search", "directory-search-form", "/members", "retain", "/members"],
   ["site-search", "site-search-form", "/search", "retire", null],
   ["partner-enquiry", "partner-enquiry-form", "/partner-with-us", "retire", null],
   ["submit-challenge", "task-enquiry-form", "/submit-challenge", "retire", null],
@@ -198,7 +201,7 @@ describe("WiseTech authoritative-source reconciliation", () => {
       ["app/WiseTechSite.tsx", "merge"], ["app/[lang]/[[...slug]]/page.tsx", "merge"],
       ["app/[lang]/layout.tsx", "merge"], ["app/chatgpt-auth.ts", "retire"],
       ["app/globals.css", "merge"], ["app/layout.tsx", "merge"], ["app/megaNav.ts", "merge"],
-      ["app/page.tsx", "retire"], ["app/partnerData.ts", "retire"],
+      ["app/page.tsx", "retire"], ["app/partnerData.ts", "merge"],
       ["app/sitemap.ts", "merge"], ["app/visualData.ts", "merge"],
     ]);
   });
@@ -233,7 +236,11 @@ describe("WiseTech authoritative-source reconciliation", () => {
     });
     const evidence = authoritativeSourceInventory.assets.map(({sourcePath, sha256, category}) => [sourcePath, sha256, category].join("|")).join("\n");
     expect(createHash("sha256").update(evidence).digest("hex")).toBe("c864faa2057bfe1257d0db9ff6166717d73a3cae90d957bfecdc0921bbbbff79");
-    expect(authoritativeSourceInventory.assets.every(({disposition, rightsStatus, relationshipStatus, englishAltStatus, traditionalChineseAltStatus, publishable}) => disposition === "retire" && rightsStatus === "unreviewed" && relationshipStatus === "unreviewed" && englishAltStatus === "unreviewed" && traditionalChineseAltStatus === "unreviewed" && publishable === false)).toBe(true);
+    const partnerLogos = authoritativeSourceInventory.assets.filter((asset) => asset.category === "historical-partner-logo");
+    const otherAssets = authoritativeSourceInventory.assets.filter((asset) => asset.category !== "historical-partner-logo");
+    expect(partnerLogos).toHaveLength(79);
+    expect(partnerLogos.every(({disposition, rightsStatus, relationshipStatus, englishAltStatus, traditionalChineseAltStatus, publishable}) => disposition === "merge" && rightsStatus === "approved" && relationshipStatus === "approved" && englishAltStatus === "unreviewed" && traditionalChineseAltStatus === "unreviewed" && publishable === false)).toBe(true);
+    expect(otherAssets.every(({disposition, rightsStatus, relationshipStatus, englishAltStatus, traditionalChineseAltStatus, publishable}) => disposition === "retire" && rightsStatus === "unreviewed" && relationshipStatus === "unreviewed" && englishAltStatus === "unreviewed" && traditionalChineseAltStatus === "unreviewed" && publishable === false)).toBe(true);
   });
 
   it("deep-freezes the complete checked-in evidence index", () => {

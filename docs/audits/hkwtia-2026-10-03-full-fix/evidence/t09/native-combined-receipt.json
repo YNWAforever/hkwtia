@@ -1,0 +1,136 @@
+{
+  "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+  "origin": "https://hkwtia-application-triage-20261003.vercel.app",
+  "observedAt": "2026-10-03T23:15:19.830Z",
+  "checks": [
+    {
+      "locale": "en",
+      "case": "required fields and manual note",
+      "caseRef": "1e85bfcbabe4980c5a9bdc604762cf1bd002e81715b01e736a34aa6a0ebc6379",
+      "sameFilteredReturn": true,
+      "keyboard": true,
+      "seriousCriticalAxe": 0,
+      "overflow": false,
+      "touchTargetMinimum": 44
+    },
+    {
+      "locale": "en",
+      "case": "completed attempt/pending membership",
+      "nextAction": "support_reconciliation",
+      "statusUnchanged": true,
+      "additionalCheckoutRequests": 0
+    },
+    {
+      "locale": "en",
+      "case": "pending review",
+      "nextAction": "review_ready",
+      "approvalsCreated": 0
+    },
+    {
+      "locale": "en",
+      "case": "edit and reject",
+      "version": 3,
+      "sendRequests": 0
+    },
+    {
+      "locale": "en",
+      "case": "facts changed",
+      "state": "stale",
+      "approved": false
+    },
+    {
+      "locale": "en",
+      "case": "approved note adoption",
+      "caseAudits": 1,
+      "applicationState": "draft",
+      "unsavedOverwriteBlocked": true,
+      "noExternalEffects": true
+    },
+    {
+      "locale": "zh-HK",
+      "case": "required fields and manual note",
+      "caseRef": "dba2a0c612e13b2af3c6342033abf98b6d8958b4966919df06b650f5f2586e9f",
+      "sameFilteredReturn": true,
+      "keyboard": true,
+      "seriousCriticalAxe": 0,
+      "overflow": false,
+      "touchTargetMinimum": 44
+    },
+    {
+      "locale": "zh-HK",
+      "case": "completed attempt/pending membership",
+      "nextAction": "support_reconciliation",
+      "statusUnchanged": true,
+      "additionalCheckoutRequests": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "pending review",
+      "nextAction": "review_ready",
+      "approvalsCreated": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "edit and reject",
+      "version": 3,
+      "sendRequests": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "facts changed",
+      "state": "stale",
+      "approved": false
+    },
+    {
+      "locale": "zh-HK",
+      "case": "approved note adoption",
+      "caseAudits": 1,
+      "applicationState": "draft",
+      "unsavedOverwriteBlocked": true,
+      "noExternalEffects": true
+    },
+    {
+      "case": "member denied",
+      "privilegedWorkspaceVisible": false
+    }
+  ],
+  "actualNeonPasswordAuth": true,
+  "realModelProvider": "not used",
+  "realProviderRequests": 0,
+  "messagesMembershipBillingBudgetDelta": 0,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "production": false,
+  "aggregateDistinctCasesVerified": 13,
+  "singleAllGreenFullRunClaimed": true,
+  "runs": [
+    {
+      "cases": 13,
+      "pass": 13,
+      "fail": 0,
+      "receipt": "native-receipt.json"
+    }
+  ],
+  "priorRuns": [
+    {
+      "sourceSha": "7c4adaaf",
+      "pass": 11,
+      "fail": 2,
+      "failure": "actual Saved feedback loss",
+      "receipt": "native-refresh-red.json"
+    },
+    {
+      "sourceSha": "cdd7872a",
+      "pass": 11,
+      "fail": 2,
+      "failure": "synchronous navigation assertion; Saved feedback was restored",
+      "structuredReceiptRetainedCases": 6
+    },
+    {
+      "sourceSha": "cdd7872a",
+      "pass": 2,
+      "fail": 0,
+      "purpose": "navigation synchronization correction"
+    }
+  ]
+}

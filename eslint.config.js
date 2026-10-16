@@ -10,9 +10,16 @@ export default defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    ".tmp/**",
     // Git ignores this, but flat config keeps its own list — without the entry
     // `npm run lint` walks into a worktree and lints a second copy of the repo.
     ".worktrees/**",
+    // Same reason: a stale Vite `dist/` build at the repo root is git-ignored but
+    // not eslint-ignored, and its 500 KB bundle makes the stylish formatter throw
+    // `RangeError: Invalid string length` instead of reporting anything.
+    "dist/**",
+    // Local workerd creates generated bundles beneath its configured fixture directory.
+    "**/.wrangler/**",
   ]),
   {
     files: ["lib/**/*.{ts,tsx}"],

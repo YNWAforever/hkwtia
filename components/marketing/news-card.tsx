@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
@@ -10,12 +11,14 @@ export function NewsCard({
   title,
   publishedAt,
   author,
+  statusLabel,
 }: Readonly<{
   locale: AppLocale;
   slug: string;
   title: string;
   publishedAt: Date | string;
   author?: string;
+  statusLabel: string;
 }>) {
   const date = new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
@@ -23,11 +26,12 @@ export function NewsCard({
   }).format(publishedAt instanceof Date ? publishedAt : new Date(publishedAt));
 
   return (
-    <article className="glass-card space-y-3 p-6">
-      <h2 className="font-serif text-2xl font-semibold">
+    <article>
+      <StatusLabel>{statusLabel}</StatusLabel>
+      <h2>
         <Link href={localizedPath(locale, `/news/${slug}`)}>{title}</Link>
       </h2>
-      <p className="text-sm text-muted-foreground">
+      <p>
         <span>{date}</span>
         {author ? <><span aria-hidden="true"> · </span><span>{author}</span></> : null}
       </p>

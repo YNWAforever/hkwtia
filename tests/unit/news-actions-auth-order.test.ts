@@ -27,6 +27,7 @@ const messages = {
   validationMessage: "Invalid.",
   slugConflictMessage: "Conflict.",
   errorMessage: "Error.",
+  conflictMessage: "Reload and compare.",
 };
 
 function unreadableForm(): FormData {

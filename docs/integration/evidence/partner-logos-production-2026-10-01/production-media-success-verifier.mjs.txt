@@ -1,0 +1,30 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {Pool} from 'pg';
+import sharp from 'sharp';
+import {request} from '@playwright/test';
+const deploy=JSON.parse(await readFile('.playwright/partner-production-deploy.json','utf8'));
+if(deploy.sourceCommit!=='e7fa4add247489f525f015007460fb522fb1531b'||deploy.deploymentUrl!=='https://hkwtia-l4iqy398l-ynwaforevers-projects.vercel.app'||deploy.target!=='production'||deploy.overrides.length)throw Error('PRODUCTION_DEPLOYMENT_GUARD');
+const state=JSON.parse(await readFile('.playwright/partner-production-import-state.json','utf8'));
+if(state.phase!=='imported-unpublished'||state.partnerIds.length!==79||new Set(state.partnerIds).size!==79||state.objectKeys.length<79)throw Error('PRODUCTION_IMPORT_SCOPE_GUARD');
+const binding=JSON.parse(await readFile('.playwright/partner-production-db.json','utf8'));
+if(binding.NEON_PROJECT_ID!=='fragrant-mountain-25240574'||binding.NEON_BRANCH_ID!=='br-noisy-glitter-ao2npd77'||new URL(binding.DATABASE_URL).hostname!=='ep-steep-wind-ao0pbldw-pooler.c-2.ap-southeast-1.aws.neon.tech')throw Error('PRODUCTION_DATABASE_GUARD');
+const evidence={recordedAt:new Date().toISOString(),sourceCommit:deploy.sourceCommit,origin:deploy.deploymentUrl,scope:'Actual deployed Production R2 media route before partner publication',mediaIds:[],verified:0,passed:false,items:[],applicationSessionIncluded:false};
+const pool=new Pool({connectionString:binding.DATABASE_URL});const client=await request.newContext({storageState:'.playwright/partner-production-state.json'});
+try{
+ const rows=(await pool.query('SELECT p.id,m.id AS media_id,m.checksum_sha256,m.width,m.height,m.byte_size,m.storage_key,m.registered_by_profile_id FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE p.id=ANY($1::uuid[]) ORDER BY p.display_order',[state.partnerIds])).rows;
+ if(rows.length!==79||!rows.every(r=>state.objectKeys.includes(r.storage_key)&&r.registered_by_profile_id===state.actorId))throw Error('PRODUCTION_MEDIA_OWNERSHIP_GUARD');
+ for(const [index,row] of rows.entries()){
+  evidence.lastAttempt={mediaId:row.media_id,status:null}; const response=await client.get(deploy.deploymentUrl+'/api/media/'+row.media_id,{timeout:45000}); evidence.lastAttempt.status=response.status();
+  if(response.status()!==200)throw Error('PRODUCTION_MEDIA_HTTP_FAILED');
+  const bytes=await response.body();const metadata=await sharp(bytes).metadata();
+  if(response.headers()['content-type']!=='image/png'||bytes.length!==row.byte_size||createHash('sha256').update(bytes).digest('hex')!==row.checksum_sha256||metadata.format!=='png'||metadata.width!==row.width||metadata.height!==row.height)throw Error('PRODUCTION_MEDIA_BYTES_FAILED');
+  evidence.mediaIds.push(row.media_id);evidence.verified++;
+  evidence.items.push({id:row.media_id,status:200,contentType:'image/png',checksumVerified:true,dimensionsVerified:true});
+  if((index+1)%10===0)console.log('Deployed Production media verified='+(index+1));
+  await writeFile('.playwright/partner-production-deployed-media.json',JSON.stringify(evidence,null,2)+'\n');
+ }
+ evidence.passed=evidence.verified===79;
+}catch(error){evidence.failure={code:/^PRODUCTION_[A-Z_]+$/.test(error.message)?error.message:'PRODUCTION_MEDIA_FAILED',name:error?.name};process.exitCode=1}
+finally{await writeFile('.playwright/partner-production-deployed-media.json',JSON.stringify(evidence,null,2)+'\n');await client.dispose();await pool.end();}
+console.log(JSON.stringify({verified:evidence.verified,passed:evidence.passed,failure:evidence.failure}));

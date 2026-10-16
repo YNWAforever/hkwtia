@@ -38,6 +38,7 @@ function mutationDependencies(overrides: Record<string, unknown> = {}) {
     lockMedia: vi.fn(async () => row()),
     updateMedia: vi.fn(async (_id: string, input: Record<string, unknown>) => row(input)),
     countListingReferences: vi.fn(async () => 0),
+    countCompanyReferences: vi.fn(async () => 0),
     countEventHeroReferences: vi.fn(async () => 0),
     insertAudit: vi.fn(async (input: {action: string; metadata: Record<string, unknown>}) => {
       audits.push(input);

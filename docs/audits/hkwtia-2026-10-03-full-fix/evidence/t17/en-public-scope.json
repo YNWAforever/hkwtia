@@ -1,0 +1,97 @@
+{
+  "observedAt": "2026-10-04T02:19:32.864Z",
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/membership",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/join",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/events",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/news",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/programmes",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/programs/asa",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/programs/cpai",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/programs/hkict",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/programs/tct",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/partners",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    }
+  ],
+  "privateAndArchived404": true,
+  "privateExcludedFromSitemap": true,
+  "keyboardLogin": true,
+  "partnerLinksStructurallyValidated": 0,
+  "unapprovedPartnerUrlsInvented": false,
+  "historicalClaimsOwnerApproval": false,
+  "production": false
+}

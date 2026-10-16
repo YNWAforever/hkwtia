@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, exists, isNull, sql} from "drizzle-orm";
+import {and, eq, isNull, sql} from "drizzle-orm";
 
 import type {Actor, MembershipPlanCode, MembershipRecord} from "@/lib/membership/lifecycle";
 import {billingAttempts, companyMembers, memberships, type BillingAttempt} from "@/lib/db/server-schema";
@@ -24,6 +24,7 @@ export type CheckoutSessionReference = Readonly<{
 }>;
 
 export type BillingAttemptErrorCode =
+  | "MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED"
   | "MEMBERSHIP_NOT_PENDING_PAYMENT"
   | "PLAN_DOES_NOT_USE_CHECKOUT"
   | "MEMBERSHIP_APPLICATION_REQUIRED"
@@ -146,6 +147,7 @@ async function lockCheckoutMembership(
   `))[0]);
   if (!membership) forbidden();
   if (membership.status !== "pending_payment") attemptError("MEMBERSHIP_NOT_PENDING_PAYMENT");
+  if (membership.stripeSubscriptionId) attemptError("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
   if (membership.planCode !== "startup" && membership.planCode !== "corporate") {
     attemptError("PLAN_DOES_NOT_USE_CHECKOUT");
   }
@@ -154,8 +156,12 @@ async function lockCheckoutMembership(
   return membership;
 }
 
+// `EXISTS (…)` written out rather than built with Drizzle's `exists()` — the
+// same way the nested one below already was. `exists()` pastes a raw `sql`
+// fragment in without parentheses and so emits the syntax error
+// `EXISTS SELECT …`. See the note in `lib/db/repos/companies.ts`.
 function memberAttemptScope(actor: Extract<Actor, {kind: "member"}>) {
-  return exists(sql`SELECT 1 FROM ${memberships}
+  return sql`EXISTS (SELECT 1 FROM ${memberships}
     WHERE ${memberships.id} = ${billingAttempts.membershipId}
       AND (${memberships.ownerUserId} = ${actor.profileId} OR EXISTS (
         SELECT 1 FROM ${companyMembers}
@@ -163,7 +169,7 @@ function memberAttemptScope(actor: Extract<Actor, {kind: "member"}>) {
           AND ${companyMembers.userId} = ${actor.profileId}
           AND ${companyMembers.revokedAt} IS NULL
           AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"})
-      ))`);
+      )))`;
 }
 
 export const billingAttemptsRepository = {

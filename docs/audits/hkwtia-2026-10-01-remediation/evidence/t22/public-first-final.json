@@ -1,0 +1,205 @@
+{
+  "sourceSha": "ce60f21089fff659a43acfa2472c8f98c198cf4b",
+  "environment": "built Next G0; 22 pass/1 transient header strict-match failure; regression follow-up required",
+  "stats": {
+    "startTime": "2026-10-02T13:31:12.469Z",
+    "duration": 70557.39,
+    "expected": 22,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "public-shell.spec.ts",
+      "line": 3,
+      "test": "desktop navigation supports trigger traversal, open, Escape, active state, and focus return",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 46,
+      "test": "mobile Sheet traps focus, resets Accordion, closes on navigation, and restores the trigger",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 80,
+      "test": "captures all four open desktop menu shapes",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 97,
+      "test": "captures / mobile Sheet review evidence",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 97,
+      "test": "captures /zh mobile Sheet review evidence",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/ shell fits 320px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/zh shell fits 320px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/ shell fits 375px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/zh shell fits 375px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/ shell fits 768px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/zh shell fits 768px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/ shell fits 1120px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/zh shell fits 1120px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/ shell fits 1440px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 108,
+      "test": "/zh shell fits 1440px and keeps 44px controls",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 149,
+      "test": "locale switch preserves path, repeated query values, and fragment",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 163,
+      "test": "/events marks Events & Programmes as the active group",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 163,
+      "test": "/showcase marks Membership & Ecosystem as the active group",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 163,
+      "test": "/ai-ops marks Impact & Insights as the active group",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 163,
+      "test": "/about/history marks About WTIA as the active group",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 170,
+      "test": "the header floats over the hero, then goes solid past 56px",
+      "status": "failed",
+      "skipReasons": [],
+      "errorLocations": [
+        {
+          "file": "public-shell.spec.ts",
+          "line": 178
+        }
+      ]
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "line": 13,
+      "test": "en: seat count, same-browser checkout recovery and owner boundary",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "line": 13,
+      "test": "zh-HK: seat count, same-browser checkout recovery and owner boundary",
+      "status": "passed",
+      "skipReasons": [],
+      "errorLocations": []
+    }
+  ],
+  "providerSends": 0,
+  "production": false
+}

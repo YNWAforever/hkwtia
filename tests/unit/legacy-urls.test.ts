@@ -43,6 +43,27 @@ describe("legacy url map", () => {
     }
   });
 
+  // The allowlist test above only asks whether a destination exists, so flipping a
+  // milestone to `featured` used to leave its legacy WordPress URL still falling back
+  // to the timeline: the detail page was built and sitemapped, but every inbound link
+  // from 25 years of the old site landed one level up from it, silently. The coupling
+  // is the invariant (design spec §6 "Redirect upgrade"), so it is asserted directly.
+  // Scoped to kind `milestone`: member stories redirect to /showcase and press releases
+  // to /news, which is their own mapping and not this rule.
+  it("points every featured milestone at its detail page and every other one at the timeline", () => {
+    const byFrom = new Map(legacyUrls.entries.map((entry) => [entry.from, entry]));
+
+    for (const milestone of milestonesOnly(milestones)) {
+      const entry = byFrom.get(milestone.legacyPath);
+      expect(entry, `${milestone.slug} has no legacy-urls entry`).toBeDefined();
+      expect({to: entry!.to, kind: entry!.kind}, milestone.slug).toEqual(
+        milestone.featured
+          ? {to: `/about/history/${milestone.slug}`, kind: "equivalent"}
+          : {to: "/about/history", kind: "section-fallback"},
+      );
+    }
+  });
+
   it("has no duplicate sources", () => {
     const sources = legacyUrls.entries.map(({from}) => from);
     expect(new Set(sources).size).toBe(sources.length);

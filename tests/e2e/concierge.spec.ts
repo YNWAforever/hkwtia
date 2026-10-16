@@ -30,6 +30,13 @@ async function ask(
   await dialog.getByRole("button", {name: labels.send}).click();
 }
 
+// This suite proves the existing explicitly authorized loopback provider double.
+// The app correctly refuses that lane in every cloud environment.
+test.beforeEach(() => {
+  test.skip(Boolean(process.env.VERCEL || process.env.VERCEL_ENV) || process.env.M4A_DETERMINISTIC_ACCEPTANCE !== "true" || process.env.M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED !== "true",
+    "Requires the authorized local deterministic profile; cloud refuses provider doubles. Real provider acceptance remains separate.");
+});
+
 const viewports = [
   {name: "desktop", width: 1280, height: 900},
   {name: "mobile", width: 375, height: 812},

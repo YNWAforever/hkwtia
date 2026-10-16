@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-04T05:39:51.417Z",
+  "sourceSha": "eb7685cfd983e14d957c03675b3308fd9c2dff83",
+  "origin": "http://localhost:3450",
+  "run": "df550b23-0bf4-4be1-996b-daaec855e09a",
+  "checks": [],
+  "ownedConversationRefs": [],
+  "actualPasswordAuth": true,
+  "syntheticFixtures": true,
+  "transport": "explicit test sink; no real recipient or provider receipt",
+  "production": false,
+  "cleanup": "Owned synthetic history retained, unrelated data preserved"
+}

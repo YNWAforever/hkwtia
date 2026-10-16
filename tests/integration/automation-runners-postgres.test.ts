@@ -14,6 +14,7 @@ import {
   type JourneyRunnerDependencies,
 } from "@/lib/automation/journey-runner";
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
 import {createCampaignRecipientDeliveryRepository} from "@/lib/db/repos/campaign-recipient-delivery";
 import {createDeliveriesRepository} from "@/lib/db/repos/deliveries";
 import {
@@ -181,6 +182,7 @@ describe.skipIf(!testDatabaseUrl)(
               emailSuppressed: false,
               whatsappOptIn: false,
               whatsappNumber: null,
+              whatsappOptedOutAt: null,
               engagementScore: 50,
               email: row.email,
               recipientName: "M3 runner fixture",
@@ -215,6 +217,9 @@ describe.skipIf(!testDatabaseUrl)(
               };
             },
           },
+          // Every registered key. These fixtures predate the B-5 approval gate and
+          // assert on the send path itself, not on which templates ops approved.
+          approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
           emailFrom: "WTIA <members@example.test>",
         } satisfies JourneyRunnerDependencies;
 
@@ -344,6 +349,7 @@ describe.skipIf(!testDatabaseUrl)(
               emailSuppressed: false,
               whatsappOptIn: false,
               whatsappNumber: null,
+              whatsappOptedOutAt: null,
               engagementScore: 50,
               email: `${fixture}@example.test`,
               recipientName: "M3 runner fixture",
@@ -378,6 +384,9 @@ describe.skipIf(!testDatabaseUrl)(
               };
             },
           },
+          // Every registered key. These fixtures predate the B-5 approval gate and
+          // assert on the send path itself, not on which templates ops approved.
+          approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
           emailFrom: "WTIA <members@example.test>",
         } satisfies JourneyRunnerDependencies;
 
@@ -745,10 +754,15 @@ describe.skipIf(!testDatabaseUrl)(
         const recipient = await activePool.query<{
           recipient_status: string;
           campaign_status: string;
+          campaign_completed: boolean;
           attempt_count: number;
         }>(
+          // Phase C2 Task 1 Step 4b: completeCampaignIfIdle, not the claim
+          // sweep, is what flips a drained blast here, so this is the only
+          // place that proves completed_at is stamped on real Postgres.
           `SELECT recipient.status AS recipient_status,
                   campaign.status AS campaign_status,
+                  campaign.completed_at IS NOT NULL AS campaign_completed,
                   recipient.attempt_count
            FROM campaign_recipients AS recipient
            INNER JOIN campaigns AS campaign
@@ -759,6 +773,7 @@ describe.skipIf(!testDatabaseUrl)(
         expect(recipient.rows).toEqual([{
           recipient_status: "sent",
           campaign_status: "completed",
+          campaign_completed: true,
           attempt_count: 1,
         }]);
       },
@@ -804,6 +819,9 @@ describe.skipIf(!testDatabaseUrl)(
           reclaimedAt,
           1,
           300_000,
+          // Phase C2 Task 10 (S-11): the claim is channel-scoped, and this
+          // fixture's campaign is an email one.
+          "email",
         );
         expect(claims).toMatchObject([{
           id: fencedRecipientId,

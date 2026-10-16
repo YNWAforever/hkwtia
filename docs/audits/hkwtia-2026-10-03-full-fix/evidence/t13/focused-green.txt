@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/unit/admin-ai-grader.test.ts (29 tests) 285ms
+
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+   Start at  21:52:39
+   Duration  1.91s (transform 233ms, setup 103ms, collect 831ms, tests 285ms, environment 0ms, prepare 118ms)
+

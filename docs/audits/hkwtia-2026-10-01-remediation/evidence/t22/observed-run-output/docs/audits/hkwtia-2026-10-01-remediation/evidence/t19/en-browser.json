@@ -1,0 +1,33 @@
+{
+  "source": "uncommitted",
+  "environment": "confirmed isolated Neon/Auth and owned built loopback",
+  "roles": [
+    "staff",
+    "superadmin"
+  ],
+  "locale": "en",
+  "checks": {
+    "staleDraftRetained": true,
+    "ownerScopes": true,
+    "closedReasonAudits": 3,
+    "financialRowsUnchanged": true,
+    "providerSends": 0
+  },
+  "storedStatusFixtureOnly": true,
+  "actualProviderAcceptance": "blocked: approved WhatsApp test recipient/provider receipt required",
+  "scans": [
+    {
+      "width": 1440,
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "width": 390,
+      "violations": 0,
+      "incomplete": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "command": "en stale handoff, keyboard, owner scope and truthful delivery"
+}

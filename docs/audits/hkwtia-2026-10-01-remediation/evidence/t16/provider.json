@@ -1,0 +1,125 @@
+{
+  "scope": "confirmed isolated Neon/Auth; synthetic data; Stripe TEST; email test sink",
+  "production": false,
+  "run": "eb9be1ef-7e50-4cb8-8b8d-dee42c986ec1",
+  "steps": [
+    {
+      "case": "decline and provider expiry",
+      "checkoutReference": "edb71263ee95589d",
+      "result": "decline leaves pending/unpaid; actual signed expiry releases order"
+    },
+    {
+      "case": "paid with interrupted return, delayed signed event and replay",
+      "checkoutReference": "f2ad868efcdd3792",
+      "paymentReference": "18f4f5e2eb05e769",
+      "orderReference": "085aff63a694dc5c",
+      "result": "provider paid while app pending; signed event -> paid; replay one audit/one seat"
+    },
+    {
+      "case": "authorized staff refund and signed provider callback replay",
+      "refundReference": "949c57c54dd00fd6",
+      "result": "provider succeeded1000HKD cents, app refunded, one refund audit; translated order reference and status"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventReference": "7c57b6ece9c1d913",
+      "type": "checkout.session.expired",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "864f691a9b4722aa",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "864f691a9b4722aa",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "95cda30b6a73916d",
+      "type": "refund.created",
+      "http": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "eventReference": "587e3a340f7704c5",
+      "type": "refund.updated",
+      "http": 200,
+      "outcome": "duplicate"
+    }
+  ],
+  "runtimeDiagnostics": [],
+  "paidNotices": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    }
+  ],
+  "paidNoticesReadback": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "error_code": null,
+      "attempt_count": 1,
+      "test_sink": true
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "error_code": null,
+      "attempt_count": 1,
+      "test_sink": true
+    }
+  ],
+  "refundNotice": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    },
+    {
+      "kind": "refund",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    }
+  ],
+  "outbox": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "n": 1
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "n": 1
+    },
+    {
+      "kind": "refund",
+      "status": "sent",
+      "n": 1
+    }
+  ],
+  "completed": true
+}

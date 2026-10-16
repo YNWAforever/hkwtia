@@ -2,8 +2,21 @@ import type {NextConfig} from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import legacyUrls from "./content/legacy-urls.json";
+import {memberToolOrigins} from "./config/member-tools";
+import {wisetechDesignRedirects} from "./config/wisetech-redirects";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+/**
+ * The origin of the Cloudflare Turnstile challenge iframe the concierge widget loads
+ * (`components/ai/concierge-widget.tsx`). It shares the one `frame-src` directive with the
+ * member tools below, so it is named here rather than derived from their registry: dropping
+ * it silently refuses the challenge on every public and portal page, and production requires
+ * Turnstile (`lib/config/env.ts` throws without the pair), so the concierge would be disabled
+ * site-wide. `tests/unit/member-tools-csp.test.ts` reads the widget for this URL and fails if
+ * the directive stops naming it.
+ */
+const turnstileChallengeOrigin = "https://challenges.cloudflare.com";
 
 /**
  * A deliberately partial Content-Security-Policy.
@@ -22,8 +35,9 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
  *                    named. A `<base>` tag injection would otherwise repoint
  *                    every relative script URL on the page.
  * - `object-src`     no plugin content anywhere on this site.
- * - `form-action`    every form here posts same-origin; Stripe is a redirect,
- *                    not a cross-origin form post.
+ * - `form-action`    native forms post same-origin and can redirect to Stripe
+ *                    Checkout or Billing Portal before hydration. Chromium
+ *                    applies this directive to those redirects too.
  *
  * NOT set, deliberately:
  * - `script-src` / `default-src` — a useful policy needs a per-request nonce,
@@ -38,7 +52,14 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "object-src 'none'",
-  "form-action 'self'",
+  "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+  // Phase D-2: the member tools are third-party pages iframed inside the portal, and the
+  // concierge's Cloudflare Turnstile challenge is a third-party iframe on every page. Both
+  // origins are named here; the tool origins are derived from config/member-tools.ts so a
+  // tool cannot be declared without its host being allowed. No `default-src` is declared:
+  // naming it would make every unnamed directive restrictive at once (see the block
+  // comment above).
+  `frame-src ${[...memberToolOrigins, turnstileChallengeOrigin].join(" ")}`,
 ].join("; ");
 
 /**
@@ -82,6 +103,17 @@ const legacyPatternRedirects: LegacyRedirect[] = [
   {source: "/category/:path*", destination: "/news", permanent: true},
   {source: "/element_category/:path*", destination: "/", permanent: true},
 ];
+
+function isCanonicalCutoverUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    // Match the configured site URL, including scheme and root path. A hostname
+    // containing hkwtia.org is not evidence that the canonical domain is live.
+    return new URL(value).href === "https://hkwtia.org/";
+  } catch {
+    return false;
+  }
+}
 
 // Must stay in sync with the prefixes matched by legacyPatternRedirects above —
 // this is what keeps legacyLiteralRedirects from double-covering the same url.
@@ -153,13 +185,41 @@ const nextConfig: NextConfig = {
     return [{source: "/:path*", headers: [...securityHeaders]}];
   },
   async redirects() {
-    return [
+    // The two explicit rules pre-date the programme and stay as they are; the WiseTech design
+    // rules are generated from the manifest (config/wisetech-redirects.ts) and go before the
+    // hkwtia.org legacy list so a design path is never swallowed by a legacy pattern.
+    // Phase B2 (D-11) removed the temporary `/members` and `/members/:id` 307s to `/showcase`:
+    // `/members` and `/members/[slug]` are real reviewed member pages now, and a redirect here
+    // would shadow them for every request.
+    const explicitRedirects = [
       {source: "/projects", destination: "/programs/asa", permanent: true},
       {source: "/history", destination: "/about", permanent: true},
-      {source: "/members", destination: "/showcase", permanent: false},
-      {source: "/members/:id", destination: "/showcase", permanent: false},
+    ];
+    // Copied, not spread as-is: the generator returns frozen rules so no consumer can mutate
+    // the shared list, but Next's load-custom-routes reassigns `r.source`/`r.destination` in
+    // place on every rule it receives (basePath prefixing, unconditionally), and a frozen rule
+    // fails `next build` with "Cannot assign to read only property 'source'".
+    const designRedirects = wisetechDesignRedirects(explicitRedirects)
+      .map((rule) => ({...rule}));
+    // Only once NEXT_PUBLIC_SITE_URL says the cutover has happened. Shipped unconditionally
+    // this would send every visitor to a WordPress site that no longer expects them, with no
+    // way back except a deploy. Gated, it is inert until the env var flips and instant when
+    // it does. Pinned by tests/unit/redirects.test.ts.
+    const cutoverDone = isCanonicalCutoverUrl(process.env.NEXT_PUBLIC_SITE_URL);
+    const hostRedirects = cutoverDone
+      ? [{
+          source: "/:path*",
+          has: [{type: "host" as const, value: "hkwtia.vercel.app"}],
+          destination: "https://hkwtia.org/:path*",
+          permanent: true,
+        }]
+      : [];
+    return [
+      ...explicitRedirects,
+      ...designRedirects,
       ...legacyPatternRedirects,
       ...legacyLiteralRedirects,
+      ...hostRedirects,
     ];
   },
 };

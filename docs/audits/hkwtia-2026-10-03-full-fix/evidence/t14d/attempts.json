@@ -1,0 +1,60 @@
+{
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "attempts": [
+    {
+      "label": "Manual browser RED setup1",
+      "privateLog": ".playwright/full-fix-t14d-manual-native-red.log",
+      "result": "build byte/EOL proof guard refused; not behavioural RED"
+    },
+    {
+      "label": "Manual browser RED setup2",
+      "privateLog": ".playwright/full-fix-t14d-manual-native-red2.log",
+      "result": "undefined label selected both check-in/resend forms; not behavioural RED"
+    },
+    {
+      "label": "Manual browser genuine RED3",
+      "privateLog": ".playwright/full-fix-t14d-manual-native-red3.log",
+      "result": "EN/HK unsafe generic retry recovery instead of unknown reconciliation; actual staff Auth and built original app"
+    },
+    {
+      "label": "First full",
+      "privateLog": ".playwright/full-fix-t14d-full.log",
+      "result": "6634PASS/20FAIL/517SKIP; obsolete SQL fakes and unsafe network-retry positives updated; no provider acceptance fabricated"
+    },
+    {
+      "label": "Legacy fixture followup",
+      "privateLog": ".playwright/full-fix-t14d-legacy-contract-green.log",
+      "result": "70PASS/1FAIL command-index assertion; final119PASS/0skip including48 actualPG restored all behaviours"
+    },
+    {
+      "label": "Synthetic field setup",
+      "result": "Earlier missing auth_user_id/consent_marketing/contacts.source and campaign approval fixture are setup errors; corrected with actual second-person review repository API and actual Auth identity linkage"
+    }
+  ],
+  "production": false,
+  "nativeMissingPreviewHarness": {
+    "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "passed": 4,
+    "failed": 2,
+    "target": "manual pass resend returned queued rather than explicit test transport accepted",
+    "cause": "Owned local NODE_ENV=production harness omitted VERCEL_ENV=preview; parseEmailEnv correctly required production RESEND_API_KEY. The harness deletes real provider credentials.",
+    "classification": "HARNESS_CONFIGURATION_NOT_PRODUCT_RED",
+    "fix": "Set VERCEL_ENV=preview for this positively isolated test-sink runtime; preserve production secret guard."
+  },
+  "remoteClock": {
+    "dbAheadMs": 1135,
+    "initialManualOutcome": "queued with attempt_count=0",
+    "fix": "Native poll repeats only unchanged known-unsent intent, preserving due-at/lease and status semantics.",
+    "productChange": false
+  },
+  "refundedUi": {
+    "cause": "Existing attendee policy removes refunded paid-order rows after server revalidation",
+    "finalAssertion": "Resend form absent; no new outbox row; existing PG/action denial also covered",
+    "productChange": false
+  },
+  "nativeTranslationTypo": {
+    "classification": "SETUP_NOT_BEHAVIOURAL_RED",
+    "cause": "noMatches instead of existing attendeeNoMatches",
+    "corrected": true
+  }
+}

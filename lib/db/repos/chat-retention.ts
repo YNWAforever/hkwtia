@@ -82,7 +82,32 @@ async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
 }
 
 function conciergeConversationPredicate(): SQL {
-  return sql.raw('"conversation"."agent_kind" = \'concierge\'');
+  // Phase C1 S-10 narrowed this to bot-handled threads. A `messages` row used to
+  // be a bot transcript artefact; once staff reply from /admin/inbox it is an
+  // operational record with an audit_events row pointing at it, and this sweep
+  // would delete a live staff↔member thread from the front on a rolling twelve
+  // months — taking the delivery record, and the metadata.normalizedSender that
+  // is the only cleartext copy of an anonymous sender's number, with it. The
+  // retention rule for human-handled threads is a separate decision (O-5), not
+  // an inheritance.
+  return sql.raw(
+    '"conversation"."agent_kind" = \'concierge\' AND "conversation"."handling" = \'bot\'',
+  );
+}
+
+/**
+ * The same exemption for the sites that spell their own
+ * `agent_kind = 'concierge'` out rather than reaching for the helper above —
+ * the three sub-selects of `inspect` and both halves of the empty-conversation
+ * sweep. Unquoted to match the local style of those statements: the helper is
+ * quoted,
+ * and swapping it in there instead would silently retire the
+ * `agent_kind = 'concierge'` assertions tests/unit/chat-retention.test.ts
+ * anchors on the unquoted spelling — a passing test that had stopped testing
+ * anything, which is the failure mode AGENTS.md calls out.
+ */
+function botHandledOnly(): SQL {
+  return sql.raw("conversation.handling = 'bot'");
 }
 
 export function createChatRetentionRepository(
@@ -105,6 +130,13 @@ export function createChatRetentionRepository(
           SELECT conversation.id
           FROM ${conversations} AS conversation
           WHERE conversation.agent_kind = 'concierge'
+            -- S-10, and here for the same reason as in the batches below: a dry
+            -- run that counts rows the sweep then refuses to touch reads as a
+            -- stuck job rather than as a deliberate exemption. (Keep the wording
+            -- clear of the two mutation verbs: tests/unit/chat-retention.test.ts
+            -- proves this statement reads and never writes by asserting neither
+            -- appears anywhere in it.)
+            AND ${botHandledOnly()}
             AND conversation.expires_at <= ${now}
             AND NOT EXISTS (
               SELECT 1
@@ -120,6 +152,7 @@ export function createChatRetentionRepository(
             INNER JOIN ${conversations} AS conversation
               ON conversation.id = transcript.conversation_id
             WHERE conversation.agent_kind = 'concierge'
+              AND ${botHandledOnly()}
               AND transcript.created_at < ${cutoff}
           ) AS messages,
           (
@@ -130,6 +163,7 @@ export function createChatRetentionRepository(
             LEFT JOIN post_delete_empty_conversations AS candidate
               ON candidate.id = run.conversation_id
             WHERE conversation.agent_kind = 'concierge'
+              AND ${botHandledOnly()}
               AND run.summary IS NOT NULL
               AND (
                 run.created_at < ${cutoff}
@@ -212,6 +246,10 @@ export function createChatRetentionRepository(
           SELECT conversation.id
           FROM ${conversations} AS conversation
           WHERE conversation.agent_kind = 'concierge'
+            -- S-10. A human-handled thread with no messages left is still the
+            -- row an audit_events entry and an assignment point at; deleting it
+            -- here would orphan both.
+            AND ${botHandledOnly()}
             AND conversation.expires_at <= ${now}
             AND NOT EXISTS (
               SELECT 1
@@ -247,6 +285,11 @@ export function createChatRetentionRepository(
           DELETE FROM ${conversations} AS conversation
           WHERE conversation.id = ANY(${ids}::uuid[])
             AND conversation.agent_kind = 'concierge'
+            -- Re-checked at the DELETE, not merely at the candidate SELECT: the
+            -- rows were chosen FOR UPDATE SKIP LOCKED in the same transaction,
+            -- but this statement is the one that destroys them and every other
+            -- predicate is repeated here for the same reason (S-10).
+            AND ${botHandledOnly()}
             AND NOT EXISTS (
               SELECT 1
               FROM ${messages} AS transcript

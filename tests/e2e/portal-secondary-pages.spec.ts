@@ -11,7 +11,7 @@ for (const locale of locales) {
       const response = await page.goto(`${locale.prefix}/portal/${path}`);
       expect(response?.status()).toBeLessThan(400);
       const url = new URL(page.url());
-      expect(url.pathname).toBe(`${locale.prefix}/join` || "/join");
+      expect(url.pathname).toBe(`${locale.prefix}/member-login` || "/member-login");
       expect(["/portal", `/portal/${path}`]).toContain(url.searchParams.get("next"));
       await expect(page.locator("html")).toHaveAttribute("lang", locale.lang);
     });

@@ -20,6 +20,7 @@ export type StartJoinResult = Readonly<{
 const defaultApplications = applicationsRepository as unknown as {
   getById: (actor: Actor, applicationId: string) => Promise<JoinApplication | null>;
   create: (actor: Actor, input: Record<string, unknown>) => Promise<JoinApplication>;
+  resumeOrCreate?: (actor: Actor, input: {planCode: JoinApplication["planCode"]; companyId: string | null; newApplication: boolean}) => Promise<JoinApplication>;
 };
 const defaultProfiles = profilesRepository as unknown as {
   ensure: (actor: Actor, input: {id: string; displayName: string; onboardingState?: string}) => Promise<unknown>;
@@ -38,7 +39,7 @@ function stepForApplication(application: JoinApplication): JoinStep {
 }
 
 /** Begin or resume an actor-scoped membership application. */
-export async function startJoin(
+export async function resumeOrStartJoin(
   actor: Actor,
   rawInput: JoinInput | Record<string, unknown>,
   dependencies?: JoinDependencies,
@@ -51,8 +52,9 @@ export async function startJoin(
   if (input.applicationId) {
     if (actor.kind === "anonymous") throw new Error("UNAUTHORIZED");
     const existing = await applications.getById(actor, input.applicationId);
-    if (!existing) throw new Error("APPLICATION_NOT_FOUND");
+    if (!existing || actor.kind !== "member" || existing.applicantUserId !== actor.profileId) throw new Error("APPLICATION_NOT_FOUND");
     if (existing.planCode !== plan.code) throw new Error("APPLICATION_PLAN_MISMATCH");
+    if (input.companyId && existing.companyId !== input.companyId) throw new Error("APPLICATION_COMPANY_MISMATCH");
     return {applicationId: existing.id, next: stepForApplication(existing)};
   }
 
@@ -62,13 +64,13 @@ export async function startJoin(
 
   if (actor.kind !== "member") throw new Error("UNAUTHORIZED");
   if (profiles) await profiles.ensure(actor, {id: actor.profileId, displayName: actor.profileId, onboardingState: "profile"});
-  const application = await applications.create(actor, {
-    planCode: plan.code,
-    currentStep: "profile",
-    status: "draft",
-  });
-  return {applicationId: application.id, next: "profile"};
+  const application = applications.resumeOrCreate
+    ? await applications.resumeOrCreate(actor, {planCode: plan.code, companyId: input.companyId, newApplication: input.newApplication})
+    : await applications.create(actor, {planCode: plan.code, ...(input.companyId ? {companyId: input.companyId} : {}), currentStep: "profile", status: "draft"});
+  return {applicationId: application.id, next: stepForApplication(application)};
 }
+
+export const startJoin = resumeOrStartJoin;
 
 export {completeApplication, getPlan};
 export type {JoinInput};

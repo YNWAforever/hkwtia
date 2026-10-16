@@ -3,9 +3,13 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {
   AutomationDashboardView,
   type AutomationDashboardLabels,
+  type JobHealthLabels,
 } from "@/components/admin/automation-dashboard";
+import {InternalPageHeader} from "@/components/internal-shell/page-header";
 import type {AppLocale} from "@/i18n/routing";
 import {retryAutomationAction} from "@/lib/admin/automation-actions";
+import {JOB_HEALTH_REASON_CODES, readJobHealth} from "@/lib/jobs/health";
+import {HEALTH_JOB_KEYS} from "@/lib/jobs/health-registry";
 import {getAutomationDashboard} from "@/lib/admin/automations";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 
@@ -23,15 +27,12 @@ export default async function AdminAutomationsPage({
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
   const query = await searchParams;
-  const dashboard = await getAutomationDashboard(actor, query);
+  const [dashboard,health] = await Promise.all([getAutomationDashboard(actor, query),readJobHealth(actor)]);
   const t = await getTranslations({
     locale,
     namespace: "Admin.automations",
   });
   const labels: AutomationDashboardLabels = {
-    eyebrow: t("eyebrow"),
-    title: t("title"),
-    description: t("description"),
     evaluatedAt: t("evaluatedAt"),
     countsLabel: t("countsLabel"),
     due: t("due"),
@@ -60,16 +61,24 @@ export default async function AdminAutomationsPage({
     retryValidation: t("retryValidation"),
     retryUnavailable: t("retryUnavailable"),
     retryError: t("retryError"),
+    retryReconciliation: t("retryReconciliation"),
     notAvailable: t("notAvailable"),
     next: t("next"),
   };
 
+  const h=await getTranslations({locale,namespace:"Admin.jobHealth"});
+  const healthLabels:JobHealthLabels={heading:h("heading"),description:h("description"),job:h("job"),state:h("state"),reason:h("reason"),reasons:Object.fromEntries(JOB_HEALTH_REASON_CODES.map(key=>[key,h(`reasons.${key}`)])) as JobHealthLabels["reasons"],lastStarted:h("lastStarted"),lastSuccess:h("lastSuccess"),nextExpected:h("nextExpected"),oldestPending:h("oldestPending"),failed:h("failed"),uncertain:h("uncertain"),deployment:h("deployment"),unobserved:h("unobserved"),states:{healthy:h("states.healthy"),degraded:h("states.degraded"),disabled:h("states.disabled"),unknown:h("states.unknown")},jobs:Object.fromEntries(HEALTH_JOB_KEYS.map(key=>[key,h(`jobs.${key}`)]))};
   return (
-    <AutomationDashboardView
-      action={retryAutomationAction}
-      dashboard={dashboard}
-      labels={labels}
-      locale={locale}
-    />
+    <div className="space-y-8">
+      <InternalPageHeader description={t("description")} eyebrow={t("eyebrow")} title={t("title")}/>
+      <AutomationDashboardView
+        action={retryAutomationAction}
+        dashboard={dashboard}
+        health={health}
+        healthLabels={healthLabels}
+        labels={labels}
+        locale={locale}
+      />
+    </div>
   );
 }

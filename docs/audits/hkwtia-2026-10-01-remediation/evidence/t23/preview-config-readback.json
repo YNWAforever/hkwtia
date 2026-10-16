@@ -1,0 +1,117 @@
+{
+  "observedAt": "2026-10-02T21:39:16.424Z",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "branch": "codex/full-remediation-acceptance-20261001",
+  "production": false,
+  "mutations": 0,
+  "flags": [
+    {
+      "name": "ADMIN_BATCH_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBER_IMPORT_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBER_EXPORT_ENABLED",
+      "value": false
+    },
+    {
+      "name": "EVENT_ATTENDEE_EXPORT_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBERSHIP_GRANTS_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBERSHIP_GRANT_BATCH_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBERSHIP_COMPANY_GRANTS_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBER_COMMUNICATION_BATCH_ENABLED",
+      "value": false
+    },
+    {
+      "name": "TICKET_RESEND_BATCH_ENABLED",
+      "value": false
+    },
+    {
+      "name": "MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED",
+      "value": false
+    },
+    {
+      "name": "PAYMENT_RECONCILIATION_ENABLED",
+      "value": false
+    },
+    {
+      "name": "CMS_SERVER_DRAFTS_ENABLED",
+      "value": false
+    },
+    {
+      "name": "AGENTS_ENABLED",
+      "value": false
+    },
+    {
+      "name": "AUTH_GOOGLE_ENABLED",
+      "value": false
+    }
+  ],
+  "matched": [
+    {
+      "name": "DATABASE_URL",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "NEON_PROJECT_ID",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "NEON_AUTH_BASE_URL",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "NEON_AUTH_COOKIE_SECRET",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "RATE_LIMIT_KEY_SECRET",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "STRIPE_WEBHOOK_SECRET",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "STRIPE_STARTUP_PRICE_ID",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "STRIPE_CORPORATE_PRICE_ID",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "R2_BUCKET",
+      "equalToConfirmedIsolatedLocal": true
+    },
+    {
+      "name": "R2_JURISDICTION",
+      "equalToConfirmedIsolatedLocal": true
+    }
+  ],
+  "emailMode": "test sink",
+  "whatsappLive": false,
+  "workerPaused": true,
+  "stripeMode": "test",
+  "valuesLogged": false,
+  "credentialsTransmitted": false
+}

@@ -9,6 +9,32 @@ export type ReportCardLabels = Readonly<{
   numerator: string; denominator: string; unavailable: string;
 }>;
 
+/**
+ * `Admin.reports.period` ("{from} – {to} ({timezone})") is interpolated with three manual
+ * `.replace()` calls below, not by next-intl -- so the page must read it with `t.raw`, not `t`.
+ * `t` parses ICU MessageFormat, and each of `{from}`/`{to}`/`{timezone}` looks exactly like an ICU
+ * argument nobody ever passed a value for; next-intl's development build throws a
+ * `FORMATTING_ERROR` for the first one it hits and falls back to the bare message key
+ * ("Admin.reports.period") as the rendered period line. Production builds happen to leave the
+ * string untouched instead, which is why this went unnoticed in `next build`, but that is an
+ * accident of next-intl's internal fast path for messages no formatted (plural/select/number/date)
+ * construct shares with these bare arguments, not a documented contract -- see the identical
+ * reasoning for `Admin.media`/`Admin.news`'s `archiveInUse` in `lib/admin/archive-toggle-labels.ts`.
+ *
+ * `t.raw` returns the bundle string untouched, but untouched means untyped -- a missing or
+ * reshaped key hands this an `undefined`, an object, or a string missing one of the three
+ * placeholders. The fallback below is the bare templates alone, locale-neutral, so a degraded
+ * period line still shows all three values in order rather than silently dropping one.
+ */
+export const FALLBACK_REPORT_PERIOD = "{from} {to} {timezone}";
+
+/** Guards the one contract `period` has with this component: a string containing `{from}`, `{to}` and `{timezone}`. */
+export function toReportPeriodMessage(value: unknown): string {
+  return typeof value === "string" && value.includes("{from}") && value.includes("{to}") && value.includes("{timezone}")
+    ? value
+    : FALLBACK_REPORT_PERIOD;
+}
+
 type CardProps = Readonly<{id: string; title: string; description: string; value?: string; period: string; children?: React.ReactNode}>;
 
 function ReportCard({id, title, description, value, period, children}: CardProps) {

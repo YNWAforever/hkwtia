@@ -22,6 +22,18 @@ export type WoztellDeliveryDependencies = Readonly<{
     deliveryId: string,
     providerId: string,
   ) => Promise<void>;
+  /**
+   * C-1 Task 10. The jsonb outbox records the provider id against the INBOUND
+   * row, so until this existed no outbound row anywhere carried one and
+   * `recordDeliveryStatus` — which reaches a row by its provider id — matched
+   * nothing for every bot reply. Optional, like the rest of this bag;
+   * `tests/unit/woztell-production-wiring.test.ts` is what makes "optional" mean
+   * "the fixtures stay green" rather than "production forgot it".
+   */
+  stampOutbound?: (input: Readonly<{
+    inboundProviderMessageId: string;
+    providerId: string;
+  }>) => Promise<Readonly<{stamped: boolean}>>;
   markDeliveryRetryable?: (deliveryId: string) => Promise<void>;
   markDeliveryUncertain?: (deliveryId: string) => Promise<void>;
   markDeliveryBlocked?: (deliveryId: string) => Promise<void>;
@@ -71,6 +83,29 @@ async function reservation(
     kind,
     idempotencyKey,
   });
+}
+
+/**
+ * S-5: a stamp applied AFTER the outbox has decided, never a second decision.
+ *
+ * The `.catch` is deliberate and this is its reason: `markDeliverySent` is the
+ * ledger the four pinned outbox integration tests exercise and the thing that
+ * decides whether the concierge may send this reply again. The stamp is
+ * bookkeeping on the outbound row so the inbox can show a tick. If it fails we
+ * lose the tick; if it were allowed to throw here it would turn a message the
+ * member has already received into `channel_delivery_uncertain` and a staff
+ * escalation, and — worse — leave the outbox saying "accepted" while the caller
+ * believes the send failed.
+ */
+async function stampOutboundRow(
+  dependencies: WoztellDeliveryDependencies,
+  inboundProviderMessageId: string,
+  providerId: string,
+): Promise<void> {
+  await dependencies.stampOutbound?.({
+    inboundProviderMessageId,
+    providerId,
+  }).catch(() => undefined);
 }
 
 async function escalateTerminal(
@@ -142,6 +177,11 @@ export async function deliverWoztellReply(
         sessionReservation.deliveryId,
         session.providerId,
       );
+      await stampOutboundRow(
+        dependencies,
+        input.providerMessageId,
+        session.providerId,
+      );
       await input.complete();
       return {status: "accepted"};
     }
@@ -209,6 +249,11 @@ export async function deliverWoztellReply(
   }
   await dependencies.markDeliverySent?.(
     templateReservation.deliveryId,
+    templateResult.providerId,
+  );
+  await stampOutboundRow(
+    dependencies,
+    input.providerMessageId,
     templateResult.providerId,
   );
   await input.complete();

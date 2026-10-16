@@ -1,0 +1,17 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {Pool} from 'pg';
+import {request} from '@playwright/test';
+const binding=JSON.parse(await readFile('.playwright/partner-production-db.json','utf8'));
+const state=JSON.parse(await readFile('.playwright/partner-production-import-state.json','utf8'));
+const deployed=JSON.parse(await readFile('.playwright/partner-production-verified-deployment.json','utf8'));
+if(new URL(binding.DATABASE_URL).hostname!=='ep-steep-wind-ao0pbldw-pooler.c-2.ap-southeast-1.aws.neon.tech'||state.phase!=='imported-unpublished'||state.partnerIds.length!==79||deployed.deploymentId!=='dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV')throw Error('CANONICAL_MEDIA_PROBE_GUARD');
+const pool=new Pool({connectionString:binding.DATABASE_URL});const client=await request.newContext();
+try{
+ const row=(await pool.query('SELECT m.id,m.checksum_sha256,m.byte_size FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE p.id=$1',[state.partnerIds[0]])).rows[0];
+ const response=await client.get('https://hkwtia.vercel.app/api/media/'+row.id,{timeout:45000});const bytes=await response.body();
+ const evidence={recordedAt:new Date().toISOString(),origin:'https://hkwtia.vercel.app',deploymentId:deployed.deploymentId,sourceCommit:deployed.sourceCommit,status:response.status(),contentType:response.headers()['content-type'],byteLengthMatches:bytes.length===row.byte_size,checksumMatches:createHash('sha256').update(bytes).digest('hex')===row.checksum_sha256,applicationSessionIncluded:false,partnersStillUnpublished:true};
+ evidence.passed=evidence.status===200&&evidence.contentType==='image/png'&&evidence.byteLengthMatches&&evidence.checksumMatches;
+ await writeFile('.playwright/partner-production-canonical-before-publish-media.json',JSON.stringify(evidence,null,2)+'\n');
+ console.log(JSON.stringify(evidence));if(!evidence.passed)process.exitCode=1;
+}finally{await client.dispose();await pool.end()}

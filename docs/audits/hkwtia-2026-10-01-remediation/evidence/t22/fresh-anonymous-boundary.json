@@ -1,0 +1,40 @@
+{
+  "initialCookieCount": 0,
+  "facts": [
+    {
+      "route": "/admin/inbox",
+      "status": 200,
+      "pathname": "/admin-login",
+      "lang": "en",
+      "emailForms": 1,
+      "loginHeading": 1,
+      "accessDeniedHeading": 0,
+      "authUserPresent": false,
+      "adminSidebar": 0
+    },
+    {
+      "route": "/admin/templates",
+      "status": 200,
+      "pathname": "/admin-login",
+      "lang": "en",
+      "emailForms": 1,
+      "loginHeading": 1,
+      "accessDeniedHeading": 0,
+      "authUserPresent": false,
+      "adminSidebar": 0
+    },
+    {
+      "route": "/admin/contacts",
+      "status": 200,
+      "pathname": "/admin-login",
+      "lang": "en",
+      "emailForms": 1,
+      "loginHeading": 1,
+      "accessDeniedHeading": 0,
+      "authUserPresent": false,
+      "adminSidebar": 0
+    }
+  ],
+  "providerSends": 0,
+  "paymentWrites": 0
+}

@@ -1,0 +1,9 @@
+{
+  "sourceBaseSha": "f7599e89",
+  "sourceRelation": "working tree header focus guard",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/site-header-streaming.test.tsx tests/unit/public-layout-announcement.test.tsx tests/unit/dual-brand-lockup.test.tsx",
+  "pass": 8,
+  "fail": 0,
+  "skip": 0,
+  "production": false
+}

@@ -1,0 +1,74 @@
+{
+  "scope": "confirmed isolated Neon/Auth; synthetic data; Stripe TEST; email test sink",
+  "production": false,
+  "run": "cb8aeb61-fc38-4e4d-8961-ab56f895a22c",
+  "steps": [
+    {
+      "case": "async-refund-success",
+      "refundReference": "bc16e42ba5dcd665",
+      "providerInitial": "pending",
+      "providerFinal": "succeeded",
+      "appInitial": "paid",
+      "appFinal": "refunded",
+      "refundCount": 1,
+      "finalAuditCount": 1,
+      "actualSignedCallback": true,
+      "replayed": true,
+      "notification": "durable outbox; delivery verified separately"
+    },
+    {
+      "case": "async-refund-failure",
+      "refundReference": "b7d938f13a5edefd",
+      "providerInitial": "succeeded",
+      "providerFinal": "failed",
+      "appInitial": "refunded",
+      "appFinal": "refund_failed",
+      "refundCount": 1,
+      "finalAuditCount": 1,
+      "actualSignedCallback": true,
+      "replayed": true,
+      "notification": "durable outbox; delivery verified separately"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventReference": "1b01d0bfd46089ef",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "931d0fce89007f9c",
+      "type": "refund.updated",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "931d0fce89007f9c",
+      "type": "refund.updated",
+      "http": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "eventReference": "40964e9aa2f63d5d",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "ae6205a282ed7b2d",
+      "type": "refund.failed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "ae6205a282ed7b2d",
+      "type": "refund.failed",
+      "http": 200,
+      "outcome": "duplicate"
+    }
+  ],
+  "runtimeDiagnostics": [],
+  "scopeCases": "actual asynchronous refunds only; baseline payment/notice receipt retained separately",
+  "completed": true
+}

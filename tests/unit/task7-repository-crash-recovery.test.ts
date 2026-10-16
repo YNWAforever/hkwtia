@@ -129,9 +129,9 @@ describe("Task 7 repository crash-recovery contracts", () => {
     await expect(repo.retryEmailFailure(
       cronActor,
       String(processing.id),
-      "retryable_network",
+      "retryable_rate_limit",
     )).resolves.toMatchObject({
-      failureCode: "retryable_network",
+      failureCode: "retryable_rate_limit",
       record: {
         status: "processing", attemptCount: 2, errorCode: null,
       },
@@ -172,7 +172,7 @@ describe("Task 7 repository crash-recovery contracts", () => {
     })]]);
     const repo = createCampaignRecipientDeliveryRepository(async () => fake.database);
 
-    await expect(repo.claimRecipients(cronActor, now, 1, 300_000))
+    await expect(repo.claimRecipients(cronActor, now, 1, 300_000, "email"))
       .resolves.toMatchObject([{claimSource: expectedSource}]);
 
     const command = fake.commands[0]?.sql.replace(/\s+/g, " ");

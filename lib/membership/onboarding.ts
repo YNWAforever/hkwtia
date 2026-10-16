@@ -1,13 +1,18 @@
 import "server-only";
 
 import type {Actor} from "@/lib/membership/lifecycle";
+import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {enrollActivatedMembership} from "@/lib/automation/enrollment";
+import {flipContactOnActivation} from "@/lib/membership/contact-member-flip";
+import {contactsRepository} from "@/lib/db/repos/contacts";
 import {journeysRepository, type JourneysRepository} from "@/lib/db/repos/journeys";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {resolveMembershipOption} from "@/lib/membership/catalog";
+import {billingEnv} from "@/lib/config/env";
 import {
   completeApplicationSchema,
   type CompanyInput,
@@ -15,6 +20,8 @@ import {
   type JoinInput,
   type ProfileInput,
 } from "@/lib/membership/join-schema";
+
+type ContactFlipRepository = {markMemberForProfile(actor: Actor, profileId: string): Promise<unknown>};
 
 export type JoinStep = "profile" | "company" | "checkout" | "complete" | "review";
 
@@ -42,6 +49,7 @@ export type JoinMembership = {
 type ApplicationRepository = {
   getById: (actor: Actor, applicationId: string) => Promise<JoinApplication | null>;
   create: (actor: Actor, input: Record<string, unknown>) => Promise<JoinApplication>;
+  resumeOrCreate?: (actor: Actor, input: {planCode: PlanCode; companyId: string | null; newApplication: boolean}) => Promise<JoinApplication>;
   update: (actor: Actor, applicationId: string, input: Record<string, unknown>) => Promise<JoinApplication | null>;
   setCompany?: (actor: Actor, applicationId: string, companyId: string) => Promise<JoinApplication | null>;
 };
@@ -65,6 +73,7 @@ export type JoinDependencies = {
   companies?: CompanyRepository;
   memberships?: MembershipRepository;
   journeys?: Pick<JourneysRepository, "enroll">;
+  contacts?: ContactFlipRepository;
   now?: () => Date;
   repositories?: {
     applications?: ApplicationRepository;
@@ -77,12 +86,13 @@ export type JoinDependencies = {
   readonly [key: string]: unknown;
 };
 
-const defaultDependencies: Required<Pick<JoinDependencies, "applications" | "profiles" | "companies" | "memberships" | "journeys" | "now">> = {
+const defaultDependencies: Required<Pick<JoinDependencies, "applications" | "profiles" | "companies" | "memberships" | "journeys" | "contacts" | "now">> = {
   applications: applicationsRepository as unknown as ApplicationRepository,
   profiles: profilesRepository as unknown as ProfileRepository,
   companies: companiesRepository as unknown as CompanyRepository,
   memberships: membershipsRepository as unknown as MembershipRepository,
   journeys: journeysRepository,
+  contacts: contactsRepository as ContactFlipRepository,
   now: () => new Date(),
 };
 
@@ -112,6 +122,8 @@ function dependencies(input?: JoinDependencies) {
     companies: custom ? input?.companies ?? input?.repositories?.companies : defaultDependencies.companies,
     memberships: input?.memberships ?? input?.repositories?.memberships ?? defaultDependencies.memberships,
     journeys: custom ? input?.journeys ?? input?.repositories?.journeys : defaultDependencies.journeys,
+    // Like journeys: injected deps opt out unless they bring their own.
+    contacts: custom ? input?.contacts : defaultDependencies.contacts,
     now: input?.now ?? defaultDependencies.now,
   };
 }
@@ -156,7 +168,7 @@ async function loadOrCreateApplication(
 ): Promise<JoinApplication> {
   if (input.applicationId) {
     const existing = await deps.applications.getById(actor, input.applicationId);
-    if (!existing) throw new Error("APPLICATION_NOT_FOUND");
+    if (!existing || existing.applicantUserId !== actor.profileId) throw new Error("APPLICATION_NOT_FOUND");
     if (existing.planCode !== input.plan) throw new Error("APPLICATION_PLAN_MISMATCH");
     if (companyId && existing.companyId && existing.companyId !== companyId) throw new Error("APPLICATION_COMPANY_MISMATCH");
     if (companyId && !existing.companyId) {
@@ -237,6 +249,14 @@ export async function completeApplication(
   const input = completeApplicationSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
   const plan = getPlan(input.plan);
+  // Validate (planCode, billingInterval) against the membership catalog before touching
+  // profile, company, application, or membership state -- a missing, duplicated, or
+  // unsupported interval must fail closed before any write.
+  const catalogEnvironment = plan.billingBehavior === "checkout"
+    ? billingEnv()
+    : {stripeStartupPriceId: "", stripeCorporatePriceId: ""};
+  const membershipOption = resolveMembershipOption(plan.code, input.billingInterval, catalogEnvironment);
+  if (!membershipOption.available) throw new Error("UNSUPPORTED_BILLING_INTERVAL");
   await ensureProfile(actor, input.profile, deps);
   const companyId = await validateCompanyTarget(actor, plan.code, input.company, deps);
   const application = await loadOrCreateApplication(actor, input, companyId, deps);
@@ -261,6 +281,7 @@ export async function completeApplication(
   if (application.status === "pending_review") return {applicationId: application.id, next: "review"};
   if (application.status === "pending_payment") return {applicationId: application.id, next: "checkout"};
 
+  await requirePolicyAcceptanceForApplication(actor,application.id);
   const target = companyId ? {ownerUserId: null, companyId} : {ownerUserId: actor.profileId, companyId: null};
   const membershipStatus = plan.billingBehavior === "free" ? "active" : plan.billingBehavior === "review" ? "pending_review" : "pending_payment";
   const membership = await createMembershipOnce(actor, application.id, {
@@ -268,8 +289,16 @@ export async function completeApplication(
     planCode: plan.code,
     status: membershipStatus,
     seatLimit: plan.seatAllowance,
+    // The interval the catalog resolver just confirmed real for this (planCode, priceReference)
+    // pair -- not re-derived here. See the resolveMembershipOption() call above.
+    billingInterval: membershipOption.billingInterval,
   }, deps);
   const result = resultForMembership(application, membership);
+  if (membership.status === "active" && deps.contacts) {
+    // Free tiers go active here, so this is their activation point (paid ones: the Stripe webhook).
+    const contacts = deps.contacts;
+    await flipContactOnActivation(() => contacts.markMemberForProfile(actor, actor.profileId), membership.id);
+  }
   if (membership.status === "active" && deps.journeys) {
     await enrollActivatedMembership(
       actor.profileId,

@@ -25,6 +25,12 @@ describe("page copy form action core", () => {
     })).resolves.toEqual({status: "success", message: "No changes to save."});
   });
 
+  it("returns the committed revision so a saved editor can submit another change", async () => {
+    await expect(runPageCopyFormAction({}, new FormData(), {
+      ...messages, mutate: async () => ({updated: 1, cleared: 0, revision: "a".repeat(64)}),
+    })).resolves.toEqual({status: "success", message: "Saved.", revision: "a".repeat(64)});
+  });
+
   it("maps a rejected key path to a field error", async () => {
     await expect(runPageCopyFormAction({}, new FormData(), {
       ...messages,
@@ -38,6 +44,14 @@ describe("page copy form action core", () => {
       message: "Check the highlighted fields.",
       fieldErrors: {[heading]: "Check the highlighted fields."},
     });
+  });
+
+  it("keeps a stale editor on the form with a specific conflict message", async () => {
+    const state = await runPageCopyFormAction({}, new FormData(), {
+      ...messages, conflictMessage: "Reload and compare.",
+      mutate: async () => {throw new Error("PAGE_COPY_EDIT_CONFLICT");},
+    });
+    expect(state).toEqual({status: "error", message: "Reload and compare."});
   });
 
   it("never leaks a domain error to the browser", async () => {

@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest";
 
 import {publicRoutes} from "@/config/public-routes";
 import en from "@/messages/en.json";
+import zhHK from "@/messages/zh-HK.json";
 import {
   pageCopyBundleValues,
   pageCopyCatalog,
@@ -15,6 +16,15 @@ import {
 } from "@/lib/i18n/page-copy-scope";
 
 describe("page copy scope", () => {
+  it.each(["selfService.title", "selfService.copy", "selfService.billing", "selfService.support"])("keeps structural membership recovery guidance out of CMS: %s", (keyPath) => {
+    expect(pageCopyCatalog("Membership").some(leaf => leaf.keyPath === keyPath)).toBe(false);
+    expect(pageCopyEnglishRejection({namespace: "Membership", keyPath, value: "Unsupported account promise"})).toBe("KEY_PATH_UNKNOWN");
+  });
+  it.each(["openNow.loading", "openNow.unavailable.title", "openNow.unavailable.copy"])("keeps runtime recovery copy out of CMS: %s", (keyPath) => {
+    expect(pageCopyCatalog("Home").some(leaf => leaf.keyPath === keyPath)).toBe(false);
+    expect(pageCopyEnglishRejection({namespace:"Home",keyPath,value:"False success"})).toBe("KEY_PATH_UNKNOWN");
+  });
+
   it("maps every editable namespace to at least one declared public route", () => {
     for (const namespace of pageCopyNamespaces) {
       const routes = pageCopyRoutes[namespace];
@@ -27,11 +37,21 @@ describe("page copy scope", () => {
     expect(Object.keys(pageCopyRoutes).sort()).toEqual([...pageCopyNamespaces].sort());
   });
 
+  it("revalidates /programmes on a Home save, not just the home page", () => {
+    // WP-7: /programmes prerenders Home.programmeShowcase's shared grid labels and is not
+    // force-dynamic, so a Home edit that only invalidated "/" would leave it stale.
+    expect(pageCopyRoutes.Home).toContain("/");
+    expect(pageCopyRoutes.Home).toContain("/programmes");
+  });
+
   it("keeps product UI and structural namespaces out of reach", () => {
     for (const namespace of ["LaunchPad", "AiOps", "Join", "Showcase", "Navigation", "Footer", "Metadata", "NotFound", "Error", "Admin", "Portal"]) {
       expect(isPageCopyNamespace(namespace), namespace).toBe(false);
     }
     expect(isPageCopyNamespace("Privacy")).toBe(true);
+    // WP-5: Footer itself stays excluded (structural), but one specific marketing
+    // string (the footer tagline) is editable via this new, narrowly-scoped namespace.
+    expect(isPageCopyNamespace("MarketingExtras")).toBe(true);
     expect(isPageCopyNamespace("__proto__")).toBe(false);
     expect(isPageCopyNamespace(undefined)).toBe(false);
   });
@@ -43,30 +63,135 @@ describe("page copy scope", () => {
     }
   });
 
+  it("gives every editable namespace an admin label in both bundles", () => {
+    // /admin/page-copy renders `t(`namespaces.${namespace}`)` for each entry, so a
+    // namespace without a label throws MISSING_MESSAGE and takes the page down. It
+    // has happened twice -- WP-5 added MarketingExtras and WP-7 added Programmes and
+    // Partners, both without labels -- because pageCopyRoutes is typed
+    // Record<PageCopyNamespace, ...> and so is checked by the compiler, while the
+    // label lives in a JSON bundle nothing checked at all.
+    for (const bundle of [{name: "en", messages: en}, {name: "zh-HK", messages: zhHK}]) {
+      const labels: Record<string, string> = bundle.messages.Admin.pageCopy.namespaces;
+      for (const namespace of pageCopyNamespaces) {
+        expect(labels[namespace], `${bundle.name}: Admin.pageCopy.namespaces.${namespace}`).toBeTruthy();
+      }
+      // A label left behind by a namespace that was removed is dead weight staff
+      // can never see, so hold the two sets equal rather than merely sufficient.
+      expect(Object.keys(labels).sort(), bundle.name).toEqual([...pageCopyNamespaces].sort());
+    }
+  });
+
   it("exposes the agreed editable surface and nothing more", () => {
     const sizes = pageCopyCatalogSizes();
 
     expect(sizes).toEqual({
-      // PR5 added the two editable partner-wall labels.
-      Home: 45,
+      // PR5 added the two editable partner-wall labels. WP-3 Task 2 added the 9
+      // editable hero fields (eyebrow/title/lead/imageAlt/note/discover plus the
+      // three hero actions) that components/home/hero.tsx reads. WP-3 Task 3 added
+      // the 8 editable Open Now fields (eyebrow/title/intro/statusLabel plus the
+      // empty-state title/copy and the two interest actions) that
+      // components/home/open-now.tsx reads. WP-3 Task 4 added 23 editable Pathways
+      // fields (eyebrow/title/intro plus title/copy/benefits/cta for each of the 5
+      // audience cards) that components/home/pathways.tsx reads. WP-3 Task 5 added
+      // 12 editable Events Journey fields (eyebrow/title/intro, title/copy for each
+      // of the 3 Before/During/After stages, plus statusLabel/emptyTitle/
+      // viewAllAction) that components/home/events-journey.tsx reads. WP-3 Task 6
+      // added 12 editable Market Products fields (eyebrow/title, plus label/title/
+      // copyEmpty/copyAvailable/action for each of the directory and marketplace
+      // panels) that components/home/market-products.tsx reads. WP-3 Task 7 added
+      // 9 editable Outcomes fields (eyebrow/title/intro/frameworkLabel/
+      // frameworkSteps/statusLabel/emptyTitle/emptyCopy/action) that
+      // components/home/outcomes.tsx reads. WP-3 Task 8 added 20 editable
+      // Ecosystem fields (eyebrow/title/intro/selectedLabel/enterAction, the 3
+      // focusAreas array elements, plus name/brief for each of the 6 industries)
+      // that components/home/ecosystem.tsx reads. WP-3 Task 9 added 16 editable
+      // Programme Showcase fields (eyebrow/title/intro/eventSeriesLabel/
+      // credentialLabel/editionsFact/credentialFact/action, plus name/description
+      // for each of the 4 programme cards) that components/home/
+      // programme-showcase.tsx reads. WP-3 Task 10 added 5 editable GBA Gateway
+      // fields (eyebrow/title/copy/openCohortAction/exploreAction) that
+      // components/home/gba-gateway.tsx reads. WP-3 Task 11 added 15 editable
+      // Impact Evidence fields (eyebrow/title/intro/sourceLabel/source/sourceLink,
+      // plus label/definition/period for each of the 3 metric tiles) that
+      // components/home/impact-evidence.tsx reads. WP-3 Task 12 added 5 editable
+      // Archive Stories fields (eyebrow/title/intro/galleryAction/captionLabel)
+      // that components/home/archive-stories.tsx reads. WP-3 Task 13 added 8
+      // editable Legacy Network fields (eyebrow/title/note/viewAllAction/
+      // previewNote, plus tabs.supporting/tabs.regional/tabs.media) that
+      // components/home/legacy-network.tsx reads. WP-3 Task 14 added 19 editable
+      // Conversion Paths fields (eyebrow/title/intro, plus label/title/copy/
+      // primaryAction/secondaryAction and the 3 points array elements for each of
+      // the membership and partnership panels) that
+      // components/home/conversion-paths.tsx reads. It is the last of the 13
+      // homepage sections.
+      // Task 15 retired the pre-WP-3 flat Home.* keys (eyebrow/title/question/summary/
+      // imageAlt/actions, highlightsTitle/highlightsIntro/highlights,
+      // featuresTitle/featuresIntro/features, partnerWallTitle/partnerWallIntro,
+      // programsTitle/programsIntro/programs, viewProgram -- 43 leaves) once page.tsx was
+      // rewritten as a composition of the 13 home/* sections and nothing referenced them
+      // any more, leaving the 2 metaTitle/metaDescription leaves plus the 13 sections'
+      // 161 editable fields already accounted for above (206 - 43 = 163).
+      // The 2026-10 experience pass made 22 more Home strings staff-editable: the route finder
+      // (pathways.legend/routeEyebrow/routeLead/primaryLabel = 4, plus label/copy for each of the
+      // 8 destinations = 16), hero.actions.findRoute (1) and openNow.recordLabel (1) --
+      // 166 + 22 = 188.
+      Home: 188,
       About: 19,
       Chairman: 8,
       Committees: 12,
-      // PR5 added 14 editable labels for the Contact concierge journeys.
-      Contact: 20,
+      // PR5 added 14 editable labels for the Contact concierge journeys. WP-4 Task 19 added 29
+      // more: breadcrumbCurrent, viewLabel, routes.about/routes.news (2 fields each, 4), and the
+      // new PreparedEmailForm's emailTopics (topicLabel/composeAction, plus label/subject/body
+      // for each of the 7 topics: 2 + 21 = 23) -- 8 + 21 = 29, so 20 + 29 = 49.
+      Contact: 49,
       // 12 for the four programmes' title/description/status, plus the 17
       // `programs.record` keys the programme records migration and PR3
-      // presentation added. Those are page furniture -- headings, and
-      // sentences with {agency}/{count} placeholders -- so staff can reword
-      // them. The facts they frame come from content/programs/*.ts, which
-      // /admin/page-copy cannot reach.
-      programs: 29,
-      // Static numeric pricing left copy, removing two editable fields.
-      Membership: 32,
-      Privacy: 46,
-      AiTransparency: 30,
+      // presentation added, plus 3 more for the WP-4 Task 15 `audience` field
+      // added to asa/hkict/tct, plus 9 more `programs.record` keys (eyebrow
+      // type labels, compass labels, the mailto ask, and the editions/
+      // credential facts) that Task 15's ProgrammeRecordPage header reads,
+      // plus 1 more for the WP-4 Task 16 `audience` field added to cpai --
+      // 29 + 3 + 9 + 1 = 42. Those are page furniture -- headings, and
+      // sentences with {agency}/{count}/{programme} placeholders -- so staff
+      // can reword them. The facts they frame come from content/programs/*.ts
+      // and lib/home/programme-summaries.ts, which /admin/page-copy cannot reach.
+      programs: 42,
+      // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
+      // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
+      // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
+      // dimensions x title/copy (24), first90.* (12: eyebrow/heading plus title/copy for each
+      // of 5 steps), and closing.* (5: eyebrow/title/copy/join/contact) -- 32 + 50 = 82.
+      // Phase A Task 1 (programme D-5) added tierBenefits.* -- the per-tier benefit
+      // lists rendered on the plan grid (community 3 + startup 4 + corporate 5 +
+      // patron 4 = 16 array elements) -- 82 + 16 = 98.
+      // Experience round 12 (2026-10-07) added breadcrumbCurrent: the breadcrumb had shown the
+      // full hero sentence ("Find your place in Hong Kong's technology community.") -- 113 + 1.
+      Membership: 114,
+      // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
+      // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
+      // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
+      Privacy: 50,
+      // D-4c Task 4 added the refund policy: the six scalar fields (metaTitle,
+      // metaDescription, eyebrow, title, description, breadcrumbCurrent) plus the
+      // 9 string leaves across its four sections (3 in "When we refund", 2 in each
+      // of the other three) -- 6 + 9 = 15.
+      RefundPolicy: 15,
+      // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
+      AiTransparency: 31,
+      // WP-7 Task 3: the /programmes index copy.
+      Programmes: 33,
+      // WP-7 Task 5: the /partners page copy. Round 18 (logo tiles) removed record.badge,
+      // relationship, website, status, since and window and added tileSince/tileWindow:
+      // 38 - 6 + 2 = 34. Production had no overrides on any Partners.record key.
+      Partners: 34,
+      // WP-5 added one editable field: the footer tagline, moved out of the
+      // deliberately-excluded structural Footer namespace into this new,
+      // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
+      MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(241);
+    // 577 + the 22 Home strings of the 2026-10 experience pass (see Home above) = 599,
+    // + Membership.breadcrumbCurrent (experience round 12) = 600, - 4 Partners keys (round 18) = 596.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(596);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

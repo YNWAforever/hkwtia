@@ -1,0 +1,67 @@
+
+> hkwtia-platform@0.0.0 test
+> vitest run tests/unit/admin-member-navigation.test.tsx -t page size consistent --maxWorkers=1
+
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-member-navigation.test.tsx (8 tests | 3 failed | 5 skipped) 509ms
+   × admin member navigation > keeps 'default' page size consistent in filter and navigation 228ms
+     → expected 20 to be 50 // Object.is equality
+   × admin member navigation > keeps 'explicit twenty' page size consistent in filter and navigation 95ms
+     → expected 50 to be 20 // Object.is equality
+   × admin member navigation > keeps 'filtered twenty' page size consistent in filter and navigation 182ms
+     → expected 50 to be 20 // Object.is equality
+   ↓ admin member navigation > opens Member 360 from the name and a view link while preserving only local list filters
+   ↓ admin member navigation > renders keyboard-usable previous and next links while preserving a validated search trail
+   ↓ admin member navigation > renders operational filter controls from the same shareable query
+   ↓ admin member navigation > keeps the full member filter in a shareable local list and detail return URL
+   ↓ admin member navigation > rejects an external return hint and constructs only a local list URL
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > keeps 'default' page size consistent in filter and navigation
+AssertionError: expected 20 to be 50 // Object.is equality
+
+- Expected
++ Received
+
+- 50
++ 20
+
+ ❯ tests/unit/admin-member-navigation.test.tsx:24:54
+     22|     const next = screen.getByRole("link", {name: en.Admin.members.next…
+     23|     const params=Object.fromEntries(new URL(next.getAttribute("href")!…
+     24|     expect(parseAdminMemberRouteQuery(params).limit).toBe(expected);
+       |                                                      ^
+     25|     const form=container.querySelector("form")!;
+     26|     const submitted=Object.fromEntries(new FormData(form).entries());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > keeps 'explicit twenty' page size consistent in filter and navigation
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > keeps 'filtered twenty' page size consistent in filter and navigation
+AssertionError: expected 50 to be 20 // Object.is equality
+
+- Expected
++ Received
+
+- 20
++ 50
+
+ ❯ tests/unit/admin-member-navigation.test.tsx:27:82
+     25|     const form=container.querySelector("form")!;
+     26|     const submitted=Object.fromEntries(new FormData(form).entries());
+     27|     expect(parseAdminMemberRouteQuery(submitted as Record<string,strin…
+       |                                                                                  ^
+     28|     const detail=screen.getByRole("link",{name: member.displayName});
+     29|     expect(parseAdminMemberRouteQuery(Object.fromEntries(new URL(detai…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 skipped (8)
+   Start at  23:49:01
+   Duration  30.84s (transform 4.43s, setup 2.78s, collect 10.76s, tests 509ms, environment 15.01s, prepare 1.07s)
+

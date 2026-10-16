@@ -1,0 +1,70 @@
+{
+  "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+  "baseSha": "a7d7abda123b260644762e57af10d6be193f1f08",
+  "files": [
+    {
+      "path": "app/[locale]/(admin)/admin/page.tsx",
+      "gitBlobSha256": "59a367fc3032d73474eade68813ca0d000b0d199e85cec3fd5f62fdb2a2dabd3"
+    },
+    {
+      "path": "app/[locale]/(admin)/admin/search/page.tsx",
+      "gitBlobSha256": "de014796dae0e685967bb9bedcb01dd6138fcc072ae11268df5eb93eabb7e228"
+    },
+    {
+      "path": "components/admin/admin-topbar.tsx",
+      "gitBlobSha256": "1d5603548e8eed13f6cbb6cef8a9c40d974dac4cf558b3f5e7a72f0adb8f75e9"
+    },
+    {
+      "path": "components/admin/work-queue-table.tsx",
+      "gitBlobSha256": "7952f4890b0c6f57bad0109790689b82404b4ebbf8b24f3532a324d450174ec4"
+    },
+    {
+      "path": "components/admin/workspace-search-view.tsx",
+      "gitBlobSha256": "5e7225399c9358eb35d4b7835e563587016e6e6858572b0e34ec141bf9469eaf"
+    },
+    {
+      "path": "config/wisetech-protected-route-inventory.ts",
+      "gitBlobSha256": "ef4c8348ea4f842d70aafeb50e046f4e3b9db8b151d4642ae946f7b02d567b80"
+    },
+    {
+      "path": "lib/admin/workspace-search-types.ts",
+      "gitBlobSha256": "d4d9602ab657fddd055e5fd0e765f746193af4cf592f78fd1c3aac35b048ebbe"
+    },
+    {
+      "path": "lib/admin/workspace-search.ts",
+      "gitBlobSha256": "b512d1a363e2c3ca473fbd98f7af2c6f3e929afd350053523a5eccb97ad342e5"
+    },
+    {
+      "path": "lib/db/repos/workspace-search.ts",
+      "gitBlobSha256": "d812798d2dd693b54a6904bd10bd20289249bf79b1bd24eb0130e838a91718a8"
+    },
+    {
+      "path": "messages/en.json",
+      "gitBlobSha256": "1d62dab4c762d4347f992b44bf0add9511c1f2d3f0edda055a9edec7231e64cd"
+    },
+    {
+      "path": "messages/zh-HK.json",
+      "gitBlobSha256": "826461d3828595e83102e1cb6bec7ce060fb9f54f4c6fd0c08ff3380b8ce862b"
+    },
+    {
+      "path": "scripts/seed-workspace-search-acceptance.ts",
+      "gitBlobSha256": "6cfa8a4dec5f2c54be4f5b0920d17afcc5b2402e7e79e55c51f13138f2f79a7c"
+    },
+    {
+      "path": "tests/e2e/full-fix-admin-workspace.spec.ts",
+      "gitBlobSha256": "aee79e85320def5feddff9ae65fb91299ccb55961ad633d8cb5046d2b651be85"
+    },
+    {
+      "path": "tests/integration/full-fix-workspace-search.test.ts",
+      "gitBlobSha256": "da25256b3c60f3e017bb22c7cb2020e80fc8719195e66109c43bdfa8cf27ead2"
+    },
+    {
+      "path": "tests/unit/full-fix-workspace-search.test.tsx",
+      "gitBlobSha256": "4246806e3c173fefbd0780acadca5f0ccb8cbc33bb23db59da69e602e85f8b8c"
+    },
+    {
+      "path": "tests/unit/wisetech-protected-route-ownership.test.ts",
+      "gitBlobSha256": "291f06ce173650df08a2c1b33ec2f5c95363b5a2011e05e891e71c6bfbb0ef38"
+    }
+  ]
+}

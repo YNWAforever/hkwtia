@@ -1,0 +1,77 @@
+{
+  "environment": "confirmed isolated Neon DB/Auth; Stripe TEST provider",
+  "production": false,
+  "sourceBaseline": "c85b6176",
+  "red": [
+    {
+      "command": "PLAYWRIGHT_BASE_URL=http://localhost:3450 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-member-renewal.spec.ts --reporter=line",
+      "failed": 2,
+      "reason": "expired/cancelled HTTP 500 instead of 200"
+    },
+    {
+      "command": "npm.cmd exec -- vitest run tests/unit/checkout-service.test.ts",
+      "failed": 1,
+      "reason": "pending row already linked to subscription opened a new checkout"
+    },
+    {
+      "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-billing-scope.test.ts",
+      "failed": 1,
+      "reason": "fault injection omitted atomic manual audit and same request replay no longer reproduced original receipt"
+    }
+  ],
+  "green": [
+    {
+      "command": "npm.cmd exec -- vitest run tests/unit/audit-full-billing-recovery.test.ts tests/unit/checkout-service.test.ts tests/unit/portal-billing-actions.test.tsx tests/unit/billing-recovery-cas.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/billing-repository-security.test.ts tests/unit/profile-identity-billing.test.ts",
+      "passed": 44,
+      "skipped": 0
+    },
+    {
+      "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-billing-scope.test.ts tests/unit/audit-full-payment-reconciliation.test.ts",
+      "passed": 21,
+      "skipped": 0,
+      "sqlCases": 8
+    },
+    {
+      "command": "PLAYWRIGHT_BASE_URL=http://localhost:3450 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-member-renewal.spec.ts --reporter=line",
+      "passed": 2,
+      "skipped": 0,
+      "seconds": 13.8
+    },
+    {
+      "command": "RUN_STRIPE_TEST_ACCEPTANCE=1 PLAYWRIGHT_BASE_URL=http://localhost:3450 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-member-payment-reconciliation.spec.ts --reporter=line",
+      "passed": 1,
+      "skipped": 0,
+      "seconds": 25.6,
+      "receipt": "provider-reconciliation.json"
+    },
+    {
+      "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-billing-scope.test.ts tests/unit/audit-full-payment-reconciliation.test.ts tests/unit/audit-full-billing-recovery.test.ts",
+      "passed": 33,
+      "skipped": 0,
+      "sqlCases": 9
+    }
+  ],
+  "setupCorrections": [
+    "SQL fixture supplied required companies.legal_name; initial setup failure was not behavior evidence",
+    "TEST PaymentMethod alias created an attached method on customer; subscription uses that actual customer default instead of unattached pm_card_visa alias",
+    "ActionState generic and minimal event fixture types corrected; only subsequent fresh typecheck counted"
+  ],
+  "flags": {
+    "PAYMENT_RECONCILIATION_ENABLED": "false/unset by default; local-only true for real provider browser acceptance; restored afterwards"
+  },
+  "schemaMigration": null,
+  "remaining": [
+    "D01 cancellation/renewal policy signoff; no blind replacement checkout",
+    "other real checkout and signed-webhook journeys U17/U19-U21 remain T16/T22",
+    "Preview and Production release acceptance pending"
+  ],
+  "repositoryGate": {
+    "command": "npm.cmd test",
+    "passed": 6178,
+    "skipped": 202,
+    "failed": 0,
+    "seconds": 293.0,
+    "skipReceipt": "../gates/t08-skips.json"
+  },
+  "architectureCorrection": "Full suite detected runtime DB imports in service; readPaymentCorrelation moved into lib/db/repos/billing-reconciliation.ts without weakening the repository guard. Focused repository boundary 45/0/0 then fresh full suite passed."
+}

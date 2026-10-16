@@ -17,27 +17,11 @@ function queueForm(): FormData {
 }
 
 describe("campaign queue action", () => {
-  it("uses the server-bound draft UUID for the initial submit and retry", async () => {
-    const inputs: unknown[] = [];
-    const paths: string[] = [];
-    let calls = 0;
-    const action = createQueueCampaignAction({draftId, path: "/en/admin/segments", dependencies: {
-      actor: async () => actor,
-      queue: async (_actor, input) => {
-        inputs.push(input);
-        calls += 1;
-        return {campaignId: "44444444-4444-4444-8444-444444444444", recipientCount: 1, disposition: calls === 1 ? "created" : "existing"};
-      },
-      revalidate: (path) => { paths.push(path); },
-    }});
-
-    await expect(action(initialState, queueForm())).resolves.toMatchObject({disposition: "created", error: null});
-    await expect(action(initialState, queueForm())).resolves.toMatchObject({disposition: "existing", error: null});
-    expect(inputs).toEqual([
-      {segmentId: "11111111-1111-4111-8111-111111111111", template: "renewal-reminder", localeStrategy: "profile", idempotencyKey: draftId},
-      {segmentId: "11111111-1111-4111-8111-111111111111", template: "renewal-reminder", localeStrategy: "profile", idempotencyKey: draftId},
-    ]);
-    expect(paths).toEqual(["/en/admin/segments", "/en/admin/segments"]);
+  it("authenticates a stale shortcut without any queue or revalidation effect", async () => {
+    const queue = vi.fn(); const revalidate = vi.fn(); const actorReader = vi.fn(async () => actor);
+    const action = createQueueCampaignAction({draftId, path: "/en/admin/segments", dependencies: {actor: actorReader, queue, revalidate}});
+    await expect(action(initialState, queueForm())).resolves.toEqual({disposition: null, recipientCount: 0, error: "generic"});
+    expect(actorReader).toHaveBeenCalledOnce(); expect(queue).not.toHaveBeenCalled(); expect(revalidate).not.toHaveBeenCalled();
   });
 
   it.each([

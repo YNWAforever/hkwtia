@@ -1,0 +1,111 @@
+{
+  "sourceCommitPending": false,
+  "productionDeployment": false,
+  "migrationRequired": false,
+  "configuredProviderVerified": false,
+  "externalProviderCalls": 0,
+  "behaviorRed": [
+    {
+      "log": ".playwright/full-fix-t05-registry-red.log",
+      "failed": 7,
+      "behavior": "Four existing actors reached provider despite unapproved route; wrong protocol, client-shaped route and missing JSON support ignored."
+    },
+    {
+      "log": ".playwright/full-fix-t05-bounds-red.log",
+      "failed": 2,
+      "passed": 7,
+      "behavior": "input/schema ceilings were metadata only and did not block provider construction"
+    },
+    {
+      "log": ".playwright/full-fix-t05-endpoint-first.log",
+      "failed": 1,
+      "passed": 7,
+      "behavior": "Actual locked SDK 429 classified as provider_error rather than rate_limited"
+    }
+  ],
+  "focused": {
+    "command": "npx vitest run tests/unit/ai-provider-registry.test.ts tests/unit/ai-provider-endpoint-contract.test.ts tests/unit/ai-provider-content-filter.test.ts tests/unit/ai-runtime.test.ts tests/unit/ai-runtime-review.test.ts tests/unit/ai-runtime-rereview.test.ts tests/unit/ai-runtime-prepared-single-use.test.ts tests/unit/ai-runtime-adopt-prestarted.test.ts tests/unit/ai-runtime-source-cleanup.test.ts tests/unit/scheduled-agent-runtime.test.ts tests/unit/ai-model.test.ts tests/unit/server-action-actor-boundary.test.ts",
+    "passed": 209,
+    "filesPassed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "contracts": {
+    "protocols": [
+      "responses",
+      "chat-completions",
+      "messages"
+    ],
+    "transport": "mock HTTP responses; actual installed SDK request creation/SSE parsing/tool execution",
+    "aggregateUsage": "two steps -> 4 input + 2 output tokens; result.usage retained; no totalUsage conversion",
+    "rateLimit": "exactly one request; stable rate_limited; no fallback",
+    "timeout": "exactly one request; stable timeout; no fallback",
+    "realProviderReceipt": false
+  },
+  "guards": {
+    "ownActorsPreserved": true,
+    "writerQuotaUnchanged": true,
+    "serverRegistryOnly": true,
+    "clientPayloadStrict": true,
+    "newPurposesDefaultDisabled": [
+      "application",
+      "support",
+      "content"
+    ],
+    "beforeProviderInputAdmission": true,
+    "stepInputAdmission": true,
+    "inputAdmissionIsConservativeBytesNotTokenizer": true
+  },
+  "openCode": {
+    "adminAdoption": "UNAPPROVED",
+    "adapter": "DISABLED_REJECTS_ALL_CALLS",
+    "reservedBase": "https://opencode.ai/zen/go/v1",
+    "independentReservedKeyName": "OPENCODE_GO_API_KEY",
+    "credentialReadOrTransmitted": false,
+    "uaSpoofed": false,
+    "liveProviderVerified": false
+  },
+  "limits": [
+    "T06 atomic budget, unknown/partial usage accounting and official price-version reconciliation still pending.",
+    "Existing engineering ceilings 128000 byte admission, 4096 output, 30000ms; T06 applies specified per-task caps/deadlines.",
+    "Historical existing price values retained; version label identifies repository snapshot, not new official price verification.",
+    "New administrative purposes remain gated until linked task validations; no flags enabled."
+  ],
+  "verifiedRuntimeCommit": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+  "fullGates": {
+    "fullUnit": {
+      "passed": 6464,
+      "skipped": 339,
+      "failed": 0,
+      "filesPassed": 767,
+      "filesSkipped": 88,
+      "durationSeconds": 938.19
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 82,
+      "exitCode": 0,
+      "command": "npx eslint ."
+    },
+    "strings": {
+      "tsxFilesScanned": 311,
+      "exitCode": 0
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "command": "npm run typecheck"
+    },
+    "build": {
+      "exitCode": 0,
+      "command": "npm run build"
+    }
+  },
+  "invariantMutation": {
+    "behavior": "mutable route alias must fail frozen-copy invariant",
+    "injectedViolationFailed": 1,
+    "deselected": 34,
+    "restoredRegistryPassed": 35,
+    "restoredRuntimeFilesMatchBuildAndFullSuite": 13,
+    "testOnlyAssertionStrengthenedAfterFullSuite": true
+  }
+}

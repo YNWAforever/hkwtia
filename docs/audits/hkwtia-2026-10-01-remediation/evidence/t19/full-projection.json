@@ -1,0 +1,13 @@
+{
+  "sourceSha": "9539f5b4b9a7afd9f15ec55a9a9bfa4d8089a949",
+  "counts": {
+    "passed": 6282,
+    "skipped": 302,
+    "failed": 0,
+    "passFiles": 747,
+    "allSkipFiles": 83
+  },
+  "success": true,
+  "laterDelta": "ee00aa288e4952e4df55425307147b197a5eecbf changes only a breadcrumb CSS class; final aggregate full gate T22, CI tracked separately",
+  "production": false
+}

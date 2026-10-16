@@ -1,0 +1,104 @@
+{
+  "environment": "source prior to minimum fix; two intended behavior failures",
+  "startTime": 1790954008620,
+  "passed": 16,
+  "failedCases": 2,
+  "notExecutedCases": 0,
+  "total": 18,
+  "failedFiles": [
+    "m2-session-reuse.test.ts",
+    "mobile-navigation.test.tsx"
+  ],
+  "cases": [
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "does not overwrite the current test locale with a cached identity's UI preference",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "rejects a cached session when identity API succeeds but the protected server page redirects",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "requires the server to confirm the same synthetic identity before reuse",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "rejects a different identity even when a cookie exists",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "rejects expired or unavailable sessions without trusting the local artifact",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps the current Chinese locale after /zh",
+      "status": "failed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps the current Chinese locale after /zh/",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps the current Chinese locale after /zh/events",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps unprefixed paths after /",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps unprefixed paths after /events",
+      "status": "passed"
+    },
+    {
+      "file": "m2-session-reuse.test.ts",
+      "title": "keeps unprefixed paths after /zh-other",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "does not offer a keyboard trigger before its client event handlers are installed",
+      "status": "failed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "puts event and join actions first, then utilities, the eyebrow and the four groups",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "shows at most five leaves per group and closes each panel with a view-all link",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "opens a group, marks the exact current leaf, closes on navigation, and returns focus",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "closes the dialog when the route changes underneath it",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "resets stale accordion state after Escape and reopen",
+      "status": "passed"
+    },
+    {
+      "file": "mobile-navigation.test.tsx",
+      "title": "closes and resets after the locale action while preserving locale navigation",
+      "status": "passed"
+    }
+  ]
+}

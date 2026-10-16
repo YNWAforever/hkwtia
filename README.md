@@ -30,7 +30,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
 | `npm run build` | Create the production build |
-| `npm run test:lighthouse` | Run Lighthouse CI on `/membership` and `/zh/membership` |
+| `npm run test:lighthouse` | Run Lighthouse CI on the ten URLs in `lighthouserc.js`: `/`, `/membership`, `/events`, `/programmes`, `/partners`, each in both locales |
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
 | `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
@@ -162,6 +162,37 @@ Preview authentication and never authorizes the target. Generate unsubscribe
 confirmation tokens from that Preview's signing configuration and never commit
 populated values.
 
+For the read-only public suites and Lighthouse against a protected Preview, turn
+a share link into a browser session instead. Mint the share URL from the Vercel
+dashboard (deployment → Share) or the Vercel tooling, then run
+`VERCEL_SHARE_URL=<share-url> node scripts/vercel-preview-session.mjs`. It
+visits the link once and writes `.playwright/preview-state.json` (Playwright
+storage state) and `.playwright/preview-cookie.txt` (the `_vercel_jwt` cookie
+header), printing only the Preview origin. Then run
+`PLAYWRIGHT_BASE_URL=<preview> PLAYWRIGHT_STORAGE_STATE=.playwright/preview-state.json npm run test:e2e -- <read-only specs>`
+and
+`LHCI_BASE_URL=<preview> LHCI_COOKIE_FILE=.playwright/preview-cookie.txt npm run test:lighthouse`
+(a remote base URL skips Lighthouse's local server). Both files expire with the
+share link, live under the git-ignored `.playwright/` directory, and must never
+be committed or pasted into a report. The script prints only its own error
+codes; a navigation failure is reported as `VERCEL_SHARE_URL_NAVIGATION_FAILED`
+because Playwright's own message would quote the share link.
+
+Lighthouse copies the `Cookie` header into every report it writes
+(`lhr.configSettings.extraHeaders`), so a run with `LHCI_COOKIE_FILE` set has
+`lighthouserc.js` select the filesystem target instead of the public one — do
+not pass `--upload.target` on the `lhci autorun` CLI for a cookie run, since a
+CLI flag overrides the rc file's `upload.target` and would silently restore the
+public upload. Its reports land in the
+git-ignored `.lighthouseci/` (Lighthouse's own working directory) and
+`.playwright/lighthouse` (the output directory). Those reports embed the session
+cookie, must be deleted together with the session files, and are never shared.
+The evidence record for a cookie run cites the category scores, never a report
+link or file; the public `temporary-public-storage` upload stays only for the
+cookie-less local run. With a session cookie, `LHCI_BASE_URL` must be an HTTPS
+`*.vercel.app` Preview; `https://hkwtia.vercel.app` and any other host are
+rejected before the cookie is read into the config.
+
 ## M3 Preview automation Worker
 
 The isolated [`workers`](./workers) package contains the Preview-only Cloudflare Cron Worker. It invokes the authenticated Next.js job routes and does not own journey or delivery state. Its UTC triggers are:
@@ -291,7 +322,12 @@ WOZTELL templates (`concierge_follow_up_en` and
 `concierge_follow_up_zh_hk`) are approved with the exact two body parameters,
 and live acceptance is separately authorized. Live WhatsApp also requires
 `RUN_LIVE_WOZTELL=1`; set `WOZTELL_APPROVED_TEMPLATE_KEYS` only to template
-keys confirmed approved by WOZTELL. The live acceptance fixture has its own
+keys confirmed approved by WOZTELL. Both send paths read that allowlist — the
+concierge reply and, since B-5, the journey runner — so a registered but
+unapproved key never reaches WOZTELL, and the journey step delivers by email
+alone. Bilingual templates are approved as a pair
+(`wtia_event_reminder_24h_{en,zh_hk}`): approving one half does not make the
+runner write to the other language's members in the approved language. The live acceptance fixture has its own
 `RUN_LIVE_WOZTELL_ACCEPTANCE=1` gate and
 `WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS` allowlist.
 
@@ -304,8 +340,10 @@ Rollback does not require a schema downgrade:
 
 1. Set `AGENTS_ENABLED=false` and redeploy, which preserves leave-message
    handling and zero-cost run evidence.
-2. Set `RUN_LIVE_WOZTELL` to a non-`1` value and remove live template
-   allowlisting.
+2. Set `RUN_LIVE_WOZTELL` to `0`, or remove it, and remove live template
+   allowlisting. Since C-9 it is parsed as `"0" | "1"`: any other value is a
+   startup error rather than a silent downgrade to mock mode, so "a non-`1`
+   value" is no longer a rollback instruction.
 3. Stop the retention scheduler while investigating; do not reverse or
    truncate additive migrations.
 4. Restore the prior application deployment if needed. Preserve conversations,
@@ -330,3 +368,15 @@ npm audit --omit=dev --audit-level=high
 ## Repository guidance
 
 See [`AGENTS.md`](./AGENTS.md) for i18n, accessibility, server-component, test, commit, and secret-handling conventions.
+
+## 2026-09-26 audit remediation branch
+
+The implementation and release evidence are in [`docs/audits/hkwtia-2026-09-26/`](./docs/audits/hkwtia-2026-09-26/). Read `finding-status.md` for F01–F25, `verification.md` for commands actually run and skips, `decisions.md` for policy gates, and `release-runbook.md` for the additive migration and rollback order. The [staff guide](./docs/audits/hkwtia-2026-09-26/staff-guide.md) covers search, batch preview/retry, import, grants, ticket resend, cancellation and check-in in an isolated Preview.
+
+The manual [audit acceptance workflow](./.github/workflows/audit-acceptance.yml) runs disposable PostgreSQL transaction/concurrency tests and bilingual public Playwright checks against a supplied HTTPS Preview URL. It rejects the production alias. Its public job does not exercise authenticated Stripe, Neon Auth or real delivery; those require the isolated environment and test credentials recorded in the runbook. All new effect flags default off.
+
+Audit remediation communication controls and staged activation: see [staff guide](docs/audits/hkwtia-2026-09-26/staff-guide.md) and [release runbook](docs/audits/hkwtia-2026-09-26/release-runbook.md). MEMBER_COMMUNICATION_BATCH_ENABLED defaults off; batch execution creates reviewed campaign drafts and does not authorize sending to live members.
+
+The audit workflow also offers `run_authenticated` in the `audit-isolated` environment. Its preflight and report checker fail missing credentials and skipped tests. The controlled batch retry case requires the isolated scheduled batch worker paused; see the release runbook for the exact secret/flag mapping. `AUDIT_METRICS_ENABLED` adds aggregate job/webhook/worker correlation logs; `scripts/audit-alert-check.ts` rehearses proposed alerts locally without sending notifications. Import payload cleanup is default-off behind `MEMBER_IMPORT_RETENTION_ENABLED`, with configurable day values and an authenticated dry run. No production activation is implied.
+
+The attendee CSV continuation uses the same batch engine and private download route. Apply additive migration 0050 before its web/worker code; EVENT_ATTENDEE_EXPORT_ENABLED defaults false and EVENT_ATTENDEE_EXPORT_TTL_MINUTES defaults to 30. When enabled, the worker materializes the current event/search preview and the download serves an owner-scoped expiring artifact. See the runbook before enabling or rolling back this operation.

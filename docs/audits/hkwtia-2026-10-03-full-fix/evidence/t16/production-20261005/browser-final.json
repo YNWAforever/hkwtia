@@ -1,0 +1,170 @@
+{
+  "observedAt": "2026-10-05T02:04:17.785Z",
+  "sourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "deploymentId": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "target": "production",
+  "publicUrl": "https://hkwtia.vercel.app",
+  "browser": "fresh anonymous Chromium contexts; no reused user cookies",
+  "passed": 16,
+  "expected": 16,
+  "checks": [
+    {
+      "case": "public concise fallback",
+      "locale": "en",
+      "width": 1440,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "en-1440-safe-disabled.png",
+      "screenshotSha256": "82622a6d04d21c1b017820f6347bf3670bde10f1897dbb94c0d829931b84ec52"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "en",
+      "width": 390,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "en-390-safe-disabled.png",
+      "screenshotSha256": "5c93e4eae60a361be7d3122c8a5eace3c5d79e78ede2b155ab4a25e7df640620"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "zh-HK",
+      "width": 1440,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "zh-HK-1440-safe-disabled.png",
+      "screenshotSha256": "4182a9e098850f2260d61ddb8c3bb95252ec35340295038228d35fcab3c99c59"
+    },
+    {
+      "case": "public concise fallback",
+      "locale": "zh-HK",
+      "width": 390,
+      "status": "PASS",
+      "httpStatus": 503,
+      "errorCode": "AI_DISABLED",
+      "cacheControlNoStore": true,
+      "questionPreserved": true,
+      "manualLinksLocalized": true,
+      "noRetryForDisabled": true,
+      "keyboardFocus": true,
+      "seriousCriticalAxe": 0,
+      "screenshot": "zh-HK-390-safe-disabled.png",
+      "screenshotSha256": "669927062867d3b1b17b63630103faa61a31313554238d4e8d88ee5e0f4e3e51"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/membership",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/membership",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/events",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/events",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/partners",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/partners",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/admin-login",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "anonymous route",
+      "route": "/zh/admin-login",
+      "httpStatus": 200,
+      "mainLandmark": true,
+      "status": "PASS"
+    },
+    {
+      "case": "admin requires identity",
+      "locale": "en",
+      "anonymousRequiresLogin": true,
+      "actualRedirectPath": "/admin-login",
+      "controlledFreshLocaleContext": true,
+      "status": "PASS"
+    },
+    {
+      "case": "admin requires identity",
+      "locale": "zh-HK",
+      "anonymousRequiresLogin": true,
+      "actualRedirectPath": "/zh/admin-login",
+      "controlledFreshLocaleContext": true,
+      "status": "PASS"
+    }
+  ],
+  "failure": null,
+  "fixtureWrites": 0,
+  "identityLoginRequests": 0,
+  "memberMessages": 0,
+  "paymentsOrRefunds": 0,
+  "providerCalls": "rejected before actor/database/provider runtime by exact deployed readiness source; provider telemetry not separately sampled",
+  "deploymentOrConfigMutations": 0,
+  "limits": "Safe disabled/fallback and anonymous reads only. Google/magic, authenticated Production operations, worker windows, provider success and migration ledger not verified."
+}

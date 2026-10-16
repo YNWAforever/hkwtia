@@ -56,6 +56,11 @@ function acceptedClaim(pendingReply?: string) {
     locale: "en" as const,
     memberName: "Member",
     whatsappOptIn: true,
+    // C-1 Task 3: the claim now reports the conversation's handling state and
+    // window clock. 'bot' is the pre-Phase-C behaviour this fixture pins.
+    handling: "bot" as const,
+    assignedToProfileId: null,
+    lastInboundAt: null,
     ...(pendingReply === undefined ? {} : {pendingReply}),
   };
 }
@@ -230,8 +235,13 @@ describe("WOZTELL webhook route", () => {
       processorDependencies: dependencies,
     });
 
-    await expect(post(request(BODY, signature(BODY))))
-      .rejects.toThrow("connection_lost");
+    // C-1 Task 4 Step 7: the route no longer lets the throw escape — it answers
+    // 500 so Woztell retries. The invariant this test cares about is unchanged:
+    // the inbound is NOT marked completed, so the retry resumes the persisted
+    // reply instead of running a second Concierge turn.
+    const failed = await post(request(BODY, signature(BODY)));
+    expect(failed.status).toBe(500);
+    await expect(failed.json()).resolves.toEqual({error: "PROCESSING_FAILED"});
     const retry = await post(request(BODY, signature(BODY)));
 
     expect(retry.status).toBe(202);
@@ -241,6 +251,28 @@ describe("WOZTELL webhook route", () => {
       "concierge:wamid.fixture.1:session",
       "concierge:wamid.fixture.1:session",
     ]);
+  });
+
+  it("answers 500 rather than 202 when processing throws, so a withdrawal is not dropped", async () => {
+    // The STOP path writes two legs in two repositories and both are idempotent
+    // by design, so a 500 that makes Woztell retry is strictly better than a 202
+    // that drops a consent withdrawal on the floor. A leaked exception would be
+    // an unhandled rejection in the route runtime, which is neither.
+    const process = vi.fn(async () => {
+      throw new Error("CONTACT_UPSERT_FAILED");
+    });
+    const post = createWoztellWebhookPostHandler({
+      channel: verifiedChannel(),
+      process,
+    });
+
+    const response = await post(request(BODY, signature(BODY)));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({error: "PROCESSING_FAILED"});
+    // The classification is the response body for every other outcome, so the
+    // failure body must not be mistakable for one of them.
+    expect(process).toHaveBeenCalledOnce();
   });
 
   it("does not expose or require live WOZTELL credentials in fixtures", () => {

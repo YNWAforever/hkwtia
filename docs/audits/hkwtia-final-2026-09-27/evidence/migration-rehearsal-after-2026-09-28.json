@@ -1,0 +1,56 @@
+{
+  "stage": "rehearsal-after",
+  "checkedAt": "2026-09-28T07:48:54.589Z",
+  "hostname": "ep-withered-flower-aoaoha9d.c-2.ap-southeast-1.aws.neon.tech",
+  "database": "neondb",
+  "readOnly": true,
+  "ledgerRows": 51,
+  "latest": {
+    "id": 51,
+    "hash": "fd9325267d5892a7b061c95fa94cf4cea8345a5eed5a79397700120acbb5f51a",
+    "created_at": "1790568000000"
+  },
+  "pending": [],
+  "unexplainedHashMismatches": [],
+  "counts": {
+    "profiles": 1,
+    "companies": 3,
+    "memberships": 0,
+    "events": 1,
+    "audit_events": 2
+  },
+  "grantColumns": [
+    {
+      "column_name": "grant_actor_profile_id"
+    },
+    {
+      "column_name": "grant_effective_at"
+    },
+    {
+      "column_name": "grant_expires_at"
+    },
+    {
+      "column_name": "grant_reason"
+    }
+  ],
+  "constraints": [
+    {
+      "conname": "admin_batches_operation_check",
+      "definition": "CHECK ((operation = ANY (ARRAY['profile_patch'::text, 'import_commit'::text, 'membership_grant'::text, 'renewal_reminder'::text, 'profile_update_invite'::text, 'ticket_resend'::text, 'export_members'::text, 'export_event_attendees'::text])))"
+    },
+    {
+      "conname": "memberships_grant_window_check",
+      "definition": "CHECK ((((grant_effective_at IS NULL) AND (grant_expires_at IS NULL) AND (grant_reason IS NULL) AND (grant_actor_profile_id IS NULL)) OR ((grant_effective_at IS NOT NULL) AND (grant_expires_at IS NOT NULL) AND (grant_reason IS NOT NULL) AND (length(TRIM(BOTH FROM grant_reason)) >= 10) AND (grant_actor_profile_id IS NOT NULL) AND (grant_effective_at < grant_expires_at))))"
+    },
+    {
+      "conname": "rate_limit_buckets_count_check",
+      "definition": "CHECK (((count >= 1) AND (count <= 20)))"
+    },
+    {
+      "conname": "rate_limit_buckets_scope_check",
+      "definition": "CHECK ((scope = ANY (ARRAY['guest-rsvp'::text, 'ticket-checkout'::text, 'auth-send-ip'::text, 'auth-send-email'::text, 'auth-credential-ip'::text])))"
+    }
+  ],
+  "metricsUniqueIndexPresent": true,
+  "grantProbePassed": true
+}

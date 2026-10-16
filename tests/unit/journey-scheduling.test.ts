@@ -50,4 +50,14 @@ describe("scheduleJourney", () => {
       channels: ["email", "whatsapp"],
     });
   });
+
+  it("defines event_reminder as a single transactional email+whatsapp step at -1 day", () => {
+    expect(JOURNEYS.event_reminder).toEqual([expect.objectContaining({
+      key: "reminder_24h",
+      offsetDays: -1,
+      template: "event_reminder_24h",
+      classification: "transactional",
+      channels: ["email", "whatsapp"],
+    })]);
+  });
 });

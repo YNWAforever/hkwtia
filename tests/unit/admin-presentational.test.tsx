@@ -1,12 +1,44 @@
+import {render, screen} from "@testing-library/react";
 import {renderToStaticMarkup} from "react-dom/server";
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 
-import {AdminNav} from "@/components/admin/admin-nav";
 import {AtRiskTable} from "@/components/admin/at-risk-table";
+import {AttendeeTable} from "@/components/admin/attendee-table";
 import {MemberTable} from "@/components/admin/member-table";
-import {ReportCards} from "@/components/admin/report-cards";
+import {ReportCards, toReportPeriodMessage} from "@/components/admin/report-cards";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
+
+/**
+ * AdminNav (Task 7) became a "use client" component that resolves its own translations from
+ * next-intl and its own current path from next/navigation, instead of taking a pre-resolved
+ * `labels` prop. These two mocks let this suite still drive AdminNav through arbitrary
+ * en.Admin/zh.Admin label content per it.each case (exactly what the pre-Task-7 tests below did
+ * by passing a `labels` prop directly) by resolving each `t("a.b.c")` call as a real dot-path
+ * lookup against whichever labels object the current test case set, rather than collapsing to
+ * the raw key -- that would make the "localized brand copy" and "translated ... automations"
+ * assertions vacuously true regardless of the real message content.
+ */
+const adminNavMocks = vi.hoisted(() => ({
+  labels: {} as Record<string, unknown>,
+  pathname: "/admin",
+}));
+vi.mock("next/navigation", () => ({usePathname: () => adminNavMocks.pathname, useRouter: () => ({push: vi.fn(), replace: vi.fn(), refresh: vi.fn()})}));
+vi.mock("next-intl", () => ({
+  useTranslations: (namespace: string) => (key: string) => {
+    const root = namespace === "Admin" ? adminNavMocks.labels : {};
+    const value = key.split(".").reduce<unknown>((acc, segment) => {
+      if (acc && typeof acc === "object" && segment in (acc as Record<string, unknown>)) {
+        return (acc as Record<string, unknown>)[segment];
+      }
+      return undefined;
+    }, root);
+    return typeof value === "string" ? value : key;
+  },
+}));
+
+// eslint-disable-next-line import/first -- must follow the vi.mock calls above so the mocked modules are in place first.
+import {AdminNav} from "@/components/admin/admin-nav";
 
 describe("admin presentation", () => {
   it.each([
@@ -32,20 +64,26 @@ describe("admin presentation", () => {
   });
 
   it.each([en.Admin, zh.Admin])("renders one page heading, an accessible nav, a table caption, and translated empty state", (labels) => {
-    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={{...labels.navigation, brand: labels.brand}}/>);
-    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null}} query="" locale="en"/>);
+    adminNavMocks.labels = labels;
+    const {container: navContainer} = render(<AdminNav locale="en" />);
+    const nav = navContainer.innerHTML;
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null, totalMatching: 0}} query="" locale="en"/>);
     const page = renderToStaticMarkup(<main><h1>{labels.members.title}</h1>{table}</main>);
 
     expect(page.match(/<h1/g)).toHaveLength(1);
     expect(nav).toContain(`aria-label="${labels.navigation.label}"`);
-    expect(nav).toContain(`>${labels.navigation.automations}</a>`);
+    expect(nav.match(/class="space-y-1"/g)).toHaveLength(6);
+    expect(nav).not.toContain("<summary");
+    expect(nav).toContain(`<span>${labels.navigation.automations}</span>`);
     expect(nav).toContain("/admin/automations");
     expect(table).toMatch(new RegExp(`<caption[^>]*>${labels.members.caption}</caption>`));
     expect(table).toContain(labels.members.empty);
   });
   it.each([en.Admin, zh.Admin])("uses localized brand copy and preserves the query in next-page links without a false previous link", (labels) => {
-    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={{...labels.navigation, brand: labels.brand}}/>);
-    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor"}} query="acme" locale="en"/>);
+    adminNavMocks.labels = labels;
+    const {container: navContainer} = render(<AdminNav locale="en" />);
+    const nav = navContainer.innerHTML;
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor", totalMatching: 21}} query="acme" locale="en"/>);
 
     expect(nav).toContain(labels.brand);
     expect(table).toContain("?q=acme&amp;cursor=opaque-cursor");
@@ -78,5 +116,36 @@ describe("admin presentation", () => {
     expect(html).toContain(">8<");
     expect(html).toContain("<section");
     expect(html.match(/aria-labelledby=/g)?.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("passes a real Admin.reports.period value through toReportPeriodMessage untouched", () => {
+    expect(toReportPeriodMessage(en.Admin.reports.period)).toBe(en.Admin.reports.period);
+    expect(toReportPeriodMessage(zh.Admin.reports.period)).toBe(zh.Admin.reports.period);
+  });
+
+  it("falls back toReportPeriodMessage to a locale-neutral bare template when a value is missing a placeholder", () => {
+    expect(toReportPeriodMessage(undefined)).toBe("{from} {to} {timezone}");
+    expect(toReportPeriodMessage("{from} only")).toBe("{from} {to} {timezone}");
+    expect(toReportPeriodMessage(42)).toBe("{from} {to} {timezone}");
+  });
+
+  /**
+   * The ticket arm emits `status = 'paid'`; the door-list label map only knew
+   * the five registration statuses, so every paid seat rendered "Not
+   * available". This drives `AttendeeTable` with the shipped bundles so a
+   * missing label fails here rather than only in front of a staff member. The
+   * page's inline label map is pinned in
+   * `tests/unit/event-attendees-ticket-rows.test.ts`.
+   */
+  it.each([en.Admin.eventsMgmt, zh.Admin.eventsMgmt])("renders a ticket seat's paid status from the door-list labels", (events) => {
+    const labels = {caption: events.attendees, search: events.attendeeSearch, noMatches: events.attendeeNoMatches, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, resendPass: events.resendPass, resending: events.resending, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
+    const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en" resendPassMessages={{successMessage: events.resendSuccess, errorMessage: events.resendError}} resendPassPath="/en/admin/events-mgmt/event-1" seatCheckInAction={async () => ({})}/>);
+    expect(container.textContent).toContain(events.statuses.paid);
+    // A ticket seat carries both controls: the seat-keyed Check in fallback for a
+    // pass that cannot be produced, and the resend (spec section 4.3). The Check
+    // in control is asserted by role, because the column header already renders
+    // the same word and a text assertion would pass without the button.
+    expect(container.textContent).toContain(events.resendPass);
+    expect(screen.getByRole("button", {name: events.checkIn})).toBeInTheDocument();
   });
 });

@@ -1,0 +1,33 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/operations-population.test.ts (5 tests | 1 failed) 23709ms
+   ✓ actual recorded operational population > counts bot, handoff, reopened and all seven unobserved non-support kinds once 30ms
+   ✓ actual recorded operational population > accepts a real CMS draft audit reference and leaves unobserved cases in the denominator 117ms
+   ✓ actual recorded operational population > keeps requested AI cases in the population without provider success or time samples 73ms
+   ✓ actual recorded operational population > resolves AI work audit references to the authoritative kind and case, refusing wrong-kind attribution  436ms
+   × actual recorded operational population > deduplicates the actual board and renewal agent conversations against their observed business kind 477ms
+     → expected 16 to be 14 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population > deduplicates the actual board and renewal agent conversations against their observed business kind
+AssertionError: expected 16 to be 14 // Object.is equality
+
+- Expected
++ Received
+
+- 14
++ 16
+
+ ❯ tests/integration/operations-population.test.ts:56:83
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  04:54:25
+   Duration  26.18s (transform 469ms, setup 317ms, collect 1.56s, tests 23.71s, environment 0ms, prepare 200ms)
+

@@ -1,0 +1,104 @@
+{
+  "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+  "runtimeSourceUnmodifiedDuringGates": true,
+  "untrackedFutureRegressionTestsPresentDuringBuild": true,
+  "gates": [
+    {
+      "startedAt": "2026-10-03T07:16:31.0045436Z",
+      "log": ".playwright/full-fix-baseline-strings.log",
+      "endedAt": "2026-10-03T07:16:33.6056671Z",
+      "name": "strings",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm run audit:strings",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:16:33.6881338Z",
+      "log": ".playwright/full-fix-baseline-lint.log",
+      "endedAt": "2026-10-03T07:18:00.9124175Z",
+      "name": "lint",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:18:00.9223800Z",
+      "log": ".playwright/full-fix-baseline-typecheck.log",
+      "endedAt": "2026-10-03T07:18:46.6260133Z",
+      "name": "typecheck",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:18:46.6302382Z",
+      "log": ".playwright/full-fix-baseline-unit.log",
+      "endedAt": "2026-10-03T07:46:09.8224055Z",
+      "name": "unit",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm test -- --maxWorkers=1",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:46:09.8314618Z",
+      "log": ".playwright/full-fix-baseline-build.log",
+      "endedAt": "2026-10-03T07:49:04.9182553Z",
+      "name": "build",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:49:04.9257198Z",
+      "log": ".playwright/full-fix-baseline-audit.log",
+      "endedAt": "2026-10-03T07:49:18.4685662Z",
+      "name": "audit",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm audit --omit=dev --audit-level=high",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:49:18.4718371Z",
+      "log": ".playwright/full-fix-baseline-worker-ci.log",
+      "endedAt": "2026-10-03T07:49:26.4185955Z",
+      "name": "worker-ci",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm ci --prefix workers",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:49:26.4222650Z",
+      "log": ".playwright/full-fix-baseline-worker-types.log",
+      "endedAt": "2026-10-03T07:49:28.4642308Z",
+      "name": "worker-types",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm --prefix workers run typecheck",
+      "exitCode": 0
+    },
+    {
+      "startedAt": "2026-10-03T07:49:28.4676572Z",
+      "log": ".playwright/full-fix-baseline-worker-tests.log",
+      "endedAt": "2026-10-03T07:49:46.2479008Z",
+      "name": "worker-tests",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "command": "npm --prefix workers test",
+      "exitCode": 0
+    }
+  ],
+  "unit": {
+    "passed": 6346,
+    "skipped": 329,
+    "filesPassed": 757,
+    "filesSkipped": 85,
+    "skipMeaning": "Guarded environment/provider acceptance not executed; not counted as passes"
+  },
+  "workers": {
+    "passed": 57,
+    "files": 7
+  },
+  "buildWarnings": [
+    "Existing Edge Runtime deprecation",
+    "Existing outdated Browserslist data"
+  ],
+  "dependenciesUpgraded": false
+}

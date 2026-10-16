@@ -18,14 +18,14 @@ export type {AdminShowcaseRepository} from "@/lib/admin/showcase-core";
 
 export async function publishShowcaseListingAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  await publishShowcaseListing(actor, String(formData.get("listingId") ?? ""));
+  await publishShowcaseListing(actor, String(formData.get("listingId") ?? ""), String(formData.get("reviewVersion") ?? ""));
   revalidateAdminPath(path);
   revalidatePath("/showcase");
 }
 
 export async function rejectShowcaseListingAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  await rejectShowcaseListing(actor, String(formData.get("listingId") ?? ""), String(formData.get("rejectionReason") ?? ""));
+  await rejectShowcaseListing(actor, String(formData.get("listingId") ?? ""), String(formData.get("rejectionReason") ?? ""), String(formData.get("reviewVersion") ?? ""));
   revalidateAdminPath(path);
   revalidatePath("/showcase");
 }

@@ -1,3 +1,4 @@
+import {localizedPath} from "@/lib/urls";
 import {z} from "zod";
 
 import type {AgentTool} from "@/lib/ai/provider";
@@ -51,7 +52,7 @@ export function createEventsTool(context: ConciergeToolContext): AgentTool {
           const citation = {
             sourceId: `event:${event.slug}`,
             title: event.title,
-            url: `${context.appOrigin}/${context.locale}/events/${encodeURIComponent(event.slug)}`,
+            url: `${context.appOrigin}${localizedPath(context.locale,`/events/${encodeURIComponent(event.slug)}`)}`,
             confidence: 1,
           };
           citations.push(citation);

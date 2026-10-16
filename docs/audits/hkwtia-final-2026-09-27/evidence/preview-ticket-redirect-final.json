@@ -1,0 +1,11 @@
+{
+  "scope": "protected branch Preview, isolated Neon and Stripe TEST",
+  "eventId": "7308ff3a-5947-457e-8fb0-3c568219d95c",
+  "orderId": "07acd6df-fb3d-4b5e-8302-51470aa7afa7",
+  "sessionId": "cs_test_a1gSFyYA8dLMUp59QW60QGJSjNLULxqgnr8SwU1oG7hGKdVGudkgrInOZo",
+  "livemode": false,
+  "amountTotal": 2500,
+  "currency": "hkd",
+  "status": "open",
+  "redirectOrigin": "https://checkout.stripe.com"
+}

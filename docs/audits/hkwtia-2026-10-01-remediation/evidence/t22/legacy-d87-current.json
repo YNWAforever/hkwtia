@@ -1,0 +1,16 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "profile": "legacy",
+  "nativeReport": ".playwright/t22-legacy-release-final.json",
+  "stats": {
+    "startTime": "2026-10-02T20:25:57.654Z",
+    "duration": 95324.391,
+    "expected": 19,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "production": false,
+  "retryUsed": false,
+  "collectionErrors": 0
+}

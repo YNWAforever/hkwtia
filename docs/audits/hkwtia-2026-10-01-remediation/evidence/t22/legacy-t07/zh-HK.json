@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-02T13:47:30.073Z",
+  "environment": "confirmed isolated DB/Auth",
+  "locale": "zh-HK",
+  "viewport": 1440,
+  "getWrites": 0,
+  "finalDraft": 1,
+  "snapshotRecipients": 1,
+  "authorApproval": false,
+  "staleApproval": "rejected",
+  "currentApproval": "queued",
+  "reviewer": "synthetic ExCo",
+  "keyboard": true,
+  "providerSend": false,
+  "production": false
+}

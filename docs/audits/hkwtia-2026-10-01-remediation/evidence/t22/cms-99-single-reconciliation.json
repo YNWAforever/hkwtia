@@ -1,0 +1,15 @@
+{
+  "observedAt": "2026-10-02T23:03:22.603Z",
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "scope": "read-only reconciliation after full native CMS timeout; reserved synthetic editors only",
+  "transactionReadOnly": true,
+  "publishedVersionsSinceFailedCase": 2,
+  "publicCopyFingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "publicMatchesBeforeFirstPublication": true,
+  "normalization": "copy snapshots include empty fallback entries; persisted blank overrides are absent",
+  "remainingOwnedOpenPrivateDrafts": 1,
+  "publicWrites": 0,
+  "historyDeleted": 0,
+  "providerCalls": 0,
+  "production": false
+}

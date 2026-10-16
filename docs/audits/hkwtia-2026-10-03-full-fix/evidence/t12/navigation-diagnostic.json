@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-04T12:39:17.686Z",
+  "production": false,
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "requests": [
+    {
+      "path": "/admin/events-mgmt/:synthetic-id",
+      "status": 200,
+      "type": "text/x-component",
+      "originMatches": true
+    },
+    {
+      "path": "/admin/events-mgmt/:synthetic-id",
+      "status": 200,
+      "type": "text/html; charset=utf-8",
+      "originMatches": true
+    }
+  ],
+  "keyboard": true,
+  "keyboardDurationMs": 7596,
+  "pathnameKind": "event",
+  "directReadStatus": 200,
+  "directReadDurationMs": 7587,
+  "directReadHeader": 1,
+  "directReadIsNotKeyboardAcceptance": true
+}

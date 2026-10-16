@@ -2,8 +2,8 @@
   "entries": [
     {
       "from": "/2001/01/2001-establishment-of-wtia/",
-      "to": "/about/history",
-      "kind": "section-fallback"
+      "to": "/about/history/2001-establishment-of-wtia",
+      "kind": "equivalent"
     },
     {
       "from": "/2002/01/2002-the-1st-wtia-panel-discussion-inter-operator-sms/",
@@ -77,8 +77,8 @@
     },
     {
       "from": "/2014/01/2014-wi-fi-hk/",
-      "to": "/about/history",
-      "kind": "section-fallback"
+      "to": "/about/history/2014-wi-fi-hk",
+      "kind": "equivalent"
     },
     {
       "from": "/2015/01/2015-asia-smartphone-apps-contest-summit-2015/",
@@ -302,8 +302,8 @@
     },
     {
       "from": "/2025/11/2025-%e4%ba%9e%e6%b4%b2%e6%99%ba%e6%85%a7%e5%89%b5%e6%96%b0%e5%a4%a7%e7%8d%8e-asia-smart-innovation-awards-2025/",
-      "to": "/about/history",
-      "kind": "section-fallback"
+      "to": "/about/history/asia-smart-innovation-awards-2025",
+      "kind": "equivalent"
     },
     {
       "from": "/about-us/",

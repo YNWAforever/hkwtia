@@ -1,0 +1,27 @@
+{
+  "sourceSha": "5b4ac2f4f1bd875047037dcaf4f9cfae79ce4e25",
+  "startTime": 1790964192063,
+  "passed": 0,
+  "failed": 2,
+  "skipped": 0,
+  "total": 2,
+  "failedFiles": [
+    "tests/unit/private-record-prefetch.test.tsx"
+  ],
+  "success": false,
+  "cases": [
+    {
+      "file": "tests/unit/private-record-prefetch.test.tsx",
+      "test": "private inbox filters waits for navigation before fetching filtered records in en",
+      "status": "failed",
+      "durationMs": 519.6203000000023
+    },
+    {
+      "file": "tests/unit/private-record-prefetch.test.tsx",
+      "test": "private inbox filters waits for navigation before fetching filtered records in zh-HK",
+      "status": "failed",
+      "durationMs": 75.45409999999902
+    }
+  ],
+  "sourceRelation": "New behavior test in working tree; original inbox Link implementation before 42930d9a"
+}

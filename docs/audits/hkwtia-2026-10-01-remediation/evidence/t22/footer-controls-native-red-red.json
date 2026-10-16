@@ -1,0 +1,14 @@
+{
+  "sourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "stats": {
+    "startTime": "2026-10-02T20:45:02.868Z",
+    "duration": 5452.16,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  },
+  "collectionErrors": 0,
+  "assertion": "Footer locale control center must not hit fixed Concierge; real pointer and keyboard; original URL filters preserved",
+  "production": false
+}

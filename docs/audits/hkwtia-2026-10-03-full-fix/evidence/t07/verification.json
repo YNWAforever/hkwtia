@@ -1,0 +1,445 @@
+{
+  "task": "T07",
+  "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+  "verifiedRuntimeCommit": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+  "codeState": "SOURCE_FULL_CI_PG31_NATIVE29_VERIFIED_PROVIDER_POLICY_GATES",
+  "production": false,
+  "providerAcceptance": false,
+  "externalProviderRequests": 0,
+  "migration": "0058_ai_knowledge_versions",
+  "behaviourRed": [
+    {
+      "case": "actual SQL denies six historical/unverified rows",
+      "failed": 6,
+      "log": "knowledge-legacy-red"
+    },
+    {
+      "case": "version hash audience and retrieval relevance contract",
+      "failed": 2,
+      "log": "tool-red"
+    },
+    {
+      "case": "runtime retains bounded retrievalScore, rejects invalid score",
+      "failed": 2,
+      "log": "runtime-relevance-red"
+    },
+    {
+      "case": "actual SQL NULL CHECK approved provenance",
+      "failed": 1,
+      "log": "null-provenance-red"
+    },
+    {
+      "case": "deliberately replace own action actor with forged actor, restore afterward",
+      "failed": 3,
+      "log": "action-boundary-red",
+      "deliberateViolationRestored": true
+    },
+    {
+      "case": "Hong Kong date label displays previous UTC date",
+      "failed": 1,
+      "log": "hk-date-red"
+    }
+  ],
+  "focused": {
+    "command": "npx vitest run tests/unit/admin-navigation-routes.test.ts tests/unit/internal-navigation-config.test.ts tests/unit/schema-contract.test.ts tests/unit/audit-full-admin-labels.test.ts tests/unit/audit-full-workspace.test.tsx tests/unit/concierge-evals-review.test.ts tests/unit/concierge-runtime-harness.test.ts tests/unit/concierge-runtime-harness-core.test.ts tests/unit/ai-tools.test.ts tests/unit/m4a-seed.test.ts tests/unit/ai-knowledge-policy.test.ts tests/unit/ai-knowledge-actions.test.ts tests/unit/server-action-actor-boundary.test.ts --maxWorkers=2",
+    "passed": 207,
+    "skipped": 0,
+    "failed": 0,
+    "files": 13,
+    "durationSeconds": 131.4
+  },
+  "actualDatabase": {
+    "command": "RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/ai-knowledge-retrieval.test.ts --maxWorkers=1",
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 59.55,
+    "engine": "owned disposable loopback pgvector/PostgreSQL16",
+    "embedding": "explicit deterministic test adapter; not real provider receipt",
+    "queries": 12,
+    "boundaries": [
+      "historical deny",
+      "pre-LIMIT audience/version/effective/review filters",
+      "Unicode code-point offsets and hash checked by DB",
+      "approval configured, separate owner and approver",
+      "concurrent version CAS once",
+      "cross-locale structured facts conflict",
+      "withdrawal and exact refs revalidated without retrieval cache",
+      "accepted embedding timeout fenced and not automatically retried",
+      "approved history preserved during namespace seed replacement"
+    ]
+  },
+  "setupFailuresExcluded": [
+    "missing synthetic auth_user_id corrected before product assertions",
+    "120s beforeAll setup timeout preserved separately; no time limit widened; own verified container cleaned, serial final31 pass"
+  ],
+  "originalEvidence": {
+    "originalAuditAndUCUnchanged": true,
+    "goldenJsonlBytesUnchanged": true,
+    "legacyCitationIdProjection": "Only declared matching URL/title/excerpt ground truth IDs projected to version/hash/locale identity; text, status, business and hostile expectations unchanged; never derived from actual model output",
+    "retrievalScore": "relevance only, not accuracy or confidence; retained existing handoff threshold"
+  },
+  "unresolved": [
+    {
+      "gate": "real embedding and invoice",
+      "owner": "AI service/finance owner",
+      "minimumEvidence": "approved admin test credential and allowed spend/run/day/month caps; actual provider request and reconciled receipt"
+    },
+    {
+      "gate": "policy/source approval",
+      "owner": "Content and policy owner",
+      "minimumEvidence": "approved owner/approver identities, verified source dates/facts and review due; no policy defaults inferred"
+    },
+    {
+      "gate": "final draft body and stale drafts",
+      "owner": "Engineering under T08/T13",
+      "minimumEvidence": "deterministic final-body validation, durable stale drafts and real-model adversarial tests"
+    },
+    {
+      "gate": "Production 0057/0058 and capability release",
+      "owner": "Release owner",
+      "minimumEvidence": "specific version/migrations/scope authorization after linked acceptance gates"
+    }
+  ],
+  "logs": [
+    {
+      "name": "knowledge-legacy-red",
+      "localLog": ".playwright/full-fix-t07-knowledge-legacy-red.log",
+      "sha256": "7313d124186cad5e65990a3fb82b9a4f961e2967273c5f8bbf0cf3980650c50e"
+    },
+    {
+      "name": "tool-red",
+      "localLog": ".playwright/full-fix-t07-tool-red.log",
+      "sha256": "8b626883c0e8a7678c6fcfff9c6904dde849e3f635bc9dbcc34df82ab28dec60"
+    },
+    {
+      "name": "runtime-relevance-red",
+      "localLog": ".playwright/full-fix-t07-runtime-relevance-red.log",
+      "sha256": "a67815dcfa9acd3c3d6c37a26b9e194effa00f9276a4219f0452f5561136e021"
+    },
+    {
+      "name": "null-provenance-red",
+      "localLog": ".playwright/full-fix-t07-null-provenance-red.log",
+      "sha256": "c3d707f8d816edf9cf998ed19400d7d1f7dc239d2e306325f16bfc5cbd77530a"
+    },
+    {
+      "name": "action-boundary-red",
+      "localLog": ".playwright/full-fix-t07-action-boundary-red.log",
+      "sha256": "9d9b6b21522d330ec547c60baf4e084420d19d460ed64920229d44709a3dea4e"
+    },
+    {
+      "name": "focused-broad-final",
+      "localLog": ".playwright/full-fix-t07-focused-broad-final.log",
+      "sha256": "52675f34a0fabe7f3ced7dc2eeff102e5e031affe7226b67810fd438d5005e76"
+    },
+    {
+      "name": "governance-final",
+      "localLog": ".playwright/full-fix-t07-governance-final.log",
+      "sha256": "0a17a61db708177b645e0429196eb089a3d10145cc6498539d45aede6f34b876"
+    },
+    {
+      "name": "hk-date-red",
+      "localLog": ".playwright/full-fix-t07-hk-date-red.log",
+      "sha256": "d6cfb4167dc5d01bc5476a79a76e4bf56ad6ddc0dbfb29e8149f186368afa1c3"
+    },
+    {
+      "name": "inventory-date-green",
+      "localLog": ".playwright/full-fix-t07-inventory-date-green.log",
+      "sha256": "5c85eff4c395773b1c4fb2e4571d7425a4470eada0fa7c7494b82876f281e30f"
+    },
+    {
+      "name": "first-full-unit",
+      "localLog": ".playwright/full-fix-t07-first-full-unit.log",
+      "sha256": "a8df4941e58706117b6a5940deb8054ff08599a20b3156a6c7dbedd7b26f7e58"
+    },
+    {
+      "name": "ci-first-failed",
+      "localLog": ".playwright/full-fix-t07-ci-first-failed.log",
+      "sha256": "778c5e27d7c82f017dec2e6e530c7bcc75ecb348e524efe188a36c0bdf9e3820"
+    },
+    {
+      "name": "full-serial-final",
+      "localLog": ".playwright/full-fix-t07-full-serial.log",
+      "sha256": "5a1ecd5a2f0ae170d40695606efde75d56208d9dfcb9fa7df90c2f461e4a3703"
+    },
+    {
+      "name": "source-url-red",
+      "localLog": ".playwright/full-fix-t07-source-url-red.log",
+      "sha256": "63b9a99e08a34c997441c93ea28146bcd4149c149d5ceb18af2e2bbf39b848f9"
+    },
+    {
+      "name": "source-url-green",
+      "localLog": ".playwright/full-fix-t07-source-url-green.log",
+      "sha256": "e8847c7dd2dad7eae9fbac8fb2df1aec3ea1f11e0dd6b79f5612507189913429"
+    },
+    {
+      "name": "source-url-pg-green",
+      "localLog": ".playwright/full-fix-t07-source-url-pg-green.log",
+      "sha256": "aaf4a465ce32afc00e925a2a6b034895ea39e9f5bb7aa71a9e18fcd566d2dbd6"
+    }
+  ],
+  "firstFullRun": {
+    "passed": 6504,
+    "failed": 9,
+    "skipped": 386,
+    "durationSeconds": 1618.83,
+    "filesFailed": 3,
+    "filesPassed": 771,
+    "filesSkipped": 90,
+    "resolution": "missing exact protected knowledge ownership entry; stale navigation/inventory counts corrected without weakening discovery invariants"
+  },
+  "inventoryAndDateFocused": {
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "files": 4,
+    "durationSeconds": 16.49,
+    "command": "npx vitest run tests/unit/ai-knowledge-workspace.test.tsx tests/unit/wisetech-route-parity.test.ts tests/unit/wisetech-protected-route-ownership.test.ts tests/unit/admin-app-shell.test.tsx --maxWorkers=2"
+  },
+  "rebaseVerification": {
+    "preRebase": "6b8a817bfdc74f9b00a462cd41182c1b9502efeb",
+    "postRebase": "bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+    "base": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "command": "git diff --name-only 6b8a817bfdc74f9b00a462cd41182c1b9502efeb bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+    "result": "EMPTY_DIFF_IDENTICAL_GIT_TREE",
+    "subsequentSourceCorrection": "7c6b0844 exact inventory plus Hong Kong display dates"
+  },
+  "ci": {
+    "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+    "checks": [
+      "checks",
+      "tests (1)",
+      "tests (2)",
+      "worker",
+      "quality",
+      "Vercel",
+      "Vercel Preview Comments"
+    ],
+    "allSuccess": true,
+    "originalFailedRun": 37136241745,
+    "production": false,
+    "greenRunId": 37137557588,
+    "unitPassed": 6514,
+    "unitSkipped": 386,
+    "workerPassed": 57
+  },
+  "nativeBeforeDateCorrection": {
+    "checks": 11,
+    "sourceSha": "bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+    "sourceSaveReviewWithdraw": true,
+    "embeddingProviderAcceptance": false,
+    "harnessFailure": "Existing locale cookie redirects /admin/knowledge to /zh; fixed test navigation by using real locale-switch control. No source-create bug found."
+  },
+  "fullGates": {
+    "sourceBase": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "uncommittedTask": "T07",
+    "productionDeployment": false,
+    "results": [
+      {
+        "name": "full-unit",
+        "command": "npm test -- --maxWorkers=2",
+        "startedAt": "2026-10-03T16:06:08.281Z",
+        "finishedAt": "2026-10-03T16:33:17.681Z",
+        "exitCode": 1,
+        "log": ".playwright/full-fix-t07-full-unit.log"
+      },
+      {
+        "name": "lint",
+        "command": "npm run lint",
+        "startedAt": "2026-10-03T16:06:08.561Z",
+        "finishedAt": "2026-10-03T16:08:52.652Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-lint.log"
+      },
+      {
+        "name": "strings",
+        "command": "npm run audit:strings",
+        "startedAt": "2026-10-03T16:06:08.788Z",
+        "finishedAt": "2026-10-03T16:06:15.438Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-strings.log"
+      },
+      {
+        "name": "types",
+        "command": "npm run typecheck",
+        "startedAt": "2026-10-03T16:06:08.995Z",
+        "finishedAt": "2026-10-03T16:07:55.572Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-types.log"
+      },
+      {
+        "name": "build",
+        "command": "npm run build",
+        "startedAt": "2026-10-03T16:07:55.572Z",
+        "finishedAt": "2026-10-03T16:13:06.020Z",
+        "exitCode": 0,
+        "log": ".playwright/full-fix-t07-build.log"
+      }
+    ]
+  },
+  "latestFullRun": "Latest source CI full6520pass386skip0fail; earlier exact7c local serial6514pass386skip0fail retained separately.",
+  "nativePreview": {
+    "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+    "deploymentId": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
+    "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
+    "baselineChecks": 17,
+    "knowledgeChecks": 12,
+    "realNeonSyntheticPasswordSignIn": true,
+    "trustedAuthUserIdMapping": true,
+    "googleVerified": false,
+    "magicLinkVerified": false,
+    "realEmbeddingVerified": false,
+    "production": false,
+    "providerRequests": 0,
+    "paymentWrites": 0
+  },
+  "finalNonUnitGates": [
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "startedAt": "2026-10-03T16:37:49.929Z",
+      "finishedAt": "2026-10-03T16:44:05.214Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-lint.log"
+    },
+    {
+      "name": "strings",
+      "command": "npm run audit:strings",
+      "startedAt": "2026-10-03T16:37:49.945Z",
+      "finishedAt": "2026-10-03T16:37:58.072Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-strings.log"
+    },
+    {
+      "name": "types",
+      "command": "npm run typecheck",
+      "startedAt": "2026-10-03T16:37:50.004Z",
+      "finishedAt": "2026-10-03T16:43:51.005Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-types.log"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "startedAt": "2026-10-03T16:43:51.014Z",
+      "finishedAt": "2026-10-03T16:51:00.440Z",
+      "exitCode": 0,
+      "log": ".playwright/full-fix-t07-build.log"
+    }
+  ],
+  "resourceFailure": {
+    "parallelRun": "INCOMPLETE_INTERRUPTED_NOT_A_PASS",
+    "verifiedOwnedParentPID": 10968,
+    "verifiedOwnedUnitPID": 51256,
+    "effects": "unit guards off; no provider/Production effects",
+    "hostMemoryMB": 32457,
+    "freeMemoryMB": 500,
+    "timeoutsChanged": false,
+    "serialRerun": "COMPLETE_6514_PASS_386_SKIP_0_FAIL"
+  },
+  "localFullUnit": {
+    "sourceSha": "7c6b0844b113c327e8e2c10ac16d11e04afba22f",
+    "command": "npm test -- --maxWorkers=1",
+    "startedAt": "2026-10-03T17:01:12.655Z",
+    "finishedAt": "2026-10-03T17:58:40.448Z",
+    "exitCode": 0,
+    "log": ".playwright/full-fix-t07-full-serial.log",
+    "summary": [
+      " Test Files  775 passed | 90 skipped (865)",
+      "      Tests  6514 passed | 386 skipped (6900)",
+      "   Duration  3440.48s (transform 164.98s, setup 240.85s, collect 1085.83s, tests 168.66s, environment 1112.27s, prepare 183.40s)"
+    ],
+    "production": false,
+    "timeoutChanged": false,
+    "passed": 6514,
+    "skipped": 386,
+    "failed": 0,
+    "filesPassed": 775,
+    "filesSkipped": 90,
+    "durationSeconds": 3440.48,
+    "skipReason": "guarded DB/provider acceptance not opted in for npm test; PG31 separately executed and recorded, not inferred from skipped tests"
+  },
+  "sourceUrlReview": {
+    "behaviourRed": {
+      "failed": 5,
+      "passed": 8,
+      "skipped": 0,
+      "durationSeconds": 21.6
+    },
+    "focused": {
+      "passed": 53,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 22.56,
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit/ai-knowledge-policy.test.ts tests/unit/https-url.test.ts tests/unit/ai-knowledge-actions.test.ts --maxWorkers=1"
+    },
+    "actualDatabase": {
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 30.81,
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/ai-knowledge-retrieval.test.ts --maxWorkers=1",
+      "provider": "explicit deterministic test adapter, not real provider receipt"
+    },
+    "change": "Reuse lib/security/https-url canonicalHttpsUrl for source validation; preserve canonical public query URLs, reject fragments and localhost/IP/trailing-dot hosts",
+    "ci": {
+      "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+      "runId": 37143368222,
+      "conclusion": "success",
+      "summaries": [
+        "worker\tRun npm --prefix workers test\t2026-10-03T18:13:25.8182395Z  Test Files  7 passed (7)",
+        "worker\tRun npm --prefix workers test\t2026-10-03T18:13:25.8183225Z       Tests  57 passed (57)",
+        "worker\tRun npm --prefix workers test\t2026-10-03T18:13:25.8184853Z    Duration  3.22s (transform 207ms, setup 0ms, import 425ms, tests 3.28s, environment 1ms)",
+        "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T18:15:39.2200197Z  Test Files  388 passed | 44 skipped (432)",
+        "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T18:15:39.2214347Z       Tests  3419 passed | 181 skipped (3600)",
+        "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-03T18:15:39.2226020Z    Duration  124.86s (transform 11.22s, setup 20.92s, collect 110.86s, tests 27.49s, environment 125.98s, prepare 30.36s)",
+        "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T18:16:34.2260488Z  Test Files  387 passed | 46 skipped (433)",
+        "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T18:16:34.2280754Z       Tests  3101 passed | 205 skipped (3306)",
+        "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-03T18:16:34.2298128Z    Duration  169.59s (transform 12.26s, setup 27.80s, collect 167.04s, tests 35.55s, environment 167.73s, prepare 38.53s)"
+      ],
+      "unit": {
+        "passed": 6520,
+        "skipped": 386,
+        "failed": 0,
+        "commands": [
+          "npx vitest run --shard=1/2",
+          "npx vitest run --shard=2/2"
+        ]
+      },
+      "worker": {
+        "passed": 57,
+        "skipped": 0,
+        "failed": 0
+      },
+      "logSha256": "26acd000a69c3c5aad9d98aed0871b1fa323bca6d05324bb8885f2406347bfc5",
+      "production": false
+    },
+    "nativePreview": {
+      "sourceSha": "a49e66296f4274b93b4fb8e89c64898a91c89e77",
+      "deploymentId": "dpl_3roUp1uVnxwpNQehBSvqCHVhxToW",
+      "observedAt": "2026-10-03T18:21:59.485Z",
+      "baselineChecks": 17,
+      "knowledgeChecks": 12,
+      "production": false,
+      "providerRequests": 0
+    }
+  },
+  "finalSourceGates": {
+    "environment": "GitHub Actions Linux exact a49e6629",
+    "runId": 37143368222,
+    "commands": [
+      "npm run audit:strings",
+      "npm run lint",
+      "npm run typecheck",
+      "npm run build",
+      "npx vitest run --shard=1/2",
+      "npx vitest run --shard=2/2",
+      "npm --prefix workers run typecheck",
+      "npm --prefix workers test"
+    ],
+    "allSuccess": true,
+    "unitPassed": 6520,
+    "unitSkipped": 386,
+    "workerPassed": 57
+  }
+}

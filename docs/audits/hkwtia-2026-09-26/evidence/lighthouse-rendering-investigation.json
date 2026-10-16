@@ -1,0 +1,381 @@
+{
+  "recordedAt": "2026-09-27T12:19:33.128Z",
+  "environment": "Windows Node 24.18.0, localhost production build, desktop shared host, Lighthouse mobile emulation, fresh owned Chrome profiles with extensions disabled, three runs per URL",
+  "limits": "Both runs failed the unchanged repository gate. No concurrent build or unit process from this task during collection. Other host load uncontrolled. Not RUM; narrower run is an experiment only.",
+  "records": [
+    {
+      "name": "lighthouse-containment",
+      "candidate": "fd775d1843784a51e50d22e5f319faccbd65d41c",
+      "exitCode": 1,
+      "runs": [
+        {
+          "path": "/",
+          "performance": 0.9,
+          "accessibility": 0.93,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2176.0599999999995,
+          "tbtMs": 364.4760000000001,
+          "reportSha256": "8c3bc43773426f7ea16574b054f13ce64573e5bac62c8e64ca5da35fe4fd9079"
+        },
+        {
+          "path": "/",
+          "performance": 0.96,
+          "accessibility": 0.93,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2646.655,
+          "tbtMs": 76,
+          "reportSha256": "0c60edbc5b10b3f4fa05b8ee6313d1a8a33fd34cfbb9cfc0bd63acb8461265bb"
+        },
+        {
+          "path": "/",
+          "performance": 0.95,
+          "accessibility": 0.93,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2641.5975,
+          "tbtMs": 143.36100000000033,
+          "reportSha256": "940f9613448c787c7337744fadbfa8afb2b812d660c19f3a9e47a701528865a6"
+        },
+        {
+          "path": "/events",
+          "performance": 0.92,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2707.53125,
+          "tbtMs": 232.38749999999982,
+          "reportSha256": "4b215b376ae176f9a41b7f6eb9830d2ae2a55cb0ad44053090fb2132cc32501c"
+        },
+        {
+          "path": "/events",
+          "performance": 0.96,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2663.12875,
+          "tbtMs": 95.2484999999997,
+          "reportSha256": "d647948c2f4be6b5582a68dea45da4223035489c96d456b94f5bac944da4b285"
+        },
+        {
+          "path": "/events",
+          "performance": 0.96,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2655.8999999999996,
+          "tbtMs": 101.44000000000005,
+          "reportSha256": "ce5043c7a6584ac4115ad535781b593a3fa3671d68cfe7ef0b7c2e77fbfa0be5"
+        },
+        {
+          "path": "/membership",
+          "performance": 0.97,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2447.6400000000003,
+          "tbtMs": 83,
+          "reportSha256": "fcd4c360ebae2121eaefc981ae3f9df31c262e5db3d65b021b816f435d50cb00"
+        },
+        {
+          "path": "/membership",
+          "performance": 0.99,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2008.79,
+          "tbtMs": 89,
+          "reportSha256": "eb3d09bb47502ee40af4897f41f19dbae0fd8c0a9dbd2cad37acb9d92d9ecfc0"
+        },
+        {
+          "path": "/membership",
+          "performance": 0.99,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2008.042,
+          "tbtMs": 71,
+          "reportSha256": "a6f99b3149dcc4846f0008b65ff54361b8cd5a55027a06e7e041efc26b8701c4"
+        },
+        {
+          "path": "/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2502.4700000000003,
+          "tbtMs": 60.5,
+          "reportSha256": "fd0c415bd02af1dce9395dcd334b38a9873ef0914f1a6fe86ce9ac09e7144f98"
+        },
+        {
+          "path": "/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2471.45,
+          "tbtMs": 44,
+          "reportSha256": "e12f0ca68ba2f65a2b711bef94bc210930fb098ea99f0edcfe9b21ad0f121f97"
+        },
+        {
+          "path": "/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2461.018,
+          "tbtMs": 78,
+          "reportSha256": "7d8eba812189bc74edac59274a7dc9d4b92d47cdf9d81fa2f3da739f642de8d5"
+        },
+        {
+          "path": "/programmes",
+          "performance": 0.94,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2613.2219999999998,
+          "tbtMs": 174.8889999999999,
+          "reportSha256": "fab599296eb8e172287034ff388f33d4df36b90ceca10108337c7001fcb1818a"
+        },
+        {
+          "path": "/programmes",
+          "performance": 0.99,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 1995.453,
+          "tbtMs": 75,
+          "reportSha256": "e86d0138007a8dabf8964bae4d33854968ec2c78c5ddc9faa2156e0efa5430ca"
+        },
+        {
+          "path": "/programmes",
+          "performance": 0.95,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2945.4725,
+          "tbtMs": 41,
+          "reportSha256": "2fb2a51e0194658a56a2f07a7e424f775cc6950601433e7dc7f4b25ed338fa13"
+        },
+        {
+          "path": "/zh",
+          "performance": 0.88,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2638.3374999999996,
+          "tbtMs": 353.865,
+          "reportSha256": "401ca426170881b1715c87773028e310017849b41f2d30589736c53bf6fb1dbd"
+        },
+        {
+          "path": "/zh",
+          "performance": 0.88,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0.1616038882138518,
+          "lcpMs": 2631.0625,
+          "tbtMs": 152,
+          "reportSha256": "96cd01b9038f6991035dd61e8d4efe7c99c60ac432c8dcb428dc0fae36f7b5b2"
+        },
+        {
+          "path": "/zh",
+          "performance": 0.87,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0.1616038882138518,
+          "lcpMs": 2531.56625,
+          "tbtMs": 185.57349999999997,
+          "reportSha256": "c3ae173b601ce3d488b54b9048604aad28b60fee32813eb90ffe3787a3cf9554"
+        },
+        {
+          "path": "/zh/events",
+          "performance": 0.89,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2693.30375,
+          "tbtMs": 301.7784999999999,
+          "reportSha256": "6fb2499c1f3348082934a98622382ba17a9ac030b9896013b1743400bf138a8e"
+        },
+        {
+          "path": "/zh/events",
+          "performance": 0.94,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2703.20125,
+          "tbtMs": 162.81949999999983,
+          "reportSha256": "1ca98d29fb2e0b73bca33fb717299961dc122e6226bd3f2c797a8b0a079cbe98"
+        },
+        {
+          "path": "/zh/events",
+          "performance": 0.9,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2706.21125,
+          "tbtMs": 294.41549999999984,
+          "reportSha256": "f60eef98e469f7066ec9b94cb992b809b8a89cba6349e9b81df817054a249ba5"
+        },
+        {
+          "path": "/zh/membership",
+          "performance": 0.93,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2418.6359999999995,
+          "tbtMs": 230.68200000000002,
+          "reportSha256": "f94e973b2627aab64698bcb2b2bb4fac00761d8cec8eb6f3bfa7743125d7f9a5"
+        },
+        {
+          "path": "/zh/membership",
+          "performance": 0.98,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2350.6275,
+          "tbtMs": 58.5,
+          "reportSha256": "b820cdef4125afe46f07b1331aa3fcce5520b74c7d5d8e2505e7eb879c594303"
+        },
+        {
+          "path": "/zh/membership",
+          "performance": 0.91,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2501.424,
+          "tbtMs": 293.788,
+          "reportSha256": "d15ff6f273f943aeb435cc810cc60406f36477062e4269d48b71b3912b57346c"
+        },
+        {
+          "path": "/zh/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2434.924,
+          "tbtMs": 85,
+          "reportSha256": "7f10ca3e6bfb6fb699797296b9bb403e8b2cf61b07fd9454a23abd3eed57b44f"
+        },
+        {
+          "path": "/zh/partners",
+          "performance": 0.98,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2397.0119999999997,
+          "tbtMs": 57.5,
+          "reportSha256": "4a5f95c0d6704006d0e2a81115d827f87a63769b0df78ddcbc8c00780c3abc5f"
+        },
+        {
+          "path": "/zh/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2491.4880000000003,
+          "tbtMs": 84.1279999999997,
+          "reportSha256": "a8891c4910991dd7e292dad1ddf33d151a37d208255d3d198da686bd69a96ff6"
+        },
+        {
+          "path": "/zh/programmes",
+          "performance": 0.86,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2936.812,
+          "tbtMs": 352,
+          "reportSha256": "a9ad3639b80eb3964b3fe5b859f8c954eab426068eb93d89983d97dc0511832c"
+        },
+        {
+          "path": "/zh/programmes",
+          "performance": 0.93,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2614.992,
+          "tbtMs": 202.00400000000036,
+          "reportSha256": "1a467899840bdd978b5a7922b66f284f363f3f6800e83a27c7a523df0aae3332"
+        },
+        {
+          "path": "/zh/programmes",
+          "performance": 0.96,
+          "accessibility": 0.96,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2625.0460000000003,
+          "tbtMs": 58.5,
+          "reportSha256": "6bbadd0d2cbd8174729dcacf0c80c8fe30a21d479e87292157bd90afaf0118e1"
+        }
+      ]
+    },
+    {
+      "name": "lighthouse-end-stability",
+      "candidate": "fd775d18 generated CSS experiment: archive-proof and conversion-section render eagerly; not a source build",
+      "exitCode": 1,
+      "runs": [
+        {
+          "path": "/",
+          "performance": 0.83,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2530.79375,
+          "tbtMs": 527.2825,
+          "reportSha256": "1ef4ea7a5495180c4a556564e41d3ab1504d1c2bc7e75233e9861e42a2302a5b"
+        },
+        {
+          "path": "/",
+          "performance": 0.88,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2388.78125,
+          "tbtMs": 391.4874999999997,
+          "reportSha256": "8de52df002c85adee4824e24fa4f813817ca7465ccd7ed6cbc890e729c7bd007"
+        },
+        {
+          "path": "/",
+          "performance": 0.86,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2351.2437499999996,
+          "tbtMs": 484.00250000000005,
+          "reportSha256": "5b3185e06df54ab3cb37b267c19724e775c57e4295eb135cef7331f43b0e2756"
+        },
+        {
+          "path": "/zh",
+          "performance": 0.88,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2614.9824999999996,
+          "tbtMs": 357.40699999999947,
+          "reportSha256": "ee54e9e2e877a21fed6efd9b71ec2157a405d6f502878704e0af1391ebd91a9a"
+        },
+        {
+          "path": "/zh",
+          "performance": 0.93,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2435.5,
+          "tbtMs": 231.9000000000001,
+          "reportSha256": "ce354e89228ec0e64c6c6259a2728d81d17b3d53d908ba1300d5e773ffc77185"
+        },
+        {
+          "path": "/zh",
+          "performance": 0.88,
+          "accessibility": 1,
+          "seo": 1,
+          "cls": 0,
+          "lcpMs": 2111.286,
+          "tbtMs": 441.35699999999997,
+          "reportSha256": "4944b1062530e62882f8766d0d4a2de32a22f9af5e91f69d5b04480d24e5ae65"
+        }
+      ]
+    }
+  ]
+}

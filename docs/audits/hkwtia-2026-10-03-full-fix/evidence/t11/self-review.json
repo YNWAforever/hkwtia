@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-10-04T10:12:49.789058+00:00",
+  "method": "author self-review; explicit sequential no-subagent instruction",
+  "sourceBase": "3675e28237633a95900545c44e80c08449a27214",
+  "reviewed": [
+    "server actor and Cron authorization before source reads",
+    "stable asOf/profile group keyset, database collation, limit101 and pending SQL",
+    "work ownership before provider, budget-first dispatch, same-key success reuse and cross-day unknown retention",
+    "whole-body source-grounding and minimized prompt",
+    "new approval FK, run/case/facts/request key matching and result CHECK",
+    "current consent/membership locks before human approve; rejection allowed",
+    "separate current renewal batch/sender path; approval does not send",
+    "feature off before configuration and worker health disabled",
+    "compatible schema rollback with ledger retained and no historical modifications"
+  ],
+  "unresolvedCriticalOrImportant": [],
+  "rulings": [
+    "Keep existing NULL requestedBy system approvals shared across authorized staff; do not infer a new association ownership policy.",
+    "Keep active/past_due and both old risk branches; consent changes invalidate proposals but this draft-only reader does not invent a new messaging policy.",
+    "Legacy v1 approvals remain historical human decisions, with no new automatic sending path.",
+    "0060 only adds the existing approval result and pending index; generated broad stale-snapshot delta was reduced before any migration."
+  ],
+  "externalGates": [
+    "Actual approved model credentials/data/spend limits and provider receipts",
+    "Pinned isolated worker service binding and two scheduled windows",
+    "Association capability activation and Production release authorization"
+  ],
+  "productionRelease": false
+}

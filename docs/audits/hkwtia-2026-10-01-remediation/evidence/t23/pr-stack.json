@@ -1,0 +1,152 @@
+{
+  "observedAt": "2026-10-02T19:55:55.008544+00:00",
+  "prs": [
+    {
+      "baseRefName": "codex/full-remediation-performance-20261001",
+      "headRefName": "codex/full-remediation-acceptance-20261001",
+      "isDraft": true,
+      "number": 122,
+      "title": "test: complete isolated remediation scale and recovery coverage",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/122"
+    },
+    {
+      "baseRefName": "codex/full-remediation-public-performance-20261001",
+      "headRefName": "codex/full-remediation-performance-20261001",
+      "isDraft": true,
+      "number": 121,
+      "title": "perf: verify isolated query and cache boundaries with truthful public loading",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/121"
+    },
+    {
+      "baseRefName": "codex/full-remediation-support-handoff-20261001",
+      "headRefName": "codex/full-remediation-public-performance-20261001",
+      "isDraft": true,
+      "number": 120,
+      "title": "fix: verify public login partner assets and content scope",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/120"
+    },
+    {
+      "baseRefName": "codex/full-remediation-daily-workspace-20261001",
+      "headRefName": "codex/full-remediation-support-handoff-20261001",
+      "isDraft": true,
+      "number": 119,
+      "title": "feat: complete versioned support handoff and truthful send recovery",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/119"
+    },
+    {
+      "baseRefName": "codex/full-remediation-cms-workspace-20261001",
+      "headRefName": "codex/full-remediation-daily-workspace-20261001",
+      "isDraft": true,
+      "number": 118,
+      "title": "feat: organize daily admin work and member maintenance (T18)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/118"
+    },
+    {
+      "baseRefName": "codex/full-remediation-ticket-lifecycle-20261001",
+      "headRefName": "codex/full-remediation-cms-workspace-20261001",
+      "isDraft": true,
+      "number": 117,
+      "title": "feat: private CMS drafting and explicit publication (T17)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/117"
+    },
+    {
+      "baseRefName": "codex/full-remediation-import-export-20261001",
+      "headRefName": "codex/full-remediation-ticket-lifecycle-20261001",
+      "isDraft": true,
+      "number": 116,
+      "title": "fix: verify ticket refunds and serialize admission (T16)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/116"
+    },
+    {
+      "baseRefName": "codex/full-remediation-batch-workflows-20261001",
+      "headRefName": "codex/full-remediation-import-export-20261001",
+      "isDraft": true,
+      "number": 115,
+      "title": "fix: complete safe import and private export workflows",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/115"
+    },
+    {
+      "baseRefName": "codex/full-remediation-renewal-window-20261001",
+      "headRefName": "codex/full-remediation-batch-workflows-20261001",
+      "isDraft": true,
+      "number": 114,
+      "title": "fix: bounded batch snapshots and reliable recovery",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/114"
+    },
+    {
+      "baseRefName": "codex/full-remediation-worker-health-20261001",
+      "headRefName": "codex/full-remediation-renewal-window-20261001",
+      "isDraft": true,
+      "number": 113,
+      "title": "perf: bound renewal enrollment and durable checkpoints (T12)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/113"
+    },
+    {
+      "baseRefName": "codex/full-remediation-policy-cases-20261001",
+      "headRefName": "codex/full-remediation-worker-health-20261001",
+      "isDraft": true,
+      "number": 112,
+      "title": "feat: verified worker health and runtime entry (T11)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/112"
+    },
+    {
+      "baseRefName": "codex/full-remediation-policy-20261001",
+      "headRefName": "codex/full-remediation-policy-cases-20261001",
+      "isDraft": true,
+      "number": 111,
+      "title": "feat: actionable membership application cases (T10)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/111"
+    },
+    {
+      "baseRefName": "codex/full-remediation-billing-20261001",
+      "headRefName": "codex/full-remediation-policy-20261001",
+      "isDraft": true,
+      "number": 110,
+      "title": "feat: version membership policy acceptance (T09)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/110"
+    },
+    {
+      "baseRefName": "codex/full-remediation-governance-20261001",
+      "headRefName": "codex/full-remediation-billing-20261001",
+      "isDraft": true,
+      "number": 109,
+      "title": "fix: recover billing history and reconcile existing payments (T08)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/109"
+    },
+    {
+      "baseRefName": "codex/full-remediation-20261001",
+      "headRefName": "codex/full-remediation-governance-20261001",
+      "isDraft": true,
+      "number": 108,
+      "title": "fix: identity and versioned grant/campaign governance (T05\u2013T07)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/108"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/full-remediation-20261001",
+      "isDraft": true,
+      "number": 107,
+      "title": "fix: complete first HKWTIA remediation slice (T00\u2013T04)",
+      "url": "https://github.com/YNWAforever/hkwtia/pull/107"
+    }
+  ],
+  "notMerged": true,
+  "sequentialReviewOrder": [
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122
+  ]
+}

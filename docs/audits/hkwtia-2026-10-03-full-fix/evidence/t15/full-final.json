@@ -1,0 +1,10 @@
+{
+  "sourceSha": "1aefcbdb654fe408291621e0e70b9e4230a02041",
+  "command": "npm test -- --reporter=default --reporter=json --outputFile=.playwright/full-fix-t15-full-final-results.json --maxWorkers=4",
+  "passed": 6752,
+  "failed": 0,
+  "skipped": 589,
+  "skipsArePass": false,
+  "skippedFiles": [],
+  "rawPrivateResultSha256": "a144754fe143ea2dd7214baccc0155cccddb2ed5fa9dedb80e4ca7425237011e"
+}

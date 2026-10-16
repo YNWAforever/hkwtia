@@ -1,0 +1,11 @@
+{
+  "environment": "isolated local",
+  "authentication": "existing Neon Auth email/password API with synthetic staff; no email send",
+  "anonymousProtected": true,
+  "providerSignInStatus": 200,
+  "staffEditor": true,
+  "unpublishedPublicCount": 78,
+  "republishedPublicCount": 79,
+  "productionChanged": false,
+  "passed": true
+}

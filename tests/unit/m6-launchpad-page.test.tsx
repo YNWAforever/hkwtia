@@ -1,6 +1,8 @@
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+const partners = vi.hoisted(() => ({listPublished: vi.fn()}));
+
 const state = vi.hoisted(() => ({
   cohorts: [{
     id: "11111111-1111-4111-8111-111111111111",
@@ -28,6 +30,17 @@ vi.mock("@/lib/db/repos/cohorts", () => ({
     listPublicCohorts: (...args: unknown[]) => state.listPublicCohorts(...args),
   },
 }));
+vi.mock("@/lib/db/repos/landing-partners", () => ({
+  landingPartnersRepository: {listPublished: partners.listPublished},
+}));
+// Task 17 gave the page a wt PageHero (breadcrumb) and ClosingBand (ActionLink), both of
+// which render @/i18n/navigation's Link -- a real next-intl navigation Link that reads
+// useLocale() from context. This suite renders the page with plain renderToStaticMarkup, no
+// NextIntlClientProvider, so the same projection every other wt-page test in this repo uses
+// (a plain <a>) is needed here too; nothing about the suite's own assertions changes.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
+}));
 
 import LaunchPadPage, {dynamic} from "@/app/[locale]/(public)/launchpad/page";
 import {CohortCalendar} from "@/components/marketing/cohort-calendar";
@@ -36,6 +49,7 @@ import {FundingWizard} from "@/components/marketing/funding-wizard";
 const labels = {
   formLabel: "Funding scheme picker",
   instructions: "Choose an answer for every question.",
+  placeholder: "Choose…",
   submit: "See matching schemes",
   questions: {
     sector: {label: "Project focus", options: {trade: "Trade", "advanced-training": "Training", "smart-production": "Smart production", "life-health": "Life and health", "ai-data-science": "AI", "advanced-manufacturing-new-energy": "Advanced manufacturing", "research-development": "Research and development"}},
@@ -63,6 +77,8 @@ describe("M6 Launch Pad public experience", () => {
   beforeEach(() => {
     state.listPublicCohorts.mockReset();
     state.listPublicCohorts.mockResolvedValue(state.cohorts);
+    partners.listPublished.mockReset();
+    partners.listPublished.mockResolvedValue([]);
   });
 
   it.each(["en", "zh-HK"] as const)("renders the explainer, calendar, partner map, picker, results, and clinic CTA in %s", async (locale) => {
@@ -76,14 +92,36 @@ describe("M6 Launch Pad public experience", () => {
     expect(markup).toContain("clinicCta");
   });
 
-  it("renders the localized partner empty state when the repository is unavailable", async () => {
+  it.each(["en", "zh-HK"] as const)("distinguishes a partner outage from no published partners in %s", async (locale) => {
+    partners.listPublished.mockRejectedValue(new Error("PARTNERS_UNAVAILABLE"));
+
+    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps(locale)));
+
+    expect(markup).toContain("partners.unavailable");
+    expect(markup).not.toContain("partners.empty");
+    expect(markup).not.toContain("PARTNERS_UNAVAILABLE");
+  });
+
+  it.each(["en", "zh-HK"] as const)("distinguishes a cohort outage from no scheduled cohorts in %s", async (locale) => {
+    state.listPublicCohorts.mockRejectedValue(new Error("COHORTS_UNAVAILABLE"));
+
+    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps(locale)));
+
+    expect(markup).toContain("calendar.unavailable");
+    expect(markup).not.toContain("calendar.empty");
+    expect(markup).not.toContain("cohort-application-title");
+    expect(markup).not.toContain("COHORTS_UNAVAILABLE");
+  });
+
+  it("keeps genuine empty cohort and partner states when both reads succeed", async () => {
+    state.listPublicCohorts.mockResolvedValue([]);
+
     const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("en")));
 
+    expect(markup).toContain("calendar.empty");
     expect(markup).toContain("partners.empty");
-    expect(markup).not.toContain("private-contact@example.com");
-    expect(markup).not.toContain("private-partner-notes");
-    expect(markup).not.toContain("in_discussion");
-    expect(markup).not.toContain("prospect");
+    expect(markup).not.toContain("calendar.unavailable");
+    expect(markup).not.toContain("partners.unavailable");
   });
 
   it("passes the explicit anonymous actor to the database-backed cohort projection", async () => {

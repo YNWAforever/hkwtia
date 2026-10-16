@@ -1,0 +1,30 @@
+{
+  "sourceSha": "145443b69df74ad2f70af172c310d10e05803220",
+  "mode": "sequential author review; user prohibited subagents",
+  "interfacesRead": [
+    "public list/count/filter/order",
+    "member list/count/snapshot/company seat predicates",
+    "draft/inbox bounds",
+    "CMS translation field scope",
+    "concierge event/focus/runtime",
+    "pinned public image and private media delivery"
+  ],
+  "preserved": [
+    "server actor authorization",
+    "paid/grant/history/consent policy",
+    "uncapped public count/sitemap",
+    "published-only public visibility",
+    "private no-store and actor switch",
+    "CMS113-field scope",
+    "original Lighthouse thresholds/route order/count"
+  ],
+  "evidence": [
+    "ci-source.json",
+    "native-final-runtime.json",
+    "lighthouse-final-scores.json",
+    "public-pagination-postgres.json",
+    "revoked-seat-mutation-red.txt",
+    "hero-precomputed.json"
+  ],
+  "unresolved": "real identities/provider/cloud windows/human/region/production gates; no whole-finding closure"
+}

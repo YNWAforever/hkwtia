@@ -3,6 +3,7 @@ import {describe, expect, expectTypeOf, it} from "vitest";
 import {
   completeApplicationSchema,
   joinInputSchema,
+  profileSchema,
   type JoinInput,
 } from "@/lib/membership/join-schema";
 import {getPlan, PLAN_CODES} from "@/lib/membership/plans";
@@ -21,14 +22,28 @@ describe("membership join schemas", () => {
     expect(joinInputSchema.parse({plan: "community", applicationId: null})).toEqual({
       plan: "community",
       applicationId: null,
+      companyId: null,
+      newApplication: false,
     });
     expectTypeOf<JoinInput["plan"]>().toEqualTypeOf<(typeof PLAN_CODES)[number]>();
   });
 
   it("requires a profile when completing an application", () => {
     expect(
-      completeApplicationSchema.safeParse({plan: "patron", profile: {displayName: "Patron"}}).success,
+      completeApplicationSchema.safeParse({plan: "patron", billingInterval: "none", profile: {displayName: "Patron"}}).success,
     ).toBe(true);
-    expect(completeApplicationSchema.safeParse({plan: "patron", company: null}).success).toBe(false);
+    expect(completeApplicationSchema.safeParse({plan: "patron", billingInterval: "none", company: null}).success).toBe(false);
+  });
+
+  it("requires an explicit billingInterval when completing an application", () => {
+    expect(
+      completeApplicationSchema.safeParse({plan: "patron", profile: {displayName: "Patron"}}).success,
+    ).toBe(false);
+  });
+  it("normalises a WhatsApp number and refuses opt-in without a number", () => {
+    expect(profileSchema.parse({displayName: "Ada", whatsappNumber: "+852 9123 4567", whatsappOptIn: true})).toMatchObject({whatsappNumber: "+85291234567", whatsappOptIn: true});
+    expect(profileSchema.safeParse({displayName: "Ada", whatsappNumber: "12", whatsappOptIn: false}).success).toBe(false);
+    expect(profileSchema.safeParse({displayName: "Ada", whatsappOptIn: true}).success).toBe(false);
+    expect(profileSchema.parse({displayName: "Ada"})).toMatchObject({whatsappNumber: null, whatsappOptIn: false});
   });
 });

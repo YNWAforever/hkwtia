@@ -1,0 +1,20 @@
+{
+  "scope": "Actual confirmed isolated built Chromium; synthetic fixtures; not Production",
+  "stats": {
+    "startTime": "2026-10-02T12:40:33.965Z",
+    "duration": 28877.179,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "cms-publish.spec.ts",
+      "title": "registered media search over 79 real static fixture images in bilingual event forms",
+      "statuses": [
+        "failed"
+      ]
+    }
+  ]
+}

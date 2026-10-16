@@ -1,0 +1,47 @@
+{
+  "applicationSha": "1e4f6246ac42f3dd0249acad2be949aaf94a6aa6",
+  "verificationScriptCommit": "b74a2109",
+  "environment": "Windows; Node24.18.0; production build without private provider/test environment; isolated dev server stopped first",
+  "checks": [
+    {
+      "name": "strings",
+      "command": "npm run audit:strings",
+      "exitCode": 0,
+      "logSha256": "aea3f76a1ffc2f145a5d5e015643cb148889545967ef573b713c978c1468c288"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "exitCode": 0,
+      "logSha256": "9fbc1311a14d09e160b22caf3b89c18a4ec9401da820e2bb9c78d2b86df47b2a"
+    },
+    {
+      "name": "typecheck",
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "logSha256": "712f4b01ca991c606f47174c5607247a0b1c924bc322c039d9c9db9324659557"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "logSha256": "b74b05e2073da0fac33f744632ecb4f4351888f68a8a2d4af6b3aa2047ac2551"
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 63
+  },
+  "stringsTsxFiles": 287,
+  "refundFocused": {
+    "passed": 30,
+    "failed": 0,
+    "skipped": 0,
+    "files": 3,
+    "disposablePostgresCases": 2,
+    "command": "RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/refund-actor-postgres.test.ts tests/unit/refund-core.test.ts tests/unit/refund-email.test.ts --maxWorkers=1 --reporter=json",
+    "reportSha256": "1ce38fd664c1eb30573938594f296d0706928e70a504b1f7b6f7417d6a900dc7"
+  },
+  "fullSuite": "Actual full two-shard gate recorded in ci-final-application.json; 5927 passed and147 skipped. Earlier failed local full suite retained in final-gates.json.",
+  "production": "Not released; no production migration, cleanup, payment/refund or message."
+}

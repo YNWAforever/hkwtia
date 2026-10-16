@@ -1,3 +1,4 @@
+import {contentDraftAssistance} from "@/lib/admin/content-draft-assistance";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
@@ -5,6 +6,7 @@ import {z} from "zod";
 import {ArchiveToggle} from "@/components/admin/archive-toggle";
 import {NewsForm} from "@/components/admin/news-form";
 import type {AppLocale} from "@/i18n/routing";
+import {toArchiveInUseMessage} from "@/lib/admin/archive-toggle-labels";
 import {setNewsArchivedAction, updateNewsAction} from "@/lib/admin/news-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
@@ -23,11 +25,13 @@ export default async function AdminNewsDetailPage({params}: Props) {
   if (!parsedId.success) notFound();
   const post = await adminPostsRepository.getForAdmin(actor, parsedId.data);
   if (!post) notFound();
+  const contentAssistance = await contentDraftAssistance(actor, "news", parsedId.data, locale);
   const t = await getTranslations({locale, namespace: "Admin.news"});
   const updateActionMessages = {
     successMessage: t("updateSuccess"),
     validationMessage: t("validation"),
     slugConflictMessage: t("slugConflict"),
+    conflictMessage: t("editConflict"),
     errorMessage: t("error"),
   };
   const updateAction = updateNewsAction.bind(
@@ -40,7 +44,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
     slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), author: t("author"),
     bodyMdx: t("bodyMdx"), bodyMdxZhHk: t("bodyMdxZhHk"),
     bodyHelp: t("bodyHelp"), published: t("published"),
-    save: t("save"), saving: t("saving"),
+    save: t("save"), saving: t("saving"), saveDraft: t("saveDraft"), savePublish: t("savePublish"), previewDraft: t("previewDraft"), previewPrivate: t("previewPrivate"), previewEnglish: t("previewEnglish"), previewChinese: t("previewChinese"),
   };
 
   return (
@@ -56,7 +60,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
             : post.publishedAt ? t("statusPublished") : t("statusDraft")}
         </p>
       </header>
-      <NewsForm action={updateAction} labels={labels} values={post}/>
+      <NewsForm action={updateAction} labels={labels} values={post} assistance={contentAssistance}/>
       <ArchiveToggle
         action={setNewsArchivedAction.bind(
           null,
@@ -67,7 +71,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
         archived={post.archivedAt !== null}
         labels={{
           archive: t("archive"), unarchive: t("unarchive"), archiving: t("archiving"),
-          archivedNotice: t("archivedNotice"), inUse: t("archiveInUse"), error: t("error"),
+          archivedNotice: t("archivedNotice"), inUse: toArchiveInUseMessage(t.raw("archiveInUse")), error: t("error"),
         }}
       />
     </div>

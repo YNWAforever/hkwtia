@@ -1,0 +1,14 @@
+{
+  "applicationSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "nativeReport": "t22-credential-free-release-final.json",
+  "stats": {
+    "pass": 7,
+    "fail": 1,
+    "skip": 0
+  },
+  "failedCase": "zh-HK footer language control is unobscured at 1280px and preserves filters",
+  "failure": "native focus attempted on intentionally disabled hydration fallback after document locale navigation",
+  "correction": "condition-based toBeEnabled before focus, retain focus assertion and native Enter; no forced click/timeout relaxation/product change",
+  "greenPending": false,
+  "greenReceipt": "credential-free-current.json"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "dpl_73vgi1W5xHaBYHgvZCmUH8uT2KH2",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "e4c72c64999977529a6bc890298df941f7da2e60",
+  "gitRef": "codex/ai-budget-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-ai-budget-20261003.vercel.app",
+  "production": false
+}

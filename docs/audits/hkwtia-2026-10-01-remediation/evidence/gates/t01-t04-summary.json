@@ -1,0 +1,48 @@
+{
+  "verifiedAt": "2026-10-01T09:46:45.471Z",
+  "codeSha": "c54e18280f3ed3532355031723545f114106748b",
+  "unit": {
+    "command": "npm.cmd test",
+    "passedFiles": 724,
+    "skippedFiles": 67,
+    "passedTests": 6140,
+    "skippedTests": 175,
+    "failedTests": 0,
+    "durationSeconds": 340.43
+  },
+  "lint": {
+    "command": "npm.cmd run lint",
+    "errors": 0,
+    "warnings": 67,
+    "exitCode": 0
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "nextVersion": "16.3.6",
+    "staticPages": 267
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exitCode": 0
+  },
+  "strings": {
+    "command": "npm.cmd run audit:strings",
+    "exitCode": 0
+  },
+  "separateIntegration": {
+    "fixtureTests": 1,
+    "segmentSqlTests": 3,
+    "pageCopyPostgresConcurrencyTests": 1,
+    "skipped": 0
+  },
+  "browser": {
+    "segmentCases": 2,
+    "cmsCases": 4,
+    "provider": "synthetic password against confirmed isolated Auth",
+    "google": false,
+    "magicLink": false
+  },
+  "productionReleased": false,
+  "previewVerified": false
+}

@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-10-02T01:21:42.111Z",
+  "productionWrites": 0,
+  "rows": [
+    {
+      "path": "/partners",
+      "status": 200,
+      "sourceNoteTitle": "Published records, not a scraped logo wall.",
+      "partnerCards": 79,
+      "headerMemberLoginLinks": 1,
+      "footerStaffLoginLinks": 1,
+      "scope": "anonymous existing Production read-only; not candidate acceptance"
+    },
+    {
+      "path": "/zh/partners",
+      "status": 200,
+      "sourceNoteTitle": "已發布的紀錄，而非抓取而來的標誌牆。",
+      "partnerCards": 79,
+      "headerMemberLoginLinks": 1,
+      "footerStaffLoginLinks": 1,
+      "scope": "anonymous existing Production read-only; not candidate acceptance"
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "sourceNoteTitle": null,
+      "partnerCards": 0,
+      "headerMemberLoginLinks": 1,
+      "footerStaffLoginLinks": 1,
+      "scope": "anonymous existing Production read-only; not candidate acceptance"
+    },
+    {
+      "path": "/zh",
+      "status": 200,
+      "sourceNoteTitle": null,
+      "partnerCards": 0,
+      "headerMemberLoginLinks": 1,
+      "footerStaffLoginLinks": 1,
+      "scope": "anonymous existing Production read-only; not candidate acceptance"
+    }
+  ]
+}

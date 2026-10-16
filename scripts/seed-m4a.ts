@@ -1,3 +1,4 @@
+import {createAiBudgetRepository,configuredAiBudgetLimits} from "../lib/db/repos/ai-budget.ts";
 import {resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
@@ -457,7 +458,7 @@ export async function runM4ASeed(
       // Named rather than left to the default, so the difference between this
       // and the production seed is visible at both call sites instead of one.
       sources: M4A_DEFAULT_SOURCES,
-      embedding: createOpenAIEmbeddingAdapter(apiKey),
+      embedding: createOpenAIEmbeddingAdapter(apiKey, {budget:createAiBudgetRepository(knowledge.loadDatabase,()=>configuredAiBudgetLimits(environment))}),
       repository: knowledge.repository,
     });
     await reconcileM4AAcceptanceFixture(

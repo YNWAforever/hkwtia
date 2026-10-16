@@ -226,6 +226,13 @@ describe("repository database boundary", () => {
     }
   });
 
+  // The explicit timeout is contention insurance, not a hang budget. This case
+  // parses every production file under `lib/` with the TypeScript compiler, so
+  // its cost tracks the size of the tree rather than anything about the test:
+  // ~1.6s on an idle box at Phase B2, but the suite runs ~510 files in
+  // parallel and under that load it crossed Vitest's 5s default and failed the
+  // gate for scheduling reasons rather than for a violation. Do not read a
+  // pass here as "fast enough" — read it as "found no violations".
   it("allows runtime database imports only within repositories", async () => {
     const violations: string[] = [];
     for (const file of await productionTypeScriptFiles(root)) {
@@ -241,7 +248,7 @@ describe("repository database boundary", () => {
     }
 
     expect(violations).toEqual([]);
-  });
+  }, 30_000);
 
   it("distinguishes runtime server-schema imports from type-only imports", () => {
     expect(runtimeDatabaseImportSpecifiers(
@@ -365,11 +372,22 @@ describe("repository database boundary", () => {
       /kind:\s*["']agent["']|AgentRunActor/,
     );
     expect(agentActor).toContain('kind: "agent"');
-    expect(agentActor).toContain(
-      "export type AgentRunActor = ConciergeAgentActor | ScheduledAgentActor;",
-    );
-    expect(agentActor).toContain(
-      "export type Actor = SessionActor | AgentRunActor;",
+    // Anchor on the property that matters — which agent actors the union names —
+    // rather than one exact spelling, so adding an actor does not silently
+    // retire this boundary check (Phase D-3 added WriterAgentActor).
+    const agentRunActor = agentActor.match(
+      /export type AgentRunActor\s*=([\s\S]*?);/,
+    )?.[1];
+    expect(agentRunActor).toBeDefined();
+    for (const member of [
+      "ConciergeAgentActor",
+      "ScheduledAgentActor",
+      "WriterAgentActor",
+    ]) {
+      expect(agentRunActor).toContain(member);
+    }
+    expect(agentActor).toMatch(
+      /export type Actor\s*=\s*SessionActor\s*\|\s*AgentRunActor;/,
     );
   });
 });

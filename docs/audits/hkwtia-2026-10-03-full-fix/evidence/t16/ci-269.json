@@ -1,0 +1,27 @@
+{
+  "sourceSha": "269b2c923dc105f0f4780613f4db67d0400c9817",
+  "runId": 37233523350,
+  "conclusion": "success",
+  "unitPassed": 6771,
+  "guardedUnitSkipped": 595,
+  "unitFailed": 0,
+  "workerPassed": 57,
+  "checks": [
+    "lint",
+    "typecheck",
+    "strings",
+    "build",
+    "productionDependencySecurityAudit",
+    "authDependencyResolution"
+  ],
+  "production": false,
+  "limits": "Current946bad06 refinement CI pending; previous source269 current evidence retained. Skips require positively proven integration targets/provider capability flags; not acceptance.",
+  "summaryLines": [
+    "worker\tRun npm --prefix workers test\t2026-10-04T20:48:57.1926036Z  Test Files  7 passed (7)",
+    "worker\tRun npm --prefix workers test\t2026-10-04T20:48:57.1926749Z       Tests  57 passed (57)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T20:51:59.3852303Z  Test Files  397 passed | 54 skipped (451)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T20:51:59.3867806Z       Tests  3173 passed | 269 skipped (3442)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T20:53:10.2746672Z  Test Files  400 passed | 50 skipped (450)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T20:53:10.2766686Z       Tests  3598 passed | 326 skipped (3924)"
+  ]
+}

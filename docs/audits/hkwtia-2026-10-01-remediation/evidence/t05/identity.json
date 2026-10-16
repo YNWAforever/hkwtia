@@ -1,0 +1,29 @@
+{
+  "sourceSha": "5a7eb9eb",
+  "environment": "confirmed isolated Neon branch br-lingering-unit-azxl75s5",
+  "provider": "no OAuth or magic-link callback exercised",
+  "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-auth-identity.test.ts tests/unit/login-profile-provision.test.ts tests/unit/login-profile-action.test.ts tests/unit/login-resolution.test.ts tests/unit/login-resolution-server.test.ts tests/unit/login-destination.test.ts",
+  "result": {
+    "filesPassed": 6,
+    "testsPassed": 44,
+    "skipped": 0,
+    "failed": 0
+  },
+  "actualSql": [
+    "same identity concurrent provision: one member profile, no membership",
+    "different verified subject with same privileged email: conflict, original role unchanged",
+    "two new subjects same email: one ready, one conflict"
+  ],
+  "cleanup": "only generated synthetic profile IDs deleted",
+  "gate": {
+    "cases": [
+      "U02",
+      "U03",
+      "U04",
+      "U05 provider callback",
+      "U06 end-to-end"
+    ],
+    "dependency": "dedicated approved test recipient; human Google device verification; isolated callback origin",
+    "owner": "identity owner"
+  }
+}

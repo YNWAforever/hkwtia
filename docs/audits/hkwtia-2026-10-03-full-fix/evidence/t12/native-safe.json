@@ -1,0 +1,13 @@
+{
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "buildId": "RTziDJb56p8wJT7zYozZ0",
+  "observedAt": "2026-10-04T12:29:46.033Z",
+  "nativeExit": 0,
+  "ledger": 61,
+  "dbSourcePositivelyProven": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderSends": 0,
+  "realDeliveryReceipt": false,
+  "production": false
+}

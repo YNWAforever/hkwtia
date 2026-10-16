@@ -1,0 +1,49 @@
+ FAIL  tests/unit/ci-security-contract.test.ts > CI and production dependency security contract > requires a valid full lockfile-only Auth tree and detects a hostile peer-invalid fixture
+Error: Auth tree process failed: code=ETIMEDOUT status=null signal=SIGKILL; spawnSync C:\WINDOWS\system32\cmd.exe ETIMEDOUT
+ ❯ runAuthTreeCheck tests/unit/ci-security-contract.test.ts:193:11
+    191| 
+    192|   if (result.error || result.status === null || result.signal) {
+    193|     throw new Error(`Auth tree process failed: code=${errorCode} statu…
+       |           ^
+    194|   }
+    195| 
+ ❯ tests/unit/ci-security-contract.test.ts:307:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/unit/page-copy-scope.test.ts > page copy scope > exposes the agreed editable surface and nothing more
+AssertionError: expected { Home: 166, About: 19, …(11) } to deeply equal { Home: 166, About: 19, …(11) }
+
+- Expected
++ Received
+
+@@ -4,11 +4,11 @@
+    "Chairman": 8,
+    "Committees": 12,
+    "Contact": 49,
+    "Home": 166,
+    "MarketingExtras": 1,
+-   "Membership": 113,
++   "Membership": 114,
+    "Partners": 38,
+    "Privacy": 50,
+    "Programmes": 33,
+    "RefundPolicy": 15,
+    "programs": 42,
+
+ ❯ tests/unit/page-copy-scope.test.ts:83:19
+     81|     const sizes = pageCopyCatalogSizes();
+     82| 
+     83|     expect(sizes).toEqual({
+       |                   ^
+     84|       // PR5 added the two editable partner-wall labels. WP-3 Task 2 a…
+     85|       // editable hero fields (eyebrow/title/lead/imageAlt/note/discov…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 795 passed | 102 skipped (899)
+      Tests  2 failed | 6758 passed | 590 skipped (7350)
+   Start at  02:22:22
+   Duration  509.78s (transform 469.01s, setup 578.62s, collect 1638.17s, tests 325.27s, environment 1698.27s, prepare 296.75s)
+

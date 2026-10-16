@@ -1,0 +1,30 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/home-hero.test.tsx (2 tests | 2 failed) 532ms
+   × Hero > renders the donor top-scrim hero over the donor's Tech Connect photo in en 521ms
+     → The hero should use precomputed responsive files without a cold optimizer request: expected null not to be null
+   × Hero > renders the donor top-scrim hero over the donor's Tech Connect photo in zh-HK 9ms
+     → The hero should use precomputed responsive files without a cold optimizer request: expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/home-hero.test.tsx > Hero > renders the donor top-scrim hero over the donor's Tech Connect photo in en
+ FAIL  tests/unit/home-hero.test.tsx > Hero > renders the donor top-scrim hero over the donor's Tech Connect photo in zh-HK
+AssertionError: The hero should use precomputed responsive files without a cold optimizer request: expected null not to be null
+ ❯ tests/unit/home-hero.test.tsx:61:119
+     59|     expect(image).toHaveAttribute("sizes", "100vw");
+     60|     const responsiveSource = image.closest("picture")?.querySelector("…
+     61|     expect(responsiveSource, "The hero should use precomputed responsi…
+       |                                                                                                                       ^
+     62|     expect(responsiveSource).toHaveAttribute("type", "image/webp");
+     63|     expect(responsiveSource).toHaveAttribute("sizes", "100vw");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  03:49:44
+   Duration  29.24s (transform 251ms, setup 2.21s, collect 1.54s, tests 532ms, environment 9.67s, prepare 603ms)
+

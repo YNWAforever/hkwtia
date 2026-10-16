@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-03T14:24:03.022Z",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "projectId": "solitary-wave-52860119",
+  "origin": "https://hkwtia-ai-budget-20261003.vercel.app",
+  "primary": false,
+  "default": false,
+  "protected": false,
+  "previousOrigins": 9,
+  "currentOrigins": 10,
+  "existingOriginsPreserved": true,
+  "productionChanged": false
+}

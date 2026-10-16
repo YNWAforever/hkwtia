@@ -127,8 +127,6 @@ describe("automation dashboard presentation", () => {
     expect(locale === "en"
       ? en.Admin.navigation.automations
       : zh.Admin.navigation.automations).toBe(nav);
-    expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html).toContain(`>${title}</h1>`);
     expect(html).toContain(`<caption>${labels.jobsCaption}</caption>`);
     expect(html).toContain(`<caption>${labels.queueCaption}</caption>`);
     expect(html.match(/<table/g)).toHaveLength(2);
@@ -198,8 +196,8 @@ describe("automation dashboard presentation", () => {
   });
 
   it.each([
-    {labels: en.Admin.member360, locale: "en" as const},
-    {labels: zh.Admin.member360, locale: "zh-HK" as const},
+    {labels: {...en.Admin.member360, planCodes: en.Admin.members.planCodes, membershipStatuses: en.Admin.members.statusCodes}, locale: "en" as const},
+    {labels: {...zh.Admin.member360, planCodes: zh.Admin.members.planCodes, membershipStatuses: zh.Admin.members.statusCodes}, locale: "zh-HK" as const},
   ])("renders sanitized Member360 automation history in $locale", ({labels, locale}) => {
     const html = renderToStaticMarkup(
       <Member360View

@@ -1,0 +1,109 @@
+{
+  "sourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "production": false,
+  "providerStubbed": false,
+  "pacingMs": 2000,
+  "statuses": {
+    "200": 557,
+    "429": 8
+  },
+  "anonymousReads": 0,
+  "observedGetSessionMaxRolling60s": 31,
+  "allAuthPathCountsRecorded": false,
+  "providerQuotaThresholdKnown": false,
+  "strictQueryCalls": 469,
+  "otherQueryCalls": 96,
+  "otherQueryContext": "Existing native m2-session-reuse calls the real /api/auth/get-session proxy without strict query; aggregate observer does not label every caller",
+  "rateLimited": [
+    {
+      "observedAt": "2026-10-02T21:12:18.335Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:12:24.126Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:12:48.118Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:12:54.093Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:13:26.184Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:13:29.981Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": false,
+      "disableRefresh": false,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:13:31.978Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    },
+    {
+      "observedAt": "2026-10-02T21:13:35.969Z",
+      "path": "/get-session",
+      "cookieCredentialed": true,
+      "status": 429,
+      "disableCookieCache": true,
+      "disableRefresh": true,
+      "payloadLogged": false,
+      "pacingMs": 2000,
+      "retryAfterSeconds": null
+    }
+  ],
+  "bodyLogged": false,
+  "cookieValuesLogged": false
+}

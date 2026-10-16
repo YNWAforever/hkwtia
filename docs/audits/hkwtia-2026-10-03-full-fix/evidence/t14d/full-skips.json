@@ -1,0 +1,1431 @@
+{
+  "fullSourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "passed": 6657,
+  "skipped": 519,
+  "failed": 0,
+  "files": [
+    {
+      "path": "tests/integration/full-fix-delivery-recovery.test.ts",
+      "skippedCases": 48,
+      "totalCases": 48,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")(\"staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/wisetech-partner-import-neon.test.ts",
+      "skippedCases": 3,
+      "totalCases": 4,
+      "environmentSwitches": [
+        "NODE_ENV",
+        "VERCEL_ENV"
+      ],
+      "guardSource": [
+        "describe.skipIf(!url)(\"partner import on the allowlisted isolated Neon database (mock storage)\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ai-application-triage.test.ts",
+      "skippedCases": 13,
+      "totalCases": 13,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ai-budget-concurrency.test.ts",
+      "skippedCases": 16,
+      "totalCases": 16,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ai-draft-review.test.ts",
+      "skippedCases": 30,
+      "totalCases": 30,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ai-knowledge-retrieval.test.ts",
+      "skippedCases": 31,
+      "totalCases": 31,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!==\"1\")(\"approved knowledge actual PostgreSQL boundary\",()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ai-operations-metrics.test.ts",
+      "skippedCases": 6,
+      "totalCases": 6,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")(\"actual isolated administrative work observations\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-application-case.test.ts",
+      "skippedCases": 8,
+      "totalCases": 8,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")(\"actual isolated application cases preserve lifecycle authority\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-auth-identity.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated identity provision boundary',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-batch-failures.test.ts",
+      "skippedCases": 13,
+      "totalCases": 13,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-batch-scale-matrix.test.ts",
+      "skippedCases": 24,
+      "totalCases": 24,
+      "environmentSwitches": [
+        "RUN_AUDIT_FULL_MATRIX",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "process.env.RUN_POSTGRES_INTEGRATION === \"1\" &&",
+        "describe.skipIf(!enabled)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-batch-snapshot.test.ts",
+      "skippedCases": 7,
+      "totalCases": 7,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION",
+        "T13_MEASUREMENT_REVISION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-billing-scope.test.ts",
+      "skippedCases": 9,
+      "totalCases": 9,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('actual isolated billing and duplicate subscription scope',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-campaign-entry.test.ts",
+      "skippedCases": 13,
+      "totalCases": 13,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated campaign entry boundaries',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-cms-workspace.test.ts",
+      "skippedCases": 9,
+      "totalCases": 9,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-company-search.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-grant-boundary.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!=='1')('manual grant retry on disposable PostgreSQL',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-import-export.test.ts",
+      "skippedCases": 6,
+      "totalCases": 6,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-job-health.test.ts",
+      "skippedCases": 7,
+      "totalCases": 7,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-migration-recovery.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-policy-acceptance.test.ts",
+      "skippedCases": 5,
+      "totalCases": 5,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")(\"actual isolated policy acceptance; synthetic policy only\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-segment-pagination.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated segment traversal',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-support-handoff.test.ts",
+      "skippedCases": 18,
+      "totalCases": 18,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-ticket-lifecycle.test.ts",
+      "skippedCases": 7,
+      "totalCases": 7,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-workspace.test.ts",
+      "skippedCases": 7,
+      "totalCases": 7,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/full-fix-cms-visibility.test.ts",
+      "skippedCases": 5,
+      "totalCases": 5,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!==\"1\")(\"full content visibility and referenced-media boundaries through real PostgreSQL\",()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/full-fix-batch-snapshot-100.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")(\"fixed 100-target renewal draft snapshot\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/full-fix-membership-lifecycle.test.ts",
+      "skippedCases": 13,
+      "totalCases": 13,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!==\"1\")(\"membership join lifecycle through real disposable PostgreSQL repositories\",()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/full-fix-event-payment.test.ts",
+      "skippedCases": 11,
+      "totalCases": 11,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!=='1')('event payment authority and recovery on actual all-migration PostgreSQL',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/full-remediation-fixture.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST",
+        "FULL_REMEDIATION_ACCEPTANCE_SEED"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated remediation fixture',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/full-fix-workspace-search.test.ts",
+      "skippedCases": 13,
+      "totalCases": 13,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION !== \"1\")(\"role scoped workspace search against disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/operations-baseline.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")(\"actual isolated immutable timing baseline\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/m4a-acceptance.test.ts",
+      "skippedCases": 1,
+      "totalCases": 15,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST",
+        "RUN_DATABASE_TESTS"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_DATABASE_TESTS !== \"true\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/m4b-acceptance.test.ts",
+      "skippedCases": 3,
+      "totalCases": 7,
+      "environmentSwitches": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "RUN_DATABASE_TESTS",
+        "RUN_M4B_ACCEPTANCE_TESTS"
+      ],
+      "guardSource": [
+        "describe.skipIf(!databaseAcceptanceEnabled)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/unit/woztell-normalizer-captured.test.ts",
+      "skippedCases": 1,
+      "totalCases": 4,
+      "environmentSwitches": [],
+      "guardSource": [
+        "it.skip(\"replays captured provider payloads (none captured yet)\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-dashboard-counts.test.ts",
+      "skippedCases": 1,
+      "totalCases": 3,
+      "environmentSwitches": [],
+      "guardSource": [
+        "describe.skipIf(!finalAuditIsolatedDatabaseUrl())(\"dashboard parity on isolated Neon\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-import-retention.test.ts",
+      "skippedCases": 1,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION==='1';",
+        "describe.skipIf(!enabled)(\"private import retention in disposable PostgreSQL\",()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-audit-load.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_AUDIT_LOAD",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\" && process.env.RUN_AUDIT_LOAD === \"1\";",
+        "describe.skipIf(!enabled)(\"audit capacity with the complete schema on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-browser-fixture.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!=='1')('browser batch fixture against real transactions',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-concurrency.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin batch lease and settlement on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-export.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "ADMIN_BATCH_ENABLED",
+        "MEMBER_EXPORT_ENABLED",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"private member export batch on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-history.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin batch history on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-profile-cleanup.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"profile operations cleanup on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-snapshot.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin batch snapshot on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-batch-ticket-resend.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket resend batch on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/admin-pagination.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin cursor pages on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/aiops-materialized-view.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)(\"AI-Ops materialized-view formula proof\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-full-renewal-window.test.ts",
+      "skippedCases": 11,
+      "totalCases": 11,
+      "environmentSwitches": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/audit-migration-upgrade.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!==\"1\")(\"incremental audit migration and old writer compatibility\",()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/auth-last-login.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"bounded last-login writes\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/auth-shared-rate-limit.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"shared auth limits on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/bulk-communication-eligibility.test.ts",
+      "skippedCases": 6,
+      "totalCases": 6,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"bulk communication eligibility on the complete schema\", () => {",
+        "describe.skipIf(!enabled)(\"communication draft and delivery controls\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/automation-runners-postgres.test.ts",
+      "skippedCases": 5,
+      "totalCases": 5,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/cohort-role-revocation-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"cohort application role revocation on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/communication-audit-load.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_AUDIT_LOAD",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION===\"1\"&&process.env.RUN_AUDIT_LOAD===\"1\";",
+        "describe.skipIf(!enabled)(\"bounded communication preview capacity\",()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/company-profile-role-revocation-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"company profile role revocation on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/company-profile-review-version-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"company profile review on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/company-review-demotion-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)(\"company review demotion on isolated Postgres\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/event-attendee-batch-export.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION==='1';",
+        "describe.skipIf(!enabled)('private background attendee exports',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/event-cancellation-notices.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"event cancellation notices on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/event-edit-version-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"event edit version on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/guest-check-in.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"guest event check-in on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/join-resume.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"join resume scope on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/journey-claim-concurrency.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)(\"journey due-claim concurrency on isolated Postgres\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/login-profile-provision-neon.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "NEON_PROFILE_TEST_HOST_ALLOWLIST",
+        "NODE_ENV",
+        "RUN_NEON_PROFILE_INTEGRATION",
+        "VERCEL_ENV"
+      ],
+      "guardSource": [
+        "describe.skipIf(!enabled)(\"Neon runtime profile provisioning\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/login-profile-provision-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"verified auth subject profile provisioning\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/m2-acceptance.test.ts",
+      "skippedCases": 10,
+      "totalCases": 10,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const disposableEnabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"M2 seed acceptance on isolated PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/m4b-cross-window-cleanup.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "RUN_DATABASE_TESTS",
+        "RUN_M4B_ACCEPTANCE_TESTS"
+      ],
+      "guardSource": [
+        "describe.skipIf(!databaseAcceptanceEnabled)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/m3-acceptance.test.ts",
+      "skippedCases": 5,
+      "totalCases": 5,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/m4c-seed-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "M4C_ACCEPTANCE_SEED",
+        "RUN_M4C_SEED_POSTGRES"
+      ],
+      "guardSource": [],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-360-purchases.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Member 360 ticket purchases on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-application-queues.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"application and payment operation queues\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-event-review-version-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member event review on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-event-role-revocation-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member event role revocation on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-filter-selection.test.ts",
+      "skippedCases": 4,
+      "totalCases": 4,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member filters and matching selection on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-import-audit-load.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_AUDIT_LOAD",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION==='1'&&process.env.RUN_AUDIT_LOAD==='1';",
+        "describe.skipIf(!enabled)('5000-row import capacity',()=>{"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/member-import-commit.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member import staging on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/membership-grant-batch.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "MEMBERSHIP_COMPANY_GRANTS_ENABLED",
+        "MEMBERSHIP_GRANTS_ENABLED",
+        "MEMBERSHIP_GRANT_BATCH_ENABLED",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"policy-gated bulk grants on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/membership-grant-benefits.test.ts",
+      "skippedCases": 4,
+      "totalCases": 4,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"finite grant benefits with the expiry job paused\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/membership-grant.test.ts",
+      "skippedCases": 6,
+      "totalCases": 6,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"finite membership grants on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/migration.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)(\"M1 through M3 database migration and seed\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/news-edit-version-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"news edit version on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/page-copy-edit-concurrency-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"page-copy concurrent edit on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/public-directory-availability-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"directory schema upgrade on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/public-directory-pagination.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"public directory cursor on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/shared-rate-limit.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"shared registration limiter on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/refund-actor-postgres.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"refund audit identity on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/showcase-lead-contact-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase lead contact capture on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+      "skippedCases": 4,
+      "totalCases": 4,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase lead email outbox on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/showcase-manager-revocation-postgres.test.ts",
+      "skippedCases": 3,
+      "totalCases": 3,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase manager revocation on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/showcase-review-transition-postgres.test.ts",
+      "skippedCases": 4,
+      "totalCases": 4,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase review transition on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/task8-automations-postgres.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "DATABASE_URL_TEST"
+      ],
+      "guardSource": [
+        "describe.skipIf(!testDatabaseUrl)("
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket checkout recovery migration on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ticket-eligibility-postgres.test.ts",
+      "skippedCases": 5,
+      "totalCases": 5,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket purchase eligibility and last seat on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ticket-email-capacity.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket email 500-notice recovery on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/ticket-email-outbox-postgres.test.ts",
+      "skippedCases": 5,
+      "totalCases": 5,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket email outbox on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/woztell-live.acceptance.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [],
+      "guardSource": [],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/integration/writer-quota-postgres.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"AI writer quota on disposable PostgreSQL\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/unit/task10-postgres-integration.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 10 reconciled reports on isolated Postgres 16\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/unit/task7-postgres-integration.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 7 production repositories on isolated Postgres 16\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/unit/task8-postgres-integration.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 8 event concurrency on isolated Postgres 16\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/unit/webhook-postgres-concurrency.test.ts",
+      "skippedCases": 1,
+      "totalCases": 1,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"webhook ordering on isolated Postgres\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    },
+    {
+      "path": "tests/unit/task9-postgres-integration.test.ts",
+      "skippedCases": 2,
+      "totalCases": 2,
+      "environmentSwitches": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guardSource": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 9 approval decisions on isolated Postgres 16\", () => {"
+      ],
+      "result": "SKIPPED_NOT_PASS",
+      "reason": "Explicit integration/provider/fixture gate not enabled in full unit run; task-specific isolated receipts are separate evidence"
+    }
+  ]
+}

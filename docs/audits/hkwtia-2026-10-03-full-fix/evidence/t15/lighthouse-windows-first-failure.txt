@@ -1,0 +1,4 @@
+Original full report/error log retained privately: .playwright/full-fix-t15-lighthouse-verified.log
+SHA256 f7a3c3819687e0f89956eec8bec2076b08bc499f2cf52e93f47ec91c30c381d3
+Windows chrome-launcher kill/destroyTmp failed with EPERM after report generation; this attempt did not complete the LHCI gate.
+The node_modules implementation was not patched. Later owned-Chrome/port execution collected all ten genuine reports and failed the original score thresholds separately.

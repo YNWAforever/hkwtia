@@ -1,3 +1,4 @@
+import type {ReactNode} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -8,23 +9,38 @@ const publicPosts = vi.hoisted(() => ({
   getPublishedBuildLogBySlug: vi.fn(),
   parsePublishedBuildLogSlug: vi.fn((slug: string) => slug),
 }));
-const events = vi.hoisted(() => ({listPublic: vi.fn()}));
+const events = vi.hoisted(() => ({listPublicSlugs: vi.fn()}));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
+const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 vi.mock("next-intl/server", () => ({
-  getTranslations: async () => (key: string) => key,
+  getTranslations: async () => Object.assign((key: string) => key, {raw: (key: string) => key}),
   setRequestLocale: () => undefined,
 }));
 vi.mock("next/navigation", () => ({
   notFound: () => { throw new Error("NOT_FOUND"); },
 }));
+// The rewritten news index now renders PageHero and FooterNewsletter, both of which pull in
+// @/i18n/navigation's real createNavigation() output -- which needs the full next/navigation
+// export surface (redirect, permanentRedirect, etc.) that the partial mock above doesn't carry.
+// Mocked here with the repo's established plain-passthrough pattern (same situation Task 17 hit
+// with m6-launchpad-page.test.tsx / launchpad-partner-cutover.test.tsx); this file's own
+// assertions are unchanged.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+  usePathname: () => "/news",
+  useRouter: () => ({replace: vi.fn()}),
+}));
 
 import NewsPage from "@/app/[locale]/(public)/news/page";
 import NewsPostPage, {generateMetadata} from "@/app/[locale]/(public)/news/[slug]/page";
 import sitemap from "@/app/sitemap";
+
+beforeEach(() => companyProfiles.listPublishedSlugs.mockResolvedValue([]));
 
 const publishedAt = new Date("2026-08-28T12:00:00.000Z");
 const chineseNews = {
@@ -72,7 +88,7 @@ describe("localized public News pages", () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.getPublishedNewsBySlug.mockResolvedValue(chineseNews);
     publicPosts.getPublishedBuildLogBySlug.mockResolvedValue(null);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 
@@ -83,6 +99,27 @@ describe("localized public News pages", () => {
     expect(html).toContain("繁體消息");
   });
 
+  it.each(["en", "zh-HK"] as const)("shows an unavailable state when both %s feeds fail", async (locale) => {
+    publicPosts.listPublishedNews.mockRejectedValue(new Error("NEWS_UNAVAILABLE"));
+    publicPosts.listPublishedBuildLogs.mockRejectedValue(new Error("BUILD_LOG_UNAVAILABLE"));
+
+    const html = await renderNewsIndex(locale);
+
+    expect(html).toContain("unavailableTitle");
+    expect(html).not.toContain("emptyTitle");
+  });
+
+  it("shows available build logs alongside a partial news outage notice", async () => {
+    publicPosts.listPublishedNews.mockRejectedValue(new Error("NEWS_UNAVAILABLE"));
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([buildLog]);
+
+    const html = await renderNewsIndex("en");
+
+    expect(html).toContain("Build log");
+    expect(html).toContain("unavailableTitle");
+    expect(html).not.toContain("emptyTitle");
+  });
+
   it("uses the localized News body for detail and metadata", async () => {
     const html = await renderNewsDetail("zh-HK");
     const metadata = await generateMetadata({
@@ -91,7 +128,8 @@ describe("localized public News pages", () => {
 
     expect(publicPosts.getPublishedNewsBySlug).toHaveBeenCalledWith("zh-HK", chineseNews.slug);
     expect(html).toContain("繁體內容");
-    expect(metadata.title).toBe("繁體消息");
+    // D-1: record titles are branded at runtime with the fullwidth bar in zh-HK.
+    expect(metadata.title).toBe("繁體消息｜WiseTech Hong Kong");
   });
 
   it("returns a Chinese 404 when the News row has no eligible Chinese body", async () => {
@@ -108,21 +146,12 @@ describe("localized public News pages", () => {
     await expect(renderNewsDetail("zh-HK", "build-log")).resolves.toContain("Operational evidence");
   });
 
-  it.each([
-    ["en", englishNews, "zh-HK"],
-    ["zh-HK", chineseNews, "en"],
-  ] as const)("retains successful %s News URLs when the other locale fails", async (successfulLocale, row, failedLocale) => {
+  it.each(["en", "zh-HK"] as const)("fails the sitemap if %s News cannot be read", async (failedLocale) => {
     publicPosts.listPublishedNews.mockImplementation((locale: string) =>
-      locale === successfulLocale ? Promise.resolve([row]) : Promise.reject(new Error(failedLocale)));
-
-    const entries = await sitemap();
-    const expectedUrl = successfulLocale === "en"
-      ? `http://localhost:3000/news/${row.slug}`
-      : `http://localhost:3000/zh/news/${row.slug}`;
-
-    expect(entries.map((entry) => entry.url)).toContain(expectedUrl);
-    expect(entries.find((entry) => entry.url === expectedUrl)?.alternates).toBeUndefined();
+      locale === failedLocale ? Promise.reject(new Error(failedLocale)) : Promise.resolve([englishNews]));
+    await expect(sitemap()).rejects.toThrow(failedLocale);
   });
+
 
   it("omits untranslated Chinese News and suppresses its alternate", async () => {
     publicPosts.listPublishedNews.mockImplementation((locale: string) =>

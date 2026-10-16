@@ -1,0 +1,97 @@
+{
+  "sourceSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+  "deploymentId": "dpl_HKFD3MBFZDveZhEbhRv3qoLheMSZ",
+  "origin": "https://hkwtia-application-triage-20261003.vercel.app",
+  "observedAt": "2026-10-03T22:53:33.417Z",
+  "production": false,
+  "ledger": 59,
+  "checks": [
+    {
+      "routeKind": "unique synthetic news",
+      "status": 200,
+      "markerRefSha256": "358c2f315317be56465e37740bb6b39653bc42179d5878165cc5639339ed314c",
+      "dbSourcePositivelyProven": true
+    },
+    {
+      "routeKind": "synthetic en news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "routeKind": "synthetic zh news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/zh",
+      "status": 200
+    },
+    {
+      "route": "/membership",
+      "status": 200
+    },
+    {
+      "route": "/zh/membership",
+      "status": 200
+    },
+    {
+      "route": "/partners",
+      "status": 200
+    },
+    {
+      "route": "/zh/partners",
+      "status": 200
+    },
+    {
+      "route": "/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/zh/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "role": "anonymous",
+      "adminLoginRequired": true
+    },
+    {
+      "role": "staff",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "route": "/admin/batches",
+      "status": 200,
+      "flagsDisabled": true,
+      "historyStillReadable": true
+    },
+    {
+      "route": "/admin/automations#verified-worker-health",
+      "status": 200,
+      "anchorVisible": true,
+      "scheduledWindowVerified": false
+    },
+    {
+      "role": "superadmin",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "role": "member",
+      "adminDenied": true,
+      "loginRequired": true
+    }
+  ],
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "providerSends": 0,
+  "paymentWrites": 0
+}

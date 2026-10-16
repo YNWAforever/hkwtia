@@ -1,0 +1,35 @@
+{
+  "headSha": "b02f4795ef02f65da2483599c566cd509557e778",
+  "runId": 37196450702,
+  "checks": [
+    {
+      "name": "checks",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "tests (2)",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "worker",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "quality",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Vercel",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Vercel Preview Comments",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "count": 7
+}

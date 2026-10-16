@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-04T00:55:52.957Z",
+  "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+  "origin": "https://hkwtia-admin-workspace-20261003.vercel.app",
+  "checks": [],
+  "applicationRefs": [
+    "bbcf6e2adfc41ba2"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticMemberProfileFixtures": true,
+  "actualFreshPasswordSignups": 1,
+  "newVerifiedIdentityProvisioning": false,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "associationPolicyApproval": false,
+  "policyFlag": false,
+  "messagesBillingBudgetDelta": 0,
+  "providerRequests": 0,
+  "production": false,
+  "cleanup": "Owned synthetic applications/history retained; no production fixtures or history removed"
+}

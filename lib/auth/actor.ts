@@ -1,5 +1,7 @@
 import "server-only";
 
+import {cache} from "react";
+
 import {requireAdmin, systemActor} from "@/lib/auth/authorize";
 import type {NeonSession} from "@/lib/auth/server";
 import {type AdminActor, type AuthenticatedActor} from "@/lib/membership/lifecycle";
@@ -41,11 +43,19 @@ export async function sessionToActor(
  * `lib/auth/server`'s own import-time check exactly as strict for anything that
  * imports it directly.
  */
-export async function getActor(resolver: ProfileIdentityResolver = profileIdentityRepository): Promise<AuthenticatedActor | null> {
+async function resolveRequestActor(resolver: ProfileIdentityResolver): Promise<AuthenticatedActor | null> {
   const {getSession} = await import("@/lib/auth/server");
   const actor = await sessionToActor(await getSession(), resolver);
   if (actor) void resolver.touchLastLogin?.(actor.profileId).catch(() => undefined);
   return actor;
+}
+
+// React cache is scoped to the current server render/request. A new request
+// resolves the profile role again, so staff revocation is not cached globally.
+const defaultRequestActor = cache(() => resolveRequestActor(profileIdentityRepository));
+
+export async function getActor(resolver: ProfileIdentityResolver = profileIdentityRepository): Promise<AuthenticatedActor | null> {
+  return resolver === profileIdentityRepository ? defaultRequestActor() : resolveRequestActor(resolver);
 }
 
 export async function requireActor(): Promise<AuthenticatedActor> {

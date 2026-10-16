@@ -1,0 +1,10 @@
+{
+  "sourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "buildCommand": "node .playwright/t22-run-isolated.mjs .playwright/t22-build.mjs",
+  "buildExitCode": 0,
+  "buildEnvironment": "confirmed isolated G0; webpack; loopback canonical localhost3450; TEST Stripe; email sink",
+  "applicationBuiltBeforeCommit": "identical working tree immediately before 3bc4c136 commit",
+  "applicationFilesAfterCommitUnchanged": true,
+  "production": false,
+  "failedEvidenceConfigAttempt": "artifact snapshots imported missing relative playwright config; renamed snapshots to .ts.txt; gate unchanged then actual build0"
+}

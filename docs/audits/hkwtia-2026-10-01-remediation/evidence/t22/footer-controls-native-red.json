@@ -1,0 +1,36 @@
+{
+  "sourceSha": "595ae008",
+  "appEquivalentTo": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "stats": {
+    "startTime": "2026-10-02T20:49:22.154Z",
+    "duration": 42667.808,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  },
+  "collectionErrors": 0,
+  "failures": [
+    {
+      "viewport": 1280,
+      "locales": [
+        "en",
+        "zh-HK"
+      ],
+      "behavior": "real hit target covered by fixed Concierge"
+    },
+    {
+      "viewport": 390,
+      "locales": [
+        "en",
+        "zh-HK"
+      ],
+      "behavior": "default-locale client redirect loses fragment after waiting for complete URL"
+    }
+  ],
+  "discardedSetupAttempts": [
+    "JSON import attribute missing before test collection",
+    "initial immediate fragment assertion replaced by condition-based complete URL check"
+  ],
+  "production": false
+}

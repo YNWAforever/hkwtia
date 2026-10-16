@@ -6,9 +6,12 @@ describe("Stripe billing adapter", () => {
   it("maps checkout parameters and passes the stable idempotency key as request options", async () => {
     const create = vi.fn().mockResolvedValue({url: "https://checkout.stripe.test/cs_1"});
     const adapter = createStripeBillingAdapter({
-      checkout: {sessions: {create}},
+      checkout: {sessions: {create, retrieve: vi.fn(), list: vi.fn()}},
+      subscriptions: {retrieve: vi.fn()},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
+      refunds: {create: vi.fn(), list: vi.fn()},
+      paymentIntents: {retrieve: vi.fn()},
     });
     await adapter.createCheckoutSession({
       priceReference: "price_startup_test",
@@ -31,9 +34,12 @@ describe("Stripe billing adapter", () => {
 
   it("rejects a Stripe checkout response without a URL", async () => {
     const adapter = createStripeBillingAdapter({
-      checkout: {sessions: {create: vi.fn().mockResolvedValue({url: null})}},
+      checkout: {sessions: {create: vi.fn().mockResolvedValue({url: null}), retrieve: vi.fn(), list: vi.fn()}},
+      subscriptions: {retrieve: vi.fn()},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
+      refunds: {create: vi.fn(), list: vi.fn()},
+      paymentIntents: {retrieve: vi.fn()},
     });
     await expect(adapter.createCheckoutSession({
       priceReference: "price_test",

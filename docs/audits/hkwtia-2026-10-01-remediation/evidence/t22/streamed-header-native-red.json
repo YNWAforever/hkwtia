@@ -1,0 +1,46 @@
+{
+  "sourceSha": "f7599e89",
+  "phase": "RED",
+  "command": "node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs tests/e2e/public-performance.spec.ts --grep \"pending announcement header\" --workers=1",
+  "stats": {
+    "startTime": "2026-10-02T19:26:37.580Z",
+    "duration": 4130.86,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  },
+  "failedLocations": [
+    {
+      "title": "en pending announcement header cannot accept focus before its replacement",
+      "location": {
+        "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\public-performance.spec.ts",
+        "column": 30,
+        "line": 78
+      },
+      "assertion": [
+        "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+        "",
+        "Expected: \u001b[32mtrue\u001b[39m",
+        "Received: \u001b[31mfalse\u001b[39m"
+      ]
+    },
+    {
+      "title": "zh-HK pending announcement header cannot accept focus before its replacement",
+      "location": {
+        "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\public-performance.spec.ts",
+        "column": 30,
+        "line": 78
+      },
+      "assertion": [
+        "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m",
+        "",
+        "Expected: \u001b[32mtrue\u001b[39m",
+        "Received: \u001b[31mfalse\u001b[39m"
+      ]
+    }
+  ],
+  "realIsolatedDatabaseLock": "site_announcements",
+  "production": false,
+  "providerMocked": false
+}

@@ -1,0 +1,113 @@
+{
+  "completed": 8,
+  "counts": {
+    "passed": 5,
+    "failed": 1,
+    "timedOut": 2
+  },
+  "last": {
+    "file": "full-cms-history.spec.ts",
+    "line": 10,
+    "status": "timedOut",
+    "durationMs": 180093,
+    "errorLocations": [
+      {
+        "file": "full-cms-history.spec.ts",
+        "line": 14
+      }
+    ],
+    "tags": [
+      "Test timeout"
+    ]
+  },
+  "current": {
+    "file": "full-cms-history.spec.ts",
+    "line": 27
+  },
+  "cases": [
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "status": "passed",
+      "durationMs": 7746,
+      "errorLocations": [],
+      "tags": []
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "status": "passed",
+      "durationMs": 6335,
+      "errorLocations": [],
+      "tags": []
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 48,
+      "status": "passed",
+      "durationMs": 5908,
+      "errorLocations": [],
+      "tags": []
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 78,
+      "status": "passed",
+      "durationMs": 1061,
+      "errorLocations": [],
+      "tags": []
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "status": "passed",
+      "durationMs": 12119,
+      "errorLocations": [],
+      "tags": []
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "status": "failed",
+      "durationMs": 8021,
+      "errorLocations": [
+        {
+          "file": "full-remediation-browser.ts",
+          "line": 10
+        }
+      ],
+      "tags": []
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 10,
+      "status": "timedOut",
+      "durationMs": 180041,
+      "errorLocations": [
+        {
+          "file": "full-cms-history.spec.ts",
+          "line": 14
+        }
+      ],
+      "tags": [
+        "Test timeout"
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 10,
+      "status": "timedOut",
+      "durationMs": 180093,
+      "errorLocations": [
+        {
+          "file": "full-cms-history.spec.ts",
+          "line": 14
+        }
+      ],
+      "tags": [
+        "Test timeout"
+      ]
+    }
+  ],
+  "completion": "interrupted after proven stale legacy CMS field visibility; not a complete suite"
+}

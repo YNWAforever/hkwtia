@@ -1,0 +1,108 @@
+{
+  "applicationSha": "55c2d036ea2bfdfd904722ecf5237ca221adc6f6",
+  "environment": "Windows Node24.18 Next16.3.6; built loopback and confirmed isolated Neon/Auth; no Production writes",
+  "homeFocused": {
+    "passed": 68,
+    "skipped": 0,
+    "failed": 0,
+    "command": "node node_modules/vitest/vitest.mjs run tests/unit/home-* tests/unit/homepage.test.tsx tests/unit/wisetech-asset-provenance.test.ts tests/unit/audit-full-performance-guard.test.ts --maxWorkers=2"
+  },
+  "focusedSqlAndGuard": {
+    "passed": 20,
+    "actualSql": 11,
+    "pureTargetGuard": 9,
+    "skipped": 0,
+    "failed": 0,
+    "sourceSha": "2888c483b0f23ac3c18094be57a27f88c7418a06",
+    "mapping": "existing audit-full-cms-workspace + new migration-recovery; actual DB repository, not all-layer mocks"
+  },
+  "cacheBrowser": {
+    "sourceSha": "b0f3d30abbaddb8bdc1b5a3934ac0636bff3f387",
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 28.1
+  },
+  "paintBrowser": {
+    "sourceSha": "27832bdc",
+    "passed": 7,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 12.8,
+    "actualReadDelay": "guarded isolated table lock with rollback",
+    "pageHeroBothLocales": "high/eager proven in actual built DOM"
+  },
+  "fullBeforeHomeDelta": {
+    "applicationSha": "2888c483b0f23ac3c18094be57a27f88c7418a06",
+    "passed": 6293,
+    "skipped": 304,
+    "failed": 0,
+    "laterDelta": "55c2d036 Home loading/read-failure/hero; final aggregate T22 running separately"
+  },
+  "lint": {
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 67,
+    "command": "npm.cmd run lint"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "npm.cmd run typecheck"
+  },
+  "strings": {
+    "exitCode": 0,
+    "tsxFiles": 308,
+    "command": "npm.cmd run audit:strings"
+  },
+  "build": {
+    "exitCode": 0,
+    "command": "NEXT_PUBLIC_SITE_URL=http://localhost:3450 npm.cmd run build",
+    "staticPages": 267,
+    "sourceEquivalentTo": "27832bdc"
+  },
+  "lighthouseDefault": {
+    "exitCode": 1,
+    "classification": "Lantern dependency graph and Windows Chrome cleanup; no valid timing pass"
+  },
+  "lighthouseDevtools": {
+    "exitCode": 1,
+    "actualEnglishVerified": true,
+    "thresholdsUnchanged": true,
+    "reports": 10,
+    "note": "target canonical was unset; supplementary mode is not default gate; corrected default run pending"
+  },
+  "production": false,
+  "rumVerified": false,
+  "finalSource": "27832bdc",
+  "scopeAndSecurityRegression": {
+    "passed": 83,
+    "skipped": 0,
+    "failed": 0,
+    "sourceEquivalentTo": "27832bdc",
+    "command": "node node_modules/vitest/vitest.mjs run tests/unit/wt-primitives.test.tsx tests/unit/page-copy-scope.test.ts tests/unit/apply-page-copy.test.ts tests/unit/ci-security-contract.test.ts tests/unit/wt-pages/events-page.test.tsx tests/unit/wt-pages/partners-page.test.tsx --maxWorkers=1"
+  },
+  "lighthouseCorrectedDefault": {
+    "sourceSha": "55c2d036",
+    "exitCode": 1,
+    "reports": 10,
+    "seoAll": 1,
+    "clsAll": 0,
+    "thresholdsUnchanged": true,
+    "remainingPerformanceFailures": [
+      "/ 0.89",
+      "/zh 0.84",
+      "/zh/events 0.81"
+    ],
+    "laterDelta": "shared pageHero now high/eager; final performance check separate"
+  },
+  "fullAt55c2d036": {
+    "passed": 6293,
+    "skipped": 328,
+    "failed": 2,
+    "failures": [
+      "new runtime copy exposed169CMSkeys instead166 (fixed guard)",
+      "lockfileAuth subprocess ETIMEDOUT; focused rerun passed"
+    ],
+    "finalRun": "27832bdc running; no earlier failed run called complete"
+  }
+}

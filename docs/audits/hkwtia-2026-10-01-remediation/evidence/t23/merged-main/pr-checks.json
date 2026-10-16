@@ -1,0 +1,216 @@
+[
+  {
+    "pr": 108,
+    "head": "5b12a6ecaa7070e1f5ce3f1b61c92aed8a9b54aa",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 109,
+    "head": "66a985116e0802262799e9089cda6dcc56e28b01",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 110,
+    "head": "95cac3f321a639760d93bb22b2aa639ea939a027",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 111,
+    "head": "0d19f718087edd1eaed7d62120bf76619b3bea41",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 112,
+    "head": "ad5acc86e3ec27158c4eca520f6afab59302acf0",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 113,
+    "head": "3b1c76f6d902c40e092b30dc8011343ba07331e2",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 114,
+    "head": "8d9aad444d666aea7d608f9153edb6613ffd1d46",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 115,
+    "head": "795e868e8a92a90e8758041a414ae0ca93e38904",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 116,
+    "head": "37e3b063deb7dfc7bc02aca6558bda417f4e25f8",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true
+  },
+  {
+    "pr": 117,
+    "head": "dd6682d8dbbe264503b778553e83afc70513e65a",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true,
+    "previewProof": {
+      "pr": 117,
+      "currentHead": "dd6682d8dbbe264503b778553e83afc70513e65a",
+      "currentCI": {
+        "checks": "SUCCESS",
+        "tests (1)": "SUCCESS",
+        "tests (2)": "SUCCESS",
+        "worker": "SUCCESS",
+        "quality": "SUCCESS"
+      },
+      "currentVercelContext": "absent; no synthetic status posted",
+      "previewSourceHead": "e9714c8fa9eeed874db482b8995e7f1dca3dd8b5",
+      "identicalFileTree": "e0e0c7587e2fdd036be786b78c83edcc00f712ae",
+      "deploymentId": "dpl_4vEp2CCU7JvvwBR5sidXyoWXpTqy",
+      "url": "hkwtia-2txktr86p-ynwaforevers-projects.vercel.app",
+      "readyState": "READY",
+      "target": null,
+      "verificationScope": "Existing real Preview build with byte-identical file tree; not a fresh current-head deployment or browser/provider acceptance claim",
+      "requireFinalMainPreview": true
+    }
+  },
+  {
+    "pr": 118,
+    "head": "6cf8db01a4dff1cc808000b4ffcb7d5de7269f1f",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true,
+    "previewProof": "current-head Vercel SUCCESS"
+  },
+  {
+    "pr": 119,
+    "head": "3359db55fd71e3b5c7145c63c6dc82cc00bc3f1e",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true,
+    "previewProof": "current-head Vercel SUCCESS"
+  },
+  {
+    "pr": 120,
+    "head": "bcf77634b8bd761f92e9bfa12486453f99e39acc",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true,
+    "previewProof": "current-head Vercel SUCCESS"
+  },
+  {
+    "pr": 121,
+    "head": "437f6587332f2925250e33cfd334b5a817de6825",
+    "checks": {
+      "checks": "SUCCESS",
+      "tests (1)": "SUCCESS",
+      "tests (2)": "SUCCESS",
+      "worker": "SUCCESS",
+      "quality": "SUCCESS",
+      "Vercel": "SUCCESS",
+      "Vercel Preview Comments": "SUCCESS"
+    },
+    "verifiedMergedTreeEqualsGreenHead": true,
+    "previewProof": "current-head Vercel SUCCESS"
+  }
+]

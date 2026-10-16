@@ -1,0 +1,4 @@
+﻿Row,Status,Reason
+4,Duplicate,The same email occurs earlier in this file. Review both rows.
+5,Manual conflict,This email matches an existing identity or contact. Review it without merging identities.
+6,Invalid,Email address is invalid.

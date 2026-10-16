@@ -4,14 +4,24 @@ import {join} from "node:path";
 import {describe, expect, it} from "vitest";
 
 const routeFiles = [
+  "app/api/admin/events/[id]/attendees.csv/route.ts",
   "app/api/admin/media/upload/route.ts",
+  "app/api/admin/woztell/backfill/route.ts",
   "app/api/ai/concierge/route.ts",
   "app/api/ai/conversations/[id]/feedback/route.ts",
+  "app/api/events/guest/cancel/route.ts",
   "app/api/jobs/aiops-metrics/route.ts",
   "app/api/jobs/board-reporter/route.ts",
   "app/api/jobs/chat-retention/route.ts",
+  "app/api/jobs/event-cancellation-refunds/route.ts",
   "app/api/jobs/retention-analyst/route.ts",
+  // Phase C2 Task 10 (C-5, D-10). This tuple is hand-maintained and discovers
+  // nothing, so a route added without a line here ships uncovered by the
+  // export-shape guard — the same silent-omission failure both Phase C plans
+  // call out for tests/unit/admin-server-action-boundaries.test.ts.
+  "app/api/jobs/whatsapp-send-queue/route.ts",
   "app/api/media/[id]/route.ts",
+  "app/api/portal/media/upload/route.ts",
   "app/api/stripe/webhook/route.ts",
   "app/api/unsubscribe/route.ts",
   "app/api/webhooks/woztell/route.ts",

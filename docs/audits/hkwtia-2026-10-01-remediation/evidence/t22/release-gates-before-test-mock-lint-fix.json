@@ -1,0 +1,37 @@
+{
+  "sourceSha": "999e6b7811bad163d9e5d2cef88b2b34aa337c7e",
+  "gates": [
+    {
+      "sourceSha": "999e6b7811bad163d9e5d2cef88b2b34aa337c7e",
+      "name": "lint",
+      "startedAt": "2026-10-02T19:41:58.358Z",
+      "endedAt": "2026-10-02T19:43:19.113Z",
+      "exitCode": 1
+    },
+    {
+      "sourceSha": "999e6b7811bad163d9e5d2cef88b2b34aa337c7e",
+      "name": "typecheck",
+      "startedAt": "2026-10-02T19:43:21.121Z",
+      "endedAt": "2026-10-02T19:43:33.738Z",
+      "exitCode": 0
+    },
+    {
+      "sourceSha": "999e6b7811bad163d9e5d2cef88b2b34aa337c7e",
+      "name": "audit:strings",
+      "startedAt": "2026-10-02T19:43:35.753Z",
+      "endedAt": "2026-10-02T19:43:37.643Z",
+      "exitCode": 0
+    },
+    {
+      "sourceSha": "999e6b7811bad163d9e5d2cef88b2b34aa337c7e",
+      "name": "private-prefetch",
+      "startedAt": "2026-10-02T19:43:39.646Z",
+      "endedAt": "2026-10-02T19:44:39.831Z",
+      "exitCode": 0
+    }
+  ],
+  "stoppedBeforeCompletion": true,
+  "notExecutedAreNotSkips": true,
+  "lintFailure": "mock Brand/Events used raw local anchors; native Next Link replaces those mocks; original lint rule retained",
+  "production": false
+}

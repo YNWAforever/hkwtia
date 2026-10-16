@@ -1,0 +1,915 @@
+{
+  "command": "npm.cmd test -- --reporter=json --outputFile=.playwright/t09-full-results.json",
+  "environment": "plain repository gate without integration/provider opt-ins",
+  "passed": 6197,
+  "skipped": 207,
+  "failed": 0,
+  "passFiles": 730,
+  "skipFiles": 72,
+  "rows": [
+    {
+      "file": "tests/integration/admin-audit-load.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_AUDIT_LOAD",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\" && process.env.RUN_AUDIT_LOAD === \"1\";",
+        "describe.skipIf(!enabled)(\"audit capacity with the complete schema on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-browser-fixture.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!=='1')('browser batch fixture against real transactions',()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-concurrency.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin batch lease and settlement on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-export.test.ts",
+      "count": 1,
+      "variables": [
+        "ADMIN_BATCH_ENABLED",
+        "MEMBER_EXPORT_ENABLED",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"private member export batch on disposable PostgreSQL\", () => {",
+        "process.env.MEMBER_EXPORT_ENABLED = \"true\";",
+        "process.env.ADMIN_BATCH_ENABLED = \"true\";",
+        "delete process.env.MEMBER_EXPORT_ENABLED;",
+        "delete process.env.ADMIN_BATCH_ENABLED;"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-history.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin batch history on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-profile-cleanup.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"profile operations cleanup on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-snapshot.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin batch snapshot on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-batch-ticket-resend.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION",
+        "TICKET_RESEND_BATCH_ENABLED"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket resend batch on disposable PostgreSQL\", () => {",
+        "process.env.TICKET_RESEND_BATCH_ENABLED = \"true\";",
+        "delete process.env.TICKET_RESEND_BATCH_ENABLED;"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-dashboard-counts.test.ts",
+      "count": 1,
+      "variables": [],
+      "guards": [
+        "describe.skipIf(!finalAuditIsolatedDatabaseUrl())(\"dashboard parity on isolated Neon\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/admin-pagination.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"admin cursor pages on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/aiops-materialized-view.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "describe.skipIf(!testDatabaseUrl)(\"AI-Ops materialized-view formula proof\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-full-auth-identity.test.ts",
+      "count": 3,
+      "variables": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated identity provision boundary',()=>{",
+        "if(new URL(url).hostname!=='ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech'||process.env.NEON_PROJECT_ID!=='solitary-wave-52860119')throw Error('UNCONFIRMED_ISOLATED_TARGET');"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-full-billing-scope.test.ts",
+      "count": 9,
+      "variables": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('actual isolated billing and duplicate subscription scope',()=>{",
+        "if(new URL(url).hostname!=='ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech'||process.env.NEON_PROJECT_ID!=='solitary-wave-52860119')throw Error('UNCONFIRMED_ISOLATED_TARGET');"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-full-campaign-entry.test.ts",
+      "count": 13,
+      "variables": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated campaign entry boundaries',()=>{",
+        "if(new URL(url).hostname!=='ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech'||process.env.NEON_PROJECT_ID!=='solitary-wave-52860119')throw Error('UNCONFIRMED_ISOLATED_TARGET');"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-full-grant-boundary.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!=='1')('manual grant retry on disposable PostgreSQL',()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-full-policy-acceptance.test.ts",
+      "count": 5,
+      "variables": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED !== \"true\")(\"actual isolated policy acceptance; synthetic policy only\", () => {",
+        "if (new URL(url).hostname !== \"ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech\" || process.env.NEON_PROJECT_ID !== \"solitary-wave-52860119\")"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-full-segment-pagination.test.ts",
+      "count": 3,
+      "variables": [
+        "FULL_REMEDIATION_ACCEPTANCE_SEED",
+        "NEON_PROJECT_ID"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated segment traversal',()=>{",
+        "if(new URL(url).hostname!=='ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech'||process.env.NEON_PROJECT_ID!=='solitary-wave-52860119')throw Error('UNCONFIRMED_ISOLATED_TARGET');"
+      ]
+    },
+    {
+      "file": "tests/integration/audit-migration-upgrade.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.RUN_POSTGRES_INTEGRATION!==\"1\")(\"incremental audit migration and old writer compatibility\",()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/auth-last-login.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"bounded last-login writes\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/auth-shared-rate-limit.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"shared auth limits on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/automation-runners-postgres.test.ts",
+      "count": 5,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "describe.skipIf(!testDatabaseUrl)("
+      ]
+    },
+    {
+      "file": "tests/integration/bulk-communication-eligibility.test.ts",
+      "count": 6,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"bulk communication eligibility on the complete schema\", () => {",
+        "describe.skipIf(!enabled)(\"communication draft and delivery controls\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/cohort-role-revocation-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"cohort application role revocation on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/communication-audit-load.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_AUDIT_LOAD",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION===\"1\"&&process.env.RUN_AUDIT_LOAD===\"1\";",
+        "describe.skipIf(!enabled)(\"bounded communication preview capacity\",()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/company-profile-review-version-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"company profile review on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/company-profile-role-revocation-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"company profile role revocation on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/company-review-demotion-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "describe.skipIf(!testDatabaseUrl)(\"company review demotion on isolated Postgres\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/event-attendee-batch-export.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION==='1';",
+        "describe.skipIf(!enabled)('private background attendee exports',()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/event-cancellation-notices.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"event cancellation notices on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/event-edit-version-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"event edit version on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/full-remediation-fixture.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL_TEST",
+        "FULL_REMEDIATION_ACCEPTANCE_SEED"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.FULL_REMEDIATION_ACCEPTANCE_SEED!=='true')('real isolated remediation fixture',()=>{",
+        "const pool=new Pool({connectionString:process.env.DATABASE_URL_TEST});"
+      ]
+    },
+    {
+      "file": "tests/integration/guest-check-in.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"guest event check-in on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/join-resume.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"join resume scope on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/journey-claim-concurrency.test.ts",
+      "count": 2,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "describe.skipIf(!testDatabaseUrl)(\"journey due-claim concurrency on isolated Postgres\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/login-profile-provision-neon.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "NEON_PROFILE_TEST_HOST_ALLOWLIST",
+        "NODE_ENV",
+        "RUN_NEON_PROFILE_INTEGRATION",
+        "VERCEL_ENV"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_NEON_PROFILE_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Neon runtime profile provisioning\", () => {",
+        "const connection = process.env.DATABASE_URL_TEST;",
+        "if (process.env.NODE_ENV === \"production\" || process.env.VERCEL_ENV === \"production\") {",
+        "if (connection === process.env.DATABASE_URL) {",
+        "const allowlist = (process.env.NEON_PROFILE_TEST_HOST_ALLOWLIST ?? \"\").split(\",\").map((item) => item.trim()).filter(Boolean);"
+      ]
+    },
+    {
+      "file": "tests/integration/login-profile-provision-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"verified auth subject profile provisioning\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/m2-acceptance.test.ts",
+      "count": 10,
+      "variables": [
+        "DATABASE_URL_TEST",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const externalDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "const disposableEnabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"M2 seed acceptance on isolated PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/m3-acceptance.test.ts",
+      "count": 5,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const acceptanceDatabase = process.env.DATABASE_URL_TEST?.trim()",
+        "describe.skipIf(!testDatabaseUrl)("
+      ]
+    },
+    {
+      "file": "tests/integration/m4a-acceptance.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL_TEST",
+        "RUN_DATABASE_TESTS"
+      ],
+      "guards": [
+        "describe.skipIf(process.env.RUN_DATABASE_TESTS !== \"true\")(",
+        "const databaseUrl = process.env.DATABASE_URL_TEST?.trim();"
+      ]
+    },
+    {
+      "file": "tests/integration/m4b-acceptance.test.ts",
+      "count": 3,
+      "variables": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "RUN_DATABASE_TESTS",
+        "RUN_M4B_ACCEPTANCE_TESTS"
+      ],
+      "guards": [
+        "process.env.RUN_DATABASE_TESTS === \"true\"",
+        "&& process.env.RUN_M4B_ACCEPTANCE_TESTS === \"true\";",
+        "describe.skipIf(!databaseAcceptanceEnabled)(",
+        "const databaseUrl = process.env.DATABASE_URL_TEST?.trim();",
+        "if (process.env.DATABASE_URL?.trim() !== databaseUrl) {"
+      ]
+    },
+    {
+      "file": "tests/integration/m4b-cross-window-cleanup.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "RUN_DATABASE_TESTS",
+        "RUN_M4B_ACCEPTANCE_TESTS"
+      ],
+      "guards": [
+        "process.env.RUN_DATABASE_TESTS === \"true\"",
+        "&& process.env.RUN_M4B_ACCEPTANCE_TESTS === \"true\";",
+        "describe.skipIf(!databaseAcceptanceEnabled)(",
+        "const databaseUrl = process.env.DATABASE_URL_TEST?.trim();",
+        "if (!databaseUrl || process.env.DATABASE_URL?.trim() !== databaseUrl) {"
+      ]
+    },
+    {
+      "file": "tests/integration/m4c-seed-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL",
+        "DATABASE_URL_TEST",
+        "M4C_ACCEPTANCE_SEED",
+        "RUN_M4C_SEED_POSTGRES"
+      ],
+      "guards": [
+        "const databaseUrl = process.env.DATABASE_URL_TEST;",
+        "process.env.RUN_M4C_SEED_POSTGRES === \"true\" &&",
+        "process.env.DATABASE_URL === databaseUrl &&",
+        "process.env.M4C_ACCEPTANCE_SEED === \"true\";"
+      ]
+    },
+    {
+      "file": "tests/integration/member-360-purchases.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Member 360 ticket purchases on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/member-application-queues.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"application and payment operation queues\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/member-event-review-version-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member event review on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/member-event-role-revocation-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member event role revocation on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/member-filter-selection.test.ts",
+      "count": 4,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member filters and matching selection on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/member-import-audit-load.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_AUDIT_LOAD",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION==='1'&&process.env.RUN_AUDIT_LOAD==='1';",
+        "describe.skipIf(!enabled)('5000-row import capacity',()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/member-import-commit.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"member import staging on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/member-import-retention.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled=process.env.RUN_POSTGRES_INTEGRATION==='1';",
+        "describe.skipIf(!enabled)(\"private import retention in disposable PostgreSQL\",()=>{"
+      ]
+    },
+    {
+      "file": "tests/integration/membership-grant-batch.test.ts",
+      "count": 3,
+      "variables": [
+        "MEMBERSHIP_COMPANY_GRANTS_ENABLED",
+        "MEMBERSHIP_GRANTS_ENABLED",
+        "MEMBERSHIP_GRANT_BATCH_ENABLED",
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"policy-gated bulk grants on disposable PostgreSQL\", () => {",
+        "process.env.MEMBERSHIP_GRANTS_ENABLED = \"true\";",
+        "process.env.MEMBERSHIP_GRANT_BATCH_ENABLED = \"true\";",
+        "} finally {delete process.env.MEMBERSHIP_GRANTS_ENABLED; delete process.env.MEMBERSHIP_GRANT_BATCH_ENABLED;}",
+        "process.env.MEMBERSHIP_GRANTS_ENABLED = \"true\";",
+        "process.env.MEMBERSHIP_GRANT_BATCH_ENABLED = \"true\";",
+        "process.env.MEMBERSHIP_COMPANY_GRANTS_ENABLED = \"true\";",
+        "} finally {delete process.env.MEMBERSHIP_GRANTS_ENABLED; delete process.env.MEMBERSHIP_GRANT_BATCH_ENABLED; delete process.env.MEMBERSHIP_COMPANY_GRANTS_ENABLED;}",
+        "process.env.MEMBERSHIP_GRANTS_ENABLED = \"true\"; process.env.MEMBERSHIP_GRANT_BATCH_ENABLED = \"true\"; process.env.MEMBERSHIP_COMPANY_GRANTS_ENABLED = \"true\";",
+        "delete process.env.MEMBERSHIP_COMPANY_GRANTS_ENABLED;",
+        "} finally {delete process.env.MEMBERSHIP_GRANTS_ENABLED; delete process.env.MEMBERSHIP_GRANT_BATCH_ENABLED; delete process.env.MEMBERSHIP_COMPANY_GRANTS_ENABLED;}"
+      ]
+    },
+    {
+      "file": "tests/integration/membership-grant-benefits.test.ts",
+      "count": 4,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"finite grant benefits with the expiry job paused\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/membership-grant.test.ts",
+      "count": 6,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"finite membership grants on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/migration.test.ts",
+      "count": 2,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "describe.skipIf(!testDatabaseUrl)(\"M1 through M3 database migration and seed\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/news-edit-version-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"news edit version on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/page-copy-edit-concurrency-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"page-copy concurrent edit on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/public-directory-availability-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"directory schema upgrade on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/public-directory-pagination.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"public directory cursor on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/refund-actor-postgres.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"refund audit identity on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/shared-rate-limit.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"shared registration limiter on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/showcase-lead-contact-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase lead contact capture on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+      "count": 4,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase lead email outbox on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/showcase-manager-revocation-postgres.test.ts",
+      "count": 3,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase manager revocation on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/showcase-review-transition-postgres.test.ts",
+      "count": 4,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"showcase review transition on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/task8-automations-postgres.test.ts",
+      "count": 1,
+      "variables": [
+        "DATABASE_URL_TEST"
+      ],
+      "guards": [
+        "const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? \"\";",
+        "describe.skipIf(!testDatabaseUrl)("
+      ]
+    },
+    {
+      "file": "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket checkout recovery migration on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/ticket-eligibility-postgres.test.ts",
+      "count": 5,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket purchase eligibility and last seat on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/ticket-email-capacity.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket email 500-notice recovery on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/ticket-email-outbox-postgres.test.ts",
+      "count": 5,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"ticket email outbox on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/integration/wisetech-partner-import-neon.test.ts",
+      "count": 3,
+      "variables": [
+        "NODE_ENV",
+        "VERCEL_ENV"
+      ],
+      "guards": [
+        "describe.skipIf(!url)(\"partner import on the allowlisted isolated Neon database (mock storage)\", () => {",
+        "if (process.env.NODE_ENV === \"production\" || process.env.VERCEL_ENV === \"production\") throw new Error(\"PRODUCTION_TEST_PROHIBITED\");"
+      ]
+    },
+    {
+      "file": "tests/integration/woztell-live.acceptance.test.ts",
+      "count": 1,
+      "variables": [],
+      "guards": []
+    },
+    {
+      "file": "tests/integration/writer-quota-postgres.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"AI writer quota on disposable PostgreSQL\", () => {"
+      ]
+    },
+    {
+      "file": "tests/unit/task10-postgres-integration.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 10 reconciled reports on isolated Postgres 16\", () => {"
+      ]
+    },
+    {
+      "file": "tests/unit/task7-postgres-integration.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 7 production repositories on isolated Postgres 16\", () => {"
+      ]
+    },
+    {
+      "file": "tests/unit/task8-postgres-integration.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 8 event concurrency on isolated Postgres 16\", () => {"
+      ]
+    },
+    {
+      "file": "tests/unit/task9-postgres-integration.test.ts",
+      "count": 2,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"Task 9 approval decisions on isolated Postgres 16\", () => {"
+      ]
+    },
+    {
+      "file": "tests/unit/webhook-postgres-concurrency.test.ts",
+      "count": 1,
+      "variables": [
+        "RUN_POSTGRES_INTEGRATION"
+      ],
+      "guards": [
+        "const enabled = process.env.RUN_POSTGRES_INTEGRATION === \"1\";",
+        "describe.skipIf(!enabled)(\"webhook ordering on isolated Postgres\", () => {"
+      ]
+    },
+    {
+      "file": "tests/unit/woztell-normalizer-captured.test.ts",
+      "count": 1,
+      "variables": [],
+      "guards": []
+    }
+  ]
+}

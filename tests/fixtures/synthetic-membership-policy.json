@@ -1,0 +1,11 @@
+{
+  "version": "synthetic-browser-test",
+  "effectiveAt": "2026-01-01T00:00:00Z",
+  "approvedAt": "2025-12-31T00:00:00Z",
+  "approvedBy": "Synthetic test owner; not WTIA approval",
+  "approvalReference": "TEST ONLY. Never deploy this fixture.",
+  "localeContent": {
+    "en": "TEST ONLY. This synthetic content is not approved WTIA policy and creates no association rights.",
+    "zh-HK": "只供測試。這些合成內容並非 WTIA 已批准的會籍政策，不會產生協會權益。"
+  }
+}

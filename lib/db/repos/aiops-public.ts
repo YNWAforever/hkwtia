@@ -68,7 +68,7 @@ function metricFrom(row: Record<string, unknown>): AiOpsMonthlyMetric {
     csatAverage: nullableNumber(row.csat_average),
     csatResponseCount: requiredNumber(row.csat_response_count),
     staffHoursSaved: requiredNumber(row.staff_hours_saved),
-    llmCostUsd: requiredNumber(row.llm_cost_usd),
+    llmCostUsd: nullableNumber(row.llm_cost_usd),
     renewalDueCount: requiredNumber(row.renewal_due_count),
     renewalPaidCount: requiredNumber(row.renewal_paid_count),
     renewalRate: nullableNumber(row.renewal_rate),
@@ -102,7 +102,25 @@ export function createAiOpsPublicRepository(
           csat_average,
           csat_response_count,
           staff_hours_saved,
-          llm_cost_usd,
+          CASE WHEN EXISTS (
+            SELECT 1 FROM ai_budget_reservations liability
+            WHERE liability.usage_state IN ('held','unknown')
+              AND timezone('Asia/Hong_Kong',liability.created_at)::date >= metrics.month_start
+              AND timezone('Asia/Hong_Kong',liability.created_at)::date < metrics.month_start + interval '1 month'
+          ) OR EXISTS (
+            SELECT 1 FROM agent_runs uncertain
+            WHERE uncertain.usage_state='unknown'
+              AND timezone('Asia/Hong_Kong',uncertain.started_at)::date >= metrics.month_start
+              AND timezone('Asia/Hong_Kong',uncertain.started_at)::date < metrics.month_start + interval '1 month'
+          ) THEN NULL ELSE (
+            COALESCE((SELECT sum(bill.actual_microusd)::numeric / 1000000 FROM ai_budget_reservations bill
+              WHERE bill.usage_state='known' AND timezone('Asia/Hong_Kong',bill.created_at)::date >= metrics.month_start
+              AND timezone('Asia/Hong_Kong',bill.created_at)::date < metrics.month_start + interval '1 month'),0)
+            + COALESCE((SELECT sum(historical.cost_usd) FROM agent_runs historical
+              WHERE timezone('Asia/Hong_Kong',historical.started_at)::date >= metrics.month_start
+              AND timezone('Asia/Hong_Kong',historical.started_at)::date < metrics.month_start + interval '1 month'
+              AND NOT EXISTS (SELECT 1 FROM ai_budget_reservations linked WHERE linked.run_key=historical.id)),0)
+          ) END AS llm_cost_usd,
           renewal_due_count,
           renewal_paid_count,
           renewal_rate,
@@ -110,7 +128,7 @@ export function createAiOpsPublicRepository(
           first_year_renewal_paid_count,
           first_year_renewal_rate,
           refreshed_at
-        FROM aiops_monthly_metrics
+        FROM aiops_monthly_metrics AS metrics
         ORDER BY month_start ASC
       `));
       const metrics = rows.map(metricFrom).sort((left, right) =>

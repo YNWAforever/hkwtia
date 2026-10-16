@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {
@@ -74,7 +75,7 @@ function createRuntime(
   agentRuns: ReturnType<typeof createAgentRunsFake>,
   provider: AgentProvider,
 ) {
-  return createAgentRuntime({
+  return createAgentRuntime({budget: syntheticAiBudget(),
     agentRuns,
     providerFactories: {
       openai: () => provider,
@@ -192,11 +193,13 @@ describe("re-review: fail-fast asymmetric provider branches", () => {
         inputTokens: 1_234,
         outputTokens: 567,
         costUsd: "0.001401",
+        usageState: "known",
+        pricingVersion: "verified-2026-10-03",
       },
     );
   });
 
-  it("fails promptly with zero billing when stream errors before finish is known", async () => {
+  it("fails promptly with unknown billing when stream errors before finish is known", async () => {
     const finish = deferred<AgentStreamFinish>();
     const agentRuns = createAgentRunsFake();
     const runtime = createRuntime(agentRuns, {
@@ -217,7 +220,9 @@ describe("re-review: fail-fast asymmetric provider branches", () => {
         errorCode: "provider_error",
         inputTokens: 0,
         outputTokens: 0,
-        costUsd: "0.000000",
+        costUsd: null,
+        usageState: "unknown",
+        pricingVersion: "verified-2026-10-03",
       },
     );
   });
@@ -390,7 +395,7 @@ describe("re-review: provider and model provenance", () => {
       order.push("configure");
       return {id: RUN_ID};
     });
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => {
@@ -421,7 +426,7 @@ describe("re-review: provider and model provenance", () => {
     ["malformed", {model: "not-a-model"}],
   ])("keeps provenance null for a %s turn", async (_label, overrides) => {
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: vi.fn(),

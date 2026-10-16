@@ -1,0 +1,11 @@
+{
+  "sourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "nativeReport": "t22-browser-release-paced.json",
+  "failedCase": "zh public login, partner assets and publication scope",
+  "location": "tests/e2e/full-public-content.spec.ts:25",
+  "issue": "CSS locator finds intentionally inert streamed header; keyboard Enter runs before stable handlers/controls",
+  "correction": "Wait native header inert property false, assert focus, retain native Enter and actual URL/form/79-image/visibility assertions",
+  "productGuardRemoved": false,
+  "greenPending": false,
+  "greenReceipt": "browser-targeted-after-quota.json"
+}

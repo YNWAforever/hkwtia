@@ -1,0 +1,38 @@
+{
+  "sourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "stats": {
+    "startTime": "2026-10-02T16:50:09.242Z",
+    "duration": 129063.39,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "environment": "Owned built Next/Chromium; confirmed isolated Neon/Auth; Stripe TEST and email sink. Scope defined by profile and guarded fixtures.",
+  "noProductionMutation": true,
+  "cases": [
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 13,
+      "title": "private bilingual CMS draft, real layout, second editor conflict and explicit publication revert",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 62655,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 373,
+      "title": "registered media search over 79 real static fixture images in bilingual event forms",
+      "status": "passed",
+      "nativeOutcome": "expected",
+      "durationMs": 9150,
+      "retry": 0,
+      "skipReasons": [],
+      "project": "chromium"
+    }
+  ],
+  "testFixtureState": "Fresh reserved real isolated Auth editors; second device signs in as the same newly created editor. App built143f2d46."
+}

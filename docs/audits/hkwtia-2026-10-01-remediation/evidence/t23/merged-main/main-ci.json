@@ -1,0 +1,93 @@
+{
+  "verifiedAt": "2026-10-03T03:45:05.921863+00:00",
+  "run": 37093643435,
+  "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37093643435",
+  "head": "a1ab93318d054f827034c456682156470dc0da14",
+  "status": "completed",
+  "conclusion": "success",
+  "environment": "GitHub Actions ubuntu-latest, Node.js 22; no fixture DB/provider environment configured in this CI workflow",
+  "jobs": [
+    {
+      "name": "checks",
+      "conclusion": "success",
+      "startedAt": "2026-10-03T03:39:27Z",
+      "completedAt": "2026-10-03T03:42:34Z"
+    },
+    {
+      "name": "worker",
+      "conclusion": "success",
+      "startedAt": "2026-10-03T03:39:27Z",
+      "completedAt": "2026-10-03T03:39:45Z"
+    },
+    {
+      "name": "tests (2)",
+      "conclusion": "success",
+      "startedAt": "2026-10-03T03:39:27Z",
+      "completedAt": "2026-10-03T03:43:31Z"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "success",
+      "startedAt": "2026-10-03T03:39:28Z",
+      "completedAt": "2026-10-03T03:44:00Z"
+    },
+    {
+      "name": "quality",
+      "conclusion": "success",
+      "startedAt": "2026-10-03T03:44:02Z",
+      "completedAt": "2026-10-03T03:44:05Z"
+    }
+  ],
+  "verifiedCommands": [
+    "npm ci",
+    "npm ls --package-lock-only @neondatabase/auth @neondatabase/auth-ui better-auth better-call",
+    "npm run audit:strings",
+    "npm run lint",
+    "npm run typecheck",
+    "npm run build",
+    "npm audit --omit=dev --audit-level=high",
+    "npx vitest run --shard=1/2",
+    "npx vitest run --shard=2/2",
+    "npm ci --prefix workers",
+    "npm --prefix workers run typecheck",
+    "npm --prefix workers test"
+  ],
+  "unit": {
+    "passed": 6346,
+    "failed": 0,
+    "skipped": 329,
+    "todo": 0,
+    "total": 6675
+  },
+  "worker": {
+    "passed": 57,
+    "failed": 0,
+    "skipped": 0,
+    "todo": 0,
+    "total": 57
+  },
+  "shards": {
+    "tests (1)": {
+      "passed": 2983,
+      "failed": 0,
+      "skipped": 166,
+      "todo": 0,
+      "total": 3149
+    },
+    "tests (2)": {
+      "passed": 3363,
+      "failed": 0,
+      "skipped": 163,
+      "todo": 0,
+      "total": 3526
+    },
+    "worker": {
+      "passed": 57,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "total": 57
+    }
+  },
+  "skipHandling": "Skipped checks are separate from passes. Existing isolated DB/provider and browser evidence remains historical and unchanged; this CI is not a new provider or complete browser acceptance run."
+}

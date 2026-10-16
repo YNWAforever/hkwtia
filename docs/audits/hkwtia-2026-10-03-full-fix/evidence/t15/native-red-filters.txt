@@ -1,0 +1,386 @@
+(node:33352) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:22476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22476) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+  x  1 [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters (1.5m)
+(node:50080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50080) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+  x  2 [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters (1.5m)
+
+
+  1) [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 280
+    Received:    124.375
+
+      110 |         expect.soft(
+      111 |           await summary.evaluate((el) => el.getBoundingClientRect().width),
+    > 112 |         ).toBeGreaterThanOrEqual(280);
+          |           ^
+      113 |         await expect.soft(
+      114 |           summary.getByText(m.Admin.members.planCodes.startup, { exact: true }),
+      115 |         ).toBeVisible();
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:112:11
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('tr').filter({ has: getByText('Membership plan', { exact: true }) }).first().locator('td').nth(1).getByText('Startup', { exact: true })
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" with timeout 20000ms
+      - waiting for locator('tr').filter({ has: getByText('Membership plan', { exact: true }) }).first().locator('td').nth(1).getByText('Startup', { exact: true })
+
+
+      113 |         await expect.soft(
+      114 |           summary.getByText(m.Admin.members.planCodes.startup, { exact: true }),
+    > 115 |         ).toBeVisible();
+          |           ^
+      116 |         const region = page.getByRole("region", { name: t.caption });
+      117 |         await expect.soft(region).toBeVisible();
+      118 |         if (await region.count()) { await region.focus(); await expect(region).toBeFocused(); await page.keyboard.press("ArrowRight"); }
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:115:11
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Pending approval requests' })
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" with timeout 20000ms
+      - waiting for getByRole('region', { name: 'Pending approval requests' })
+
+
+      115 |         ).toBeVisible();
+      116 |         const region = page.getByRole("region", { name: t.caption });
+    > 117 |         await expect.soft(region).toBeVisible();
+          |                                   ^
+      118 |         if (await region.count()) { await region.focus(); await expect(region).toBeFocused(); await page.keyboard.press("ArrowRight"); }
+      119 |         expect(
+      120 |           await page.evaluate(
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:117:35
+
+    Error: expect(locator).not.toHaveAccessibleName(expected) failed
+
+    Locator:  locator('select[name="state"]')
+    Expected: not "Validation required"
+    Received: "Validation required"
+    Timeout:  20000ms
+
+    Call log:
+      - Expect "soft not toHaveAccessibleName" with timeout 20000ms
+      - waiting for locator('select[name="state"]')
+        42 × locator resolved to <select name="state" class="min-h-11 w-full rounded-md border">…</select>
+           - unexpected value "Validation required"
+
+
+      124 |         await page.goto(origin + prefix + "/admin/ai-review");
+      125 |         const stateSelect = page.locator('select[name="state"]');
+    > 126 |         await expect.soft(stateSelect).not.toHaveAccessibleName(
+          |                                            ^
+      127 |           m.AiDraftReview.proposed,
+      128 |         );
+      129 |         await expect.soft(
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:126:44
+
+    Error: expect(locator).toHaveAccessibleDescription(expected) failed
+
+    Locator: locator('input[name="dueBefore"]')
+    Expected pattern: /time zone|時區/u
+    Received string:  ""
+    Timeout: 20000ms
+
+    Call log:
+      - Expect "soft toHaveAccessibleDescription" with timeout 20000ms
+      - waiting for locator('input[name="dueBefore"]')
+        42 × locator resolved to <input value="" placeholder="" name="dueBefore" class="min-h-11 w-full rounded-md border"/>
+           - unexpected value ""
+
+
+      129 |         await expect.soft(
+      130 |           page.locator('input[name="dueBefore"]'),
+    > 131 |         ).toHaveAccessibleDescription(/time zone|時區/u);
+          |           ^
+      132 |         await page.screenshot({
+      133 |           path: root + locale + "-review-mobile.png",
+      134 |           fullPage: true,
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:131:11
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 49
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "description": "Ensure <dl> elements are structured correctly",
+    +     "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+    +     "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/definition-list?application=playwright",
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "all": Array [],
+    +         "any": Array [],
+    +         "failureSummary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > a",
+    +         "html": "<dl class=\"grid gap-4 rounded-lg border p-4 sm:grid-cols-3\">",
+    +         "impact": "serious",
+    +         "none": Array [
+    +           Object {
+    +             "data": Object {
+    +               "values": "div > a",
+    +             },
+    +             "id": "only-dlitems",
+    +             "impact": "serious",
+    +             "message": "dl element has direct children that are not allowed: div > a",
+    +             "relatedNodes": Array [
+    +               Object {
+    +                 "html": "<a class=\"underline\" href=\"/admin/automations#verified-worker-health\">Background job health</a>",
+    +                 "target": Array [
+    +                   "div:nth-child(3) > .underline",
+    +                 ],
+    +               },
+    +             ],
+    +           },
+    +         ],
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +     "tags": Array [
+    +       "cat.structure",
+    +       "wcag2a",
+    +       "wcag131",
+    +       "EN-301-549",
+    +       "EN-9.1.3.1",
+    +       "RGAAv4",
+    +       "RGAA-9.3.3",
+    +     ],
+    +   },
+    + ]
+
+      141 |               ["serious", "critical"].includes(v.impact ?? ""),
+      142 |             ),
+    > 143 |           ).toEqual([]);
+          |             ^
+      144 |           await page.keyboard.press("Tab");
+      145 |           await page.keyboard.press("Shift+Tab");
+      146 |           checks.push({
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:143:13
+
+    Error Context: test-results\ai-admin-usability-actual--40f8b-able-state-deadline-filters-chromium\error-context.md
+
+    Error Context: test-results\ai-admin-usability-actual--40f8b-able-state-deadline-filters-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 280
+    Received:    146.078125
+
+      110 |         expect.soft(
+      111 |           await summary.evaluate((el) => el.getBoundingClientRect().width),
+    > 112 |         ).toBeGreaterThanOrEqual(280);
+          |           ^
+      113 |         await expect.soft(
+      114 |           summary.getByText(m.Admin.members.planCodes.startup, { exact: true }),
+      115 |         ).toBeVisible();
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:112:11
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('tr').filter({ has: getByText('會籍計劃', { exact: true }) }).first().locator('td').nth(1).getByText('初創', { exact: true })
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" with timeout 20000ms
+      - waiting for locator('tr').filter({ has: getByText('會籍計劃', { exact: true }) }).first().locator('td').nth(1).getByText('初創', { exact: true })
+
+
+      113 |         await expect.soft(
+      114 |           summary.getByText(m.Admin.members.planCodes.startup, { exact: true }),
+    > 115 |         ).toBeVisible();
+          |           ^
+      116 |         const region = page.getByRole("region", { name: t.caption });
+      117 |         await expect.soft(region).toBeVisible();
+      118 |         if (await region.count()) { await region.focus(); await expect(region).toBeFocused(); await page.keyboard.press("ArrowRight"); }
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:115:11
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: '待審批要求' })
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" with timeout 20000ms
+      - waiting for getByRole('region', { name: '待審批要求' })
+
+
+      115 |         ).toBeVisible();
+      116 |         const region = page.getByRole("region", { name: t.caption });
+    > 117 |         await expect.soft(region).toBeVisible();
+          |                                   ^
+      118 |         if (await region.count()) { await region.focus(); await expect(region).toBeFocused(); await page.keyboard.press("ArrowRight"); }
+      119 |         expect(
+      120 |           await page.evaluate(
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:117:35
+
+    Error: expect(locator).not.toHaveAccessibleName(expected) failed
+
+    Locator:  locator('select[name="state"]')
+    Expected: not "需要驗證"
+    Received: "需要驗證"
+    Timeout:  20000ms
+
+    Call log:
+      - Expect "soft not toHaveAccessibleName" with timeout 20000ms
+      - waiting for locator('select[name="state"]')
+        42 × locator resolved to <select name="state" class="min-h-11 w-full rounded-md border">…</select>
+           - unexpected value "需要驗證"
+
+
+      124 |         await page.goto(origin + prefix + "/admin/ai-review");
+      125 |         const stateSelect = page.locator('select[name="state"]');
+    > 126 |         await expect.soft(stateSelect).not.toHaveAccessibleName(
+          |                                            ^
+      127 |           m.AiDraftReview.proposed,
+      128 |         );
+      129 |         await expect.soft(
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:126:44
+
+    Error: expect(locator).toHaveAccessibleDescription(expected) failed
+
+    Locator: locator('input[name="dueBefore"]')
+    Expected pattern: /time zone|時區/u
+    Received string:  ""
+    Timeout: 20000ms
+
+    Call log:
+      - Expect "soft toHaveAccessibleDescription" with timeout 20000ms
+      - waiting for locator('input[name="dueBefore"]')
+        43 × locator resolved to <input value="" placeholder="" name="dueBefore" class="min-h-11 w-full rounded-md border"/>
+           - unexpected value ""
+
+
+      129 |         await expect.soft(
+      130 |           page.locator('input[name="dueBefore"]'),
+    > 131 |         ).toHaveAccessibleDescription(/time zone|時區/u);
+          |           ^
+      132 |         await page.screenshot({
+      133 |           path: root + locale + "-review-mobile.png",
+      134 |           fullPage: true,
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:131:11
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 49
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "description": "Ensure <dl> elements are structured correctly",
+    +     "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+    +     "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/definition-list?application=playwright",
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "all": Array [],
+    +         "any": Array [],
+    +         "failureSummary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > a",
+    +         "html": "<dl class=\"grid gap-4 rounded-lg border p-4 sm:grid-cols-3\">",
+    +         "impact": "serious",
+    +         "none": Array [
+    +           Object {
+    +             "data": Object {
+    +               "values": "div > a",
+    +             },
+    +             "id": "only-dlitems",
+    +             "impact": "serious",
+    +             "message": "dl element has direct children that are not allowed: div > a",
+    +             "relatedNodes": Array [
+    +               Object {
+    +                 "html": "<a class=\"underline\" href=\"/zh/admin/automations#verified-worker-health\">背景工作健康狀態</a>",
+    +                 "target": Array [
+    +                   "div:nth-child(3) > .underline",
+    +                 ],
+    +               },
+    +             ],
+    +           },
+    +         ],
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +     "tags": Array [
+    +       "cat.structure",
+    +       "wcag2a",
+    +       "wcag131",
+    +       "EN-301-549",
+    +       "EN-9.1.3.1",
+    +       "RGAAv4",
+    +       "RGAA-9.3.3",
+    +     ],
+    +   },
+    + ]
+
+      141 |               ["serious", "critical"].includes(v.impact ?? ""),
+      142 |             ),
+    > 143 |           ).toEqual([]);
+          |             ^
+      144 |           await page.keyboard.press("Tab");
+      145 |           await page.keyboard.press("Shift+Tab");
+      146 |           checks.push({
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:143:13
+
+    Error Context: test-results\ai-admin-usability-actual--94e42-able-state-deadline-filters-chromium\error-context.md
+
+    Error Context: test-results\ai-admin-usability-actual--94e42-able-state-deadline-filters-chromium\error-context.md
+
+  2 failed
+    [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters 
+    [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters 
+{"error":"USABILITY_ACCEPTANCE_GATE_FAILED","stage":"native","sqlState":null,"production":false}

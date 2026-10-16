@@ -1,4 +1,4 @@
-export type JourneyName = "onboarding_90d" | "renewal" | "dunning" | "winback";
+export type JourneyName = "onboarding_90d" | "renewal" | "dunning" | "winback" | "event_reminder";
 export type MessageClassification = "transactional" | "marketing";
 export type JourneyChannel = "email" | "whatsapp";
 export type StepCondition = "always" | "no_login" | "has_login" | "profile_below_70" | "score_below_20";

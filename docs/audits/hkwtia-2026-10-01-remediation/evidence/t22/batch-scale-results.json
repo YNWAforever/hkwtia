@@ -1,0 +1,132 @@
+{
+  "sourceSha": "b0f3d30abbaddb8bdc1b5a3934ac0636bff3f387",
+  "command": "RUN_POSTGRES_INTEGRATION=1 RUN_AUDIT_FULL_MATRIX=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-batch-scale-matrix.test.ts --maxWorkers=1 --reporter=json",
+  "passed": 24,
+  "skipped": 0,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL profile_patch 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 421.1713
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL profile_patch 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 4641.4957
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL profile_patch 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 59214.024300000005
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL membership_grant 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 877.2842999999993
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL membership_grant 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 6112.163799999995
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL membership_grant 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 126027.4336
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL renewal_reminder 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 2404.6719999999914
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL renewal_reminder 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 17232.131800000003
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL renewal_reminder 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 326502.16919999995
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL profile_update_invite 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 3100.0924999999115
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL profile_update_invite 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 22672.755000000005
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL profile_update_invite 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 530831.7146000001
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL import_commit 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 21560.48680000007
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL import_commit 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 49390.179000000004
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL import_commit 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 225724.4856
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL export_members 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 1500.2658999999985
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL export_members 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 16773.482099999906
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL export_members 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 274832.9956
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL export_event_attendees 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 309.82720000017434
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL export_event_attendees 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 674.6385999999475
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL export_event_attendees 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 8111.9832999999635
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL ticket_resend 50: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 1614.1789000001736
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL ticket_resend 500: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 31123.173199999845
+    },
+    {
+      "name": "eight operations across50/500/5000 on actual full-schema SQL ticket_resend 5000: preview/CAS/claims/settlement and durable effect count",
+      "status": "passed",
+      "durationMs": 148144.7435000001
+    }
+  ],
+  "providerCalls": 0,
+  "ownedContainerClosed": true,
+  "scope": "actual handlers/SQL/durable intent/private artifacts, not provider delivery"
+}

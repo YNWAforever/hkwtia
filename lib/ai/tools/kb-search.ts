@@ -1,4 +1,6 @@
+import {publicFactValues} from "@/lib/ai/drafts/public-facts";
 import {z} from "zod";
+import {knowledgeRefSchema,type KnowledgeRef} from "@/lib/ai/knowledge/policy";
 
 import type {AgentTool} from "@/lib/ai/provider";
 import {
@@ -39,24 +41,31 @@ export function createKbSearchTool(context: ConciergeToolContext): AgentTool {
           sourceId: string;
           title: string;
           url: string;
-          confidence: number;
+          retrievalScore: number;
+          knowledgeRef: KnowledgeRef;
         }> = [];
         for (const row of rows.slice(0, parsed.k)) {
           const url = canonicalHttpsUrl(row.url);
-          if (!url) continue;
+          const approved = knowledgeRefSchema.safeParse(row.ref);
+          if (!url || !approved.success || approved.data.locale !== context.locale || approved.data.audience !== "public") continue;
           const confidence = Math.max(0, Math.min(1, row.score));
           const citation = {
-            sourceId: sourceId("kb", url),
+            sourceId: sourceId("kb", [approved.data.sourceId, approved.data.version, approved.data.contentHash, context.locale].join(":")),
             title: row.title.slice(0, 200),
             url,
-            confidence,
+            retrievalScore: confidence,
+            knowledgeRef: approved.data,
           };
           citations.push(citation);
           records.push(Object.freeze({
             code: "ok",
             title: citation.title,
-            excerpt: row.excerpt.slice(0, 400),
-            score: confidence,
+            excerpt: row.excerpt,
+            retrievalScore: confidence,
+            knowledgeRef: approved.data,
+            factBlocks: Object.entries(publicFactValues(approved.data.sourceId,context.locale,row.structuredFacts??{})).map(([field,fact])=>({field,label:fact.label,token:`{{facts.${field}}}`})),
+            offsetStart: row.offsetStart,
+            offsetEnd: row.offsetEnd,
             citation,
           }));
         }
@@ -67,7 +76,7 @@ export function createKbSearchTool(context: ConciergeToolContext): AgentTool {
           durationMs: durationSince(startedAt),
           count: records.length,
         });
-        return ok(records, citations);
+        return records.length ? ok(records, citations) : ok([{code: "knowledge_handoff_required"}]);
       } catch {
         await auditBestEffort(context, {
           tool: "kb_search",

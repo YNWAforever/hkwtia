@@ -1,0 +1,25 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/public-hero-streaming.test.tsx (2 tests | 2 failed) 1062ms
+   × public hero streaming > events exposes its hero while the repository is still pending 521ms
+     → The hero must not wait for the catalogue read: expected undefined to be defined
+   × public hero streaming > membership exposes its hero while the repository is still pending 539ms
+     → The hero must not wait for the catalogue read: expected undefined to be defined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/public-hero-streaming.test.tsx > public hero streaming > events exposes its hero while the repository is still pending
+ FAIL  tests/unit/public-hero-streaming.test.tsx > public hero streaming > membership exposes its hero while the repository is still pending
+AssertionError: The hero must not wait for the catalogue read: expected undefined to be defined
+ ❯ vi.waitFor.timeout tests/unit/public-hero-streaming.test.tsx:23:88
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  02:05:46
+   Duration  29.37s (transform 2.41s, setup 2.84s, collect 6.29s, tests 1.06s, environment 15.97s, prepare 1.15s)
+

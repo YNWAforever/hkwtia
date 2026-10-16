@@ -1,0 +1,102 @@
+[
+  {
+    "snapshot": "run-isolated.mjs",
+    "restoreTo": ".playwright/t22-run-isolated.mjs"
+  },
+  {
+    "snapshot": "built-browser.mjs",
+    "restoreTo": ".playwright/t22-e2e.mjs"
+  },
+  {
+    "snapshot": "auth-provider-observer.mjs",
+    "restoreTo": ".playwright/t22-auth-provider-observer.mjs"
+  },
+  {
+    "snapshot": "full-unit.mjs",
+    "restoreTo": ".playwright/t22-full-final.mjs"
+  },
+  {
+    "snapshot": "sequential-paced-gates.mjs",
+    "restoreTo": ".playwright/t22-release-paced-sequence.mjs"
+  },
+  {
+    "snapshot": "sequential-unpaced-gates.mjs",
+    "restoreTo": ".playwright/t22-release-final-sequence.mjs"
+  },
+  {
+    "snapshot": "static-stage.mjs",
+    "restoreTo": ".playwright/t23-static-stage.mjs"
+  },
+  {
+    "snapshot": "lighthouse-built.mjs",
+    "restoreTo": ".playwright/t22-lighthouse-final.mjs"
+  },
+  {
+    "snapshot": "lighthouse.config.js",
+    "restoreTo": ".playwright/t22-lhci.config.js"
+  },
+  {
+    "snapshot": "progress.cjs",
+    "restoreTo": ".playwright/t22-progress.cjs"
+  },
+  {
+    "snapshot": "unit-target.mjs",
+    "restoreTo": ".playwright/t22-unit-target.mjs"
+  },
+  {
+    "snapshot": "preview-runtime.mjs",
+    "restoreTo": ".playwright/t23-preview-runtime.mjs"
+  },
+  {
+    "snapshot": "anonymous-session.spec.ts.txt",
+    "restoreTo": ".playwright/t22-anonymous-session.spec.ts"
+  },
+  {
+    "snapshot": "anonymous-session.config.ts.txt",
+    "restoreTo": ".playwright/t22-anonymous-session.config.ts"
+  },
+  {
+    "snapshot": "public-message-payload.spec.ts.txt",
+    "restoreTo": ".playwright/t22-public-message-payload.spec.ts"
+  },
+  {
+    "snapshot": "public-message-payload.config.ts.txt",
+    "restoreTo": ".playwright/t22-public-message-payload.config.ts"
+  },
+  {
+    "snapshot": "build-isolated.mjs",
+    "restoreTo": ".playwright/t22-build.mjs"
+  },
+  {
+    "snapshot": "safe-progress.cjs",
+    "restoreTo": ".playwright/t22-progress.cjs"
+  },
+  {
+    "snapshot": "historical-sql.mjs",
+    "restoreTo": ".playwright/t22-existing-sql-final.mjs"
+  },
+  {
+    "snapshot": "historical-sql-targets.json",
+    "restoreTo": ".playwright/t22-existing-sql-targets.json"
+  },
+  {
+    "snapshot": "lighthouse-public-profile.cjs",
+    "restoreTo": ".playwright/t21-lhci-public.cjs"
+  },
+  {
+    "snapshot": "lighthouse-config.js",
+    "restoreTo": ".playwright/t22-lhci.config.js"
+  },
+  {
+    "snapshot": "migration-preflight-readonly.mjs",
+    "restoreTo": ".playwright/t23-preflight-readonly.mjs"
+  },
+  {
+    "snapshot": "cms-readonly-reconciliation.mjs",
+    "restoreTo": ".playwright/t23-cms-readonly.mjs"
+  },
+  {
+    "snapshot": "record-native-receipt.py.txt",
+    "restoreTo": ".playwright/t23-record-final-native.py"
+  }
+]

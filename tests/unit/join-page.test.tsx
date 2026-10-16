@@ -1,11 +1,19 @@
 import {renderToStaticMarkup} from "react-dom/server";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+const social = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/auth/client", () => ({authClient: {signIn: {social}}}));
 const state = vi.hoisted(() => ({
-  actor: null as {kind: "member"; userId: string} | null,
+  actor: null as {kind: "member"; userId: string; profileId?:string} | null,
   redirectUrl: null as string | null,
   startJoinCalls: [] as unknown[][],
+  ownedApplications: [] as Array<Record<string, unknown>>,
+  completionMembership:null as {id:string;status:string}|null,
+  completionReads:[] as unknown[][],
+  completionReadFails:false,
+  loginResolution: {kind: "signed-out"} as {kind: string},
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -17,6 +25,9 @@ vi.mock("next/navigation", () => ({
   notFound: () => { throw new Error("NEXT_NOT_FOUND"); },
 }));
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => state.actor}));
+vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: async () => state.loginResolution}));
+vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {listOwned: async () => state.ownedApplications}}));
+vi.mock("@/lib/db/repos/memberships",()=>({membershipsRepository:{getByApplicationId:async(...args:unknown[])=>{state.completionReads.push(args);if(state.completionReadFails)throw Error("SYNTHETIC_READ_FAILURE");return state.completionMembership;}}}));
 vi.mock("@/lib/membership/join-service", () => ({
   startJoin: async (...args: unknown[]) => { state.startJoinCalls.push(args); return {applicationId: "application-a", next: "profile"}; },
 }));
@@ -26,7 +37,7 @@ vi.mock("@/components/join/join-form", () => ({
 vi.mock("@/components/join/progress", () => ({
   JoinProgress: ({active}: {active: string}) => <div data-active={active}/> ,
 }));
-vi.mock("@/app/[locale]/(join)/join/actions", () => ({requestMagicLink: vi.fn()}));
+vi.mock("@/app/[locale]/(join)/join/actions", () => ({requestMagicLink: vi.fn(), resumeJoinAction: vi.fn()}));
 
 import JoinPage from "@/app/[locale]/(join)/join/page";
 
@@ -39,6 +50,10 @@ describe("JoinPage portal continuation auth", () => {
     state.actor = null;
     state.redirectUrl = null;
     state.startJoinCalls = [];
+    state.ownedApplications = [];
+    state.completionMembership=null;state.completionReads=[];state.completionReadFails=false;
+    social.mockReset();
+    state.loginResolution = {kind: "signed-out"};
   });
 
   it("renders the localized auth form when a portal continuation has no plan", async () => {
@@ -50,11 +65,84 @@ describe("JoinPage portal continuation auth", () => {
     expect(state.startJoinCalls).toHaveLength(0);
   });
 
+  it("offers Google and returns to the selected plan and application after authentication", async () => {
+    social.mockResolvedValue({data: {}, error: null});
+    const application = "1a538745-848b-448f-94d6-3b6a92f4e891";
+    const previous = process.env.AUTH_GOOGLE_ENABLED;
+    process.env.AUTH_GOOGLE_ENABLED = "true";
+    try {
+      render(await JoinPage(props("zh-HK", {plan: "startup", application})));
+      fireEvent.click(screen.getByRole("button", {name: "localized:google"}));
+      await waitFor(() => expect(social).toHaveBeenCalledWith({
+        provider: "google",
+        callbackURL: `/zh/member-login?next=${encodeURIComponent(`/join?plan=startup&application=${application}`)}`,
+      }));
+    } finally {
+      if (previous === undefined) delete process.env.AUTH_GOOGLE_ENABLED;
+      else process.env.AUTH_GOOGLE_ENABLED = previous;
+    }
+  });
+  it("sends a verified provider subject without a profile to onboarding with the selected plan", async () => {
+    state.loginResolution = {kind: "needs-profile"};
+    await expect(JoinPage(props("zh-HK", {plan: "startup"}))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe("/zh/member-login?next=%2Fjoin%3Fplan%3Dstartup");
+  });
+  it("renders the plan chooser on a bare /join and the unavailable state for a malformed plan", async () => {
+    const chooser = renderToStaticMarkup(await JoinPage(props("zh-HK", {})));
+    expect(chooser).toContain("localized:choosePlanTitle");
+    expect(chooser).toContain('href="/zh/join?plan=startup"');
+    expect(chooser).toContain('href="/zh/contact"');
+    expect(chooser).toContain('data-active="plan"');
+
+    const malformed = renderToStaticMarkup(await JoinPage(props("en", {plan: "gold"})));
+    expect(malformed).toContain("localized:invalidPlanTitle");
+    expect(malformed).not.toContain("localized:choosePlanTitle");
+  });
+
+  it("renders a signed-in plan entry without creating an application during GET", async () => {
+    state.actor = {kind: "member", userId: "user-a"};
+    const markup = renderToStaticMarkup(await JoinPage(props("en", {plan: "startup"})));
+    expect(state.startJoinCalls).toHaveLength(0);
+    expect(state.redirectUrl).toBeNull();
+    expect(markup).toContain("localized:resume.start");
+  });
+
+  it("shows owned resumable state and keeps the explicit new path separate", async () => {
+    state.actor = {kind: "member", userId: "user-a"};
+    state.ownedApplications = [{id: "application-a", planCode: "startup", status: "pending_payment", currentStep: "profile", updatedAt: new Date("2026-09-27T00:00:00Z")}];
+    const markup = renderToStaticMarkup(await JoinPage(props("en", {plan: "startup", application: "application-a"})));
+    expect(markup).toContain("localized:resume.steps.checkout");
+    expect(markup).toContain("localized:resume.lastSaved");
+    expect(markup).toContain('name="applicationId"');
+    expect(markup).toContain('name="intent"');
+    expect(state.startJoinCalls).toHaveLength(0);
+    await expect(JoinPage(props("en", {plan: "startup", application: "foreign"}))).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
   it("redirects an authenticated no-plan continuation directly to the portal", async () => {
     state.actor = {kind: "member", userId: "user-a"};
 
     await expect(JoinPage(props("zh-HK", {next: "/portal/profile"}))).rejects.toThrow("NEXT_REDIRECT");
     expect(state.redirectUrl).toBe("/zh/portal/profile");
     expect(state.startJoinCalls).toHaveLength(0);
+  });
+
+  it.each(["en","zh-HK"])("%s completed owned application returns to its authoritative membership rather than a new application",async locale=>{
+    state.actor={kind:"member",userId:"auth-a",profileId:"profile-a"};
+    state.ownedApplications=[{id:"completed-app",planCode:"community",status:"completed",currentStep:"complete"}];
+    state.completionMembership={id:"membership-existing",status:"active"};
+    await expect(JoinPage(props(locale,{plan:"community",application:"completed-app"}))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe((locale==="zh-HK"?"/zh":"")+"/join/complete?membership_id=membership-existing");
+    expect(state.completionReads).toEqual([[state.actor,"completed-app"]]);expect(state.startJoinCalls).toHaveLength(0);
+  });
+  it.each([false,true])("missing or failed completed membership read (%s) gives manual recovery without offering a duplicate application",async fails=>{
+    state.actor={kind:"member",userId:"auth-a",profileId:"profile-a"};state.completionReadFails=fails;
+    state.ownedApplications=[{id:"completed-app",planCode:"community",status:"completed",currentStep:"complete"}];
+    const markup=renderToStaticMarkup(await JoinPage(props("zh-HK",{plan:"community",application:"completed-app"})));
+    expect(markup).toContain("localized:resume.statusUnavailable");expect(markup).toContain('href="/zh/contact"');expect(markup).toContain('href="/zh/portal"');expect(markup).not.toContain("localized:resume.start");expect(state.startJoinCalls).toHaveLength(0);
+  });
+  it("a foreign completed application cannot trigger a membership lookup",async()=>{
+    state.actor={kind:"member",userId:"auth-a",profileId:"profile-a"};state.ownedApplications=[{id:"owned-app",planCode:"community",status:"completed"}];
+    await expect(JoinPage(props("en",{plan:"community",application:"foreign-app"}))).rejects.toThrow("NEXT_NOT_FOUND");expect(state.completionReads).toHaveLength(0);
   });
 });

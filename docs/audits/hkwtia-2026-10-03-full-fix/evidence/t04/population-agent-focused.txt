@@ -1,0 +1,18 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/unit/aiops-components.test.tsx (4 tests) 646ms
+ ✓ tests/unit/aiops-page.test.tsx (8 tests) 289ms
+ ✓ tests/unit/operations-timing-form.test.tsx (1 test) 120ms
+ ✓ tests/unit/aiops-dashboard.test.ts (15 tests) 37ms
+ ✓ tests/unit/ai-operations-metrics.test.ts (20 tests) 17ms
+ ✓ tests/unit/operations-metrics-action.test.ts (4 tests) 11ms
+ ✓ tests/unit/operations-baseline.test.ts (4 tests) 22ms
+ ✓ tests/unit/server-action-actor-boundary.test.ts (110 tests) 5292ms
+   ✓ Server Action actor boundary > detects actor-taking runtime functions through every local export shape  4538ms
+
+ Test Files  8 passed (8)
+      Tests  166 passed (166)
+   Start at  04:56:25
+   Duration  32.54s (transform 693ms, setup 1.31s, collect 19.38s, tests 6.44s, environment 27.83s, prepare 931ms)
+

@@ -1,0 +1,9 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run tests/unit/private-link-boundary.test.tsx -t \"keeps every discovered private caller\" --maxWorkers=1",
+  "reintroducedViolation": "MemberFilters direct next/link import",
+  "exitCode": 1,
+  "passed": 0,
+  "failed": 1,
+  "intendedBehavior": "eager private caller discovery",
+  "restoredInFinally": true
+}

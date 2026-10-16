@@ -64,7 +64,7 @@ export type AutomationRetryWriter = Readonly<{
 
 export type RetryAutomationActionState = Readonly<{
   status?: "success" | "error";
-  code?: "scheduled" | "validation" | "unavailable" | "error";
+  code?: "scheduled" | "validation" | "unavailable" | "reconciliation" | "error";
 }>;
 
 type RetryAutomationActionOptions = Readonly<{
@@ -153,6 +153,7 @@ export async function runRetryAutomationAction(
     return {status: "success", code: "scheduled"};
   } catch (error) {
     if (isAuthorizationDenial(error)) throw error;
+    if (error instanceof Error && error.message === "DELIVERY_RECONCILIATION_REQUIRED") return {status: "error", code: "reconciliation"};
     if (
       error instanceof JourneyTransitionError
       || (

@@ -1,0 +1,34 @@
+{
+  "task": "T10",
+  "environment": "confirmed isolated Neon/Auth; localhost3450; synthetic identities only",
+  "codeFixed": [
+    "unique application operational case in existing staff_tasks/context",
+    "own authenticated admin actions and CAS",
+    "original applicant-only saved-step resume",
+    "loaded editor version pinned across external refresh",
+    "generic resolve rejects application case without version"
+  ],
+  "actualSql": {
+    "passed": 8,
+    "skipped": 0,
+    "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-application-case.test.ts --maxWorkers=1 --no-file-parallelism"
+  },
+  "focused": {
+    "passed": 177,
+    "skipped": 0,
+    "files": 12
+  },
+  "browser": {
+    "passed": 4,
+    "skipped": 0,
+    "seconds": 43.3,
+    "command": "PLAYWRIGHT_BASE_URL=http://localhost:3450 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-application-cases.spec.ts tests/e2e/full-application-resume.spec.ts --reporter=line"
+  },
+  "migration": "none; JSONB TypeScript contract only",
+  "production": "unchanged",
+  "gates": [
+    "approved association review/activation policy",
+    "approved missing-document test recipient/provider delivery",
+    "full partial unsaved draft U10, company invites U11, signed payment lifecycle U12 remain T22"
+  ]
+}

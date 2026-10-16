@@ -1,0 +1,28 @@
+{
+  "recordedAt": "2026-10-01T02:22:03.872Z",
+  "deploymentId": "dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "anonymous": true,
+  "applicationSession": false,
+  "passed": true,
+  "captures": [
+    {
+      "filename": "home-en-desktop-viewport.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "path": "/",
+      "origin": "https://hkwtia.vercel.app"
+    },
+    {
+      "filename": "home-zh-mobile-viewport.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/zh",
+      "origin": "https://hkwtia.vercel.app"
+    }
+  ]
+}

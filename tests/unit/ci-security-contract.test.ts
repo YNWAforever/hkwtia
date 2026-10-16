@@ -12,7 +12,31 @@ const authTreeCommand = `npm ls --package-lock-only ${authTreePackages.join(" ")
 const authTreeProcessTimeoutMs = 18_000;
 const authTreeContractTimeoutMs = 50_000;
 const neonAuthLockRoots = ["node_modules/@neondatabase/auth", "node_modules/@neondatabase/auth-ui"];
-const requiredCiCommands = ["npm ci", authTreeCommand, "npm run audit:strings", "npm test", "npm run lint", "npm run typecheck", "npm run build", "npm audit --omit=dev --audit-level=high"];
+// Phase B1 (B-8) split the single `quality` job three ways: `checks` runs the static gates and the
+// build, `tests` shards the unit suite across two runners, and `quality` aggregates every required job
+// so the branch-protection check name PRs #47-#49 were gated on survives. T11 also
+// requires the separate worker typecheck/tests/actual-entry job. The run steps are still
+// pinned as one ordered list across all jobs -- a shard that quietly dropped, or a gate that moved
+// out of `checks`, would change this sequence. The `quality` step is a block scalar (its `- run: |`
+// line is what this list sees); its body is pinned separately by `requiredQualityJob` because the
+// aggregate must fail on a red shard: without `if: always()` a failed `needs` skips the job, and a
+// skipped required status check counts as passing on GitHub.
+const requiredCiCommands = [
+  "npm ci", authTreeCommand, "npm run audit:strings", "npm run lint", "npm run typecheck", "npm run build", "npm audit --omit=dev --audit-level=high",
+  "npm ci", "npx vitest run --shard=${{ matrix.shard }}/2",
+  "npm ci --prefix workers", "npm --prefix workers run typecheck", "npm --prefix workers test",
+  "|",
+];
+const requiredQualityJob = [
+  "  quality:",
+  "    needs: [checks, tests, worker]",
+  "    if: ${{ always() }}",
+  "    runs-on: ubuntu-latest",
+  "    steps:",
+  "      - run: |",
+  '          test "${{ needs.checks.result }}" = "success" && test "${{ needs.tests.result }}" = "success" && test "${{ needs.worker.result }}" = "success" || exit 1',
+  '          echo "quality gate passed"',
+].join("\n") + "\n";
 const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> = {
   "node_modules/@neondatabase/auth-ui/node_modules/ajv": {
     version: "8.20.0",
@@ -41,9 +65,9 @@ const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> 
     peer: true,
   },
   "node_modules/fast-uri": {
-    version: "3.1.6",
-    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.6.tgz",
-    integrity: "sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==",
+    version: "3.1.7",
+    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.7.tgz",
+    integrity: "sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==",
     funding: [
       {type: "github", url: "https://github.com/sponsors/fastify"},
       {type: "opencollective", url: "https://opencollective.com/fastify"},
@@ -241,6 +265,19 @@ describe("CI and production dependency security contract", () => {
     }
   });
 
+  it("detects a vulnerable fast-uri version in the optional-peer closure", () => {
+    const vulnerableFixture: Record<string, unknown> = {
+      packages: structuredClone(requiredNpm10OptionalPeerClosure),
+    };
+    const packages = vulnerableFixture.packages as Record<string, Record<string, unknown>>;
+    packages["node_modules/fast-uri"] = {
+      ...packages["node_modules/fast-uri"],
+      version: "3.1.6",
+    };
+
+    expect(npm10OptionalPeerClosureMismatches(vulnerableFixture)).toEqual(["node_modules/fast-uri"]);
+  });
+
   it("scopes Better Auth lock assertions to Neon Auth ancestry", () => {
     const lockfile = readJson("package-lock.json");
     const packages = lockfile.packages as Record<string, {version?: string}>;
@@ -345,6 +382,11 @@ describe("CI and production dependency security contract", () => {
     expect(workflowTriggerBranches(workflow, "push"), "CI must run on pushes to main and release, so production is never deployed unchecked").toEqual(expect.arrayContaining(["main", "release"]));
     expect(workflow, "CI must use Node 22 with npm caching").toMatch(/node-version:\s*22[\s\S]*cache:\s*npm/);
     expect(workflowRunSteps(workflow), "CI run steps must be exactly the required commands in order").toEqual(requiredCiCommands);
+    expect(normalizeNewlines(workflow), "the `quality` job must aggregate `checks` and `tests` so the branch-protection check name is preserved").toMatch(/^  quality:\n    needs: \[checks, tests, worker\]/m);
+    expect(normalizeNewlines(workflow), "the `quality` job must declare `if: ${{ always() }}` so a red shard fails it instead of skipping it").toMatch(/^  quality:\n    needs: \[checks, tests, worker\]\n    if: \$\{\{ always\(\) \}\}\n/m);
+    expect(normalizeNewlines(workflow), "the `quality` step must check all three needs.*.result values").toMatch(/test "\$\{\{ needs\.checks\.result \}\}" = "success" && test "\$\{\{ needs\.tests\.result \}\}" = "success" && test "\$\{\{ needs\.worker\.result \}\}" = "success" \|\| exit 1/);
+    expect(normalizeNewlines(workflow), "the `quality` job must be exactly the pinned always-run aggregate").toContain(requiredQualityJob);
+    expect(normalizeNewlines(workflow), "the unit suite must run as a two-way shard matrix").toMatch(/matrix:\n\s*shard: \[1, 2\]/);
   });
 
   it("bounds the exact Auth dependency-tree CI step to one minute", () => {
@@ -368,5 +410,17 @@ describe("CI and production dependency security contract", () => {
     expect(workflowRunSteps(reordered), "reordered workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
     expect(workflowRunSteps(missingAuthTree), "missing Auth-tree validation must fail the exact command contract").not.toEqual(requiredCiCommands);
     expect(workflowRunSteps(withExtraCommand), "extra workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
+  });
+
+  it("rejects a quality gate that skips on a red shard or ignores any of the three results", () => {
+    const workflow = normalizeNewlines(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
+    const withoutAlways = mutateFixture("quality job without if: always()", workflow, "    if: ${{ always() }}\n", "");
+    const ignoringTests = mutateFixture("quality job ignoring the tests result", workflow, ' && test "${{ needs.tests.result }}" = "success"', "");
+    const ignoringWorker = mutateFixture("quality job ignoring the worker result", workflow, ' && test "${{ needs.worker.result }}" = "success"', "");
+    const missingWorkerDependency = mutateFixture("quality missing worker dependency", workflow, 'needs: [checks, tests, worker]', 'needs: [checks, tests]');
+    const ignoringChecks = mutateFixture("quality job ignoring the checks result", workflow, 'test "${{ needs.checks.result }}" = "success" && ', "");
+
+    expect(workflow).toContain(requiredQualityJob);
+    for (const mutated of [withoutAlways, ignoringTests, ignoringChecks, ignoringWorker, missingWorkerDependency]) expect(mutated).not.toContain(requiredQualityJob);
   });
 });

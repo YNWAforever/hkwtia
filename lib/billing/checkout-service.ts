@@ -7,6 +7,7 @@ import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {appEnv, billingEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
+import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {localizedPath} from "@/lib/urls";
 
 type MembershipReader = {
@@ -70,6 +71,7 @@ export async function getAuthorizedBillingMembership(
 
 function validateCheckoutMembership(membership: MembershipRecord): void {
   if (membership.status !== "pending_payment") throw new Error("MEMBERSHIP_NOT_PENDING_PAYMENT");
+  if (membership.stripeSubscriptionId) throw new Error("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
   if (membership.planCode !== "startup" && membership.planCode !== "corporate") {
     throw new Error("PLAN_DOES_NOT_USE_CHECKOUT");
   }
@@ -123,6 +125,7 @@ export async function createCheckoutSession(
   const preflightMembership = await dependencies.memberships.getBillingAccess(actor, membershipId);
   if (!preflightMembership) throw new Error("FORBIDDEN");
   validateCheckoutMembership(preflightMembership);
+  await requirePolicyAcceptanceForApplication(actor,preflightMembership.applicationId);
   const priceReference = dependencies.priceForPlan(preflightMembership.planCode);
   const {attempt, membership} = await dependencies.attempts.claimActive(
     actor, preflightMembership.id, priceReference, preflightMembership.planCode,
@@ -142,6 +145,7 @@ export async function startNewCheckoutAttempt(
   const membership = await dependencies.memberships.getBillingAccess(actor, membershipId);
   if (!membership) throw new Error("FORBIDDEN");
   validateCheckoutMembership(membership);
+  await requirePolicyAcceptanceForApplication(actor,membership.applicationId);
   const priceReference = dependencies.priceForPlan(membership.planCode);
   const result = await dependencies.attempts.startNewAttempt(
     actor, membershipId, priceReference, reason, {...request, expectedPlanCode: membership.planCode},
@@ -152,14 +156,23 @@ export async function startNewCheckoutAttempt(
 export async function createBillingPortalSession(
   actor: Actor,
   membershipId: string,
+  locale: AppLocale,
   dependencies: CheckoutDependencies = defaultDependencies(),
 ): Promise<{url: string}> {
   const membership = await getAuthorizedBillingMembership(actor, membershipId, dependencies);
-  if (!["active", "past_due", "cancel_at_period_end"].includes(membership.status)) {
+  if (!["active", "past_due", "cancel_at_period_end", "expired", "cancelled", "pending_payment"].includes(membership.status)) {
     throw new Error("MEMBERSHIP_BILLING_NOT_RECOVERABLE");
   }
+  if (membership.stripeSubscriptionId) {
+    const current = await dependencies.stripe.currentSubscription(membership.stripeSubscriptionId);
+    if (current.stripeCustomerId !== membership.stripeCustomerId || current.stripeSubscriptionId !== membership.stripeSubscriptionId) {
+      throw new Error("BILLING_SUBSCRIPTION_CORRELATION_FAILED");
+    }
+  }
+  // The provider portal offers existing invoices/subscription management; it
+  // does not create a replacement membership or grant an entitlement here.
   return dependencies.stripe.createBillingPortalSession({
     customerId: membership.stripeCustomerId!,
-    returnUrl: `${appOrigin(dependencies.appUrl)}/portal/billing`,
+    returnUrl: `${appOrigin(dependencies.appUrl)}${localizedPath(locale, "/portal/billing")}`,
   });
 }

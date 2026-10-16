@@ -1,3 +1,5 @@
+import {knowledgeRefSchema,type KnowledgeRef} from "@/lib/ai/knowledge/contracts";
+import type {ModelRoute} from "@/lib/ai/providers/registry";
 import type {ZodTypeAny} from "zod";
 
 export const MAX_AGENT_STEPS = 8;
@@ -11,6 +13,9 @@ export type AgentMessage = Readonly<{
 export type AgentUsage = Readonly<{
   inputTokens: number;
   outputTokens: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+  reasoningTokens?: number;
 }>;
 
 export type AgentCitationInput = Readonly<{
@@ -18,6 +23,9 @@ export type AgentCitationInput = Readonly<{
   title: string;
   url?: string;
   confidence?: number;
+  /** Retrieval relevance, never a probability of factual accuracy. */
+  retrievalScore?: number;
+  knowledgeRef?: KnowledgeRef;
 }>;
 
 export type AgentCitation = Readonly<{
@@ -25,6 +33,9 @@ export type AgentCitation = Readonly<{
   title: string;
   url?: string;
   confidence?: number;
+  /** Retrieval relevance, never a probability of factual accuracy. */
+  retrievalScore?: number;
+  knowledgeRef?: KnowledgeRef;
 }>;
 
 export type AgentToolResult = Readonly<{
@@ -54,6 +65,7 @@ export type AgentStreamRequest = Readonly<{
   messages: AgentMessage[];
   tools: AgentToolSet;
   abortSignal?: AbortSignal;
+  onProviderReceipt?: (requestId: string) => Promise<void> | void;
 }>;
 
 export type AgentStreamFinish = Readonly<{
@@ -76,7 +88,7 @@ export type AgentProvider = Readonly<{
 }>;
 
 export type AgentProviderFactory = (
-  options: Readonly<{apiKey: string}>,
+  options: Readonly<{apiKey: string; route?: ModelRoute}>,
 ) => AgentProvider;
 
 export class AgentInvalidProviderResponseError extends Error {
@@ -131,12 +143,16 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
     let titleValue: unknown;
     let urlValue: unknown;
     let confidenceValue: unknown;
+    let relevanceValue: unknown;
+    let knowledgeRefValue: unknown;
     try {
       const record = input as Record<string, unknown>;
       sourceIdValue = record.sourceId;
       titleValue = record.title;
       urlValue = record.url;
       confidenceValue = record.confidence;
+      relevanceValue = record.retrievalScore;
+      knowledgeRefValue = record.knowledgeRef;
     } catch {
       continue;
     }
@@ -163,12 +179,26 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
         : undefined;
     if (confidenceValue !== undefined && confidence === undefined) continue;
 
+    const retrievalScore = relevanceValue === undefined ? undefined : typeof relevanceValue === "number" && Number.isFinite(relevanceValue) && relevanceValue >= 0 && relevanceValue <= 1 ? relevanceValue : undefined;
+    if (relevanceValue !== undefined && retrievalScore === undefined) continue;
+
+    let knowledgeRef: KnowledgeRef | undefined;
+    if (knowledgeRefValue !== undefined) {
+      try {
+        const parsed = knowledgeRefSchema.safeParse(knowledgeRefValue);
+        if (!parsed.success) continue;
+        knowledgeRef = parsed.data;
+      } catch { continue; }
+    }
+
     seen.add(sourceId);
     citations.push({
       sourceId,
       title,
       ...(url === undefined ? {} : {url}),
       ...(confidence === undefined ? {} : {confidence}),
+      ...(retrievalScore === undefined ? {} : {retrievalScore}),
+      ...(knowledgeRef === undefined ? {} : {knowledgeRef}),
     });
   }
 

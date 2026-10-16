@@ -1,0 +1,66 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-ai-grader.test.ts (26 tests | 1 failed) 606ms
+   ✓ administrative AI deterministic hard gates > rejects wrong amount even when the judge approves 37ms
+   ✓ administrative AI deterministic hard gates > rejects authority claimed in the final body 3ms
+   ✓ administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value 1ms
+   ✓ administrative AI deterministic hard gates > rejects invalid first JSON without repairing it 0ms
+   ✓ administrative AI deterministic hard gates > rejects expired policy even when its values match 1ms
+   ✓ administrative AI deterministic hard gates > rejects a draft missing human review 1ms
+   ✓ administrative AI deterministic hard gates > accepts current server-labelled facts in a review-only draft 1ms
+   ✓ administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks 29ms
+   ✓ administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results 117ms
+   ✓ administrative AI runner evidence and admission > never reports an offline grader score as model acceptance 1ms
+   ✓ administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs 130ms
+   ✓ administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution 2ms
+   ✓ administrative AI runner evidence and admission > accepts equivalent claims independent of JSON property order 1ms
+   ✓ evaluation total budget and independent review > holds unknown dispatched cost and refuses a second call over the total ceiling 1ms
+   ✓ evaluation total budget and independent review > will not refund a dispatched reservation through the undispatched release path 0ms
+   ✓ evaluation total budget and independent review > does not call a single reviewer an independent pair 0ms
+   ✓ evaluation total budget and independent review > retains disagreements between two independent reviewers 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > will not let an overall score hide missing task and locale subgroups 2ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects real contacts and non-fixture record identities before execution 2ms
+   ✓ corpus, subgroup and uncertainty safeguards > reports empty uncertainty and a finite descriptive interval for small samples 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects an external effect even if the expected disposition is correct 2ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects invented plaintext figures despite correctly self-reported claims 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > settles known cost once and releases only its difference from the hold 0ms
+   ✓ runtime mode and human evidence cannot be inferred > does not interpret an unknown mode as authorized live execution 1ms
+   ✓ runtime mode and human evidence cannot be inferred > does not accept a bare human-reviewed boolean as two independent blind reviews 242ms
+   × reports the independent-review agreement uncertainty without inventing samples 23ms
+     → expected { pairedSamples: +0, …(3) } to match object { agreement95: null }
+(4 matching properties omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > reports the independent-review agreement uncertainty without inventing samples
+AssertionError: expected { pairedSamples: +0, …(3) } to match object { agreement95: null }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "agreement95": null,
++   "agreement": null,
++   "complete": false,
++   "disagreements": [],
++   "pairedSamples": 0,
+  }
+
+ ❯ tests/unit/admin-ai-grader.test.ts:415:36
+    413| 
+    414| it("reports the independent-review agreement uncertainty without inven…
+    415|  expect(summarizeBlindReviews([])).toMatchObject({agreement95:null});
+       |                                    ^
+    416|  const rows=[{sampleId:"sample-a",reviewerId:"reviewer-a",passed:true}…
+    417|  expect(summarizeBlindReviews(rows)).toMatchObject({agreement95:[expec…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 25 passed (26)
+   Start at  21:37:52
+   Duration  3.46s (transform 662ms, setup 233ms, collect 1.48s, tests 606ms, environment 0ms, prepare 176ms)
+

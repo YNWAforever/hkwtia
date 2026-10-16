@@ -1,0 +1,37 @@
+{
+  "sourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "runId": "37063772285",
+  "runUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37063772285",
+  "status": "completed",
+  "conclusion": "success",
+  "environment": "GitHub Actions Ubuntu Node22; native repository Vitest shards and Workerd worker suite",
+  "nativeSummaries": [
+    {
+      "job": "tests (2)",
+      "pass": 3363,
+      "skip": 163,
+      "total": 3526
+    },
+    {
+      "job": "tests (1)",
+      "pass": 2983,
+      "skip": 166,
+      "total": 3149
+    },
+    {
+      "job": "worker",
+      "pass": 57,
+      "skip": 0,
+      "total": 57
+    }
+  ],
+  "logPayloadIncluded": false,
+  "productionReleased": false,
+  "fullUnitTotals": {
+    "pass": 6346,
+    "skip": 329,
+    "fail": 0,
+    "total": 6675
+  },
+  "summaryParser": "ANSI controls and literal caret-escaped terminal controls normalized; three native summaries required"
+}

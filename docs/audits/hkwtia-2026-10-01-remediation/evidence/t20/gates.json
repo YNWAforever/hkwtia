@@ -1,0 +1,28 @@
+{
+  "applicationSourceSha": "f327fd334e7766b22102154bf1959310b658ab78",
+  "testHarnessSha256": "2f0b241fa5366718a531f19256b84079f293ae93d36b95ee0bd86fa1314488fd",
+  "environment": "confirmed isolated Neon/Auth; built owned localhost3450; approved existing R2 read only",
+  "focused": {
+    "passed": 77,
+    "skipped": 0,
+    "failed": 0,
+    "files": 7,
+    "command": "node node_modules/vitest/vitest.mjs run tests/unit/membership-public-catalog.test.ts tests/unit/membership-page-catalog.test.tsx tests/unit/public-event-repository.test.ts tests/unit/featured-public-event-query.test.ts tests/unit/wt-pages/partners-page.test.tsx tests/unit/public-shell.test.tsx tests/unit/mobile-navigation.test.tsx --maxWorkers=1"
+  },
+  "browser": {
+    "passed": 4,
+    "skipped": 0,
+    "failed": 0,
+    "durationSeconds": 34.3,
+    "command": "node --env-file=.env.local .playwright/t20-browser.mjs"
+  },
+  "build": {
+    "exitCode": 0,
+    "next": "16.3.6",
+    "pages": 267,
+    "command": "npm.cmd run build"
+  },
+  "providerWrites": 0,
+  "productionMutations": 0,
+  "fullAggregate": "T21/T22 pending"
+}

@@ -1,0 +1,19 @@
+{
+  "environment": "confirmed isolated Neon DB/Auth; synthetic policy",
+  "behaviorRed": "enabled policy gate without approved registry previously returned checkout URL; now rejects before claim/provider",
+  "focused": {
+    "pure": 10,
+    "sql": 5,
+    "regression": 204,
+    "extended": 27
+  },
+  "registry": "empty after temporary browser fixture restored",
+  "migration": "none; existing immutable audit_events",
+  "production": false,
+  "businessApproval": false,
+  "pending": [
+    "D01-D06 approved bilingual policy",
+    "T20 public content",
+    "Preview and concrete release approval"
+  ]
+}

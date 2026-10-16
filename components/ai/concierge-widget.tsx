@@ -1,12 +1,17 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import {ExternalLink, MessageCircle, Send, Star, X} from "lucide-react";
+import {ExternalLink, Send, Star, X} from "lucide-react";
+import {usePathname} from "next/navigation";
 import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
+import {ConciergeLauncher} from "@/components/ai/concierge-launcher";
 import {Button} from "@/components/ui/button";
+import {Arrow} from "@/components/wt/arrow";
 import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
 import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
+import {type ConciergePrompts, resolveConciergePromptSection} from "@/lib/ai/concierge-prompts";
+import {localizedPath} from "@/lib/urls";
 import {cn} from "@/lib/utils";
 
 export type {ConciergeLabels} from "@/lib/ai/concierge-labels";
@@ -26,13 +31,49 @@ type TranscriptMessage = Readonly<{
   escalationId?: string | null;
 }>;
 
-type ErrorState = Readonly<{message: string; retryMessage?: string}>;
+type ErrorState = Readonly<{
+  message: string;
+  retryMessage?: string;
+  requestId?: string;
+  manualFallback?: boolean;
+}>;
+class ConciergeHttpError extends Error {
+  constructor(readonly recovery: ErrorState) {
+    super("CONCIERGE_HTTP_ERROR");
+  }
+}
+
+async function httpRecovery(response: Response, labels: ConciergeLabels): Promise<ErrorState> {
+  let input: Record<string, unknown> = {};
+  try { input = record(await response.json()); } catch { /* An empty or non-JSON error has no public details. */ }
+  const code = input.error;
+  const requestId = typeof input.requestId === "string"
+    && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.requestId)
+    ? input.requestId : undefined;
+  const stopped = response.status === 503
+    && (code === "AI_CONFIGURATION_UNAVAILABLE" || code === "AI_DISABLED");
+  const message = response.status === 429 ? labels.rateLimited
+    : response.status === 504 ? labels.timeout
+    : stopped ? code === "AI_DISABLED" ? labels.disabled : labels.configurationUnavailable
+    : response.status >= 500 ? labels.temporarilyUnavailable : labels.requestFailed;
+  return {message, manualFallback: true, ...(requestId ? {requestId} : {}),
+    ...(stopped ? {} : {retryMessage: ""})};
+}
 type DisabledState = Readonly<{taskId: string}>;
-type Props = Readonly<{
+export type ConciergeWidgetProps = Readonly<{
+  /** Client-only initial intent, supplied by the deferred public launcher. */
+  initialOpen?: boolean;
+  initialInvoker?: HTMLElement | null;
   locale: "en" | "zh-HK";
   labels: ConciergeLabels;
   /** Absent when Turnstile is not configured; the challenge is then skipped. */
   turnstileSiteKey?: string;
+  /**
+   * Optional so the label contract (`ConciergeLabels`) stays a closed localization contract and the
+   * widget's own suite keeps compiling. Absent means no prompt list and no transparency link.
+   */
+  prompts?: ConciergePrompts;
+  transparencyLabel?: string;
 }>;
 
 const TURNSTILE_SCRIPT_SRC =
@@ -181,13 +222,21 @@ async function readSse(
   }
 }
 
-export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
+export function ConciergeWidget({
+  locale,
+  labels,
+  turnstileSiteKey,
+  prompts,
+  transparencyLabel,
+  initialOpen = false,
+  initialInvoker = null,
+}: ConciergeWidgetProps) {
   const dialogId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | undefined>(undefined);
   const contactEmailRef = useRef<HTMLInputElement>(null);
-  const externalInvokerRef = useRef<HTMLElement | null>(null);
+  const externalInvokerRef = useRef<HTMLElement | null>(initialInvoker);
   const terminalEscalationRef = useRef(false);
   const mountedRef = useRef(true);
   const conversationIdRef = useRef<string | undefined>(undefined);
@@ -195,7 +244,7 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
   const requestActiveRef = useRef(false);
   const feedbackPendingRef = useRef(new Set<string>());
   const sequenceRef = useRef(0);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [draft, setDraft] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactEmailInvalid, setContactEmailInvalid] = useState(false);
@@ -212,6 +261,17 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
   >({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileFailed, setTurnstileFailed] = useState(false);
+  // The donor keys its prompt set on path[0]. Read during render, never resolved once into
+  // state: this widget is mounted by app/[locale]/(public)/layout.tsx, which survives every
+  // in-app navigation, so a value captured at mount would still serve the first route's
+  // prompts after the reader had clicked through the header, the mega menu and the footer.
+  // `next/navigation` rather than next-intl's hook, for two reasons: the latter needs locale
+  // context that tests/unit/concierge-widget.test.tsx does not provide, and it strips the `/zh`
+  // prefix that resolveConciergePromptSection expects to strip itself. Next's hook is
+  // useContext(PathnameContext) with a null default, so a bare render outside the App Router
+  // gets null rather than throwing. Presentation only — nothing here reaches the action.
+  const pathname = usePathname();
+  const sectionPrompts = prompts?.[resolveConciergePromptSection(pathname ?? "/")] ?? [];
 
   useEffect(() => {
     mountedRef.current = true;
@@ -370,7 +430,12 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
         }),
         signal: controller.signal,
       });
-      if (!response.ok || !response.body) throw new Error("REQUEST_FAILED");
+      if (!response.ok) {
+        const recovery = await httpRecovery(response, labels);
+        throw new ConciergeHttpError({...recovery,
+          ...(recovery.retryMessage === undefined ? {} : {retryMessage: normalized})});
+      }
+      if (!response.body) throw new Error("REQUEST_FAILED");
 
       await readSse(response.body, ({event, data}) => {
         if (!mountedRef.current || controller.signal.aborted) return;
@@ -435,7 +500,7 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
             current.filter((item) => item.id !== assistantId),
           );
         }
-        setError({
+        setError(caught instanceof ConciergeHttpError ? caught.recovery : {
           message: labels.error,
           ...(errorEscalationId ? {} : {retryMessage: normalized}),
         });
@@ -511,20 +576,13 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
-      <Dialog.Trigger asChild>
-        <button
-          type="button"
-          aria-label={labels.launcher}
-          aria-controls={dialogId}
-          aria-expanded={open}
-          className="fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
-        >
-          <MessageCircle aria-hidden="true" className="size-5" />
-          <span>{labels.launcher}</span>
-        </button>
-      </Dialog.Trigger>
+      <ConciergeLauncher label={labels.launcher}>
+        <Dialog.Trigger asChild>
+          <ConciergeLauncher.Button label={labels.launcher} aria-controls={dialogId} aria-expanded={open} />
+        </Dialog.Trigger>
+      </ConciergeLauncher>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
+        <Dialog.Overlay className="fixed inset-0 z-[600] bg-foreground/50 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
         <Dialog.Content
           id={dialogId}
           onOpenAutoFocus={(event) => {
@@ -538,7 +596,7 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
             externalInvokerRef.current = null;
             externalInvoker.focus();
           }}
-          className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
+          className="fixed left-1/2 top-1/2 z-[610] flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
         >
           <header className="relative border-b border-border px-5 py-4 pr-16">
             <Dialog.Title className="editorial-serif text-xl font-semibold">
@@ -561,9 +619,35 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
               aria-live="polite"
               className="min-h-40 flex-1 space-y-4 overflow-y-auto overscroll-contain overflow-x-hidden px-4 py-4"
             >
+              {/* Openers only while the transcript is empty. The donor keeps `.prompt-list`
+                  beside the answer (commit f91ecc5 :1050); hkwtia drops it once a real
+                  conversation exists, because re-offering "How can WiseTech help my
+                  organisation?" underneath the reader's own third question reads as the
+                  assistant having lost the thread. */}
               {messages.length === 0 && !disabledState ? (
                 <li className="text-sm leading-6 text-muted-foreground">
                   {labels.empty}
+                  {sectionPrompts.length > 0 ? (
+                    <div className="mt-3 grid gap-2">
+                      {sectionPrompts.map((prompt) => (
+                        <button
+                          key={prompt}
+                          type="button"
+                          className="flex min-h-11 touch-manipulation items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-left text-sm text-foreground hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+                          onClick={() => {
+                            // Fills the composer instead of sending: `submit` is the only path
+                            // that runs the contact-email and Turnstile gates, and WP-2 changes
+                            // no runtime behaviour (errata E-23).
+                            setDraft(prompt);
+                            textareaRef.current?.focus();
+                          }}
+                        >
+                          {prompt}
+                          <Arrow />
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </li>
               ) : null}
               {messages.map((message) => (
@@ -677,12 +761,31 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
               ) : null}
             </ol>
 
+            {transparencyLabel === undefined ? null : (
+              <p className="px-4 pb-2 text-xs leading-5 text-muted-foreground">
+                <a
+                  className="inline-flex min-h-11 touch-manipulation items-center gap-1 underline decoration-muted-foreground/50 underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+                  href={localizedPath(locale, "/ai-transparency")}
+                >
+                  {transparencyLabel}
+                  <Arrow />
+                </a>
+              </p>
+            )}
+
             <div aria-live="assertive" className="px-4">
               {error ? (
                 <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
-                  <p role="alert" className="text-sm text-destructive">
+                  <p role="alert" className="text-sm text-foreground">
                     {error.message}
                   </p>
+                  {error.requestId ? <p className="mt-2 break-all text-sm">
+                    {interpolate(labels.reference, {id: error.requestId})}
+                  </p> : null}
+                  {error.manualFallback ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                    <a href={localizedPath(locale, "/join")} className="inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{labels.applicationGuide}</a>
+                    <a href={localizedPath(locale, "/contact")} className="inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{labels.contactSupport}</a>
+                  </div> : null}
                   {error.retryMessage ? (
                     <Button
                       type="button"

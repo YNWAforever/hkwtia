@@ -1,0 +1,9 @@
+# Final isolated fixture boundaries
+
+The complete built browser collection first had 318 pass / 14 fail / 155 skip. Five Concierge cases require the existing explicitly authorized loopback deterministic lane; cloud refuses that lane. They passed separately under the local profile. No paid model or provider receipt is inferred from those tests.
+
+The reusable identity cache previously copied NEXT_LOCALE into later contexts and treated a membership-gated portal redirect as invalid authentication. A new locale-cache unit first failed (4 pass/1 target fail), then passed 5/5. Reuse now excludes the cached UI preference and verifies the localized protected server page. Member/company identities use /portal/profile, which proves authentication without requiring paid membership. Staff still use the authenticated admin boundary; actor/role/eligibility checks remain unchanged. Cached identity API responses cannot independently authorize reuse.
+
+The historical SQL collection exposed setup failures: cases marked skipped by Vitest after beforeAll failure are unexecuted, not guarded acceptance skips. The native migration probe returned PostgreSQL 0A000 for the unavailable vector extension in plain postgres:16-alpine. M2 now uses the already available pgvector/pgvector:pg16 image; actual db:migrate, M1/demo seed and all ten M2 SQL cases passed. The owned startup probe also observed 57P03 after Unix-socket readiness during the entrypoint's temporary initialization server. Existing fixture waiters now check TCP 127.0.0.1, which waits for the final server. No schema migration was changed, no synthetic data was written to Production, and bounded waits were retained.
+
+A concurrent outbox test assumed the first Promise must claim ack. Actual PostgreSQL correctly claimed distinct ack/staff notices in either scheduler order; the test now proves both kinds exactly once and retains lease/retry/stale-settlement assertions. The focused four-case outbox suite passed.

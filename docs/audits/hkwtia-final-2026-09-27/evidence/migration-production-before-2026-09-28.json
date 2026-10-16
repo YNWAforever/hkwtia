@@ -1,0 +1,41 @@
+{
+  "stage": "production-before",
+  "checkedAt": "2026-09-28T07:49:28.822Z",
+  "hostname": "ep-steep-wind-ao0pbldw.c-2.ap-southeast-1.aws.neon.tech",
+  "database": "neondb",
+  "readOnly": true,
+  "ledgerRows": 36,
+  "latest": {
+    "id": 36,
+    "hash": "f1719db45a2a5e959662a6a7c697d8b7d7abef8d12bceab557c0ec37c7796fbb",
+    "created_at": "1789286918480"
+  },
+  "pending": [
+    "0037_phase_d3_writer_agent",
+    "0038_phase_d4a_event_orders",
+    "0039_ticket_refund_failure",
+    "0040_phase_d_aiops_bot_cohort",
+    "0041_showcase-lead-email-outbox",
+    "0042_ticket_email_outbox",
+    "0043_event_checkout_recoveries",
+    "0044_event_cancellation_notifications",
+    "0045_admin_member_views",
+    "0046_admin_batches",
+    "0047_member_imports",
+    "0048_membership_grants",
+    "0049_shared_rate_limit",
+    "0050_event_attendee_exports",
+    "0051_auth_rate_limits"
+  ],
+  "unexplainedHashMismatches": [],
+  "counts": {
+    "profiles": 1,
+    "companies": 3,
+    "memberships": 0,
+    "events": 1,
+    "audit_events": 2
+  },
+  "grantColumns": [],
+  "constraints": [],
+  "metricsUniqueIndexPresent": true
+}

@@ -16,7 +16,7 @@ import {getMember360} from "@/lib/admin/member-360";
 import {searchAdminMembers} from "@/lib/admin/members";
 import {getAdminReport} from "@/lib/admin/reports";
 import {listPendingApprovals} from "@/lib/admin/approvals";
-import {queueCampaign} from "@/lib/admin/campaigns";
+import {createCampaignDraft, campaignDraftKey} from "@/lib/admin/campaign-wizard";
 import {parseSegmentRouteQuery} from "@/lib/admin/segment-schema";
 import {previewSegment} from "@/lib/admin/segments";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
@@ -80,7 +80,7 @@ function docker(args: string[]): string {
 async function waitForPostgres(): Promise<void> {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
-      docker(["exec", container, "pg_isready", "-U", "postgres"]);
+      docker(["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]);
       return;
     } catch {
       await delay(100);
@@ -119,7 +119,7 @@ async function tableCounts(): Promise<Record<string, number>> {
 describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
   beforeAll(async () => {
     if (!externalDatabaseUrl) {
-      docker(["run", "--rm", "-d", "--name", container, "-e", "POSTGRES_PASSWORD=test", "-p", "127.0.0.1::5432", "postgres:16-alpine"]);
+      docker(["run", "--rm", "-d", "--name", container, "-e", "POSTGRES_PASSWORD=test", "-p", "127.0.0.1::5432", "pgvector/pgvector:pg16"]);
       await waitForPostgres();
       const binding = docker(["port", container, "5432/tcp"]).trim();
       const port = binding.slice(binding.lastIndexOf(":") + 1);
@@ -283,7 +283,9 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     vi.setSystemTime(M2_REFERENCE_INSTANT);
     const canonical = parseSegmentRouteQuery({tier: "corporate", status: ["active", "past_due"], scoreMax: "19.99", renewalWithinDays: "60"});
     const preview = await previewSegment(staff, {...canonical, limit: 50, cursor: null});
-    expect(preview.items.map(({profileId}) => profileId)).toEqual(M2_AT_RISK_PROFILE_IDS);
+    // C-6: a preview row is now discriminated audience, so its identity is
+    // `id` — a profile id for a member, a contact id for a contact.
+    expect(preview.items.map(({id}) => id)).toEqual(M2_AT_RISK_PROFILE_IDS);
     expect(preview.total).toBe(3);
 
     const atRisk = await listAtRiskMembers(staff, {asOf: M2_REFERENCE_INSTANT});
@@ -312,19 +314,30 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     await pool.query("INSERT INTO saved_segments (id,owner_profile_id,name_en,filter_version,filters) VALUES ($1,$2,$3,1,$4::jsonb)", [
       segmentId, staff.profileId, "Suppression correlation proof", JSON.stringify({profileIds: ["m2-risk-02", "m2-risk-03"], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null}),
     ]);
-    await pool.query("INSERT INTO email_log (id,profile_id,template,subject,status) VALUES ($1,'m2-risk-02','suppression-proof','fixture','suppressed')", [suppressionId]);
+    // Phase C2 Task 8. This fixture used to write `email_log.status='suppressed'`
+    // and assert the campaign skipped that member. It never could have: no
+    // writer in the tree has ever produced that value (`DeliveryStatus` is
+    // processing|sent|failed), so the audience query's `suppressed` column had
+    // been constant `false` since M2 and the member was skipped for a different
+    // reason entirely. The live suppression fact is a `message_suppressions`
+    // row, which is what the eligibility classifier now reads.
+    await pool.query("INSERT INTO message_suppressions (id,profile_id,channel,classification,reason_code) VALUES ($1,'m2-risk-02','email','marketing','acceptance-fixture')", [suppressionId]);
     try {
-      const result = await queueCampaign(staff, {segmentId, template: "renewal-reminder", localeStrategy: "profile", idempotencyKey});
-      const recipients = await pool.query<{profile_id: string}>("SELECT profile_id FROM campaign_recipients WHERE campaign_id=$1 ORDER BY profile_id", [result.campaignId]);
-      const audits = await pool.query<{recipient_count: number}>("SELECT (metadata->>'recipientCount')::int AS recipient_count FROM audit_events WHERE action='campaign.queued' AND target_id=$1", [result.campaignId]);
+      const result = await createCampaignDraft(staff, {draftId: idempotencyKey, segmentId, name: "Suppression correlation draft", channel: "email", template: "renewal-reminder"});
+      // The snapshot now holds the WHOLE audience, so the sendable half is the
+      // rows carrying no `blocked_reason`.
+      const recipients = await pool.query<{profile_id: string}>("SELECT profile_id FROM campaign_recipients WHERE campaign_id=$1 AND blocked_reason IS NULL ORDER BY profile_id", [result.campaignId]);
+      const blocked = await pool.query<{profile_id: string; blocked_reason: string}>("SELECT profile_id, blocked_reason FROM campaign_recipients WHERE campaign_id=$1 AND blocked_reason IS NOT NULL ORDER BY profile_id", [result.campaignId]);
+      const audits = await pool.query<{eligible: number; blocked: number}>("SELECT (metadata->>'eligible')::int AS eligible, (metadata->>'blocked')::int AS blocked FROM audit_events WHERE action='campaign.drafted' AND target_id=$1", [result.campaignId]);
       expect(result).toMatchObject({recipientCount: 1, disposition: "created"});
       expect(recipients.rows.map(({profile_id}) => profile_id)).toEqual(["m2-risk-03"]);
-      expect(audits.rows).toEqual([{recipient_count: 1}]);
+      expect(blocked.rows).toEqual([{profile_id: "m2-risk-02", blocked_reason: "suppressed"}]);
+      expect(audits.rows).toEqual([{eligible: 1, blocked: 1}]);
     } finally {
-      const campaign = await pool.query<{id: string}>("SELECT id::text FROM campaigns WHERE idempotency_key=$1", [idempotencyKey]);
-      for (const {id} of campaign.rows) await pool.query("DELETE FROM audit_events WHERE action='campaign.queued' AND target_id=$1", [id]);
-      await pool.query("DELETE FROM campaigns WHERE idempotency_key=$1", [idempotencyKey]);
-      await pool.query("DELETE FROM email_log WHERE id=$1", [suppressionId]);
+      const campaign = await pool.query<{id: string}>("SELECT id::text FROM campaigns WHERE idempotency_key=$1", [campaignDraftKey(idempotencyKey, segmentId)]);
+      for (const {id} of campaign.rows) await pool.query("DELETE FROM audit_events WHERE action='campaign.drafted' AND target_id=$1", [id]);
+      await pool.query("DELETE FROM campaigns WHERE idempotency_key=$1", [campaignDraftKey(idempotencyKey, segmentId)]);
+      await pool.query("DELETE FROM message_suppressions WHERE id=$1", [suppressionId]);
       await pool.query("DELETE FROM saved_segments WHERE id=$1", [segmentId]);
     }
   });

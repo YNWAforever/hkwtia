@@ -17,6 +17,12 @@ const messages = {
 };
 
 describe("public Event registration recovery", () => {
+  it.each(["registered", "waitlist", "attended", "no_show"] as const)("restores stored %s after refresh and prevents another registration", (initialStatus) => {
+    render(<EventRegistrationForm action={vi.fn()} eventId="event" messages={messages}
+      initialStatus={initialStatus} statusLabel={`Stored: ${initialStatus}`} pendingLabel="Registering" registerLabel="Register" />);
+    expect(screen.getByRole("status")).toHaveTextContent(`Stored: ${initialStatus}`);
+    expect(screen.queryByRole("button", {name: "Register"})).toBeNull();
+  });
   it.each([
     ["unauthenticated", "Sign in to register.", "/join"],
     ["ineligible", "Membership required.", "/membership"],

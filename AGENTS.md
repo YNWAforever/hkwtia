@@ -70,25 +70,46 @@ Use only an isolated `DATABASE_URL_TEST` for M2 migration/seed acceptance. With 
 
 For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECRET_KEY`, `STRIPE_TEST_WEBHOOK_SECRET`, `STRIPE_TEST_STARTUP_PRICE_ID`, and `STRIPE_TEST_CORPORATE_PRICE_ID`. Keep production Stripe variables separate and do not use live keys against the test database.
 
-## Changelog
+## Active boundaries and targeted history
 
-- M0: public bilingual route surface, metadata, structured data, crawler endpoints, translation parity, and accessibility gates.
-- M1 Task 1: server-only runtime configuration, Neon/Drizzle client foundation, and non-placeholder database commands.
-- M1 Task 11: idempotent plan seed, isolated migration-test contract, and Neon/Stripe test-environment documentation.
-- M2 Task 11: deterministic non-PII CRM demo fixtures, combined seed command, and isolated PostgreSQL acceptance assertions.
-- M2 Task 12: real Neon Auth browser boundary, credential-gated Admin CRM Playwright flows, exact fixture-count acceptance, and preview release evidence.
-- M6 Task 7: deterministic Launch Pad browser fixtures, isolated-seed evidence, guarded Preview smoke, and public graduate-badge acceptance record.
-- M7.1: staff news authoring on `/admin/news` scoped to `kind: "news"`, publication recorded as in-transaction audit rows, and the static news path retired.
-- M7.2: staff-editable marketing copy — 194 allowlisted strings merged over the message bundles in `i18n/request.ts`, fail-soft so a build without `DATABASE_URL` still serves shipped copy.
-- M7.3: curated media registry — staff register own-origin images on `/admin/media` and attach them to showcase listings, which now render a logo; adds an image-scoped CSP and closes an obfuscation bypass in the logo-reference validator.
-- M7.3 follow-up: `"use server"` modules no longer export actor-taking helpers. That directive publishes every export as an HTTP endpoint, so nine of them across admin, portal, showcase and Launch Pad accepted a forged actor and bypassed authorization entirely; a discovery test now enforces the boundary.
-- Security hardening: rate-limited the auth send and credential endpoints at both entrypoints (the `/join` Server Action calls the upstream service directly and never crosses our route); split `UNSUBSCRIBE_TOKEN_SECRET` out of `CRON_SECRET`, with a dual-verify fallback that **must be removed after 2026-09-06** (a test fails once that date passes); added `frame-ancestors`/`X-Frame-Options` and the other static headers; capped the feedback and Woztell bodies; stopped the showcase view beacon being inflatable via the user-agent; and made a missing Turnstile pair fail the production boot instead of silently disabling the captcha.
-- Pages/CMS audit: fixed nine `<Link>` hrefs built as `` `/${locale}/…` ``. `zh-HK` is served under the `/zh` prefix, so those rendered `/zh-HK/…`, which the middleware does not recognise — the Chinese news, page-copy, media and events-mgmt editors were reachable only by typing a URL, and every event on the Chinese `/events` listing 404'd. They now use `localizedPath`, and `tests/unit/locale-href-boundary.test.ts` keeps hand-built locale prefixes out. `revalidatePath` is untouched: it takes the internal path, where `/zh-HK/…` is correct. Also repaired two source-text assertions that the feature-scoped env refactor had silently inverted — `m4b-runtime-guard` compared against a `serverEnv()` that no longer existed, so its ordering check passed a `-1`.
-- Public route environment isolation, continued: `requireAdmin`/`systemActor` moved to `lib/auth/authorize.ts`. They decide against an `Actor` the caller already holds and read no session, but living in `lib/auth/actor` meant importing either one pulled in `lib/auth/server`, which calls `authEnv()` at module scope. Because `import` is transitive, `/sitemap.xml` failed on import — before its per-read `try`/`catch` could run — whenever the Neon Auth pair was absent. 26 modules now import the pure helpers directly; `lib/auth/actor` re-exports them for callers that read the session anyway. The fail-closed contract is untouched: importing `lib/auth/server` still throws in production, as `auth-server-runtime.test.ts` pins. `/join` and `/launchpad` still require the pair, because they genuinely import session-reading code.
-- Admin capability gaps closed after an inventory of what the panel could actually do: `/admin` was a heading with no content and now shows the four queues that decide whether staff need to act, each counted independently so one unreachable table costs its own tile rather than the workspace; cohorts could only be moved through stages, never created, so a Launch Pad cohort needed `scripts/seed-m6.ts` and a developer; nothing could be removed anywhere, so news posts and media entries now archive (`archived_at`, nullable, no backfill) rather than delete — archiving an image is refused while a showcase listing still points at it, because archiving does not clear `logo_media_id` and would otherwise blank a published logo; and the members section was read-only apart from notes, so staff can now correct display name, job title, phone and preferred language. That last scope is deliberately narrow and `.strict()`: `role`, `email`, the consent flags and the derived fields stay unreachable, each for its own reason recorded in `lib/db/repos/admin-member-profile.ts`. Media upload is still not built — it needs a storage backend, and the registry remains own-origin URL references.
+- Every exported `"use server"` action must establish its own authenticated
+  actor. Keep actor-taking helpers in server-only modules.
+- Preserve bilingual `/zh` routing via `localizedPath`, published-only public
+  data, shared URL validation, and the distinction between missing records
+  and failed reads. Keep pure authorization separate from session loading.
+- Unsubscribe verification uses `UNSUBSCRIBE_TOKEN_SECRET`; never restore
+  the retired `CRON_SECRET` fallback. Keep feature-scoped runtime env access.
+- Messaging must preserve both consent stores, locale/template approval,
+  per-attempt deduplication, send claims/timeouts, provider field bounds,
+  and transactional audit records. Unsupported audience filters must fail
+  closed, never widen a recipient set.
+- Existing database isolation, test-mode, approval and verification
+  requirements above remain mandatory. A plan, mocked provider result or
+  skipped acceptance check is not live acceptance evidence.
 
-- Programme records migration (sub-project 3): `/programs/{asa,hkict,cpai,tct}` were one-line stubs and now state which editions ran, who funded each, and the winners the archive names. Four tight schemas rather than one shared loose one, because CPAI is a credential with no editions while the others are event series; `funder` and `organisedFor` live on the edition, never the programme, so "the funder of ASA" has no field to be written in — which is the structural fix for the content audit's claim that ASA is CCIDA-funded, when CCIDA appears only from 2024 and every edition 2017–2022/23 names Create Hong Kong. Absence is a tagged variant (`unrecorded` / `off-site`), never an empty array, because an empty winners list is indistinguishable from an unfinished one: seven of ASA's ten editions and four of HKICT's six genuinely have no recorded winners. 180 archive images are own-origin under `public/images/programs/` (62 MB committed, untouched originals kept outside the repo beside the capture). **Treat `docs/wtia-content-migration-audit.md` as a claim log to verify, not a source — it is wrong about all four of these programmes**, and `docs/wtia-programme-claims-review.md` is the corrected record.
-- Programme records, two lessons worth more than the feature. First, **a text sweep of that archive is not a complete sweep of it**: every value in the four records was transcribed from page prose, and the four images opened at the end — to write alt text — produced three findings, including a government funding body (創新科技署, on Tech to Connect 4.0's own speaker line-up graphic) that the record says the archive never names. `docs/superpowers/plans/2026-08-16-programme-image-evidence.md` plans the pass over the other 176. Second, **a page classifier that reads filenames misses pages whose titles are in the other language**: seven Tech Connect workshop pages carry the series name only in their body, and were found by someone reading pages, not by any search — they are in an explicit allowlist in `scripts/index-program-pages.ts` with the reason recorded.
+Before changing a relevant area, read its linked history section:
+
+- Public routes, auth, CMS, media and admin:
+  [M0–M7 and admin boundaries](docs/agent-history.md#public-and-admin).
+- Programme records or archive claims:
+  [programme migration](docs/agent-history.md#programme-records).
+- Member directory, URL policy or scoped database reads:
+  [Phase B2](docs/agent-history.md#member-directory).
+- Programme image claims:
+  [image evidence](docs/agent-history.md#programme-images).
+- Test boundaries, token expiry or secret verification:
+  [test lessons and secret sunset](docs/agent-history.md#tests-and-secrets).
+- Events, reminders or render-test reliability:
+  [Phase B gate hardening](docs/agent-history.md#events-and-reminders).
+- Inbox, consent, idempotency, provider parsing or migration sequencing:
+  [Phase C1](docs/agent-history.md#whatsapp-human-lane), including paired
+  migrations 0031/0032 and enum constraints.
+- Segments, campaign recipients, live messaging, metrics or reminder locales:
+  [Phase C2 and reconciliation](docs/agent-history.md#segments-and-go-live)
+  and the ordered [WhatsApp go-live guide](docs/integration/phase-c-whatsapp-go-live.md).
+
+The history records prior evidence; verify claims against the current
+checkout when implementing. Read only the sections relevant to the task.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)
@@ -113,3 +134,13 @@ ALWAYS prefer MCP graph tools over grep/glob/file-search for code discovery.
 - Who calls it: `trace_path(function_name="OrderHandler", direction="inbound")`
 - Read source: `get_code_snippet(qualified_name="pkg/orders.OrderHandler")`
 <!-- codebase-memory-mcp:end -->
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

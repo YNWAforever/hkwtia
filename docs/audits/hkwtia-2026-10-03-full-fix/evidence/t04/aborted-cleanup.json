@@ -1,0 +1,8 @@
+{
+  "production": false,
+  "isolatedSentinelVerified": true,
+  "abortedRunObservedAt": "2026-10-03T09:42:02.957Z",
+  "ownedSyntheticSourcesRemoved": 1,
+  "ownedSyntheticObservationsRemoved": 0,
+  "reason": "terminated owned repeating browser test after inaccessible select label diagnosis"
+}

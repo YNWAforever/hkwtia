@@ -1,0 +1,423 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/unit/wisetech-asset-provenance.test.ts (2 tests) 11ms
+ ❯ tests/unit/image-render-policy.test.ts (341 tests | 1 failed) 230ms
+   ✓ image render policy > discovers the component tree 3ms
+   ✓ image render policy > app/[locale]/(admin)/admin/ai-review/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/announcements/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/announcements/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/approvals/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/at-risk/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/automations/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/batches/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/batches/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/campaigns/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/campaigns/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/check-in/[token]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/cohorts/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/cohorts/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/contacts/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/events-mgmt/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/inbox/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/inbox/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/knowledge/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/landing-partners/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/landing-partners/page.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > app/[locale]/(admin)/admin/layout.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/listings-review/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/media/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/media/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/communications/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/grants/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/import/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/queue/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/queue/loading.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/members/queue/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/news/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/news/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/page-copy/[namespace]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/page-copy/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/partners/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/partners/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/profiles-review/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/reports/board-drafts/[id]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/reports/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/search/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/segments/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/tasks/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(admin)/admin/templates/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(join)/join/checkout/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(join)/join/company/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(join)/join/complete/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(join)/join/page.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > app/[locale]/(join)/join/profile/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(join)/layout.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/billing/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/company/listing/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/company/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/company/seats/accept/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/company/seats/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/directory/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/documents/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/events/[id]/edit/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/events/new/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/events/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/layout.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/profile/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/tools/[key]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(member)/portal/tools/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/about/chairman/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/about/committees/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/about/history/[slug]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/about/history/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/about/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/admin/cms-preview/[draftId]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/ai-ops/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/ai-transparency/page.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > app/[locale]/(public)/contact/page.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > app/[locale]/(public)/events/[slug]/page.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > app/[locale]/(public)/events/guest-cancel/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/events/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/launchpad/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/layout.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/members/[slug]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/members/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/membership/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/news/[slug]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/news/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/not-found.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/page.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > app/[locale]/(public)/partners/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/pass/[token]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/privacy/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/programmes/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/programs/asa/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/programs/cpai/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/programs/hkict/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/programs/tct/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/refund-policy/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/showcase/[slug]/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/showcase/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/(public)/unsubscribe/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/admin-login/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/error.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/layout.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/member-login/page.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/[locale]/not-found.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > app/api/og/route.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/admin-account-menu.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/admin-app-shell.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/admin-nav.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/admin/admin-sidebar.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/admin-topbar.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/ai-draft-selection.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/admin/ai-review-panel.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/announcement-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/application-case-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/application-draft-adopt.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/application-queue-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/approval-list.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/admin/archive-toggle.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/admin/at-risk-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/attendee-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/automation-dashboard.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/automation-retry-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/batch-preview.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/batch-progress.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/board-draft-list.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/campaign-report.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/campaign-wizard.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/cancel-event-panel.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/check-in-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/cohort-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/cohort-kanban.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/company-picker.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/contact-pipeline-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/content-draft-panel.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/dashboard-tiles.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/event-attendee-export-button.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/admin/event-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/event-review-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/inbox-composer.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/inbox-list.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/inbox-thread.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/knowledge-workspace.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/landing-partner-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/media-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/media-picker.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/media-upload-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-360.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-bulk-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-communication-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-filters.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-import-wizard.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-maintenance-summary.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-note-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-profile-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-saved-view-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-saved-views.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/member-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/membership-comp-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/membership-grant-form.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/admin/news-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/operations-baseline-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/operations-timing-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/orders-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/page-copy-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/partner-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/payment-reconciliation-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/profile-review-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/report-cards.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/safe-generated-content.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/segment-builder.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/segment-results.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/segment-save-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/showcase-review-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/support-draft-panel.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/support-follow-up-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/task-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/template-registry-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/ticket-resend-preview-button.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/unsaved-changes-guard.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/work-queue-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/admin/workspace-search-view.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ai/concierge-launcher.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ai/concierge-widget.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ai/deferred-concierge-widget.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/auth/access-denied.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/auth/google-sign-in-button.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/auth/sign-in-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/billing/billing-actions.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/billing/checkout-status.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/content/safe-structured-content.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/archive-stories.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/conversion-paths.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/ecosystem.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/events-journey.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/gba-gateway.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   × image render policy > components/home/hero.tsx uses no raw img and only the authorized optimizer bypass 10ms
+     → expected 'import {getHomeTranslations, type Hom…' not to contain 'unoptimized'
+   ✓ image render policy > components/home/home-content.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/home/impact-evidence.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/legacy-network.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/market-products.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/open-now.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/outcomes.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/pathways.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/home/programme-showcase.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/action-feedback.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/internal-shell/app-shell.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/empty-state.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/navigation.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/page-header.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/private-link.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/section.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/status-badge.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/internal-shell/table-frame.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/join/join-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/join/policy-confirmation.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/join/progress.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/announcement-bar.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/announcement-dismiss.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/desktop-mega-navigation.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/dual-brand-lockup.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/footer-newsletter.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/header-shell.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/layout/locale-switcher.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/mega-menu-panel.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/mobile-navigation.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/public-header.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/site-footer.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/layout/site-header.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/aiops/architecture-diagram.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/aiops/dashboard.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/aiops/evidence-links.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/aiops/metric-grid.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/aiops/renewal-chart.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/build-log-card.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/build-log-detail.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/cohort-application-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/cohort-calendar.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/contact-concierge-launcher.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/directory-prompts.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/empty-state.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/event-calendar-view.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/event-card.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/event-detail.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/event-filter-panel.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/event-view-switch.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/faq.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/funding-wizard.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/guest-rsvp-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/home-highlight-card.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/institutional-page-intro.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/interest-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/landing-partner-map.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/launchpad-gba-opening.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/media-gallery.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/member-card.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/member-filters.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/membership-dimensions.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/milestone-timeline.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/news-card.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/news-detail.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/news-quality-panel.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/page-hero.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/plan-grid.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/policy-sections.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/prepared-email-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/preview-state.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/pricing-note.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/program-credential.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/program-editions.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/programme-grid.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/request-intro-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/section.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/showcase-card.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/marketing/showcase-detail.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/showcase-filters.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/showcase-view-beacon.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/solution-needs.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/solution-pathways.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/solution-verification.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/stats.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/story-section.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/ticket-checkout-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/tier-comparison.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/marketing/whatsapp-link.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/company-profile-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/directory-results.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/document-list.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/event-company-picker.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/event-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/event-registration-form.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/portal/hero-upload.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/portal/portal-nav.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/portal-sign-out-button.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/seat-invite-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/seat-table.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/showcase-listing-form.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/portal/status-card.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/seo/structured-data.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/server/await-read-model.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ui/accordion.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ui/button.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ui/navigation-menu.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/ui/sheet.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/wt/action-link.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/arrow.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/card-grid.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/card-index.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/wt/closing-band.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/wt/eyebrow.tsx uses no raw img and only the authorized optimizer bypass 0ms
+   ✓ image render policy > components/wt/honest-empty.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/inner-card-grid.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/interest-band.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/page-hero.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/page-updated.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/rich-compass.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/rich-related-routes.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/route-map.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/section-heading.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/section.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/shell.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/status-label.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ image render policy > components/wt/step-grid.tsx uses no raw img and only the authorized optimizer bypass 1ms
+   ✓ next.config.ts image posture > configures no a remote image host allowlist 0ms
+   ✓ next.config.ts image posture > configures no a domains allowlist 0ms
+   ✓ next.config.ts image posture > configures no SVG rendering through the optimizer 0ms
+   ✓ next.config.ts image posture > configures no a loosened content disposition 0ms
+   ✓ next.config.ts image posture > restricts images to this origin at the browser 0ms
+   ✓ next.config.ts image posture > restricts framing, which is what makes admin clickjacking possible at the browser 0ms
+   ✓ next.config.ts image posture > restricts base-tag injection repointing relative script URLs at the browser 0ms
+   ✓ next.config.ts image posture > restricts plugin content at the browser 0ms
+   ✓ next.config.ts image posture > restricts cross-origin form posts at the browser 0ms
+   ✓ next.config.ts image posture > sends X-Frame-Options 0ms
+   ✓ next.config.ts image posture > sends Referrer-Policy 0ms
+   ✓ next.config.ts image posture > sends X-Content-Type-Options 0ms
+   ✓ next.config.ts image posture > sends Permissions-Policy 0ms
+   ✓ next.config.ts image posture > still declares no default-src — would make every unnamed directive restrictive at once 0ms
+   ✓ next.config.ts image posture > still declares no script-src — needs a per-request nonce; staged separately, report-only first 0ms
+   ✓ next.config.ts image posture > still declares no Strict-Transport-Security — Vercel already sends it, and preload outlives a mistake 0ms
+ ✓ tests/unit/home-hero.test.tsx (2 tests) 294ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/image-render-policy.test.ts > image render policy > components/home/hero.tsx uses no raw img and only the authorized optimizer bypass
+AssertionError: expected 'import {getHomeTranslations, type Hom…' not to contain 'unoptimized'
+
+- Expected
++ Received
+
+- unoptimized
++ import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
++ import Image from 'next/image';
++ 
++ import {assertOwnOriginEditorialImage} from '@/components/marketing/institutional-page-intro';
++ import {ActionLink} from '@/components/wt/action-link';
++ import {Link} from '@/i18n/navigation';
++ 
++ // The donor's own hero photograph (WiseTechSite.tsx:477), ported on the owner's 2026-09-07
++ // instruction and byte-pinned by tests/unit/wisetech-asset-provenance.test.ts via the
++ // integration manifest's `photos` provenance. It replaced the /images/projects-hero.jpg
++ // placeholder that stood in until the donor photography was cleared for use.
++ const HERO_IMAGE = '/archive/tech-connect-ai-leaders.webp';
++ 
++ // Donor top-spanning scrim (design doc §2, closes E-47): app/styles/wisetech.css:92 .hero;
++ // :93 .hero-image/.hero-scrim/.network-field; :99 .hero-content; :102 .hero-actions;
++ // :103 .hero-note; :104 .hero-scroll.
++ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
++   const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.hero'});
++   const image = assertOwnOriginEditorialImage(HERO_IMAGE);
++ 
++   return (
++     <section className="hero defer-following-sections" aria-labelledby="hero-title">
++       <picture>
++         {/* Same pinned photograph, resized offline. The first request needs no server transform. */}
++         <source type="image/webp" sizes="100vw" srcSet="/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w" />
++         <Image alt={t('imageAlt')} className="hero-image" fill loading="eager" fetchPriority="high" sizes="100vw" src={image} unoptimized />
++       </picture>
++       <div className="hero-scrim" aria-hidden="true" />
++       <div className="network-field" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
++       <div className="hero-content shell">
++         <p className="eyebrow light">{t('eyebrow')}</p>
++         <h1 id="hero-title">{t('title')}</h1>
++         <p>{t('lead')}</p>
++         <div className="hero-actions">
++           <ActionLink href="/events?status=open" variant="button">{t('actions.findEvent')}</ActionLink>
++           <ActionLink href="/join" variant="text-link-light">{t('actions.join')}</ActionLink>
++           <ActionLink href="/members" variant="text-link-light">{t('actions.members')}</ActionLink>
++         </div>
++       </div>
++       <div className="hero-note">{t('note')}</div>
++       <Link className="hero-scroll" href="#home-discover">
++         <span aria-hidden="true" />
++         {t('discover')}
++       </Link>
++     </section>
++   );
++ }
++
+
+ ❯ tests/unit/image-render-policy.test.ts:59:26
+     57|       expect(source).toContain("unoptimized={isPrivateMediaDeliveryUrl…
+     58|     } else {
+     59|       expect(source).not.toContain("unoptimized");
+       |                          ^
+     60|     }
+     61|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 344 passed (345)
+   Start at  03:52:05
+   Duration  2.24s (transform 230ms, setup 325ms, collect 329ms, tests 536ms, environment 1.97s, prepare 557ms)
+

@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-10-05T11:49:34.6585710Z",
+  "projectId": "solitary-wave-52860119",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "name": "codex-audit-20260927",
+  "previousExpiresAt": "2026-10-05T12:00:00Z",
+  "expiresAt": "2026-10-06T12:00:00Z",
+  "primary": false,
+  "default": false,
+  "protected": false,
+  "currentState": "ready",
+  "readbackVerified": true,
+  "scope": "Only owned synthetic non-Production branch expiration extended by 24h",
+  "sqlWrites": 0,
+  "schemaOrFixturesChanged": false,
+  "credentialValuesExported": false,
+  "productionChanges": 0,
+  "command": "npx.cmd --no-install neonctl branches set-expiration br-lingering-unit-azxl75s5 --project-id solitary-wave-52860119 --expires-at 2026-10-06T12:00:00Z --output json",
+  "fullFixComplete": false
+}

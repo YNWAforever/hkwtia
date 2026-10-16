@@ -16,14 +16,14 @@ type Locale = "en" | "zh-HK";
 
 const approvedHistory = {
   en: {
-    metaTitle: "History | WTIA",
+    metaTitle: "History | WiseTech Hong Kong",
     metaDescription: "Twenty-five years of the Hong Kong Wireless Technology Industry Association, 2001 to 2025.",
     eyebrow: "Since 2001",
     title: "Our history",
     intro: "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
   },
   "zh-HK": {
-    metaTitle: "歷史｜WTIA",
+    metaTitle: "歷史｜WiseTech Hong Kong",
     metaDescription: "香港無線科技商會二十五年歷程，由2001年至2025年。",
     eyebrow: "自2001年",
     title: "我們的歷史",
@@ -107,6 +107,40 @@ describe("milestone timeline", () => {
     expect(document.querySelector('a[href^="/zh/zh"]')).not.toBeInTheDocument();
   });
 
+  // The full bodies inline made /about/history 36,000px on a phone (two records run 6,500 and
+  // 9,300 characters). A long or multi-paragraph record previews its lead and links on.
+  it("previews a long non-featured body with its lead only and a locale-aware link", () => {
+    const lead = "A".repeat(200);
+    const rest = "Second paragraph that belongs on the record page.";
+    renderWithIntl("zh-HK",
+      <MilestoneTimeline locale="zh-HK" readMoreLabel="閱讀更多" milestones={[
+        milestone({slug: "multi", bodyZh: `${lead}\n\n${rest}`}),
+        milestone({slug: "one-long", bodyZh: "B".repeat(400)}),
+      ]} />,
+    );
+
+    expect(screen.getByText(lead)).toHaveClass("line-clamp-3");
+    expect(screen.queryByText(rest)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", {name: "閱讀更多"}).map((a) => a.getAttribute("href")))
+      .toEqual(["/zh/about/history/multi", "/zh/about/history/one-long"]);
+  });
+
+  it("weighs Chinese characters by their width and skips a lead that only repeats the title", () => {
+    const echo = "Pandemic Deals Heavy Blow to IT SMEs";
+    const substance = "The industry asked for direct funding and a meeting with the Bureau.";
+    renderWithIntl("zh-HK",
+      <MilestoneTimeline locale="zh-HK" readMoreLabel="閱讀更多" milestones={[
+        // 150 CJK characters: under a raw-length limit, but ten lines on a phone.
+        milestone({slug: "dense", bodyZh: "會".repeat(150)}),
+        milestone({slug: "echo", titleZh: `[Press Release] ${echo}`, bodyZh: `[PRESS RELEASE]\n\n${echo}\n\n${substance}`}),
+      ]} />,
+    );
+
+    expect(document.querySelector('a[href="/zh/about/history/dense"]')).toBeInTheDocument();
+    expect(screen.getByText(substance)).toHaveClass("line-clamp-3");
+    expect(screen.queryByText(echo)).not.toBeInTheDocument();
+  });
+
   it("renders year headings newest first without empty years", () => {
     renderWithIntl("en",
       <MilestoneTimeline locale="en" readMoreLabel="Read more" milestones={[
@@ -121,7 +155,32 @@ describe("milestone timeline", () => {
     expect(screen.queryByRole("heading", {level: 2, name: "2004"})).not.toBeInTheDocument();
   });
 
-  it("pins the current factual count, year order, and three featured destinations", async () => {
+  // Round 24 (owner decision 2026-10-10): 68 milestones over 17 years made /about/history the
+  // longest page on a phone (17,454px). The three newest years stay open; each older year is one
+  // native <details> row — year and count — whose entries stay in the HTML for search and find.
+  it("keeps the three newest years open and folds each older year behind its year and count", () => {
+    renderWithIntl("en",
+      <MilestoneTimeline locale="en" readMoreLabel="Read more" countLabel={(count) => `${count} milestones`} milestones={[
+        milestone({slug: "y25", year: 2025, titleEn: "In 2025"}), milestone({slug: "y22", year: 2022, titleEn: "In 2022"}),
+        milestone({slug: "y21", year: 2021, titleEn: "In 2021"}), milestone({slug: "y20a", year: 2020, titleEn: "In 2020 A"}),
+        milestone({slug: "y20b", year: 2020, titleEn: "In 2020 B"}), milestone({slug: "y05", year: 2005, titleEn: "In 2005"}),
+      ]} />,
+    );
+
+    for (const year of ["2025", "2022", "2021"]) {
+      expect(screen.getByRole("heading", {level: 2, name: year}).closest("details")).toBeNull();
+    }
+    const folded = [...document.querySelectorAll("details")];
+    expect(folded).toHaveLength(2);
+    expect(folded.every((details) => !details.open)).toBe(true);
+    expect(folded[0].querySelector("summary")?.textContent).toContain("2020");
+    expect(folded[0].querySelector("summary")?.textContent).toContain("2 milestones");
+    expect(folded[1].querySelector("summary")?.textContent).toContain("1 milestones");
+    expect(screen.getByRole("heading", {level: 2, name: "2020"}).closest("summary")).not.toBeNull();
+    for (const title of ["In 2020 A", "In 2020 B", "In 2005"]) expect(screen.getByText(title)).toBeInTheDocument();
+  });
+
+  it("pins the current factual count, year order, and six featured destinations", async () => {
     const actual = await vi.importActual<typeof import("@/content/milestones")>("@/content/milestones");
     const history = milestonesOnly(actual.milestones);
 
@@ -132,9 +191,12 @@ describe("milestone timeline", () => {
       2014, 2013, 2007, 2006, 2005, 2003, 2002, 2001,
     ]);
     expect(featuredOnly(history).map(({slug}) => slug)).toEqual([
+      "2001-establishment-of-wtia",
+      "2014-wi-fi-hk",
       "the-strategies-for-expanding-global-internet-of-things-iot-markets",
       "new-term-of-executive-committee-2022-2024",
       "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
+      "asia-smart-innovation-awards-2025",
     ]);
   });
 });
@@ -164,13 +226,17 @@ const fixture = vi.hoisted(() => ({
 
 vi.mock("@/content/milestones", () => ({milestones: fixture.milestones}));
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async (input: string | {locale?: string; namespace: string}) => {
+  getTranslations: vi.fn(async (input: string | {locale?: string; namespace?: string}) => {
     const namespace = typeof input === "string" ? input : input.namespace;
     const locale = typeof input === "string"
       ? translationState.locale
       : (input.locale ?? translationState.locale) as Locale;
     return (key: string) => {
-      let value: unknown = translationState.messages[locale]?.[namespace];
+      // An unscoped getTranslations({locale}) resolves fully-qualified keys from the
+      // bundle root, so an absent namespace starts there rather than at [undefined].
+      let value: unknown = namespace === undefined
+        ? translationState.messages[locale]
+        : translationState.messages[locale]?.[namespace];
       for (const part of key.split(".")) value = (value as Record<string, unknown> | undefined)?.[part];
       if (typeof value !== "string") throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
       return value;
@@ -209,7 +275,7 @@ describe("history page", () => {
   });
 
   it.each(["en", "zh-HK"] as const)(
-    "uses the pinned %s History strings in one institutional intro before the timeline",
+    "uses the pinned %s History strings across the hero and compass, before the timeline",
     async (locale) => {
       const {default: HistoryPage} = await import("@/app/[locale]/(public)/about/history/page");
       const page = await HistoryPage({params: Promise.resolve({locale})});
@@ -219,10 +285,11 @@ describe("history page", () => {
       expect(setRequestLocaleSpy).toHaveBeenCalledExactlyOnceWith(locale);
       expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
       expect(screen.getByRole("heading", {level: 1, name: expected.title})).toBeVisible();
-      expect(screen.getByText(expected.eyebrow)).toBeVisible();
+      expect(screen.getAllByText(expected.eyebrow).length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(expected.intro)).toBeVisible();
       expect(screen.getAllByRole("heading", {level: 2}).map(({textContent}) => textContent)).toEqual(["2010"]);
       expect(screen.getByText(locale === "en" ? "Body EN" : "正文")).toBeVisible();
+      expect(document.querySelectorAll(".rich-compass-grid>div")).toHaveLength(3);
       expect(document.querySelector("main")).not.toBeInTheDocument();
     },
   );
@@ -244,7 +311,7 @@ describe("history page", () => {
     }
   });
 
-  it("keeps the list route and timeline server-only on the new presentation primitive", () => {
+  it("keeps the list route and timeline server-only on the RichPage shell", () => {
     const pageSource = readFileSync(
       resolve(process.cwd(), "app/[locale]/(public)/about/history/page.tsx"),
       "utf8",
@@ -254,8 +321,9 @@ describe("history page", () => {
       "utf8",
     );
 
-    expect(pageSource).toContain("InstitutionalPageIntro");
-    expect(pageSource).not.toContain("PageHero");
+    expect(pageSource).toContain("PageHero");
+    expect(pageSource).toContain("RichCompass");
+    expect(pageSource).not.toContain("InstitutionalPageIntro");
     for (const source of [pageSource, timelineSource]) {
       expect(source).not.toMatch(/["']use client["']/);
       expect(source).not.toMatch(/<main\b/);

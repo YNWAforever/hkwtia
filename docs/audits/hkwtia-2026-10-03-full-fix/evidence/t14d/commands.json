@@ -1,0 +1,60 @@
+{
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "workingDirectory": "owned full-remediation worktree",
+  "shell": "PowerShell",
+  "commands": [
+    {
+      "label": "Focused sender/outbox/journey/inbox regression",
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-delivery-recovery.test.ts tests/integration/admin-batch-ticket-resend.test.ts tests/unit/inbox-action-core.test.ts tests/unit/inbox-repeat-reply.test.ts tests/unit/inbox-write-repository.test.ts tests/unit/inbox-thread.test.tsx tests/unit/woztell-inbound-events.test.ts tests/unit/notification-dispatch.test.ts tests/unit/journey-runner.test.ts tests/unit/journey-repository.test.ts tests/unit/automation-admin.test.ts tests/unit/campaign-delivery.test.ts tests/unit/whatsapp-campaign-runner.test.ts tests/unit/delivery-retry-idempotency.test.ts tests/unit/full-fix-delivery-action.test.ts tests/unit/automation-dashboard.test.tsx tests/unit/ticket-email-runner.test.ts tests/unit/showcase-lead-email-runner.test.ts tests/integration/ticket-email-outbox-postgres.test.ts tests/integration/showcase-lead-email-outbox-postgres.test.ts tests/unit/attendee-table-seat-check-in.test.tsx --maxWorkers=2",
+      "result": "294 PASS /0skip before final two added regression cases",
+      "log": ".playwright/full-fix-t14d-all-focused.log"
+    },
+    {
+      "label": "Final PostgreSQL48 and legacy sender contracts",
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-delivery-recovery.test.ts tests/unit/task7-review-failures.test.ts tests/unit/task7-second-rereview.test.ts tests/unit/task7-repository-crash-recovery.test.ts tests/unit/ticket-email-runner.test.ts tests/unit/d4b-resend-pass.test.ts tests/unit/task7-lazy-admin-retry.test.ts tests/unit/task7-per-channel-retry-crash.test.ts tests/unit/automation-repository-authorization.test.ts --maxWorkers=2",
+      "result": "119 PASS /0skip including48 actual all59-migration PostgreSQL",
+      "log": ".playwright/full-fix-t14d-final-pg-legacy-green.log"
+    },
+    {
+      "label": "Owned isolated native browser six",
+      "command": "node --env-file=.env.local --experimental-strip-types scripts/verify-full-support.mjs",
+      "result": "6PASS/0FAIL; actual isolated DB/Auth; test sink only",
+      "log": ".playwright/full-fix-t14d-native-final-six.log"
+    },
+    {
+      "label": "Preview-mode dependency construction",
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit/full-fix-support-runtime.test.ts",
+      "result": "1PASS/0skip"
+    },
+    {
+      "label": "Final harness typecheck",
+      "command": "npm.cmd run typecheck",
+      "result": "exit0"
+    },
+    {
+      "label": "Lint",
+      "command": "npm.cmd run lint",
+      "result": "exit0/0errors/94localwarnings"
+    },
+    {
+      "label": "Strings",
+      "command": "npm.cmd run audit:strings",
+      "result": "exit0/317TSX"
+    },
+    {
+      "label": "Build",
+      "command": "node .playwright/full-fix-t14d-build-owned.mjs",
+      "result": "exit0/XPeRxVjxcSqaEF1qWY38y/25apphashes"
+    },
+    {
+      "label": "Source CI checks",
+      "command": "gh pr checks 135 --repo YNWAforever/hkwtia",
+      "result": "7SUCCESS exactsource9603519; finaldocs+harnessHEAD CI pending"
+    }
+  ],
+  "fullGate": {
+    "command": "npm.cmd test -- --maxWorkers=2",
+    "env": "RUN_POSTGRES_INTEGRATION and DATABASE_URL_TEST unset; actual PG evidence separately required",
+    "result": "6657PASS/519SKIP/0FAIL exit0"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "deploymentId": "dpl_ELFx9FrAXc4JA6sJq2Ra2MXimC4E",
+  "origin": "https://hkwtia-grounded-support-20261003.vercel.app",
+  "observedAt": "2026-10-04T08:55:20.099Z",
+  "production": false,
+  "ledger": 59,
+  "checks": [
+    {
+      "routeKind": "unique synthetic news",
+      "status": 200,
+      "markerRefSha256": "df3db155057eb0a81b9b753525ec7b4e5e6357419770478038023825430a8364",
+      "dbSourcePositivelyProven": true
+    },
+    {
+      "routeKind": "synthetic en news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "routeKind": "synthetic zh news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/zh",
+      "status": 200
+    },
+    {
+      "route": "/membership",
+      "status": 200
+    },
+    {
+      "route": "/zh/membership",
+      "status": 200
+    },
+    {
+      "route": "/partners",
+      "status": 200
+    },
+    {
+      "route": "/zh/partners",
+      "status": 200
+    },
+    {
+      "route": "/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/zh/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "role": "anonymous",
+      "adminLoginRequired": true
+    },
+    {
+      "role": "staff",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "route": "/admin/batches",
+      "status": 200,
+      "flagsDisabled": true,
+      "historyStillReadable": true
+    },
+    {
+      "route": "/admin/automations#verified-worker-health",
+      "status": 200,
+      "anchorVisible": true,
+      "scheduledWindowVerified": false
+    },
+    {
+      "task": "T10",
+      "locale": "en",
+      "actualPasswordAuth": true,
+      "actualReview": true,
+      "adoptionOnly": true,
+      "externalModelCalls": 0,
+      "offlineFixture": true,
+      "outboundMessages": 0,
+      "encryptedRecoveryConfigured": true,
+      "deletionClears": true,
+      "mobileWidth": 390,
+      "axeViolations": 0
+    },
+    {
+      "task": "T10",
+      "locale": "zh-HK",
+      "actualPasswordAuth": true,
+      "actualReview": true,
+      "adoptionOnly": true,
+      "externalModelCalls": 0,
+      "offlineFixture": true,
+      "outboundMessages": 0,
+      "encryptedRecoveryConfigured": true,
+      "deletionClears": true,
+      "mobileWidth": 390,
+      "axeViolations": 0
+    },
+    {
+      "role": "superadmin",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "role": "member",
+      "adminDenied": true,
+      "loginRequired": true
+    }
+  ],
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "providerSends": 0,
+  "paymentWrites": 0
+}

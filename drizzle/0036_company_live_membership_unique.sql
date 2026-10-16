@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "memberships_company_live_unique" ON "memberships" USING btree ("company_id") WHERE "memberships"."company_id" IS NOT NULL AND "memberships"."status" NOT IN ('cancelled', 'expired');

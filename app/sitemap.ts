@@ -2,26 +2,27 @@ import type {MetadataRoute} from "next";
 
 import {publicRoutes} from "@/config/public-routes";
 import {milestones} from "@/content/milestones";
+import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {
   listPublishedBuildLogs,
   listPublishedNews,
-  type PublishedBuildLogSummary,
   type PublishedNewsSummary,
 } from "@/lib/db/repos/public-posts";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
-import {featuredOnly, milestonesOnly} from "@/lib/history/milestones";
+import {milestonesOnly} from "@/lib/history/milestones";
 import type {AppLocale} from "@/i18n/routing";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
 const locales: AppLocale[] = ["en", "zh-HK"];
-const anonymous = {kind: "anonymous", userId: null} as const;
 
 function alternates(pathname: string) {
+  const englishUrl = absoluteUrl(localizedPath("en", pathname));
   return {
     languages: {
-      en: absoluteUrl(localizedPath("en", pathname)),
+      en: englishUrl,
       "zh-HK": absoluteUrl(localizedPath("zh-HK", pathname)),
+      "x-default": englishUrl, // x-default -> English (design D-2): hreflang tags stay zh-HK, not the donor's zh-Hant.
     },
   };
 }
@@ -64,28 +65,34 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const asOf = new Date();
-  const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs] = await Promise.all([
-    listPublishedBuildLogs().catch((): readonly PublishedBuildLogSummary[] => []),
-    eventsRepository.listPublic(anonymous, {status: "open", asOf})
-      .then((rows) => rows.map(({slug}) => slug))
-      .catch((): readonly string[] => []),
-    listPublishedNews("en", asOf).catch((): readonly PublishedNewsSummary[] => []),
-    listPublishedNews("zh-HK", asOf).catch((): readonly PublishedNewsSummary[] => []),
-    showcaseRepository.listPublishedSlugs().catch((): readonly string[] => []),
+  const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs, memberSlugs] = await Promise.all([
+    listPublishedBuildLogs(),
+    eventsRepository.listPublicSlugs(),
+    listPublishedNews("en", asOf),
+    listPublishedNews("zh-HK", asOf),
+    showcaseRepository.listPublishedSlugs(),
+    // A transient read failure must not publish an apparently complete partial sitemap.
+    companyProfilesRepository.listPublishedSlugs(),
   ]);
   const staticEntries = publicRoutes.flatMap((pathname) => localizedEntries(pathname));
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`));
   const buildLogEntries = buildLogs.flatMap(({slug}) => localizedEntries(`/news/${slug}`));
   const newsEntries = localizedNewsEntries(englishNews, chineseNews);
-  const milestoneEntries = featuredOnly(milestonesOnly(milestones))
+  // Every milestone, not only the featured six: these are 25 years of association
+  // history, already bilingual, and they are the largest body of indexable content the
+  // site has. Must stay in lockstep with generateStaticParams in the history route --
+  // a sitemap wider than the route publishes urls that 404.
+  const milestoneEntries = milestonesOnly(milestones)
     .flatMap(({slug}) => localizedEntries(`/about/history/${slug}`));
   const showcaseEntries = showcaseSlugs.flatMap((slug) => localizedEntries(`/showcase/${slug}`));
+  const memberEntries = memberSlugs.flatMap((slug) => localizedEntries(`/members/${slug}`));
   return [
     ...staticEntries,
     ...eventEntries,
     ...newsEntries,
     ...buildLogEntries,
     ...showcaseEntries,
+    ...memberEntries,
     ...milestoneEntries,
   ];
 }

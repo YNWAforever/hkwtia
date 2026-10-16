@@ -30,6 +30,13 @@ export const conciergeLabelKeys = [
   "verificationLabel",
   "verificationPending",
   "verificationError",
+  "configurationUnavailable",
+  "temporarilyUnavailable",
+  "rateLimited",
+  "timeout",
+  "requestFailed",
+  "applicationGuide",
+  "contactSupport",
 ] as const;
 
 export type ConciergeLabelKey = typeof conciergeLabelKeys[number];

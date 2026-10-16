@@ -17,11 +17,25 @@ const sources = ["app", "components"]
 
 const revocationAwareConsumers = new Set([
   "app/[locale]/(admin)/admin/media/page.tsx",
+  // Phase B2 (D-11): the public member page and its directory card render the logo the member
+  // uploaded, which is the same private-delivery reference — the optimizer cannot fetch a signed,
+  // short-lived asset, and going through it would also outlive an archived row.
+  "app/[locale]/(public)/members/[slug]/page.tsx",
+  "app/[locale]/(public)/partners/page.tsx",
   "components/admin/media-form.tsx",
+  // The searchable event picker retains the same exact private-delivery guard.
+  "components/admin/media-picker.tsx",
+  // Phase B2 (B-7): the member-page queue previews the logo a member attached,
+  // which is the same private-delivery reference the showcase queue renders.
+  "components/admin/profile-review-table.tsx",
   "components/admin/showcase-review-table.tsx",
+  "components/home/legacy-network.tsx",
+  // The portal logo field previews the member's own upload from the same private-delivery route.
+  "components/portal/forms/image-field.tsx",
+  "components/marketing/event-card.tsx",
   "components/marketing/event-detail.tsx",
   "components/marketing/home-highlight-card.tsx",
-  "components/marketing/home-partner-wall.tsx",
+  "components/marketing/member-card.tsx",
   "components/marketing/showcase-card.tsx",
   "components/marketing/showcase-detail.tsx",
 ]);
@@ -33,16 +47,21 @@ describe("image render policy", () => {
     expect(sources).toContain("components/admin/media-form.tsx");
   });
 
-  // Raw images remain forbidden. The only optimizer bypass is the exact,
-  // conditional own-origin delivery path whose per-request database check makes
-  // archive revocation effective.
+  // Private images retain conditional revocation-aware delivery. The one static
+  // editorial exception is validated by home-hero behaviour/native tests and
+  // precompute-home-hero's pinned input/derivative hashes; no private URLs enter it.
   it.each(sources)("%s uses no raw img and only the authorized optimizer bypass", (path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
 
     expect(source).not.toMatch(/<img[\s/>]/);
     if (revocationAwareConsumers.has(path)) {
-      expect(source).toContain('from "@/lib/media/url"');
+      expect(source).toMatch(/from ['"]@\/lib\/media\/url['"]/);
       expect(source).toContain("unoptimized={isPrivateMediaDeliveryUrl(");
+    } else if (path === "components/home/hero.tsx") {
+      // Fixed, public, approved photograph only; responsive derivatives are
+      // independently cacheable. Do not extend this exception to uploaded media.
+      expect(source).toContain("assertOwnOriginEditorialImage(HERO_IMAGE)");
+      expect((source.match(/\bunoptimized\b/g) ?? []).length).toBe(1);
     } else {
       expect(source).not.toContain("unoptimized");
     }

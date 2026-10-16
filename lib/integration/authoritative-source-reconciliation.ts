@@ -25,18 +25,24 @@ type UnknownRecord = Record<string, unknown>;
 
 const expectedReportedArchiveFingerprint = "140b35532895b728c8e4d73ca56d1d00653b69d57ae8366a5460c61249715c62";
 
+// Each hash covers every field of its inventory group's rows, including hkwtia's own
+// `disposition`/`canonicalPath`. A deliberate re-classification (WP-7 un-retired `/programmes`
+// and `/partners`; Phase B2 / D-11 un-redirected `/members` and `/members/[slug]`, which rotated
+// `sitemapRoutes`, `dispatcherOnlyRoutes`, `navigationTargets` and `formFlows`) rotates the
+// affected values together with the regression test that pins them — a differing hash found any
+// other way is tampering, not drift.
 const expectedFingerprints = Object.freeze({
   identity: "e2054bb31977224ad9ccab1d59f122a13e54d426eb95b98aeaf0e3f0cdcfc102",
   locales: "5977857e5ddad59cb252cebcafea43b7a3563098b7778aa6c4d816a7b68c5d41",
-  sitemapRoutes: "06e960215298b4dcfc92e2de622e66346a2046007fa4321a6c58753bf2518036",
-  dispatcherOnlyRoutes: "3ad964fd28f3b34bbf02113233fc111f4c39b1103edb35421c85c39f10300495",
-  navigationTargets: "9f023ef38743a53bac7134dd49bd39cc75eee970df6120131bdc845b1d93d94f",
+  sitemapRoutes: "c08311ac80477e0d6a90bedaf1513e14279692dea65b97871c5514b6f0176073",
+  dispatcherOnlyRoutes: "a2e42f34e5abf8e7960cc558bf169e85262c25242759bf200b65826e64d61e41",
+  navigationTargets: "4021c449ec1023a91fe94866123fc797b5de3adfa08f4e7e847e03b3767adb5d",
   forms: "2d6170f4f8df1dcb7f20c223f8de52b41123eb64b6361dd42d25cd8ac370ce99",
-  formFlows: "51486e568c916a9320f544420d8bb73cad73f06508f333bcf6982a7a62717b24",
-  sourceArtifacts: "4e4cff89b3ff0f51843e371ddb752a8515018324b49cd59acd81f78360217d29",
+  formFlows: "348b4d93a7dae34fdf8e82682503158cb27f50d0cc7bf76b538308f1aabe1283",
+  sourceArtifacts: "ca1a24184c88cf7efc12a61790b39bf59582c236e574cc5f6d55572cb17000b6",
   componentGroups: "4537b37dd90e7158cdb7f528d2a0a297f4787c883709b8626a01f6644a9e412c",
   content: "844b6c938731eb0afb64a4ca5f4fbf7f58cf46a004668dce7697b2eef1c6240c",
-  assets: "b3f512993bfb3042d5928a4852e2f99694658ec9eb33655c6126d2e6bc26c325",
+  assets: "466c6840a5401d499196eeff14d5c6307d234c25249604b528dc2801223d2e50",
 });
 
 const requiredGroups = Object.freeze(Object.keys(expectedFingerprints) as (keyof typeof expectedFingerprints)[]);

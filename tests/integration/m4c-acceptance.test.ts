@@ -152,10 +152,18 @@ async function exerciseM4B(): Promise<void> {
       commit: (value: unknown) => Promise<unknown>;
     }) => {
       const output = {
-        executiveSummary: "Acceptance report.",
-        highlights: ["Deterministic"],
-        risks: ["Review"],
-        recommendedActions: ["Approve"],
+        en: {
+          executiveSummary: "Review the reporting window.",
+          highlights: ["Review the recorded metrics."],
+          risks: ["Human review is required."],
+          recommendedActions: ["Review before publication."],
+        },
+        zhHK: {
+          executiveSummary: "請檢視報告期間。",
+          highlights: ["請檢視記錄指標。"],
+          risks: ["須由職員檢視。"],
+          recommendedActions: ["發布前請先檢視。"],
+        },
       };
       await inputValue.commit(output);
       return output;
@@ -421,7 +429,12 @@ describe("complete M4 deterministic acceptance", () => {
         evidence: [],
         labels,
       }));
-      expect(html).toContain(labels.title);
+      // Decision 3 (WP-4 task 21): eyebrow/title/description moved out of AiOpsDashboard into the
+      // page-level PageHero, so this component-level render no longer contains labels.title --
+      // assert on a label that stays in the shrunk AiOpsDashboardLabels contract instead.
+      expect(html).toContain(labels.methodologyHeading);
+      expect(html).toContain(labels.operationsHeading);
+      expect(html).toContain(labels.operationsUnmeasured);
       expect(html).toContain(`aria-labelledby="ai-ops-evidence-${locale}"`);
       return {locale, html};
     });
@@ -432,7 +445,27 @@ describe("complete M4 deterministic acceptance", () => {
     for (const {id} of fixture.profiles) {
       expect(safeDashboard).not.toContain(id);
     }
-    expect(opaque(safeDashboard)).toBe("25a77a92b6ac6180f0343258d018407117ca2caa5ae9f18c9387ab58f3d319e6");
+    // Hash recomputed for WP-4 task 21: AiOpsDashboard's rendered HTML changed (header removed
+    // per Decision 3, MetricGrid adopts .impact-metrics markup) -- see the methodologyHeading
+    // note above. Re-verified deterministic across repeated runs before pinning.
+    // Recomputed again after commit 3da1be4 ("fix: restore region landmark on MetricGrid
+    // wrapper"), which added role="region" to MetricGrid's wrapper <div> as a reviewed
+    // accessibility fix -- the prior hash above was never updated for that markup change, so
+    // it went stale relative to real (non-private) rendered output. Re-verified deterministic
+    // across repeated runs before pinning.
+    // Recomputed again for C-9 (Phase C2 Task 13 Step 4): `AiOps.methodologyDescription` gained
+    // the human-takeover caveat in both bundles, because the `aiops_monthly_metrics` fix was
+    // declined -- drizzle-kit regenerates the materialized view without the unique index
+    // `REFRESH ... CONCURRENTLY` needs. The dashboard renders that string, so the hash moved for
+    // a copy change and nothing else. Re-verified deterministic across repeated runs before
+    // pinning.
+    // T22: page-scoped aiops-metrics class fixes light-page contrast; all privacy invariants above remain.
+    // T04 adds a separate unmeasured-impact section; privacy assertions remain above.
+    // Round 17 (2026-10-09): the evidence and build-log links gained `inline-flex min-h-6
+    // items-center` so they meet the 24px target size (they measured 17px). Markup only;
+    // re-verified deterministic across repeated runs before pinning.
+    expect(state).toMatchObject({operationsImpact: {netMinutes: null, sampleCount: 0, caseCount: null}});
+    expect(opaque(safeDashboard)).toBe("b34330f0a4076b187beec4765193959f8ba3e29abfe87ff92e30541edea31f0f");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();

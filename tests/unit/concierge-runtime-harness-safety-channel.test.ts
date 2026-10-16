@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import type {AgentProviderFactory} from "@/lib/ai/provider";
@@ -102,6 +103,7 @@ describe("Concierge runtime harness safety and channel policy", () => {
     const actual = await executeOfflineCase(
       safetyCase("social-content-filter", "en", "hi", "prompt_injection"),
       {
+        budget: syntheticAiBudget(),
         providerFactories: {
           openai: providerFactory,
           anthropic: providerFactory,
@@ -142,6 +144,7 @@ describe("Concierge runtime harness safety and channel policy", () => {
     const actual = await executeOfflineCase(
       safetyCase("social-success", "en", "hi", "prompt_injection"),
       {
+        budget: syntheticAiBudget(),
         providerFactories: {
           openai: providerFactory,
           anthropic: providerFactory,

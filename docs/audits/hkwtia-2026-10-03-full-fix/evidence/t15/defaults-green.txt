@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ✓ tests/integration/admin-workflow-performance.test.ts (27 tests | 22 skipped) 37254ms
+   ✓ T15 actual full-schema synthetic administrative scale > default draft review queue returns50 of55 actual drafts  638ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 22 skipped (27)
+   Start at  23:07:36
+   Duration  45.04s (transform 3.32s, setup 897ms, collect 4.09s, tests 37.25s, environment 0ms, prepare 301ms)
+

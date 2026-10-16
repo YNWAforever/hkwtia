@@ -1,0 +1,11 @@
+import {parseEnv} from "node:util";
+import {spawn} from "node:child_process";
+import {createWriteStream,readFileSync} from "node:fs";
+import assert from "node:assert/strict";
+const parsed=parseEnv(readFileSync(".env.local","utf8"));
+assert.equal(new URL(parsed.DATABASE_URL).hostname,"ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech");
+assert.equal(parsed.DATABASE_URL,parsed.DATABASE_URL_TEST);
+const env={...process.env,...parsed,NODE_OPTIONS:"",NEXT_PUBLIC_SITE_URL:"http://localhost:3450",APP_URL:"http://localhost:3450",EMAIL_DELIVERY_MODE:"test",RUN_LIVE_WOZTELL:"0",AUDIT_ISOLATED_ACCEPTANCE:"true"};
+const log=createWriteStream(".playwright/t22-build-current.log");
+const child=spawn(process.execPath,["node_modules/next/dist/bin/next","build","--webpack"],{env,windowsHide:true,stdio:["ignore","pipe","pipe"]});child.stdout.pipe(log);child.stderr.pipe(log);
+const exitCode=await new Promise(resolve=>child.on("exit",resolve));console.log(JSON.stringify({buildExitCode:exitCode,production:false,canonical:"http://localhost:3450"}));process.exitCode=exitCode;

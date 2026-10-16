@@ -1,0 +1,9 @@
+{
+  "sourceShaBeforeFix": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/admin-member-view.test.tsx",
+  "pass": 2,
+  "fail": 0,
+  "skip": 0,
+  "change": "Convert owned CP950 test fixture to UTF-8; assert actual Chinese title in Member360 render",
+  "productChanged": false
+}

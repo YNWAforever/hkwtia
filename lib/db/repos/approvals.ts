@@ -3,6 +3,8 @@ import "server-only";
 import {and, asc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
+import {createRetentionAnalystRepository} from "@/lib/db/repos/retention-analyst";
+import {automationCronActor} from "@/lib/auth/automation-actor";
 import type {RetentionRiskCode} from "@/lib/ai/retention-analyst/candidates";
 import {
   requireConciergeAgent,
@@ -32,7 +34,7 @@ export const approvalDecisionSchema = z.object({
 }).strict();
 
 export type ApprovalDecisionInput = z.infer<typeof approvalDecisionSchema>;
-export type ApprovalPayloadSummary = Readonly<{key: "campaignId" | "template" | "eventId" | "slug" | "profileId" | "membershipId" | "field" | "to" | "subject" | "text" | "body" | "locale" | "reasonCodes" | "conversationId" | "agentRunId"; value: string}>;
+export type ApprovalPayloadSummary = Readonly<{key: "campaignId" | "template" | "eventId" | "slug" | "profileId" | "membershipId" | "field" | "to" | "subject" | "text" | "body" | "locale" | "reasonCodes" | "conversationId" | "agentRunId" | "factsHash" | "renewalDate" | "planCode"; value: string}>;
 export const draftEmailApprovalSchema = z.object({
   to: z.string().email().max(320),
   subject: z.string().min(1).max(998),
@@ -53,6 +55,9 @@ export const retentionOutreachApprovalSchema = z.object({
   reasonCodes: z.array(retentionRiskCodeSchema).min(1).max(2),
   subject: z.string().min(1).max(160),
   body: z.string().min(1).max(4000),
+  factsHash:z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  renewalDate:z.string().nullable().optional(),
+  planCode:z.string().min(1).max(120).optional(),
 }).strict();
 const retentionOutreachPayloadSchema = retentionOutreachApprovalSchema
   .omit({requestKey: true})
@@ -167,6 +172,7 @@ async function defaultAutomationDatabaseLoader(): Promise<AutomationDatabase> {
 
 export function createApprovalsRepository(
   loadDatabase: DatabaseLoader = getDb,
+  now:()=>Date=()=>new Date(),
 ): ApprovalsRepository & AgentApprovalsRepository {
   return {
     async createDraftEmail(actor, input) {
@@ -206,6 +212,7 @@ export function createApprovalsRepository(
         subject: parsed.subject,
         body: parsed.body,
         agentRunId: actor.runId,
+        ...(parsed.factsHash?{factsHash:parsed.factsHash,renewalDate:parsed.renewalDate??null,planCode:parsed.planCode}:{}),
       };
       const db = await loadDatabase();
       const rows = resultRows(await db.execute(sql`
@@ -231,7 +238,8 @@ export function createApprovalsRepository(
             'subject', ${payload.subject}::text,
             'body', ${payload.body}::text,
             'agentRunId', ${payload.agentRunId}::text
-          ),
+          ) || ${JSON.stringify(parsed.factsHash ? {factsHash:parsed.factsHash,renewalDate:parsed.renewalDate??null,planCode:parsed.planCode} : {})}::jsonb
+          ,
           ${parsed.requestKey},
           ${"pending"},
           NULL
@@ -288,7 +296,17 @@ export function createApprovalsRepository(
         if (candidate.status !== "pending") throw new Error("APPROVAL_ALREADY_DECIDED");
         if (!reviewApprovalPayload(candidate.actionType, candidate.payload).actionable) throw new Error("APPROVAL_UNSUPPORTED");
 
-        const decidedAt = new Date();
+        if (parsed.decision === "approved" && candidate.actionType === "agent.retention_outreach") {
+          const payload=retentionOutreachPayloadSchema.parse(candidate.payload);
+          if(payload.factsHash){
+            await transaction.execute(sql`SELECT id FROM profiles WHERE id=${payload.profileId} FOR SHARE`);
+            await transaction.execute(sql`SELECT id FROM memberships WHERE id=${payload.membershipId} FOR SHARE`);
+            await transaction.execute(sql`SELECT id FROM contacts WHERE profile_id=${payload.profileId} FOR SHARE`);
+            const current=await createRetentionAnalystRepository(async()=>transaction as unknown as AutomationDatabase).getCurrentCandidate(automationCronActor(),{profileId:payload.profileId,asOf:now()});
+            if(!current || current.factsHash!==payload.factsHash)throw Error("APPROVAL_FACTS_STALE");
+          }
+        }
+        const decidedAt = now();
         const [decision] = await transaction.update(approvals).set({status: parsed.decision, decidedByProfileId: actor.profileId, decidedAt})
           .where(and(eq(approvals.id, parsed.approvalId), eq(approvals.status, "pending")))
           .returning({id: approvals.id, status: approvals.status, decidedAt: approvals.decidedAt});

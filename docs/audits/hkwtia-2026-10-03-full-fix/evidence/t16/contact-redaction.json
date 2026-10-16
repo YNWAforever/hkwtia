@@ -1,0 +1,28 @@
+{
+  "observedAt": "2026-10-04T21:13:02.807912+00:00",
+  "redactions": [
+    {
+      "file": "evidence/t15/ci-lazy-announcement-harness-failure.txt",
+      "contactMatchesMasked": 6,
+      "originalSha256": "5556de82734e387fb04c0323fd47ab770ede4806da790d6c04e94263bff8c64c",
+      "maskedSha256": "efd463146cfc3c3b059484dbdf686315ac740c3438d5879f38ebfb9960019824",
+      "testFailureOrOutcomeChanged": false
+    },
+    {
+      "file": "evidence/t15/ci-lazy-original-checks-failure.txt",
+      "contactMatchesMasked": 6,
+      "originalSha256": "512e8d704c5d7ff51e6017e8e051647517dda7a5e786f9d7cc7db94d7515fb31",
+      "maskedSha256": "e5f9febe11439fda1074f3909f415d2fbc33d46a6366a505b64c69554fc614a5",
+      "testFailureOrOutcomeChanged": false
+    },
+    {
+      "file": "evidence/t15/ci-lazy-original-shard-failure.txt",
+      "contactMatchesMasked": 6,
+      "originalSha256": "4bbf77ab33709df9d2362fe7eeb1469e3393dc5a63f146d60f1eb38892518c16",
+      "maskedSha256": "3c53ffa3009cc1fc15d5f00347baaaa76701cb6ec19f623f73ec69aafebb0915",
+      "testFailureOrOutcomeChanged": false
+    }
+  ],
+  "originalInputArchiveModified": false,
+  "meaning": "Only dependency maintainer contact masked; original diagnostic source/outcome and GitHub run links retained; raw bytes kept in ignored private local artifacts."
+}

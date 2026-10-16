@@ -25,6 +25,9 @@ export type RetentionApprovalPreview = Readonly<{
   agentRunReference: string;
   subject: string;
   body: string;
+  planCode?:string;
+  renewalDate?:string|null;
+  factsHash?:string;
 }>;
 export type AdminPendingApproval = PendingApproval & Readonly<{
   retentionPreview?: RetentionApprovalPreview;
@@ -70,6 +73,7 @@ function retentionPreview(approval: PendingApproval): RetentionApprovalPreview |
     subject,
     body,
     reasonCodes,
+    ...(values.get("factsHash") ? {factsHash:values.get("factsHash"),planCode:values.get("planCode"),renewalDate:values.get("renewalDate")==="null"?null:values.get("renewalDate")} : {}),
   };
 }
 

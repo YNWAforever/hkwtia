@@ -1,5 +1,9 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {
+  WHATSAPP_TEMPLATE_KEYS,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
 import {runJourneyBatch, type JourneyRunnerContext, type JourneyRunnerDependencies} from "@/lib/automation/journey-runner";
 import {DeliveryFailure, type DeliveryFailureCode} from "@/lib/email/transport";
 import type {JourneyClaim} from "@/lib/db/repos/journeys";
@@ -43,6 +47,7 @@ function context(overrides: Partial<JourneyRunnerContext> = {}): JourneyRunnerCo
     emailSuppressed: false,
     whatsappOptIn: false,
     whatsappNumber: null,
+    whatsappOptedOutAt: null,
     engagementScore: 50,
     email: "member@example.test",
     recipientName: "Fixture Member",
@@ -76,6 +81,10 @@ function harness(
   claims: JourneyClaim[],
   contextFor: (claim: JourneyClaim) => JourneyRunnerContext = () => context(),
   claimBatches: readonly (readonly JourneyClaim[])[] = [claims],
+  // Default: every registered key. Most of these cases predate the B-5
+  // approval gate and assert on the send path itself, not on which templates
+  // ops approved; the B-5 cases pass a narrower set.
+  approvedTemplateKeys: ReadonlySet<WhatsAppTemplateKey> = new Set(WHATSAPP_TEMPLATE_KEYS),
 ) {
   const logs = new Map<string, DeliveryRecord>();
   const tasks = new Map<string, {
@@ -240,6 +249,7 @@ function harness(
         return {status: "sent" as const, providerId: `wa-${input.idempotencyKey}`};
       },
     },
+    approvedTemplateKeys,
     emailFrom: "WTIA <members@example.test>",
   };
 
@@ -381,11 +391,179 @@ describe("runJourneyBatch", () => {
     }]);
   });
 
+  /**
+   * C-9 review. The opt-in flag is half the consent fact, and this lane is the
+   * second send path `RUN_LIVE_WOZTELL=1` turns on.
+   *
+   * A STOP from a handset two profiles share resolves no profile
+   * (`woztellProfileResolver`: `matches.length !== 1`), so it stamps
+   * `contacts.whatsapp_opted_out_at` and leaves `profiles.whatsapp_opt_in` true
+   * with no `message_suppressions` row — the case above therefore cannot catch
+   * it, and before this gate `renewal_14` kept going out on every tick. The
+   * blast and the inbox already refuse that member through
+   * `messageEligibilityRepository`; this is the same rule 1, for the lane that
+   * holds no database of its own.
+   */
+  it("sends no WhatsApp when the linked contact recorded a STOP, even with the opt-in flag still true", async () => {
+    const renewal = due("renewal_14", {
+      journey: "renewal",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([renewal], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+      whatsappOptedOutAt: new Date("2027-01-10T02:00:00.000Z"),
+    }));
+
+    const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toHaveLength(0);
+    // Not a reservation either: a withdrawal means "this step has no WhatsApp
+    // channel", so there is no delivery row for a later retry to replay.
+    expect([...test.logs.values()].filter((record) => record.channel === "whatsapp")).toHaveLength(0);
+    // A WhatsApp STOP is not an email unsubscribe. The step still delivers, and
+    // a gate that failed the step instead would raise a staff task per member.
+    expect(test.sentEmails).toHaveLength(1);
+    expect(summary).toMatchObject({sent: 1, failed: 0, tasksCreated: 0});
+  });
+
+  /**
+   * C-9 review. The third way this lane can reach the provider with something
+   * Meta refuses, after consent and approval: a BODY parameter it never
+   * resolved.
+   *
+   * `lib/channels/woztell.ts` fills a parameter it was not given with `""`, Meta
+   * rejects an empty BODY parameter, the adapter maps the 4xx to
+   * `provider_client_error` and S-15 makes it permanent — so an unresolved
+   * variable is one failed step and one staff task per member, and no member
+   * receives the message. That was the live state of `renewal_14` and
+   * `dunning_3` until `lib/jobs/runners.ts` started supplying `memberName` and
+   * `amountDue`, and every fixture in this file hand-wrote both, which is
+   * exactly why nothing here failed. `tests/unit/journey-whatsapp-template-variables.test.ts`
+   * drives the real production bag; this case pins the runner's refusal, so the
+   * gate cannot be removed on the argument that the bag is complete now.
+   */
+  it("delivers by email alone when a declared BODY parameter is blank", async () => {
+    const dunning = due("dunning_3", {
+      journey: "dunning",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([dunning], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+      // The shape production produces for a plan that records no price for its
+      // interval: `lib/jobs/runners.ts` writes "" rather than fabricating a
+      // figure, and this is the gate that turns that into "no WhatsApp channel".
+      variables: {
+        ctaUrl: "https://example.test/member",
+        memberName: "Fixture Member",
+        renewalDate: "2027-02-01",
+        renewalUrl: "https://example.test/renew",
+        amountDue: "",
+        paymentUrl: "https://example.test/pay",
+      },
+    }));
+
+    const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toHaveLength(0);
+    // Not a reservation either, for the same reason an unapproved template is
+    // not one: there is nothing here for a later retry to replay.
+    expect([...test.logs.values()].filter((record) => record.channel === "whatsapp")).toHaveLength(0);
+    // The email still goes out, and no staff task is raised. Failing the step
+    // instead would cost one task per member in arrears — for a message the
+    // provider was always going to refuse.
+    expect(test.sentEmails).toHaveLength(1);
+    expect(summary).toMatchObject({sent: 1, failed: 0, tasksCreated: 0});
+  });
+
+  it("sends the WhatsApp leg when every declared BODY parameter resolves", async () => {
+    // The positive control for the case above: an assertion that only ever saw
+    // a blank would pass just as well against a lane that never sent at all.
+    const dunning = due("dunning_3", {
+      journey: "dunning",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([dunning], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+    }));
+
+    await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toEqual([{
+      idempotencyKey: `${dunning.deliveryKey}:whatsapp`,
+      template: "dunning_3",
+    }]);
+  });
+
+  /**
+   * C-7 (C2 Task 2). The regression a fail-closed approval gate makes possible:
+   * Meta pauses `renewal_14`, the registry stops approving it, and a dunning or
+   * renewal step that used to reach the member by two channels turns into a
+   * permanent delivery failure plus a staff task per member — for an email that
+   * would have sent perfectly well.
+   *
+   * Nothing else in the suite asserts this, because every other fixture leaves
+   * `approvedTemplateKeys` absent, which means "no gate" and is the behaviour
+   * up to Phase C1.
+   */
+  it("delivers by email alone, with no failure and no staff task, when the template is not approved", async () => {
+    const renewal = due("renewal_14", {
+      journey: "renewal",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([renewal], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+    }));
+    const gated: JourneyRunnerDependencies = {
+      ...test.deps,
+      approvedTemplateKeys: new Set([]),
+    };
+
+    const summary = await runJourneyBatch(gated, {now, limit: 1});
+
+    expect(summary).toMatchObject({sent: 1, failed: 0, tasksCreated: 0});
+    expect(test.sentEmails).toHaveLength(1);
+    expect(test.sentWhatsapp).toHaveLength(0);
+    // Not even a reservation: an unapproved key is "this step has no WhatsApp
+    // channel", not "this step failed on WhatsApp", so there is no delivery row
+    // for a later retry to replay.
+    expect([...test.logs.values()].filter((record) => record.channel === "whatsapp")).toHaveLength(0);
+    expect(test.tasks.size).toBe(0);
+    expect(test.failed).toEqual([]);
+  });
+
+  it("still sends an approved template when the gate is supplied", async () => {
+    const renewal = due("renewal_14", {
+      journey: "renewal",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([renewal], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+    }));
+    // The positive control, so the assertion above can never go vacuous: a gate
+    // that refused everything would satisfy it just as well as a working one.
+    const gated: JourneyRunnerDependencies = {
+      ...test.deps,
+      approvedTemplateKeys: new Set(["renewal_14"]),
+    };
+
+    await runJourneyBatch(gated, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toEqual([{
+      idempotencyKey: `${renewal.deliveryKey}:whatsapp`,
+      template: "renewal_14",
+    }]);
+  });
+
   it("reschedules a retryable first failure with the claim fencing token", async () => {
     const welcome = due("welcome");
     const test = harness([welcome]);
     test.deps.emailTransport.send = vi.fn(async () => {
-      throw new DeliveryFailure("retryable_network");
+      throw new DeliveryFailure("retryable_rate_limit");
     });
 
     const summary = await runJourneyBatch(test.deps, {now, limit: 1});
@@ -395,11 +573,11 @@ describe("runJourneyBatch", () => {
       id: welcome.id,
       claimedAt: now,
       scheduledAt: new Date(now.getTime() + 5 * 60_000),
-      code: "retryable_network",
+      code: "retryable_rate_limit",
     }]);
   });
 
-  it("reuses the delivery key after a provider-success completion crash", async () => {
+  it("does not resend after a provider-success completion crash", async () => {
     const welcome = due("welcome");
     const retryNow = new Date(now.getTime() + 5 * 60_000);
     const retryClaim = due("welcome", {
@@ -432,22 +610,21 @@ describe("runJourneyBatch", () => {
     const first = await runJourneyBatch(test.deps, {now, limit: 1});
     const second = await runJourneyBatch(test.deps, {now: retryNow, limit: 1});
 
-    expect(first).toMatchObject({retried: 1, sent: 0});
-    expect(second).toMatchObject({retried: 0, sent: 1});
+    expect(first).toMatchObject({retried: 0, failed: 1, sent: 0});
+    expect(second).toMatchObject({retried: 0, failed: 1, sent: 0});
     expect(test.sentEmails.map((item) => item.idempotencyKey)).toEqual([
-      welcome.deliveryKey,
       welcome.deliveryKey,
     ]);
     expect(test.logs).toHaveLength(1);
-    expect(test.logs.get(welcome.deliveryKey)).toMatchObject({status: "sent"});
-    expect(test.sent).toEqual([{id: welcome.id, claimedAt: retryNow}]);
+    expect(test.logs.get(welcome.deliveryKey)).toMatchObject({status: "processing"});
+    expect(test.sent).toEqual([]);
   });
 
   it("fails attempt three permanently and creates one deduplicated task", async () => {
     const welcome = due("welcome", {attemptCount: 3});
     const test = harness([welcome]);
     test.deps.emailTransport.send = vi.fn(async () => {
-      throw new DeliveryFailure("retryable_network");
+      throw new DeliveryFailure("retryable_rate_limit");
     });
 
     const summary = await runJourneyBatch(test.deps, {now, limit: 1});
@@ -459,5 +636,146 @@ describe("runJourneyBatch", () => {
       kind: "permanent_delivery_failure",
       summaryCode: "attempts_exhausted",
     }));
+  });
+
+  it("renders the 24-hour event reminder with the event variables from the loaded context (B-5)", async () => {
+    const eventId = "33333333-3333-4333-8333-333333333333";
+    const reminder = due("reminder_24h", {
+      journey: "event_reminder",
+      membershipId: null,
+      instanceKey: `event:${eventId}`,
+      deliveryKey: `journey:member-reminder_24h:event_reminder:event:${eventId}:reminder_24h`,
+    });
+    const eventVariables = {
+      eventTitle: "Fixture Event",
+      startsAt: "1 March 2030 at 10:00",
+      venue: "KOHO, Kwun Tong",
+      eventUrl: "https://example.test/events/fixture-event",
+      ctaUrl: "https://example.test/events/fixture-event",
+    };
+    const test = harness([reminder], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+      variables: {memberName: "Fixture Member", ...eventVariables},
+    }));
+
+    const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(summary).toMatchObject({claimed: 1, sent: 1, skipped: 0, failed: 0});
+    expect(test.rendered).toEqual([expect.objectContaining({
+      template: "event_reminder_24h",
+      locale: "en",
+      variables: expect.objectContaining(eventVariables),
+    })]);
+    expect(test.sentEmails.map((item) => item.idempotencyKey)).toEqual([reminder.deliveryKey]);
+    // The step's template id is `event_reminder_24h` for email; WhatsApp
+    // resolves it through the registered locale pair, so an `en` member gets
+    // the `en_US` half.
+    expect(test.sentWhatsapp).toEqual([{
+      idempotencyKey: `${reminder.deliveryKey}:whatsapp`,
+      template: "event_reminder_24h",
+    }]);
+  });
+
+  // B-5 gap the Phase B audit found: one en_US reminder template meant a zh-HK
+  // member read their reminder email in Chinese and their WhatsApp in English.
+  describe("24-hour event reminder template language (B-5)", () => {
+    const eventId = "44444444-4444-4444-8444-444444444444";
+
+    function reminderClaim(): JourneyClaim {
+      return due("reminder_24h", {
+        journey: "event_reminder",
+        membershipId: null,
+        instanceKey: `event:${eventId}`,
+        deliveryKey: `journey:member-reminder_24h:event_reminder:event:${eventId}:reminder_24h`,
+      });
+    }
+
+    function reminderContext(locale: "en" | "zh-HK"): JourneyRunnerContext {
+      return context({
+        locale,
+        whatsappOptIn: true,
+        whatsappNumber: "+85255550000",
+        variables: {
+          memberName: "Fixture Member",
+          eventTitle: locale === "zh-HK" ? "示範活動" : "Fixture Event",
+          startsAt: "1 March 2030 at 10:00",
+          venue: "KOHO, Kwun Tong",
+          eventUrl: "https://example.test/events/fixture-event",
+          ctaUrl: "https://example.test/events/fixture-event",
+        },
+      });
+    }
+
+    it("sends a zh-HK member the zh-HK template", async () => {
+      const reminder = reminderClaim();
+      const test = harness([reminder], () => reminderContext("zh-HK"));
+
+      const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+      expect(summary).toMatchObject({claimed: 1, sent: 1, failed: 0});
+      expect(test.sentWhatsapp.map((item) => item.template))
+        .toEqual(["event_reminder_24h_zh_hk"]);
+    });
+
+    it(
+      "delivers by email alone when only the other language is approved",
+      async () => {
+        const reminder = reminderClaim();
+        const test = harness(
+          [reminder],
+          () => reminderContext("zh-HK"),
+          undefined,
+          new Set<WhatsAppTemplateKey>(["event_reminder_24h"]),
+        );
+
+        const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+        // The decision this pins: an unapproved zh_HK template drops the
+        // WhatsApp leg rather than falling back to the approved English one.
+        // Which language a member is written to must not be decided by which
+        // half of the pair ops happened to get approved first.
+        expect(test.sentWhatsapp).toEqual([]);
+        // Not a failure and not `recipient_ineligible`: the email leg still
+        // carries the reminder, in the member's own language.
+        expect(summary).toMatchObject({claimed: 1, sent: 1, skipped: 0, failed: 0, retried: 0});
+        expect(test.sentEmails.map((item) => item.idempotencyKey))
+          .toEqual([reminder.deliveryKey]);
+        expect(test.rendered.map((item) => item.locale)).toEqual(["zh-HK"]);
+      },
+    );
+
+    it("reserves the whatsapp_log row against the resolved template", async () => {
+      const reminder = reminderClaim();
+      const test = harness([reminder], () => reminderContext("zh-HK"));
+
+      await runJourneyBatch(test.deps, {now, limit: 1});
+
+      // The delivery row names the template that actually went out, so an
+      // audit of whatsapp_log can tell the two languages apart.
+      expect([...test.logs.values()]
+        .filter((record) => record.channel === "whatsapp")
+        .map((record) => record.idempotencyKey))
+        .toEqual([`${reminder.deliveryKey}:whatsapp`]);
+    });
+
+    it("leaves a step with no registered locale pair on its own name", async () => {
+      const renewal = due("renewal_14", {
+        journey: "renewal",
+        instanceKey: `renewal:${membershipId}`,
+      });
+      const test = harness([renewal], () => context({
+        locale: "zh-HK",
+        whatsappOptIn: true,
+        whatsappNumber: "+85255550000",
+      }));
+
+      await runJourneyBatch(test.deps, {now, limit: 1});
+
+      // renewal_14 and dunning_3 are single en_US templates until ops submits
+      // pairs for them; resolving by locale must not invent a key that is not
+      // registered, or the step would silently stop sending WhatsApp.
+      expect(test.sentWhatsapp.map((item) => item.template)).toEqual(["renewal_14"]);
+    });
   });
 });

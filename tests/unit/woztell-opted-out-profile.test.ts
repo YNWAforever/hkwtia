@@ -22,6 +22,10 @@ describe("WOZTELL opted-out profile identity", () => {
       locale: input.locale,
       memberName: input.memberName,
       whatsappOptIn: input.whatsappOptIn,
+      // C-1 Task 3: 'bot' is the pre-Phase-C behaviour this fixture pins.
+      handling: "bot" as const,
+      assignedToProfileId: null,
+      lastInboundAt: null,
     }));
     const dependencies: WoztellWebhookProcessorDependencies = {
       channel: {
@@ -32,6 +36,7 @@ describe("WOZTELL opted-out profile identity", () => {
           intent: null,
           providerMessageId: "wamid.opted-out",
           receivedAt: RECEIVED_AT,
+          whatsappMemberId: null,
         }),
         verifyWebhook: () => true,
         sendSessionMessage,

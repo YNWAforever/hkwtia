@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
@@ -6,6 +6,7 @@ import {z} from "zod";
 import {ArchiveToggle} from "@/components/admin/archive-toggle";
 import {MediaForm} from "@/components/admin/media-form";
 import type {AppLocale} from "@/i18n/routing";
+import {toArchiveInUseMessage} from "@/lib/admin/archive-toggle-labels";
 import {setMediaArchivedAction, updateMediaAction} from "@/lib/admin/media-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {mediaRepository} from "@/lib/db/repos/media";
@@ -67,7 +68,7 @@ export default async function AdminMediaDetailPage({params}: Props) {
         archived={entry.archivedAt !== null}
         labels={{
           archive: t("archive"), unarchive: t("unarchive"), archiving: t("archiving"),
-          archivedNotice: t("archivedNotice"), inUse: t("archiveInUse"), error: t("error"),
+          archivedNotice: t("archivedNotice"), inUse: toArchiveInUseMessage(t.raw("archiveInUse")), error: t("error"),
         }}
       />
     </div>

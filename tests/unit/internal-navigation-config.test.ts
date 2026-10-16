@@ -1,0 +1,44 @@
+import {describe, expect, it} from "vitest";
+
+import {
+  adminNavigationGroups,
+  portalNavigationGroups,
+  type InternalNavGroupConfig,
+} from "@/config/internal-navigation";
+
+// The configs are declared `as const satisfies readonly InternalNavGroupConfig[]` so nav components
+// can derive a literal union of link ids (see PortalNavLinkId/AdminNavLinkId). That makes each config
+// a tuple of distinctly-shaped group literals; widen back to InternalNavGroupConfig[] here so generic
+// array methods like .flatMap/.find aren't asked to unify those heterogeneous literal shapes.
+const portalGroups: readonly InternalNavGroupConfig[] = portalNavigationGroups;
+const adminGroups: readonly InternalNavGroupConfig[] = adminNavigationGroups;
+
+describe("internal navigation config", () => {
+  it("defines the Portal's 11 nav links, with own history under me and Seats under company", () => {
+    const links = portalGroups.flatMap((group) => group.links);
+    expect(links.map((link) => link.href)).toEqual([
+      "/portal",
+      "/portal/profile",
+      "/portal/events/my",
+      "/portal/company",
+      "/portal/company/listing",
+      "/portal/company/seats",
+      "/portal/events",
+      "/portal/directory",
+      "/portal/tools",
+      "/portal/documents",
+      "/portal/billing",
+    ]);
+  });
+
+  it("retains existing destinations and exposes applications, health and knowledge in six groups", () => {
+    expect(adminGroups.map((group) => group.id)).toEqual(["workspace", "members-organizations", "events", "communications-follow-up", "content-settings","system-audit"]);
+    const allLinks = adminGroups.flatMap((group) => group.links);
+    expect(allLinks).toHaveLength(26);
+    expect(allLinks).toContainEqual({id:"knowledge",href:"/admin/knowledge"});
+    expect(new Set(allLinks.map((link) => link.href)).size).toBe(26);
+    expect(adminGroups.find((group) => group.id === "members-organizations")?.links.map((link) => link.id)).toEqual(["members","applications","at-risk", "batches", "contacts", "segments", "listings", "profiles-review", "cohorts"]);
+    expect(adminGroups.find((group) => group.id === "communications-follow-up")?.links.map((link) => link.id)).toEqual(["inbox", "campaigns", "templates"]);
+  });
+
+});

@@ -47,7 +47,6 @@ const publicJourneyKeys = [
   'Events.empty.open.description',
   'Events.empty.past.title',
   'Events.empty.past.description',
-  'Events.registration.title',
   'Events.registration.submit',
   'Events.registration.pending',
   'Events.registration.registered',
@@ -58,14 +57,6 @@ const publicJourneyKeys = [
   'Events.registration.ineligible',
   'Events.registration.closed',
   'Events.registration.error',
-  'Home.highlights.event.empty',
-  'Home.highlights.event.unavailable',
-  'Home.highlights.news.empty',
-  'Home.highlights.news.unavailable',
-  'Home.highlights.showcase.empty',
-  'Home.highlights.showcase.unavailable',
-  'Home.partnerWallTitle',
-  'Home.partnerWallIntro',
   'Membership.tiersTitle',
   'Membership.tiersIntro',
   'Membership.tiers.community.name',
@@ -97,6 +88,7 @@ const publicJourneyKeys = [
   'Concierge.title',
   'Concierge.messageLabel',
   'Concierge.close',
+  'Common.breadcrumbLabel',
 ] as const;
 
 describe('message bundles', () => {

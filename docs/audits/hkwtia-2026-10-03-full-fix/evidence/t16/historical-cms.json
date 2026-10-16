@@ -1,0 +1,15 @@
+{
+  "appSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+  "ledger": 61,
+  "realPasswordAuth": true,
+  "serverActorMatchedAuthId": true,
+  "privateSave": true,
+  "publish": true,
+  "restorePublication": true,
+  "publicProjectionRestored": true,
+  "publicationAuditRetained": true,
+  "originalProjectionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "providerSends": 0,
+  "externalModelCalls": 0,
+  "production": false
+}

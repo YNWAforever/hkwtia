@@ -3,13 +3,15 @@ import {readFileSync} from "node:fs";
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-const events = vi.hoisted(() => ({getPublicBySlug: vi.fn(), listPublic: vi.fn()}));
+const events = vi.hoisted(() => ({getPublicBySlug: vi.fn(), listPublicSlugs: vi.fn()}));
 const publicPosts = vi.hoisted(() => ({listPublishedBuildLogs: vi.fn(), listPublishedNews: vi.fn()}));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
+const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
 vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)}/> }));
@@ -17,6 +19,8 @@ vi.mock("@/components/portal/event-registration-form", () => ({EventRegistration
 
 import EventPage, {generateMetadata} from "@/app/[locale]/(public)/events/[slug]/page";
 import sitemap from "@/app/sitemap";
+
+beforeEach(() => companyProfiles.listPublishedSlugs.mockResolvedValue([]));
 
 const props = {params: Promise.resolve({locale: "en", slug: "public-event"})};
 const event = (endsAt: string, hero: {url: string; alt: string} | null = null) => ({
@@ -37,13 +41,13 @@ describe("public Event detail page review regressions", () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.listPublishedNews.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
   });
 
   it("uses the reader's exact equality boundary to keep registration visible", async () => {
     events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => {
       await new Promise((resolve) => setTimeout(resolve, 15));
-      return event(options.asOf.toISOString());
+      return {...event(options.asOf.toISOString()), startsAt: new Date(options.asOf.getTime() - 3_600_000).toISOString()};
     });
 
     const rendered = renderToStaticMarkup(await EventPage(props));
@@ -52,8 +56,25 @@ describe("public Event detail page review regressions", () => {
     expect(rendered).toContain('data-registration-form="true"');
   });
 
+  it("shows online and hybrid locations on published event details", async () => {
+    events.getPublicBySlug.mockResolvedValue({...event("2030-01-01T12:00:00.000Z"), venue: null, format: "online", onlineUrl: "https://meet.example.test/session"});
+    const online = renderToStaticMarkup(await EventPage(props));
+    expect(online).toContain("detail.formats.online");
+    expect(online).toContain('href="https://meet.example.test/session"');
+
+    events.getPublicBySlug.mockResolvedValue({...event("2030-01-01T12:00:00.000Z"), format: "hybrid", onlineUrl: "https://meet.example.test/hybrid"});
+    const hybrid = renderToStaticMarkup(await EventPage(props));
+    expect(hybrid).toContain("detail.formats.hybrid");
+    expect(hybrid).toContain("Hong Kong");
+    expect(hybrid).toContain('href="https://meet.example.test/hybrid"');
+  });
+
+  it("propagates a detail read outage instead of returning a false 404", async () => {
+    events.getPublicBySlug.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
+    await expect(EventPage(props)).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
+  });
   it("hides registration immediately before the request-scoped boundary", async () => {
-    events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => event(new Date(options.asOf.getTime() - 1).toISOString()));
+    events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => ({...event(new Date(options.asOf.getTime() - 1).toISOString()), startsAt: new Date(options.asOf.getTime() - 3_600_000).toISOString()}));
 
     const rendered = renderToStaticMarkup(await EventPage(props));
 
@@ -71,6 +92,18 @@ describe("public Event detail page review regressions", () => {
     expect(rendered).toContain('"image":"http://localhost:3000/api/media/10000000-0000-4000-8000-000000000001"');
   });
 
+  it.each([
+    "/images/events/hero.webp",
+    "/api/media/10000000-0000-4000-8000-000000000001",
+  ])("uses a safe event hero in the Open Graph image: %s", async (url) => {
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-01T12:00:00.000Z", {url, alt: "Event hero"}));
+
+    const metadata = await generateMetadata(props);
+    const imageUrl = (metadata.openGraph as {images: {url: string}[]}).images[0].url;
+
+    expect(new URL(imageUrl).searchParams.get("image")).toBe(url);
+  });
+
   it("uses repository public visibility for metadata and detail markup, excluding an unsafe archived-or-donor hero", async () => {
     events.getPublicBySlug.mockResolvedValue(null);
     await expect(generateMetadata(props)).resolves.toEqual({});
@@ -78,6 +111,14 @@ describe("public Event detail page review regressions", () => {
 
     const donorUrl = "https://donor.example/hero.png";
     events.getPublicBySlug.mockResolvedValue(event("2030-01-01T12:00:00.000Z", {url: donorUrl, alt: "Donor hero"}));
+    // D-1: the record title is branded at runtime; the description stays the row's own.
+    const metadata = await generateMetadata(props);
+    expect(metadata.title).toBe("Public Event | WiseTech Hong Kong");
+    expect(metadata.description).toBe("A public Event description.");
+    const imageUrl = (metadata.openGraph as {images: {url: string}[]}).images[0].url;
+    expect(new URL(imageUrl).searchParams.get("image")).toBeNull();
+    const zhMetadata = await generateMetadata({params: Promise.resolve({locale: "zh-HK", slug: "public-event"})});
+    expect(zhMetadata.title).toBe("Public Event｜WiseTech Hong Kong");
     const rendered = renderToStaticMarkup(await EventPage(props));
     expect(rendered).toContain("Public Event");
     expect(rendered).not.toContain(donorUrl);
@@ -86,15 +127,32 @@ describe("public Event detail page review regressions", () => {
 });
 
 describe("Event sitemap repository behavior", () => {
-  it("emits only repository Event URLs, not static-content fallback URLs", async () => {
-    events.listPublic.mockResolvedValue([{slug: "repository-event"}]);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    publicPosts.listPublishedNews.mockResolvedValue([]);
+    showcase.listPublishedSlugs.mockResolvedValue([]);
+    companyProfiles.listPublishedSlugs.mockResolvedValue([]);
+  });
+
+  it("includes published past events as well as upcoming events in both locales", async () => {
+    events.listPublicSlugs.mockResolvedValue(["upcoming-event", "past-event"]);
 
     const urls = (await sitemap()).map(({url}) => url);
 
-    expect(events.listPublic).toHaveBeenCalledWith(
-      {kind: "anonymous", userId: null},
-      expect.objectContaining({status: "open", asOf: expect.any(Date)}),
-    );
+    expect(events.listPublicSlugs).toHaveBeenCalledOnce();
+    for (const slug of ["upcoming-event", "past-event"]) {
+      expect(urls).toContain(`http://localhost:3000/events/${slug}`);
+      expect(urls).toContain(`http://localhost:3000/zh/events/${slug}`);
+    }
+  });
+
+  it("emits only repository Event URLs, not static-content fallback URLs", async () => {
+    events.listPublicSlugs.mockResolvedValue(["repository-event"]);
+
+    const urls = (await sitemap()).map(({url}) => url);
+
+    expect(events.listPublicSlugs).toHaveBeenCalledOnce();
     expect(urls).toEqual(expect.arrayContaining([
       "http://localhost:3000/events/repository-event",
       "http://localhost:3000/zh/events/repository-event",
@@ -103,17 +161,8 @@ describe("Event sitemap repository behavior", () => {
     expect(readFileSync("app/sitemap.ts", "utf8")).not.toContain("@/content/events");
   });
 
-  it("omits Event detail URLs after a repository failure while retaining unrelated routes", async () => {
-    events.listPublic.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
-
-    const urls = (await sitemap()).map(({url}) => url);
-
-    expect(urls).toEqual(expect.arrayContaining([
-      "http://localhost:3000/",
-      "http://localhost:3000/zh",
-      "http://localhost:3000/news",
-      "http://localhost:3000/zh/news",
-    ]));
-    expect(urls.some((url) => url.includes("/events/"))).toBe(false);
+  it("fails the sitemap read after an Event repository outage", async () => {
+    events.listPublicSlugs.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
+    await expect(sitemap()).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
   });
 });

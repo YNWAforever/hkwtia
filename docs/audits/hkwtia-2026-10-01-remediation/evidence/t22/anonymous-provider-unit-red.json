@@ -1,0 +1,15 @@
+{
+  "sourceSha": "8119b7f3477c48d1b375c8d352b5b0f5bfb47109",
+  "phase": "RED",
+  "command": "node .playwright/t22-unit-target.mjs tests/unit/auth-server-runtime.test.ts",
+  "pass": 13,
+  "fail": 3,
+  "skip": 0,
+  "failedTitles": [
+    "Neon Auth server session runtime returns signed out without a provider read for an absent Auth credential ()",
+    "Neon Auth server session runtime returns signed out without a provider read for an absent Auth credential (NEXT_LOCALE=zh-HK)",
+    "Neon Auth server session runtime returns signed out without a provider read for an absent Auth credential (role=superadmin; profileId=forged)"
+  ],
+  "failureBehaviour": "absent Auth credential returned mocked provider user instead of null",
+  "production": false
+}

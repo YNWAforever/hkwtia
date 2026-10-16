@@ -1,5 +1,6 @@
 "use client";
 
+import {Arrow} from "@/components/wt/arrow";
 import type {FundingLocale} from "@/config/funding-schemes";
 import type {FundingAnswers, FundingQuestionKey} from "@/lib/launchpad/funding";
 
@@ -11,6 +12,8 @@ type QuestionLabels = Readonly<{
 export type FundingWizardLabels = Readonly<{
   formLabel: string;
   instructions: string;
+  /** The empty option. The full instruction sentence was cut off inside a phone-width select. */
+  placeholder: string;
   submit: string;
   questions: Readonly<Record<FundingQuestionKey, QuestionLabels>>;
 }>;
@@ -26,18 +29,23 @@ export function FundingWizard({
 }>) {
   const action = locale === "zh-HK" ? "/zh/launchpad" : "/launchpad";
   const keys: readonly FundingQuestionKey[] = ["sector", "stage", "market", "employees", "revenue"];
-  return <form action={action} aria-label={labels.formLabel} className="glass-card space-y-6 p-6" method="get">
-    <p className="text-sm text-muted-foreground" role="status">{labels.instructions}</p>
-    <div className="grid gap-5 sm:grid-cols-2">
-      {keys.map((key) => <div key={key} className="space-y-2">
-        <label className="font-medium" htmlFor={`funding-${key}`}>{labels.questions[key].label}</label>
-        <select className="w-full rounded-md border bg-background px-3 py-2" defaultValue={answers?.[key] ?? ""} id={`funding-${key}`} name={key} required>
-          <option value="">{labels.instructions}</option>
+  // The site's filter-form grammar (.event-filter-panel / -grid / .directory-actions, as on
+  // /events): this was the one form still in generic Tailwind -- 16px blue labels, glass card,
+  // a square-cornered primary button.
+  return <form action={action} aria-label={labels.formLabel} className="event-filter-panel funding-form" method="get">
+    <p className="funding-form-note" role="status">{labels.instructions}</p>
+    <div className="event-filter-grid">
+      {keys.map((key) => <label htmlFor={`funding-${key}`} key={key}>
+        <span>{labels.questions[key].label}</span>
+        <select defaultValue={answers?.[key] ?? ""} id={`funding-${key}`} name={key} required>
+          <option value="">{labels.placeholder}</option>
           {Object.entries(labels.questions[key].options).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
-      </div>)}
+      </label>)}
     </div>
-    <button className="rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground" type="submit">{labels.submit}</button>
+    <div className="directory-actions">
+      <button className="button" type="submit">{labels.submit}</button>
+    </div>
   </form>;
 }
 
@@ -56,16 +64,22 @@ export function FundingResults({
   labels: FundingResultsLabels;
   results: ReadonlyArray<Readonly<{id: string; name: string; summary: string; sourceUrl: string; potentiallyEligible: boolean; disclaimer: string; asOf: string}>>;
 }>) {
-  return <section aria-labelledby="funding-results-heading" className="space-y-5">
-    <h3 className="font-serif text-2xl font-semibold" id="funding-results-heading">{labels.heading}</h3>
-    <div className="grid gap-4 lg:grid-cols-2">
-      {results.map((result) => <article className="rounded-lg border p-5" key={result.id}>
-        <p className="font-medium" role="status">{result.potentiallyEligible ? labels.eligible : labels.ineligible}</p>
-        <h4 className="mt-2 text-lg font-semibold">{result.name}</h4>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{result.summary}</p>
-        <p className="mt-4 text-sm text-muted-foreground">{labels.asOf} {result.asOf}</p>
-        <p className="mt-2 text-sm text-muted-foreground">{result.disclaimer}</p>
-        <a className="mt-4 inline-flex font-medium underline" href={result.sourceUrl} rel="noreferrer" target="_blank">{labels.source}</a>
+  // Every scheme carries the same verify-current-terms disclaimer, and printed in each card it
+  // read five times down the list. When they agree it is said once, under the heading.
+  const shared = results.length > 1 && results.every(({disclaimer}) => disclaimer === results[0]!.disclaimer)
+    ? results[0]!.disclaimer
+    : null;
+  return <section aria-labelledby="funding-results-heading" className="funding-results">
+    <h3 id="funding-results-heading">{labels.heading}</h3>
+    {shared ? <p className="funding-results-note">{shared}</p> : null}
+    <div className="funding-result-grid">
+      {results.map((result) => <article className="funding-result" key={result.id}>
+        <p className="status-label" role="status">{result.potentiallyEligible ? labels.eligible : labels.ineligible}</p>
+        <h4>{result.name}</h4>
+        <p>{result.summary}</p>
+        <p className="funding-result-meta">{labels.asOf} {result.asOf}</p>
+        {shared ? null : <p className="funding-result-meta">{result.disclaimer}</p>}
+        <a className="text-link" href={result.sourceUrl} rel="noreferrer" target="_blank">{labels.source} <Arrow /></a>
       </article>)}
     </div>
   </section>;

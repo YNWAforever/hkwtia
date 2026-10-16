@@ -1,5 +1,5 @@
 import {createElement} from "react";
-import {render, screen} from "@testing-library/react";
+import {render, screen, within} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 import {EventForm} from "@/components/admin/event-form";
@@ -7,6 +7,7 @@ import {eventFormInput} from "@/lib/admin/event-form-input";
 import {createEvent, updateEvent, type EventMutationDependencies} from "@/lib/db/repos/events";
 import {setMediaArchived, type MediaMutationDependencies} from "@/lib/db/repos/media";
 import type {Actor} from "@/lib/membership/lifecycle";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 
 const staff: Actor = {kind: "staff", userId: "auth-staff", profileId: "profile-staff"};
 const heroMediaId = "11111111-1111-4111-8111-111111111111";
@@ -20,7 +21,14 @@ const createInput = {
 };
 
 function storedEvent(overrides: Record<string, unknown> = {}) {
+  const legacy = {
+    memberOnly: false,
+    published: false,
+    createdAt: new Date("2029-01-01T00:00:00.000Z"),
+    ...overrides,
+  } as Parameters<typeof legacyDerivedEventColumns>[0];
   return {
+    ...legacyDerivedEventColumns(legacy),
     id: eventId,
     slug: "public-event",
     titleEn: "Public event",
@@ -44,14 +52,14 @@ describe("Event hero administration and media lifecycle", () => {
   it("offers only supplied active media IDs in the Event hero selector", () => {
     render(createElement(EventForm, {
       action: async () => ({}),
-      labels: {slug: "Slug", titleEn: "Title", titleZh: "Title", descriptionEn: "Description", descriptionZh: "Description", startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", memberOnly: "Members", published: "Published", heroMediaId: "Hero media", noHeroMedia: "No hero media", save: "Save", saving: "Saving"},
+      labels: {slug: "Slug", titleEn: "Title", titleZh: "Title", descriptionEn: "Description", descriptionZh: "Description", startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration", registrationModes: {rsvp: "RSVP", external: "External", ticketed: "Ticketed"}, format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Online URL", externalRegistrationUrl: "External URL", tags: "Tags", visibility: "Visibility", visibilities: {public: "Public", members_only: "Members only", invite_only: "Invite only"}, ticketPriceHkdCents: "Ticket price (HKD)", memberOnly: "Members", published: "Published", heroMediaId: "Hero media", mediaSearch: "Search registered media", mediaResult: "Matches", mediaSelected: "Selected image", noHeroMedia: "No hero media", save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Private draft preview", previewEnglish: "English", previewChinese: "Chinese"},
       mediaRows: [{id: heroMediaId, altEn: "Active image", altZh: "啟用圖片"}],
     }));
 
     const selector = screen.getByLabelText("Hero media");
     expect(selector).toHaveAttribute("name", "heroMediaId");
     expect(screen.getByRole("option", {name: "Active image / 啟用圖片"})).toHaveValue(heroMediaId);
-    expect(screen.getAllByRole("option").map((option) => option.getAttribute("value"))).toEqual(["", heroMediaId]);
+    expect(within(selector).getAllByRole("option").map((option) => option.getAttribute("value"))).toEqual(["", heroMediaId]);
   });
 
   it("normalizes an empty heroMediaId and rejects archived media inside the write transaction", async () => {
@@ -114,7 +122,7 @@ describe("Event hero administration and media lifecycle", () => {
       } as never),
     };
 
-    await expect(updateEvent(staff, eventId, {heroMediaId}, dependencies))
+    await expect(updateEvent(staff, eventId, {heroMediaId}, dependencies, new Date("2029-01-01T00:00:00.000Z")))
       .rejects.toMatchObject({issues: [expect.objectContaining({path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"})]});
     expect(updateEventRow).not.toHaveBeenCalled();
     expect(insertAudit).not.toHaveBeenCalled();
@@ -149,10 +157,12 @@ describe("Event hero administration and media lifecycle", () => {
         insertAudit: updateAudit,
       } as never),
     };
-    await expect(updateEvent(staff, eventId, {heroMediaId: null}, updateDependencies))
+    await expect(updateEvent(staff, eventId, {heroMediaId: null}, updateDependencies, new Date("2029-01-01T00:00:00.000Z")))
       .resolves.toMatchObject({heroMediaId: null});
     expect(lockActiveMedia).not.toHaveBeenCalled();
-    expect(updateEventRow).toHaveBeenCalledWith(eventId, {heroMediaId: null});
+    // D-12: a boolean-free admin update still writes both pairs, carried
+    // over from the locked row rather than reset.
+    expect(updateEventRow).toHaveBeenCalledWith(eventId, {heroMediaId: null, status: "draft", visibility: "public", published: false, memberOnly: false, publishedAt: null}, expect.any(Date));
     expect(updateAudit).toHaveBeenCalledOnce();
   });
 
@@ -165,6 +175,7 @@ describe("Event hero administration and media lifecycle", () => {
         lockMedia: vi.fn(async () => ({id: heroMediaId, url: "/api/media/11111111-1111-4111-8111-111111111111", archivedAt: null})),
         updateMedia: vi.fn(),
         countListingReferences: vi.fn(async () => 0),
+        countCompanyReferences: vi.fn(async () => 0),
         countPartnerReferences: vi.fn(async () => 0),
         setArchivedAt,
         insertAudit: vi.fn(),
@@ -187,6 +198,7 @@ describe("Event hero administration and media lifecycle", () => {
         lockMedia: vi.fn(async () => ({id: heroMediaId, url: "/api/media/11111111-1111-4111-8111-111111111111", archivedAt: null})),
         updateMedia: vi.fn(),
         countListingReferences: vi.fn(async () => 0),
+        countCompanyReferences: vi.fn(async () => 0),
         countPartnerReferences: vi.fn(async () => 0),
         countEventHeroReferences,
         setArchivedAt,

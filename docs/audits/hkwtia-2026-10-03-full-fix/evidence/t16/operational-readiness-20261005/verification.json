@@ -1,0 +1,58 @@
+{
+  "observedAt": "2026-10-05T04:01:34.9270231Z",
+  "sourceSha": "4da4bc590dc984768bd87b1f597dfde96c81593a",
+  "branch": "codex/operational-verification-20261005",
+  "fullFixComplete": false,
+  "workerFocusedPassed": 57,
+  "workerFocusedSkipped": 0,
+  "workerTypecheckExit": 0,
+  "workerNativeBundleDryRunExit": 0,
+  "cloudWorkerDeployed": false,
+  "cloudNativeWindowsVerified": 0,
+  "productionLedgerQueries": 0,
+  "productionMigrations": 0,
+  "providerCalls": 0,
+  "deploymentProtectionChanges": 0,
+  "authorizationForRemoteIntegration": "PENDING_USER_REPLY",
+  "authorizationForPaidSyntheticAi": "PENDING_USER_REPLY",
+  "controlledIdentityResources": "PENDING_USER_REPLY",
+  "originalUcUnchanged": true,
+  "commands": [
+    {
+      "command": "npm.cmd --prefix workers test",
+      "result": "57 PASS / 0 SKIP / 0 FAIL",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd --prefix workers run typecheck",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": "node workers/node_modules/wrangler/bin/wrangler.js deploy --dry-run --config .playwright/complete-20261005/worker.acceptance.toml --outdir .playwright/complete-20261005/worker-bundle",
+      "result": "BUNDLE_PASS_NOT_DEPLOYED",
+      "exitCode": 0
+    },
+    {
+      "command": "node --env-file=.env.local .playwright/complete-20261005-isolation.mjs",
+      "result": "READ_ONLY_ISOLATION_PROVEN_61_LEDGER_1_SENTINEL_ZERO_OUTSIDE_PROFILES_CONTACTS",
+      "exitCode": 0
+    },
+    {
+      "command": "node .playwright/complete-20261005-production-ledger.mjs",
+      "result": "BLOCKED_SPECIFIC_PRODUCTION_DATABASE_URL_REDACTED_DIAGNOSTIC_ONLY",
+      "exitCode": 0
+    },
+    {
+      "command": "node .playwright/complete-20261005-access.mjs",
+      "result": "EXTERNAL_CALLBACK_NOT_ACCESSIBLE_302_VERCEL_LOGIN_DIAGNOSTIC_ONLY",
+      "exitCode": 0
+    },
+    {
+      "command": "node .playwright/complete-20261005-worker-observe.mjs",
+      "result": "NO_VERIFIED_TWO_NATIVE_WINDOWS_DIAGNOSTIC_ONLY",
+      "exitCode": 0
+    }
+  ],
+  "traceabilityUnchangedVerification": "git diff --exit-code HEAD -- acceptance.csv tasks.csv status.csv source-map.json -> exit0"
+}

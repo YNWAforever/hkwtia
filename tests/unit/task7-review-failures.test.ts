@@ -1,5 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
+
 import {
   runCampaignBatch,
   type CampaignRecipientClaim,
@@ -56,6 +58,7 @@ function journeyContext(): JourneyRunnerContext {
     emailSuppressed: false,
     whatsappOptIn: false,
     whatsappNumber: null,
+    whatsappOptedOutAt: null,
     engagementScore: 50,
     email: "review-member@example.test",
     recipientName: "Review Member",
@@ -172,6 +175,11 @@ function failedJourneyHarness(
         throw new Error("unexpected WhatsApp send");
       }),
     },
+    // `as unknown as JourneyRunnerDependencies` below means the compiler will
+    // not ask for this, but the runner reads it: without it the WhatsApp leg
+    // throws on `undefined.has`. Every registered key keeps these cases on the
+    // behaviour they were written for, which is retry authorization, not approval.
+    approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
     emailFrom: "WTIA <members@example.test>",
   } as unknown as JourneyRunnerDependencies;
   return {
@@ -319,13 +327,13 @@ describe("Task 7 review: provider-failure crash recovery", () => {
     expect(test.createOnce).not.toHaveBeenCalled();
   });
 
-  it("replays a retryable journey failure at second-attempt 25 minute backoff without provider I/O", async () => {
+  it("replays a definite 429 journey failure at second-attempt 25 minute backoff without provider I/O", async () => {
     const claim = journeyClaim({
       attemptCount: 2,
       claimedAt: later,
       claimSource: "stale",
     });
-    const test = failedJourneyHarness(claim, "retryable_server");
+    const test = failedJourneyHarness(claim, "retryable_rate_limit");
 
     const summary = await runJourneyBatch(test.dependencies, {now: later, limit: 1});
 
@@ -337,7 +345,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       claim.id,
       later,
       new Date(later.getTime() + 25 * 60_000),
-      "retryable_server",
+      "retryable_rate_limit",
     );
   });
 
@@ -391,6 +399,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       }),
       emailTransport: {send: vi.fn()},
       whatsappTransport: {sendTemplateMessage: vi.fn()},
+      approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
       emailFrom: "WTIA <members@example.test>",
     } as unknown as JourneyRunnerDependencies;
 
@@ -410,7 +419,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
     expect(terminalTasks.size).toBe(1);
   });
 
-  it("replays retryable campaign failure with 25 minute backoff and no second provider call", async () => {
+  it("replays definite 429 campaign failure with 25 minute backoff and no second provider call", async () => {
     const claim = campaignClaim({
       attemptCount: 2,
       claimedAt: later,
@@ -423,7 +432,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
         status: "failed" as const,
         idempotencyKey: `campaign:${claim.campaignId}:${claim.id}:email`,
         providerId: null,
-        errorCode: "retryable_server" as const,
+        errorCode: "retryable_rate_limit" as const,
         attemptCount: 1,
       },
       disposition: "existing" as const,
@@ -438,7 +447,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       claim.id,
       later,
       new Date(later.getTime() + 25 * 60_000),
-      "retryable_server",
+      "retryable_rate_limit",
     );
   });
 });

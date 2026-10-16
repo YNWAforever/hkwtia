@@ -1,0 +1,365 @@
+{
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "branch": "codex/bilingual-admin-content-20261003",
+  "productionChanged": false,
+  "transmissionAuthorized": "existing user approval for isolated Vercel Preview credentials",
+  "variables": [
+    {
+      "name": "DATABASE_URL",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "NEON_PROJECT_ID",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "NEON_AUTH_BASE_URL",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "NEON_AUTH_COOKIE_SECRET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "RATE_LIMIT_KEY_SECRET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "STRIPE_WEBHOOK_SECRET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "STRIPE_STARTUP_PRICE_ID",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "STRIPE_CORPORATE_PRICE_ID",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "R2_ACCOUNT_ID",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "R2_ACCESS_KEY_ID",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "R2_SECRET_ACCESS_KEY",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "R2_BUCKET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "R2_JURISDICTION",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "APP_URL",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_RETENTION_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_BOARD_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_CONTENT_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_CONTENT_PROVIDER_APPROVED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_RETENTION_CONCURRENCY",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_SUPPORT_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_SUPPORT_PROVIDER_APPROVED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "INBOX_DRAFT_PROTECTION_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "INBOX_DRAFT_RETENTION_SECONDS",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "INBOX_DRAFT_ENCRYPTION_SECRET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_AI_APPLICATION_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AI_KNOWLEDGE_MANAGEMENT_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "EMAIL_DELIVERY_MODE",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "RUN_LIVE_WOZTELL",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AGENTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AI_BUDGET_RUN_MICROUSD",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AI_BUDGET_DAY_MICROUSD",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AI_BUDGET_MONTH_MICROUSD",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AUTH_GOOGLE_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AUDIT_ISOLATED_ACCEPTANCE",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "AUDIT_BATCH_WORKER_PAUSED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "ADMIN_BATCH_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBER_IMPORT_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBER_EXPORT_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "EVENT_ATTENDEE_EXPORT_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBERSHIP_GRANTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBERSHIP_GRANT_BATCH_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBERSHIP_COMPANY_GRANTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBER_COMMUNICATION_BATCH_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "TICKET_RESEND_BATCH_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "PAYMENT_RECONCILIATION_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "CMS_SERVER_DRAFTS_ENABLED",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "CONCIERGE_COOKIE_SECRET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    },
+    {
+      "name": "CRON_SECRET",
+      "environment": "preview",
+      "gitBranch": "codex/bilingual-admin-content-20261003",
+      "exitCode": 0,
+      "valueLogged": false
+    }
+  ]
+}

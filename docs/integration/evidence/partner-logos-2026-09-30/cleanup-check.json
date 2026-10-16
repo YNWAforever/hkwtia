@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-09-30T16:25:11.059Z",
+  "mode": "cleanup-check",
+  "passed": true,
+  "transactionRolledBack": true,
+  "fixtureRetained": true,
+  "objectsDeleted": 0,
+  "beforeCounts": {
+    "profiles": 100,
+    "partners": 79,
+    "media": 79,
+    "audits": 359
+  },
+  "afterDeleteCounts": {
+    "profiles": 99,
+    "partners": 0,
+    "media": 0,
+    "audits": 120
+  },
+  "restoredCounts": {
+    "profiles": 100,
+    "partners": 79,
+    "media": 79,
+    "audits": 359
+  },
+  "residue": {
+    "profiles": 0,
+    "partners": 0,
+    "media": 0,
+    "audits": 0,
+    "sentinels": 0
+  },
+  "productionChanged": false
+}

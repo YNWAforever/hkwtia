@@ -1,0 +1,51 @@
+{
+  "sourceSha": "7c4adaafdf984a7259cb30a1d07cc1f588ad2846",
+  "origin": "https://hkwtia-application-triage-20261003.vercel.app",
+  "observedAt": "2026-10-03T22:46:13.324Z",
+  "checks": [
+    {
+      "locale": "zh-HK",
+      "case": "completed attempt/pending membership",
+      "nextAction": "support_reconciliation",
+      "statusUnchanged": true,
+      "additionalCheckoutRequests": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "pending review",
+      "nextAction": "review_ready",
+      "approvalsCreated": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "edit and reject",
+      "version": 3,
+      "sendRequests": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "facts changed",
+      "state": "stale",
+      "approved": false
+    },
+    {
+      "locale": "zh-HK",
+      "case": "approved note adoption",
+      "caseAudits": 1,
+      "applicationState": "draft",
+      "unsavedOverwriteBlocked": true,
+      "noExternalEffects": true
+    },
+    {
+      "case": "member denied",
+      "privilegedWorkspaceVisible": false
+    }
+  ],
+  "actualNeonPasswordAuth": true,
+  "realModelProvider": "not used",
+  "realProviderRequests": 0,
+  "messagesMembershipBillingBudgetDelta": 0,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "production": false
+}

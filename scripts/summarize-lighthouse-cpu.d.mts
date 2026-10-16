@@ -1,0 +1,1 @@
+export function summarizeLighthouseTrace(trace: unknown): {sampledProfiles: number; sampleCount: number; clockAdjustedSamples: number; cpuSelf: {functionName: string; path: string | null; sourceKind: string; line: number | null; column: number | null; selfMs: number}[]; longTasks: {name: string; durationMs: number; path: string | null}[]};

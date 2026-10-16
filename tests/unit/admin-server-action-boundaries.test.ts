@@ -11,6 +11,24 @@ describe("admin mutation Server Action boundaries", () => {
     ["news", "lib/admin/news-actions.ts"],
     ["page copy", "lib/admin/page-copy-actions.ts"],
     ["media", "lib/admin/media-actions.ts"],
+    // C-2. This list is hand-maintained, so omitting a module does not fail CI —
+    // it just leaves it uncovered. The inbox is the one action module that sends
+    // messages to members, so it is the last one that should be missing here.
+    ["inbox", "lib/admin/inbox-actions.ts"],
+    // C-7. The registry decides which template may reach a member's phone at
+    // all, so it is the second-last module that should be missing from a list
+    // whose omissions fail nothing.
+    ["whatsapp template", "lib/admin/template-registry-actions.ts"],
+    // C-4. The pipeline writes a person's stage and owner and audits both, and
+    // it is the one action module here that also redirects — so a denial that
+    // fell through to the redirect instead of notFound() would disclose the
+    // surface it is meant to hide.
+    ["contact", "lib/admin/contact-actions.ts"],
+    // C-5. This module decides whether a marketing blast goes out and is the
+    // only one that both redirects and writes a campaign, so a denial that
+    // fell through to the redirect instead of notFound() would disclose the
+    // surface it is meant to hide.
+    ["campaign review", "lib/admin/campaign-review-actions.ts"],
   ])("maps authorization denial to notFound in the top-level %s action module", (_name, path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
     expect(source.trimStart()).toMatch(/^"use server";/);

@@ -37,3 +37,59 @@ export const M4_AI_JOB_KINDS = [
 ] as const;
 
 export type M4AiJobKind = typeof M4_AI_JOB_KINDS[number];
+
+/**
+ * Phase C2 (C-5, D-10). A group of its own, and deliberately NOT a member of
+ * `M3_AUTOMATION_JOB_KINDS` (S-11).
+ *
+ * That constant is interpolated into `jobs_automation_recent_idx`'s partial
+ * predicate and pinned by `tests/unit/automation-admin-indexes.test.ts`, so
+ * adding a member emits an unintended DROP INDEX / CREATE INDEX in the next
+ * generated migration and reddens two contract tests for a reason that has
+ * nothing to do with the send queue.
+ */
+export const PHASE_C_JOB_KIND = {
+  WHATSAPP_SEND_QUEUE: "whatsapp-send-queue",
+} as const;
+
+export const PHASE_C_JOB_KINDS = [
+  PHASE_C_JOB_KIND.WHATSAPP_SEND_QUEUE,
+] as const;
+
+export type PhaseCJobKind = typeof PHASE_C_JOB_KINDS[number];
+
+/**
+ * A group of its own, for the reason PHASE_C_JOB_KIND records: a member added to
+ * `M3_AUTOMATION_JOB_KINDS` is interpolated into `jobs_automation_recent_idx`'s
+ * partial predicate, so the next generated migration emits an unintended DROP
+ * INDEX / CREATE INDEX and two contract tests go red for a reason unrelated to
+ * this job.
+ */
+export const PHASE_D_JOB_KIND = {
+  EVENT_CANCELLATION_REFUNDS: "event-cancellation-refunds",
+  EVENT_NOTIFICATIONS: "event-notifications",
+  SHOWCASE_LEAD_EMAILS: "showcase-lead-emails",
+  TICKET_EMAILS: "ticket-emails",
+} as const;
+
+export const PHASE_D_JOB_KINDS = [
+  PHASE_D_JOB_KIND.EVENT_CANCELLATION_REFUNDS,
+  PHASE_D_JOB_KIND.EVENT_NOTIFICATIONS,
+  PHASE_D_JOB_KIND.SHOWCASE_LEAD_EMAILS,
+  PHASE_D_JOB_KIND.TICKET_EMAILS,
+] as const;
+
+export type PhaseDJobKind = typeof PHASE_D_JOB_KINDS[number];
+
+/** Phase E. Separate from the M3 partial-index list, for the reason PHASE_D_JOB_KIND records. */
+export const LEAD_JOB_KIND = {REMINDERS: "lead-reminders"} as const;
+
+/** Kept out of the M3 partial-index kind list. */
+export const ADMIN_BATCH_JOB_KIND = {ADMIN_BATCHES: "admin-batches"} as const;
+
+/** Separate from the M3 partial-index list. */
+export const MEMBERSHIP_GRANT_JOB_KIND = {EXPIRY: "membership-grant-expiry"} as const;
+
+
+/** Separate from the M3 partial-index list; T17's bounded TTL cleanup. */
+export const RATE_LIMIT_JOB_KIND = {CLEANUP: "rate-limit-cleanup"} as const;

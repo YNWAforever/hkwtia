@@ -1,0 +1,51 @@
+(node:24716) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24716) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+
+> hkwtia-platform@0.0.0 test:lighthouse
+> lhci autorun --config=.playwright/full-fix-t15-lighthouse-config.json
+
+✅  .lighthouseci/ directory writable
+✅  Configuration file found
+✅  Chrome installation found
+⚠️   GitHub token not set
+Healthcheck passed!
+
+Running Lighthouse 1 time(s) on http://localhost:3450/
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/membership
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/events
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/programmes
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/partners
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/zh
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/zh/membership
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/zh/events
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/zh/programmes
+Run #1...done.
+Running Lighthouse 1 time(s) on http://localhost:3450/zh/partners
+Run #1...done.
+Done running Lighthouse!
+
+Checking assertions against 10 URL(s), 10 total run(s)
+
+All results processed!
+
+Dumping 10 reports to disk at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\.playwright\full-fix-t15-lighthouse...
+Done writing reports to disk.
+
+Done running autorun.
+{"sourceSha":"145443b69df74ad2f70af172c310d10e05803220","buildId":"5gfh3thCdYeh6P09ogzeq","buildSourceSha":"145443b69df74ad2f70af172c310d10e05803220","observedAt":"2026-10-04T20:00:33.373Z","nativeExit":0,"ledger":61,"dbSourcePositivelyProven":true,"googleVerified":false,"magicLinkVerified":false,"realProviderSends":0,"realDeliveryReceipt":false,"production":false}

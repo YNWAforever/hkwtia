@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-09-30T15:09:38.098Z",
+  "codeSource": "d9b75111",
+  "databaseProject": "solitary-wave-52860119",
+  "databaseBranch": "br-lingering-unit-azxl75s5",
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "sourceVerified": 79,
+  "initial": {
+    "created": 79,
+    "skippedExisting": 0,
+    "skippedError": 0
+  },
+  "repeated": {
+    "created": 0,
+    "skippedExisting": 79,
+    "skippedError": 0
+  },
+  "uploads": 79,
+  "readVerified": 79,
+  "categories": {
+    "supporting": 58,
+    "regional": 15,
+    "media": 6
+  },
+  "unpublishedAndUnconfirmed": 79,
+  "createdAudits": 79,
+  "actor": "synthetic stored staff",
+  "publication": "existing repository methods on isolated branch",
+  "productionChanged": false,
+  "refusedBeforeConfirm": true,
+  "publicEn": 79,
+  "publicZh": 79,
+  "publicationAudits": [
+    {
+      "action": "partner.created",
+      "count": 79
+    },
+    {
+      "action": "partner.published",
+      "count": 79
+    },
+    {
+      "action": "partner.updated",
+      "count": 79
+    }
+  ],
+  "relationshipDatesUnchanged": true
+}

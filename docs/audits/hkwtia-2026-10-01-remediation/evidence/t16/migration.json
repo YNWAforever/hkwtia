@@ -1,0 +1,20 @@
+{
+  "environment": "confirmed isolated Neon; sentinel verified",
+  "migration": "0055_ticket_refund_pending",
+  "sqlSha256": "9fa64b175bf9e3a3f287bb1e2989b7e1defcc3e7d6d1ea013efbb931e5f09738",
+  "ledgerBefore": 54,
+  "ledgerAfter": 55,
+  "statuses": [
+    "pending",
+    "paid",
+    "expired",
+    "failed",
+    "refunded",
+    "refund_failed",
+    "refund_pending"
+  ],
+  "membershipFingerprintUnchanged": true,
+  "orderFingerprintUnchanged": true,
+  "production": false,
+  "command": "node --env-file=.env.local --import tsx .playwright/migrate-ticket-pending.mts (guard then actual scripts/db-migrate.ts)"
+}

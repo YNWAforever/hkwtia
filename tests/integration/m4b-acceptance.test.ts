@@ -202,11 +202,11 @@ describe("M4B deterministic service acceptance", () => {
     }>();
     const model = vi.fn(async (input) => {
       const output = {
-      executiveSummary: "Deterministic M4B acceptance month.",
-      highlights: ["Three qualifying retention profiles."],
-      risks: ["Approval review remains required."],
+      en: {executiveSummary: "Review the reporting window.",
+      highlights: ["{{facts.atRiskCount}}"] ,
+      risks: ["Human review remains required."],
       recommendedActions: ["Review the staff-only queues."],
-      };
+      },zhHK:{executiveSummary:"請檢視報告期間。",highlights:["{{facts.atRiskCount}}"],risks:["請由職員審閱。"],recommendedActions:["請檢視來源紀錄。"]}};
       await input.commit?.(output);
       return output;
     });

@@ -1,13 +1,14 @@
 import "server-only";
+import {cache} from "react";
 
 import {forbidden, requireMember, type Actor} from "@/lib/membership/lifecycle";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {type Company, type Membership, type Profile} from "@/lib/db/server-schema";
-import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {requestMemberships} from "@/lib/portal/request-context";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import type {AppLocale} from "@/i18n/routing";
-import {localizedPath} from "@/lib/urls";
+import {choosePrimaryMembership} from "@/lib/portal/membership-selection";
+import {PortalAccessDenied} from "@/lib/portal/access-state";
 
 export const portalMembershipStatuses = [
   "pending_payment",
@@ -32,6 +33,17 @@ export type DashboardCompany = Pick<
   | "sizeBand"
   | "description"
   | "directoryVisible"
+  // Programme B-7: the public member page's own copy, so `/portal/company` can
+  // render the profile form's defaults from the dashboard it already loads
+  // rather than making a second company read.
+  | "slug"
+  | "tags"
+  | "taglineEn"
+  | "taglineZhHk"
+  | "descriptionZhHk"
+  | "logoMediaId"
+  | "publicProfileStatus"
+  | "profileRejectionReason"
 > & {role: PortalCompanyRole | null; canManage: boolean};
 
 export type DashboardViewModel = Readonly<{
@@ -44,9 +56,13 @@ export type DashboardViewModel = Readonly<{
     | "locale"
     | "onboardingState"
     | "directoryVisible"
+    | "whatsappNumber"
+    | "whatsappOptIn"
   >;
   memberships: readonly DashboardMembership[];
   companies: readonly DashboardCompany[];
+  primaryMembershipId: DashboardMembership["id"];
+  primaryMembership: DashboardMembership;
   primaryStatus: PortalMembershipStatus;
   onboarding: Readonly<{
     completedSteps: number;
@@ -58,9 +74,11 @@ export type DashboardViewModel = Readonly<{
   privateDataAvailable: true;
 }>;
 
-type PortalProfile = Pick<Profile, "id" | "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible">;
+type PortalProfile = Pick<Profile, "id" | "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible" | "whatsappNumber" | "whatsappOptIn">;
 export type PortalMembershipRecord = Pick<Membership, "id" | "ownerUserId" | "companyId" | "planCode" | "status" | "seatLimit"> & Partial<Pick<Membership, "applicationId" | "cancelAtPeriodEnd" | "billingPeriodStart" | "billingPeriodEnd">>;
-type PortalCompanyRecord = Pick<Company, "id" | "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "directoryVisible">>;
+// Everything past the three required keys stays optional: the reader is a
+// repository that returns whole rows, and the test fakes build the minimum.
+type PortalCompanyRecord = Pick<Company, "id" | "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "directoryVisible" | "slug" | "tags" | "taglineEn" | "taglineZhHk" | "descriptionZhHk" | "logoMediaId" | "publicProfileStatus" | "profileRejectionReason">>;
 type ProfileReader = {getById: (actor: Actor, userId: string) => Promise<PortalProfile | null>};
 type MembershipReader = {list: (actor: Actor) => Promise<PortalMembershipRecord[]>};
 type CompanyReader = {getById: (actor: Actor, companyId: string) => Promise<PortalCompanyRecord | null>};
@@ -74,7 +92,7 @@ export type PortalQueryDependencies = Readonly<{
 
 export const defaultPortalQueryDependencies: PortalQueryDependencies = {
   profiles: profilesRepository,
-  memberships: membershipsRepository,
+  memberships: {list: requestMemberships},
   companies: companiesRepository,
   getCompanyRole: portalContentRepository.getCompanyRole,
 };
@@ -87,32 +105,8 @@ export function isPortalMembershipStatus(status: Membership["status"]): status i
   return (portalMembershipStatuses as readonly string[]).includes(status);
 }
 
-function primaryMembership(memberships: readonly DashboardMembership[]): DashboardMembership {
-  const rank: Record<DashboardMembership["status"], number> = {
-    active: 5,
-    past_due: 4,
-    cancel_at_period_end: 3,
-    pending_review: 2,
-    pending_payment: 1,
-  };
-  return [...memberships].sort((a, b) => rank[b.status] - rank[a.status])[0];
-}
-
-/** Build the only safe continuation accepted by the member sign-in flow. */
-export function buildPortalSignInPath(locale: AppLocale, continuation = "/portal"): string {
-  if (!continuation.startsWith("/") || continuation.startsWith("//") || continuation.includes("\\") || continuation.includes("\r") || continuation.includes("\n")) {
-    throw new Error("INVALID_CONTINUATION");
-  }
-  const parsed = new URL(continuation, "http://portal.local");
-  if (parsed.origin !== "http://portal.local" || parsed.pathname !== continuation || parsed.search || parsed.hash) {
-    throw new Error("INVALID_CONTINUATION");
-  }
-  const query = new URLSearchParams({next: continuation});
-  return `${localizedPath(locale, "/join")}?${query.toString()}`;
-}
-
 /** Read the member dashboard only after an actor and a recoverable membership are verified. */
-export async function getDashboard(
+async function readDashboard(
   actor: Actor,
   inputDependencies?: Partial<PortalQueryDependencies>,
 ): Promise<DashboardViewModel> {
@@ -124,7 +118,8 @@ export async function getDashboard(
   const memberships = (await deps.memberships.list(actor))
     .filter((membership): membership is PortalMembershipRecord & {status: PortalMembershipStatus} => isPortalMembershipStatus(membership.status))
     .map((membership) => ({...membership, applicationId: membership.applicationId ?? null, cancelAtPeriodEnd: membership.cancelAtPeriodEnd ?? false, billingPeriodStart: membership.billingPeriodStart ?? null, billingPeriodEnd: membership.billingPeriodEnd ?? null} satisfies DashboardMembership));
-  if (memberships.length === 0) throw new Error("MEMBERSHIP_INACTIVE");
+  const primaryMembership = choosePrimaryMembership(memberships);
+  if (!primaryMembership) throw new PortalAccessDenied({status: "inactive"});
 
   const profile = await deps.profiles.getById(actor, actor.profileId);
   if (!profile) throw new Error("PROFILE_NOT_FOUND");
@@ -143,6 +138,16 @@ export async function getDashboard(
       sizeBand: company.sizeBand ?? null,
       description: company.description ?? null,
       directoryVisible: company.directoryVisible ?? false,
+      slug: company.slug ?? null,
+      tags: company.tags ?? [],
+      taglineEn: company.taglineEn ?? null,
+      taglineZhHk: company.taglineZhHk ?? null,
+      descriptionZhHk: company.descriptionZhHk ?? null,
+      logoMediaId: company.logoMediaId ?? null,
+      // A row that predates 0028 (or a fake that omits the column) is not
+      // published; defaulting the other way would put unreviewed copy on /members.
+      publicProfileStatus: company.publicProfileStatus ?? "hidden",
+      profileRejectionReason: company.profileRejectionReason ?? null,
       role,
       canManage: role === "owner" || role === "admin",
     } satisfies DashboardCompany;
@@ -161,10 +166,14 @@ export async function getDashboard(
       locale: profile.locale,
       onboardingState: profile.onboardingState,
       directoryVisible: profile.directoryVisible,
+      whatsappNumber: profile.whatsappNumber,
+      whatsappOptIn: profile.whatsappOptIn,
     },
     memberships,
     companies,
-    primaryStatus: primaryMembership(memberships).status,
+    primaryMembershipId: primaryMembership.id,
+    primaryMembership,
+    primaryStatus: primaryMembership.status,
     onboarding: {
       completedSteps: Number(profileComplete) + Number(companyComplete),
       totalSteps: 2,
@@ -174,6 +183,12 @@ export async function getDashboard(
     },
     privateDataAvailable: true,
   };
+}
+
+const requestDashboard = cache((actor: Actor) => readDashboard(actor));
+
+export async function getDashboard(actor: Actor, inputDependencies?: Partial<PortalQueryDependencies>): Promise<DashboardViewModel> {
+  return inputDependencies ? readDashboard(actor, inputDependencies) : requestDashboard(actor);
 }
 
 export function requirePortalMember(actor: Actor): asserts actor is Extract<Actor, {kind: "member"}> {

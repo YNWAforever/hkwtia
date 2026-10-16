@@ -1,0 +1,99 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-ai-grader.test.ts (13 tests | 5 failed) 62ms
+   ✓ administrative AI deterministic hard gates > rejects wrong amount even when the judge approves 28ms
+   ✓ administrative AI deterministic hard gates > rejects authority claimed in the final body 2ms
+   ✓ administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value 1ms
+   ✓ administrative AI deterministic hard gates > rejects invalid first JSON without repairing it 0ms
+   ✓ administrative AI deterministic hard gates > rejects expired policy even when its values match 1ms
+   ✓ administrative AI deterministic hard gates > rejects a draft missing human review 1ms
+   ✓ administrative AI deterministic hard gates > accepts current server-labelled facts in a review-only draft 1ms
+   × administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks 6ms
+     → expected 0 to be greater than or equal to 60
+   × administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results 5ms
+     → expected 'COMPLETE' to be 'BLOCKED' // Object.is equality
+   × administrative AI runner evidence and admission > never reports an offline grader score as model acceptance 3ms
+     → expected true to be false // Object.is equality
+   × administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs 3ms
+     → expected [] to have a length of 3 but got +0
+   × administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution 7ms
+     → promise resolved "{ results: [], …(5) }" instead of rejecting
+   ✓ administrative AI runner evidence and admission > accepts equivalent claims independent of JSON property order 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks
+AssertionError: expected 0 to be greater than or equal to 60
+ ❯ tests/unit/admin-ai-grader.test.ts:27:145
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results
+AssertionError: expected 'COMPLETE' to be 'BLOCKED' // Object.is equality
+
+Expected: "BLOCKED"
+Received: "COMPLETE"
+
+ ❯ tests/unit/admin-ai-grader.test.ts:28:207
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > never reports an offline grader score as model acceptance
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:29:268
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs
+AssertionError: expected [] to have a length of 3 but got +0
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ tests/unit/admin-ai-grader.test.ts:30:194
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution
+AssertionError: promise resolved "{ results: [], …(5) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "blockers": [],
++   "mode": "offline",
++   "results": [],
++   "sourceSha": "0000000000000000000000000000000000000000",
++   "startedAt": "2026-10-04T13:14:03.685Z",
++   "status": "COMPLETE",
+  }
+
+ ❯ tests/unit/admin-ai-grader.test.ts:31:208
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 8 passed (13)
+   Start at  21:14:00
+   Duration  2.37s (transform 167ms, setup 168ms, collect 1.85s, tests 62ms, environment 0ms, prepare 97ms)
+

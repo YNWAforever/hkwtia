@@ -1,0 +1,226 @@
+{
+  "observedAt": "2026-10-04T03:37:50.821Z",
+  "sourceSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+  "buildId": "1cWtPIkj3-Lm6cOXMOJ6P",
+  "automaticRemoteWebhook": false,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "relay": "Actual Stripe CLI signed events held in an owned loopback relay, then forwarded/replayed",
+  "partialRefund": "NOT_APPLICABLE: existing refundOrder and Stripe adapter support full refunds only",
+  "emailDelivery": "actual outbox/job with synthetic test sink, not external recipient delivery",
+  "scope": "confirmed isolated Neon/Auth; synthetic data; Stripe TEST; email test sink",
+  "production": false,
+  "run": "1d7fda18-e23e-46c4-a7df-62f9ebe22b86",
+  "steps": [
+    {
+      "case": "cancel return resumes original actual hosted session; provider expiry",
+      "checkoutReference": "45c07302136c65df",
+      "orders": 1
+    },
+    {
+      "case": "provider-confirmed expiry clears only the authorized recovery cookie on another event",
+      "sameBrowser": true,
+      "actualProviderRead": true
+    },
+    {
+      "case": "decline and provider expiry",
+      "checkoutReference": "381ebbbdf3c10a58",
+      "result": "decline leaves pending/unpaid; actual signed expiry releases order"
+    },
+    {
+      "case": "paid seat actual private ticket page",
+      "http": 200,
+      "hasQr": true,
+      "tokenLogged": false,
+      "screenshot": false
+    },
+    {
+      "case": "paid with interrupted return, delayed signed event and replay",
+      "checkoutReference": "ef78201f9780368b",
+      "paymentReference": "086c9ec561575a10",
+      "orderReference": "09e1f94f2f4a46d4",
+      "result": "provider paid while app pending; signed event -> paid; replay one audit/one seat"
+    },
+    {
+      "case": "successful full refund invalidates signed ticket",
+      "http": 404,
+      "tokenLogged": false
+    },
+    {
+      "case": "authorized staff refund and signed provider callback replay",
+      "refundReference": "2411d2889e10f97c",
+      "result": "provider succeeded1000HKD cents, app refunded, one refund audit; translated order reference and status"
+    },
+    {
+      "case": "async-refund-success",
+      "refundReference": "7ad69522ea93c337",
+      "providerInitial": "pending",
+      "providerFinal": "succeeded",
+      "appInitial": "paid",
+      "appFinal": "refunded",
+      "refundCount": 1,
+      "finalAuditCount": 1,
+      "actualSignedCallback": true,
+      "replayed": true,
+      "notification": "durable outbox; delivery verified separately"
+    },
+    {
+      "case": "async-refund-failure",
+      "refundReference": "31a4127adeb528d8",
+      "providerInitial": "succeeded",
+      "providerFinal": "failed",
+      "appInitial": "refunded",
+      "appFinal": "refund_failed",
+      "refundCount": 1,
+      "finalAuditCount": 1,
+      "actualSignedCallback": true,
+      "replayed": true,
+      "notification": "durable outbox; delivery verified separately"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventReference": "ab602979767a14d6",
+      "type": "checkout.session.expired",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "fa234af6f89697d7",
+      "type": "checkout.session.expired",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "77b9358a18d44e5e",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "77b9358a18d44e5e",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "45d3b207d74e3fe1",
+      "type": "refund.created",
+      "http": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "eventReference": "e365996849982bac",
+      "type": "refund.updated",
+      "http": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "eventReference": "c62dd60c0237d73b",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "e0f29343b5d2e314",
+      "type": "refund.updated",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "e0f29343b5d2e314",
+      "type": "refund.updated",
+      "http": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "eventReference": "2d5a0a32689f45e4",
+      "type": "checkout.session.completed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "8cd955488ec97125",
+      "type": "refund.failed",
+      "http": 200,
+      "outcome": "processed"
+    },
+    {
+      "eventReference": "8cd955488ec97125",
+      "type": "refund.failed",
+      "http": 200,
+      "outcome": "duplicate"
+    }
+  ],
+  "runtimeDiagnostics": [],
+  "isolatedDbPositivelyProven": true,
+  "nativeEventWorkspaceExit": 0,
+  "paidNotices": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    }
+  ],
+  "paidNoticesReadback": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "error_code": null,
+      "attempt_count": 1,
+      "test_sink": true
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "error_code": null,
+      "attempt_count": 1,
+      "test_sink": true
+    }
+  ],
+  "refundNotice": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    },
+    {
+      "kind": "refund",
+      "status": "sent",
+      "error_code": null,
+      "test_sink": true
+    }
+  ],
+  "outbox": [
+    {
+      "kind": "confirmation",
+      "status": "sent",
+      "n": 1
+    },
+    {
+      "kind": "pass",
+      "status": "sent",
+      "n": 1
+    },
+    {
+      "kind": "refund",
+      "status": "sent",
+      "n": 1
+    }
+  ],
+  "completed": true
+}

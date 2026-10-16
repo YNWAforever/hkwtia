@@ -1,19 +1,57 @@
 import {describe, expect, it, vi} from "vitest";
 
-import type {Event} from "@/lib/db/server-schema";
-import {getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import type {Event, PublicProfileStatus} from "@/lib/db/server-schema";
+import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listPublicEventSlugs, listFeaturedPublicEvents, localizeEvent, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import {parseEventFilters} from "@/lib/events/filters";
 import type {Actor} from "@/lib/membership/lifecycle";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 
 const anonymous: Actor = {kind: "anonymous", userId: null};
 const member: Actor = {kind: "member", userId: "auth-member", profileId: "profile-member"};
 const asOf = new Date("2030-01-01T10:00:00.000Z");
 
 function event(slug: string, overrides: Partial<Event> = {}): Event {
-  return {id: `${slug}-id`, slug, titleEn: `${slug} title`, titleZh: null, descriptionEn: `${slug} description`, descriptionZh: null, startsAt: new Date("2030-01-01T09:00:00.000Z"), endsAt: new Date("2030-01-01T12:00:00.000Z"), venue: "WTIA", capacity: null, memberOnly: false, published: true, heroMediaId: null, createdAt: new Date("2026-07-20T00:00:00.000Z"), updatedAt: new Date("2026-07-20T00:00:00.000Z"), ...overrides};
+  const row = {id: `${slug}-id`, slug, titleEn: `${slug} title`, titleZh: null, descriptionEn: `${slug} description`, descriptionZh: null, startsAt: new Date("2030-01-01T09:00:00.000Z"), endsAt: new Date("2030-01-01T12:00:00.000Z"), venue: "WTIA", capacity: null, memberOnly: false, published: true, heroMediaId: null, createdAt: new Date("2026-07-20T00:00:00.000Z"), updatedAt: new Date("2026-07-20T00:00:00.000Z"), ...overrides};
+  return {...legacyDerivedEventColumns(row), ...row};
+}
+
+/**
+ * The three `companies` columns the public projection's LEFT JOIN hands back
+ * (B-6, D-11). `slug` is the stored column — every company has one after the
+ * 0029 backfill, published or not — and `publicProfileStatus` is what decides
+ * whether it may also become a /members link.
+ */
+function organiser(name: string, slug: string | null, publicProfileStatus: PublicProfileStatus = "published") {
+  return {name, slug, publicProfileStatus};
 }
 
 describe("repository-backed Event visibility", () => {
+  it("preserves registration mode and destination in the member portal event projection", () => {
+    const projected = localizeEvent(event("offsite", {
+      registrationMode: "external",
+      visibility: "members_only",
+      externalRegistrationUrl: "https://tickets.example.hk/offsite",
+    }), "en");
+    expect(projected).toMatchObject({
+      registrationMode: "external",
+      visibility: "members_only",
+      externalRegistrationUrl: "https://tickets.example.hk/offsite",
+    });
+  });
+
+
   const rows = [event("draft-public", {published: false}), event("published-member", {memberOnly: true}), event("published-public")];
+
+  it("keeps the exact audited demonstration event out of every public reader", async () => {
+    const demo = event("wtia-global-growth-demo-briefing-2026");
+    const real = event("real-event");
+    const source = [demo, real];
+    expect((await listPublicEvents(anonymous, {status: "open", asOf, source})).map((row) => row.slug)).toEqual(["real-event"]);
+    expect((await listFeaturedPublicEvents(anonymous, {asOf, limit: 2}, source)).map((row) => row.slug)).toEqual(["real-event"]);
+    expect(await listPublicEventSlugs(source)).toEqual(["real-event"]);
+    expect(await countPublicEvents(anonymous, {status: "open", asOf, source})).toBe(1);
+    expect(await getPublicEventBySlug(demo.slug, "en", {asOf, source})).toBeNull();
+  });
 
   it("returns only published public Events to anonymous readers", async () => {
     expect((await listPublicEvents(anonymous, {status: "open", asOf, source: rows})).map((item) => item.slug)).toEqual(["published-public"]);
@@ -62,5 +100,187 @@ describe("repository-backed Event visibility", () => {
 
   it("maps malformed public slugs to a safe not-found result", async () => {
     await expect(getEventBySlug(anonymous, "../private", rows)).resolves.toBeNull();
+  });
+
+  it("pages the same filtered, published order without repeating the first 12 rows", async () => {
+    const matching = Array.from({ length: 25 }, (_, index) =>
+      event(`page-${String(index).padStart(2, "0")}`, { tags: ["ai"] }),
+    );
+    const source = [
+      ...matching,
+      event("hidden", { visibility: "members_only", tags: ["ai"] }),
+      event("draft", { status: "draft", tags: ["ai"] }),
+      event("other", { tags: ["health"] }),
+    ];
+    const filters = parseEventFilters({ tag: "ai" });
+    const page = (offset: number) =>
+      listPublicEvents(anonymous, {
+        status: "open",
+        asOf,
+        limit: 12,
+        offset,
+        filters,
+        source,
+      });
+    expect((await page(0)).map((row) => row.slug)).toEqual(
+      matching.slice(0, 12).map((row) => row.slug),
+    );
+    expect((await page(12)).map((row) => row.slug)).toEqual(
+      matching.slice(12, 24).map((row) => row.slug),
+    );
+    expect((await page(24)).map((row) => row.slug)).toEqual(["page-24"]);
+    expect(await page(36)).toEqual([]);
+    await expect(
+      countPublicEvents(anonymous, { status: "open", asOf, filters, source }),
+    ).resolves.toBe(25);
+  });
+
+  it.each([-1, 1.5, 2147483648])(
+    "rejects invalid public offset %s before reading",
+    async (offset) => {
+      const source = { list: vi.fn(async () => [event("never")]) };
+      await expect(
+        listPublicEvents(anonymous, {
+          status: "open",
+          asOf,
+          limit: 12,
+          offset,
+          source,
+        }),
+      ).rejects.toThrow();
+      expect(source.list).not.toHaveBeenCalled();
+    },
+  );
+
+  it("requires a bounded limit before accepting a nonzero offset", async () => {
+    const source = { list: vi.fn(async () => [event("never")]) };
+    await expect(
+      listPublicEvents(anonymous, { status: "open", asOf, offset: 12, source }),
+    ).rejects.toThrow();
+    expect(source.list).not.toHaveBeenCalled();
+  });
+
+  it("counts past and open published public Events with no 12-item cap", async () => {
+    const pastCount = 15;
+    const manyPast = Array.from({length: pastCount}, (_unused, index) =>
+      event(`past-${index}`, {startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}));
+    const openEvents = [event("open-a", {startsAt: new Date("2030-01-02T10:00:00.000Z"), endsAt: null})];
+    const source = [...manyPast, ...openEvents];
+
+    await expect(countPublicEvents(anonymous, {status: "past", asOf, source})).resolves.toBe(pastCount);
+    await expect(countPublicEvents(anonymous, {status: "open", asOf, source})).resolves.toBe(openEvents.length);
+  });
+
+  it("reads public events by status and visibility, not the legacy booleans", async () => {
+    const source = [
+      event("enum-published", {published: false, memberOnly: false, status: "published", visibility: "public"}),
+      event("bool-only", {published: true, memberOnly: false, status: "draft", visibility: "public"}),
+      event("members", {published: true, memberOnly: false, status: "published", visibility: "members_only"}),
+    ];
+    const slugs = (await listPublicEvents(anonymous, {status: "open", asOf, locale: "en", source})).map((item) => item.slug);
+    expect(slugs).toEqual(["enum-published"]);
+    await expect(countPublicEvents(anonymous, {status: "open", asOf, source})).resolves.toBe(1);
+    await expect(getPublicEventBySlug("bool-only", "en", {asOf, source})).resolves.toBeNull();
+    await expect(getPublicEventBySlug("enum-published", "en", {asOf, source})).resolves.toMatchObject({slug: "enum-published"});
+  });
+
+  it("serves members every published event except invite-only, by enum", async () => {
+    const source = [
+      event("invite", {status: "published", visibility: "invite_only"}),
+      event("members", {published: false, status: "published", visibility: "members_only"}),
+      event("pending", {published: true, status: "pending_review", visibility: "public"}),
+      event("public", {status: "published", visibility: "public"}),
+    ];
+    const listed = await listMemberEvents(member, source, {hasEligibleMembership: async () => true});
+    expect(listed.map((item) => item.slug)).toEqual(["members", "public"]);
+    await expect(getEventBySlug(member, "invite", source)).resolves.toBeNull();
+    await expect(getEventBySlug(member, "members", source)).resolves.toMatchObject({slug: "members"});
+    await expect(getEventBySlug(anonymous, "members", source)).resolves.toBeNull();
+    await expect(getEventBySlug(anonymous, "pending", source)).resolves.toBeNull();
+    await expect(getEventBySlug(anonymous, "public", source)).resolves.toMatchObject({slug: "public"});
+  });
+
+  it("projects format, registration mode, tags and the organiser name for the detail page (B-4)", async () => {
+    const source = [
+      {event: event("hosted", {format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted", tags: ["ai", "fintech"], organiserCompanyId: "company-1"}), hero: null, organiser: organiser("Acme Robotics", "acme-robotics")},
+      {event: event("admin-authored"), hero: null},
+    ] as const;
+    await expect(getPublicEventBySlug("hosted", "en", {asOf, source})).resolves.toMatchObject({
+      format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted",
+      tags: ["ai", "fintech"], organiser: {name: "Acme Robotics", slug: "acme-robotics"},
+    });
+    await expect(getPublicEventBySlug("admin-authored", "en", {asOf, source})).resolves.toMatchObject({
+      format: "in_person", onlineUrl: null, registrationMode: "rsvp", externalRegistrationUrl: null, tags: [], organiser: null,
+    });
+    // A bare Event row (no memory wrapper) projects the same defaults.
+    await expect(listPublicEvents(anonymous, {status: "open", asOf, source: [event("bare")]})).resolves.toMatchObject([{slug: "bare", registrationMode: "rsvp", organiser: null}]);
+  });
+
+  // B-6 / D-11: /events/[slug] links the organiser on `organiser.slug` alone, so the
+  // projection is where "has a public page" is decided. A company keeps its slug through
+  // every profile state, so publishing it is the only difference between a link and text.
+  it("projects the organiser's member-page slug only where that page is published (B-6, D-11)", async () => {
+    const source = [
+      {event: event("published-organiser", {organiserCompanyId: "company-1"}), hero: null, organiser: organiser("Acme Robotics", "acme-robotics", "published")},
+      {event: event("pending-organiser", {organiserCompanyId: "company-2"}), hero: null, organiser: organiser("Beta Labs", "beta-labs", "pending_review")},
+      {event: event("hidden-organiser", {organiserCompanyId: "company-3"}), hero: null, organiser: organiser("Gamma Works", "gamma-works", "hidden")},
+      {event: event("rejected-organiser", {organiserCompanyId: "company-4"}), hero: null, organiser: organiser("Delta Systems", "delta-systems", "rejected")},
+      // `companies_public_profile_slug_check` forbids this pair in the database; the
+      // projection must still refuse to build `/members/null` if one ever arrives.
+      {event: event("slugless-organiser", {organiserCompanyId: "company-5"}), hero: null, organiser: organiser("Epsilon Group", null, "published")},
+    ] as const;
+    await expect(getPublicEventBySlug("published-organiser", "en", {asOf, source})).resolves.toMatchObject({organiser: {name: "Acme Robotics", slug: "acme-robotics"}});
+    // The name still renders for each of these; only the link is withheld.
+    const unlinked = [["pending-organiser", "Beta Labs"], ["hidden-organiser", "Gamma Works"], ["rejected-organiser", "Delta Systems"], ["slugless-organiser", "Epsilon Group"]] as const;
+    for (const [slug, name] of unlinked) {
+      await expect(getPublicEventBySlug(slug, "en", {asOf, source})).resolves.toMatchObject({organiser: {name, slug: null}});
+    }
+  });
+
+  it("applies format, month (Hong Kong), organiser slug and tag filters (B-6)", async () => {
+    const readAsOf = new Date("2026-09-01T00:00:00.000Z");
+    const source = [
+      {event: event("online-oct", {startsAt: new Date("2026-10-05T02:00:00.000Z"), endsAt: null, format: "online", tags: ["ai"], organiserCompanyId: "company-1"}), hero: null, organiser: organiser("Acme Robotics", "acme-robotics")},
+      // An organiser whose own page is still hidden: `?organiser=` matches the stored slug,
+      // so hiding a member's profile must not also hide the public events they run.
+      {event: event("in-person-nov", {startsAt: new Date("2026-11-05T02:00:00.000Z"), endsAt: null, format: "in_person", tags: ["health"], organiserCompanyId: "company-2"}), hero: null, organiser: organiser("Acme Ltd.", "acme-ltd", "hidden")},
+      // 2026-10-31T17:00Z is already 1 November in Hong Kong: the month filter must use the HK boundary.
+      {event: event("hk-november", {startsAt: new Date("2026-10-31T17:00:00.000Z"), endsAt: null, format: "hybrid", tags: ["ai", "health"]}), hero: null},
+      // An owner-edited slug, which 0029's derivation from `display_name` would never mint.
+      // This row is what separates "matches companies.slug" from "matches a derived name".
+      {event: event("renamed-dec", {startsAt: new Date("2026-12-05T02:00:00.000Z"), endsAt: null, organiserCompanyId: "company-3"}), hero: null, organiser: organiser("Gamma Works Limited", "gamma")},
+    ] as const;
+    const read = (filters: NonNullable<Parameters<typeof listPublicEvents>[1]["filters"]>) =>
+      listPublicEvents(anonymous, {status: "open", asOf: readAsOf, locale: "en", filters, source}).then((rows) => rows.map((row) => row.slug));
+    const none = {format: null, month: null, organiser: null, tag: null} as const;
+    await expect(read(none)).resolves.toEqual(["online-oct", "hk-november", "in-person-nov", "renamed-dec"]);
+    await expect(read({...none, format: "online"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, month: "2026-10"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, month: "2026-11"})).resolves.toEqual(["hk-november", "in-person-nov"]);
+    await expect(read({...none, organiser: "acme-robotics"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, organiser: "acme-ltd"})).resolves.toEqual(["in-person-nov"]);
+    await expect(read({...none, organiser: "someone-else"})).resolves.toEqual([]);
+    // The stored slug decides, not the display name: `gamma` hits and `gamma-works-limited` misses.
+    await expect(read({...none, organiser: "gamma"})).resolves.toEqual(["renamed-dec"]);
+    await expect(read({...none, organiser: "gamma-works-limited"})).resolves.toEqual([]);
+    await expect(read({...none, tag: "health"})).resolves.toEqual(["hk-november", "in-person-nov"]);
+    await expect(read({...none, format: "hybrid", tag: "ai"})).resolves.toEqual(["hk-november"]);
+    await expect(countPublicEvents(anonymous, {status: "open", asOf: readAsOf, filters: {...none, tag: "ai"}, source})).resolves.toBe(2);
+
+    // The `?organiser=` text box takes a typed name, not a slug: parseEventFilters
+    // normalises it to the shape `companies.slug` holds, and the read still resolves.
+    // "Acme Ltd." keeps the case that made the old derivation subtle -- the trailing
+    // dot must not leave the edge hyphen the SLUG regex rejects.
+    await expect(read(parseEventFilters({organiser: "Acme Robotics"}))).resolves.toEqual(["online-oct"]);
+    await expect(read(parseEventFilters({organiser: "  acme LTD.  "}))).resolves.toEqual(["in-person-nov"]);
+  });
+
+  it("excludes member-only and unpublished Events from the count", async () => {
+    const source = [
+      event("draft-public", {published: false, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
+      event("published-member", {memberOnly: true, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
+      event("published-public", {startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
+    ];
+    await expect(countPublicEvents(anonymous, {status: "past", asOf, source})).resolves.toBe(1);
   });
 });

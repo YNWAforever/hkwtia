@@ -7,6 +7,7 @@ vi.mock("next/image", () => ({
 }));
 
 import {EventDetail} from "@/components/marketing/event-detail";
+import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
 describe("private Event hero rendering", () => {
   it("bypasses the image optimizer for an own-origin private media hero", () => {
@@ -21,8 +22,9 @@ describe("private Event hero rendering", () => {
         venue: "Hong Kong",
         capacity: 12,
         hero: {url: "/api/media/10000000-0000-4000-8000-000000000001", alt: "Curated Event hero"},
+        ...publicEventDefaults,
       }}
-      labels={{date: "Date", venue: "Venue", capacity: "Capacity"}}
+      labels={{date: "Date", venue: "Venue", capacity: "Capacity", format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Join online"}}
       locale="en"
     />);
 

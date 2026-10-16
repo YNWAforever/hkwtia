@@ -1,0 +1,90 @@
+{
+  "sourceSha": "a4b3e90d8f3ed22f47be984dd6efa1acf35c6824",
+  "deploymentId": "dpl_656pbVCqGhiMzMYvrfoA7UmAVPmu",
+  "origin": "https://hkwtia-content-drafts-20261003.vercel.app",
+  "observedAt": "2026-10-04T12:22:28.584Z",
+  "production": false,
+  "checks": [
+    {
+      "routeKind": "unique synthetic news",
+      "status": 200,
+      "markerRefSha256": "6195114af77a4a708abef3b6e1569bd16442092f6b5a6cf68465aae981f9104d",
+      "dbSourcePositivelyProven": true
+    },
+    {
+      "routeKind": "synthetic en news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "routeKind": "synthetic zh news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/zh",
+      "status": 200
+    },
+    {
+      "route": "/membership",
+      "status": 200
+    },
+    {
+      "route": "/zh/membership",
+      "status": 200
+    },
+    {
+      "route": "/partners",
+      "status": 200
+    },
+    {
+      "route": "/zh/partners",
+      "status": 200
+    },
+    {
+      "route": "/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/zh/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "role": "anonymous",
+      "adminLoginRequired": true
+    },
+    {
+      "role": "staff",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "route": "/admin/batches",
+      "status": 200,
+      "flagsDisabled": true,
+      "historyStillReadable": true
+    },
+    {
+      "route": "/admin/automations#verified-worker-health",
+      "status": 200,
+      "anchorVisible": true,
+      "scheduledWindowVerified": false
+    }
+  ],
+  "gate": {
+    "stage": "t12-preview-en-event-review",
+    "status": 200
+  },
+  "providerSends": 0,
+  "paymentWrites": 0,
+  "classification": "Standalone poll default5s expired; authoritative synthetic draft was approved. Align future standalone polls with existing repository expect20s; unchanged repository deadline. Not a facts/timezone/provider success claim.",
+  "completedChecks": 15
+}

@@ -1,0 +1,402 @@
+{
+  "applicationSha": "1e4f6246ac42f3dd0249acad2be949aaf94a6aa6",
+  "preview": "https://hkwtia-p7vk6461f-ynwaforevers-projects.vercel.app",
+  "deploymentId": "dpl_AvucgCHx4LsXy66QbaDJ6sua161f",
+  "scope": "Read-only protected Vercel Preview; public en/zh routes, layout/navigation/axe, public login shell and rendering; no member session or shared DB mutation",
+  "command": "node node_modules/@playwright/test/cli.js test tests/e2e/core-pages.spec.ts tests/e2e/public-navigation.spec.ts tests/e2e/public-rendering.spec.ts --reporter=line,json",
+  "stats": {
+    "startTime": "2026-09-27T15:15:11.738Z",
+    "duration": 178423.857,
+    "expected": 32,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "/ renders one English heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6265
+        }
+      ]
+    },
+    {
+      "title": "/zh renders one Chinese heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3956
+        }
+      ]
+    },
+    {
+      "title": "/about renders one English heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3348
+        }
+      ]
+    },
+    {
+      "title": "/zh/about renders one Chinese heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3996
+        }
+      ]
+    },
+    {
+      "title": "/about/chairman renders one English heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2281
+        }
+      ]
+    },
+    {
+      "title": "/zh/about/chairman renders one Chinese heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 4018
+        }
+      ]
+    },
+    {
+      "title": "/about/committees renders one English heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 1459
+        }
+      ]
+    },
+    {
+      "title": "/zh/about/committees renders one Chinese heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 1877
+        }
+      ]
+    },
+    {
+      "title": "/membership renders one English heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 5652
+        }
+      ]
+    },
+    {
+      "title": "/zh/membership renders one Chinese heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3130
+        }
+      ]
+    },
+    {
+      "title": "/ai-ops renders one English heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2801
+        }
+      ]
+    },
+    {
+      "title": "/zh/ai-ops renders one Chinese heading",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3805
+        }
+      ]
+    },
+    {
+      "title": "en: home destinations, member directory, showcase and answered FAQ",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 14591
+        }
+      ]
+    },
+    {
+      "title": "en: public home and membership fit 390px",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 9041
+        }
+      ]
+    },
+    {
+      "title": "en: public home and membership fit 768px",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 5336
+        }
+      ]
+    },
+    {
+      "title": "en: public home and membership fit 1440px",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6651
+        }
+      ]
+    },
+    {
+      "title": "en: membership FAQ and navigation have no serious axe findings",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6349
+        }
+      ]
+    },
+    {
+      "title": "/zh: home destinations, member directory, showcase and answered FAQ",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 13906
+        }
+      ]
+    },
+    {
+      "title": "/zh: public home and membership fit 390px",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 5827
+        }
+      ]
+    },
+    {
+      "title": "/zh: public home and membership fit 768px",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 5816
+        }
+      ]
+    },
+    {
+      "title": "/zh: public home and membership fit 1440px",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 7573
+        }
+      ]
+    },
+    {
+      "title": "/zh: membership FAQ and navigation have no serious axe findings",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 4890
+        }
+      ]
+    },
+    {
+      "title": "en: member login keeps safe return and recovery paths",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6622
+        }
+      ]
+    },
+    {
+      "title": "/zh: member login keeps safe return and recovery paths",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6147
+        }
+      ]
+    },
+    {
+      "title": "en: long home sections defer layout and reveal on keyboard focus",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 4386
+        }
+      ]
+    },
+    {
+      "title": "en: programme anchors reveal their sections and print includes the full page",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2790
+        }
+      ]
+    },
+    {
+      "title": "en: membership FAQ remains available on direct fragment navigation",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 4360
+        }
+      ]
+    },
+    {
+      "title": "/zh: long home sections defer layout and reveal on keyboard focus",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6313
+        }
+      ]
+    },
+    {
+      "title": "/zh: programme anchors reveal their sections and print includes the full page",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3274
+        }
+      ]
+    },
+    {
+      "title": "/zh: membership FAQ remains available on direct fragment navigation",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3321
+        }
+      ]
+    },
+    {
+      "title": "en: streamed home shell keeps the footer below the first viewport",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 5692
+        }
+      ]
+    },
+    {
+      "title": "/zh: streamed home shell keeps the footer below the first viewport",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 3366
+        }
+      ]
+    }
+  ],
+  "rawReportSha256": "4b7ccf896ed3053828a39fd1e16e078213684cfc46037f8a2ed5d542bdb34ada"
+}

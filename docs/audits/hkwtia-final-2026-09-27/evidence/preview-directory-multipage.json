@@ -1,0 +1,31 @@
+{
+  "observedAtUtc": "2026-09-28T04:25:03Z",
+  "scope": "Protected Preview, isolated Neon, 26 temporary synthetic published company memberships",
+  "deploymentId": "dpl_8pnP2RjoSuPfA9oP92RVDP8n3yZR",
+  "branchHeadAtTest": "84854d04",
+  "run": "8e0de3d0",
+  "expected": 26,
+  "locales": [
+    {
+      "locale": "en",
+      "firstCount": 24,
+      "secondCount": 2,
+      "uniqueCount": 26,
+      "cursorAndFilterPreserved": true,
+      "orderedSlugSha256": "91533a96ddf337d0184124dc6d708b75e14652da80da1177168e25483b365d87"
+    },
+    {
+      "locale": "zh-HK",
+      "firstCount": 24,
+      "secondCount": 2,
+      "uniqueCount": 26,
+      "cursorAndFilterPreserved": true,
+      "orderedSlugSha256": "91533a96ddf337d0184124dc6d708b75e14652da80da1177168e25483b365d87"
+    }
+  ],
+  "cleanup": {
+    "memberships": 26,
+    "companies": 26
+  },
+  "remainingFixtureCompanies": 0
+}

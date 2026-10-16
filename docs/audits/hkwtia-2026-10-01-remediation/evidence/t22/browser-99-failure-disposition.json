@@ -1,0 +1,67 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "fullOriginal": {
+    "pass": 332,
+    "unexpected": 4,
+    "skip": 162,
+    "fullGreen": false
+  },
+  "targeted": {
+    "pass": 4,
+    "fail": 0,
+    "skip": 0,
+    "getSessionStatuses": {
+      "200": 90
+    }
+  },
+  "cases": [
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 13,
+      "title": "private bilingual CMS draft, real layout, second editor conflict and explicit publication revert",
+      "fullRunStatus": "timedOut",
+      "fullDurationMs": 180008,
+      "targetedStatus": "passed",
+      "targetedDurationMs": 62435,
+      "sourceCodeChanged": false,
+      "disposition": "native original case passed at2000ms; full failure retained; sustained isolated Auth capacity and pacing/timeouts unresolved"
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 237,
+      "title": "anonymous, member, and company-admin identities require login or receive access denied on every admin route",
+      "fullRunStatus": "timedOut",
+      "fullDurationMs": 180028,
+      "targetedStatus": "passed",
+      "targetedDurationMs": 95997,
+      "sourceCodeChanged": false,
+      "disposition": "native original case passed at2000ms; full failure retained; sustained isolated Auth capacity and pacing/timeouts unresolved"
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 240,
+      "title": "the wizard refuses a blank template variable and previews a real eligibility partition",
+      "fullRunStatus": "failed",
+      "fullDurationMs": 59788,
+      "targetedStatus": "passed",
+      "targetedDurationMs": 28402,
+      "sourceCodeChanged": false,
+      "disposition": "native original case passed at2000ms; full failure retained; sustained isolated Auth capacity and pacing/timeouts unresolved"
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "line": 40,
+      "title": "staff price a ticketed event and a buyer reaches Stripe Checkout (en)",
+      "fullRunStatus": "failed",
+      "fullDurationMs": 26127,
+      "targetedStatus": "passed",
+      "targetedDurationMs": 11045,
+      "sourceCodeChanged": false,
+      "disposition": "native original case passed at2000ms; full failure retained; sustained isolated Auth capacity and pacing/timeouts unresolved"
+    }
+  ],
+  "distinctOriginalCaseCoverage": 336,
+  "singleFullGreenRun": false,
+  "allFourOriginalFailuresHavePassingNativeReplay": true,
+  "production": false
+}

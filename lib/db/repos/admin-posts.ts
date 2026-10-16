@@ -53,8 +53,8 @@ export type NewsMutationDependencies = Readonly<{transaction: <T>(work: (transac
   findBySlug: (slug: string) => Promise<Readonly<{id: string}> | null>;
   insertPost: (input: StoredNewsInput) => Promise<Post>;
   lockPost: (id: string) => Promise<Post | null>;
-  updatePost: (id: string, input: StoredNewsUpdate) => Promise<Post | null>;
-  setArchivedAt: (id: string, archivedAt: Date | null) => Promise<Post | null>;
+  updatePost: (id: string, input: StoredNewsUpdate, updatedAt: Date) => Promise<Post | null>;
+  setArchivedAt: (id: string, archivedAt: Date | null, updatedAt: Date) => Promise<Post | null>;
   insertAudit: (input: NewsAudit) => Promise<void>;
 }>) => Promise<T>) => Promise<T>}>;
 
@@ -87,12 +87,12 @@ async function defaultMutationDependencies(): Promise<NewsMutationDependencies> 
       (await tx.select().from(posts)
         .where(and(eq(posts.id, id), eq(posts.kind, NEWS_KIND)))
         .for("update"))[0] ?? null,
-    updatePost: async (id, input) =>
-      (await tx.update(posts).set({...input, updatedAt: new Date()})
+    updatePost: async (id, input, updatedAt) =>
+      (await tx.update(posts).set({...input, updatedAt})
         .where(and(eq(posts.id, id), eq(posts.kind, NEWS_KIND)))
         .returning())[0] ?? null,
-    setArchivedAt: async (id, archivedAt) =>
-      (await tx.update(posts).set({archivedAt, updatedAt: new Date()})
+    setArchivedAt: async (id, archivedAt, updatedAt) =>
+      (await tx.update(posts).set({archivedAt, updatedAt})
         .where(and(eq(posts.id, id), eq(posts.kind, NEWS_KIND))).returning())[0] ?? null,
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
   }))};
@@ -153,18 +153,22 @@ export async function updateNewsPost(
   id: unknown,
   input: unknown,
   dependencies?: NewsMutationDependencies,
+  expectedUpdatedAt?: Date,
 ): Promise<Post | null> {
   requireAdmin(actor);
   const postId = postIdSchema.parse(id);
   const parsed = newsUpdateSchema.parse(input);
+  if (!(expectedUpdatedAt instanceof Date) || !Number.isFinite(expectedUpdatedAt.getTime())) throw new Error("NEWS_EDIT_REVISION_REQUIRED");
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     const current = await transaction.lockPost(postId);
     if (!current) return null;
+    if (current.updatedAt.getTime() !== expectedUpdatedAt.getTime()) throw new Error("NEWS_EDIT_CONFLICT");
     if (parsed.slug !== undefined && parsed.slug !== current.slug) {
       const clash = await transaction.findBySlug(parsed.slug);
       if (clash && clash.id !== postId) throw slugConflictError();
     }
-    const post = await transaction.updatePost(postId, parsed);
+    const nextUpdatedAt = new Date(Math.max(Date.now(), current.updatedAt.getTime() + 1));
+    const post = await transaction.updatePost(postId, parsed, nextUpdatedAt);
     if (!post) return null;
     await transaction.insertAudit({
       actorUserId: actor.profileId, actorType: actor.kind,
@@ -205,7 +209,8 @@ export async function setNewsArchived(
     if (!current) return null;
     // Already in the requested state: not an event worth recording.
     if (archived === (current.archivedAt !== null)) return current;
-    const post = await transaction.setArchivedAt(postId, archived ? now() : null);
+    const changedAt = new Date(Math.max(now().getTime(), current.updatedAt.getTime() + 1));
+    const post = await transaction.setArchivedAt(postId, archived ? changedAt : null, changedAt);
     if (!post) return null;
     await transaction.insertAudit({
       actorUserId: actor.profileId, actorType: actor.kind,

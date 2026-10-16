@@ -1,0 +1,10 @@
+{
+  "id": "dpl_D9eXE5esoTCf7ncQZ8ZBNCDXWjMn",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+  "gitRef": "codex/ai-governance-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-ai-routing-20261003.vercel.app",
+  "production": false
+}

@@ -1,0 +1,149 @@
+{
+  "observedAt": "2026-10-04T01:20:03.543890+00:00",
+  "baseSha": "1de8cb46e8830c7fc20e783900f0ce013ad9546d",
+  "branch": "codex/membership-lifecycle-20261003",
+  "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+  "commits": {
+    "staleEngagement": "8e334c33",
+    "completedContinuation": "5a751878",
+    "nativeProviderVerifier": "1e9709ce"
+  },
+  "red": [
+    {
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-membership-lifecycle.test.ts",
+      "result": "12 pass / 1 target failure: stale renewal incorrectly created engagement",
+      "log": ".playwright/full-fix-t14b-lifecycle-red.log"
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit/join-page.test.tsx",
+      "result": "8 pass / 4 target failures: completed-owned application lacked authoritative redirect/recovery",
+      "log": ".playwright/full-fix-t14b-completed-red.log"
+    },
+    {
+      "command": "node --env-file=.env.local .playwright/full-fix-t14b-run-native.mjs",
+      "result": "2 pass / 2 actual Preview return-flow failures against source28322fd3",
+      "log": ".playwright/full-fix-t14b-native-fresh.log"
+    }
+  ],
+  "focused": [
+    {
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-membership-lifecycle.test.ts tests/unit/webhook-service.test.ts tests/unit/webhook-repository-sequential.test.ts tests/unit/webhook-postgres-concurrency.test.ts",
+      "passed": 45,
+      "skipped": 0,
+      "failed": 0,
+      "environment": "owned disposable loopback PostgreSQL16 with all59migrations; provider payload synthetic here"
+    },
+    {
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-membership-lifecycle.test.ts",
+      "passed": 13,
+      "skipped": 0,
+      "failed": 0,
+      "finalTypedFixture": true
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit/join-page.test.tsx tests/unit/join-actions.test.ts tests/unit/join-service-review.test.ts tests/unit/join-service.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/join-actions-profile-identity.test.ts",
+      "passed": 58,
+      "skipped": 0,
+      "failed": 0
+    },
+    {
+      "command": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-billing-scope.test.ts tests/integration/audit-full-auth-identity.test.ts tests/integration/audit-full-renewal-window.test.ts tests/integration/audit-full-policy-acceptance.test.ts",
+      "passed": 28,
+      "skipped": 0,
+      "failed": 0,
+      "environment": "positively proven isolated Neon DB/Auth; no real provider requests"
+    },
+    {
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-grant-boundary.test.ts tests/integration/membership-grant-benefits.test.ts tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-entitlements.test.ts",
+      "passed": 18,
+      "skipped": 0,
+      "failed": 0,
+      "environment": "6 actual disposable PG existing finite/legacy grant benefits cases plus12 pure boundaries; no new policy/default approval"
+    }
+  ],
+  "full": {
+    "command": "npm test",
+    "passed": 6637,
+    "skipped": 455,
+    "failed": 0,
+    "filesPassed": 786,
+    "filesSkipped": 94,
+    "log": ".playwright/full-fix-t14b-full-unit.log",
+    "skipReason": "integration suites require explicit disposable PG/isolated Neon/provider guards; absent optional environment is NOT pass"
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "repair": "initial test fixture used wrong Neon driver type; reran with actual disposable fixture type"
+  },
+  "lint": {
+    "command": "npm run lint",
+    "exitCode": 0,
+    "errors": 0,
+    "existingWarnings": 91
+  },
+  "strings": {
+    "command": "npm run audit:strings",
+    "exitCode": 0,
+    "tsxFiles": 317
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0
+  },
+  "nativeCandidate": {
+    "command": "node --env-file=.env.local .playwright/full-fix-t14b-run-native.mjs",
+    "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "passed": 4,
+    "skipped": 0,
+    "failed": 0,
+    "entryChecks": 17,
+    "receipt": "native-1e9709ce-worker-0.json",
+    "origin": "https://hkwtia-membership-lifecycle-20261003.vercel.app",
+    "screenshotsVisuallyInspected": [
+      "zh-HK-community-complete.png",
+      "zh-HK-provider-paid.png"
+    ],
+    "baseline": "same two completed-return cases failed on source28322fd3; fresh actual password/Auth subjects with member-only profile fixtures"
+  },
+  "realStripeTest": {
+    "command": "FULL_FIX_STRIPE_TEST_ACCEPTANCE=1 AUDIT_BATCH_WORKER_PAUSED=true node --env-file=.env.local scripts/verify-full-fix-membership-provider.mjs",
+    "receipt": "stripe-test-provider.json",
+    "succeeded": true,
+    "trueHostedCheckout": true,
+    "actualProviderEvent": true,
+    "controlledSignedReplay": true,
+    "duplicate": "processed then duplicate; one membership/attempt",
+    "ownedTestSubscriptionCancelledAndReconciled": true,
+    "automaticRemoteWebhookVerified": false,
+    "renewalProviderVerified": false,
+    "refunds": 0,
+    "production": false
+  },
+  "migration": "none",
+  "policy": "existing policies preserved; synthetic consent registry exists only in disposable PG test; no association policy approval inferred",
+  "production": false,
+  "googleMagicLink": "BLOCKED_CONTROLLED_IDENTITY_MAILBOX",
+  "automaticRemoteWebhook": "NOT_VERIFIED",
+  "humanStaffPilot": "NOT_COLLECTED",
+  "originalEvidenceAndCaseResultsPreserved": true,
+  "ci": {
+    "runId": 37167576351,
+    "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "checks": 7,
+    "allSuccess": true,
+    "passed": 6637,
+    "skipped": 455,
+    "workerPassed": 57,
+    "remoteLintWarnings": 75,
+    "localLintWarnings": 91,
+    "receipt": "ci-source.json"
+  },
+  "remainingGates": [
+    "controlled Google identity and actual magic-link mailbox/challenge; verified-email/no-profile provision acceptance",
+    "automatic remote Stripe webhook and real recurring renewal provider receipt",
+    "G5 two isolated worker scheduled windows and connected sender/batch outcomes",
+    "finite-grant/company-seat/HK month boundaries retain approved policies; expanded1k/10k staff/performance acceptance belongsT11/T15",
+    "review-tier live association approval workflow and3-5 human staff pilot; no policy approval fabricated"
+  ]
+}

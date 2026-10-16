@@ -1,0 +1,453 @@
+{
+  "checkedAt": "2026-09-28T06:48:01.074Z",
+  "projectId": "fragrant-mountain-25240574",
+  "branchId": "br-noisy-glitter-ao2npd77",
+  "branchName": "production",
+  "hostname": "ep-steep-wind-ao0pbldw.c-2.ap-southeast-1.aws.neon.tech",
+  "database": "neondb",
+  "vercelBinding": "unverified",
+  "readOnly": true,
+  "session": {
+    "database": "neondb",
+    "read_only": "on"
+  },
+  "ledgerRows": 36,
+  "latestMigration": {
+    "id": 36,
+    "hash": "f1719db45a2a5e959662a6a7c697d8b7d7abef8d12bceab557c0ec37c7796fbb",
+    "created_at": "1789286918480"
+  },
+  "ledgerMatches": [
+    {
+      "id": 1,
+      "tag": "0001_m1_membership",
+      "appliedHash": "22c0fca9dd3453ce8bcf2ad59b9b21575e8322f08410854e1f68a50397a76031",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 2,
+      "tag": "0002_rich_lester",
+      "appliedHash": "37f1317097bc1c4b8bc8a707e2d3cbe00b25c743ee88c0147203b1b267e5f6cd",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 3,
+      "tag": "0003_confused_lifeguard",
+      "appliedHash": "f6f9f104288de23be52721d0b14d7b7eaf769ab8c38ceb4d42317e597ccb711b",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 4,
+      "tag": "0004_outgoing_vermin",
+      "appliedHash": "3ad5f5ddb0d058cee0c9c33bf211aa31471fad7e282f33f932f46013a724eb99",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 5,
+      "tag": "0005_worried_kang",
+      "appliedHash": "1be4c25ab2d3fa82fca98bf046c3cdec19a3f16e9604171e16c51b4cb89b9555",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 6,
+      "tag": "0006_m2_integrity_indexes",
+      "appliedHash": "821ba2002b0c1d44e5c28e3bc76692c18bb32dfea38d614358f2ee10358086e7",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 7,
+      "tag": "0007_m3_automations",
+      "appliedHash": "d5559fcaa1f19534aa3d757f0c688871a5bfc7ba1be1cef3e924b510adbd4fda",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 8,
+      "tag": "0008_m3_campaign_recipient_leases",
+      "appliedHash": "692ea422dab531c176f8bafed0d8cf51cfc6a6fef99916d5efbbe4363076c96f",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 9,
+      "tag": "0009_m3_automation_admin_indexes",
+      "appliedHash": "45a6c952fe3b018e125575670f9b9cd46b8be2b47c2f8f355d4b4225457ecc80",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 10,
+      "tag": "0010_m4a_ai_concierge",
+      "appliedHash": "32bcea66735ae36e1ffd31426006a5984123fc57d27b4d87b6ca677f3a32b57a",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 11,
+      "tag": "0011_m4a_chat_retention",
+      "appliedHash": "59aaa4ce3c321264c98b76869ab4d34d255b0edcd789a81bd61c24a6fad3d775",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 12,
+      "tag": "0012_m4b_scheduled_agents",
+      "appliedHash": "8b234a99797a22a0e406e3547159056189f99fbe4b4de7374d5ee9949748f85a",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 13,
+      "tag": "0013_m4c_aiops_metrics",
+      "appliedHash": "0ef6dfc157a787498b748f91e238a4ae7f0c8af03e3824449f7c8ada4e937acb",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 14,
+      "tag": "0014_m5_showcase",
+      "appliedHash": "15257d66388b36d19b15411ffdd8a99cbec60c6ec99a2ee97b97dc390e13376d",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 15,
+      "tag": "0015_m6_launch_pad",
+      "appliedHash": "943548d72b9cfdb9dc26a448284c8328ae15d2065c2995ca306bb435d2ac1d8d",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 16,
+      "tag": "0016_m7_page_copy",
+      "appliedHash": "bbd1c3a174bd422b0a84ecd67a87e7a7adba40e6d5d493402e2fe7e6394f9147",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 17,
+      "tag": "0017_m7_media",
+      "appliedHash": "5493b47327bb77d3eb27565bb7d9e1ec84f761fffbd25e5599fc9251cf0008de",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 18,
+      "tag": "0018_m7_archive",
+      "appliedHash": "2ef7e1b45f2d6e27092f730855729995226bc992c443bad8842400b0e0d6179d",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 19,
+      "tag": "0019_wisetech_announcements",
+      "appliedHash": "3aa5a4e3738b367ff61f086d2192c75dce486d5dc5313f29101a9fc6a8430e85",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 20,
+      "tag": "0020_wisetech_partners",
+      "appliedHash": "cb4f8559e7886cc6eeaebebea9b45c749886862e1f65d64044549a56fdf7409f",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 21,
+      "tag": "0021_wisetech_media_upload",
+      "appliedHash": "af0a62b3ca182f9a3d7823363a638cf47e926708742c5fef520c697a425f25ef",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 22,
+      "tag": "0022_wisetech_localized_news",
+      "appliedHash": "b267f8b633f7b160a26b561f5203080492bd6d6c1780102d844247e81634cb37",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 23,
+      "tag": "0023_wisetech_event_hero",
+      "appliedHash": "f110f7a5e7fdec6ff681fa20071c4341fffefd0f280e5eded588acee4a30cc7d",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 24,
+      "tag": "0024_acceptance_sentinel",
+      "appliedHash": "5d010e65035de2d29d5db2b06edeb94fedd1a527c39308799f4c7fa532c00a40",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 25,
+      "tag": "0025_phase_a_contacts_consent",
+      "appliedHash": "c75cb09b844b835fe6c2d0bdaa5c828b961b85fc00487935a01f68c0f24868d2",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 26,
+      "tag": "0026_phase_b_events_two_sided",
+      "appliedHash": "233207065b9af426875eda76b1d9ccebe3e51566a9e8d97048f8e10283c242a0",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 27,
+      "tag": "0027_phase_b_events_backfill",
+      "appliedHash": "68ce70eb0d7d0e655fd119cc7e8b4897570de0cbce45313d88ccd9f0a7a1193c",
+      "hashMatches": false,
+      "lfHashMatches": true,
+      "crlfHashMatches": false
+    },
+    {
+      "id": 28,
+      "tag": "0028_phase_b_company_profiles",
+      "appliedHash": "f25d42bdbb5c5e967d4617314daecd5cd6d9f1f8502721b29ea70eab376266d9",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 29,
+      "tag": "0029_phase_b_company_slugs",
+      "appliedHash": "6d0e3c1dbe3b0f6118bbed616f0a537b36de1980122bb0e22292326dd50421cf",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 30,
+      "tag": "0030_phase_b_members_route",
+      "appliedHash": "fd8ca56e2cdcfad1b048aa799704ec3cc34c7fc36f5b923f15b44e87bc4d0663",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 31,
+      "tag": "0031_phase_c_conversation_operations",
+      "appliedHash": "d4b1d13abca4393716ea9f542d3accb6cf0c6237b635ac0591a739d03c16e6d2",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 32,
+      "tag": "0032_phase_c_message_direction_backfill",
+      "appliedHash": "8c09fc7ed3295b8b32c0fe490364499c22d1c05696ab56d7f5538f540535a9b3",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 33,
+      "tag": "0033_phase_c_campaign_channels",
+      "appliedHash": "91a0f3c0855158541f0c6402a815ced7763dad43e7e0d6ef01e9de680da1babf",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 34,
+      "tag": "0034_phase_c_whatsapp_template_seed",
+      "appliedHash": "4a5446abb9393e233ed196177f5eaf1a54c6bb11cde6075823fdb4bc74f97384",
+      "hashMatches": true,
+      "lfHashMatches": false,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 35,
+      "tag": "0035_refuse_duplicate_live_membership",
+      "appliedHash": "a63ad00fddde15fd513c8ba94a791a34aa5d609d3c4ca319b999a0b5b7ad9395",
+      "hashMatches": true,
+      "lfHashMatches": true,
+      "crlfHashMatches": true
+    },
+    {
+      "id": 36,
+      "tag": "0036_company_live_membership_unique",
+      "appliedHash": "f1719db45a2a5e959662a6a7c697d8b7d7abef8d12bceab557c0ec37c7796fbb",
+      "hashMatches": true,
+      "lfHashMatches": true,
+      "crlfHashMatches": true
+    }
+  ],
+  "pendingMigrations": [
+    {
+      "tag": "0037_phase_d3_writer_agent",
+      "hash": "f0dffb25b760d3cd141cefc8ec2b9c30b91e46eedffcba207a1a372f0607d107"
+    },
+    {
+      "tag": "0038_phase_d4a_event_orders",
+      "hash": "8a69a09baa10817a77d452b9a2dc05e273eb7a03e9484e4ef71d26bf383d08e0"
+    },
+    {
+      "tag": "0039_ticket_refund_failure",
+      "hash": "0e36e70b9bd5b3e544a9e621b039fb4f0726e38868ac9502408fd415dc0a679e"
+    },
+    {
+      "tag": "0040_phase_d_aiops_bot_cohort",
+      "hash": "fcc4c4ddc01cc2a2df4fb36ce68c6cc88b4e9cfa38bc6ce34c2d8fd50d21666d"
+    },
+    {
+      "tag": "0041_showcase-lead-email-outbox",
+      "hash": "02359e1e3506b83db5bd01984cafc2a988af86ebca88966ba3b1372f56f83784"
+    },
+    {
+      "tag": "0042_ticket_email_outbox",
+      "hash": "afac7d47860ff3fc1e7c25d557d7a9dffc9b4ec612c495bee393f2650469d9e4"
+    },
+    {
+      "tag": "0043_event_checkout_recoveries",
+      "hash": "4772fa2eddd45a5888d62233773276d664bdbe18de8c2e96514844ba9dcd682b"
+    },
+    {
+      "tag": "0044_event_cancellation_notifications",
+      "hash": "c3f7b507ec6a93c110eac3a34a39b5158652f95f991ed428a1e8626002ba5dff"
+    },
+    {
+      "tag": "0045_admin_member_views",
+      "hash": "cd0cd6cd1a8cbc707eccb686ce1c7ad9db06f710efecd59c0b316ea2274aec29"
+    },
+    {
+      "tag": "0046_admin_batches",
+      "hash": "5676817ea5b73667b70736a74a33b905d82e9ad7715e1b8569c9303f4d27d1b5"
+    },
+    {
+      "tag": "0047_member_imports",
+      "hash": "a9f7ad70f3a1ad9f37faa8f90e97a44522f05dd48dba7c9076e592ca80b4bcb6"
+    },
+    {
+      "tag": "0048_membership_grants",
+      "hash": "848b0adc8a5f1bfd7a04f1fa1a5ca8a824ea1152854a7f6abbe929dc8e4993b8"
+    },
+    {
+      "tag": "0049_shared_rate_limit",
+      "hash": "a6a780db5e06edf7dde626dabddf7e305a5b95908c15e308af01b38ded2d78f8"
+    },
+    {
+      "tag": "0050_event_attendee_exports",
+      "hash": "75615e97487c6e9219bb117a7770fac50a5b044c9e9f5e2c1a49dbc60c88de37"
+    },
+    {
+      "tag": "0051_auth_rate_limits",
+      "hash": "fd9325267d5892a7b061c95fa94cf4cea8345a5eed5a79397700120acbb5f51a"
+    }
+  ],
+  "membershipGrantColumns": [],
+  "pendingTablePresence": [
+    {
+      "name": "event_order_seats",
+      "present": null
+    },
+    {
+      "name": "event_orders",
+      "present": null
+    },
+    {
+      "name": "showcase_lead_email_outbox",
+      "present": null
+    },
+    {
+      "name": "ticket_email_outbox",
+      "present": null
+    },
+    {
+      "name": "event_checkout_recoveries",
+      "present": null
+    },
+    {
+      "name": "event_cancellation_intents",
+      "present": null
+    },
+    {
+      "name": "event_cancellation_notifications",
+      "present": null
+    },
+    {
+      "name": "email_address_blocks",
+      "present": null
+    },
+    {
+      "name": "admin_member_views",
+      "present": null
+    },
+    {
+      "name": "admin_batches",
+      "present": null
+    },
+    {
+      "name": "admin_batch_items",
+      "present": null
+    },
+    {
+      "name": "member_import_uploads",
+      "present": null
+    },
+    {
+      "name": "member_import_runs",
+      "present": null
+    },
+    {
+      "name": "member_import_rows",
+      "present": null
+    },
+    {
+      "name": "member_operations_metadata",
+      "present": null
+    },
+    {
+      "name": "rate_limit_buckets",
+      "present": null
+    },
+    {
+      "name": "admin_batch_export_artifacts",
+      "present": null
+    }
+  ],
+  "ticketedEventCount": 0,
+  "metricsView": [
+    {
+      "matviewname": "aiops_monthly_metrics"
+    }
+  ],
+  "grantProbe": {
+    "passed": false,
+    "code": "42703"
+  }
+}

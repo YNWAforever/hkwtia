@@ -1,0 +1,72 @@
+{
+  "locale": "zh-HK",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": [
+        {
+          "targets": [
+            ".impact-metrics > div:nth-child(1) > strong"
+          ]
+        },
+        {
+          "targets": [
+            ".impact-metrics > div:nth-child(2) > strong"
+          ]
+        },
+        {
+          "targets": [
+            ".impact-metrics > div:nth-child(2) > small"
+          ]
+        },
+        {
+          "targets": [
+            ".impact-metrics > div:nth-child(3) > strong"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(3) > small"
+          ]
+        },
+        {
+          "targets": [
+            ".impact-metrics > div:nth-child(4) > strong"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(4) > small"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(5) > strong"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(5) > small"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(6) > strong"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(6) > small"
+          ]
+        },
+        {
+          "targets": [
+            "div:nth-child(7) > strong"
+          ]
+        }
+      ]
+    }
+  ],
+  "production": false
+}

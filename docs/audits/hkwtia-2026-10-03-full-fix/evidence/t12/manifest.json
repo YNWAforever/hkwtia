@@ -1,0 +1,232 @@
+{
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "observedAt": "2026-10-04T12:50:33.669145+00:00",
+  "syntheticEvidenceOnly": true,
+  "files": [
+    {
+      "file": "build-proof.json",
+      "bytes": 100788,
+      "sha256": "48767b0803e5931b174d22c52581e5145ac58a9bf276429fd786085d1607baaf"
+    },
+    {
+      "file": "ci-source.json",
+      "bytes": 1823,
+      "sha256": "f8df8851f1dbdd6aa9082073077fa649282d2b9eb240cc5c5f6b877c3705cd84"
+    },
+    {
+      "file": "commands.json",
+      "bytes": 1559,
+      "sha256": "11c9f78da909c6a96110f6b7e5dccb27e80c02169a24c9f895c0f0c0a452a551"
+    },
+    {
+      "file": "en-board-content-desktop.png",
+      "bytes": 120983,
+      "sha256": "7c51b81343e45c92e3c22e56a6839ffce341c6a3cb50f77e96e80f90354a27d1"
+    },
+    {
+      "file": "en-board-content-mobile.png",
+      "bytes": 77763,
+      "sha256": "79d72b375f956c641797f59ee12f52f8993e9d3540bc8f2f893816bb6e4c9aa1"
+    },
+    {
+      "file": "en-event-content-desktop.png",
+      "bytes": 176767,
+      "sha256": "b55b8c101b828536714646088e02c38db7f634cb24e1976a81dc0e5eaa41bae2"
+    },
+    {
+      "file": "en-event-content-mobile.png",
+      "bytes": 138914,
+      "sha256": "41d2da5761ad169642662da8104f4ba8267da664ee70b4860883eb4eec21d5cc"
+    },
+    {
+      "file": "en-news-content-desktop.png",
+      "bytes": 141446,
+      "sha256": "fdb9a4e1f410ce78694079fd6f2bab9b1d576b010216ab11588d45da47371294"
+    },
+    {
+      "file": "en-news-content-mobile.png",
+      "bytes": 100052,
+      "sha256": "7cb4d99332e52b7cd6f7afe33f60595af956ad86028e281ce289aa8b12a11ecc"
+    },
+    {
+      "file": "en-preview-board-desktop.png",
+      "bytes": 121199,
+      "sha256": "9f08cace00967d071da483c98e13eec6cf5052b1ee56bc2c390d9962d34b20ef"
+    },
+    {
+      "file": "en-preview-board-mobile.png",
+      "bytes": 77705,
+      "sha256": "5937d3b4d3cbe19df282e8a0f890ce0f16c1cfac99287f8de832d151d287b4a8"
+    },
+    {
+      "file": "en-preview-event-desktop.png",
+      "bytes": 191383,
+      "sha256": "64490623767a1780be613c4793c2d253ef5f738b4fd30b335438625d61919af4"
+    },
+    {
+      "file": "en-preview-event-mobile.png",
+      "bytes": 139167,
+      "sha256": "78cc66c72eb1cdc38630a50c3e4d3672e16cfb5e0eaced0684e9f8c07a005110"
+    },
+    {
+      "file": "en-preview-news-desktop.png",
+      "bytes": 141075,
+      "sha256": "d9fbad64e959db3c45fbe95b438f24260959083cb90de06f1b3850273eb278fb"
+    },
+    {
+      "file": "en-preview-news-mobile.png",
+      "bytes": 100212,
+      "sha256": "655d00ed92e9e30b13ee64ce1dc554e03829753287187a0e5c9c5b2c426478e2"
+    },
+    {
+      "file": "full-skips.json",
+      "bytes": 113622,
+      "sha256": "09f942ef8cba035c627f3c63bbe9d274aa1622a9a921e2e740665cfccd500537"
+    },
+    {
+      "file": "full.json",
+      "bytes": 442,
+      "sha256": "ccd6e02afa7ee4bb256f48d26a533db973343838c1bbc10a476cd061b62eef9e"
+    },
+    {
+      "file": "isolated-migration.json",
+      "bytes": 346,
+      "sha256": "05c9c9f808031af69e8a1e7124af99d2dcb91952d968427ddfad2abbf5e479ab"
+    },
+    {
+      "file": "literal-render-green.json",
+      "bytes": 97,
+      "sha256": "e5f67607ab575409c455d2a1bdfa1b105a63c1aaebfe4fe5437609b9ff333cf8"
+    },
+    {
+      "file": "literal-render-red.json",
+      "bytes": 97,
+      "sha256": "ac24c579faa90579bdbe3b89fc6752b459f1f26c0678fef6072a714a7084c245"
+    },
+    {
+      "file": "native-current.json",
+      "bytes": 1824,
+      "sha256": "abead2710116a624882af139931b703988892c79c66711e9eebeadff4decd5c4"
+    },
+    {
+      "file": "native-first-fail.json",
+      "bytes": 592,
+      "sha256": "1d27d67119f0560d81ad14a4f21145ff61cbce9c85e2e7928f665592784f5455"
+    },
+    {
+      "file": "native-literal-fail.json",
+      "bytes": 644,
+      "sha256": "c075dc11f9779932a650dfb5bb1fcda1f37e27f4aa71f46e344e156cc090357d"
+    },
+    {
+      "file": "native-safe.json",
+      "bytes": 352,
+      "sha256": "b929f5f25d4661a7424238b42117cf5d22a2a230d8e9c302f56fb16aca92b997"
+    },
+    {
+      "file": "native-second-fail.json",
+      "bytes": 608,
+      "sha256": "5b14fa7f989cd8507edd7bdbdc187bc1cc596f38f6912bef12fbc064d573cb88"
+    },
+    {
+      "file": "navigation-diagnostic.json",
+      "bytes": 654,
+      "sha256": "b3d571e9770bddc1c057d5ec796f4929322bd4463576abdca0f15dd2005afaea"
+    },
+    {
+      "file": "preview-configuration.json",
+      "bytes": 10228,
+      "sha256": "a33b9f4417d3988d37c5c5d35cba1c69a000db65897b30e56e7f27905ffe13e3"
+    },
+    {
+      "file": "preview-deployment.json",
+      "bytes": 498,
+      "sha256": "74248e8f5f878a6768958717fd6d9dd3da53d373f21ec4631bc3db1ca71aeca2"
+    },
+    {
+      "file": "preview-first-fail.json",
+      "bytes": 2220,
+      "sha256": "857f4a122efe73523061071c56e7001a1d143da3466c944235d9a80035a8ea87"
+    },
+    {
+      "file": "preview-return-first-fail.json",
+      "bytes": 2232,
+      "sha256": "c2b6015070a2f07feb564fca09c0056f9d726698e90eea63568c77525685ad0c"
+    },
+    {
+      "file": "preview-runtime.json",
+      "bytes": 4043,
+      "sha256": "63febcce7b678e9f901eb0383184d056fabac2a92dde8b2c644a06be0ae751f0"
+    },
+    {
+      "file": "test-runs.json",
+      "bytes": 100023,
+      "sha256": "52515bb859d398437191de9203038b5fd77a22e8c9b149726574373f2aabb03f"
+    },
+    {
+      "file": "verification.json",
+      "bytes": 2137,
+      "sha256": "169d74d0e59ded25af96e313d4e106f315a9161d4128de8a014d0e43767fb970"
+    },
+    {
+      "file": "zh-HK-board-content-desktop.png",
+      "bytes": 158563,
+      "sha256": "40bf247cd158fa0eafd232734d6013c13bbeec1bdcef8e8589c79a39136a768e"
+    },
+    {
+      "file": "zh-HK-board-content-mobile.png",
+      "bytes": 105876,
+      "sha256": "0c193405b434c087ad4b2de0725e4aac55193809452460e99726a0aab57bc4df"
+    },
+    {
+      "file": "zh-HK-event-content-desktop.png",
+      "bytes": 242428,
+      "sha256": "12b40f9d3f69ddb956dfe237fa0957b2f0d681918260844125f62d7ccd516bb2"
+    },
+    {
+      "file": "zh-HK-event-content-mobile.png",
+      "bytes": 194969,
+      "sha256": "3f15547a2dbbcec53eab0cc7ac7535520ad0b35eefc6011a9a00300dadaea455"
+    },
+    {
+      "file": "zh-HK-news-content-desktop.png",
+      "bytes": 192948,
+      "sha256": "b156796b2a0bda0ac78f0b4e2e5d90541090b46bc42742a67e605de127207580"
+    },
+    {
+      "file": "zh-HK-news-content-mobile.png",
+      "bytes": 135986,
+      "sha256": "2b6036869dfc8b7c629a9d5b511f497e81608964bc645a289ac408466e564d46"
+    },
+    {
+      "file": "zh-HK-preview-board-desktop.png",
+      "bytes": 158688,
+      "sha256": "551be5fffd492f2bed4e28c2f16a4cac8dde99e701ca17ebda8b28f353c6e9df"
+    },
+    {
+      "file": "zh-HK-preview-board-mobile.png",
+      "bytes": 105925,
+      "sha256": "7f119731ed77008e69b58f197b09a173033bfac2a4deffe1b0f82ffa38971bc2"
+    },
+    {
+      "file": "zh-HK-preview-event-desktop.png",
+      "bytes": 260347,
+      "sha256": "910433ea78a0add67f1904287d527e1864997d48c5e09e3715dfabf9ec994d52"
+    },
+    {
+      "file": "zh-HK-preview-event-mobile.png",
+      "bytes": 195321,
+      "sha256": "382e804213780cc12015e21e70a78bc6875841f599c170ce51556a67b4dcac89"
+    },
+    {
+      "file": "zh-HK-preview-news-desktop.png",
+      "bytes": 191054,
+      "sha256": "c73492731c17fcd68d6a3e3df67d828ca0dc949986918fd97b9934c46096b983"
+    },
+    {
+      "file": "zh-HK-preview-news-mobile.png",
+      "bytes": 135883,
+      "sha256": "6bdd058d0f48997dcea9242b5c5d141f4b1966f4357f6997665da35094c2f18a"
+    }
+  ]
+}

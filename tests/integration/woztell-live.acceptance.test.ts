@@ -3,6 +3,7 @@ import {describe, expect, it} from "vitest";
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {
+  acceptanceTemplateVariables,
   isWoztellAcceptanceEnabled,
   requireWoztellAcceptanceAuthorization,
 } from "@/tests/fixtures/woztell-live-acceptance";
@@ -19,10 +20,21 @@ describe.runIf(authorized)("WOZTELL separately authorized live acceptance", () =
       WOZTELL_WEBHOOK_SECRET: credentials.webhookSecret,
     });
 
-    expect(credentials.approvedTemplateKeys.has("concierge_follow_up_en"))
-      .toBe(true);
-    expect(WHATSAPP_TEMPLATES.concierge_follow_up_en.variables)
-      .toEqual(["memberName", "supportUrl"]);
+    // C-9 (C2 Task 13 Step 2). The template is whichever one the operator
+    // approved, not a hard-coded concierge follow-up: the harness's ceiling was
+    // lifted so this run can exercise a MARKETING template — the blast half of
+    // the §6 gate — and hard-coding here would have gone red for exactly the
+    // approval set that widening exists to allow.
+    const [templateKey] = [...credentials.approvedTemplateKeys];
+    if (!templateKey) throw new Error("WOZTELL_ACCEPTANCE_TEMPLATE_APPROVAL_REQUIRED");
+    const variables = acceptanceTemplateVariables(templateKey);
+    // Meta rejects a template send whose BODY parameters are empty, and the
+    // adapter builds the body as `variables[key] ?? ""`.
+    expect(Object.keys(variables))
+      .toEqual([...WHATSAPP_TEMPLATES[templateKey].variables]);
+    for (const value of Object.values(variables)) {
+      expect(value.trim().length).toBeGreaterThan(0);
+    }
     expect(adapter.verifyWebhook(
       credentials.recordedRawWebhookBody,
       credentials.recordedWebhookSignature,
@@ -37,11 +49,8 @@ describe.runIf(authorized)("WOZTELL separately authorized live acceptance", () =
     await expect(adapter.sendTemplateMessage({
       whatsappOptIn: true,
       whatsappNumber: credentials.recipientId,
-      template: "concierge_follow_up_en",
-      variables: {
-        memberName: "Acceptance",
-        supportUrl: "https://www.hkwtia.org/en/contact",
-      },
+      template: templateKey,
+      variables,
       idempotencyKey: `acceptance:${Date.now()}`,
     })).resolves.toMatchObject({
       status: "sent",

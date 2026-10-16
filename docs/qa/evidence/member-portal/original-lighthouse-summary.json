@@ -1,0 +1,439 @@
+{
+  "runId": 38230512485,
+  "artifactId": 11738656043,
+  "artifactSha256": "75578c2cb63c9c4a30d2b61646fc7b99171f0fd4bb736bc12f1330fce92f7826",
+  "headSha": "e8254bab79cff5945da4abe995a7c075d0ce3d57",
+  "conclusion": "failure",
+  "reports": [
+    {
+      "file": "lhr-1791797655807.json",
+      "url": "https://hkwtia.vercel.app/programmes",
+      "fetchTime": "2026-10-12T09:34:05.323Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1274.7075,
+        "largest-contentful-paint": 2474.7075,
+        "total-blocking-time": 94,
+        "cumulative-layout-shift": 0,
+        "speed-index": 2385.0323179999964
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 144,
+          "startTime": 2039.7075
+        },
+        {
+          "url": "https://hkwtia.vercel.app/programmes",
+          "duration": 118,
+          "startTime": 991.7075
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797689806.json",
+      "url": "https://hkwtia.vercel.app/zh",
+      "fetchTime": "2026-10-12T09:34:37.215Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1226.92,
+        "largest-contentful-paint": 2232.92,
+        "total-blocking-time": 75.5,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1822.8101760076515
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/webpack-64082f19174d990d.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 181,
+          "startTime": 2276.92
+        },
+        {
+          "url": "https://hkwtia.vercel.app/zh",
+          "duration": 179.0000000000001,
+          "startTime": 983.92
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 60,
+          "startTime": 1867.92
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797702771.json",
+      "url": "https://hkwtia.vercel.app/zh/membership",
+      "fetchTime": "2026-10-12T09:34:52.864Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1218.683,
+        "largest-contentful-paint": 2261.683,
+        "total-blocking-time": 93,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1218.683
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/zh/membership",
+          "duration": 147,
+          "startTime": 930.683
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/webpack-64082f19174d990d.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 143,
+          "startTime": 2118.683
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797745825.json",
+      "url": "https://hkwtia.vercel.app/zh/partners",
+      "fetchTime": "2026-10-12T09:35:33.008Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1243.46,
+        "largest-contentful-paint": 1543.46,
+        "total-blocking-time": 94,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1652.6600520000193
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/zh/partners",
+          "duration": 204,
+          "startTime": 984.46
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 168,
+          "startTime": 2045.46
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/3794-de0a7b0284f8b2f1.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 52,
+          "startTime": 1993.46
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797628747.json",
+      "url": "https://hkwtia.vercel.app/membership",
+      "fetchTime": "2026-10-12T09:33:38.730Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1231.795,
+        "largest-contentful-paint": 2137.795,
+        "total-blocking-time": 53,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1231.795
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/3794-de0a7b0284f8b2f1.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 156,
+          "startTime": 2131.795
+        },
+        {
+          "url": "https://hkwtia.vercel.app/membership",
+          "duration": 86.00000000000011,
+          "startTime": 995.795
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797642309.json",
+      "url": "https://hkwtia.vercel.app/events",
+      "fetchTime": "2026-10-12T09:33:51.727Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.94,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1359.271,
+        "largest-contentful-paint": 2915.2709999999997,
+        "total-blocking-time": 107,
+        "cumulative-layout-shift": 0,
+        "speed-index": 2467.790560000011
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/events",
+          "duration": 385,
+          "startTime": 974.271
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 157,
+          "startTime": 2308.2709999999997
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797674170.json",
+      "url": "https://hkwtia.vercel.app/partners",
+      "fetchTime": "2026-10-12T09:34:18.864Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1240.2145,
+        "largest-contentful-paint": 1690.2145,
+        "total-blocking-time": 120,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1630.9343259999926
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 170,
+          "startTime": 1990.2145
+        },
+        {
+          "url": "https://hkwtia.vercel.app/partners",
+          "duration": 126,
+          "startTime": 1007.2145
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797729952.json",
+      "url": "https://hkwtia.vercel.app/zh/programmes",
+      "fetchTime": "2026-10-12T09:35:19.449Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1250.2185,
+        "largest-contentful-paint": 2300.2185,
+        "total-blocking-time": 92,
+        "cumulative-layout-shift": 0,
+        "speed-index": 2383.3903319999768
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/zh/programmes",
+          "duration": 164,
+          "startTime": 964.2185
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/webpack-64082f19174d990d.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 142,
+          "startTime": 2000.2185
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797615072.json",
+      "url": "https://hkwtia.vercel.app/",
+      "fetchTime": "2026-10-12T09:33:17.316Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.7,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1628.8110000000001,
+        "largest-contentful-paint": 2679.811,
+        "total-blocking-time": 844.5,
+        "cumulative-layout-shift": 0,
+        "speed-index": 6665.195023338869
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/",
+          "duration": 517,
+          "startTime": 1466.8110000000001
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/3794-de0a7b0284f8b2f1.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 349,
+          "startTime": 2420.811
+        },
+        {
+          "url": "Unattributable",
+          "duration": 222,
+          "startTime": 1055.8110000000001
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/3794-de0a7b0284f8b2f1.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 197,
+          "startTime": 2769.811
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 192,
+          "startTime": 2082.811
+        }
+      ]
+    },
+    {
+      "file": "lhr-1791797716425.json",
+      "url": "https://hkwtia.vercel.app/zh/events",
+      "fetchTime": "2026-10-12T09:35:05.806Z",
+      "lighthouseVersion": "12.6.1",
+      "formFactor": "mobile",
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "scores": {
+        "performance": 0.94,
+        "accessibility": 1,
+        "best-practices": 0.79,
+        "seo": 1
+      },
+      "metrics": {
+        "first-contentful-paint": 1216.357,
+        "largest-contentful-paint": 2881.357,
+        "total-blocking-time": 115,
+        "cumulative-layout-shift": 0,
+        "speed-index": 2414.9208879999815
+      },
+      "slowTasks": [
+        {
+          "url": "https://hkwtia.vercel.app/zh/events",
+          "duration": 190,
+          "startTime": 1000.357
+        },
+        {
+          "url": "https://hkwtia.vercel.app/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_CZQMJB8LRDBpYdgGX1zWwsdZfhpo",
+          "duration": 165,
+          "startTime": 2266.357
+        },
+        {
+          "url": "Unattributable",
+          "duration": 55,
+          "startTime": 916.357
+        }
+      ]
+    }
+  ]
+}

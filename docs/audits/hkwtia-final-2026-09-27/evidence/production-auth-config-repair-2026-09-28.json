@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-09-28T10:59:10.682Z",
+  "deploymentId": "dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A",
+  "checks": [
+    {
+      "path": "/admin-login",
+      "httpStatus": 200,
+      "googleEnabled": true
+    },
+    {
+      "path": "/zh/admin-login",
+      "httpStatus": 200,
+      "googleEnabled": true
+    },
+    {
+      "path": "/member-login",
+      "httpStatus": 200,
+      "googleEnabled": true
+    },
+    {
+      "path": "/zh/member-login",
+      "httpStatus": 200,
+      "googleEnabled": true
+    },
+    {
+      "path": "/api/auth/sign-in/email",
+      "httpStatus": 401,
+      "errorCode": "INVALID_EMAIL_OR_PASSWORD"
+    },
+    {
+      "path": "/api/auth/sign-in/magic-link",
+      "httpStatus": 400,
+      "errorCode": "VALIDATION_ERROR"
+    }
+  ],
+  "realEmailSent": false,
+  "googleAccountAuthenticated": false,
+  "googleDestination": {
+    "origin": "https://accounts.google.com",
+    "path": "/v3/signin/identifier"
+  },
+  "googleBrowserRedirectPassed": true
+}

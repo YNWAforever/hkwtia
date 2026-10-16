@@ -1,0 +1,148 @@
+{
+  "sourceSha": null,
+  "runtime": "next start / NODE_ENV=production",
+  "observedAt": "2026-10-03T08:39:35.898Z",
+  "productionDeployment": false,
+  "realProviderAcceptance": false,
+  "checks": [
+    {
+      "mode": "missing",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Keys removed and request rejected before runtime construction"
+    },
+    {
+      "mode": "disabled",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Keys removed and request rejected before runtime construction"
+    }
+  ],
+  "gitBaseSha": "1554959da0917e973eeacbd5138dd71af98a8b7f",
+  "sourceInputsVerified": true,
+  "sourceInputManifest": "build-inputs.json",
+  "cases": [
+    {
+      "title": "en 1440px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1517,
+      "screenshots": [
+        {
+          "path": "before-stacking/en-1440-missing.png",
+          "sha256": "02b80114169b0a8bedd91e44c330269dd615529a1f45048c6317629aa8db9e0a"
+        }
+      ]
+    },
+    {
+      "title": "en 390px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1256,
+      "screenshots": [
+        {
+          "path": "before-stacking/en-390-missing.png",
+          "sha256": "eed438b6370403f68cfb0c18255bb6adc1574f9371d974ee4d2b5bd37145ff61"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 1440px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1767,
+      "screenshots": [
+        {
+          "path": "before-stacking/zh-HK-1440-missing.png",
+          "sha256": "fb237e40adc060821aa4a6b3127b23c1f2d9126f2eb622debee4b9e119ee374b"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 390px real configuration failure keeps manual journeys available",
+      "mode": "missing",
+      "status": "passed",
+      "durationMs": 1413,
+      "screenshots": [
+        {
+          "path": "before-stacking/zh-HK-390-missing.png",
+          "sha256": "33432fb5ca8e42068ce0a392caf42b3cad1ee478dc926d8a14bbc3ca2d7f86ce"
+        }
+      ]
+    },
+    {
+      "title": "en 1440px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1503,
+      "screenshots": [
+        {
+          "path": "before-stacking/en-1440-disabled.png",
+          "sha256": "f23fa0054b349ecdae4e58db7a436ca85fa2489d59f85cb15ec711b926ac6175"
+        }
+      ]
+    },
+    {
+      "title": "en 390px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1128,
+      "screenshots": [
+        {
+          "path": "before-stacking/en-390-disabled.png",
+          "sha256": "da71821a6d8c19cfc124ba88c9e67515f5e176721f6d1dd0c0f8d19342ec6394"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 1440px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1257,
+      "screenshots": [
+        {
+          "path": "before-stacking/zh-HK-1440-disabled.png",
+          "sha256": "d2e598f2ecfa235a4fea1b3f565c291e909d6f362fdce89fea145c84193a6bec"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 390px real configuration failure keeps manual journeys available",
+      "mode": "disabled",
+      "status": "passed",
+      "durationMs": 1320,
+      "screenshots": [
+        {
+          "path": "before-stacking/zh-HK-390-disabled.png",
+          "sha256": "78ebfa1142624b30f6e1343f356a3081e05201f3c4765bcbbd3bb9e7d7bf537b"
+        }
+      ]
+    }
+  ],
+  "providers": "No provider success claimed; no keys present in the failure profile",
+  "contrast": {
+    "before": 3.49,
+    "required": 4.5,
+    "afterSeriousCriticalViolations": 0
+  },
+  "earlierFailures": [
+    {
+      "kind": "harness isolation flag spelling",
+      "businessWrites": 0
+    },
+    {
+      "kind": "harness IP alias self-redirect /about",
+      "resolvedBy": "existing localhost convention; app routing unchanged"
+    },
+    {
+      "kind": "real browser color-contrast",
+      "casesFailed": 4,
+      "target": "recovery message",
+      "fixedBy": "foreground text on existing alert background"
+    }
+  ]
+}

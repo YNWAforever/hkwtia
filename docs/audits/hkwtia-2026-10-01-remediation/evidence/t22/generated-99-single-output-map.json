@@ -1,0 +1,239 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "observedAt": "2026-10-02T23:04:02.443838+00:00",
+  "fullGreen": false,
+  "historicalOriginalFilesRestored": true,
+  "files": [
+    {
+      "original": "docs/audits/hkwtia-2026-09-29/evidence/join-zh-desktop.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-09-29/evidence/join-zh-desktop.png",
+      "sha256": "01e9e0f4d91e72e0b1b5e8eb89fccecf85e5c9673e23381619d3507a8ccaa1be",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-09-29/evidence/member-login-en-desktop.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-09-29/evidence/member-login-en-desktop.png",
+      "sha256": "a33bfc19369b17cd7f9bbe8362cc8dd490948fc434582e9b82a6a4e2208baacb",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-09-29/evidence/member-login-zh-mobile.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-09-29/evidence/member-login-zh-mobile.png",
+      "sha256": "7581f5538fc2d3ac2f2e7ca78cbcfaa0641b99b945ce428929a76511993908b3",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/media-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/media-browser.json",
+      "sha256": "baa26ec925999cd51000a321e27526d12c39a10e1d0912302f24694b2b7c4425",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-browser.json",
+      "sha256": "5f30852dc1a1e1d35f5df52348b0c9608a210bc7e2cb2a2c4c4e3679df37a0db",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-company-keyboard-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-company-keyboard-390.png",
+      "sha256": "3697c9a72d3e13d1e2c4d016ecb466be6e41f3b5125acc7e32abd0cf3fb01fff",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-1440.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-1440.png",
+      "sha256": "2561c3adae1f0398e95548ffffcadea36671c7b3770a03a3b88eab1694ba11f0",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-390.png",
+      "sha256": "8d18cbc602294a863aa4d984003cc38c4b7df5ee5ad8f921eec05790f5524323",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-768.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-dashboard-768.png",
+      "sha256": "99834e54eb4f63799e1f0b212df699c61cbe7a38f596f77b5648808f0dfe9591",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-member360-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/en-member360-390.png",
+      "sha256": "c987c14052f46d808b43f6bb5cd6305b5fa83a8012faad7b0c34d2699fe35a59",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-browser.json",
+      "sha256": "fbff668e1e9eabd06280f3d59e47f09a4e6b15be7550fd4c1467d25844be14e1",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-company-keyboard-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-company-keyboard-390.png",
+      "sha256": "2405d2696fb4c877c99ae158ed97764e24a8ddc2a8208029d7ec2ff355ad98ce",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-1440.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-1440.png",
+      "sha256": "06cbc95849c32e95f011f17bda995b9ef203c59ba562f4bdd84dbc6ffbe979ff",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-390.png",
+      "sha256": "d3e5a647206cadd560c4aedf6cedcfaa67b2ce3c36efc441f827640fa073157d",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-768.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-dashboard-768.png",
+      "sha256": "47c64fc9234b663ac1203b339771ad4b618e18c0439078935848e793b2ae0e55",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-member360-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t18/zh-HK-member360-390.png",
+      "sha256": "94c12a9528e879de447390fb6b25a63a067e670431c1c43afe09132e1124b620",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-browser.json",
+      "sha256": "6ecf27ea1412dde9d00316d744cdf9859312c1cb41b33ff56695d6e90bb38ce4",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-1440.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-1440.png",
+      "sha256": "9618dac1c55ba8e507849171a1356a1de13903aeeaff4774834e42cb3eac63dd",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/en-support-390.png",
+      "sha256": "0923dc7f9ed6a5e40ce346d39698cd05c90a89283a29d75cea6643a34a2fcd95",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-browser.json",
+      "sha256": "cbdf43ae1097aa8ff5a9c388b3ab9c9d22ac96a7a411c134eba819068b7d097e",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-1440.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-1440.png",
+      "sha256": "6e3d076a8204d0317a1595c58c18ce39a164cac1ce7216cd06728defd0bcb46d",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t19/zh-support-390.png",
+      "sha256": "1c43e516da475485973506f5d9d3c261db2765a0a284b9cc4c86905eb852629a",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-browser.json",
+      "sha256": "69c39ce0ecfc1abe29aa61e4151c99747680600f01073c74cf9c13b83ca6c795",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-1440.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-1440.png",
+      "sha256": "a293535690727852b0d96e40a12634c66535fbb989882812255524c00f025b5f",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/en-partners-390.png",
+      "sha256": "cb8b336c494ed96fa7d10c3a87c6533b29c1406016d325a4e03d9651bbad9420",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-browser.json",
+      "sha256": "93820ffd6b157c1e53deec2e82f2d66f48ae7bf33fcfd496ae1c16f060b0ae2c",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-1440.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-1440.png",
+      "sha256": "fdb943351f7ea0292279cd12d6beaff1d01c16a6e6ec9352ef8c4cac344cfd9e",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t20/zh-partners-390.png",
+      "sha256": "614036d9ece7840e5571f17318847a4a2cb74484192cc723334aa28f92e58f03",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/cache-browser.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/cache-browser.json",
+      "sha256": "b5d590a20320d7bcc36cb0a59bb0d00367b86372047b9161d8ca673879d529ae",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en-390.png",
+      "sha256": "bba3873738d223779fabb608ee4ab0ebb5d58f345b26cda0b53fa6cb3859984b",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-en.json",
+      "sha256": "8032f5b038fd727d688473117efde6fa12c4cf3f04cb2e8b0b9f012e5fdd946c",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK-390.png",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK-390.png",
+      "sha256": "d6b899a6fe55c08cc6c335340e682112247f0545dbbfe811a53b401d52d41c0f",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    },
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK.json",
+      "captured": "evidence/t22/observed-99-single-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t21/paint-zh-HK.json",
+      "sha256": "260c23ad8b29e3fa4e2a3f3c16da948391a7e1d557465ade606dcfd0203d5ffc",
+      "parentRun": "evidence/t22/browser-99-single.json",
+      "provenance": "generated output from the completed original full collection; consult parent case outcome, not all cases passed"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "runId": 37207503898,
+  "headSha": "8f6349340c18283a77230cdb7cbfa5e68a3a9377",
+  "codeSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+  "merge": {
+    "headRefOid": "8f6349340c18283a77230cdb7cbfa5e68a3a9377",
+    "mergeCommit": {
+      "oid": "899e74cfc034f3f223dec39c51ecf18c26de4fdb"
+    },
+    "mergedAt": "2026-10-04T14:06:49Z",
+    "state": "MERGED"
+  },
+  "checks": [
+    {
+      "name": "checks",
+      "result": "SUCCESS",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37207503898/job/111451670130"
+    },
+    {
+      "name": "tests (1)",
+      "result": "SUCCESS",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37207503898/job/111451670208"
+    },
+    {
+      "name": "tests (2)",
+      "result": "SUCCESS",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37207503898/job/111451670070"
+    },
+    {
+      "name": "worker",
+      "result": "SUCCESS",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37207503898/job/111451670165"
+    },
+    {
+      "name": "quality",
+      "result": "SUCCESS",
+      "url": "https://github.com/YNWAforever/hkwtia/actions/runs/37207503898/job/111452568858"
+    },
+    {
+      "name": "Vercel",
+      "result": "SUCCESS",
+      "url": "https://vercel.com/ynwaforevers-projects/hkwtia/HGDJ3arom2mBfqXJjiamtC3XABQU"
+    },
+    {
+      "name": "Vercel Preview Comments",
+      "result": "SUCCESS",
+      "url": "https://vercel.com/github"
+    }
+  ],
+  "rootSuite": {
+    "pass": 6748,
+    "skip": 562,
+    "fail": 0,
+    "shards": 2
+  },
+  "worker": {
+    "pass": 57,
+    "skip": 0,
+    "fail": 0
+  },
+  "environment": "GitHub Ubuntu node22 exact same source/collection, disjoint2 shards; worker separate",
+  "productionReadOnly": {
+    "observedAt": "2026-10-04T14:05:21.547Z",
+    "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+    "productionGitBranch": "release",
+    "production": {
+      "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+      "state": "READY",
+      "target": "production",
+      "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "gitRef": "main"
+    },
+    "readOnly": true,
+    "productionChanged": false
+  }
+}

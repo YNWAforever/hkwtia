@@ -127,7 +127,18 @@ describe("auth send-path rate limiting", () => {
     await expect(request.json()).resolves.toEqual({email: "person@example.test"});
   });
 
-  it("ignores an oversized body rather than buffering it", async () => {
+  it("rejects an oversized send body with no Content-Length before the provider reads it", async () => {
+    const request = new Request("https://hkwtia.test/api/auth/sign-in/magic-link", {
+      method: "POST",
+      headers: {"content-type": "application/json", "x-vercel-forwarded-for": "203.0.113.10"},
+      body: JSON.stringify({email: "person@example.test", pad: "x".repeat(9_000)}),
+    });
+    expect(request.headers.get("content-length")).toBeNull();
+    const response = await rateLimitAuthRequest(request, limiters());
+    expect(response?.status).toBe(413);
+  });
+
+  it("rejects a declared oversized body without buffering it", async () => {
     const request = new Request("https://hkwtia.test/api/auth/sign-in/magic-link", {
       method: "POST",
       headers: {
@@ -138,8 +149,8 @@ describe("auth send-path rate limiting", () => {
       body: JSON.stringify({email: "person@example.test", pad: "x".repeat(9_000)}),
     });
 
-    // Allowed through on the IP bucket, but the address was never extracted.
-    await expect(rateLimitAuthRequest(request, limiters())).resolves.toBeNull();
+    const response = await rateLimitAuthRequest(request, limiters());
+    expect(response?.status).toBe(413);
   });
 });
 
@@ -201,31 +212,31 @@ describe("the route module", () => {
 describe("the shared decision used by the /join Server Action", () => {
   // auth.signIn.magicLink fetches the upstream service directly, so /join never
   // passes through the route wrapper. Both entrypoints must share this.
-  it("applies the same IP and email ceilings the route uses", () => {
+  it("applies the same IP and email ceilings the route uses", async () => {
     const dependencies = limiters();
     const send = (email: string, ip: string | null = "203.0.113.10") =>
       checkAuthSend({ip, email}, dependencies);
 
-    expect(send("a@example.test").allowed).toBe(true);
-    expect(send("a@example.test").allowed).toBe(true);
-    const blocked = send("a@example.test");
+    expect((await send("a@example.test")).allowed).toBe(true);
+    expect((await send("a@example.test")).allowed).toBe(true);
+    const blocked = await send("a@example.test");
     expect(blocked.allowed).toBe(false);
     expect(blocked.retryAfterSeconds).toBeGreaterThan(0);
   });
 
-  it("charges the IP bucket before the email bucket", () => {
+  it("charges the IP bucket before the email bucket", async () => {
     const dependencies = limiters();
 
     // Three distinct addresses from one source exhausts the IP ceiling of 3,
     // so a fourth is refused even though no address has been used twice.
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      expect(checkAuthSend({ip: "198.51.100.7", email: `x${attempt}@example.test`}, dependencies).allowed).toBe(true);
+      expect((await checkAuthSend({ip: "198.51.100.7", email: `x${attempt}@example.test`}, dependencies)).allowed).toBe(true);
     }
-    expect(checkAuthSend({ip: "198.51.100.7", email: "fresh@example.test"}, dependencies).allowed).toBe(false);
+    expect((await checkAuthSend({ip: "198.51.100.7", email: "fresh@example.test"}, dependencies)).allowed).toBe(false);
   });
 
-  it("allows a send with no address once the IP bucket has room", () => {
-    expect(checkAuthSend({ip: "198.51.100.8", email: null}, limiters()).allowed).toBe(true);
+  it("allows a send with no address once the IP bucket has room", async () => {
+    expect((await checkAuthSend({ip: "198.51.100.8", email: null}, limiters())).allowed).toBe(true);
   });
 });
 
@@ -241,6 +252,7 @@ describe("the /join Server Action shares the guard", () => {
   });
 
   it("reports the refusal with a localized message rather than a generic auth error", () => {
-    expect(source).toContain('t("errors.rateLimited")');
+    expect(source).toContain('"errors.rateLimited"');
+    expect(source).toContain('"errors.limiterUnavailable"');
   });
 });

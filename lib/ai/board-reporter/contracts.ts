@@ -59,6 +59,10 @@ function percentageMetric(id:
     numerator: z.number().int().nonnegative(),
     denominator: z.number().int().nonnegative(),
   }).strict().superRefine((metric, context) => {
+    const expected = metric.denominator === 0 ? null : Math.round(metric.numerator / metric.denominator * 1000) / 10;
+    if (metric.value !== expected) {
+      context.addIssue({code: z.ZodIssueCode.custom, path: ["value"], message: "percentage disagrees with authoritative ratio"});
+    }
     if (metric.numerator > metric.denominator) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -112,3 +116,6 @@ export function buildBoardNarrativePrompt(factPack: BoardFactPack): string {
     JSON.stringify(facts),
   ].join("\n");
 }
+
+export const bilingualBoardNarrativeSchema = z.object({en: boardNarrativeSchema, zhHK: boardNarrativeSchema.refine(value => /\p{Script=Han}/u.test(value.executiveSummary), {message: "Chinese summary is required"})}).strict();
+export type BilingualBoardNarrative = z.infer<typeof bilingualBoardNarrativeSchema>;

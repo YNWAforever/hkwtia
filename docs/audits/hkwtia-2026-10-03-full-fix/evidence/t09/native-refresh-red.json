@@ -1,0 +1,11 @@
+{
+  "sourceSha": "7c4adaafdf984a7259cb30a1d07cc1f588ad2846",
+  "pass": 11,
+  "fail": 2,
+  "failedBehavior": "Successful case write/revalidation remounted the form by record.version and removed Saved feedback; both languages failed actual native assertion",
+  "rootCause": "ApplicationCaseForm key={record.version}",
+  "expected": "Persist Saved feedback and unsaved field snapshot; expose stale-version recovery",
+  "providerRequests": 0,
+  "production": false,
+  "logSha256": "c307fbc9971b6223549b8be7319661310e02da574a36d33e825a3fe0606a66b6"
+}

@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-10-04T10:42:45.495389+00:00",
+  "sourceSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+  "runtimeSourceSha": "92fa8e338bf0dab773490d38f0bbc86d73b0926e",
+  "branch": "codex/bounded-retention-drafts-20261003",
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/137",
+  "code": "PASS",
+  "actualPostgresDistinct": 61,
+  "nativePassed": 2,
+  "previewChecks": 19,
+  "externalModelCalls": 0,
+  "outboundMessages": 0,
+  "migration": "0060_retention_work_result",
+  "isolatedLedger": 60,
+  "fullCi": {
+    "unitPassed": 6698,
+    "skipped": 555,
+    "failed": 0,
+    "workerPassed": 57,
+    "runId": 37195649773,
+    "all7": "SUCCESS"
+  },
+  "provider": "BLOCKED_APPROVED_MODEL_DATA_CREDENTIAL_CAPS_REAL_RECEIPTS",
+  "worker": "BLOCKED_PINNED_SERVICE_BINDING_TWO_ACTUAL_WINDOWS",
+  "productionReleased": false,
+  "productionCapabilityEnabled": false,
+  "limits": [
+    "Password Auth/offline proposals are not Google/magic-link/real model acceptance.",
+    "Keep shared system proposals and both existing risk branches.",
+    "Approval does not send; batch/sender independently revalidate.",
+    "Loopback is not HK/SG performance evidence.",
+    "Initial failures retained; exactsource CI/native green.",
+    "Narrow mobile table will be improved under T15 visual acceptance."
+  ]
+}

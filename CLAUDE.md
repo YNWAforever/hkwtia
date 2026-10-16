@@ -59,7 +59,7 @@ caused production incidents recorded in the AGENTS.md changelog.
 
 ## Conventions
 
-- Server Components by default; `'use client'` only for interactive browser behaviour (25 files).
+- Server Components by default; `'use client'` only for interactive browser behaviour (40 files).
 - Files are kebab-case, without exception (378/378).
 - Strict TypeScript; no `any` unless the code carries a reasoned comment.
 - Zod for input validation at every boundary.
@@ -91,7 +91,20 @@ acceptance test at a shared or production database.
 
 ## Known deadline
 
-`lib/email/unsubscribe-token.ts` sets `LEGACY_UNSUBSCRIBE_SECRET_SUNSET = "2026-09-06"`. On that
-date `tests/unit/unsubscribe-secret-rotation.test.ts` starts failing by design. Remove the
-`cronSecret` fallback from `lib/api/unsubscribe-route.ts` and
-`app/[locale]/(public)/unsubscribe/page.tsx`, then delete the constant and that test.
+None outstanding. The one that stood here — `LEGACY_UNSUBSCRIBE_SECRET_SUNSET`, the `cronSecret`
+fallback for unsubscribe links — came due on 2026-09-10 and was removed that day
+(Phase B of `docs/superpowers/plans/2026-09-01-unsubscribe-secret-sunset.md`). Its one-shot timer
+is now a permanent invariant in `tests/unit/unsubscribe-secret-rotation.test.ts`: neither call site
+may reference `cronSecret` again.
+
+If you add another dated deadline, record it here **and** back it with a test that fails on the
+date, the way that one did — and give the test a fixed clock for anything it mints, not the wall
+clock. `tests/unit/unsubscribe-one-click.test.ts` minted a token at a frozen instant and verified it
+against `Date.now()`, so it passed for thirty days and turned red on the day the fixture expired.
+
+## Active programme: WiseTech design fidelity (2026-09)
+
+Execution spec: `docs/superpowers/plans/2026-09-01-wisetech-design-fidelity.md` (read its Appendix D errata
+first). Work packages WP-0…WP-8 in order; design = presentation authority, hkwtia = data/route/auth
+authority; donor repo is read-only evidence (`../wisetech`, produced from local commit `f91ecc5`).
+Living status: `docs/integration/wisetech-design-fidelity-checklist.md`.

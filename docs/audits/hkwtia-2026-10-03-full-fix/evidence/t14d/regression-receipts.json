@@ -1,0 +1,95 @@
+[
+  {
+    "kind": "baseline behavioural mutation",
+    "originalPrivateLog": ".playwright/full-fix-t14d-expanded-mutation-red.log",
+    "summary": "Test Files  1 failed (1)\nTests  34 failed | 7 passed | 7 skipped (48)\nStart at  14:07:00\nDuration  46.61s (transform 585ms, setup 128ms, collect 1.93s, tests 43.85s, environment 0ms, prepare 90ms)",
+    "failedTargetBehaviours": [
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > STOP committed after queue but before transport refuses the send and retains a truthful failed ledger",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > contact STOP after queue is read from the contact store rather than member opt-in",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > a takeover change after the send claim stops the old human operation",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > a changed recipient link cannot receive an earlier queued reply",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > unknown acceptance is not retried; a matching synthetic provider echo and delivered/read ticks reconcile the same row",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > a new client attempt cannot bypass an unresolved identical send",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > an ambiguous identical echo never selects one of two queued attempts by recency",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > wrong-locale approved template is refused before the queue or provider",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > template approval withdrawn during queue is rechecked before effects",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > campaign timeout is an unknown effect and does not retry the same persisted delivery",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > campaign STOP committed during reservation blocks dispatch using fresh actual contact facts",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > journey provider retryable_network is reconciled before any second send or administrative retry",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > journey provider retryable_server is reconciled before any second send or administrative retry",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > a journey worker cannot resend an existing processing effect after an expired parent lease",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > journey email unsubscribe committed during reservation blocks the pending marketing send",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > raw or legacy-authorized unknown delivery retryable_network cannot bypass repository reconciliation",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > raw or legacy-authorized unknown delivery retryable_server cannot bypass repository reconciliation",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > raw or legacy-authorized unknown delivery admin_retry_retryable_network cannot bypass repository reconciliation",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > raw or legacy-authorized unknown delivery admin_retry_retryable_server cannot bypass repository reconciliation",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > raw or legacy-authorized unknown delivery provider_unclassified_failure cannot bypass repository reconciliation",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > email campaign provider retryable_network never retries an unknown external effect",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > email campaign provider retryable_server never retries an unknown external effect",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > email campaign unsubscribe during reservation prevents provider send and records suppression",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > journey facts changed after reservation cannot send the stale rendered body",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > batch pass preview blocks a pre-existing unknown provider effect",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > batch execution rechecks an effect that becomes unknown after its eligible preview",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > retryable_network ticket outbox effect becomes uncertain immediately rather than being blindly reissued inside provider TTL",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > retryable_server ticket outbox effect becomes uncertain immediately rather than being blindly reissued inside provider TTL",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > delivery_unknown ticket outbox effect becomes uncertain immediately rather than being blindly reissued inside provider TTL",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > retryable_network lead outbox effect becomes uncertain immediately rather than being blindly reissued inside provider TTL",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > retryable_server lead outbox effect becomes uncertain immediately rather than being blindly reissued inside provider TTL",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > delivery_unknown lead outbox effect becomes uncertain immediately rather than being blindly reissued inside provider TTL",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > ticket outbox worker restart after a frozen payload cannot adopt an expired send lease",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > lead outbox worker restart after a frozen payload cannot adopt an expired send lease"
+    ],
+    "infrastructureFailure": false
+  },
+  {
+    "kind": "byte-restored mutation",
+    "originalPrivateLog": ".playwright/full-fix-t14d-expanded-mutation-green.log",
+    "summary": "Test Files  1 passed (1)\nTests  41 passed | 7 skipped (48)\nStart at  14:07:48\nDuration  57.30s (transform 535ms, setup 92ms, collect 1.73s, tests 55.17s, environment 0ms, prepare 90ms)",
+    "failedTargetBehaviours": [],
+    "infrastructureFailure": false
+  },
+  {
+    "kind": "actual batch preview/execute RED",
+    "originalPrivateLog": ".playwright/full-fix-t14d-batch-pass-red.log",
+    "summary": "Test Files  1 failed (1)\nTests  2 failed | 38 skipped (40)\nStart at  13:40:54\nDuration  9.36s (transform 551ms, setup 167ms, collect 1.94s, tests 6.91s, environment 0ms, prepare 103ms)",
+    "failedTargetBehaviours": [
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > batch pass preview blocks a pre-existing unknown provider effect",
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > batch execution rechecks an effect that becomes unknown after its eligible preview"
+    ],
+    "infrastructureFailure": false
+  },
+  {
+    "kind": "post-reservation stale-body RED",
+    "originalPrivateLog": ".playwright/full-fix-t14d-journey-facts-red.log",
+    "summary": "Test Files  1 failed (1)\nTests  1 failed | 45 skipped (46)\nStart at  13:47:14\nDuration  8.61s (transform 559ms, setup 114ms, collect 1.76s, tests 6.43s, environment 0ms, prepare 86ms)",
+    "failedTargetBehaviours": [
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > journey facts changed after reservation cannot send the stale rendered body"
+    ],
+    "infrastructureFailure": false
+  },
+  {
+    "kind": "refund-during-render RED",
+    "originalPrivateLog": ".playwright/full-fix-t14d-pass-final-preflight-red.log",
+    "summary": "Test Files  1 failed (1)\nTests  1 failed | 46 skipped (47)\nStart at  13:52:49\nDuration  12.76s (transform 851ms, setup 168ms, collect 2.66s, tests 9.23s, environment 0ms, prepare 150ms)",
+    "failedTargetBehaviours": [
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > manual pass order refunded during render is rechecked before the provider request"
+    ],
+    "infrastructureFailure": false
+  },
+  {
+    "kind": "queued preservation RED",
+    "originalPrivateLog": ".playwright/full-fix-t14d-pause-red.log",
+    "summary": "Test Files  1 failed (1)\nTests  1 failed | 47 skipped (48)\nStart at  14:01:58\nDuration  9.29s (transform 708ms, setup 99ms, collect 2.46s, tests 6.40s, environment 0ms, prepare 87ms)",
+    "failedTargetBehaviours": [
+      "staff delivery recovery on actual all-migration PostgreSQL; synthetic provider boundary only > pausing batch pass sends preserves the queued notice and resumes the original effect only"
+    ],
+    "infrastructureFailure": false
+  },
+  {
+    "kind": "actual full-migration PG and legacy contracts",
+    "originalPrivateLog": ".playwright/full-fix-t14d-final-pg-legacy-green.log",
+    "summary": "Test Files  9 passed (9)\nTests  119 passed (119)\nStart at  14:04:50\nDuration  72.72s (transform 1.22s, setup 855ms, collect 8.41s, tests 70.04s, environment 4.53s, prepare 893ms)",
+    "failedTargetBehaviours": [],
+    "infrastructureFailure": false
+  }
+]

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {NewsForm} from "@/components/admin/news-form";
@@ -21,6 +21,7 @@ export default async function AdminNewsPage({params}: Props) {
     successMessage: t("createSuccess"),
     validationMessage: t("validation"),
     slugConflictMessage: t("slugConflict"),
+    conflictMessage: t("editConflict"),
     errorMessage: t("error"),
   };
   const createAction = createNewsAction.bind(null, "/" + locale + "/admin/news", createActionMessages);
@@ -28,7 +29,7 @@ export default async function AdminNewsPage({params}: Props) {
     slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), author: t("author"),
     bodyMdx: t("bodyMdx"), bodyMdxZhHk: t("bodyMdxZhHk"),
     bodyHelp: t("bodyHelp"), published: t("published"),
-    save: t("create"), saving: t("saving"),
+    save: t("create"), saving: t("saving"), saveDraft: t("saveDraft"), savePublish: t("savePublish"), previewDraft: t("previewDraft"), previewPrivate: t("previewPrivate"), previewEnglish: t("previewEnglish"), previewChinese: t("previewChinese"),
   };
 
   return (

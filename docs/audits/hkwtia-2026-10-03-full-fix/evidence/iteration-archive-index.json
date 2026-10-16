@@ -1,0 +1,95 @@
+{
+  "archiveSha256": "63b2481278b324e60cecc14f90d83e8aa785bf85bb5e8a4225a7179dea490f28",
+  "archiveLocalPath": ".playwright/full-fix-iteration-archive.zip",
+  "scope": "Superseded local iteration screenshots/manifests; original supplied audit ZIP is untouched. Latest evidence and two selected behavior failures remain directly reviewable.",
+  "files": [
+    {
+      "path": "evidence/t01/before-stacking/en-1440-disabled.png",
+      "sha256": "f23fa0054b349ecdae4e58db7a436ca85fa2489d59f85cb15ec711b926ac6175"
+    },
+    {
+      "path": "evidence/t01/before-stacking/en-1440-missing.png",
+      "sha256": "02b80114169b0a8bedd91e44c330269dd615529a1f45048c6317629aa8db9e0a"
+    },
+    {
+      "path": "evidence/t01/before-stacking/en-390-disabled.png",
+      "sha256": "da71821a6d8c19cfc124ba88c9e67515f5e176721f6d1dd0c0f8d19342ec6394"
+    },
+    {
+      "path": "evidence/t01/before-stacking/en-390-missing.png",
+      "sha256": "eed438b6370403f68cfb0c18255bb6adc1574f9371d974ee4d2b5bd37145ff61"
+    },
+    {
+      "path": "evidence/t01/before-stacking/zh-HK-1440-disabled.png",
+      "sha256": "d2e598f2ecfa235a4fea1b3f565c291e909d6f362fdce89fea145c84193a6bec"
+    },
+    {
+      "path": "evidence/t01/before-stacking/zh-HK-1440-missing.png",
+      "sha256": "fb237e40adc060821aa4a6b3127b23c1f2d9126f2eb622debee4b9e119ee374b"
+    },
+    {
+      "path": "evidence/t01/before-stacking/zh-HK-390-disabled.png",
+      "sha256": "78ebfa1142624b30f6e1343f356a3081e05201f3c4765bcbbd3bb9e7d7bf537b"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/en-1440-disabled.png",
+      "sha256": "1c77a972331efa038fe2eab5e14b9bd9cf6307cef7bb89e81c37db8e89fe2805"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/en-1440-missing.png",
+      "sha256": "353b955cb9d9cdf434c3d9cfbfebdd9f75793462ffbcc1e1185614d24bbf0e22"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/en-390-disabled.png",
+      "sha256": "429c89f082a4ddbcb67fc7f7f2b554ff48132f0104b508ecfb846c799fe0e0ce"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/en-390-missing.png",
+      "sha256": "97f3977d4dfda5de2af6a869187e0de2a532079607310cfbbafb4be0007c7e37"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/zh-HK-1440-disabled.png",
+      "sha256": "63c1530c0a8f1a8ec350c6b2a30167a9e60b7bbfd97c0afe701fba9812573d8d"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/zh-HK-1440-missing.png",
+      "sha256": "f5284417c4a418cc97678feeb0d32d1e9b74d55c9b675fc0451a28cb02c7d03d"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/zh-HK-390-disabled.png",
+      "sha256": "9c8b27e637555c024a9e7f4f03ce9a795f589573ccec46f2cb1a1a0fbac8a1da"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/zh-HK-390-missing-final.png",
+      "sha256": "4ff4fe86a036257cd420c44a13b0165e5621259cd898d450dc1e715147953f10"
+    },
+    {
+      "path": "evidence/t01/previous-native-run/zh-HK-390-missing.png",
+      "sha256": "4ff4fe86a036257cd420c44a13b0165e5621259cd898d450dc1e715147953f10"
+    },
+    {
+      "path": "evidence/t04/before-completion-state/en-1440-staff-timing.png",
+      "sha256": "738cdfb0f82394ad351d5416af73f73b61e9107afc198035ad11b6009b590d0d"
+    },
+    {
+      "path": "evidence/t04/before-completion-state/en-390-staff-timing.png",
+      "sha256": "a1fa72167cf3f0d0a1662f16785288ce78af196a93f08c6d4b5bfef2648549c1"
+    },
+    {
+      "path": "evidence/t04/before-completion-state/full-fix-t04-browser-timing.json",
+      "sha256": "672e502ccc3f644981a945faf0f3003952f974a2f12df627007ac09a1650fdd4"
+    },
+    {
+      "path": "evidence/t04/before-completion-state/zh-HK-1440-staff-timing.png",
+      "sha256": "be08118d768f2b11d74c8d4cb145b1677256b0d0edab12b617019941eeccf7dd"
+    },
+    {
+      "path": "evidence/t01/build-inputs.json",
+      "sha256": "e729109c50e777af7e6b5ed1a079d0ae08f5e2ccf45badcee82e9817fface1ea"
+    },
+    {
+      "path": "evidence/t04/build-inputs.json",
+      "sha256": "2d17d5d086386f4dc6e727d39cf56ff1cfb48b45fcb114e7740dc4e07cbcc1ae"
+    }
+  ]
+}

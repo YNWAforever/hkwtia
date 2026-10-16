@@ -1,0 +1,74 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/operations-population.test.ts (3 tests | 3 failed) 6655ms
+   × actual recorded operational population > counts bot, handoff, reopened and all seven unobserved non-support kinds once 19ms
+     → expected { Object (status, caseCount, ...) } to match object { Object (caseCount, sampleCount, ...) }
+(9 matching properties omitted from actual)
+   × actual recorded operational population > accepts a real CMS draft audit reference and leaves unobserved cases in the denominator 14ms
+     → OPERATION_SOURCE_MISMATCH
+   × actual recorded operational population > keeps requested AI cases in the population without provider success or time samples 10ms
+     → expected 3 to be 12 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population > counts bot, handoff, reopened and all seven unobserved non-support kinds once
+AssertionError: expected { Object (status, caseCount, ...) } to match object { Object (caseCount, sampleCount, ...) }
+(9 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "caseCount": 11,
++   "caseCount": 3,
+    "missingRate": 1,
+    "netMinutes": null,
+    "sampleCount": 0,
+  }
+
+ ❯ tests/integration/operations-population.test.ts:27:18
+     25|  it("counts bot, handoff, reopened and all seven unobserved non-suppor…
+     26|   const report=await repo.read(actor,{from,toExclusive});
+     27|   expect(report).toMatchObject({caseCount:11,sampleCount:0,missingRate…
+       |                  ^
+     28|  });
+     29|  it("accepts a real CMS draft audit reference and leaves unobserved ca…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population > accepts a real CMS draft audit reference and leaves unobserved cases in the denominator
+Error: OPERATION_SOURCE_MISMATCH
+ ❯ lib/db/repos/operations-metrics.ts:52:134
+     50|           const source = (await tx.select({targetType: auditEvents.tar…
+     51|             .where(eq(auditEvents.id, observation.auditId)).limit(1))[…
+     52|           if (!source || source.targetId !== observation.caseId || !ta…
+       |                                                                                                                                      ^
+     53|         }
+     54|         if (observation.runId) {
+ ❯ NodePgSession.transaction node_modules/src/node-postgres/session.ts:259:19
+ ❯ Object.record lib/db/repos/operations-metrics.ts:29:7
+ ❯ tests/integration/operations-population.test.ts:30:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population > keeps requested AI cases in the population without provider success or time samples
+AssertionError: expected 3 to be 12 // Object.is equality
+
+- Expected
++ Received
+
+- 12
++ 3
+
+ ❯ tests/integration/operations-population.test.ts:36:83
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  04:26:37
+   Duration  8.43s (transform 217ms, setup 151ms, collect 867ms, tests 6.65s, environment 0ms, prepare 128ms)
+

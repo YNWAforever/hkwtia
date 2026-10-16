@@ -1,0 +1,16 @@
+{
+  "sourceSha": "e1250cb1002a95ce63f76d5fc6458c2a41479b9e",
+  "buildId": "7b2y1C8JYD0tC1xWMgaq3",
+  "observedAt": "2026-10-04T12:14:12.426Z",
+  "nativeExit": 1,
+  "ledger": 61,
+  "dbSourcePositivelyProven": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderSends": 0,
+  "realDeliveryReceipt": false,
+  "production": false,
+  "passed": 1,
+  "failed": 1,
+  "classification": "English app serializer escapes period but bounded reader previously displayed backslash; Hong Kong Chinese report grammar was also displayed as raw Markdown. Two behavior REDs and27focused GREEN before source repair commit."
+}

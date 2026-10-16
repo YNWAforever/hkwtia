@@ -1,0 +1,80 @@
+{
+  "sourceSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+  "deploymentId": "dpl_6ugvMLSDGzYUNofZ39VDBKgu7yCa",
+  "origin": "https://hkwtia-ai-drafts-20261003.vercel.app",
+  "observedAt": "2026-10-03T20:56:39.283Z",
+  "checks": [
+    {
+      "name": "native private queue and review",
+      "unknownCostNotZero": true,
+      "sendOrPublishControls": 0
+    },
+    {
+      "name": "english review accessibility",
+      "seriousOrCritical": 0
+    },
+    {
+      "name": "native approval records only review",
+      "version": 2
+    },
+    {
+      "name": "native edit clears old approval and preserves prior rendered body",
+      "version": 3,
+      "frozenPrevious": true
+    },
+    {
+      "name": "two actual synthetic identities approve same version once",
+      "reviewRows": 1,
+      "version": 4
+    },
+    {
+      "name": "current existing task facts change invalidates approved draft",
+      "state": "stale",
+      "manualFallback": true
+    },
+    {
+      "name": "unsupported raw90 cannot be approved or rendered as validated text",
+      "renderedEmpty": true
+    },
+    {
+      "name": "hong kong mobile review",
+      "width": 390,
+      "seriousOrCritical": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "mobile review touch target",
+      "minimumHeight": 44
+    },
+    {
+      "name": "native keyboard focus",
+      "focusReceived": true
+    },
+    {
+      "name": "member denied review workspace",
+      "denied": true
+    },
+    {
+      "name": "actual transaction audits with unchanged business counts",
+      "actions": [
+        "ai_draft_created",
+        "ai_draft_reviewed",
+        "ai_draft_edited",
+        "ai_draft_reviewed",
+        "ai_draft_stale"
+      ],
+      "messagesDelta": 0,
+      "membershipsDelta": 0,
+      "billingDelta": 0,
+      "budgetDelta": 0
+    }
+  ],
+  "production": false,
+  "actualNeonPasswordAuth": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderRequests": 0,
+  "paymentsOrMessages": 0,
+  "syntheticFixturesRetainedForHistory": true,
+  "sourceIdentityLogged": false
+}

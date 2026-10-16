@@ -28,6 +28,7 @@ describe("uploaded media registry invariants", () => {
         findByUrl: vi.fn(async () => null),
         updateMedia: update,
         countListingReferences: vi.fn(async () => 0),
+        countCompanyReferences: vi.fn(async () => 0),
         countEventHeroReferences: vi.fn(async () => 0),
         insertAudit: vi.fn(),
       }),

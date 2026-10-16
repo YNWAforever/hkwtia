@@ -3,6 +3,8 @@ import "server-only";
 import {z} from "zod";
 
 import {PLAN_CODES, type PlanCode} from "@/lib/membership/plans";
+import {BILLING_INTERVALS} from "@/lib/membership/catalog";
+import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
 
 export const planCodeSchema = z.enum(PLAN_CODES);
 
@@ -12,6 +14,8 @@ const applicationIdSchema = z.string().trim().min(1).max(128).nullable().optiona
 export const joinInputSchema = z.object({
   plan: planCodeSchema,
   applicationId: applicationIdSchema,
+  companyId: z.string().uuid().nullable().optional().default(null),
+  newApplication: z.boolean().optional().default(false),
 });
 
 export type JoinInput = z.infer<typeof joinInputSchema> & {plan: PlanCode};
@@ -22,6 +26,18 @@ export const profileSchema = z.object({
   phone: z.string().trim().max(64).optional().nullable(),
   jobTitle: z.string().trim().max(160).optional().nullable(),
   locale: z.string().trim().max(10).optional(),
+  whatsappNumber: z.string().trim().max(32).optional().nullable()
+    .transform((value, context) => {
+      if (!value) return null;
+      const normalized = normalizeWhatsAppNumber(value);
+      if (!normalized) context.addIssue({code: z.ZodIssueCode.custom, message: "INVALID_WHATSAPP_NUMBER"});
+      return normalized;
+    }),
+  whatsappOptIn: z.boolean().optional().default(false),
+}).superRefine((profile, context) => {
+  if (profile.whatsappOptIn && !profile.whatsappNumber) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["whatsappNumber"], message: "WHATSAPP_NUMBER_REQUIRED"});
+  }
 });
 
 export const companySchema = z.object({
@@ -37,6 +53,11 @@ export const companySchema = z.object({
 export const completeApplicationSchema = z.object({
   plan: planCodeSchema,
   applicationId: applicationIdSchema,
+  // Caller-supplied and validated against the membership catalog (lib/membership/catalog.ts)
+  // before any mutation -- see completeApplication() in lib/membership/onboarding.ts. No
+  // default here: a real caller must always state the interval it wants, never inherit one
+  // silently derived by the server.
+  billingInterval: z.enum(BILLING_INTERVALS),
   profile: profileSchema,
   company: companySchema.nullable().optional().default(null),
 });

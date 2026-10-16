@@ -1,0 +1,30 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {chromium,expect} from '@playwright/test';
+const values=parseEnv(await readFile(process.argv[2],'utf8'));
+if(new URL(values.DATABASE_URL_TEST).hostname!=='ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech'||!values.M2_TEST_STAFF_EMAIL?.endsWith('.example.test')||!values.M2_TEST_STAFF_PASSWORD)throw new Error('ISOLATED_CMS_IDENTITY_REQUIRED');
+const state=JSON.parse(await readFile('.playwright/partner-r2-fixture-state.json','utf8'));
+if(state.phase!=='published-isolated'||state.partnerIds.length!==79)throw new Error('ISOLATED_CMS_FIXTURE_REQUIRED');
+const messages=JSON.parse(await readFile('messages/zh-HK.json','utf8')).Admin.partners;
+const deployment=JSON.parse(await readFile('.playwright/partner-r2-preview-deploy.json','utf8'));
+const base=deployment.origin;
+if(base!=='https://hkwtia-partner-logos-20260930.vercel.app'||deployment.sourceCommit!=='68faa7be95abfa09710e871e68a6db501585559c')throw Error('PREVIEW_CMS_GUARD');
+const browser=await chromium.launch({headless:true});
+const context=await browser.newContext({baseURL:base,storageState:'.playwright/partner-r2-preview-state.json',viewport:{width:1440,height:1000}});
+const evidence={recordedAt:new Date().toISOString(),environment:'isolated Vercel Preview',base,candidateCommit:deployment.sourceCommit,deploymentId:deployment.deploymentId,authentication:'existing Neon Auth email/password API with synthetic staff; no email send',anonymousProtected:false,providerSignInStatus:null,staffEditor:false,unpublishedPublicCount:null,republishedPublicCount:null,productionChanged:false};
+let editorPage;let unpublished=false;
+try {
+  const page=await context.newPage();editorPage=page;
+  const path='/zh/admin/partners/'+state.partnerIds[0];
+  await page.goto(path,{timeout:120_000});await expect(page).toHaveURL(/\/zh\/admin-login/,{timeout:45_000});evidence.anonymousProtected=true;
+  const response=await page.request.post('/api/auth/sign-in/email',{data:{email:values.M2_TEST_STAFF_EMAIL,password:values.M2_TEST_STAFF_PASSWORD,callbackURL:'/admin'},headers:{Origin:base}});
+  evidence.providerSignInStatus=response.status();if(!response.ok()){try{const body=await response.json();const code=body.code??body.error?.code;evidence.providerErrorCode=typeof code==='string'&&/^[A-Z_]{1,80}$/.test(code)?code:'UNCLASSIFIED_AUTH_ERROR'}catch{evidence.providerErrorCode='NON_JSON_AUTH_RESPONSE'}}expect(response.ok()).toBe(true);
+  await page.goto(path,{timeout:120_000});await expect(page.locator('input[name="nameEn"]')).toHaveValue('HBCC Investment',{timeout:45_000});
+  await expect(page.locator('input[name="relationshipConfirmed"]')).toBeChecked();await expect(page.locator('input[name="logoRightsConfirmed"]')).toBeChecked();evidence.staffEditor=true;
+  await page.getByRole('button',{name:messages.unpublish,exact:true}).click();unpublished=true;await expect(page.getByRole('button',{name:messages.publish,exact:true})).toBeVisible({timeout:30_000});
+  const publicPage=await context.newPage();await publicPage.goto('/zh/partners',{timeout:90_000});await expect(publicPage.locator('img[src^="/api/media/"]')).toHaveCount(78,{timeout:20_000});evidence.unpublishedPublicCount=78;
+  await page.getByRole('button',{name:messages.publish,exact:true}).click();await expect(page.getByRole('button',{name:messages.unpublish,exact:true})).toBeVisible({timeout:30_000});
+  await publicPage.reload();await expect(publicPage.locator('img[src^="/api/media/"]')).toHaveCount(79,{timeout:20_000});evidence.republishedPublicCount=79;unpublished=false;
+  await mkdir('.playwright/partner-r2-preview-cms',{recursive:true});await page.screenshot({path:'.playwright/partner-r2-preview-cms/staff-editor.png',fullPage:true});evidence.passed=true;
+} catch(error) {evidence.passed=false;evidence.error={name:error?.name};process.exitCode=1;}
+finally {if(unpublished&&editorPage){try{await editorPage.reload();await editorPage.getByRole('button',{name:messages.publish,exact:true}).click();await expect(editorPage.getByRole('button',{name:messages.unpublish,exact:true})).toBeVisible({timeout:30000});evidence.recoveryRepublished=true}catch{evidence.recoveryRepublished=false}}await writeFile('.playwright/partner-r2-preview-cms-evidence.json',JSON.stringify(evidence,null,2)+'\n');console.log(JSON.stringify(evidence));await browser.close();}

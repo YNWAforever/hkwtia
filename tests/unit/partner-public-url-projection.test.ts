@@ -47,4 +47,12 @@ describe("published partner website projection", () => {
     const [projected] = await listPublishedPartners("en", {asOf: now}, [row("https://Example.COM/partner")]);
     expect(projected?.websiteUrl).toBe("https://example.com/partner");
   });
+
+  it("projects the relationship window as ISO date strings or null", async () => {
+    const windowed: PublicPartnerRow = {...row("https://example.com/"), relationshipStartsOn: "2019-03-01", relationshipEndsOn: null};
+    const open: PublicPartnerRow = {...row("https://example.com/"), id: "44444444-4444-4444-8444-444444444444"};
+    const rows = await listPublishedPartners("en", {asOf: now}, [windowed, open]);
+    expect(rows.map(({relationshipStartsOn, relationshipEndsOn}) => [relationshipStartsOn, relationshipEndsOn]))
+      .toEqual([["2019-03-01", null], [null, null]]);
+  });
 });

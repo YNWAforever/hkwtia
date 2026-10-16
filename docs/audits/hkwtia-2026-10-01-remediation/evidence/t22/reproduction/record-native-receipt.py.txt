@@ -1,0 +1,38 @@
+from pathlib import Path
+import json,re,collections,subprocess,hashlib,sys
+from datetime import datetime
+root=Path.cwd();b=root/'docs/audits/hkwtia-2026-10-01-remediation/evidence/t22'
+source=sys.argv[2] if len(sys.argv)>2 else '99d5b11974644c06318da4f91d20bf39a8615b9a'
+reportName=sys.argv[1] if len(sys.argv)>1 else '.playwright/t22-browser-final-single.json'
+prefix=sys.argv[3] if len(sys.argv)>3 else 'browser-99-single'
+assert re.fullmatch(r'[a-f0-9]{40}',source) and re.fullmatch(r'browser-[a-z0-9-]+',prefix)
+p=root/reportName
+assert p.resolve().is_relative_to((root/'.playwright').resolve())
+assert p.exists(), 'FULL_NATIVE_NOT_FINISHED'
+r=json.loads(p.read_text(encoding='utf-8'))
+rows=[]
+def walk(suites):
+ for suite in suites:
+  for spec in suite.get('specs',[]):
+   for test in spec.get('tests',[]):
+    results=test.get('results',[])
+    row={'file':spec.get('file','').replace('\\','/').split('tests/e2e/')[-1],'line':spec.get('line'),'title':spec.get('title'),'status':test.get('status'),'attempts':[{'status':x.get('status'),'startTime':x.get('startTime'),'durationMs':x.get('duration'),'errorLocations':[{'file':str(e.get('location',{}).get('file','')).replace('\\','/').split('tests/e2e/')[-1],'line':e.get('location',{}).get('line'),'column':e.get('location',{}).get('column')} for e in x.get('errors',[]) if e.get('location')]} for x in results],'skipReasons':[a.get('description') for a in test.get('annotations',[]) if a.get('type')=='skip' and a.get('description')]}
+    rows.append(row)
+  walk(suite.get('suites',[]))
+walk(r.get('suites',[]))
+stats=r['stats'];assert len(rows)==sum(stats.get(k,0) for k in ['expected','unexpected','skipped','flaky']), 'CASE_COUNT_MISMATCH'
+actual=collections.Counter(x['attempts'][-1]['status'] if x['attempts'] else 'not-executed' for x in rows)
+fullGreen=stats.get('unexpected',0)==0 and stats.get('flaky',0)==0 and len(r.get('errors',[]))==0 and actual.get('failed',0)==0 and actual.get('timedOut',0)==0 and actual.get('interrupted',0)==0
+safe={'sourceSha':source,'applicationSourceSha':'3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f','command':f'T22_SOURCE_SHA={source}; T22_AUTH_PROVIDER_MIN_INTERVAL_MS=5000; T22_REPORT_PATH={reportName}; node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs --workers=1','profile':'confirmed isolated G0 DB/Auth; TEST Stripe; email sink; exact-host5000ms original-fetch pacing; original full collection/timeouts/actor/limiter; native built Chromium; Windows Node24','stats':stats,'actualLastAttemptCounts':dict(actual),'collectionErrors':len(r.get('errors',[])),'cases':rows,'production':False,'fullGreen':fullGreen,'skipsArePass':False,'providerStubbed':False,'rawBodiesLogsCookiesIncluded':False}
+(b/(prefix+'.json')).write_text(json.dumps(safe,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+skips=[x for x in rows if x['status']=='skipped'];assert len(skips)==stats['skipped']
+(b/(prefix+'-skip-inventory.json')).write_text(json.dumps({'sourceSha':source,'count':len(skips),'cases':skips,'skipsArePass':False,'profile':'modern AUDIT true; legacy AUDIT1, Concierge local-deterministic and unavailable/credential-free profiles verified in distinct runs'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+a=json.loads(Path(str(p)+'.auth-safe.json').read_text(encoding='utf-8'));calls=a['calls'];statuses=collections.Counter(str(x.get('status')) for x in calls)
+times=sorted(datetime.fromisoformat(x['observedAt'].replace('Z','+00:00')).timestamp() for x in calls if x.get('path')=='/get-session')
+j=0;maximum=0
+for i,t in enumerate(times):
+ while t-times[j]>=60:j+=1
+ maximum=max(maximum,i-j+1)
+auth={'sourceSha':source,'production':False,'providerStubbed':False,'pacingMs':5000,'statuses':dict(statuses),'anonymousReads':sum(x.get('cookieCredentialed') is False for x in calls),'observedGetSessionMaxRolling60s':maximum,'allAuthPathCountsRecorded':False,'providerQuotaThresholdKnown':False,'strictQueryCalls':sum(x.get('disableCookieCache') is True and x.get('disableRefresh') is True for x in calls),'otherQueryCalls':sum(not(x.get('disableCookieCache') is True and x.get('disableRefresh') is True) for x in calls),'otherQueryContext':'Existing real m2-session-reuse /api/auth/get-session proxy has other query flags; application strict provider boundary retained','rateLimited':[x for x in calls if x.get('status')==429],'bodyLogged':False,'cookieValuesLogged':False}
+(b/(prefix.replace('browser-','auth-',1)+'.json')).write_text(json.dumps(auth,indent=2)+'\n',encoding='utf-8')
+print(json.dumps({'source':source,'fullGreen':fullGreen,'stats':stats,'actualLastAttempts':dict(actual),'collectionErrors':len(r.get('errors',[])),'getSessionStatuses':dict(statuses),'maxObservedRolling60s':maximum,'failedCases':[{'file':x['file'],'line':x['line'],'title':x['title'],'status':x['status']} for x in rows if x['status'] in ['unexpected','flaky']]}))

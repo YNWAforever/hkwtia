@@ -1,0 +1,14 @@
+{
+  "environment": "isolated local",
+  "authentication": "existing Neon Auth email/password API with synthetic staff; no email send",
+  "anonymousProtected": true,
+  "providerSignInStatus": 200,
+  "staffEditor": true,
+  "unpublishedPublicCount": 78,
+  "republishedPublicCount": 79,
+  "productionChanged": false,
+  "passed": true,
+  "recordedAt": "2026-09-30T16:54:57.994Z",
+  "candidateCommit": "f46be17b35b8d688b6d0c8ae0706f28e377fda99",
+  "nextVersion": "16.3.6"
+}

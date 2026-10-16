@@ -8,7 +8,7 @@ import {
   type ScheduledAgentActor,
 } from "@/lib/auth/agent-actor";
 import {getDb, type Database} from "@/lib/db/repos/common";
-import {posts} from "@/lib/db/server-schema";
+import {posts, agentRuns} from "@/lib/db/server-schema";
 
 const boardDraftInputSchema = z.object({
   sourceKey: z.string().min(1).max(500),
@@ -16,6 +16,7 @@ const boardDraftInputSchema = z.object({
   titleEn: z.string().min(1).max(500),
   titleZh: z.string().min(1).max(500),
   bodyMdx: z.string().min(1).max(500_000),
+  bodyMdxZhHk: z.string().min(1).max(500_000).optional(),
 }).strict();
 
 const boardDraftResultSchema = z.object({
@@ -25,6 +26,7 @@ const boardDraftResultSchema = z.object({
 
 export type BoardDraftInput = z.infer<typeof boardDraftInputSchema>;
 export type PostsRepository = Readonly<{
+  getBoardDraftBySourceKey: (actor: ScheduledAgentActor, sourceKey: string) => Promise<{postId: string; created: false; completed?: boolean} | null>;
   createBoardDraftOnce: (
     actor: ScheduledAgentActor,
     input: BoardDraftInput,
@@ -50,6 +52,13 @@ export function createPostsRepository(
   loadDatabase: DatabaseLoader = getDb,
 ): PostsRepository {
   return {
+    async getBoardDraftBySourceKey(actor, sourceKey) {
+      requireScheduledAgent(actor, "board_reporter");
+      const key = z.string().regex(/^board-report:\d{4}-(0[1-9]|1[0-2]):[A-Za-z0-9._-]+$/).parse(sourceKey);
+      const database = await loadDatabase();
+      const row = resultRows(await database.execute(sql`SELECT ${posts.id} AS post_id, ${agentRuns.status} AS run_status FROM ${posts} LEFT JOIN ${agentRuns} ON ${agentRuns.id}=${posts.agentRunId} AND ${agentRuns.agent}='board_reporter' WHERE ${posts.sourceKey}=${key} AND ${posts.author}='Board Reporter' AND ${posts.kind}='page' LIMIT 1`))[0];
+      return row ? {postId: z.object({post_id:z.string().uuid()}).parse(row).post_id, created:false, completed:z.object({run_status:z.string().nullable()}).parse(row).run_status === "completed"} : null;
+    },
     async createBoardDraftOnce(actor, input) {
       requireScheduledAgent(actor, "board_reporter");
       const parsed = boardDraftInputSchema.parse(input);
@@ -62,6 +71,7 @@ export function createPostsRepository(
             title_en,
             title_zh,
             body_mdx,
+            body_mdx_zh_hk,
             published_at,
             author,
             source_key,
@@ -73,6 +83,7 @@ export function createPostsRepository(
           ${parsed.titleEn},
           ${parsed.titleZh},
           ${parsed.bodyMdx},
+          ${parsed.bodyMdxZhHk ?? null},
           NULL,
           ${"Board Reporter"},
           ${parsed.sourceKey},

@@ -1,5 +1,6 @@
 import "server-only";
 
+import {JOURNEYS} from "@/config/journeys";
 import {systemActor} from "@/lib/auth/authorize";
 import {scheduleJourney} from "@/lib/automation/schedule";
 import type {JourneyName, ScheduledJourneyStep} from "@/lib/automation/types";
@@ -13,8 +14,11 @@ import {
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {
   renewalEnrollmentsRepository,
-  type RenewalEnrollmentCandidate,
+  type RenewalEnrollmentWindow,
+  type RenewalEnrollmentPage,
 } from "@/lib/db/repos/renewal-enrollments";
+import {renewalWindow, renewalRunLimits, renewalInstanceKey} from "@/lib/automation/renewal-window";
+import {requireAutomationCron} from "@/lib/auth/automation-actor";
 import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
 import type {Actor, MembershipStatus} from "@/lib/membership/lifecycle";
 
@@ -55,6 +59,10 @@ type AuditEventsReader = Readonly<{
 }>;
 
 type JourneyEnroller = Readonly<{
+  enrollRenewalPage?: (
+    actor: AutomationRepositoryActor,
+    steps: readonly JourneyEnrollment[],
+  ) => Promise<Readonly<{created: number; existing: number; skipped: number}>>;
   enroll: (actor: AutomationRepositoryActor, enrollment: JourneyEnrollment) => Promise<JourneyEnrollmentDisposition>;
 }>;
 
@@ -66,12 +74,13 @@ export type LifecycleEnrollmentDependencies = Readonly<{
 }>;
 
 type RenewalEnrollmentsReader = Readonly<{
-  listDue: (actor: AutomationRepositoryActor) => Promise<readonly RenewalEnrollmentCandidate[]>;
+  listDue: (actor: AutomationRepositoryActor, input: RenewalEnrollmentWindow) => Promise<RenewalEnrollmentPage>;
 }>;
 
 export type RenewalEnrollmentDependencies = Readonly<{
   renewals: RenewalEnrollmentsReader;
   journeys: JourneyEnroller;
+  elapsedNow?: () => number;
 }>;
 
 export type LifecycleEnrollmentErrorCode =
@@ -80,6 +89,8 @@ export type LifecycleEnrollmentErrorCode =
   | "MISSING_PROFILE";
 
 export type JobSummary = Readonly<{
+  pages?: number;
+  deferred?: boolean;
   scanned: number;
   createdSteps: number;
   existingSteps: number;
@@ -108,6 +119,8 @@ const defaultRenewalDependencies: RenewalEnrollmentDependencies = {
 };
 
 type MutableSummary = {
+  pages?: number;
+  deferred?: boolean;
   scanned: number;
   createdSteps: number;
   existingSteps: number;
@@ -320,32 +333,79 @@ export async function reconcileRenewalEnrollments(
   now: Date,
   dependencies: RenewalEnrollmentDependencies = defaultRenewalDependencies,
 ): Promise<JobSummary> {
-  if (actor.kind !== "system") throw new Error("FORBIDDEN");
+  requireAutomationCron(actor);
   if (!validDate(now)) throw new Error("INVALID_RECONCILIATION_TIME");
-  const memberships = await dependencies.renewals.listDue(actor);
+  const limits = renewalRunLimits(),
+    window = renewalWindow(now, limits.pageSize),
+    clock = dependencies.elapsedNow ?? (() => performance.now()),
+    started = clock();
   const summary: MutableSummary = {
-    scanned: memberships.length,
+    scanned: 0,
     createdSteps: 0,
     existingSteps: 0,
     skipped: 0,
     errors: {},
+    pages: 0,
+    deferred: false,
   };
-  for (const membership of memberships) {
-    if (!validDate(membership.billingPeriodEnd)) {
-      recordError(summary, "MISSING_BILLING_PERIOD_END");
-      continue;
+  let after = window.after;
+  do {
+    const page = await dependencies.renewals.listDue(actor, {
+      ...window,
+      after,
+    });
+    summary.pages!++;
+    summary.scanned += page.items.length;
+    const steps: ScheduledJourneyStep[] = [];
+    for (const membership of page.items) {
+      if (!validDate(membership.billingPeriodEnd)) {
+        recordError(summary, "MISSING_BILLING_PERIOD_END");
+        continue;
+      }
+      if (!membership.profileId) {
+        recordError(summary, "MISSING_PROFILE");
+        continue;
+      }
+      steps.push(
+        ...scheduleJourney({
+          journey: "renewal",
+          profileId: membership.profileId,
+          membershipId: membership.membershipId,
+          instanceKey: renewalInstanceKey(
+            membership.membershipId,
+            membership.billingPeriodEnd,
+          ),
+          anchor: membership.billingPeriodEnd,
+        }),
+      );
     }
-    if (!membership.profileId) {
-      recordError(summary, "MISSING_PROFILE");
-      continue;
+    if (steps.length && dependencies.journeys.enrollRenewalPage) {
+      const result = await dependencies.journeys.enrollRenewalPage(
+        actor,
+        steps,
+      );
+      if (
+        [result.created, result.existing, result.skipped].some(
+          (value) => !Number.isSafeInteger(value) || value < 0,
+        ) ||
+        result.created + result.existing + result.skipped !== steps.length
+      )
+        throw Error("INVALID_RENEWAL_CHECKPOINT_RESULT");
+      summary.createdSteps += result.created;
+      summary.existingSteps += result.existing;
+      summary.skipped += result.skipped / JOURNEYS.renewal.length;
+    } else await enrollSteps(actor, steps, dependencies.journeys, summary);
+    after = page.nextCursor;
+    // The existing per-membership/period journey receipts are the durable checkpoint.
+    // A later poll starts the bounded window again and selects only missing steps.
+    if (
+      after &&
+      (summary.pages! >= limits.maxPages ||
+        clock() - started >= limits.budgetMs)
+    ) {
+      summary.deferred = true;
+      break;
     }
-    await enrollSteps(actor, scheduleJourney({
-      journey: "renewal",
-      profileId: membership.profileId,
-      membershipId: membership.membershipId,
-      instanceKey: `period:${membership.billingPeriodEnd.toISOString()}`,
-      anchor: membership.billingPeriodEnd,
-    }), dependencies.journeys, summary);
-  }
+  } while (after);
   return summary;
 }

@@ -24,6 +24,8 @@ for (const file of sourceFiles) {
   }
 }
 
+auditMessages();
+
 if (findings.length > 0) {
   console.error(findings.join('\n'));
   process.exitCode = 1;
@@ -84,4 +86,45 @@ function isAllowedLiteral(text, ariaHidden) {
   if (allowedTechnicalIds.has(text)) return true;
   if (/^[\p{P}\p{S}\s]+$/u.test(text)) return true;
   return ariaHidden;
+}
+
+// Metadata keys are not UI labels. Every other message leaf is required.
+function messageLeaves(value, prefix = '') {
+  if (typeof value === 'string') return [[prefix, value]];
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
+  return Object.entries(value).flatMap(([key, child]) => key.startsWith('_') ? [] : messageLeaves(child, prefix ? prefix + '.' + key : key));
+}
+
+function interpolationTokens(value) {
+  return [...new Set([...value.matchAll(/\{([A-Za-z_]\w*)\s*[,}]/g)].map((match) => match[1]))].sort().join(',');
+}
+
+function auditMessages() {
+  const bundles = new Map();
+  for (const locale of ['en', 'zh-HK']) {
+    const file = path.join('messages', locale + '.json');
+    try {
+      const leaves = new Map(messageLeaves(JSON.parse(fs.readFileSync(file, 'utf8'))));
+      bundles.set(locale, leaves);
+      if (leaves.size === 0) findings.push(file + ": EMPTY_BUNDLE");
+      for (const [key, value] of leaves) {
+        if (!value.trim()) findings.push(file + ':' + key + ': EMPTY_LABEL');
+        if (/\uFFFD/u.test(value)) findings.push(file + ':' + key + ': REPLACEMENT_CHARACTER');
+        // A URL may use '?' as a query delimiter; only valid whole URLs qualify.
+        let isUrl = false;
+        try {const url = new URL(value); isUrl = ['https:', 'http:'].includes(url.protocol);} catch { /* UI text */ }
+        if (!isUrl && /[?？]{2,}/u.test(value)) findings.push(file + ':' + key + ': CORRUPT_PLACEHOLDER');
+      }
+    } catch {findings.push(file + ': MESSAGES_UNREADABLE');}
+  }
+  const english = bundles.get('en');
+  const chinese = bundles.get('zh-HK');
+  if (!english || !chinese) return;
+  for (const key of new Set([...english.keys(), ...chinese.keys()])) {
+    if (!english.has(key) || !chinese.has(key)) {
+      findings.push('messages:' + key + ': MISSING_KEY');
+    } else if (interpolationTokens(english.get(key)) !== interpolationTokens(chinese.get(key))) {
+      findings.push('messages:' + key + ': TOKEN_MISMATCH');
+    }
+  }
 }

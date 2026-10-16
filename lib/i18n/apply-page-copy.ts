@@ -1,4 +1,4 @@
-import {isPageCopyNamespace, type PageCopyNamespace} from "@/lib/i18n/page-copy-scope";
+import {isPageCopyNamespace, isPageCopyKeyEditable, type PageCopyNamespace} from "@/lib/i18n/page-copy-scope";
 
 export type PageCopyOverride = Readonly<{
   namespace: PageCopyNamespace;
@@ -79,7 +79,8 @@ export function pageCopyLeaves(bundle: unknown, namespace: string): readonly Pag
   const leaves: PageCopyLeaf[] = [];
   function walk(node: unknown, path: readonly string[]): void {
     if (typeof node === "string") {
-      leaves.push({keyPath: path.join("."), value: node});
+      const keyPath = path.join(".");
+      if (isPageCopyKeyEditable(namespace, keyPath)) leaves.push({keyPath, value: node});
       return;
     }
     if (Array.isArray(node)) {
@@ -105,6 +106,7 @@ export function pageCopyRejection(
   override: Readonly<{namespace: string; keyPath: string; value: string}>,
 ): PageCopyRejection | null {
   if (!isPageCopyNamespace(override.namespace)) return "NAMESPACE_NOT_EDITABLE";
+  if (!isPageCopyKeyEditable(override.namespace, override.keyPath)) return "KEY_PATH_UNKNOWN";
   const current = readLeaf(bundle, `${override.namespace}.${override.keyPath}`);
   if (current === null) return "KEY_PATH_UNKNOWN";
   if (!placeholdersMatch(current, override.value)) return "PLACEHOLDER_MISMATCH";

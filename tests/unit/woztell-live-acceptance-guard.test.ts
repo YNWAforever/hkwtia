@@ -5,6 +5,7 @@ import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {
   WOZTELL_ACCEPTANCE_AUTHORIZATION,
   WOZTELL_ACCEPTANCE_TARGET_KIND,
+  acceptanceTemplateVariables,
   isWoztellAcceptanceEnabled,
   requireWoztellAcceptanceAuthorization,
 } from "@/tests/fixtures/woztell-live-acceptance";
@@ -71,6 +72,49 @@ describe("WOZTELL live acceptance authorization guard", () => {
         WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS: "",
       }),
     )).toThrow("WOZTELL_ACCEPTANCE_TEMPLATE_APPROVAL_REQUIRED");
+  });
+
+  // C-9 (C2 Task 13 Step 2). The filter used to accept the two concierge
+  // follow-ups and nothing else and then require `concierge_follow_up_en`, so
+  // the harness could not exercise a template blast at all — half of what §6
+  // gates go-live on. These three cases are the widening and its two edges.
+  it("accepts an approval set naming only a marketing template", () => {
+    const guarded = requireWoztellAcceptanceAuthorization(authorizedEnvironment({
+      WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS: "wtia_announcement_en",
+    }));
+    expect([...guarded.approvedTemplateKeys]).toEqual(["wtia_announcement_en"]);
+    expect(guarded.approvedTemplateKeys.has("concierge_follow_up_en")).toBe(false);
+    expect(WHATSAPP_TEMPLATES.wtia_announcement_en.category).toBe("marketing");
+
+    // The blast leg is only reachable if every BODY parameter resolves: Meta
+    // rejects a template send with an empty parameter, and the adapter builds
+    // the body as `variables[key] ?? ""`.
+    const variables = acceptanceTemplateVariables("wtia_announcement_en");
+    expect(Object.keys(variables))
+      .toEqual([...WHATSAPP_TEMPLATES.wtia_announcement_en.variables]);
+    for (const value of Object.values(variables)) {
+      expect(value.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it("drops a key the config does not declare and refuses an all-unknown set", () => {
+    const guarded = requireWoztellAcceptanceAuthorization(authorizedEnvironment({
+      WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS:
+        "wtia_lead_followup_zh_hk, not_a_template",
+    }));
+    expect([...guarded.approvedTemplateKeys]).toEqual(["wtia_lead_followup_zh_hk"]);
+    expect(() => requireWoztellAcceptanceAuthorization(authorizedEnvironment({
+      WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS: "not_a_template",
+    }))).toThrow("WOZTELL_ACCEPTANCE_TEMPLATE_APPROVAL_REQUIRED");
+  });
+
+  // `"constructor" in WHATSAPP_TEMPLATES` is true through the prototype chain,
+  // and this predicate is the type assertion deciding which element name a live
+  // run may put on the wire. `Object.hasOwn` is what keeps it honest.
+  it("does not accept an inherited property name as a template key", () => {
+    expect(() => requireWoztellAcceptanceAuthorization(authorizedEnvironment({
+      WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS: "constructor, toString",
+    }))).toThrow("WOZTELL_ACCEPTANCE_TEMPLATE_APPROVAL_REQUIRED");
   });
 
   it("is disabled by default before any credentials or network are used", () => {

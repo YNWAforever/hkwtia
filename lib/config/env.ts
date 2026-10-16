@@ -3,6 +3,7 @@ import "server-only";
 import {z} from "zod";
 
 import {parseAgentModel} from "@/lib/ai/model";
+import {DEFAULT_AGENT_MODEL_KEY} from "@/config/ai-pricing";
 
 export {parseAgentModel};
 export type {AgentModel} from "@/lib/ai/model";
@@ -39,18 +40,77 @@ export interface AutomationEnv {
 
 export interface UnsubscribeEnv {
   unsubscribeTokenSecret: string;
-  cronSecret: string;
+}
+
+export interface MemberToolsEnv {
+  /**
+   * The access token for the Content Calendar member tool (Phase D-2). Optional and
+   * deliberately NOT in `serverKeys`: a missing token makes one portal page degrade to
+   * "temporarily unavailable", and a hard boot requirement for a value only that page
+   * reads is the boundary-7 coupling that once took /sitemap.xml down.
+   */
+  contentCalendarToken?: string;
 }
 
 export interface AiEnv {
   agentsEnabled: boolean;
   agentModelConcierge: string;
+  /**
+   * A dedicated model for the portal AI writers, so changing the concierge's
+   * model does not silently change them. Optional and deliberately NOT in
+   * `serverKeys`: a missing writer model must degrade the writer, not block
+   * boot — the boundary-7 coupling that once took /sitemap.xml down.
+   */
+  agentModelWriter: string;
   openaiApiKey?: string;
   anthropicApiKey?: string;
   conciergeCookieSecret?: string;
   woztellApiToken?: string;
   woztellChannelId?: string;
   woztellWebhookSecret?: string;
+  /**
+   * Programme C-3. Configuration for the conversation-history backfill, and
+   * deliberately NOT in `serverKeys`: the backfill is an admin-triggered import,
+   * not a boot requirement, and boundary 7 exists because a transitive env pull
+   * once took `/sitemap.xml`, `/events`, `/showcase` and `/launchpad` down. The
+   * route answers 503 BACKFILL_NOT_CONFIGURED when it is blank rather than
+   * refusing to start the process.
+   */
+  woztellOpenApiToken?: string;
+  /**
+   * Programme C-9 (C1 open question O-8). The switch that decides whether a real
+   * WhatsApp message leaves the building.
+   *
+   * It and `woztellApprovedTemplateKeys` were the last two variables read from
+   * bare `process.env`, outside boundary 7 — no Zod parse and no owner — and
+   * this one fails in the worst available direction: `RUN_LIVE_WOZTELL=true`
+   * finds no live credentials, so every send returns
+   * `{status: "sent", providerId: "mock:…"}` and journey, dunning and blast
+   * messages are recorded as delivered while nothing is sent
+   * (`lib/jobs/runners.ts:421-427` is that incident). Parsed as `"0" | "1"`, a
+   * typo is a startup error instead of a silent downgrade.
+   *
+   * Deliberately NOT in `serverKeys`: it is optional everywhere, and a hard boot
+   * requirement there is how a transitive env pull once took `/sitemap.xml`,
+   * `/events`, `/showcase` and `/launchpad` down. A blank value — which
+   * `.env.example` ships and Vercel produces for an empty variable — reads as
+   * absent, exactly as it did before this contract existed.
+   */
+  runLiveWoztell?: "0" | "1";
+  /**
+   * Programme C-9 (O-8). The operator allowlist that `whatsapp_templates`
+   * replaced, kept as the fallback for one condition only: a registry with no
+   * rows at all, which is what a half-run migration or a database restored
+   * without 0034 looks like (S-14).
+   *
+   * Declared here so the variable has an owner and a parse. Its single reader,
+   * `lib/whatsapp/approved-templates.ts`, deliberately takes its environment by
+   * injection rather than calling `aiEnv()`: `/admin/templates` imports it, and
+   * `parseAiEnvironment` requires `CONCIERGE_COOKIE_SECRET` in production — so
+   * reading the contract from there would put a boot requirement on a page that
+   * sends nothing, which is the boundary-7 coupling above.
+   */
+  woztellApprovedTemplateKeys?: string;
   turnstileSecret?: string;
   turnstileSiteKey?: string;
 }
@@ -71,6 +131,7 @@ export interface ServerEnv {
   appUrl: string;
   agentsEnabled: boolean;
   agentModelConcierge: string;
+  agentModelWriter: string;
   openaiApiKey?: string;
   anthropicApiKey?: string;
   conciergeCookieSecret?: string;
@@ -126,9 +187,32 @@ function requireProductionKeys(
   }
 }
 
+/**
+ * The live-send switch, parsed in ONE place (C-9 O-8, and the C-9 review).
+ *
+ * Strict, and blank-tolerant on purpose: `.env.example` ships
+ * `RUN_LIVE_WOZTELL=` and an empty Vercel variable arrives as `""`, so a blank
+ * must keep meaning "not live" — while `true`, `yes` or `TRUE` must stop meaning
+ * it silently, because that typo used to find no live credentials and record
+ * every send as delivered with a `mock:` provider id.
+ *
+ * Exported because `lib/whatsapp/approved-templates.ts` decides "are we live?"
+ * for `/admin/templates` and the campaign wizard and deliberately cannot call
+ * `aiEnv()` — that would put `CONCIERGE_COOKIE_SECRET` on a page that sends
+ * nothing, which is the boundary-7 coupling that once took `/sitemap.xml` down.
+ * It reads the same schema instead, so the flip has one parse and not two: two
+ * parses of one switch is how a value that means "live" over here comes to mean
+ * "mock" over there.
+ */
+export const runLiveWoztellSchema = z.preprocess(
+  (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
+  z.enum(["0", "1"]).optional(),
+);
+
 const aiEnvironmentSchema = z.object({
   AGENTS_ENABLED: z.string().optional().transform((value) => value === "true"),
-  AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
+  AGENT_MODEL_CONCIERGE: z.string().default(DEFAULT_AGENT_MODEL_KEY),
+  AGENT_MODEL_WRITER: z.string().default(DEFAULT_AGENT_MODEL_KEY),
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   CONCIERGE_COOKIE_SECRET: z.string().refine(
@@ -138,6 +222,9 @@ const aiEnvironmentSchema = z.object({
   WOZTELL_API_TOKEN: z.string().optional(),
   WOZTELL_CHANNEL_ID: z.string().optional(),
   WOZTELL_WEBHOOK_SECRET: z.string().optional(),
+  WOZTELL_OPEN_API_TOKEN: z.string().optional(),
+  RUN_LIVE_WOZTELL: runLiveWoztellSchema,
+  WOZTELL_APPROVED_TEMPLATE_KEYS: z.string().optional(),
   TURNSTILE_SECRET: z.string().refine(
     (value) => value.trim().length > 0,
     {message: "TURNSTILE_SECRET must not be blank"},
@@ -151,6 +238,7 @@ const aiEnvironmentSchema = z.object({
 function parseAiEnvironment(environment: Environment): AiEnv {
   const ai = aiEnvironmentSchema.parse(environment);
   parseAgentModel(ai.AGENT_MODEL_CONCIERGE);
+  parseAgentModel(ai.AGENT_MODEL_WRITER);
 
   if (environment.NODE_ENV === "production") {
     const conciergeSecret = valueFor(environment, "CONCIERGE_COOKIE_SECRET");
@@ -166,12 +254,18 @@ function parseAiEnvironment(environment: Environment): AiEnv {
   return {
     agentsEnabled: ai.AGENTS_ENABLED,
     agentModelConcierge: ai.AGENT_MODEL_CONCIERGE,
+    agentModelWriter: ai.AGENT_MODEL_WRITER,
     ...(ai.OPENAI_API_KEY === undefined ? {} : {openaiApiKey: ai.OPENAI_API_KEY}),
     ...(ai.ANTHROPIC_API_KEY === undefined ? {} : {anthropicApiKey: ai.ANTHROPIC_API_KEY}),
     ...(ai.CONCIERGE_COOKIE_SECRET === undefined ? {} : {conciergeCookieSecret: ai.CONCIERGE_COOKIE_SECRET}),
     ...(ai.WOZTELL_API_TOKEN === undefined ? {} : {woztellApiToken: ai.WOZTELL_API_TOKEN}),
     ...(ai.WOZTELL_CHANNEL_ID === undefined ? {} : {woztellChannelId: ai.WOZTELL_CHANNEL_ID}),
     ...(ai.WOZTELL_WEBHOOK_SECRET === undefined ? {} : {woztellWebhookSecret: ai.WOZTELL_WEBHOOK_SECRET}),
+    ...(ai.WOZTELL_OPEN_API_TOKEN === undefined ? {} : {woztellOpenApiToken: ai.WOZTELL_OPEN_API_TOKEN}),
+    ...(ai.RUN_LIVE_WOZTELL === undefined ? {} : {runLiveWoztell: ai.RUN_LIVE_WOZTELL}),
+    ...(ai.WOZTELL_APPROVED_TEMPLATE_KEYS === undefined
+      ? {}
+      : {woztellApprovedTemplateKeys: ai.WOZTELL_APPROVED_TEMPLATE_KEYS}),
     ...(ai.TURNSTILE_SECRET === undefined ? {} : {turnstileSecret: ai.TURNSTILE_SECRET}),
     ...(ai.TURNSTILE_SITE_KEY === undefined ? {} : {turnstileSiteKey: ai.TURNSTILE_SITE_KEY}),
   };
@@ -316,17 +410,49 @@ export function automationEnv(): AutomationEnv {
   return parseAutomationEnv(process.env);
 }
 
+// `CRON_SECRET` was required here while unsubscribe links signed with it were
+// still being honoured. Now that the fallback is gone, keeping it would make a
+// public page fail to boot over a variable it never reads — the transitive
+// coupling that once took /sitemap.xml down. `automationEnv().cronSecret` still
+// serves the job routes.
 export function parseUnsubscribeEnv(environment: Environment = process.env): UnsubscribeEnv {
-  requireProductionKeys(environment, ["UNSUBSCRIBE_TOKEN_SECRET", "CRON_SECRET"]);
+  requireProductionKeys(environment, ["UNSUBSCRIBE_TOKEN_SECRET"]);
 
   return {
     unsubscribeTokenSecret: valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET"),
-    cronSecret: valueFor(environment, "CRON_SECRET"),
   };
 }
 
 export function unsubscribeEnv(): UnsubscribeEnv {
   return parseUnsubscribeEnv(process.env);
+}
+
+export type TicketPassEnv = Readonly<{ticketPassTokenSecret: string}>;
+
+export function parseTicketPassEnv(environment: Environment = process.env): TicketPassEnv {
+  requireProductionKeys(environment, ["TICKET_PASS_TOKEN_SECRET"]);
+
+  return {
+    ticketPassTokenSecret: valueFor(environment, "TICKET_PASS_TOKEN_SECRET"),
+  };
+}
+
+export function ticketPassEnv(): TicketPassEnv {
+  return parseTicketPassEnv(process.env);
+}
+
+const memberToolsEnvironmentSchema = z.object({
+  MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: z.string().optional(),
+});
+
+export function parseMemberToolsEnv(environment: Environment = process.env): MemberToolsEnv {
+  const parsed = memberToolsEnvironmentSchema.parse(environment);
+  const token = parsed.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN?.trim();
+  return token ? {contentCalendarToken: token} : {};
+}
+
+export function memberToolsEnv(): MemberToolsEnv {
+  return parseMemberToolsEnv(process.env);
 }
 
 export function parseAiEnv(environment: Environment = process.env): AiEnv {
@@ -361,6 +487,7 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     appUrl: valueFor(environment, "APP_URL"),
     agentsEnabled: ai.agentsEnabled,
     agentModelConcierge: ai.agentModelConcierge,
+    agentModelWriter: ai.agentModelWriter,
     ...(ai.openaiApiKey === undefined ? {} : {openaiApiKey: ai.openaiApiKey}),
     ...(ai.anthropicApiKey === undefined ? {} : {anthropicApiKey: ai.anthropicApiKey}),
     ...(ai.conciergeCookieSecret === undefined ? {} : {conciergeCookieSecret: ai.conciergeCookieSecret}),

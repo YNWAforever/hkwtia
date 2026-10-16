@@ -1,0 +1,62 @@
+{
+  "scope": "Built full Chromium for native media, Chromium for other routes; confirmed isolated; synthetic identities; no Production",
+  "stats": {
+    "startTime": "2026-10-02T12:47:14.825Z",
+    "duration": 22492.559,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "accessibility.spec.ts",
+      "title": "/news has no serious or critical accessibility violations",
+      "statuses": [
+        "passed"
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "title": "/zh/news has no serious or critical accessibility violations",
+      "statuses": [
+        "passed"
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "title": "member detail keeps the Members destination current",
+      "statuses": [
+        "passed"
+      ]
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "title": "registered media search over 79 real static fixture images in bilingual event forms",
+      "statuses": [
+        "passed"
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "title": "/ shell fits 320px and keeps 44px controls",
+      "statuses": [
+        "passed"
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "title": "/zh shell fits 320px and keeps 44px controls",
+      "statuses": [
+        "passed"
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "title": "locale switch preserves path, repeated query values, and fragment",
+      "statuses": [
+        "passed"
+      ]
+    }
+  ]
+}

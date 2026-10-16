@@ -1,0 +1,97 @@
+{
+  "observedAt": "2026-10-04T02:20:10.993Z",
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "checks": [
+    {
+      "path": "/zh/",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/about",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/membership",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/join",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/events",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/news",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/programmes",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/programs/asa",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/programs/cpai",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/programs/hkict",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/programs/tct",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/contact",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/privacy",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    },
+    {
+      "path": "/zh/partners",
+      "status": 200,
+      "titlePresent": true,
+      "mainHeadingPresent": true
+    }
+  ],
+  "privateAndArchived404": true,
+  "privateExcludedFromSitemap": true,
+  "keyboardLogin": true,
+  "partnerLinksStructurallyValidated": 0,
+  "unapprovedPartnerUrlsInvented": false,
+  "historicalClaimsOwnerApproval": false,
+  "production": false
+}

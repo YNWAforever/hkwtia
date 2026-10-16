@@ -1,0 +1,17 @@
+{
+  "sourceSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+  "environment": "GitHub Linux runners; both repository shards and worker",
+  "runId": 37195649773,
+  "passed": 6698,
+  "failed": 0,
+  "skipped": 555,
+  "workerPassed": 57,
+  "all7Checks": "SUCCESS",
+  "commands": [
+    "npx vitest run --shard=1/2",
+    "npx vitest run --shard=2/2",
+    "npm --prefix workers test"
+  ],
+  "localFirstAttempt": "full-first-fail.json;6696pass555skip2fail; current CI resolves both, deadlines unchanged",
+  "skipsAreNotPasses": true
+}

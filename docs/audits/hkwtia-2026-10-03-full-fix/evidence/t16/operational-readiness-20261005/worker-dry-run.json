@@ -1,0 +1,7 @@
+{
+  "dryRunExit": 0,
+  "deploymentPerformed": false,
+  "workerJobAllowlist": "none",
+  "target": "https://hkwtia-usability-20261003.vercel.app",
+  "workerRevision": "4da4bc590dc984768bd87b1f597dfde96c81593a"
+}

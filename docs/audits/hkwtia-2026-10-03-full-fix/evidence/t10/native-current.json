@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-04T08:25:34.443Z",
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "actualPasswordAuth": true,
+  "syntheticOfflineDrafts": true,
+  "externalModelCalls": 0,
+  "realProviderSends": 0,
+  "production": false,
+  "checks": [
+    {
+      "locale": "en",
+      "case": "real staff password Auth; offline synthetic draft reviewed→adopted but not sent; encrypted reload preserves attempt, deletion/sign-out clear, new login empty, consent CAS stale,390 keyboard axe0",
+      "syntheticOfflineDraft": true,
+      "externalModelCalls": 0,
+      "outboundMessages": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "real staff password Auth; offline synthetic draft reviewed→adopted but not sent; encrypted reload preserves attempt, deletion/sign-out clear, new login empty, consent CAS stale,390 keyboard axe0",
+      "syntheticOfflineDraft": true,
+      "externalModelCalls": 0,
+      "outboundMessages": 0
+    }
+  ]
+}

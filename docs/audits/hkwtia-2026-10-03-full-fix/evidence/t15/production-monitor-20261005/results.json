@@ -1,0 +1,740 @@
+{
+  "observedAt": "2026-10-05T12:56:27.538Z",
+  "productionDeployment": "dpl_7kPgC4PcwHcP6Q9fWFaVTYgkvVFV",
+  "productionSourceSha": "ed550b96ca837bed6d6526bb7ead39998838ceef",
+  "normalProductionGate": {
+    "unchanged": true,
+    "thresholds": {
+      "performance": 0.9,
+      "accessibility": 0.95,
+      "seo": 0.95
+    },
+    "numberOfRuns": 1,
+    "results": [
+      {
+        "runId": 37289652737,
+        "sourceSha": "a73d10f1aae51337db90efdf08e6116cbd613758",
+        "result": "FAIL",
+        "reports": [
+          {
+            "file": "lhr-1791192241309.json",
+            "url": "https://hkwtia.vercel.app/",
+            "fetchTime": "2026-10-05T09:23:47.296Z",
+            "version": "12.6.1",
+            "performance": 0.88,
+            "accessibility": 1,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1169.0014999999999,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 2206.0015,
+                "display": "2.2 s",
+                "score": 0.95
+              },
+              "total-blocking-time": {
+                "numeric": 351.5,
+                "display": "350 ms",
+                "score": 0.73
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 4170.349917500252,
+                "display": "4.2 s",
+                "score": 0.78
+              },
+              "server-response-time": {
+                "numeric": 19.756999999999998,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192254805.json",
+            "url": "https://hkwtia.vercel.app/membership",
+            "fetchTime": "2026-10-05T09:24:04.425Z",
+            "version": "12.6.1",
+            "performance": 0.99,
+            "accessibility": 0.97,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1159.94,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 1949.94,
+                "display": "1.9 s",
+                "score": 0.97
+              },
+              "total-blocking-time": {
+                "numeric": 45,
+                "display": "50 ms",
+                "score": 1
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1805.695960000002,
+                "display": "1.8 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.75399999999999,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192267454.json",
+            "url": "https://hkwtia.vercel.app/events",
+            "fetchTime": "2026-10-05T09:24:17.483Z",
+            "version": "12.6.1",
+            "performance": 0.97,
+            "accessibility": 1,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1118.909,
+                "display": "1.1 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 2472.909,
+                "display": "2.5 s",
+                "score": 0.9
+              },
+              "total-blocking-time": {
+                "numeric": 51,
+                "display": "50 ms",
+                "score": 1
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1118.909,
+                "display": "1.1 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.775,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192279239.json",
+            "url": "https://hkwtia.vercel.app/programmes",
+            "fetchTime": "2026-10-05T09:24:30.101Z",
+            "version": "12.6.1",
+            "performance": 0.98,
+            "accessibility": 0.96,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1089.983,
+                "display": "1.1 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 2139.983,
+                "display": "2.1 s",
+                "score": 0.95
+              },
+              "total-blocking-time": {
+                "numeric": 78,
+                "display": "80 ms",
+                "score": 0.99
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1089.983,
+                "display": "1.1 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.644000000000005,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192298312.json",
+            "url": "https://hkwtia.vercel.app/partners",
+            "fetchTime": "2026-10-05T09:24:41.896Z",
+            "version": "12.6.1",
+            "performance": 0.99,
+            "accessibility": 1,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1229.49,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 1829.49,
+                "display": "1.8 s",
+                "score": 0.98
+              },
+              "total-blocking-time": {
+                "numeric": 66.99999999999977,
+                "display": "70 ms",
+                "score": 0.99
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 2646.0225920000094,
+                "display": "2.6 s",
+                "score": 0.97
+              },
+              "server-response-time": {
+                "numeric": 19.644,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192312514.json",
+            "url": "https://hkwtia.vercel.app/zh",
+            "fetchTime": "2026-10-05T09:25:00.959Z",
+            "version": "12.6.1",
+            "performance": 0.99,
+            "accessibility": 1,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1080.451,
+                "display": "1.1 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 2105.451,
+                "display": "2.1 s",
+                "score": 0.96
+              },
+              "total-blocking-time": {
+                "numeric": 75,
+                "display": "80 ms",
+                "score": 0.99
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1291.3342620000087,
+                "display": "1.3 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.964000000000006,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192324244.json",
+            "url": "https://hkwtia.vercel.app/zh/membership",
+            "fetchTime": "2026-10-05T09:25:15.162Z",
+            "version": "12.6.1",
+            "performance": 0.99,
+            "accessibility": 0.97,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1229.278,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 1962.278,
+                "display": "2.0 s",
+                "score": 0.97
+              },
+              "total-blocking-time": {
+                "numeric": 41.5,
+                "display": "40 ms",
+                "score": 1
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1229.278,
+                "display": "1.2 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.631,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192336744.json",
+            "url": "https://hkwtia.vercel.app/zh/events",
+            "fetchTime": "2026-10-05T09:25:26.900Z",
+            "version": "12.6.1",
+            "performance": 0.98,
+            "accessibility": 1,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1231.3035,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 2266.3035,
+                "display": "2.3 s",
+                "score": 0.94
+              },
+              "total-blocking-time": {
+                "numeric": 85,
+                "display": "90 ms",
+                "score": 0.99
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1231.3035,
+                "display": "1.2 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.903999999999996,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192348688.json",
+            "url": "https://hkwtia.vercel.app/zh/programmes",
+            "fetchTime": "2026-10-05T09:25:39.424Z",
+            "version": "12.6.1",
+            "performance": 0.98,
+            "accessibility": 0.96,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1238.853,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 2288.853,
+                "display": "2.3 s",
+                "score": 0.93
+              },
+              "total-blocking-time": {
+                "numeric": 94,
+                "display": "90 ms",
+                "score": 0.98
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 1238.853,
+                "display": "1.2 s",
+                "score": 1
+              },
+              "server-response-time": {
+                "numeric": 19.857999999999997,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791192366341.json",
+            "url": "https://hkwtia.vercel.app/zh/partners",
+            "fetchTime": "2026-10-05T09:25:51.347Z",
+            "version": "12.6.1",
+            "performance": 0.99,
+            "accessibility": 1,
+            "seo": 1,
+            "metrics": {
+              "first-contentful-paint": {
+                "numeric": 1234.3985,
+                "display": "1.2 s",
+                "score": 0.99
+              },
+              "largest-contentful-paint": {
+                "numeric": 1834.3985,
+                "display": "1.8 s",
+                "score": 0.98
+              },
+              "total-blocking-time": {
+                "numeric": 80.00000000000023,
+                "display": "80 ms",
+                "score": 0.99
+              },
+              "cumulative-layout-shift": {
+                "numeric": 0,
+                "display": "0",
+                "score": 1
+              },
+              "speed-index": {
+                "numeric": 2440.6590820000224,
+                "display": "2.4 s",
+                "score": 0.98
+              },
+              "server-response-time": {
+                "numeric": 19.636999999999993,
+                "display": "Root document took 20 ms",
+                "score": 1
+              }
+            },
+            "runtimeError": null,
+            "warningCount": 0,
+            "extraHeaderNames": []
+          }
+        ]
+      },
+      {
+        "runId": 37309208646,
+        "sourceSha": "8ce8ee4766d85fe497cdfc4c0f6da9505bd6345b",
+        "result": "FAIL",
+        "reports": [
+          {
+            "file": "lhr-1791203088916.json",
+            "path": "/",
+            "observedAt": "2026-10-05T12:24:36.190Z",
+            "perf": 0.82,
+            "a11y": 1,
+            "seo": 1,
+            "benchmark": 2033,
+            "FCP": 1366.1485,
+            "LCP": 2533.1485000000002,
+            "TBT": 567,
+            "SI": 2161.649016087922,
+            "CLS": 0,
+            "server": 2.596,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203102224.json",
+            "path": "/membership",
+            "observedAt": "2026-10-05T12:24:52.710Z",
+            "perf": 0.99,
+            "a11y": 0.97,
+            "seo": 1,
+            "benchmark": 2427.5,
+            "FCP": 1214.357,
+            "LCP": 1969.357,
+            "TBT": 52.5,
+            "SI": 1214.357,
+            "CLS": 0,
+            "server": 2.0890000000000004,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203115751.json",
+            "path": "/events",
+            "observedAt": "2026-10-05T12:25:05.243Z",
+            "perf": 0.96,
+            "a11y": 1,
+            "seo": 1,
+            "benchmark": 2493,
+            "FCP": 1147.6335,
+            "LCP": 2678.1335,
+            "TBT": 104,
+            "SI": 2351.922910000002,
+            "CLS": 0,
+            "server": 2.6099999999999994,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203128288.json",
+            "path": "/programmes",
+            "observedAt": "2026-10-05T12:25:18.833Z",
+            "perf": 0.98,
+            "a11y": 0.96,
+            "seo": 1,
+            "benchmark": 2468.5,
+            "FCP": 1068.271,
+            "LCP": 2118.2709999999997,
+            "TBT": 92,
+            "SI": 1068.271,
+            "CLS": 0,
+            "server": 1.8710000000000004,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203147784.json",
+            "path": "/partners",
+            "observedAt": "2026-10-05T12:25:31.325Z",
+            "perf": 0.99,
+            "a11y": 1,
+            "seo": 1,
+            "benchmark": 2472,
+            "FCP": 1071.992,
+            "LCP": 1813.992,
+            "TBT": 57.000000000000114,
+            "SI": 1385.095272000027,
+            "CLS": 0,
+            "server": 2.6609999999999996,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203162816.json",
+            "path": "/zh",
+            "observedAt": "2026-10-05T12:25:50.881Z",
+            "perf": 0.98,
+            "a11y": 1,
+            "seo": 1,
+            "benchmark": 2429,
+            "FCP": 1089.3315,
+            "LCP": 2162.3315000000002,
+            "TBT": 86,
+            "SI": 1089.3315,
+            "CLS": 0,
+            "server": 1.725999999999999,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203175287.json",
+            "path": "/zh/membership",
+            "observedAt": "2026-10-05T12:26:05.903Z",
+            "perf": 0.97,
+            "a11y": 0.97,
+            "seo": 1,
+            "benchmark": 2494.5,
+            "FCP": 1212.5839999999998,
+            "LCP": 2278.584,
+            "TBT": 116,
+            "SI": 1212.5839999999998,
+            "CLS": 0,
+            "server": 2.439,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203187903.json",
+            "path": "/zh/events",
+            "observedAt": "2026-10-05T12:26:18.367Z",
+            "perf": 0.98,
+            "a11y": 1,
+            "seo": 1,
+            "benchmark": 2493.5,
+            "FCP": 1106.161,
+            "LCP": 2283.161,
+            "TBT": 58.5,
+            "SI": 1106.161,
+            "CLS": 0,
+            "server": 2.1529999999999987,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203200959.json",
+            "path": "/zh/programmes",
+            "observedAt": "2026-10-05T12:26:30.962Z",
+            "perf": 0.97,
+            "a11y": 0.96,
+            "seo": 1,
+            "benchmark": 2485.5,
+            "FCP": 1091.446,
+            "LCP": 2265.446,
+            "TBT": 129,
+            "SI": 1091.446,
+            "CLS": 0,
+            "server": 2.4000000000000004,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          },
+          {
+            "file": "lhr-1791203220110.json",
+            "path": "/zh/partners",
+            "observedAt": "2026-10-05T12:26:44.003Z",
+            "perf": 0.98,
+            "a11y": 1,
+            "seo": 1,
+            "benchmark": 2492,
+            "FCP": 1154.6,
+            "LCP": 1994.6,
+            "TBT": 114,
+            "SI": 2518.202848000011,
+            "CLS": 0,
+            "server": 2.1850000000000005,
+            "warningCount": 0,
+            "runtimeError": null,
+            "extraHeaderNames": []
+          }
+        ]
+      }
+    ]
+  },
+  "localLocaleControlledReproduction": {
+    "chromeVersion149": true,
+    "requestedAndFinalLocalesMatch": true,
+    "reports": [
+      {
+        "run": 0,
+        "path": "/",
+        "finalPath": "/",
+        "observedAt": "2026-10-05T12:21:27.066Z",
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1,
+        "metrics": {
+          "first-contentful-paint": 1305.813,
+          "largest-contentful-paint": 2375.813,
+          "total-blocking-time": 122,
+          "cumulative-layout-shift": 0,
+          "speed-index": 1871.9794787792882,
+          "server-response-time": 112.05900000000001
+        },
+        "benchmarkIndex": 2562.5,
+        "warnings": [],
+        "error": null,
+        "extraHeaderNames": [
+          "Accept-Language"
+        ],
+        "chrome": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36"
+      },
+      {
+        "run": 1,
+        "path": "/",
+        "finalPath": "/",
+        "observedAt": "2026-10-05T12:21:43.662Z",
+        "performance": 0.98,
+        "accessibility": 1,
+        "seo": 1,
+        "metrics": {
+          "first-contentful-paint": 1259.0520000000001,
+          "largest-contentful-paint": 2084.052,
+          "total-blocking-time": 114,
+          "cumulative-layout-shift": 0,
+          "speed-index": 1780.620161102563,
+          "server-response-time": 75.01799999999999
+        },
+        "benchmarkIndex": 2382.5,
+        "warnings": [],
+        "error": null,
+        "extraHeaderNames": [
+          "Accept-Language"
+        ],
+        "chrome": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36"
+      },
+      {
+        "run": 2,
+        "path": "/zh",
+        "finalPath": "/zh",
+        "observedAt": "2026-10-05T12:21:59.706Z",
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1,
+        "metrics": {
+          "first-contentful-paint": 1245.876,
+          "largest-contentful-paint": 2101.876,
+          "total-blocking-time": 155.00000000000023,
+          "cumulative-layout-shift": 0,
+          "speed-index": 2162.485867764276,
+          "server-response-time": 74.42699999999999
+        },
+        "benchmarkIndex": 2200,
+        "warnings": [],
+        "error": null,
+        "extraHeaderNames": [
+          "Accept-Language"
+        ],
+        "chrome": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36"
+      }
+    ],
+    "doesNotCloseLinuxFailure": true
+  },
+  "realDiagnosticAdapter": {
+    "sampledProfiles": 1,
+    "sampleCount": 9520,
+    "clockAdjustedSamples": 8,
+    "rawTraceOrDevtoolsHeadersExported": false,
+    "timingsNotPerformanceAcceptance": true
+  },
+  "rootCause": "UNRESOLVED_LINUX_COLD_FIRST_EN_HOMEPAGE; source patch is opt-in diagnostics, not an application performance fix",
+  "productionChanged": false,
+  "providerCalls": 0,
+  "fullFixComplete": false
+}

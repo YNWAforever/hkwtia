@@ -1,0 +1,100 @@
+import {describe, expect, it} from "vitest";
+
+import {parseDonorPartnerFile, parseZhNameSidecar, resolveZhName} from "@/scripts/lib/partner-import-input";
+
+describe("parseDonorPartnerFile", () => {
+  it("accepts the archived donor's three named arrays and resolves each category's logo directory", () => {
+    const parsed = parseDonorPartnerFile({
+      supportingOrganisations: [{name: "Harbour Trade Council", file: "trade.png"}],
+      regionalPartners: [{name: "Regional Council", file: "regional.png"}],
+      mediaPartners: [{name: "GBA Media Group", file: "media.png"}],
+    });
+
+    expect(parsed).toEqual([
+      {name: "Harbour Trade Council", category: "supporting", logoFile: "supporting/trade.png"},
+      {name: "Regional Council", category: "regional", logoFile: "regional/regional.png"},
+      {name: "GBA Media Group", category: "media", logoFile: "media/media.png"},
+    ]);
+  });
+
+  it("accepts a well-formed donor partner array", () => {
+    const parsed = parseDonorPartnerFile([
+      {name: "Harbour Trade Council", category: "supporting", logoFile: "harbour-trade.png"},
+      {name: "GBA Media Group", category: "media", website: "https://example.org", logoFile: "gba-media.png"},
+    ]);
+    expect(parsed).toHaveLength(2);
+    expect(parsed[1]!.website).toBe("https://example.org");
+  });
+
+  it("rejects parent-directory logo paths before the importer reads local files", () => {
+    expect(() => parseDonorPartnerFile([{name: "X", category: "supporting", logoFile: "../private.png"}])).toThrow();
+  });
+
+  it("rejects archived filenames that escape their category directory", () => {
+    expect(() => parseDonorPartnerFile({supportingOrganisations: [{name: "X", file: "../private.png"}], regionalPartners: [], mediaPartners: []})).toThrow();
+  });
+
+  it("accepts an empty donor array", () => {
+    expect(parseDonorPartnerFile([])).toEqual([]);
+  });
+
+  it("rejects an unknown category rather than silently coercing it", () => {
+    expect(() => parseDonorPartnerFile([{name: "X", category: "sponsor-tier", logoFile: "x.png"}]))
+      .toThrow();
+  });
+
+  it("rejects a record with no logo file reference", () => {
+    expect(() => parseDonorPartnerFile([{name: "X", category: "supporting"}])).toThrow();
+  });
+
+  it("rejects a whitespace-only name once trimmed, pinning that .trim() runs before .min(1)", () => {
+    expect(() => parseDonorPartnerFile([{name: "   ", category: "supporting", logoFile: "x.png"}]))
+      .toThrow();
+  });
+
+  it("rejects a whitespace-only logoFile once trimmed, pinning that .trim() runs before .min(1)", () => {
+    expect(() => parseDonorPartnerFile([{name: "X", category: "supporting", logoFile: "   "}]))
+      .toThrow();
+  });
+});
+
+describe("parseZhNameSidecar", () => {
+  it("parses a two-column name_en,name_zh_hk CSV", () => {
+    const map = parseZhNameSidecar("name_en,name_zh_hk\nHarbour Trade Council,港口貿易協會\n");
+    expect(map.get("Harbour Trade Council")).toBe("港口貿易協會");
+  });
+
+  it("returns an empty map for a header-only CSV with no data rows", () => {
+    const map = parseZhNameSidecar("name_en,name_zh_hk\n");
+    expect(map.size).toBe(0);
+  });
+
+  it("parses a CSV using Windows-style \\r\\n line endings", () => {
+    const map = parseZhNameSidecar("name_en,name_zh_hk\r\nHarbour Trade Council,港口貿易協會\r\n");
+    expect(map.get("Harbour Trade Council")).toBe("港口貿易協會");
+  });
+
+  it("rejects empty CSV text and reports the missing header as row 1", () => {
+    expect(() => parseZhNameSidecar("")).toThrow("PARTNER_IMPORT_ZH_CSV_INVALID: row 1");
+  });
+
+  it("rejects a CSV missing the required header and names the row", () => {
+    expect(() => parseZhNameSidecar("en,zh\nHarbour,港口\n")).toThrow("PARTNER_IMPORT_ZH_CSV_INVALID: row 1");
+  });
+
+  it("rejects a row with a blank name_en and names the offending row, not just the header", () => {
+    expect(() => parseZhNameSidecar("name_en,name_zh_hk\nGood Co,好公司\n,港口貿易協會\n"))
+      .toThrow("PARTNER_IMPORT_ZH_CSV_INVALID: row 3");
+  });
+});
+
+describe("resolveZhName", () => {
+  it("uses the sidecar's Chinese name when present", () => {
+    const sidecar = new Map([["Harbour Trade Council", "港口貿易協會"]]);
+    expect(resolveZhName("Harbour Trade Council", sidecar)).toBe("港口貿易協會");
+  });
+
+  it("falls back to the English name when the sidecar has no entry", () => {
+    expect(resolveZhName("GBA Media Group", new Map())).toBe("GBA Media Group");
+  });
+});

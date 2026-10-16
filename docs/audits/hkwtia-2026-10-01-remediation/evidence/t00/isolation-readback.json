@@ -1,0 +1,85 @@
+{
+  "checkedAt": "2026-10-01T07:41:35.438Z",
+  "project": "solitary-wave-52860119",
+  "branch": "br-lingering-unit-azxl75s5",
+  "host": "ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech",
+  "authHost": "ep-plain-mouse-azm8pl2j.neonauth.c-3.ap-southeast-1.aws.neon.tech",
+  "stripeMode": "test",
+  "emailMode": "test",
+  "workerPaused": true,
+  "ledger": [
+    {
+      "count": 51,
+      "latest": "1790568000000"
+    }
+  ],
+  "profiles": [
+    {
+      "role": "member",
+      "count": 5096,
+      "non_synthetic": 0
+    },
+    {
+      "role": "staff",
+      "count": 2,
+      "non_synthetic": 0
+    },
+    {
+      "role": "exco",
+      "count": 1,
+      "non_synthetic": 0
+    },
+    {
+      "role": "superadmin",
+      "count": 1,
+      "non_synthetic": 0
+    }
+  ],
+  "sentinel": [
+    {
+      "count": 1
+    }
+  ],
+  "batches": [
+    {
+      "state": "completed",
+      "count": 4
+    }
+  ],
+  "envNames": [
+    "AUDIT_BATCH_WORKER_PAUSED",
+    "AUDIT_ISOLATED_ACCEPTANCE",
+    "AUTH_GOOGLE_ENABLED",
+    "DATABASE_URL",
+    "DATABASE_URL_TEST",
+    "DEMO_ACCEPTANCE_SEED",
+    "EMAIL_DELIVERY_MODE",
+    "FULL_REMEDIATION_ACCEPTANCE_SEED",
+    "FULL_REMEDIATION_DATABASE_HOST_ALLOWLIST",
+    "M2_TEST_COMPANY_ADMIN_EMAIL",
+    "M2_TEST_COMPANY_ADMIN_PASSWORD",
+    "M2_TEST_EXCO_EMAIL",
+    "M2_TEST_EXCO_PASSWORD",
+    "M2_TEST_MEMBER_EMAIL",
+    "M2_TEST_MEMBER_PASSWORD",
+    "M2_TEST_NEON_HOST",
+    "M2_TEST_NEON_PROJECT_ID",
+    "M2_TEST_STAFF_EMAIL",
+    "M2_TEST_STAFF_PASSWORD",
+    "M2_TEST_SUPERADMIN_EMAIL",
+    "M2_TEST_SUPERADMIN_PASSWORD",
+    "NEON_AUTH_BASE_URL",
+    "NEON_AUTH_COOKIE_SECRET",
+    "NEON_PROJECT_ID",
+    "RATE_LIMIT_KEY_SECRET",
+    "RUN_LIVE_WOZTELL",
+    "STRIPE_CORPORATE_PRICE_ID",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_STARTUP_PRICE_ID",
+    "STRIPE_TEST_CORPORATE_PRICE_ID",
+    "STRIPE_TEST_SECRET_KEY",
+    "STRIPE_TEST_STARTUP_PRICE_ID",
+    "STRIPE_TEST_WEBHOOK_SECRET",
+    "STRIPE_WEBHOOK_SECRET"
+  ]
+}

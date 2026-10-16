@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {searchAdminMembers, type AdminMemberReader} from "@/lib/admin/members";
+import {adminMemberQuerySchema} from "@/lib/admin/member-query";
 import type {AdminActor, Actor} from "@/lib/membership/lifecycle";
 
 const staffActor = (): AdminActor => ({kind: "staff", userId: "staff-1", profileId: "staff-1"});
@@ -15,6 +16,8 @@ describe("admin member list", () => {
         return {
           items: [{
             profileId: "member-acme",
+            membershipId: "membership-acme",
+            companyId: "company-acme",
             displayName: "Acme Member",
             email: "member@acme.example",
             companyName: "Acme Limited",
@@ -22,8 +25,10 @@ describe("admin member list", () => {
             membershipStatus: "active",
             renewalAt: "2026-12-31T00:00:00.000Z",
             score: 42,
+            matchingMembershipIds: ["membership-acme"],
           }],
           nextCursor: null,
+          totalMatching: 1,
         };
       },
     };
@@ -32,7 +37,7 @@ describe("admin member list", () => {
 
     expect(page.items.map((row) => row.profileId)).toEqual(["member-acme"]);
     expect(page.nextCursor).toBeNull();
-    expect(calls).toEqual([{search: "acme", limit: 20, cursor: null}]);
+    expect(calls).toEqual([adminMemberQuerySchema.parse({search: "acme", limit: 20, cursor: null})]);
   });
 
   it("denies a member before the repository can read staff-only data", async () => {

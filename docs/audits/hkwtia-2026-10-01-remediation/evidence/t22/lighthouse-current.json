@@ -1,0 +1,138 @@
+{
+  "sourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "startedAt": "2026-10-02T21:30:58.215Z",
+  "endedAt": "2026-10-02T21:33:57.440Z",
+  "command": "npm.cmd run test:lighthouse -- --config=.playwright/t22-lhci.config.js",
+  "environment": "owned built Next on loopback; confirmed isolated DB; fresh cookie-free browser; no public upload",
+  "mode": "repository simulated defaults",
+  "thresholds": {
+    "performance": 0.9,
+    "accessibility": 0.95,
+    "seo": 0.95
+  },
+  "exitCode": 0,
+  "routes": [
+    {
+      "route": "/",
+      "actualRoute": "/",
+      "fetchTime": "2026-10-02T21:31:33.714Z",
+      "performance": 0.98,
+      "accessibility": 0.97,
+      "seo": 1,
+      "lcpMs": 2376.188,
+      "cls": 0,
+      "tbtMs": 54,
+      "runtimeError": null
+    },
+    {
+      "route": "/events",
+      "actualRoute": "/events",
+      "fetchTime": "2026-10-02T21:31:59.786Z",
+      "performance": 0.94,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 2745.5462500000003,
+      "cls": 0,
+      "tbtMs": 171.48149999999987,
+      "runtimeError": null
+    },
+    {
+      "route": "/membership",
+      "actualRoute": "/membership",
+      "fetchTime": "2026-10-02T21:31:48.170Z",
+      "performance": 0.96,
+      "accessibility": 0.97,
+      "seo": 1,
+      "lcpMs": 2694.6749999999997,
+      "cls": 0,
+      "tbtMs": 59,
+      "runtimeError": null
+    },
+    {
+      "route": "/partners",
+      "actualRoute": "/partners",
+      "fetchTime": "2026-10-02T21:32:30.929Z",
+      "performance": 0.96,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 2700.92875,
+      "cls": 0,
+      "tbtMs": 33,
+      "runtimeError": null
+    },
+    {
+      "route": "/programmes",
+      "actualRoute": "/programmes",
+      "fetchTime": "2026-10-02T21:32:19.010Z",
+      "performance": 0.96,
+      "accessibility": 0.96,
+      "seo": 1,
+      "lcpMs": 2684.3012500000004,
+      "cls": 0,
+      "tbtMs": 73,
+      "runtimeError": null
+    },
+    {
+      "route": "/zh",
+      "actualRoute": "/zh",
+      "fetchTime": "2026-10-02T21:32:45.648Z",
+      "performance": 0.94,
+      "accessibility": 0.96,
+      "seo": 1,
+      "lcpMs": 2983.265000000001,
+      "cls": 0,
+      "tbtMs": 72,
+      "runtimeError": null
+    },
+    {
+      "route": "/zh/events",
+      "actualRoute": "/zh/events",
+      "fetchTime": "2026-10-02T21:33:10.899Z",
+      "performance": 0.91,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 3047.3549999999996,
+      "cls": 0,
+      "tbtMs": 188.65799999999967,
+      "runtimeError": null
+    },
+    {
+      "route": "/zh/membership",
+      "actualRoute": "/zh/membership",
+      "fetchTime": "2026-10-02T21:32:58.921Z",
+      "performance": 0.95,
+      "accessibility": 0.97,
+      "seo": 1,
+      "lcpMs": 2822.2962500000003,
+      "cls": 0,
+      "tbtMs": 60,
+      "runtimeError": null
+    },
+    {
+      "route": "/zh/partners",
+      "actualRoute": "/zh/partners",
+      "fetchTime": "2026-10-02T21:33:42.544Z",
+      "performance": 0.97,
+      "accessibility": 1,
+      "seo": 1,
+      "lcpMs": 2523.744,
+      "cls": 0,
+      "tbtMs": 65.5,
+      "runtimeError": null
+    },
+    {
+      "route": "/zh/programmes",
+      "actualRoute": "/zh/programmes",
+      "fetchTime": "2026-10-02T21:33:30.329Z",
+      "performance": 0.96,
+      "accessibility": 0.96,
+      "seo": 1,
+      "lcpMs": 2730.065,
+      "cls": 0,
+      "tbtMs": 104.17399999999998,
+      "runtimeError": null
+    }
+  ],
+  "production": false,
+  "rum": false
+}

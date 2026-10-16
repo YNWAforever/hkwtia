@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {
@@ -39,7 +40,7 @@ function createHarness(
       citations: [],
     }),
   }));
-  const runtime = createAgentRuntime({
+  const runtime = createAgentRuntime({budget: syntheticAiBudget(),
     agentRuns,
     providerFactories: {
       openai: () => ({stream: providerStream}),

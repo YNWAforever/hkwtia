@@ -28,10 +28,16 @@ export function buildM2RuntimeEnvironment(environment: RuntimeEnvironment = proc
   return {
     ...definedEnvironment,
     DATABASE_URL: environment.DATABASE_URL_TEST?.trim() ?? "",
+    NEON_PROJECT_ID: environment.M2_TEST_NEON_PROJECT_ID?.trim() ?? "",
     STRIPE_SECRET_KEY: environment.STRIPE_TEST_SECRET_KEY?.trim() ?? "",
     STRIPE_WEBHOOK_SECRET: environment.STRIPE_TEST_WEBHOOK_SECRET?.trim() ?? "",
     STRIPE_STARTUP_PRICE_ID: environment.STRIPE_TEST_STARTUP_PRICE_ID?.trim() ?? "",
     STRIPE_CORPORATE_PRICE_ID: environment.STRIPE_TEST_CORPORATE_PRICE_ID?.trim() ?? "",
     APP_URL: environment.APP_URL?.trim() ?? "",
   };
+}
+
+/** Credential subset for journeys that never call a payment provider. */
+export function missingM2IdentityEnvironment(environment: RuntimeEnvironment = process.env): readonly string[] {
+  return missingM2LiveEnvironment(environment).filter((name) => !name.startsWith("STRIPE_TEST_"));
 }

@@ -1,0 +1,151 @@
+{
+  "recordedAt": "2026-09-30T19:43:27.856Z",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "origin": "https://hkwtia.vercel.app",
+  "environment": "Production-configured deployment before authorized import",
+  "cases": [
+    {
+      "kind": "home",
+      "path": "/",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "home-en-desktop.png"
+    },
+    {
+      "kind": "partners",
+      "path": "/partners",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/partners",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-en-desktop.png",
+      "publishedPartners": 0,
+      "localizedEmptyState": true
+    },
+    {
+      "kind": "anonymous-admin",
+      "path": "/admin/partners",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin-login",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "anonymous-admin-en-desktop.png"
+    },
+    {
+      "kind": "home",
+      "path": "/zh",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/zh",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "home-zh-desktop.png"
+    },
+    {
+      "kind": "partners",
+      "path": "/zh/partners",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/zh/partners",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-zh-desktop.png",
+      "publishedPartners": 0,
+      "localizedEmptyState": true
+    },
+    {
+      "kind": "anonymous-admin",
+      "path": "/zh/admin/partners",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/zh/admin-login",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "anonymous-admin-zh-desktop.png"
+    },
+    {
+      "kind": "home",
+      "path": "/",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "home-en-mobile.png"
+    },
+    {
+      "kind": "partners",
+      "path": "/partners",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/partners",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-en-mobile.png",
+      "publishedPartners": 0,
+      "localizedEmptyState": true
+    },
+    {
+      "kind": "anonymous-admin",
+      "path": "/admin/partners",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin-login",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "anonymous-admin-en-mobile.png"
+    },
+    {
+      "kind": "home",
+      "path": "/zh",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/zh",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "home-zh-mobile.png"
+    },
+    {
+      "kind": "partners",
+      "path": "/zh/partners",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/zh/partners",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-zh-mobile.png",
+      "publishedPartners": 0,
+      "localizedEmptyState": true
+    },
+    {
+      "kind": "anonymous-admin",
+      "path": "/zh/admin/partners",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/zh/admin-login",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "anonymous-admin-zh-mobile.png"
+    }
+  ],
+  "applicationSessionIncluded": false,
+  "productionDataWritten": false,
+  "passed": true
+}

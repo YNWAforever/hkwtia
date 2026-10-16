@@ -1,0 +1,13 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "historicalOriginalFilesRestored": true,
+  "files": [
+    {
+      "original": "docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/browser.json",
+      "captured": "evidence/t22/observed-99-targeted-output/docs/audits/hkwtia-2026-10-01-remediation/evidence/t17/browser.json",
+      "sha256": "86d725dea750874d6e543820b2e55e37a300dfb6d04e3848bbe8704c3bd5ec60",
+      "parentRun": "evidence/t22/browser-99-targeted.json",
+      "scope": "original-case focused native rerun; not a full green collection"
+    }
+  ]
+}

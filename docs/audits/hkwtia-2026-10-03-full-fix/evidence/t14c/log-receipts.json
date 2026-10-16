@@ -1,0 +1,165 @@
+[
+  {
+    "log": ".playwright/full-fix-t14c-event-target-red.log",
+    "sha256": "4bafee937ed1cea9956db2854910958802341b318cd40bdc7d79996932e35fcc",
+    "bytes": 5221,
+    "summary": [
+      " Test Files  1 failed (1)",
+      "      Tests  6 failed | 5 passed (11)",
+      "   Start at  10:30:33",
+      "   Duration  18.12s (transform 624ms, setup 220ms, collect 2.65s, tests 13.84s, environment 0ms, prepare 184ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-event-green.log",
+    "sha256": "f989a9878f8297e3e84715d73ba7bb87af05ca8f18eec4d33372e33a82e817c6",
+    "bytes": 353,
+    "summary": [
+      " Test Files  1 passed (1)",
+      "      Tests  11 passed (11)",
+      "   Start at  10:32:49",
+      "   Duration  17.74s (transform 719ms, setup 188ms, collect 2.64s, tests 13.98s, environment 0ms, prepare 176ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-mutation-red.log",
+    "sha256": "5b3ebcb28609595a8452de69d427ac9ee2e457813df9634cf8727568acf3d68e",
+    "bytes": 5139,
+    "summary": [
+      " Test Files  1 failed (1)",
+      "      Tests  6 failed | 5 passed (11)",
+      "   Start at  10:44:19",
+      "   Duration  21.58s (transform 1.28s, setup 650ms, collect 3.40s, tests 16.08s, environment 0ms, prepare 168ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-mutation-restored-green.log",
+    "sha256": "48c0d55b86f2e0a40ca54bd6fe4c229ae1a9d30bbe9ebb460801f9b33d362c89",
+    "bytes": 2437,
+    "summary": [
+      " Test Files  1 passed (1)",
+      "      Tests  11 passed (11)",
+      "   Start at  10:44:44",
+      "   Duration  30.36s (transform 1.81s, setup 265ms, collect 4.60s, tests 23.69s, environment 0ms, prepare 170ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-focused-final.log",
+    "sha256": "53b4a6042bc8b8125deb0f49caf2775d81dfe3ec2ed5a1f49c3079be75345653",
+    "bytes": 1414,
+    "summary": [
+      " Test Files  13 passed (13)",
+      "      Tests  171 passed (171)",
+      "   Start at  11:32:07",
+      "   Duration  15.44s (transform 5.21s, setup 2.65s, collect 29.87s, tests 23.75s, environment 13.23s, prepare 2.56s)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-expired-cookie-red.log",
+    "sha256": "92d7b9db8063f944d9a95286100af1b211e92486463bfddd8db5a385de760d9f",
+    "bytes": 3828,
+    "summary": [
+      " Test Files  1 failed (1)",
+      "      Tests  2 failed | 10 passed (12)",
+      "   Start at  11:24:59",
+      "   Duration  3.20s (transform 122ms, setup 222ms, collect 202ms, tests 40ms, environment 1.03s, prepare 184ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-expiry-provider-guard-red.log",
+    "sha256": "5da19ade00f30f15779e2d02c3df56af6e1388168e4ecee57a8c65a30cb5781e",
+    "bytes": 6387,
+    "summary": [
+      " Test Files  1 failed (1)",
+      "      Tests  5 failed | 12 passed (17)",
+      "   Start at  11:29:15",
+      "   Duration  1.92s (transform 97ms, setup 153ms, collect 132ms, tests 34ms, environment 719ms, prepare 224ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-expiry-provider-guard-green.log",
+    "sha256": "d14eb740ecb5a5a385a83554a7b1facb18f536d179f0d1fadbdf17fceeb7c78e",
+    "bytes": 552,
+    "summary": [
+      " Test Files  4 passed (4)",
+      "      Tests  40 passed (40)",
+      "   Start at  11:30:01",
+      "   Duration  2.34s (transform 258ms, setup 436ms, collect 527ms, tests 553ms, environment 2.41s, prepare 545ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-expiry-mutation-red.log",
+    "sha256": "340048f87d9349d079a5b4d02b6411ab45089c31cd3f2480bc0f6bcbf5106359",
+    "bytes": 5099,
+    "summary": [
+      " Test Files  1 failed (1)",
+      "      Tests  3 failed | 14 passed (17)",
+      "   Start at  11:32:00",
+      "   Duration  2.26s (transform 85ms, setup 149ms, collect 157ms, tests 38ms, environment 695ms, prepare 96ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-expiry-mutation-green.log",
+    "sha256": "a7d97a784a5a1245612f010fd02e2f0e51c15d96080a9bc4abb94d3230074491",
+    "bytes": 340,
+    "summary": [
+      " Test Files  1 passed (1)",
+      "      Tests  17 passed (17)",
+      "   Start at  11:32:04",
+      "   Duration  2.05s (transform 108ms, setup 164ms, collect 184ms, tests 44ms, environment 520ms, prepare 134ms)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-native.log",
+    "sha256": "72b75738ee1d5f164558db10cd0a0788e7f9a06251fe481b4b6f1d4c1107cce1",
+    "bytes": 1632,
+    "summary": [
+      "  4 passed (1.1m)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-provider-final.log",
+    "sha256": "c3777033c83430ddb1500f7c45c01b188e3e4cddd2971f2607eec21229d9bc01",
+    "bytes": 5117,
+    "summary": [
+      "{\"observedAt\":\"2026-10-04T03:37:50.821Z\",\"sourceSha\":\"fe92e533f8634f084b0105b3fb58b056d7091203\",\"buildId\":\"1cWtPIkj3-Lm6cOXMOJ6P\",\"automaticRemoteWebhook\":false,\"googleVerified\":false,\"magicLinkVerified\":false,\"relay\":\"Actual Stripe CLI signed events held in an owned loopback relay, then forwarded/replayed\",\"partialRefund\":\"NOT_APPLICABLE: existing refundOrder and Stripe adapter support full refunds only\",\"emailDelivery\":\"actual outbox/job with synthetic test sink, not external recipient delivery\",\"scope\":\"confirmed isolated Neon/Auth; synthetic data; Stripe TEST; email test sink\",\"production\":false,\"run\":\"1d7fda18-e23e-46c4-a7df-62f9ebe22b86\",\"steps\":[{\"case\":\"cancel return resumes original actual hosted session; provider expiry\",\"checkoutReference\":\"45c07302136c65df\",\"orders\":1},{\"case\":\"provider-confirmed expiry clears only the authorized recovery cookie on another event\",\"sameBrowser\":true,\"actualProviderRead\":true},{\"case\":\"decline and provider expiry\",\"checkoutReference\":\"381ebbbdf3c10a58\",\"result\":\"decline leaves pending/unpaid; actual signed expiry releases order\"},{\"case\":\"paid seat actual private ticket page\",\"http\":200,\"hasQr\":true,\"tokenLogged\":false,\"screenshot\":false},{\"case\":\"paid with interrupted return, delayed signed event and replay\",\"checkoutReference\":\"ef78201f9780368b\",\"paymentReference\":\"086c9ec561575a10\",\"orderReference\":\"09e1f94f2f4a46d4\",\"result\":\"provider paid while app pending; signed event -> paid; replay one audit/one seat\"},{\"case\":\"successful full refund invalidates signed ticket\",\"http\":404,\"tokenLogged\":false},{\"case\":\"authorized staff refund and signed provider callback replay\",\"refundReference\":\"2411d2889e10f97c\",\"result\":\"provider succeeded1000HKD cents, app refunded, one refund audit; translated order reference and status\"},{\"case\":\"async-refund-success\",\"refundReference\":\"7ad69522ea93c337\",\"providerInitial\":\"pending\",\"providerFinal\":\"succeeded\",\"appInitial\":\"paid\",\"appFinal\":\"refunded\",\"refundCount\":1,\"finalAuditCount\":1,\"actualSignedCallback\":true,\"replayed\":true,\"notification\":\"durable outbox; delivery verified separately\"},{\"case\":\"async-refund-failure\",\"refundReference\":\"31a4127adeb528d8\",\"providerInitial\":\"succeeded\",\"providerFinal\":\"failed\",\"appInitial\":\"refunded\",\"appFinal\":\"refund_failed\",\"refundCount\":1,\"finalAuditCount\":1,\"actualSignedCallback\":true,\"replayed\":true,\"notification\":\"durable outbox; delivery verified separately\"}],\"deliveries\":[{\"eventReference\":\"ab602979767a14d6\",\"type\":\"checkout.session.expired\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"fa234af6f89697d7\",\"type\":\"checkout.session.expired\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"77b9358a18d44e5e\",\"type\":\"checkout.session.completed\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"77b9358a18d44e5e\",\"type\":\"checkout.session.completed\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"45d3b207d74e3fe1\",\"type\":\"refund.created\",\"http\":200,\"outcome\":\"duplicate\"},{\"eventReference\":\"e365996849982bac\",\"type\":\"refund.updated\",\"http\":200,\"outcome\":\"duplicate\"},{\"eventReference\":\"c62dd60c0237d73b\",\"type\":\"checkout.session.completed\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"e0f29343b5d2e314\",\"type\":\"refund.updated\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"e0f29343b5d2e314\",\"type\":\"refund.updated\",\"http\":200,\"outcome\":\"duplicate\"},{\"eventReference\":\"2d5a0a32689f45e4\",\"type\":\"checkout.session.completed\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"8cd955488ec97125\",\"type\":\"refund.failed\",\"http\":200,\"outcome\":\"processed\"},{\"eventReference\":\"8cd955488ec97125\",\"type\":\"refund.failed\",\"http\":200,\"outcome\":\"duplicate\"}],\"runtimeDiagnostics\":[],\"isolatedDbPositivelyProven\":true,\"nativeEventWorkspaceExit\":0,\"paidNotices\":[{\"kind\":\"confirmation\",\"status\":\"sent\",\"error_code\":null,\"test_sink\":true},{\"kind\":\"pass\",\"status\":\"sent\",\"error_code\":null,\"test_sink\":true}],\"paidNoticesReadback\":[{\"kind\":\"confirmation\",\"status\":\"sent\",\"error_code\":null,\"attempt_count\":1,\"test_sink\":true},{\"kind\":\"pass\",\"status\":\"sent\",\"error_code\":null,\"attempt_count\":1,\"test_sink\":true}],\"refundNotice\":[{\"kind\":\"confirmation\",\"status\":\"sent\",\"error_code\":null,\"test_sink\":true},{\"kind\":\"pass\",\"status\":\"sent\",\"error_code\":null,\"test_sink\":true},{\"kind\":\"refund\",\"status\":\"sent\",\"error_code\":null,\"test_sink\":true}],\"outbox\":[{\"kind\":\"confirmation\",\"status\":\"sent\",\"n\":1},{\"kind\":\"pass\",\"status\":\"sent\",\"n\":1},{\"kind\":\"refund\",\"status\":\"sent\",\"n\":1}],\"completed\":true}"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-final-full-unit.log",
+    "sha256": "8c9bb3189e95547f40d570625f8750360fd4e47b27ca6c6db011bbe3bc14152e",
+    "bytes": 84809,
+    "summary": [
+      " Test Files  786 passed | 96 skipped (882)",
+      "      Tests  6652 passed | 471 skipped (7123)",
+      "   Start at  11:34:43",
+      "   Duration  714.98s (transform 16.78s, setup 109.08s, collect 386.92s, tests 75.62s, environment 462.78s, prepare 93.86s)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-final-lint.log",
+    "sha256": "8a09ea5ded7c8bb2c3c98f77562a98d6fca80e11449e13f8d3cd0e74a4524222",
+    "bytes": 22431,
+    "summary": [
+      "✖ 93 problems (0 errors, 93 warnings)"
+    ]
+  },
+  {
+    "log": ".playwright/full-fix-t14c-final-types.log",
+    "sha256": "fddac362903b61ce1e1d0663b62ef4676589475221c9c60a0ece1c509e15c637",
+    "bytes": 51,
+    "summary": []
+  },
+  {
+    "log": ".playwright/full-fix-t14c-final-build.log",
+    "sha256": "64786d7453ed55eca2fdaf15bdf09d8f788b60df6db3494f00c414d5a8af087f",
+    "bytes": 6870,
+    "summary": []
+  },
+  {
+    "log": ".playwright/full-fix-t14c-final-strings.log",
+    "sha256": "8d86398b71ee91e0eff86ed3a5c2f7ad6eb71a4a86131df0586d183cd838f8c7",
+    "bytes": 134,
+    "summary": []
+  }
+]

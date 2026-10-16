@@ -1,0 +1,75 @@
+{
+  "observedAtUtc": "2026-09-28T04:01:47Z",
+  "scope": "Protected branch Preview, isolated Neon, synthetic member, genuine Stripe TEST events; worker paused; no live send",
+  "deploymentId": "dpl_7LhfE17XFjDYPq9gvsQvTDAFUiCq",
+  "branchHeadAtTest": "e6cd8d16a27838d7f7fccd4e251197f596e87965",
+  "signedIngressProbe": {
+    "eventId": "evt_1UKVZaELEX4A1xsqMssk4FjP",
+    "type": "customer.created",
+    "livemode": false,
+    "accepted": true
+  },
+  "membershipId": "371cd957-23fa-4257-98d5-77fd9aeaf998",
+  "sessionId": "cs_test_a1R6THiOMI4UPW0TlgiZr5FWBzbB2GdmQG0BHqsCVP3DQn717MdiDt0F0J",
+  "paymentMethods": [
+    "card",
+    "link"
+  ],
+  "provider": {
+    "status": "complete",
+    "paymentStatus": "paid",
+    "livemode": false
+  },
+  "steps": [
+    {
+      "case": "decline",
+      "result": "declined at provider; membership remains processing; same Checkout session"
+    },
+    {
+      "case": "3DS and delayed webhook",
+      "result": "challenge completed; real paid Checkout returns processing while signed provider events held"
+    },
+    {
+      "case": "webhook release",
+      "result": "real Stripe-signed deliveries activate membership and browser polling reveals active"
+    },
+    {
+      "case": "replay",
+      "result": "same signed event replay acknowledged without membership change"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventId": "evt_1UKViUELEX4A1xsqS6Cdzd7V",
+      "type": "checkout.session.completed",
+      "cliExit": 0,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKViVELEX4A1xsqLq25MhfB",
+      "type": "invoice.paid",
+      "cliExit": 0,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKViUELEX4A1xsqS6Cdzd7V",
+      "type": "checkout.session.completed",
+      "cliExit": 0,
+      "outcome": {
+        "received": true,
+        "result": "duplicate"
+      }
+    }
+  ],
+  "limits": [
+    "No hosted asynchronous payment-method run",
+    "No hosted ticket payment/refund",
+    "No worker or real email delivery"
+  ]
+}

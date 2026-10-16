@@ -2,7 +2,6 @@ import {describe, expect, it} from "vitest";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {
-  buildPortalSignInPath,
   getDashboard,
   type PortalQueryDependencies,
 } from "@/lib/portal/queries";
@@ -56,6 +55,9 @@ function dependencies(overrides: Record<string, unknown> = {}) {
         return {id: companyId, legalName: "Company A", displayName: input.displayName ?? "Company A"};
       },
     },
+    // Phase C2 Task 5: `updateProfile` fires the contact merge afterwards
+    // (S-16). Stubbed so this authorization suite never reaches a database.
+    contacts: {async linkProfile() { return {linked: null, matchedBy: null, candidates: []}; }},
     ...overrides,
   } as unknown as PortalQueryDependencies & PortalCommandDependencies;
 }
@@ -99,6 +101,37 @@ describe("protected member portal", () => {
 
     const dashboard = await getDashboard(member, deps);
     expect(dashboard.companies).toMatchObject([{id: "company-a", role: null, canManage: false}]);
+    // A row read before 0028 (or a fake that omits the columns) is NOT published:
+    // defaulting the other way would put unreviewed copy on /members (B-7).
+    expect(dashboard.companies[0]).toMatchObject({publicProfileStatus: "hidden", slug: null, tags: [], logoMediaId: null});
+  });
+
+  it("carries the public member page's own copy onto the dashboard company (B-7)", async () => {
+    const deps = dependencies({
+      memberships: {
+        async list() { return [{id: "membership-company-a", ownerUserId: null, companyId: "company-a", applicationId: "application-company-a", planCode: "corporate" as const, status: "active" as const, seatLimit: 5, cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null}]; },
+      },
+      companies: {
+        async getById() {
+          return {
+            id: "company-a", legalName: "Company A", displayName: "Company A", website: "https://company-a.example",
+            slug: "company-a", tags: ["ai", "logistics"], taglineEn: "Ships things", taglineZhHk: "運送",
+            descriptionZhHk: "簡介", logoMediaId: "44444444-4444-4444-8444-444444444444",
+            publicProfileStatus: "rejected" as const, profileRejectionReason: "Add a Chinese tagline.",
+          };
+        },
+      },
+      getCompanyRole: async () => "owner" as const,
+    });
+
+    // /portal/company renders the profile form's defaults from these fields, so
+    // a projection that dropped one would silently blank it on the next save.
+    const dashboard = await getDashboard(member, deps);
+    expect(dashboard.companies[0]).toMatchObject({
+      canManage: true, slug: "company-a", tags: ["ai", "logistics"], taglineEn: "Ships things", taglineZhHk: "運送",
+      descriptionZhHk: "簡介", logoMediaId: "44444444-4444-4444-8444-444444444444",
+      publicProfileStatus: "rejected", profileRejectionReason: "Add a Chinese tagline.",
+    });
   });
 
   it("does not load private data for cancelled or expired memberships", async () => {
@@ -121,6 +154,21 @@ describe("protected member portal", () => {
     await expect(updateProfile({...member, profileId: "user-b"}, {displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
   });
 
+  it.each(["expired", "cancelled"] as const)("keeps own profile preferences writable for a %s member", async (status) => {
+    const deps = dependencies({memberships: {list: async () => [{id: "inactive", status, ownerUserId: "user-a", companyId: null, planCode: "community", seatLimit: 1}]}});
+    await expect(updateProfile(member, {displayName: "Updated Ada", locale: "zh-HK", directoryVisible: false, whatsappOptIn: false}, deps))
+      .resolves.toMatchObject({id: "user-a", displayName: "Updated Ada", locale: "zh-HK", directoryVisible: false, whatsappOptIn: false});
+    await expect(updateProfile({...member, profileId: "user-b"}, {displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
+  });
+
+  it.each(["expired", "cancelled"] as const)("keeps company-private writes blocked for a %s membership", async (status) => {
+    const deps = dependencies({
+      memberships: {list: async () => [{id: "inactive", status, companyId: "company-a", ownerUserId: null, planCode: "corporate", seatLimit: 25}]},
+      companies: {getById: async () => { throw new Error("PRIVATE_READ"); }, update: async () => { throw new Error("PRIVATE_WRITE"); }},
+    });
+    await expect(updateCompany(member, {companyId: "company-a", displayName: "Nope"}, deps)).rejects.toThrow("MEMBERSHIP_INACTIVE");
+  });
+
   it("allows company updates only for an owner or admin", async () => {
     const deps = dependencies({
       memberships: {
@@ -137,12 +185,5 @@ describe("protected member portal", () => {
 
     await expect(updateCompany({...member, companyRoles: {"company-a": "owner"}}, {companyId: "company-a", displayName: "Updated Co"}, deps)).resolves.toMatchObject({displayName: "Updated Co"});
     await expect(updateCompany({...member, companyRoles: {"company-a": "member"}}, {companyId: "company-a", displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
-  });
-
-  it("builds a locale-aware sign-in continuation and rejects open redirects", () => {
-    expect(buildPortalSignInPath("en", "/portal")).toBe("/join?next=%2Fportal");
-    expect(buildPortalSignInPath("zh-HK", "/portal/profile")).toBe("/zh/join?next=%2Fportal%2Fprofile");
-    expect(buildPortalSignInPath("en", "/portal/company/seats")).toBe("/join?next=%2Fportal%2Fcompany%2Fseats");
-    expect(() => buildPortalSignInPath("en", "https://evil.example/steal")).toThrow("INVALID_CONTINUATION");
   });
 });

@@ -46,6 +46,13 @@ const labels: ConciergeLabels = {
   verificationLabel: "Human verification",
   verificationPending: "Complete the verification check to send your message.",
   verificationError: "Verification is unavailable. Reload the page and try again.",
+  configurationUnavailable: "AI support is temporarily unavailable. You can still apply for membership or contact WTIA.",
+  temporarilyUnavailable: "WTIA Concierge is temporarily unavailable. Please try again later or contact WTIA.",
+  rateLimited: "Too many requests. Please wait before trying again.",
+  timeout: "WTIA Concierge took too long to respond. Please try again later.",
+  requestFailed: "Your question could not be sent. Please try again later or contact WTIA.",
+  applicationGuide: "Apply for membership",
+  contactSupport: "Contact WTIA",
 };
 
 function widget(): ReactElement {
@@ -454,5 +461,24 @@ describe("ConciergeWidget", () => {
     });
     expect(screen.queryByRole("button", {name: "5 out of 5"}))
       .not.toBeInTheDocument();
+  });
+
+  it("wraps the launcher in the donor .concierge positioning wrapper", () => {
+    render(widget());
+    const launcher = screen.getByRole("button", {name: labels.launcher});
+    const wrapper = launcher.closest(".concierge");
+    expect(wrapper).not.toBeNull();
+    expect(wrapper).not.toBe(launcher);
+    expect(wrapper).toHaveClass(
+      "concierge",
+      "fixed",
+      "bottom-[calc(1rem+env(safe-area-inset-bottom))]",
+      "right-[calc(1rem+env(safe-area-inset-right))]",
+      "z-40",
+    );
+    expect(launcher).toHaveClass("concierge-trigger", "touch-manipulation");
+    expect(launcher).not.toHaveClass("fixed", "z-40");
+    expect(launcher.className).not.toMatch(/bottom-\[calc\(1rem/);
+    expect(launcher.className).not.toMatch(/right-\[calc\(1rem/);
   });
 });

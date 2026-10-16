@@ -1,0 +1,20 @@
+{
+  "caseId": "UC-34",
+  "observedAt": "2026-10-03T14:21:55.582Z",
+  "command": "node --conditions=react-server --import tsx .playwright/full-fix-t06-uc34.ts",
+  "sdk": "locked AI SDK 7.0.37",
+  "adapter": "actual installed OpenAI Responses SDK",
+  "transport": "synthetic SSE mock HTTP",
+  "usage": {
+    "inputTokens": 2200,
+    "outputTokens": 300,
+    "cacheReadTokens": 0,
+    "reasoningTokens": 0
+  },
+  "steps": 2,
+  "toolExecutions": 1,
+  "requests": 2,
+  "realProviderReceipt": false,
+  "production": false,
+  "result": "PASS"
+}

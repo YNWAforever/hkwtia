@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-04T20:34:10.423668+00:00",
+  "historicalVerificationRetained": "verification.json; its remainingEngineering entry predates this correction",
+  "targetBehaviorRed": {
+    "initialCases": 3,
+    "expectedCases": 11,
+    "failed": 3,
+    "sourceMismatch": "real page_copy_draft audit not accepted"
+  },
+  "aiSourceRed": {
+    "passed": 3,
+    "failed": 1,
+    "reason": "authoritative AI kind/case source not resolved"
+  },
+  "finalPostgres": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "receipt": "population-postgres.json"
+  },
+  "focused": {
+    "passed": 166,
+    "failed": 0,
+    "skipped": 0
+  },
+  "fixtureFailures": {
+    "files": [
+      "population-red.txt",
+      "population-behavior-red.txt"
+    ],
+    "meaning": "setup/schema mistakes, not target behavior regression evidence"
+  },
+  "migrationRequired": false,
+  "scope": "support created/active in window; distinct audited seven business kinds; requested/reviewed AI cases; distinct observations. All counts by (kind,caseId). Unknown timing stays missing; reopening accumulates time once per case.",
+  "operationalGate": "Actual two-week human baseline, agreed platform/off-platform comparison scope and operational/release approval remain",
+  "sourceState": "Final946bad06 source CI6771/596skip/0fail/worker57 and currentnative5/Preview2+10smoke verified",
+  "productionEffects": false,
+  "nativeReceipt": "../t16/operations-native.json",
+  "baselineRegression": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "receipt": "population-regression.txt"
+  },
+  "agentClassification": {
+    "redExpected": 14,
+    "redActual": 16,
+    "redFailed": 1,
+    "greenCases": 14,
+    "greenSamples": 4,
+    "behavior": "legacy board/retention conversations and their audits use their stored workflow kind; observed work does not create a second support case"
+  },
+  "fixtureAgentEnumFailure": {
+    "receipt": "population-agent-red.txt",
+    "meaning": "invalid test enum, not target behavior red"
+  }
+}

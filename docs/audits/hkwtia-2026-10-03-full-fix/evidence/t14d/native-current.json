@@ -1,0 +1,25 @@
+{
+  "sourceSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+  "buildId": "XPeRxVjxcSqaEF1qWY38y",
+  "observedAt": "2026-10-04T06:47:32.158Z",
+  "nativeExit": 0,
+  "ledger": 59,
+  "dbSourcePositivelyProven": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderSends": 0,
+  "realDeliveryReceipt": false,
+  "production": false,
+  "passed": 6,
+  "failed": 0,
+  "transport": "explicit isolated Preview test sink; acceptance is not delivery",
+  "command": "node --env-file=.env.local --experimental-strip-types scripts/verify-full-support.mjs",
+  "screenshots": [
+    "en-support-recovery.png",
+    "zh-HK-support-recovery.png",
+    "en-manual-pass-reconciliation.png",
+    "zh-HK-manual-pass-reconciliation.png",
+    "en-manual-pass-refunded.png",
+    "zh-HK-manual-pass-refunded.png"
+  ]
+}

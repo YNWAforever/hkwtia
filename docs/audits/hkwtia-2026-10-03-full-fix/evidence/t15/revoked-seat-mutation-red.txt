@@ -1,0 +1,58 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/admin-workflow-performance.test.ts (27 tests | 1 failed | 26 skipped) 12751ms
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 synthetic profiles: seed and measure search, keyset and aggregate report
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-0 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-1 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-2 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-3 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-4 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-5 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-6 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: descending keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: renewal keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 synthetic drafts: bounded queue, filters, current actor and keyset coverage
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 synthetic profiles: seed and measure search, keyset and aggregate report
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-0 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-1 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-2 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-3 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-4 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-5 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: renewal keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 synthetic drafts: bounded queue, filters, current actor and keyset coverage
+   ↓ T15 actual full-schema synthetic administrative scale > 50-row defaults and 100-row inbox cap are enforced by actual repositories
+   ↓ T15 actual full-schema synthetic administrative scale > default draft review queue returns50 of55 actual drafts
+   ↓ T15 actual full-schema synthetic administrative scale > inbox UI defaults to50 actual conversations
+   ↓ T15 actual full-schema synthetic administrative scale > inbox refuses a request above100 rows before querying
+   × T15 actual full-schema synthetic administrative scale > set visibility preserves personal and company memberships, active seats, revoked-seat exclusion and matching membership IDs 62ms
+     → expected [ 'owner', 'revoked', 'seat' ] to deeply equal [ 'owner', 'seat' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > set visibility preserves personal and company memberships, active seats, revoked-seat exclusion and matching membership IDs
+AssertionError: expected [ 'owner', 'revoked', 'seat' ] to deeply equal [ 'owner', 'seat' ]
+
+- Expected
++ Received
+
+  [
+    "owner",
++   "revoked",
+    "seat",
+  ]
+
+ ❯ tests/integration/admin-workflow-performance.test.ts:408:53
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 26 skipped (27)
+   Start at  23:10:06
+   Duration  16.48s (transform 1.28s, setup 512ms, collect 2.59s, tests 12.75s, environment 0ms, prepare 236ms)
+

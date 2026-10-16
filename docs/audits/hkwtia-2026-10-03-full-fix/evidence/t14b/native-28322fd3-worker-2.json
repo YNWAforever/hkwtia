@@ -1,0 +1,34 @@
+{
+  "observedAt": "2026-10-04T00:57:12.615Z",
+  "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+  "origin": "https://hkwtia-admin-workspace-20261003.vercel.app",
+  "checks": [
+    {
+      "case": "patron approval boundary",
+      "status": "pending_review",
+      "paymentRequests": 0
+    },
+    {
+      "case": "company submit and forged success rejected",
+      "applicationRef": "df4bcc818e4761f1",
+      "status": "pending_payment",
+      "checkoutAttempts": 0
+    }
+  ],
+  "applicationRefs": [
+    "c3d15f978d4a8c2f",
+    "df4bcc818e4761f1"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticMemberProfileFixtures": true,
+  "actualFreshPasswordSignups": 2,
+  "newVerifiedIdentityProvisioning": false,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "associationPolicyApproval": false,
+  "policyFlag": false,
+  "messagesBillingBudgetDelta": 0,
+  "providerRequests": 0,
+  "production": false,
+  "cleanup": "Owned synthetic applications/history retained; no production fixtures or history removed"
+}

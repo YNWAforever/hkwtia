@@ -1,0 +1,11 @@
+{
+  "origin": "https://hkwtia-full-fix-20261003.vercel.app",
+  "deploymentId": "dpl_6LmjSs1zgMnDnGH5dCTsdbp3TUH4",
+  "command": "vercel curl / --deployment OWNED_PREVIEW --scope OWNED_TEAM -- x-vercel-set-bypass-cookie:true",
+  "exitCode": 0,
+  "httpStatus": 307,
+  "freshOfficialCliAccess": true,
+  "oldBrowserSessionRead": false,
+  "protectionDisabled": false,
+  "credentialsLogged": false
+}

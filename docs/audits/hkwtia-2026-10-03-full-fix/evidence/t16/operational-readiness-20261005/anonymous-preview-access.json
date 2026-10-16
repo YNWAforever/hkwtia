@@ -1,0 +1,33 @@
+{
+  "observedAt": "2026-10-05T03:33:03.587Z",
+  "target": "https://hkwtia-usability-20261003.vercel.app",
+  "results": [
+    {
+      "path": "/zh/admin-login",
+      "method": "GET",
+      "status": 302,
+      "contentType": "text/plain",
+      "vercelProtectionPage": true,
+      "locationHost": "vercel.com"
+    },
+    {
+      "path": "/api/webhooks/stripe",
+      "method": "GET",
+      "status": 302,
+      "contentType": "text/plain",
+      "vercelProtectionPage": true,
+      "locationHost": "vercel.com"
+    },
+    {
+      "path": "/api/jobs/health",
+      "method": "GET",
+      "status": 302,
+      "contentType": "text/plain",
+      "vercelProtectionPage": true,
+      "locationHost": "vercel.com"
+    }
+  ],
+  "credentialsOrCookiesSent": false,
+  "postRequests": 0,
+  "providerCalls": 0
+}

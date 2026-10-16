@@ -1,0 +1,24 @@
+{
+  "scope": "confirmed isolated Neon/Auth; synthetic identities; actual built Next/browser/repository",
+  "production": false,
+  "sourceSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+  "runRef": "bd18fdd89487c162",
+  "actualPasswordAuth": true,
+  "syntheticPrivilegedRoleFixtures": true,
+  "googleMagicLinkVerified": false,
+  "draftReference": "fe8130c0f02b29fc",
+  "results": {
+    "privateSave": true,
+    "crossDevice": true,
+    "anonymousAndOtherEditorDenied": true,
+    "realLayoutEnZh": true,
+    "privateNoStore": true,
+    "explicitKeyboardPublish": true,
+    "secondEditorConflict": true,
+    "privateRestoreBeforePublish": true,
+    "publishedRevert": true,
+    "publicCopyRestored": true,
+    "publishedAudits": 2,
+    "syntheticOtherDraftRetired": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "setupHookTimeoutMs": 120000,
+  "casesNotRun": 29,
+  "productFailure": false,
+  "observedLedger": 0,
+  "activeDatabaseBackends": 0,
+  "ownedProcessExited": true,
+  "ownedContainerName": "hkwtia-audit-53760-def94bb0",
+  "creationVerified": "2026-10-03T15:15:05.591836667Z",
+  "imageVerified": "pgvector/pgvector:pg16",
+  "onlyOwnedContainerRemoved": true,
+  "observedAt": "2026-10-03T15:24:25.829495+00:00"
+}

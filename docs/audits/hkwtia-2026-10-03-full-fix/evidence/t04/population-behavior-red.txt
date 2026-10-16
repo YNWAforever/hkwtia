@@ -1,0 +1,24 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/operations-population.test.ts (3 tests | 3 skipped) 6985ms
+   ↓ actual recorded operational population > counts bot, handoff, reopened and all seven unobserved non-support kinds once
+   ↓ actual recorded operational population > accepts a real CMS draft audit reference and leaves unobserved cases in the denominator
+   ↓ actual recorded operational population > keeps requested AI cases in the population without provider success or time samples
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population
+
+error: null value in column "display_name" of relation "profiles" violates not-null constraint
+ ❯ node_modules/pg-pool/index.js:45:11
+ Test Files  1 failed (1)
+ ❯ tests/integration/operations-population.test.ts:15:3
+      Tests  3 skipped (3)
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+   Start at  04:25:59
+   Duration  9.41s (transform 609ms, setup 298ms, collect 1.64s, tests 6.98s, environment 0ms, prepare 165ms)
+

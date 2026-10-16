@@ -5,7 +5,7 @@ import type {BillingAttempt} from "@/lib/db/server-schema";
 import type {CheckoutSessionReference} from "@/lib/db/repos/billing-attempts";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
+import {createBillingPortalSession, createCheckoutSession, startNewCheckoutAttempt} from "@/lib/billing/checkout-service";
 import * as stripeModule from "@/lib/billing/stripe";
 import {listReceipts} from "@/lib/billing/receipt-service";
 import {actorFor, FakeStripeBillingAdapter} from "@/tests/helpers/fakes";
@@ -21,6 +21,7 @@ function membership(overrides: Record<string, unknown> = {}) {
     applicationId,
     planCode: "startup" as const,
     status: "pending_payment" as const,
+    billingInterval: "annual" as const,
     seatLimit: 5,
     stripeCustomerId: null,
     ...overrides,
@@ -75,6 +76,29 @@ afterEach(() => {
 });
 
 describe("membership checkout", () => {
+  it("blocks the new policy-gated checkout when no approved version exists", async () => {
+    vi.stubEnv("MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED", "true");
+    const setup = dependencies();
+    await expect(createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).rejects.toThrow("MEMBERSHIP_POLICY_UNAVAILABLE");
+    expect(setup.stripe.checkoutRequests).toHaveLength(0);
+    expect(setup.attempts.claimActive).not.toHaveBeenCalled();
+  });
+
+  it("does not bypass current policy when recovering a checkout attempt", async () => {
+    vi.stubEnv("MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED", "true");
+    const setup = dependencies();
+    await expect(startNewCheckoutAttempt(actorFor("user@example.test"), membershipId, "en", "expired", {expectedCurrentAttemptId: "attempt-1", recoveryRequestId: "request-1"}, setup.dependencies)).rejects.toThrow("MEMBERSHIP_POLICY_UNAVAILABLE");
+    expect(setup.attempts.startNewAttempt).not.toHaveBeenCalled();
+    expect(setup.stripe.checkoutRequests).toHaveLength(0);
+  });
+
+  it("refuses a pending row already correlated to an existing subscription", async () => {
+    const setup = dependencies(membership({stripeCustomerId: "cus_test", stripeSubscriptionId: "sub_existing"}));
+    await expect(createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).rejects.toThrow("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
+    expect(setup.stripe.checkoutRequests).toHaveLength(0);
+    expect(setup.attempts.claimActive).not.toHaveBeenCalled();
+  });
+
   it("uses the same idempotency key for retries of one membership", async () => {
     const setup = dependencies();
     const actor = actorFor("user@example.test");
@@ -173,19 +197,28 @@ describe("membership checkout", () => {
 describe("billing ownership", () => {
   it("creates a portal only for the personal owner with a matching customer", async () => {
     const setup = dependencies(membership({status: "active", stripeCustomerId: "cus_owned"}));
-    await expect(createBillingPortalSession(actorFor("user@example.test"), membershipId, setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
+    await expect(createBillingPortalSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
     expect(setup.stripe.portalRequests[0]).toEqual({customerId: "cus_owned", returnUrl: "https://members.example.test/portal/billing"});
   });
 
   it("denies Billing Portal to a non-admin company member", async () => {
     const setup = dependencies(membership({ownerUserId: null, companyId: "company-a", status: "active", stripeCustomerId: "cus_company"}));
-    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": "member"}), membershipId, setup.dependencies)).rejects.toThrow("FORBIDDEN");
+    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": "member"}), membershipId, "en", setup.dependencies)).rejects.toThrow("FORBIDDEN");
     expect(setup.stripe.portalRequests).toHaveLength(0);
   });
 
   it.each(["owner", "admin"] as const)("allows a company %s to open Billing Portal", async (role) => {
     const setup = dependencies(membership({ownerUserId: null, companyId: "company-a", status: "active", stripeCustomerId: "cus_company"}));
-    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": role}), membershipId, setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
+    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": role}), membershipId, "en", setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
+  });
+
+  it("builds the return URL through localizedPath for the given locale", async () => {
+    const setup = dependencies(membership({status: "active", stripeCustomerId: "cus_owned"}));
+    await createBillingPortalSession(actorFor("user@example.test"), membershipId, "zh-HK", setup.dependencies);
+    expect(setup.stripe.portalRequests[0]).toMatchObject({
+      customerId: "cus_owned",
+      returnUrl: "https://members.example.test/zh/portal/billing",
+    });
   });
 });
 

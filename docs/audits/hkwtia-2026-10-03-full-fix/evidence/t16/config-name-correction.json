@@ -1,0 +1,8 @@
+{
+  "observedAt": "2026-10-04T20:39:34.417Z",
+  "actualRuntimeKey": "RATE_LIMIT_KEY_SECRET",
+  "productionPresence": true,
+  "previousIncorrectName": "ADMIN_RATE_LIMIT_SECRET",
+  "correction": "Unused name absence is not a runtime limiter configuration defect. Concierge independent secret still absent. No configuration mutation.",
+  "valuesLogged": false
+}

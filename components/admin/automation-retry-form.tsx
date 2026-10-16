@@ -16,6 +16,7 @@ type AutomationRetryLabels = Readonly<{
   retryScheduled: string;
   retryValidation: string;
   retryUnavailable: string;
+  retryReconciliation: string;
   retryError: string;
 }>;
 
@@ -35,6 +36,8 @@ function actionMessage(
       return labels.retryScheduled;
     case "validation":
       return labels.retryValidation;
+    case "reconciliation":
+      return labels.retryReconciliation;
     case "unavailable":
       return labels.retryUnavailable;
     case "error":

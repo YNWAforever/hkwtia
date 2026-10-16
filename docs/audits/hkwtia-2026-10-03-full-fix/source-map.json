@@ -1,0 +1,1415 @@
+[
+  {
+    "taskId": "T01",
+    "symbol": "POST",
+    "path": "lib/api/concierge-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.concierge-route.POST",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "createConciergePostHandler",
+    "path": "lib/api/concierge-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.concierge-route.createConciergePostHandler",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "productionHandler",
+    "path": "lib/api/concierge-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.concierge-route.productionHandler",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createGuestRegistrationService",
+    "path": "lib/events/guest-registration-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.guest-registration-core.createGuestRegistrationService",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createTicketCheckout",
+    "path": "lib/tickets/checkout-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.tickets.checkout-core.createTicketCheckout",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createTicketProcessor",
+    "path": "lib/billing/ticket-webhook-processor.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.billing.ticket-webhook-processor.createTicketProcessor",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createWebhookPost",
+    "path": "lib/api/stripe-webhook-route.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.api.stripe-webhook-route.createWebhookPost",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "ensureProfile",
+    "path": "lib/membership/onboarding.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.ensureProfile",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "ensureProfile",
+    "path": "lib/db/repos/seats.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.seats.ensureProfile",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "parseAiEnvironment",
+    "path": "lib/config/env.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.config.env.parseAiEnvironment",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "parseLoginDestination",
+    "path": "lib/auth/login-destination.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.login-destination.parseLoginDestination",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T17",
+    "symbol": "publishCopyDraft",
+    "path": "lib/db/repos/page-copy.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.page-copy.publishCopyDraft",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "refundOrder",
+    "path": "lib/tickets/refund-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.tickets.refund-core.refundOrder",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "refundOrder",
+    "path": "lib/jobs/event-cancellation-refunds.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.event-cancellation-refunds.refundOrder",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "resolveCurrentLogin",
+    "path": "lib/auth/login-resolution-server.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.login-resolution-server.resolveCurrentLogin",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "runPublicEventRegistrationAction",
+    "path": "lib/events/registration-action.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.registration-action.runPublicEventRegistrationAction",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "verifyWorkerHealthRequest",
+    "path": "lib/jobs/worker-health-request.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.worker-health-request.verifyWorkerHealthRequest",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "canTransitionMembership",
+    "path": "lib/membership/lifecycle.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.lifecycle.canTransitionMembership",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "completeApplication",
+    "path": "lib/membership/onboarding.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.completeApplication",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "isMembershipGrantEffectiveAt",
+    "path": "lib/membership/grants.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.grants.isMembershipGrantEffectiveAt",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "loadOrCreateApplication",
+    "path": "lib/membership/onboarding.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.onboarding.loadOrCreateApplication",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "resolveMembershipPolicy",
+    "path": "lib/membership/policy.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.policy.resolveMembershipPolicy",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "resumeOrStartJoin",
+    "path": "lib/membership/join-service.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.membership.join-service.resumeOrStartJoin",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "createJobPost",
+    "path": "lib/jobs/handler.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.handler.createJobPost",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "createJobRunners",
+    "path": "lib/jobs/runners.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.runners.createJobRunners",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "projectJobHealth",
+    "path": "lib/jobs/health.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.health.projectJobHealth",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "readJobHealth",
+    "path": "lib/jobs/health.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.health.readJobHealth",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T02",
+    "symbol": "runAdminBatchJob",
+    "path": "lib/jobs/admin-batch-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.jobs.admin-batch-runner.runAdminBatchJob",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "getActor",
+    "path": "lib/auth/actor.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.actor.getActor",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14A",
+    "symbol": "provisionVerifiedMember",
+    "path": "lib/auth/login-provision.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.auth.login-provision.provisionVerifiedMember",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "bindSegmentCursor",
+    "path": "lib/admin/segment-pagination.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.segment-pagination.bindSegmentCursor",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "parseSegmentPageQuery",
+    "path": "lib/admin/segment-pagination.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.segment-pagination.parseSegmentPageQuery",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "updateApplicationCase",
+    "path": "lib/admin/application-case-service.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.application-case-service.updateApplicationCase",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createGuestRegistrationService",
+    "path": "lib/events/guest-registration-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.guest-registration-core.createGuestRegistrationService",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "runPublicEventRegistrationAction",
+    "path": "lib/events/registration-action.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.registration-action.runPublicEventRegistrationAction",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "saveMemberEvent",
+    "path": "lib/events/member-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.events.member-core.saveMemberEvent",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "sendLive",
+    "path": "lib/channels/woztell.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.channels.woztell.sendLive",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "sendSessionMessage",
+    "path": "lib/channels/woztell.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.channels.woztell.sendSessionMessage",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "getApplicationCase",
+    "path": "lib/db/repos/applications.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.applications.getApplicationCase",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "updateApplicationCase",
+    "path": "lib/db/repos/applications.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.applications.updateApplicationCase",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "grantMembership",
+    "path": "lib/db/repos/membership-grants.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.membership-grants.grantMembership",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "expireFiniteGrants",
+    "path": "lib/db/repos/membership-grant-expiry.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.membership-grant-expiry.expireFiniteGrants",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks"
+  },
+  {
+    "taskId": "T04",
+    "symbol": "buildAiOpsDashboardState",
+    "path": "lib/aiops/dashboard.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.aiops.dashboard.buildAiOpsDashboardState",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createAiOpsMetricsRepository",
+    "path": "lib/db/repos/aiops-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.aiops-metrics.createAiOpsMetricsRepository",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createAdminDashboardRepository",
+    "path": "lib/db/repos/admin-dashboard.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.admin-dashboard.createAdminDashboardRepository",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "createAgentRuntime",
+    "path": "lib/ai/runtime.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.runtime.createAgentRuntime",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T17",
+    "symbol": "runNewsFormAction",
+    "path": "lib/admin/news-action-core.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.news-action-core.runNewsFormAction",
+    "headSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current-checkout"
+  },
+  {
+    "taskId": "T01",
+    "symbol": "getAiReadiness",
+    "path": "lib/ai/readiness.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.readiness.getAiReadiness",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "calculateAdminImpact",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.calculateAdminImpact",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "summarizeObservedWork",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.summarizeObservedWork",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "buildOperationBaseline",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.buildOperationBaseline",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "compareObservedWork",
+    "path": "lib/ai/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.ai.operations-metrics.compareObservedWork",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createOperationsMetricsRepository",
+    "path": "lib/db/repos/operations-metrics.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.db.repos.operations-metrics.createOperationsMetricsRepository",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "recordOperationObservationAction",
+    "path": "lib/admin/operations-metrics-actions.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.operations-metrics-actions.recordOperationObservationAction",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "freezeOperationBaselineAction",
+    "path": "lib/admin/operations-metrics-actions.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.lib.admin.operations-metrics-actions.freezeOperationBaselineAction",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "OperationsTimingForm",
+    "path": "components/admin/operations-timing-form.tsx",
+    "qualifiedName": "hkwtia-full-fix-20261003.components.admin.operations-timing-form.OperationsTimingForm",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T04",
+    "symbol": "OperationsBaselineForm",
+    "path": "components/admin/operations-baseline-form.tsx",
+    "qualifiedName": "hkwtia-full-fix-20261003.components.admin.operations-baseline-form.OperationsBaselineForm",
+    "headSha": "2c992618c5c737b98d911c086195db312a21de6f",
+    "evidenceBasis": "implemented-current-checkout",
+    "mapping": "New T04 metrics reuse existing audit_events, actor boundary and report window; no parallel membership/payment/approval system."
+  },
+  {
+    "taskId": "T05",
+    "symbol": "resolveAdminModel",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "validateModelRoute",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "createAdminModelRegistry",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "assertRouteInputWithinBounds",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "taskForAgent",
+    "path": "lib/ai/providers/registry.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "4db5ced75cf23f3303f5c3cb75e6274a10812715266874cb3feb86192b0314ba"
+  },
+  {
+    "taskId": "T05",
+    "symbol": "createOpenCodeAgentProvider",
+    "path": "lib/ai/providers/opencode.ts",
+    "headSha": "d1d40fb2786cbefdfdbc353ba2d8e131c1154eb3",
+    "sourceBaseSha": "a6017b5d3ea4426bd70eaa4e27af9040d016d720",
+    "evidenceBasis": "implemented-source-verified",
+    "worktreeSha256": "d90d60cf1787dd9f988662d801b57b0966d0cb2baa36a2c696418cbad4f33b9b"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "createAiBudgetRepository",
+    "path": "lib/db/repos/ai-budget.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "One shared ledger/control reuses existing DB loader and server-only boundary; integer admission and settlement.",
+    "worktreeSha256": "c9382979a1d148c7b2dfb10ba3fa3fb75668e8f8a04aa56825abb3f062972b7c"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "maximumAgentCostMicrousd",
+    "path": "lib/ai/budget.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Eight bounded steps/no SDK retries; optional server test DI retains fail-closed production default.",
+    "worktreeSha256": "9999d150bfe7bc4a5e3f59920f49c7288396a8d7a08ba339bc840e0e0aca87ca"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "createAgentRuntime",
+    "path": "lib/ai/runtime.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Preserves actor/prepared run/Writer quota/finalization; reserves before provider, late receipt reconciles billing only.",
+    "worktreeSha256": "6771c67b2cf4d71b77b59ff0f630963dfd1275ca84a604799d1508bf75a23ece"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "calculateAgentCostMicrousd",
+    "path": "lib/ai/pricing.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Preserves SDK7 aggregate usage and adds cache/reasoning fixed-point details; original pricing base retained.",
+    "worktreeSha256": "540e51895937cdf2bf15678936191b05e29e8634da8ee3303467dc0667e810c2"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "reconcileUsage",
+    "path": "lib/db/repos/agent-runs.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Existing own-actor run predicate and terminal state retained; billing-only late reconciliation.",
+    "worktreeSha256": "82798e4e4b2d455c01db6086bfaa310c08872960605095d16d38b8aa964226c2"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "receiptAwareFetch",
+    "path": "lib/ai/providers/request-receipt.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Accepted response request id persisted before body, no response/body/header secret logging.",
+    "worktreeSha256": "81222bd9ff5fc24156e429c7920bf2f014f0aaa8ed23d1d0999ed12e1862967d"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "createOpenAIEmbeddingAdapter",
+    "path": "lib/ai/embeddings.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Existing embeddings now share category embedding budget; deterministic adapter remains test-only.",
+    "worktreeSha256": "a8604bb7bdb82065d9e0e084751850bf78e308290aee66b7068a47c9880eee9b"
+  },
+  {
+    "taskId": "T06",
+    "symbol": "defaultLiveJudge",
+    "path": "evals/grader.ts",
+    "headSha": "fbd73047e1b4820e984f69a96d2a5ff14f0ef6d2",
+    "sourceBaseSha": "c4edc54045e2d62b4fe8c5bbddf9e70facfcb84d",
+    "evidenceBasis": "source_full_gates_actual_PG_verified",
+    "mapping": "Existing guarded administrative runtime, evaluation/judge budget categories, no raw provider reason in reports.",
+    "worktreeSha256": "a4f566e41e428950cf1533ae43e9be23f9376235ecc5c8324e64aff10f824f7f"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "createKnowledgeGovernanceRepository",
+    "path": "lib/db/repos/knowledge-governance.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Server-only lifecycle helper uses existing kb_documents and actual DB loader; separate configured approver, version CAS, audit and embedding claim.",
+    "worktreeSha256": "f10c05c4a35e7020030512e689ebb8a1b9feb1cd583bee38fee9cbef30940b00"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "createKbDocumentRepository",
+    "path": "lib/db/repos/kb-documents.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Existing vector SQL filters approved/version/effective/review/audience before ordering; unverified historical rows stay excluded.",
+    "worktreeSha256": "4502d79fa6a014ca032a489f523c03646421ff23fc3ab49ecfafbf8b386a3bfa"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "selectApprovedKnowledge",
+    "path": "lib/ai/knowledge/policy.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Server-side actor scope and typed KnowledgeRef; semantic Unicode offsets/hash; retrievalScore is relevance, not accuracy.",
+    "worktreeSha256": "d707dae3ec030ef8e4873b8881eec6c975786f61acd3c5293208f08dc6e5e5f2"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "KnowledgeWorkspace",
+    "path": "components/admin/knowledge-workspace.tsx",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Existing authenticated SaaS workspace and bilingual navigation; save/review/index/withdraw separate; manual workflow remains available.",
+    "worktreeSha256": "fe782012cdfc6109c50502d9d0eea689e1f97e05fc19eef75153132b31be688d"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "kb_search",
+    "path": "lib/ai/tools/kb-search.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Existing public tool requires exact approved version ref; citations pinned to source/version/hash/locale.",
+    "worktreeSha256": "b12059af3e982cf0fcd5f97860826222f5de4b28b9e9baca3b4973a068a0a8d6"
+  },
+  {
+    "taskId": "T07",
+    "symbol": "loadGoldenCases",
+    "path": "evals/grader.ts",
+    "headSha": null,
+    "sourceBaseSha": "973a0feca5ffb4609c184ec53366e47b5bddcb70",
+    "evidenceBasis": "focused207_actualPG31_full_gates_preview_pending",
+    "mapping": "Original golden bytes and business criteria unchanged; explicit offline matching ground-truth citation IDs migrate to new version identity.",
+    "worktreeSha256": "b89b3148d3c1c292a897e3a2211009eef1d3d317069aa6f4a3f52cadd1e405ca"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "validateGroundedContent",
+    "path": "lib/ai/drafts/validation.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "createAiDraftsRepository",
+    "path": "lib/db/repos/ai-drafts.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "createDraftWorkRepository",
+    "path": "lib/db/repos/ai-draft-work.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "createPublicConciergeFactsReader",
+    "path": "lib/db/repos/ai-public-facts.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "readApprovedDraftFacts",
+    "path": "lib/ai/drafts/case-facts.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "reviewAiDraftAction",
+    "path": "lib/admin/ai-draft-actions.ts",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "AiReviewPanel",
+    "path": "components/admin/ai-review-panel.tsx",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T08",
+    "symbol": "TasksPage",
+    "path": "app/[locale]/(admin)/admin/tasks/page.tsx",
+    "headSha": "9cfb70ded53f7b3324da1bbb53bf78f018b32d86",
+    "evidenceBasis": "current-checkout",
+    "state": "Exact 9cf CI6567pass416skip/worker57; actualPG30; native17+12/mobile44; PR129 merged abad08d4; external/business gates remain",
+    "pathMapping": "Reuse existing Tasks workspace; no parallel approval/send queue"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "deriveApplicationTriage",
+    "path": "lib/ai/application-triage.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "prepareApplicationDraft",
+    "path": "lib/ai/application-draft-service.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "createDraftGenerationService",
+    "path": "lib/ai/drafts/generation.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "readApplicationTriageSource",
+    "path": "lib/db/repos/applications.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "updateApplicationCaseInTransaction",
+    "path": "lib/db/repos/applications.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "adoptApplicationDraft",
+    "path": "lib/admin/application-case-service.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "ApplicationCaseForm",
+    "path": "components/admin/application-case-form.tsx",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "ApplicationDraftAdopt",
+    "path": "components/admin/application-draft-adopt.tsx",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T09",
+    "symbol": "applicationQueueReturnHref",
+    "path": "lib/admin/application-return.ts",
+    "headSha": "cdd7872ab2bed8625ef09ee4b793e0d4ffaeb516",
+    "evidenceBasis": "current-checkout",
+    "state": "Source committed; prior actualPG43/core unchanged; exactcdd CI6618pass429skip/worker57/all7; native17entry+13cases all-green full run; real model/config/other journeys still gated",
+    "pathMapping": "Reuse existing application CaseWriter, Tasks AiReviewPanel, actor/runtime/budget/work and audit; no migration or parallel approval/send system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "searchWorkspace",
+    "path": "lib/admin/workspace-search.ts",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "createWorkspaceSearchRepository",
+    "path": "lib/db/repos/workspace-search.ts",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "WorkspaceSearchView",
+    "path": "components/admin/workspace-search-view.tsx",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T18",
+    "symbol": "AdminWorkspaceSearchPage",
+    "path": "app/[locale]/(admin)/admin/search/page.tsx",
+    "headSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "evidenceBasis": "RED12+8+1 to actualPG20 and focused174; uses current actor/role, repository, shared cursor and existing shell",
+    "interface": "searchWorkspace(actor:AdminActor,input:{query:string;cursor?:string;limit:20}):Promise<{items:{kind:member|company|application|event|conversation;id:string;label:string;href:string}[];nextCursor:string|null}>",
+    "mappingNote": "Domain-facing planned path reexports existing repository architecture; no alternate CRM, role authority, draft or messaging system"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "jobsRepository.processWebhookLifecycle",
+    "path": "lib/db/repos/jobs.ts",
+    "headSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "interface": "existing actor/system correlated WebhookLifecycleCommand; transactional stale invoice engagement ignored",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
+    "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "JoinPage",
+    "path": "app/[locale]/(join)/join/page.tsx",
+    "headSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "interface": "explicit current-member owned completed application reads existing getByApplicationId; localized authoritative complete route or manual recovery",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
+    "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
+  },
+  {
+    "taskId": "T14B",
+    "symbol": "real Stripe TEST verifier",
+    "path": "scripts/verify-full-fix-membership-provider.mjs",
+    "headSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "interface": "explicit isolated opt-in; actual hosted Checkout/provider-retrieved events; controlled signed replay separate from automatic remote delivery",
+    "evidenceBasis": "real PG RED1/13 and unitRED4; native completed-return RED2 on283→4green on1e9709ce;17entry;actual hostedStripeTEST; exact7CIchecks",
+    "mappingNote": "Reuse existing membership/payment/actor architecture; no schema, pricing, eligibility or historical entitlement change"
+  },
+  {
+    "taskId": "T17",
+    "path": "lib/db/repos/media.ts",
+    "symbol": "setMediaArchived",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Required countCompanyReferences port shares existing archive transaction/media row lock; count all company logo references; existing MEDIA_IN_USE recovery, no parallel media system."
+  },
+  {
+    "taskId": "T17",
+    "path": "lib/db/repos/company-profiles.ts",
+    "symbol": "updateProfile",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Existing membership/company manager row locks retained; owned active media FOR UPDATE recheck serializes against archive; preflight is not authority."
+  },
+  {
+    "taskId": "T17",
+    "path": "lib/admin/page-copy-actions.ts",
+    "symbol": "workspacePageCopyAction",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Existing self-resolved actor, private draft/history/CAS, bilingual atomic publish, namespace-only public invalidation retained; native audited restore/publish verified."
+  },
+  {
+    "taskId": "T17",
+    "path": "tests/e2e/full-fix-content-maintenance.spec.ts",
+    "symbol": "nativeAcceptance",
+    "headSha": "73272cc69ebc72bc8c552bb940b4a3eb6590c783",
+    "evidenceBasis": "current checkout and actual isolated PG/browser",
+    "mapping": "Existing CMS publish and browser-history tests reused by path mapping; eight current exact Preview cases, no fake sessions/provider pass."
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "settlePaid",
+    "path": "lib/db/repos/event-orders.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "expireBySession",
+    "path": "lib/db/repos/event-orders.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "normalizeTicket",
+    "path": "lib/billing/webhook-service.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "createTicketProcessor",
+    "path": "lib/billing/ticket-webhook-processor.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "isProviderExpiredTicketRecovery",
+    "path": "lib/tickets/checkout-recovery.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "GET",
+    "path": "app/api/events/checkout-recovery/route.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "native event/payment acceptance",
+    "path": "tests/e2e/full-fix-events.spec.ts",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14C",
+    "symbol": "existing isolated provider driver",
+    "path": "scripts/verify-full-ticket-provider.mjs",
+    "headSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+    "evidenceBasis": "current checkout and actual PG/native/provider receipts",
+    "pathMapping": "Reuse existing ticket/provider architecture; no parallel delivery/payment system"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "sendInboxReply",
+    "path": "lib/admin/inbox-action-core.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createInboxRepository",
+    "path": "lib/db/repos/inbox.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createWoztellInboundEventsRepository",
+    "path": "lib/db/repos/woztell-inbound-events.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "dispatchNotification",
+    "path": "lib/notifications/dispatch.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "runJourneyBatch",
+    "path": "lib/automation/journey-runner.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "runCampaignBatch",
+    "path": "lib/automation/campaign-runner.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createDeliveriesRepository",
+    "path": "lib/db/repos/deliveries.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createJourneysRepository",
+    "path": "lib/db/repos/journeys.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createTicketEmailOutboxRepository",
+    "path": "lib/db/repos/ticket-email-outbox.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "createShowcaseLeadEmailOutboxRepository",
+    "path": "lib/db/repos/showcase-lead-email-outbox.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "ticketResendBatchHandler",
+    "path": "lib/db/repos/batch-handlers/ticket-resend.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "resendStaffPass",
+    "path": "lib/admin/ticket-resend.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "resendPassAction",
+    "path": "lib/admin/event-actions.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T14D",
+    "symbol": "deliverTicketEmailsForOrder",
+    "path": "lib/billing/ticket-email-runner.ts",
+    "headSha": "9603519ad40ddbb7228eb31c5984890e7eaa27b9",
+    "baselineHeadSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "evidenceBasis": "current source and actual SQL/native target verification; new symbols are not claimed indexed",
+    "mapping": "existing outbox/actor/claim/runner architecture; staff direct-send caller now maps to durable ticket outbox"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "prepareSupportDraft",
+    "path": "lib/ai/support-drafts.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Purpose wrapper reuses T08 generation/runtime/work/budget; caller actor remains server-derived"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "reviewDraftSelection",
+    "path": "lib/admin/ai-draft-selection.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Same existing AI draft repository, manual per-row review/CAS, no send"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "listReviewQueue",
+    "path": "lib/db/repos/ai-drafts.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing queue extended with scoped keyset/filters; same immutable store"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "readSupportDraftSource",
+    "path": "lib/ai/drafts/support-facts.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Current concierge server facts and minimized intent codes; private agent conversations excluded"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "AiReviewPage",
+    "path": "app/[locale]/(admin)/admin/ai-review/page.tsx",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "New owned route over existing repository; historical /admin/tasks?draft= retained"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "readRemainingDay",
+    "path": "lib/db/repos/ai-budget.ts",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing atomic budget ledger; unknown prior-day liability stays held"
+  },
+  {
+    "taskId": "T10",
+    "symbol": "InboxComposer",
+    "path": "components/admin/inbox-composer.tsx",
+    "headSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing sender unchanged; only explicit adoption and optional opaque private recovery"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/db/repos/retention-analyst.ts",
+    "symbol": "createRetentionAnalystRepository",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing reader pages100; compatibility facade and DB group/collation order, pending SQL"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/ai/retention-analyst/service.ts",
+    "symbol": "runRetentionAnalyst",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Existing scheduled service + T08 work/budget, no new sender"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/ai/retention-analyst/grounding.ts",
+    "symbol": "validateRetentionDraft",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "T08 whole-body tokens/claims validator"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/db/repos/ai-draft-work.ts",
+    "symbol": "finishDraftWork",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "0060 restricted existing approval result, existing ai-review drafts preserved"
+  },
+  {
+    "taskId": "T11",
+    "path": "lib/db/repos/approvals.ts",
+    "symbol": "decide",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Current facts/consent before approve, stale rejection allowed"
+  },
+  {
+    "taskId": "T11",
+    "path": "components/admin/approval-list.tsx",
+    "symbol": "ApprovalList",
+    "headSha": "894e923bdfa71005f6e126690ceb53f8a137f61c",
+    "evidenceBasis": "current-checkout-and-actual-acceptance",
+    "mapping": "Human review, GuardedAdminLink to separate batch, accessible stale recovery"
+  },
+  {
+    "taskId": "T12",
+    "symbol": "prepareContentDraft",
+    "path": "lib/ai/content-drafts.ts",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "readContentDraftFacts",
+    "path": "lib/ai/drafts/content-facts.ts",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "runBoardReporter",
+    "path": "lib/ai/board-reporter/service.ts",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "getBoardDraftBySourceKey",
+    "path": "lib/db/repos/posts.ts",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T12",
+    "symbol": "ContentDraftPanel",
+    "path": "components/admin/content-draft-panel.tsx",
+    "headSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+    "evidenceBasis": "Graph historical index did not contain new T12 symbols; current authoritative checkout and actual behavioral tests; reuse existing T08/T17 repositories."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "gradeAdminResponse",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.gradeAdminResponse",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "loadAdminCases",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.loadAdminCases",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "validateAdminCorpus",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.validateAdminCorpus",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "runAdminEval",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.runAdminEval",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "createEvaluationBudget",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.createEvaluationBudget",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "summarizeAdminEval",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.summarizeAdminEval",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T13",
+    "symbol": "summarizeBlindReviews",
+    "path": "evals/admin-ai-runner.ts",
+    "qualifiedName": "hkwtia-full-fix-20261003.evals.admin-ai-runner.summarizeBlindReviews",
+    "headSha": "11133bb24eaa39dc79ded83955a4fcb2a6f49aff",
+    "evidenceBasis": "Graph dependencies/current source; hard/total cap/mode/human/subgroup/capture/task-cap RED→GREEN29; offline70x3; external gates open."
+  },
+  {
+    "taskId": "T15",
+    "symbol": "memberMatchingFrom",
+    "path": "lib/db/repos/admin-members.ts",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph inbound callers + current matching list/snapshot interfaces; real SQL before/after",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "ApprovalsPage",
+    "path": "app/[locale]/(admin)/admin/approvals/page.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph + current caller; canonical plan labels",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "ApprovalList",
+    "path": "components/admin/approval-list.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph with stale ranges + current source; native width/keyboard",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "AiReviewPage",
+    "path": "app/[locale]/(admin)/admin/ai-review/page.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "new T10 symbol absent from stale graph; current caller and labels read",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "listInbox",
+    "path": "lib/admin/inbox.ts",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "graph + current caller/repository limit contract",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "MemberTable",
+    "path": "components/admin/member-table.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Current hidden limit + strict query shape and native selection/pagination",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "DeferredConciergeWidget",
+    "path": "components/ai/deferred-concierge-widget.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Native heavy chunk before-intent RED; event/focus/download recovery and safe503; existing widget runtime reused",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "AwaitReadModel",
+    "path": "components/server/await-read-model.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Two real held-read behaviour REDs; catalogue/public pricing/status tests, original CMS scope preserved",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "listPublicEvents / EventsPage",
+    "path": "lib/db/repos/events.ts",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Graph list/count/filter interfaces and current public caller; real native 282-card RED, bounded SQL offset/order 25-row PASS; original uncapped count/sitemap preserved",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T15",
+    "symbol": "Hero",
+    "path": "components/home/hero.tsx",
+    "headSha": "145443b69df74ad2f70af172c310d10e05803220",
+    "evidenceBasis": "Graph has no current home symbol; current caller/provenance/picture interfaces read; 2unit +2native REDs, static derivatives unchanged input hash, actual LH10 PASS",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T16",
+    "symbol": "backupAndRestore",
+    "path": "tests/integration/audit-database-fixture.ts",
+    "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "evidenceBasis": "Existing owned PG16 fixture extended; actual custom dump/restore, no environment URL; byte-verified committed source/current receipts",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T16",
+    "symbol": "verify historical web",
+    "path": "scripts/verify-full-rollback-web.mjs",
+    "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "evidenceBasis": "Exact old archive/build/runtime byte proof; isolated unique marker/auth/current schema; 3 native passes; byte-verified committed source/current receipts",
+    "implementedInWorkingTree": false
+  },
+  {
+    "taskId": "T04",
+    "symbol": "createOperationsMetricsRepository.read/record",
+    "path": "lib/db/repos/operations-metrics.ts",
+    "headSha": "946bad06a41f09939c779709d7e31951617ffce6",
+    "implementedInWorkingTree": false,
+    "evidenceBasis": "actual PostgreSQL16 recorded population and strict CMS/AI source attribution regression; byte-verified committed source/current receipts"
+  },
+  {
+    "taskId": "T15",
+    "symbol": "summarizeLighthouseTrace",
+    "path": "scripts/summarize-lighthouse-cpu.mjs",
+    "qualifiedName": null,
+    "headSha": "51a6f1bac59dd2d794fd44126e680914ea5cb7e1",
+    "evidenceBasis": "current-checkout; diagnostic only, no application rewrite"
+  },
+  {
+    "taskId": "T15",
+    "symbol": "capture_profile",
+    "path": ".github/workflows/weekly-lighthouse.yml",
+    "qualifiedName": null,
+    "headSha": "13a81a4522d419c3cb55a6aa628a549ab8be0707",
+    "evidenceBasis": "current-checkout; diagnostic only, no application rewrite"
+  }
+]

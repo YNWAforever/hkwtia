@@ -1,0 +1,24 @@
+{
+  "recordedAt": "2026-09-30T19:39:40.677Z",
+  "databaseProject": "fragrant-mountain-25240574",
+  "databaseBranch": "br-noisy-glitter-ao2npd77",
+  "migrationLedger": 51,
+  "sourceVerified": 79,
+  "categories": {
+    "supporting": 58,
+    "regional": 15,
+    "media": 6
+  },
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "jurisdiction": "default",
+  "operatorSelection": "pending",
+  "counts": {
+    "profiles": 2,
+    "companies": 3,
+    "memberships": 0,
+    "billing_attempts": 0
+  },
+  "partners": 0,
+  "databaseWritten": false,
+  "storageWritten": false
+}

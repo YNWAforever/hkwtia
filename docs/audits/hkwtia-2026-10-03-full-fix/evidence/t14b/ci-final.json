@@ -1,0 +1,92 @@
+{
+  "headSha": "a0bfa482d28e67f2ef8569b51b6f1dac2f61c73e",
+  "runId": 37168129341,
+  "checks": {
+    "headRefOid": "a0bfa482d28e67f2ef8569b51b6f1dac2f61c73e",
+    "mergeStateStatus": "CLEAN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-04T01:33:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37168129341/job/111335301903",
+        "name": "checks",
+        "startedAt": "2026-10-04T01:29:20Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-04T01:33:09Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37168129341/job/111335302066",
+        "name": "tests (1)",
+        "startedAt": "2026-10-04T01:28:45Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-04T01:33:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37168129341/job/111335302050",
+        "name": "tests (2)",
+        "startedAt": "2026-10-04T01:28:45Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-04T01:29:03Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37168129341/job/111335302082",
+        "name": "worker",
+        "startedAt": "2026-10-04T01:28:45Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-04T01:33:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/37168129341/job/111336006405",
+        "name": "quality",
+        "startedAt": "2026-10-04T01:33:18Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "StatusContext",
+        "context": "Vercel",
+        "startedAt": "2026-10-04T01:30:06Z",
+        "state": "SUCCESS",
+        "targetUrl": "https://vercel.com/ynwaforevers-projects/hkwtia/AKAhSu9dYves2hyCiWv6anFgxY1i"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-04T01:30:07Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://vercel.com/github",
+        "name": "Vercel Preview Comments",
+        "startedAt": "2026-10-04T01:30:07Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ]
+  },
+  "summaryLines": [
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T01:33:10.6208847Z  Test Files  394 passed | 46 skipped (440)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T01:33:10.6227840Z       Tests  3499 passed | 212 skipped (3711)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T01:33:07.5527272Z  Test Files  392 passed | 48 skipped (440)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T01:33:07.5552403Z       Tests  3138 passed | 243 skipped (3381)",
+    "worker\tRun npm --prefix workers test\t2026-10-04T01:29:01.3599294Z  Test Files  7 passed (7)",
+    "worker\tRun npm --prefix workers test\t2026-10-04T01:29:01.3600829Z       Tests  57 passed (57)"
+  ],
+  "appBytesEqualNativeVerifiedSource": true,
+  "full": {
+    "passed": 6637,
+    "skipped": 455,
+    "failed": 0
+  },
+  "workerPassed": 57
+}

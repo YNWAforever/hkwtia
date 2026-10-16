@@ -1,0 +1,61 @@
+{
+  "sourceSha": "cf14c5c35f20d3be03425864ccec3920d4927a80",
+  "workingTree": true,
+  "environment": "owned disposable PostgreSQL16; full actual migrator/repositories",
+  "production": false,
+  "providerEffects": 0,
+  "cases": [
+    {
+      "case": "clean",
+      "ledger": 61,
+      "repeatedMigrations": 2,
+      "requiredTables": [
+        "job_health",
+        "page_copy_drafts"
+      ],
+      "refundPendingRetained": true,
+      "indexes": 3,
+      "pass": true
+    },
+    {
+      "case": "baseline51",
+      "interruptionRolledBackTo": 51,
+      "repeatedUpgradeLedger": 61,
+      "preexistingFinancialAndRightsFingerprintUnchanged": true,
+      "historicalNullNullRightsRetained": true,
+      "olderSqlProjectionCompatible": true,
+      "retainedCmsHistory": 1,
+      "flagOffNewDraftWriteDenied": true,
+      "publicReadRetained": true,
+      "scope": "SQL compatibility and gated new writer; not an arbitrary old app/inbox writer or deployed rollback",
+      "pass": true
+    },
+    {
+      "case": "baseline56-backup-current61-restore-old-module",
+      "baselineLedger": 56,
+      "currentLedger": 61,
+      "backupTool": "PostgreSQL16 pg_dump -Fc / pg_restore --exit-on-error",
+      "backupBytes": [
+        233646,
+        264644
+      ],
+      "backupSha256": [
+        "7e7e4f76d6eecb4aea1c8f9e8419b851bbef08348b8b15941d09aba9197ed4de",
+        "c9b10845f3e6b854df18b1331cb4be3c2f36a97bd7288f07c67cfeb52c6340d9"
+      ],
+      "coreFingerprintUnchanged": true,
+      "journalHashesAndOrderingRetained": true,
+      "unknownBudgetChargeRetained": true,
+      "expiredUnknownClaimRetained": true,
+      "uncertainOutboxProviderReceiptRetained": true,
+      "historicalRightsRetained": true,
+      "historicalRepositorySha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+      "historicalModuleSha256": "8da3d951beeacfa122df8bf09d421e134e658e64b137d09a84c701459b4942f8",
+      "historicalModuleReadWrite": true,
+      "currentRepositoryRead": true,
+      "flagOffOldWriterDenied": true,
+      "scope": "Actual isolated database restore and historical page-copy module; not a complete old app/worker binary or Production rollback",
+      "pass": true
+    }
+  ]
+}

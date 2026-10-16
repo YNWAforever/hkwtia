@@ -19,7 +19,7 @@ export type ResolvedAgentModel = Readonly<{
 }>;
 
 export class AgentModelConfigurationError extends Error {
-  constructor(code: "AGENT_MODEL_INVALID" | "AGENT_PROVIDER_UNSUPPORTED" | "AGENT_MODEL_UNSUPPORTED") {
+  constructor(code: "AGENT_MODEL_INVALID" | "AGENT_PROVIDER_UNSUPPORTED" | "AGENT_MODEL_UNSUPPORTED" | "AGENT_ROUTE_INVALID" | "AGENT_ROUTE_UNAPPROVED" | "AGENT_ROUTE_CAPABILITY_UNSUPPORTED") {
     super(code);
     this.name = "AgentModelConfigurationError";
   }

@@ -1,0 +1,62 @@
+{
+  "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+  "runId": 37167576351,
+  "checks": [
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37167576351/job/111334103901",
+      "name": "quality",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://vercel.com/github",
+      "name": "Vercel Preview Comments",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37167576351/job/111333651352",
+      "name": "worker",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37167576351/job/111333651499",
+      "name": "checks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37167576351/job/111333651436",
+      "name": "tests (1)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37167576351/job/111333651427",
+      "name": "tests (2)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://vercel.com/ynwaforevers-projects/hkwtia/9m5BHcTshdDpN1jwcuzwLaWDwbDw",
+      "name": "Vercel",
+      "state": "SUCCESS"
+    }
+  ],
+  "summaryLines": [
+    "worker\tRun npm --prefix workers test\t2026-10-04T01:18:24.9936409Z  Test Files  7 passed (7)",
+    "worker\tRun npm --prefix workers test\t2026-10-04T01:18:24.9950044Z       Tests  57 passed (57)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T01:20:42.7881948Z  Test Files  394 passed | 46 skipped (440)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-04T01:20:42.7906769Z       Tests  3499 passed | 212 skipped (3711)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T01:20:46.4840351Z  Test Files  392 passed | 48 skipped (440)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-04T01:20:46.4856589Z       Tests  3138 passed | 243 skipped (3381)",
+    "checks\tRun npm run audit:strings\t2026-10-04T01:18:27.0089669Z Visible-string audit passed (317 TSX files scanned).",
+    "checks\tRun npm run lint\t2026-10-04T01:18:52.6526878Z \u2716 75 problems (0 errors, 75 warnings)"
+  ],
+  "skipsArePasses": false,
+  "full": {
+    "passed": 6637,
+    "skipped": 455,
+    "failed": 0
+  },
+  "worker": {
+    "passed": 57,
+    "skipped": 0,
+    "failed": 0
+  }
+}

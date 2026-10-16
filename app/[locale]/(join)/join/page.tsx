@@ -4,16 +4,24 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
+import {GoogleSignInButton} from "@/components/auth/google-sign-in-button";
 import {JoinProgress} from "@/components/join/progress";
+import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
-import {destinationForJoin, parseJoinContinuation} from "@/lib/membership/join-navigation";
+import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
+import {allowedMemberDestination} from "@/lib/auth/login-destination";
+import {parseJoinContinuation} from "@/lib/membership/join-navigation";
 import {buildPageMetadata} from "@/lib/metadata";
-import {startJoin} from "@/lib/membership/join-service";
+import {applicationsRepository} from "@/lib/db/repos/applications";
+import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
+import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
-import {requestMagicLink} from "./actions";
+import {requestMagicLink, resumeJoinAction} from "./actions";
 
 type Props = {params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>};
 
@@ -37,20 +45,67 @@ export default async function JoinPage({params, searchParams}: Props) {
   const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("Join");
+  const tLogin = await getTranslations("MemberLogin");
+  // Unscoped: the breadcrumb label keys are fully qualified (`Common.breadcrumbJoin`).
+  const tRoot = await getTranslations({locale});
+  // Five states render below -- chooser, invalid plan, two magic-link forms and the signed-in
+  // status -- but every one is /join at the same canonical URL, so each carries the same trail.
+  const trail = <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/join", tRoot))} />;
   const plan = selectedPlan(queryValue(query.plan));
   const continuation = parseJoinContinuation(queryValue(query.next), locale);
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
+  const joinQuery = new URLSearchParams();
+  if (plan) joinQuery.set("plan", plan);
+  if (continuation) joinQuery.set("next", continuation);
+  const requestedApplication = queryValue(query.application);
+  if (requestedApplication) joinQuery.set("application", requestedApplication);
+  const joinDestination = allowedMemberDestination(`/join?${joinQuery.toString()}`);
+  const googleCallback = joinDestination
+    ? `${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(joinDestination)}` : null;
+  const googleLabels = {google: tLogin("google"), googleUnavailable: tLogin("googleUnavailable"), providerError: tLogin("errors.auth")};
 
   const actor = await getActor().catch(() => null);
+  if (!actor && joinDestination) {
+    const login = await resolveCurrentLogin({intent: "member", path: joinDestination});
+    if (login.kind === "needs-profile") {
+      redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(joinDestination)}`);
+    }
+    if (login.kind === "forbidden") notFound();
+  }
   if (actor && continuation) redirect(localizedPath(locale, continuation));
 
-  if (!plan && !continuation) return (
-    <section className="glass-card p-6 sm:p-10">
-      <h1 className="font-serif text-4xl font-semibold">{t("invalidPlanTitle")}</h1>
-      <p className="mt-4 text-muted-foreground">{t("invalidPlanDescription")}</p>
-      <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("backToMembership")}</Link>
-    </section>
-  );
+  if (!plan && !continuation) {
+    // A malformed ?plan= still gets the old "unavailable" message; a bare /join
+    // gets the chooser, because that is where every "Join WiseTech" CTA lands.
+    if (queryValue(query.plan) !== undefined) return (
+      <section className="glass-card p-6 sm:p-10">
+        <h1 className="font-serif text-4xl font-semibold">{t("invalidPlanTitle")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("invalidPlanDescription")}</p>
+        <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("backToMembership")}</Link>
+        {trail}
+      </section>
+    );
+    return (
+      <section className="glass-card p-6 sm:p-10">
+        <JoinProgress active="plan" labels={labels} showCompany={false}/>
+        <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+          {planChooserItems(locale).map((item) => (
+            <li className="rounded-lg border border-border p-5" key={item.code}>
+              <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
+              <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
+                {item.kind === "join" ? t("choosePlanAction", {plan: t(`plans.${item.code}`)}) : t("choosePlanContact")}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("choosePlanCompare")}</Link>
+        {trail}
+      </section>
+    );
+  }
 
   if (!plan) {
     const action = requestMagicLink.bind(null, locale, null, continuation);
@@ -59,6 +114,8 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active="auth" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("title")}</h1>
         <p className="mt-4 text-muted-foreground">{queryValue(query.sent) ? t("magicLinkSent") : t("authDescription")}</p>
+        {googleCallback ? <GoogleSignInButton callbackURL={googleCallback} enabled={process.env.AUTH_GOOGLE_ENABLED === "true"} labels={googleLabels}/> : null}
+        {googleCallback ? <p className="my-5 text-center text-sm text-muted-foreground">{tLogin("separator")}</p> : null}
         <div className="mt-8">
           <JoinForm action={action} fieldNames={["email"]} pendingLabel={t("sending")} submitLabel={t("sendMagicLink")}>
             <div>
@@ -67,21 +124,63 @@ export default async function JoinPage({params, searchParams}: Props) {
             </div>
           </JoinForm>
         </div>
+        {trail}
       </section>
     );
   }
 
   const companyPlan = plan === "startup" || plan === "corporate";
   if (actor) {
-    const application = await startJoin(actor, {plan, applicationId: queryValue(query.application) ?? null}).catch(() => notFound());
-    const destination = destinationForJoin(locale, plan, application.applicationId, application.next);
-    if (destination.kind === "page") redirect(destination.href!);
-    const status = destination.next === "complete" || destination.next === "review" ? destination.next : "checkout";
+    if (actor.kind !== "member") notFound();
+    const applications = await applicationsRepository.listOwned(actor, plan);
+    const requestedId = queryValue(query.application);
+    if (requestedId && !applications.some((application) => application.id === requestedId)) notFound();
+    // An explicit completed application is a continuation of its existing
+    // membership. Do not offer a new application just because completed rows
+    // are deliberately excluded from the ordinary resumable draft list.
+    const completed = applications.find(application => application.id === requestedId && application.status === "completed");
+    if (completed) {
+      let membership: Awaited<ReturnType<typeof membershipsRepository.getByApplicationId>> = null;
+      try { membership = await membershipsRepository.getByApplicationId(actor, completed.id); }
+      catch { /* A failed scoped read must give manual recovery, never a duplicate join. */ }
+      if (membership) redirect(`${localizedPath(locale, "/join/complete")}?${new URLSearchParams({membership_id: membership.id})}`);
+      return (
+        <section className="glass-card p-6 sm:p-10">
+          <h1 className="font-serif text-4xl font-semibold">{t("status.failed.title")}</h1>
+          <p className="mt-4 text-muted-foreground" role="alert">{t("resume.statusUnavailable")}</p>
+          <Link className="mt-6 inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, "/portal")}>{t("resume.account")}</Link>
+          <Link className="ms-6 mt-6 inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, "/contact")}>{t("checkoutSummary.contactSupport")}</Link>
+          {trail}
+        </section>
+      );
+    }
+    const resumable = applications.filter((application) => ["draft", "pending_payment", "pending_review"].includes(application.status));
     return (
       <section className="glass-card p-6 sm:p-10">
         <JoinProgress active={companyPlan ? "company" : "profile"} labels={labels} showCompany={companyPlan}/>
-        <h1 className="font-serif text-4xl font-semibold">{t(`status.${status}.title`)}</h1>
-        <p className="mt-4 text-muted-foreground">{t(`status.${status}.description`)}</p>
+        <p className="text-sm font-medium text-primary">{t(`plans.${plan}`)}</p>
+        <h1 className="mt-3 font-serif text-4xl font-semibold">{t("resume.title")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("resume.description")}</p>
+        {queryValue(query.error) === "status" && <p className="mt-4 text-destructive" role="alert">{t("resume.statusUnavailable")}</p>}
+        {resumable.length > 0 && <ul className="mt-6 space-y-3">
+          {resumable.map((application) => (
+            <li className="rounded-lg border border-border p-4" key={application.id}>
+              <p className="font-medium">{t(`resume.steps.${application.status === "pending_payment" ? "checkout" : application.status === "pending_review" ? "review" : application.currentStep}`)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("resume.lastSaved", {date: new Intl.DateTimeFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(application.updatedAt)})}</p>
+              <form action={resumeJoinAction} className="mt-3">
+                <input name="locale" type="hidden" value={locale}/><input name="plan" type="hidden" value={plan}/><input name="applicationId" type="hidden" value={application.id}/>
+                <button className="min-h-11 rounded-md bg-primary px-5 text-primary-foreground" type="submit">{t("resume.continue")}</button>
+              </form>
+            </li>
+          ))}
+        </ul>}
+        <form action={resumeJoinAction} className="mt-6">
+          <input name="locale" type="hidden" value={locale}/><input name="plan" type="hidden" value={plan}/>
+          {resumable.length > 0 && <input name="intent" type="hidden" value="new"/>}
+          <button className="min-h-11 rounded-md border border-primary px-5 text-primary" type="submit">{t(resumable.length > 0 ? "resume.new" : "resume.start")}</button>
+        </form>
+        {applications.some((application) => application.status === "completed") && <Link className="mt-5 inline-block text-primary underline" href={localizedPath(locale, "/portal")}>{t("resume.account")}</Link>}
+        {trail}
       </section>
     );
   }
@@ -93,14 +192,18 @@ export default async function JoinPage({params, searchParams}: Props) {
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t(`plans.${plan}`)}</p>
       <h1 className="mt-3 font-serif text-4xl font-semibold">{t("title")}</h1>
       <p className="mt-4 text-muted-foreground">{queryValue(query.sent) ? t("magicLinkSent") : t("authDescription")}</p>
+      {googleCallback ? <GoogleSignInButton callbackURL={googleCallback} enabled={process.env.AUTH_GOOGLE_ENABLED === "true"} labels={googleLabels}/> : null}
+      {googleCallback ? <p className="my-5 text-center text-sm text-muted-foreground">{tLogin("separator")}</p> : null}
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["email"]} pendingLabel={t("sending")} submitLabel={t("sendMagicLink")}>
+          {plan && queryValue(query.application) && <input name="application" type="hidden" value={queryValue(query.application)}/>}
           <div>
             <label className="mb-2 block text-sm font-medium" htmlFor="email">{t("fields.email")}</label>
             <input aria-describedby="email-error" autoComplete="email" className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="email" name="email" required type="email"/>
           </div>
         </JoinForm>
       </div>
+      {trail}
     </section>
   );
 }

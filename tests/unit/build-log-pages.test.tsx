@@ -1,4 +1,5 @@
 import {render, screen} from "@testing-library/react";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const publicPosts = vi.hoisted(() => ({
@@ -19,8 +20,22 @@ vi.mock("@/lib/db/repos/public-posts", async (importOriginal) => ({
 }));
 vi.mock("next/navigation", () => navigation);
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async () => (key: string) => `translated:${key}`),
+  getTranslations: vi.fn(async () => Object.assign(
+    (key: string) => `translated:${key}`,
+    {raw: (key: string) => `translated:${key}`},
+  )),
   setRequestLocale: vi.fn(),
+}));
+// The rewritten news index now renders PageHero and FooterNewsletter, both of which pull in
+// @/i18n/navigation's real createNavigation() output -- which needs the full next/navigation
+// export surface that the partial mock above (just `notFound`) doesn't carry. Mocked here with
+// the repo's established plain-passthrough pattern (same situation Task 17 hit with
+// m6-launchpad-page.test.tsx / launchpad-partner-cutover.test.tsx); this file's own assertions
+// (including the exact accessible link names below) are unchanged.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+  usePathname: () => "/news",
+  useRouter: () => ({replace: vi.fn()}),
 }));
 
 import NewsPage from "@/app/[locale]/(public)/news/page";
@@ -93,13 +108,14 @@ describe("published posts through news routes", () => {
     expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
   });
 
-  it("degrades to the empty state when the database is unavailable", async () => {
+  it("shows the unavailable state when both database reads fail", async () => {
     publicPosts.listPublishedNews.mockRejectedValueOnce(new Error("DB_DOWN"));
     publicPosts.listPublishedBuildLogs.mockRejectedValueOnce(new Error("DB_DOWN"));
 
     render(await NewsPage({params: Promise.resolve({locale: "en"})}));
 
-    expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
+    expect(screen.getByText("translated:unavailableTitle")).toBeInTheDocument();
+    expect(screen.queryByText("translated:emptyTitle")).not.toBeInTheDocument();
   });
 
   it("resolves a news slug without falling through to build logs", async () => {
@@ -179,9 +195,10 @@ describe("published posts through news routes", () => {
     expect(navigation.notFound).not.toHaveBeenCalled();
   });
 
+  // D-1: the locale-specific record title, branded at runtime with that locale's separator.
   it.each([
-    ["en", "How we built the AI-Ops dashboard"],
-    ["zh-HK", "我們如何建立 AI 營運儀表板"],
+    ["en", "How we built the AI-Ops dashboard | WiseTech Hong Kong"],
+    ["zh-HK", "我們如何建立 AI 營運儀表板｜WiseTech Hong Kong"],
   ])("selects the %s build-log title for metadata", async (locale, title) => {
     const metadata = await generateMetadata({
       params: Promise.resolve({locale, slug: summary.slug}),

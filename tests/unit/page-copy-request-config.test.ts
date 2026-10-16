@@ -1,4 +1,11 @@
+// @vitest-environment node
+await vi.hoisted(async()=>{const {AsyncLocalStorage}=await import("node:async_hooks");Object.assign(globalThis,{AsyncLocalStorage});});
 import {beforeEach, describe, expect, it, vi} from "vitest";
+
+import {nextDataCacheStore} from "@/tests/helpers/next-data-cache";
+const store=nextDataCacheStore();
+Object.assign(globalThis,{__incrementalCache:store});
+vi.mock("next/cache",async importOriginal=>({...await importOriginal<typeof import("next/cache")>(),revalidateTag:(tag:string)=>store.expire(tag)}));
 
 const repository = vi.hoisted(() => ({listPageCopyForLocale: vi.fn()}));
 
@@ -11,7 +18,7 @@ vi.mock("next-intl/server", () => ({
 }));
 
 import getConfig from "@/i18n/request";
-import {clearPageCopyCache, pageCopyOverrides} from "@/lib/i18n/page-copy-cache";
+import {clearPageCopyCache} from "@/lib/i18n/page-copy-cache";
 
 async function config(locale: string) {
   return getConfig({
@@ -92,74 +99,5 @@ describe("getRequestConfig with staff page copy", () => {
     const {messages} = await config("en");
 
     expect(JSON.stringify(messages)).not.toContain("Retired");
-  });
-});
-
-describe("page copy cache", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    clearPageCopyCache();
-  });
-
-  it("serves a second read from cache and refetches once the entry expires", async () => {
-    const load = vi.fn(async () => []);
-    let clock = 0;
-    const now = () => clock;
-
-    await pageCopyOverrides("en", {load, now});
-    await pageCopyOverrides("en", {load, now});
-    expect(load).toHaveBeenCalledOnce();
-
-    clock = 30_001;
-    await pageCopyOverrides("en", {load, now});
-    expect(load).toHaveBeenCalledTimes(2);
-  });
-
-  it("caches each locale separately", async () => {
-    const load = vi.fn(async () => []);
-
-    await pageCopyOverrides("en", {load});
-    await pageCopyOverrides("zh-HK", {load});
-
-    expect(load.mock.calls).toEqual([["en"], ["zh-HK"]]);
-  });
-
-  it("collapses concurrent misses into one read", async () => {
-    const load = vi.fn(async () => []);
-
-    await Promise.all([
-      pageCopyOverrides("en", {load}),
-      pageCopyOverrides("en", {load}),
-      pageCopyOverrides("en", {load}),
-    ]);
-
-    expect(load).toHaveBeenCalledOnce();
-  });
-
-  it("retries sooner after a failure than after a success", async () => {
-    let clock = 0;
-    const now = () => clock;
-    const load = vi.fn(async () => {
-      throw new Error("DB_DOWN");
-    });
-
-    await expect(pageCopyOverrides("en", {load, now})).resolves.toEqual([]);
-    clock = 4_999;
-    await pageCopyOverrides("en", {load, now});
-    expect(load).toHaveBeenCalledOnce();
-
-    clock = 5_001;
-    await pageCopyOverrides("en", {load, now});
-    expect(load).toHaveBeenCalledTimes(2);
-  });
-
-  it("drops the cached entry when a save clears it", async () => {
-    const load = vi.fn(async () => []);
-
-    await pageCopyOverrides("en", {load});
-    clearPageCopyCache();
-    await pageCopyOverrides("en", {load});
-
-    expect(load).toHaveBeenCalledTimes(2);
   });
 });

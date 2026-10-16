@@ -1,40 +1,222 @@
+import type {CSSProperties} from "react";
 import type {Metadata} from "next";
+import Link from "next/link";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {EventDetail} from "@/components/marketing/event-detail";
+import {GuestRsvpForm} from "@/components/marketing/guest-rsvp-form";
+import {TicketCheckoutForm} from "@/components/marketing/ticket-checkout-form";
 import {EventRegistrationForm} from "@/components/portal/event-registration-form";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
+// lib/auth/actor reads the session (and so needs the Neon Auth pair); this page already
+// takes that dependency through registration-action.ts, so importing it here adds nothing.
+import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
-import {eventBoundary} from "@/lib/events/public";
+import {profilesRepository} from "@/lib/db/repos/profiles";
+import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
+import {deriveEventDisplayStatus} from "@/lib/events/status";
+import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
 import type {RegistrationActionState} from "@/lib/events/registration-state";
-import {buildPageMetadata} from "@/lib/metadata";
+import {formatTicketPrice} from "@/lib/tickets/format";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {buildEventData} from "@/lib/structured-data";
-import {localizedPath} from "@/lib/urls";
+import {absoluteUrl, localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;
+// The donor's own event-detail photograph (its globals.css `.event-detail-hero` default),
+// ported on the owner's 2026-09-07 instruction and byte-pinned through the integration
+// manifest's `photos` provenance. Used only when the event has no validated hero of its own.
+const EVENT_HERO_PLACEHOLDER = "/editorial/events-community.webp";
+
+/**
+ * Wraps a URL as a quoted CSS `url(...)` token, escaping embedded `"` and `\`.
+ *
+ * `isRegistrableMediaUrl` (lib/media/url.ts) and `isPrivateMediaDeliveryUrl` guard
+ * *which URLs may be treated as own-origin images* -- they don't, and were never
+ * meant to, forbid characters that are only dangerous at this specific CSS
+ * interpolation site (`(`, `)`, `;`, whitespace, quotes). In particular a
+ * manually-entered media URL (mediaInputSchema in lib/db/repos/media.ts) can
+ * contain those characters and still pass validation. Interpolating such a value
+ * unquoted into `url(...)` would let it terminate the token early and inject a
+ * second `background-image` declaration into this same inline style. Quoting
+ * the value turns every one of those characters into inert string content for
+ * the CSS parser, regardless of what the value contains.
+ */
+function cssUrlToken(value: string): string {
+  return `url("${value.replace(/["\\]/g, "\\$&")}")`;
+}
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const row = await eventsRepository.getPublicBySlug(slug, locale, {asOf: new Date()}).catch(() => null);
+  const [row, t] = await Promise.all([
+    eventsRepository.getPublicBySlug(slug, locale, {asOf: new Date()}).catch(() => null),
+    getTranslations({locale, namespace: "Events"}),
+  ]);
   if (!row) return {};
-  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: row.title, description: row.description});
+  // Match the page body: only a registered own-origin image or a private delivery
+  // image can appear in og:image. A donor URL is excluded.
+  const heroImageUrl = row.hero && (isPrivateMediaDeliveryUrl(row.hero.url) || isRegistrableMediaUrl(row.hero.url)) ? row.hero.url : null;
+  const base = buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl})});
+  return {
+    ...base,
+    robots: row.cancelled ? {index: false, follow: false} : undefined,
+  };
 }
 
 export default async function EventPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
   const asOf = new Date();
-  const [event, t] = await Promise.all([eventsRepository.getPublicBySlug(slug, locale, {asOf}).catch(() => null), getTranslations({locale, namespace: "Events"})]);
+  // A failed session read degrades to the anonymous path: the public page must render
+  // whether or not auth is reachable, and the guest form is the anonymous path anyway.
+  const [event, t, tTicket, actor] = await Promise.all([
+    eventsRepository.getPublicBySlug(slug, locale, {asOf}),
+    getTranslations({locale, namespace: "Events"}),
+    getTranslations({locale, namespace: "Ticket"}),
+    getActor().catch(() => null),
+  ]);
   if (!event) notFound();
   const displayEvent = event.hero && !(isPrivateMediaDeliveryUrl(event.hero.url) || isRegistrableMediaUrl(event.hero.url)) ? {...event, hero: null} : event;
   const appLocale = locale as AppLocale;
+  // The spec requires a signed-in member's own details prefilled. The read is
+  // caught because it is an optimisation here, not the page's content: an
+  // unreachable profile leaves an empty form rather than failing the page.
+  const memberProfile = actor?.kind === "member"
+    ? await profilesRepository.getById(actor, actor.profileId).catch(() => null)
+    : null;
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
-  const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
-  return <><StructuredData data={buildEventData({...displayEvent, image: displayEvent.hero?.url}, displayEvent.title, appLocale)}/><section className="container mx-auto px-6 py-12"><EventDetail event={displayEvent} labels={{date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity")}} locale={locale}/>{!past ? <section className="mt-8 glass-card space-y-3 p-6"><h2 className="font-serif text-2xl font-semibold">{t("registration.title")}</h2><EventRegistrationForm action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")}/></section> : null}</section></>;
+  const displayStatus = deriveEventDisplayStatus({...displayEvent, confirmedSeats: null, waitlistAvailable: false}, asOf);
+  const past = displayStatus.lifecycle === "ended";
+  const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity"), format: t("detail.format"), formats: {in_person: t("detail.formats.in_person"), online: t("detail.formats.online"), hybrid: t("detail.formats.hybrid")}, onlineUrl: t("detail.onlineUrl")};
+  // Programme B-6 / D-11: the organiser links to its /members page when it has one, and is
+  // otherwise a name in the facts grid and an unlinked Event.organizer. The slug alone is the
+  // condition on purpose -- `projectPublicEvent` in lib/db/repos/events.ts already withholds it
+  // for a company whose public profile is not `published`, so this page cannot link to a 404.
+  const organiserHref = displayEvent.organiser?.slug ? localizedPath(appLocale, `/members/${displayEvent.organiser.slug}`) : null;
+  const organiserData = displayEvent.organiser ? {name: displayEvent.organiser.name, url: organiserHref ? absoluteUrl(organiserHref) : null} : null;
+  // app/styles/wisetech.css:565's `.event-detail-hero` background-image reads var(--wt-event-photo)
+  // with no fallback -- an unset custom property invalidates the whole declaration, so this is
+  // always set: the event's own validated, already-filtered hero, or the placeholder above.
+  const heroStyle = {"--wt-event-photo": cssUrlToken(displayEvent.hero?.url ?? EVENT_HERO_PLACEHOLDER)} as CSSProperties;
+  // Programme B-4: external registration always leaves the site; an anonymous visitor to an
+  // RSVP event gets the guest form; a signed-in member keeps the membership-gated form.
+  const registration = displayEvent.registrationMode === "ticketed"
+    ? {kind: "ticket" as const}
+    : displayEvent.registrationMode === "external" && displayEvent.externalRegistrationUrl
+      ? {kind: "external" as const, url: displayEvent.externalRegistrationUrl}
+      : actor === null && displayEvent.registrationMode === "rsvp"
+        ? {kind: "guest" as const}
+        : {kind: "member" as const};
+  const guestLabels = {
+    title: t("guest.title"), name: t("guest.name"), email: t("guest.email"), organisation: t("guest.organisation"), whatsappNumber: t("guest.whatsappNumber"),
+    marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
+    registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), confirmationPending: t("guest.confirmationPending"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
+    closed: t("guest.closed"), external: t("guest.external"), unavailable: t("guest.unavailable"),
+    requiredField: t("guest.requiredField"), invalidField: t("guest.invalidField"), invalidEmail: t("guest.invalidEmail"), invalidWhatsapp: t("guest.invalidWhatsapp"), errorReference: t("guest.errorReference"),
+  };
+  const ticketLabels = {
+    heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
+    seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
+    website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"), refundPolicy: tTicket("refundPolicy"),
+    fillBuyer: tTicket("fillBuyer"), removeSeat: tTicket("removeSeat"), total: tTicket("total"), paymentNature: tTicket("paymentNature"), eventDate: tTicket("eventDate"), fieldErrors: {required: tTicket("fieldErrors.required"), invalid: tTicket("fieldErrors.invalid"), extra: tTicket("fieldErrors.extra")},
+    recoveryLoading: tTicket("recoveryLoading"), recoveryTitle: tTicket("recoveryTitle"), recoverySummary: tTicket("recoverySummary"), recoveryResume: tTicket("recoveryResume"), recoveryChecking: tTicket("recoveryChecking"), recoveryUnavailable: tTicket("recoveryUnavailable"),
+    errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), NOT_ELIGIBLE: tTicket("errors.NOT_ELIGIBLE"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RETRY_CHANGED: tTicket("errors.RETRY_CHANGED"), RETRY_EXPIRED: tTicket("errors.RETRY_EXPIRED"), ALREADY_COMPLETED: tTicket("errors.ALREADY_COMPLETED"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
+  };
+
+  return (
+    <>
+      <StructuredData data={buildEventData({...displayEvent, image: displayEvent.hero?.url, organiser: organiserData, eventStatus: displayEvent.cancelled ? "https://schema.org/EventCancelled" : undefined}, displayEvent.title, appLocale)} />
+      <section className="event-detail-page">
+        {/* EventDetail is rendered completely unchanged inside this wrapper: its own <h1> is
+            the page's only title, styled by the donor's `.event-detail-hero h1` descendant rule
+            without this file touching EventDetail's markup at all. */}
+        <section className="event-detail-hero" style={heroStyle}>
+          <div className="shell">
+            <div className="event-detail-meta">
+              <span>{t("detail.eyebrow")}</span>
+              <span>{formatEventDate(displayEvent.startsAt, appLocale)}</span>
+            </div>
+            <EventDetail event={displayEvent} labels={detailLabels} locale={locale} />
+          </div>
+        </section>
+        <div className="shell">
+          <div className="event-detail-layout">
+            <div className="event-detail-main">
+              <section>
+                <h2>{t("detail.factsTitle")}</h2>
+                <div className="event-detail-facts">
+                  <div><span>{detailLabels.date}</span><time dateTime={displayEvent.startsAt}>{formatEventDate(displayEvent.startsAt, appLocale)}</time></div>
+                  {displayEvent.venue ? <div><span>{detailLabels.venue}</span><strong>{displayEvent.venue}</strong></div> : null}
+                  {displayEvent.capacity !== null ? <div><span>{detailLabels.capacity}</span><strong>{displayEvent.capacity}</strong></div> : null}
+                  {displayEvent.organiser ? (
+                    <div>
+                      <span>{t("detail.organiser")}</span>
+                      <strong>{organiserHref ? <Link href={organiserHref}>{displayEvent.organiser.name}</Link> : displayEvent.organiser.name}</strong>
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+            </div>
+            <aside className="event-detail-aside">
+              <h2>{t("detail.asideTitle")}</h2>
+              {/* Plain next/link + localizedPath, not @/i18n/navigation's Link: the latter's
+                  createNavigation() call needs next/navigation's redirect/permanentRedirect at
+                  module-eval time, which breaks the pinned event-public-detail-review test's
+                  partial next/navigation mock. event-registration-form.tsx already uses this
+                  same plain-Link + localizedPath pattern for its own event-scoped links. */}
+              <Link href={localizedPath(appLocale, "/contact")}>{t("detail.asideContact")}</Link>
+              <Link href={localizedPath(appLocale, "/events")}>{t("detail.asideBrowse")}</Link>
+            </aside>
+          </div>
+        </div>
+        {displayEvent.cancelled ? (
+          <section className="glass-card p-6" role="status">
+            <h2 className="font-serif text-2xl font-semibold">{t("cancelled.heading")}</h2>
+            <p className="text-muted-foreground">{t("cancelled.body")}</p>
+            <Link className="underline" href={localizedPath(appLocale, "/refund-policy")}>{t("cancelled.refundPolicy")}</Link>
+          </section>
+        ) : !past ? (
+          <div className="event-action-bar">
+            <div>
+              <time dateTime={displayEvent.startsAt}>{formatEventDate(displayEvent.startsAt, appLocale)}</time>
+              <strong>{t("lifecycle." + displayStatus.lifecycle)}</strong>
+            </div>
+            <div>
+              {registration.kind === "ticket" ? (
+                <TicketCheckoutForm
+                  defaultBuyerEmail={memberProfile?.email ?? undefined}
+                  defaultBuyerName={memberProfile?.displayName ?? undefined}
+                  eventId={displayEvent.id}
+                  locale={appLocale}
+                  labels={ticketLabels}
+                  pricePerSeat={tTicket("price", {price: formatTicketPrice(displayEvent.ticketPriceHkdCents, appLocale)})}
+                  unitAmountHkdCents={displayEvent.ticketPriceHkdCents ?? 0}
+                  eventStartsAt={displayEvent.startsAt}
+                  refundPolicyHref={localizedPath(appLocale, "/refund-policy")}
+                />
+              ) : registration.kind === "external" ? (
+                <a className="button" href={registration.url} rel="noopener noreferrer" target="_blank">{t("detail.registerExternally")}</a>
+              ) : registration.kind === "guest" ? (
+                <GuestRsvpForm action={submitGuestRsvpAction} eventId={displayEvent.id} labels={guestLabels} locale={appLocale} />
+              ) : (
+                <EventRegistrationForm action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="event-action-bar">
+            <div><strong>{t("detail.pastEventLabel")}</strong></div>
+            <div><p>{t("detail.pastEventNotice")}</p></div>
+          </div>
+        )}
+      </section>
+    </>
+  );
 }

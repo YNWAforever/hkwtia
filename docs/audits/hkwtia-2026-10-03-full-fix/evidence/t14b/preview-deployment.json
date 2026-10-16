@@ -1,0 +1,10 @@
+{
+  "id": "dpl_9m5BHcTshdDpN1jwcuzwLaWDwbDw",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+  "gitRef": "codex/membership-lifecycle-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-membership-lifecycle-20261003.vercel.app",
+  "production": false
+}

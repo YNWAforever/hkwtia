@@ -1,0 +1,6864 @@
+{
+  "sourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "stats": {
+    "startTime": "2026-10-02T15:18:28.753Z",
+    "duration": 1060709.058,
+    "expected": 323,
+    "skipped": 158,
+    "unexpected": 6,
+    "flaky": 0
+  },
+  "exitCode": 1,
+  "fullCollection": true,
+  "production": false,
+  "cases": [
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/ has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3847,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/events has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 8037,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/membership has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2730,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/news has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1821,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/about has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1866,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/about/chairman has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1856,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1695,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/programs/asa has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2006,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3831,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/events has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 8012,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/membership has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2203,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/news has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2056,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/about has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1882,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/about/chairman has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1435,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1635,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 44,
+      "title": "/zh/programs/asa has no serious or critical accessibility violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1779,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 50,
+      "title": "open desktop and mobile navigation surfaces pass axe",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4306,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 97,
+      "title": "the current mobile group passes axe and keeps AA contrast on the donor gradient",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2336,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 169,
+      "title": "skip link targets the sole main content landmark",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 695,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "line": 17,
+      "title": "en: ten selected members, two controlled failures, retry only failures",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 36469,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "line": 17,
+      "title": "zh-HK: ten selected members, two controlled failures, retry only failures",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 33317,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "line": 19,
+      "title": "en: staff event modes survive create, edit and public rendering",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 19064,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "line": 19,
+      "title": "zh-HK: staff event modes survive create, edit and public rendering",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 17696,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "line": 15,
+      "title": "en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 21363,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "line": 15,
+      "title": "zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 21495,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "line": 18,
+      "title": "en: import reviews differences and commits only two eligible synthetic rows",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 23706,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "line": 18,
+      "title": "zh-HK: import reviews differences and commits only two eligible synthetic rows",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 28433,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-members-bulk.spec.ts",
+      "line": 12,
+      "title": "staff can find, reopen and safely interpret synthetic batch jobs",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 186,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "line": 11,
+      "title": "en: member search, detail and return retain the filter",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5787,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "line": 11,
+      "title": "zh-HK: member search, detail and return retain the filter",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5908,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 12,
+      "title": "staff can navigate all original destinations, use the mobile drawer and sign out",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4585,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 39,
+      "title": "member detail keeps the Members destination current",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3014,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 46,
+      "title": "zh-HK superadmin keeps locale and authorized navigation",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2330,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 58,
+      "title": "removing a synthetic staff role denies the next server request",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 115,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 87,
+      "title": "member identity sees denial and no workspace links",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1861,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "title": "anonymous member-login-en-desktop renders for audit evidence",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 492,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "title": "anonymous member-login-zh-mobile renders for audit evidence",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 514,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "title": "anonymous join-zh-desktop renders for audit evidence",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 867,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "en member: method readiness and safe continuation render",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 497,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "en member: sent-state recovery keeps resend waiting",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 695,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "en member: provider-error return offers email recovery",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 452,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "en admin: method readiness and safe continuation render",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 540,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "en admin: sent-state recovery keeps resend waiting",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 664,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "en admin: provider-error return offers email recovery",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 403,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "zh-HK member: method readiness and safe continuation render",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 529,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "zh-HK member: sent-state recovery keeps resend waiting",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 696,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "zh-HK member: provider-error return offers email recovery",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 430,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "title": "zh-HK admin: method readiness and safe continuation render",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 491,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "title": "zh-HK admin: sent-state recovery keeps resend waiting",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 669,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "title": "zh-HK admin: provider-error return offers email recovery",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 443,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 13,
+      "title": "private bilingual CMS draft, real layout, second editor conflict and explicit publication revert",
+      "expectedStatus": "passed",
+      "outcome": "unexpected",
+      "runs": [
+        {
+          "status": "failed",
+          "durationMs": 3498,
+          "errorLocations": [
+            {
+              "file": "cms-publish.spec.ts",
+              "line": 124
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "line": 344,
+      "title": "registered media search over 79 real static fixture images in bilingual event forms",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4996,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "desktop en real-route mock provider cites sources and keeps continuity",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "desktop zh-HK real-route mock provider cites sources and keeps continuity",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "mobile en real-route mock provider cites sources and keeps continuity",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 47,
+      "title": "mobile zh-HK real-route mock provider cites sources and keeps continuity",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 109,
+      "title": "authenticated member can use the real Concierge route from the member portal",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/ renders one English heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 961,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh renders one Chinese heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 794,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/about renders one English heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 778,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/about renders one Chinese heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 901,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/about/chairman renders one English heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1188,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/about/chairman renders one Chinese heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1278,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/about/committees renders one English heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1308,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/about/committees renders one Chinese heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 787,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/membership renders one English heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1327,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/membership renders one Chinese heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 731,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "title": "/ai-ops renders one English heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 614,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "title": "/zh/ai-ops renders one Chinese heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 669,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "title": "en: staff finds and checks in a confirmed guest at 390px",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "title": "zh-HK: staff finds and checks in a confirmed guest at 390px",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-admin-daily-work.spec.ts",
+      "line": 110,
+      "title": "en scope, company keyboard, history and Member360 facts",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 16094,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-admin-daily-work.spec.ts",
+      "line": 110,
+      "title": "zh-HK scope, company keyboard, history and Member360 facts",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 17045,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "zh-HK staff assigns, follows up and rejects a stale tab without changing rights",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "line": 35,
+      "title": "en staff assigns, follows up and rejects a stale tab without changing rights",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 48,
+      "title": "fresh login resumes the same company application with valid saved fields",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "line": 78,
+      "title": "another applicant cannot read company draft even with a legitimate seat in that company",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "zh-HK GET is read-only; final draft and stale/current two-person approval",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "line": 23,
+      "title": "en GET is read-only; final draft and stale/current two-person approval",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "title": "zh-HK recovers bilingual edits after real browser history",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 14,
+      "title": "en recovers bilingual edits after real browser history",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 31,
+      "title": "denied storage warns truthfully and keeps edits in the form",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "line": 38,
+      "title": "another authorized synthetic identity cannot see the prior identity draft",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "STAFF has no indefinite grant entry",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "EXCO has no indefinite grant entry",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "line": 18,
+      "title": "SUPERADMIN has no indefinite grant entry",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "line": 13,
+      "title": "en: row decisions, private correction report and exact import commit",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 37589,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "line": 13,
+      "title": "zh-HK: row decisions, private correction report and exact import commit",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 35457,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "zh-HK presents unknown/disabled/verified polling separately",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "line": 44,
+      "title": "en presents unknown/disabled/verified polling separately",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-member-payment-reconciliation.spec.ts",
+      "line": 38,
+      "title": "provider paid invoice → root replays original event → one activation and visible receipt",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "expired history remains accessible without entitlements",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "line": 23,
+      "title": "cancelled history remains accessible without entitlements",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-membership-policy.spec.ts",
+      "line": 58,
+      "title": "unchecked server submission writes no payment; keyboard confirmation records one receipt and reaches real TEST checkout",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 23,
+      "title": "en public login, partner assets and publication scope",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 11658,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 41,
+      "title": "en existing signed-in staff returns to admin",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2232,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 23,
+      "title": "zh public login, partner assets and publication scope",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 26514,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "line": 41,
+      "title": "zh existing signed-in staff returns to admin",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1768,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "zh-HK traverses 101 rows and retains context on previous and filter reset",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "line": 18,
+      "title": "en traverses 51 rows and retains context on previous and filter reset",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-support-handoff.spec.ts",
+      "line": 89,
+      "title": "en stale handoff, keyboard, owner scope and truthful delivery",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 16909,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "full-support-handoff.spec.ts",
+      "line": 89,
+      "title": "zh stale handoff, keyboard, owner scope and truthful delivery",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 18515,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "line": 11,
+      "title": "en: empty RSVP and a lost action response stay on the form",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 3337,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "line": 11,
+      "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 3310,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 19,
+      "title": "en join shows localized progress and a single heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 419,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 19,
+      "title": "zh-HK join shows localized progress and a single heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 544,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 37,
+      "title": "a forged completion status still renders anonymous authentication",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 426,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "line": 44,
+      "title": "a Startup join link never exposes a payment or portal state before authentication",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 414,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "join-resume.spec.ts",
+      "line": 14,
+      "title": "en: signed-in join start and return are resumable across tabs",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4036,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "join-resume.spec.ts",
+      "line": 14,
+      "title": "zh-HK: signed-in join start and return are resumable across tabs",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3102,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 390px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1066,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 768px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 863,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1024px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 904,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1280px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 922,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1366px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1057,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1440px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1039,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/ login visible and keyboard reachable at 1920px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1385,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 390px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1705,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 768px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1026,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1024px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1045,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1280px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1366,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1366px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1167,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1440px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1335,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 8,
+      "title": "/zh login visible and keyboard reachable at 1920px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1162,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "line": 26,
+      "title": "anonymous admin deep link opens staff login and preserves the allowed filter",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 456,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 64,
+      "title": "M1 join remains available in en",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 425,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 64,
+      "title": "M1 join remains available in zh-HK",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 517,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 6,
+      "title": "Startup join -> deterministic Checkout adapter -> signed webhook state is under five minutes",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 442,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 23,
+      "title": "Community and Patron plans use deterministic non-checkout branches",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 32,
+      "title": "signed webhook verification feeds the real processor and exact replay is a duplicate",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 42,
+      "title": "deterministic seat and Billing Portal contracts enforce capacity and ownership",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "line": 55,
+      "title": "live Neon/Stripe acceptance is explicitly unimplemented when isolated credentials are absent",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 66,
+      "title": "anonymous admin requests require the discoverable staff login",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 396,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 73,
+      "title": "public presentation and protected portal routes remain available without credentials",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 973,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 97,
+      "title": "staff searches Member 360 and appends a note through the real auth and database seams",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 8168,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 115,
+      "title": "the canonical segment has exact rows and CSV headers and its draft entry cannot queue on GET",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 11518,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 151,
+      "title": "the operational at-risk queue contains exactly the three engineered members in order",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 18384,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 164,
+      "title": "the report reconciles current ledger stock and committed July flow before browser mutations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 12333,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 189,
+      "title": "event check-in appends exactly one event_attended engagement",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3465,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 202,
+      "title": "staff records one supported approval decision and persists its audit fact",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2633,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 213,
+      "title": "representative authenticated admin routes have no serious or critical axe violations",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5393,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 222,
+      "title": "Traditional Chinese admin routes render localized headings and segment recovery state",
+      "expectedStatus": "passed",
+      "outcome": "unexpected",
+      "runs": [
+        {
+          "status": "failed",
+          "durationMs": 22268,
+          "errorLocations": [
+            {
+              "file": "m2-admin-crm.spec.ts",
+              "line": 228
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "line": 237,
+      "title": "anonymous, member, and company-admin identities require login or receive access denied on every admin route",
+      "expectedStatus": "passed",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 93,
+      "title": "staff sees the English and Traditional Chinese automation consoles",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 113,
+      "title": "staff sees seeded automation history in Member 360",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 141,
+      "title": "a member receives a real 404 for both automation console locales",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 177,
+      "title": "confirms marketing unsubscribe in en",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 174,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "line": 177,
+      "title": "confirms marketing unsubscribe in zh-HK",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 102,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "line": 86,
+      "title": "staff sees three approval-only drafts and one inert board preview",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "line": 139,
+      "title": "member identities receive real 404s for both staff queues",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "line": 64,
+      "title": "en exposes the complete privacy-safe dashboard",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2615,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "line": 64,
+      "title": "zh-HK exposes the complete privacy-safe dashboard",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2346,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "line": 142,
+      "title": "sitemap publishes the canonical AI-Ops route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 766,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 27,
+      "title": "preserves every public filter in a stable shareable query",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 32,
+      "title": "projects only public SoftwareApplication JSON-LD fields",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "line": 39,
+      "title": "live Preview browser scenarios are explicitly gated",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 156,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 85,
+      "title": "maps each fixture answer set to exactly one eligible scheme",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 104,
+      "title": "member submits through the real route and the application survives a reload",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "line": 129,
+      "title": "staff performs legal stage moves, proves audit persistence, and sees the real Showcase projection",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "line": 27,
+      "title": "en: company billing manager can reach billing without starting payment",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 72,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "line": 27,
+      "title": "zh-HK: company billing manager can reach billing without starting payment",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 128,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 16,
+      "title": "en: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 16,
+      "title": "zh-HK: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 51,
+      "title": "en: native membership form reaches Stripe before hydration",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "line": 51,
+      "title": "zh-HK: native membership form reaches Stripe before hydration",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 29,
+      "title": "en: bare /join renders the plan chooser with four plans",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 839,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 44,
+      "title": "en: /events interest form acknowledges a submission",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1199,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 29,
+      "title": "zh-HK: bare /join renders the plan chooser with four plans",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 976,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 44,
+      "title": "zh-HK: /events interest form acknowledges a submission",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1416,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 65,
+      "title": "en: /admin/inbox and /admin/tasks render for staff",
+      "expectedStatus": "passed",
+      "outcome": "unexpected",
+      "runs": [
+        {
+          "status": "failed",
+          "durationMs": 21641,
+          "errorLocations": [
+            {
+              "file": "phase-a-funnel.spec.ts",
+              "line": 68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "line": 65,
+      "title": "zh-HK: /admin/inbox and /admin/tasks render for staff",
+      "expectedStatus": "passed",
+      "outcome": "unexpected",
+      "runs": [
+        {
+          "status": "failed",
+          "durationMs": 23174,
+          "errorLocations": [
+            {
+              "file": "phase-a-funnel.spec.ts",
+              "line": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 83,
+      "title": "en: /events filter panel round-trips the format filter",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1484,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 97,
+      "title": "en: guest RSVP form rejects a malformed address before writing",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 2464,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 83,
+      "title": "zh-HK: /events filter panel round-trips the format filter",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3108,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 97,
+      "title": "zh-HK: guest RSVP form rejects a malformed address before writing",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 3261,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 135,
+      "title": "the guest cancel link lands on /events for token \"not-a-token\"",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2525,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 135,
+      "title": "the guest cancel link lands on /events for token \"000000000000\"",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1283,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 149,
+      "title": "en: a submitted event reaches /events with its organiser once staff approve it",
+      "expectedStatus": "passed",
+      "outcome": "unexpected",
+      "runs": [
+        {
+          "status": "failed",
+          "durationMs": 25264,
+          "errorLocations": [
+            {
+              "file": "phase-b1-member-events.spec.ts",
+              "line": 163
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "line": 149,
+      "title": "zh-HK: a submitted event reaches /events with its organiser once staff approve it",
+      "expectedStatus": "passed",
+      "outcome": "unexpected",
+      "runs": [
+        {
+          "status": "failed",
+          "durationMs": 21823,
+          "errorLocations": [
+            {
+              "file": "phase-b1-member-events.spec.ts",
+              "line": 152
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 53,
+      "title": "en: /members renders the directory heading and its filter form",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 966,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 64,
+      "title": "en: the industry filter round-trips through the URL",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 746,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 75,
+      "title": "en: a member page carries Organization and BreadcrumbList JSON-LD",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 746,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 53,
+      "title": "zh-HK: /members renders the directory heading and its filter form",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 612,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 64,
+      "title": "zh-HK: the industry filter round-trips through the URL",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 868,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 75,
+      "title": "zh-HK: a member page carries Organization and BreadcrumbList JSON-LD",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 616,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "line": 102,
+      "title": "a company admin submits their public page and staff publishes it",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 12853,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 84,
+      "title": "en: /admin/inbox is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 511,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 95,
+      "title": "en: the inbox description no longer promises a read-only inbox",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 84,
+      "title": "zh-HK: /admin/inbox is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 544,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 95,
+      "title": "zh-HK: the inbox description no longer promises a read-only inbox",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 109,
+      "title": "en: /admin/inbox renders its heading, both filter rows and the reply-capable description",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2241,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 109,
+      "title": "zh-HK: /admin/inbox renders its heading, both filter rows and the reply-capable description",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1391,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "line": 135,
+      "title": "staff take a WhatsApp thread over, reply inside the window and hand it back",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1756,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "en: /admin/templates is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 483,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "en: /admin/contacts is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 390,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "en: /admin/campaigns is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 559,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "zh-HK: /admin/templates is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 564,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "zh-HK: /admin/contacts is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 812,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 87,
+      "title": "zh-HK: /admin/campaigns is hidden from anyone who is not staff",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 421,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 99,
+      "title": "the send queue refuses a request with no bearer",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 106,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 117,
+      "title": "en: /admin/templates lists every seeded key with its category and approval state",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1503,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 157,
+      "title": "en: /admin/contacts round-trips the stage and source filters through the URL",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2186,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 176,
+      "title": "en: /admin/segments can address the contacts audience",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1429,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 117,
+      "title": "zh-HK: /admin/templates lists every seeded key with its category and approval state",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1255,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 157,
+      "title": "zh-HK: /admin/contacts round-trips the stage and source filters through the URL",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1702,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 176,
+      "title": "zh-HK: /admin/segments can address the contacts audience",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 2327,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 209,
+      "title": "approving a template makes it sendable",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2097,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 226,
+      "title": "a contact with a thread links to the inbox conversation it wrote from",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 1647,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 240,
+      "title": "the wizard refuses a blank template variable and previews a real eligibility partition",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 8469,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "line": 347,
+      "title": "a second POST inside the same ten minutes is a duplicate",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 3,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 39,
+      "title": "en: the member tools list renders",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 120,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 46,
+      "title": "en: an entitled member's tools page embeds the configured tool with its token",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 454,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 39,
+      "title": "zh-HK: the member tools list renders",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 77,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "line": 46,
+      "title": "zh-HK: an entitled member's tools page embeds the configured tool with its token",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 182,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "line": 40,
+      "title": "staff price a ticketed event and a buyer reaches Stripe Checkout (en)",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 10651,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "line": 40,
+      "title": "staff price a ticketed event and a buyer reaches Stripe Checkout (zh-HK)",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7612,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "line": 50,
+      "title": "en: a pass renders, admits once, reports the second scan, and is undone",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "line": 50,
+      "title": "zh-HK: a pass renders, admits once, reports the second scan, and is undone",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d4c-refunds.spec.ts",
+      "line": 117,
+      "title": "staff refund the seeded order, and both locales lose the seats",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "phase-d4d-event-cancellation.spec.ts",
+      "line": 102,
+      "title": "staff cancel the seeded event, and every public surface explains it",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 9,
+      "title": "en protects the member portal with a locale-aware continuation",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 537,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 9,
+      "title": "zh-HK protects the member portal with a locale-aware continuation",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 615,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 18,
+      "title": "portal navigation does not expose a private dashboard to an anonymous user",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 460,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "line": 26,
+      "title": "an anonymous portal never exposes company controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 459,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-membership-recovery.spec.ts",
+      "line": 12,
+      "title": "a signed-in member with no current membership sees bilingual recovery and can sign out",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 74,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member directory route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 625,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member events route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 517,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member documents route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 468,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "en protects the localized member billing route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 479,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member directory route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 466,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member events route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 670,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member documents route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 455,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "line": 10,
+      "title": "zh-HK protects the localized member billing route",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 468,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-cache-isolation.spec.ts",
+      "line": 29,
+      "title": "member A, company member B and guest see only the public bilingual news projection",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4896,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-cache-isolation.spec.ts",
+      "line": 70,
+      "title": "private bilingual drafts stay out of warmed public cache; explicit publish and revert invalidate it",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 19746,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 10,
+      "title": "en: home destinations, member directory, showcase and answered FAQ",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1773,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "en: public home and membership fit 390px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1357,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "en: public home and membership fit 768px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3769,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "en: public home and membership fit 1440px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1043,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 38,
+      "title": "en: membership FAQ and navigation have no serious axe findings",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2006,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 10,
+      "title": "/zh: home destinations, member directory, showcase and answered FAQ",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1557,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "/zh: public home and membership fit 390px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 903,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "/zh: public home and membership fit 768px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 943,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 26,
+      "title": "/zh: public home and membership fit 1440px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 995,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 38,
+      "title": "/zh: membership FAQ and navigation have no serious axe findings",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2050,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 49,
+      "title": "en: member login keeps safe return and recovery paths",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 756,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "line": 49,
+      "title": "/zh: member login keeps safe return and recovery paths",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 597,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 10,
+      "title": "a pending real database read preserves the discovery anchor",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1201,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 56,
+      "title": "en page hero image requests are eager and high priority",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 608,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 64,
+      "title": "en hero request is explicitly eager and high priority",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 771,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 77,
+      "title": "en streamed opening section does not move the first viewport",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4547,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 56,
+      "title": "zh-HK page hero image requests are eager and high priority",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 754,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 64,
+      "title": "zh-HK hero request is explicitly eager and high priority",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 591,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "line": 77,
+      "title": "zh-HK streamed opening section does not move the first viewport",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5486,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 4,
+      "title": "en: long home sections defer layout and reveal on keyboard focus",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1156,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 36,
+      "title": "en: programme anchors reveal their sections and print includes the full page",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 624,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 56,
+      "title": "en: membership FAQ remains available on direct fragment navigation",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 500,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 4,
+      "title": "/zh: long home sections defer layout and reveal on keyboard focus",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1211,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 36,
+      "title": "/zh: programme anchors reveal their sections and print includes the full page",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 704,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 56,
+      "title": "/zh: membership FAQ remains available on direct fragment navigation",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 615,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 67,
+      "title": "en: streamed home shell keeps the footer below the first viewport",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1491,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "line": 67,
+      "title": "/zh: streamed home shell keeps the footer below the first viewport",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 518,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/showcase renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 662,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/showcase renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 630,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/launchpad renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 601,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/launchpad renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 782,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/ai-ops renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 759,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/ai-ops renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 629,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/events renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 962,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/events renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1187,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/news renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 638,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/news renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 584,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programmes renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 526,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programmes renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 598,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/partners renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 877,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/partners renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2501,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 623,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 572,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/chairman renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 632,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/chairman renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 580,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/committees renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 503,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/committees renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 521,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 542,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 846,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/2001-establishment-of-wtia renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 497,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/2001-establishment-of-wtia renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 578,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/2014-wi-fi-hk renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 476,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/2014-wi-fi-hk renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 592,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 519,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 571,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/new-term-of-executive-committee-2022-2024 renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 554,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/new-term-of-executive-committee-2022-2024 renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 578,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 886,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 562,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/about/history/asia-smart-innovation-awards-2025 renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 514,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/about/history/asia-smart-innovation-awards-2025 renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 613,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/cpai renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 533,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/cpai renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 592,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/hkict renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 502,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/hkict renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 512,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/tct renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 486,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/tct renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 621,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/programs/asa renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 490,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/programs/asa renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 541,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/contact renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 502,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/contact renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 554,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/privacy renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 513,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/privacy renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 693,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/ai-transparency renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 531,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "line": 21,
+      "title": "/zh/ai-transparency renders one public heading",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 782,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 3,
+      "title": "desktop navigation supports trigger traversal, open, Escape, active state, and focus return",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 12128,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 46,
+      "title": "mobile Sheet traps focus, resets Accordion, closes on navigation, and restores the trigger",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7343,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 81,
+      "title": "captures all four open desktop menu shapes",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7215,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 98,
+      "title": "captures / mobile Sheet review evidence",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1335,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 98,
+      "title": "captures /zh mobile Sheet review evidence",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1434,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 320px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 695,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 320px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1047,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 375px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 722,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 375px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1161,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 768px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1337,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 768px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1260,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 1120px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 986,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 1120px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1362,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/ shell fits 1440px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 654,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 109,
+      "title": "/zh shell fits 1440px and keeps 44px controls",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 909,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 150,
+      "title": "locale switch preserves path, repeated query values, and fragment",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2195,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/events marks Events & Programmes as the active group",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1379,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/showcase marks Membership & Ecosystem as the active group",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1023,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/ai-ops marks Impact & Insights as the active group",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 617,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 164,
+      "title": "/about/history marks About WTIA as the active group",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 678,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "line": 171,
+      "title": "the header floats over the hero, then goes solid past 56px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1408,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "seat-management.spec.ts",
+      "line": 4,
+      "title": "company seat route is protected and localized",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 793,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "seat-management.spec.ts",
+      "line": 11,
+      "title": "Chinese company seat route is protected",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 533,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "line": 13,
+      "title": "en: seat count, same-browser checkout recovery and owner boundary",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 12237,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "line": 13,
+      "title": "zh-HK: seat count, same-browser checkout recovery and owner boundary",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 11612,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 93,
+      "title": "/ renders the WP-3 hero over the real homepage sections",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1346,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 375px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 538,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 768px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 670,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 1024px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 971,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/ fits 1440px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1566,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 93,
+      "title": "/zh renders the WP-3 hero over the real homepage sections",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 698,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 375px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 766,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 768px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 744,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 1024px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 899,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 112,
+      "title": "/zh fits 1440px with 44px hero actions clear of Concierge",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 982,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 418,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 434,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/chairman preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 387,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/chairman preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 462,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/committees preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 691,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/committees preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 570,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/history preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 573,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/history preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 834,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 603,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 513,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/asa preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 506,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/asa preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 485,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/cpai preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 483,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/cpai preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 535,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/hkict preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 477,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/hkict preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 575,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/programs/tct preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 465,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 202,
+      "title": "/zh/programs/tct preserves the PR3 public route contract",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 531,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 215,
+      "title": "captures PR3 Home and programme review evidence at 375px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 1571,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "line": 215,
+      "title": "captures PR3 Home and programme review evidence at 1440px",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 2749,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 64,
+      "title": "preserves Event status and Showcase filters across locale switches",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 212,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 83,
+      "title": "keeps the bilingual Membership catalog honest without repository credentials",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 68,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 119,
+      "title": "opens Contact Concierge, focuses the message, and restores the launcher after Escape",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 761,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "line": 149,
+      "title": "renders exact own-origin private Event and partner media without optimization",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 3275,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/why-wisetech resolves to /about",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 95,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/en/why-wisetech resolves to /about",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 95,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/zh/why-wisetech resolves to /zh/about",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 93,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/programmes/launchpad resolves to /launchpad",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 376,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/zh/join/success resolves to /zh/join/complete",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 658,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/request-introduction resolves to /showcase",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 159,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "line": 29,
+      "title": "/zh/solutions/anything resolves to /zh/showcase/anything",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 194,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/ renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/events renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/showcase renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/membership renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/about renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/contact renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programs/asa renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/news renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/launchpad renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/programmes renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "line": 95,
+      "title": "/zh/partners renders the visual baseline",
+      "expectedStatus": "skipped",
+      "outcome": "skipped",
+      "runs": [
+        {
+          "status": "skipped",
+          "durationMs": 0,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 617,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/join renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 429,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 842,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about/chairman renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 681,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about/committees renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 448,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/about/history renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 626,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/membership renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 520,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/showcase renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 483,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/launchpad renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 862,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/ai-ops renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 602,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/events renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 829,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/news renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 522,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/cpai renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 963,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/hkict renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 526,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/tct renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 514,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programs/asa renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 529,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/programmes renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 681,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/contact renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 541,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/partners renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 626,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/privacy renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 493,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/refund-policy renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 435,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/ai-transparency renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 619,
+          "errorLocations": []
+        }
+      ]
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "line": 30,
+      "title": "/zh/members renders in Chinese without leaks",
+      "expectedStatus": "passed",
+      "outcome": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 521,
+          "errorLocations": []
+        }
+      ]
+    }
+  ]
+}

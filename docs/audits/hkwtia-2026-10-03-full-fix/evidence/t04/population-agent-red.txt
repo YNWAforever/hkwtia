@@ -1,0 +1,27 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/operations-population.test.ts (5 tests | 1 failed) 23215ms
+   ✓ actual recorded operational population > counts bot, handoff, reopened and all seven unobserved non-support kinds once 36ms
+   ✓ actual recorded operational population > accepts a real CMS draft audit reference and leaves unobserved cases in the denominator 213ms
+   ✓ actual recorded operational population > keeps requested AI cases in the population without provider success or time samples 96ms
+   ✓ actual recorded operational population > resolves AI work audit references to the authoritative kind and case, refusing wrong-kind attribution  315ms
+   × actual recorded operational population > deduplicates the actual board and renewal agent conversations against their observed business kind 57ms
+     → invalid input value for enum agent_trigger: "cron"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population > deduplicates the actual board and renewal agent conversations against their observed business kind
+error: invalid input value for enum agent_trigger: "cron"
+ ❯ node_modules/pg-pool/index.js:45:11
+ ❯ tests/integration/operations-population.test.ts:52:4
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  04:53:39
+   Duration  39.72s (transform 461ms, setup 2.99s, collect 2.71s, tests 23.21s, environment 0ms, prepare 800ms)
+

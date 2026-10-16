@@ -1,0 +1,33 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/operations-population.test.ts (4 tests | 1 failed) 8414ms
+   ✓ actual recorded operational population > counts bot, handoff, reopened and all seven unobserved non-support kinds once 11ms
+   ✓ actual recorded operational population > accepts a real CMS draft audit reference and leaves unobserved cases in the denominator 28ms
+   ✓ actual recorded operational population > keeps requested AI cases in the population without provider success or time samples 12ms
+   × actual recorded operational population > resolves AI work audit references to the authoritative kind and case, refusing wrong-kind attribution 36ms
+     → OPERATION_SOURCE_MISMATCH
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/operations-population.test.ts > actual recorded operational population > resolves AI work audit references to the authoritative kind and case, refusing wrong-kind attribution
+Error: OPERATION_SOURCE_MISMATCH
+ ❯ lib/db/repos/operations-metrics.ts:52:134
+     50|           const source = (await tx.select({targetType: auditEvents.tar…
+     51|             .where(eq(auditEvents.id, observation.auditId)).limit(1))[…
+     52|           if (!source || source.targetId !== observation.caseId || !ta…
+       |                                                                                                                                      ^
+     53|         }
+     54|         if (observation.runId) {
+ ❯ NodePgSession.transaction node_modules/src/node-postgres/session.ts:259:19
+ ❯ Object.record lib/db/repos/operations-metrics.ts:29:7
+ ❯ tests/integration/operations-population.test.ts:44:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  04:28:50
+   Duration  9.88s (transform 268ms, setup 209ms, collect 859ms, tests 8.41s, environment 0ms, prepare 116ms)
+

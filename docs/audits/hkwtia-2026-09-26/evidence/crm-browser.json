@@ -1,0 +1,612 @@
+{
+  "scope": "Local Next, isolated Neon branch br-lingering-unit-azxl75s5, real synthetic Auth; scheduled worker paused",
+  "code": "1a703edb",
+  "database": "Final run uses separate hkwtia_m2_audit, fresh 50 migrations, exactly 30 M2 profiles, five mapped synthetic Auth identities",
+  "finalResult": "11 passed, zero failed/skipped/flaky/unexecuted; 5.4 minutes",
+  "diagnosis": [
+    "Old login continuation and CSV contract assertions corrected.",
+    "Operational queue dates now explicitly derived from frozen M2 fixtures relative to test time.",
+    "Mixed acceptance database included extra active revenue; strict report uses a fresh database without deleting completed payment evidence.",
+    "July31 report includes July25 event: 3/8 attendance, unlike the integration reference instant July20:3/6."
+  ],
+  "runs": [
+    {
+      "name": "m2-crm-browser",
+      "stats": {
+        "startTime": "2026-09-27T13:59:50.343Z",
+        "duration": 200099.404,
+        "expected": 2,
+        "skipped": 7,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "anonymous admin requests receive a real 404",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 15916
+            }
+          ]
+        },
+        {
+          "title": "public presentation and protected portal routes remain available without credentials",
+          "status": "unexpected",
+          "attempts": [
+            {
+              "status": "failed",
+              "durationMs": 60073
+            }
+          ]
+        },
+        {
+          "title": "staff searches Member 360 and appends a note through the real auth and database seams",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 63118
+            }
+          ]
+        },
+        {
+          "title": "the canonical segment has exact rows and CSV headers while queueing is idempotent",
+          "status": "unexpected",
+          "attempts": [
+            {
+              "status": "failed",
+              "durationMs": 40158
+            }
+          ]
+        },
+        {
+          "title": "the operational at-risk queue contains exactly the three engineered members in order",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "the report reconciles committed July fixture values before browser mutations",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "event check-in appends exactly one event_attended engagement",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "staff records one supported approval decision and persists its audit fact",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "representative authenticated admin routes have no serious or critical axe violations",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "Traditional Chinese admin routes render localized headings and segment recovery state",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "anonymous, member, and company-admin identities receive 404 for every admin route",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        }
+      ],
+      "sha256": "f54f22f8039bdd8e018e9c8608e63e5d8877d460fbb18ef20cfb6cfff3ebaac4"
+    },
+    {
+      "name": "m2-crm-independent",
+      "stats": {
+        "startTime": "2026-09-27T14:04:11.783Z",
+        "duration": 394975.953,
+        "expected": 8,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "anonymous admin requests receive a real 404",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 24798
+            }
+          ]
+        },
+        {
+          "title": "public presentation and protected portal routes remain available without credentials",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 80954
+            }
+          ]
+        },
+        {
+          "title": "staff searches Member 360 and appends a note through the real auth and database seams",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 46961
+            }
+          ]
+        },
+        {
+          "title": "event check-in appends exactly one event_attended engagement",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 65153
+            }
+          ]
+        },
+        {
+          "title": "staff records one supported approval decision and persists its audit fact",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 24606
+            }
+          ]
+        },
+        {
+          "title": "representative authenticated admin routes have no serious or critical axe violations",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 30916
+            }
+          ]
+        },
+        {
+          "title": "Traditional Chinese admin routes render localized headings and segment recovery state",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 17434
+            }
+          ]
+        },
+        {
+          "title": "anonymous, member, and company-admin identities receive 404 for every admin route",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 92994
+            }
+          ]
+        }
+      ],
+      "sha256": "e7f92df2feb79e2152420dcb763c239901cd815b9b3760a2731f4777e68be7a2"
+    },
+    {
+      "name": "m2-crm-dated",
+      "stats": {
+        "startTime": "2026-09-27T14:14:12.116Z",
+        "duration": 39999.723,
+        "expected": 0,
+        "skipped": 2,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "the canonical segment has exact rows and CSV headers while queueing is idempotent",
+          "status": "unexpected",
+          "attempts": [
+            {
+              "status": "failed",
+              "durationMs": 29088
+            }
+          ]
+        },
+        {
+          "title": "the operational at-risk queue contains exactly the three engineered members in order",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "the report reconciles committed July fixture values before browser mutations",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        }
+      ],
+      "sha256": "8c5c291a3698878e505db6ca62d144587719fefe06ac051b5256ac5411b27346"
+    },
+    {
+      "name": "m2-crm-dated-recheck",
+      "stats": {
+        "startTime": "2026-09-27T14:16:05.301Z",
+        "duration": 30967.561999999998,
+        "expected": 0,
+        "skipped": 2,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "the canonical segment has exact rows and CSV headers while queueing is idempotent",
+          "status": "unexpected",
+          "attempts": [
+            {
+              "status": "failed",
+              "durationMs": 20707
+            }
+          ]
+        },
+        {
+          "title": "the operational at-risk queue contains exactly the three engineered members in order",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "the report reconciles committed July fixture values before browser mutations",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        }
+      ],
+      "sha256": "0fa980e09123e894d00513a034efeea30aeb7cb45d46c1685b24f6d81f26add5"
+    },
+    {
+      "name": "m2-crm-dated-final",
+      "stats": {
+        "startTime": "2026-09-27T14:18:43.182Z",
+        "duration": 94526.708,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "the canonical segment has exact rows and CSV headers while queueing is idempotent",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 24694
+            }
+          ]
+        },
+        {
+          "title": "the operational at-risk queue contains exactly the three engineered members in order",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 5897
+            }
+          ]
+        },
+        {
+          "title": "the report reconciles committed July fixture values before browser mutations",
+          "status": "unexpected",
+          "attempts": [
+            {
+              "status": "failed",
+              "durationMs": 45272
+            }
+          ]
+        }
+      ],
+      "sha256": "e3d1ef276dbc3fc48e0bbd9727caddff7de7d3ceadebf8fb74fa355eb46ad3c3"
+    },
+    {
+      "name": "m2-crm-pristine",
+      "stats": {
+        "startTime": "2026-09-27T14:26:58.075Z",
+        "duration": 318178.839,
+        "expected": 5,
+        "skipped": 5,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "anonymous admin requests receive a real 404",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 56730
+            }
+          ]
+        },
+        {
+          "title": "public presentation and protected portal routes remain available without credentials",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 42968
+            }
+          ]
+        },
+        {
+          "title": "staff searches Member 360 and appends a note through the real auth and database seams",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 68665
+            }
+          ]
+        },
+        {
+          "title": "the canonical segment has exact rows and CSV headers while queueing is idempotent",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 60193
+            }
+          ]
+        },
+        {
+          "title": "the operational at-risk queue contains exactly the three engineered members in order",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 23907
+            }
+          ]
+        },
+        {
+          "title": "the report reconciles committed July fixture values before browser mutations",
+          "status": "unexpected",
+          "attempts": [
+            {
+              "status": "failed",
+              "durationMs": 49215
+            }
+          ]
+        },
+        {
+          "title": "event check-in appends exactly one event_attended engagement",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "staff records one supported approval decision and persists its audit fact",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "representative authenticated admin routes have no serious or critical axe violations",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "Traditional Chinese admin routes render localized headings and segment recovery state",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        },
+        {
+          "title": "anonymous, member, and company-admin identities receive 404 for every admin route",
+          "status": "skipped",
+          "attempts": [
+            {
+              "status": "skipped",
+              "durationMs": 0
+            }
+          ]
+        }
+      ],
+      "sha256": "534286e94c104794ffb26b568ea5bb8fd470a4a89bb5abbba4fe6b608f6c2a79"
+    },
+    {
+      "name": "m2-crm-pristine-final",
+      "stats": {
+        "startTime": "2026-09-27T14:33:44.275Z",
+        "duration": 323987.418,
+        "expected": 11,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "anonymous admin requests receive a real 404",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 8815
+            }
+          ]
+        },
+        {
+          "title": "public presentation and protected portal routes remain available without credentials",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 25993
+            }
+          ]
+        },
+        {
+          "title": "staff searches Member 360 and appends a note through the real auth and database seams",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 28143
+            }
+          ]
+        },
+        {
+          "title": "the canonical segment has exact rows and CSV headers while queueing is idempotent",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 27844
+            }
+          ]
+        },
+        {
+          "title": "the operational at-risk queue contains exactly the three engineered members in order",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 9316
+            }
+          ]
+        },
+        {
+          "title": "the report reconciles committed July fixture values before browser mutations",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 19601
+            }
+          ]
+        },
+        {
+          "title": "event check-in appends exactly one event_attended engagement",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 23357
+            }
+          ]
+        },
+        {
+          "title": "staff records one supported approval decision and persists its audit fact",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 24461
+            }
+          ]
+        },
+        {
+          "title": "representative authenticated admin routes have no serious or critical axe violations",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 24592
+            }
+          ]
+        },
+        {
+          "title": "Traditional Chinese admin routes render localized headings and segment recovery state",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 17648
+            }
+          ]
+        },
+        {
+          "title": "anonymous, member, and company-admin identities receive 404 for every admin route",
+          "status": "expected",
+          "attempts": [
+            {
+              "status": "passed",
+              "durationMs": 103057
+            }
+          ]
+        }
+      ],
+      "sha256": "dc8f252967a90b0483d87b3c006f158e0d415d9fae0bc720a00f6a6cfd1bb794"
+    }
+  ]
+}

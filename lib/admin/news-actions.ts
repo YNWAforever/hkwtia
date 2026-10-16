@@ -1,6 +1,7 @@
 "use server";
 
 import {notFound} from "next/navigation";
+import {z} from "zod";
 
 import {runNewsFormAction, type NewsActionState} from "@/lib/admin/news-action-core";
 import {newsFormInput} from "@/lib/admin/news-form-input";
@@ -15,6 +16,7 @@ export type NewsFormActionMessages = Readonly<{
   validationMessage: string;
   slugConflictMessage: string;
   errorMessage: string;
+  conflictMessage: string;
 }>;
 
 export async function createNewsAction(
@@ -48,14 +50,16 @@ export async function updateNewsAction(
     return await runNewsFormAction(state, formData, {...messages, mutate: async (data) => {
       // Read the current publication instant only after authorization so re-saving
       // a published post keeps its original timestamp instead of bumping it.
+      const revision = new Date(z.string().datetime().parse(data.get("expectedUpdatedAt")));
       const current = await getNewsForAdmin(actor, postId);
       if (!current) throw new Error("NEWS_POST_NOT_FOUND");
       const updated = await updateNewsPost(
-        actor, postId, newsFormInput(data, current.publishedAt),
+        actor, postId, newsFormInput(data, current.publishedAt), undefined, revision,
       );
       if (!updated) throw new Error("NEWS_POST_NOT_FOUND");
       revalidateAdminPath(path);
       revalidatePublicNews(updated.slug, current.slug);
+      return {revision: updated.updatedAt.toISOString()};
     }});
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();

@@ -1,0 +1,285 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+stderr | tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > bounds each page and preserves validated filters and calendar in both navigation links
+Each child in a list should have a unique "key" prop.
+
+Check the top-level render call using <Root>. See https://react.dev/link/warning-keys for more information.
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `Shell`. See https://react.dev/link/warning-keys for more information.
+Each child in a list should have a unique "key" prop.
+
+Check the top-level render call using <form>. See https://react.dev/link/warning-keys for more information.
+Each child in a list should have a unique "key" prop.
+
+Check the top-level render call using <nav>. See https://react.dev/link/warning-keys for more information.
+Each child in a list should have a unique "key" prop.
+
+Check the top-level render call using <Offscreen>. See https://react.dev/link/warning-keys for more information.
+Each child in a list should have a unique "key" prop.
+
+Check the top-level render call using <p>. See https://react.dev/link/warning-keys for more information.
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `Link`. See https://react.dev/link/warning-keys for more information.
+
+ ❯ tests/unit/wt-pages/events-page.test.tsx (15 tests | 6 failed) 2156ms
+   × Events page donor markup > bounds each page and preserves validated filters and calendar in both navigation links 231ms
+     → expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+   × Events page donor markup > uses the bounded first page for invalid page 0 163ms
+     → expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+   × Events page donor markup > uses the bounded first page for invalid page -1 72ms
+     → expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+   × Events page donor markup > uses the bounded first page for invalid page 2.5 185ms
+     → expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+   × Events page donor markup > uses the bounded first page for invalid page 999999999999999999 80ms
+     → expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+   × Events page donor markup > uses the bounded first page for invalid page <script> 53ms
+     → expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+   ✓ Events page donor markup > renders the hero, activity strip, an EventCard grid and the recommendations/interest/closing bands  691ms
+   ✓ Events page donor markup > renders the honest-empty state with a contact action, and no view switch, when no open event exists 102ms
+   ✓ Events page donor markup > announces the guest cancel outcome ?guest=cancelled beneath the hero (B-4) 87ms
+   ✓ Events page donor markup > announces the guest cancel outcome ?guest=unknown beneath the hero (B-4) 52ms
+   ✓ Events page donor markup > announces the guest cancel outcome ?guest=invalid beneath the hero (B-4) 72ms
+   ✓ Events page donor markup > renders no guest notice for an unrecognised ?guest value 111ms
+   ✓ Events page donor markup > renders the day-grouped calendar view instead of the card grid when ?view=calendar 88ms
+   ✓ Events page donor markup > parses ?format into repository filters and reflects it in the filter panel (B-6) 107ms
+   ✓ Events page donor markup > carries ?view=calendar through the filter panel so applying a filter keeps the calendar layout (B-6) 60ms
+ ❯ tests/unit/public-event-repository.test.ts (23 tests | 5 failed) 80ms
+   ✓ repository-backed Event visibility > preserves registration mode and destination in the member portal event projection 3ms
+   ✓ repository-backed Event visibility > keeps the exact audited demonstration event out of every public reader 8ms
+   ✓ repository-backed Event visibility > returns only published public Events to anonymous readers 0ms
+   ✓ repository-backed Event visibility > uses endsAt or startsAt inclusively for open and exact ordering 3ms
+   ✓ repository-backed Event visibility > never projects member-only Events or archived hero media 1ms
+   ✓ repository-backed Event visibility > rejects invalid feature limit 0 before reading 3ms
+   ✓ repository-backed Event visibility > rejects invalid feature limit 13 before reading 1ms
+   ✓ repository-backed Event visibility > rejects invalid feature limit 1.5 before reading 0ms
+   ✓ repository-backed Event visibility > returns public and member-only published Events to eligible members in deterministic order 1ms
+   ✓ repository-backed Event visibility > rejects anonymous and inactive members before reading rows 1ms
+   ✓ repository-backed Event visibility > maps malformed public slugs to a safe not-found result 0ms
+   × repository-backed Event visibility > pages the same filtered, published order without repeating the first 12 rows 26ms
+     → expected [ 'page-00', 'page-01', …(10) ] to deeply equal [ 'page-12', 'page-13', …(10) ]
+   × repository-backed Event visibility > rejects invalid public offset -1 before reading 9ms
+     → promise resolved "[ { id: 'never-id', …(16) } ]" instead of rejecting
+   × repository-backed Event visibility > rejects invalid public offset 1.5 before reading 1ms
+     → promise resolved "[ { id: 'never-id', …(16) } ]" instead of rejecting
+   × repository-backed Event visibility > rejects invalid public offset 2147483648 before reading 2ms
+     → promise resolved "[ { id: 'never-id', …(16) } ]" instead of rejecting
+   × repository-backed Event visibility > requires a bounded limit before accepting a nonzero offset 2ms
+     → promise resolved "[ { id: 'never-id', …(16) } ]" instead of rejecting
+   ✓ repository-backed Event visibility > counts past and open published public Events with no 12-item cap 2ms
+   ✓ repository-backed Event visibility > reads public events by status and visibility, not the legacy booleans 3ms
+   ✓ repository-backed Event visibility > serves members every published event except invite-only, by enum 3ms
+   ✓ repository-backed Event visibility > projects format, registration mode, tags and the organiser name for the detail page (B-4) 2ms
+   ✓ repository-backed Event visibility > projects the organiser's member-page slug only where that page is published (B-6, D-11) 1ms
+   ✓ repository-backed Event visibility > applies format, month (Hong Kong), organiser slug and tag filters (B-6) 5ms
+   ✓ repository-backed Event visibility > excludes member-only and unpublished Events from the count 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/public-event-repository.test.ts > repository-backed Event visibility > pages the same filtered, published order without repeating the first 12 rows
+AssertionError: expected [ 'page-00', 'page-01', …(10) ] to deeply equal [ 'page-12', 'page-13', …(10) ]
+
+- Expected
++ Received
+
+  [
+-   "page-12",
+-   "page-13",
+-   "page-14",
+-   "page-15",
+-   "page-16",
+-   "page-17",
+-   "page-18",
+-   "page-19",
+-   "page-20",
+-   "page-21",
+-   "page-22",
+-   "page-23",
++   "page-00",
++   "page-01",
++   "page-02",
++   "page-03",
++   "page-04",
++   "page-05",
++   "page-06",
++   "page-07",
++   "page-08",
++   "page-09",
++   "page-10",
++   "page-11",
+  ]
+
+ ❯ tests/unit/public-event-repository.test.ts:111:51
+    109|     const page = (offset: number) => listPublicEvents(anonymous, {stat…
+    110|     expect((await page(0)).map(row => row.slug)).toEqual(matching.slic…
+    111|     expect((await page(12)).map(row => row.slug)).toEqual(matching.sli…
+       |                                                   ^
+    112|     expect((await page(24)).map(row => row.slug)).toEqual(["page-24"]);
+    113|     expect((await page(36))).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  tests/unit/public-event-repository.test.ts > repository-backed Event visibility > rejects invalid public offset -1 before reading
+ FAIL  tests/unit/public-event-repository.test.ts > repository-backed Event visibility > rejects invalid public offset 1.5 before reading
+ FAIL  tests/unit/public-event-repository.test.ts > repository-backed Event visibility > rejects invalid public offset 2147483648 before reading
+AssertionError: promise resolved "[ { id: 'never-id', …(16) } ]" instead of rejecting
+
+- Expected: 
+Error {
+  "message": "rejected promise",
+}
+
++ Received: 
+[
+  {
+    "cancelled": false,
+    "capacity": null,
+    "description": "never description",
+    "endsAt": "2030-01-01T12:00:00.000Z",
+    "externalRegistrationUrl": null,
+    "format": "in_person",
+    "hero": null,
+    "id": "never-id",
+    "onlineUrl": null,
+    "organiser": null,
+    "registrationMode": "rsvp",
+    "slug": "never",
+    "startsAt": "2030-01-01T09:00:00.000Z",
+    "tags": [],
+    "ticketPriceHkdCents": null,
+    "title": "never title",
+    "venue": "WTIA",
+  },
+]
+
+ ❯ tests/unit/public-event-repository.test.ts:119:96
+    117|   it.each([-1, 1.5, 2147483648])("rejects invalid public offset %s bef…
+    118|     const source = {list: vi.fn(async () => [event("never")])};
+    119|     await expect(listPublicEvents(anonymous, {status: "open", asOf, li…
+       |                                                                                                ^
+    120|     expect(source.list).not.toHaveBeenCalled();
+    121|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  tests/unit/public-event-repository.test.ts > repository-backed Event visibility > requires a bounded limit before accepting a nonzero offset
+AssertionError: promise resolved "[ { id: 'never-id', …(16) } ]" instead of rejecting
+
+- Expected: 
+Error {
+  "message": "rejected promise",
+}
+
++ Received: 
+[
+  {
+    "cancelled": false,
+    "capacity": null,
+    "description": "never description",
+    "endsAt": "2030-01-01T12:00:00.000Z",
+    "externalRegistrationUrl": null,
+    "format": "in_person",
+    "hero": null,
+    "id": "never-id",
+    "onlineUrl": null,
+    "organiser": null,
+    "registrationMode": "rsvp",
+    "slug": "never",
+    "startsAt": "2030-01-01T09:00:00.000Z",
+    "tags": [],
+    "ticketPriceHkdCents": null,
+    "title": "never title",
+    "venue": "WTIA",
+  },
+]
+
+ ❯ tests/unit/public-event-repository.test.ts:125:89
+    123|   it("requires a bounded limit before accepting a nonzero offset", asy…
+    124|     const source = {list: vi.fn(async () => [event("never")])};
+    125|     await expect(listPublicEvents(anonymous, {status: "open", asOf, of…
+       |                                                                                         ^
+    126|     expect(source.list).not.toHaveBeenCalled();
+    127|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > bounds each page and preserves validated filters and calendar in both navigation links
+AssertionError: expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+
+- Expected
++ Received
+
+  [
+    Anything,
+-   ObjectContaining {
++   {
++     "asOf": 2026-10-04T19:30:48.587Z,
+      "filters": {
+        "format": null,
+        "month": null,
+        "organiser": null,
+        "tag": "ai",
+      },
+-     "limit": 12,
+-     "offset": 12,
++     "locale": "en",
+      "status": "past",
+    },
+  ]
+
+ ❯ tests/unit/wt-pages/events-page.test.tsx:94:24
+     92|     countPublic.mockResolvedValueOnce(25);
+     93|     await renderEventsPage({page: "2", status: "past", tag: "AI", mont…
+     94|     expect(listPublic).toHaveBeenLastCalledWith(expect.anything(), exp…
+       |                        ^
+     95|     const nav = screen.getByRole("navigation", {name: bundles.en.Commo…
+     96|     for(const [label, page] of [[bundles.en.Common.previousPage, "1"],…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > uses the bounded first page for invalid page 0
+ FAIL  tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > uses the bounded first page for invalid page -1
+ FAIL  tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > uses the bounded first page for invalid page 2.5
+ FAIL  tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > uses the bounded first page for invalid page 999999999999999999
+ FAIL  tests/unit/wt-pages/events-page.test.tsx > Events page donor markup > uses the bounded first page for invalid page <script>
+AssertionError: expected last "spy" call to have been called with [ Anything, ObjectContaining{…} ]
+
+- Expected
++ Received
+
+  [
+    Anything,
+-   ObjectContaining {
+-     "limit": 12,
+-     "offset": 0,
++   {
++     "asOf": 2026-10-04T19:30:48.816Z,
++     "filters": {
++       "format": null,
++       "month": null,
++       "organiser": null,
++       "tag": null,
++     },
++     "locale": "en",
++     "status": "open",
+    },
+  ]
+
+ ❯ tests/unit/wt-pages/events-page.test.tsx:108:24
+    106|     listPublic.mockResolvedValueOnce([]);
+    107|     await renderEventsPage({page});
+    108|     expect(listPublic).toHaveBeenLastCalledWith(expect.anything(), exp…
+       |                        ^
+    109|   });
+    110| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  11 failed | 27 passed (38)
+   Start at  03:30:13
+   Duration  38.34s (transform 5.58s, setup 6.08s, collect 15.37s, tests 2.24s, environment 27.49s, prepare 1.57s)
+

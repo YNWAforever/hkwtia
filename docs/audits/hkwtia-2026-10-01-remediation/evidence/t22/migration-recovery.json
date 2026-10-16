@@ -1,0 +1,32 @@
+{
+  "environment": "owned disposable PostgreSQL16; full actual migrator/repositories",
+  "production": false,
+  "providerEffects": 0,
+  "cases": [
+    {
+      "case": "clean",
+      "ledger": 56,
+      "repeatedMigrations": 2,
+      "requiredTables": [
+        "job_health",
+        "page_copy_drafts"
+      ],
+      "refundPendingRetained": true,
+      "indexes": 3,
+      "pass": true
+    },
+    {
+      "case": "baseline51",
+      "interruptionRolledBackTo": 51,
+      "repeatedUpgradeLedger": 56,
+      "preexistingFinancialAndRightsFingerprintUnchanged": true,
+      "historicalNullNullRightsRetained": true,
+      "olderSqlProjectionCompatible": true,
+      "retainedCmsHistory": 1,
+      "flagOffNewDraftWriteDenied": true,
+      "publicReadRetained": true,
+      "scope": "SQL compatibility and gated new writer; not an arbitrary old app/inbox writer or deployed rollback",
+      "pass": true
+    }
+  ]
+}

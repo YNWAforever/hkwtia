@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-10-01T01:51:37.983Z",
+  "runId": 36802683917,
+  "headSha": "70a5d6b7cac9fac7a17f3a6c1167cfafe6336bdb",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/YNWAforever/hkwtia/actions/runs/36802683917",
+  "jobs": [
+    {
+      "name": "tests (2)",
+      "conclusion": "success"
+    },
+    {
+      "name": "checks",
+      "conclusion": "success"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "success"
+    },
+    {
+      "name": "quality",
+      "conclusion": "success"
+    }
+  ],
+  "selectedSummary": [
+    "tests (2)\tRun npm ci\t2026-10-01T01:47:00.4179130Z 30 vulnerabilities (3 low, 18 moderate, 9 high)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-01T01:50:11.3765365Z ^[[2m Test Files ^[[22m ^[[1m^[[32m359 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m31 skipped^[[39m^[[90m (390)^[[39m",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-10-01T01:50:11.3777659Z ^[[2m      Tests ^[[22m ^[[1m^[[32m3225 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m76 skipped^[[39m^[[90m (3301)^[[39m",
+    "checks\tRun npm ci\t2026-10-01T01:47:05.7229636Z 30 vulnerabilities (3 low, 18 moderate, 9 high)",
+    "checks\tRun npm run audit:strings\t2026-10-01T01:47:08.3826106Z Visible-string audit passed (297 TSX files scanned).",
+    "checks\tRun npm run build\t2026-10-01T01:49:44.0367685Z ✓ Generating static pages using 3 workers (267/267) in 6.4s",
+    "checks\tRun npm audit --omit=dev --audit-level=high\t2026-10-01T01:49:56.1361935Z 13 vulnerabilities (1 low, 12 moderate)",
+    "tests (1)\tRun npm ci\t2026-10-01T01:47:00.8949664Z 30 vulnerabilities (3 low, 18 moderate, 9 high)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-01T01:50:17.5031098Z ^[[2m Test Files ^[[22m ^[[1m^[[32m357 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m34 skipped^[[39m^[[90m (391)^[[39m",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-10-01T01:50:17.5046286Z ^[[2m      Tests ^[[22m ^[[1m^[[32m2872 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m95 skipped^[[39m^[[90m (2967)^[[39m"
+  ]
+}

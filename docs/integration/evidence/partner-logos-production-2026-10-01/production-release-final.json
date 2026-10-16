@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-01T02:24:51.354Z",
+  "scope": "79 approved partner-logo restoration only",
+  "status": "production_released_and_verified",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "deploymentId": "dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV",
+  "immutableOrigin": "https://hkwtia-l4iqy398l-ynwaforevers-projects.vercel.app",
+  "canonicalOrigin": "https://hkwtia.vercel.app",
+  "promotedAt": "2026-10-01T02:10:34.996Z",
+  "publishedAt": "2026-10-01T02:13:14.171Z",
+  "productionKeysUpdated": [
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY"
+  ],
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "jurisdiction": "default",
+  "existingStoredActor": "superadmin",
+  "profileOrRoleChanges": false,
+  "published": 79,
+  "categories": {
+    "supporting": 58,
+    "regional": 15,
+    "media": 6
+  },
+  "auditRows": 237,
+  "deployedMedia": 79,
+  "prepublicationBrowserCases": 12,
+  "postpublicationBrowserCases": {
+    "immutable": 8,
+    "canonicalAnonymous": 8
+  },
+  "checksumsAndDimensionsVerified": true,
+  "unchangedUnrelatedCounts": {
+    "profiles": 2,
+    "companies": 3,
+    "memberships": 0,
+    "billing_attempts": 0
+  },
+  "migrationLedger": 51,
+  "migrationPerformed": false,
+  "workerDeployed": false,
+  "paymentRefundOrMemberMessagePerformed": false,
+  "productionRollbackPerformed": false,
+  "fullPreviewFixtureCleanupPerformed": false,
+  "immediateWebRollback": "dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ",
+  "earlierDashboardRollback": "dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu",
+  "rollbackOrder": "Unpublish exact recorded 79 IDs first; verify both public counts; only then optional compatible web rollback. Retain rows/audits/objects. Immediate old deployment has known R2 image404.",
+  "ci": {
+    "runId": 36802683917,
+    "headSha": "70a5d6b7cac9fac7a17f3a6c1167cfafe6336bdb",
+    "conclusion": "success",
+    "testsPassed": 6097,
+    "testsSkipped": 171,
+    "filesPassed": 716,
+    "filesSkipped": 65
+  },
+  "broaderAuditProviderPolicyGates": "Unchanged; no Google/magic-link/payment/send acceptance claim",
+  "passed": true
+}

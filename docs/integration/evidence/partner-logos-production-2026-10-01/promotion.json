@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-09-30T19:42:14.753Z",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "deploymentId": "dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ",
+  "canonicalDomain": "hkwtia.vercel.app",
+  "authorization": "Requester explicitly authorized PR105 merge and Production deployment, import and publication",
+  "scope": "promote Production-configured web release; partner import separately requires chosen stored admin actor",
+  "rollbackDeployment": "dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu",
+  "preimportBrowserCases": 12,
+  "productionDataWritten": false,
+  "migrationPerformed": false,
+  "phase": "promoted",
+  "completedAt": "2026-09-30T19:42:22.254Z"
+}

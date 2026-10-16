@@ -1,0 +1,36 @@
+{
+  "projectId": "solitary-wave-52860119",
+  "testBranch": {
+    "id": "br-lingering-unit-azxl75s5",
+    "name": "codex-audit-20260927",
+    "primary": false,
+    "default": false,
+    "protected": false,
+    "expiresAt": "2026-10-04T12:00:00Z",
+    "currentState": "ready"
+  },
+  "auth": {
+    "baseHost": "ep-plain-mouse-azm8pl2j.neonauth.c-3.ap-southeast-1.aws.neon.tech",
+    "dbName": "neondb",
+    "configAvailable": true,
+    "quotaExposed": false,
+    "emailProviderType": "shared",
+    "emailPasswordEnabled": true,
+    "googleProviderListed": true,
+    "secretsRecorded": false
+  },
+  "readOnlySql": {
+    "transactionReadOnly": true,
+    "statementTimeoutSeconds": 15,
+    "ledgerRows": 56,
+    "sentinelRows": 1,
+    "populatedProfiles": 5932,
+    "reservedDomainProfiles": 5932,
+    "outsideReservedTestDomains": 0,
+    "conflictingRenewalEpisodeGroups": 0,
+    "pendingRefundOrders": 0
+  },
+  "productionBindingVerified": false,
+  "productionSqlExecuted": false,
+  "receiptCreatedAt": "2026-10-03T04:28:00.776670+00:00"
+}

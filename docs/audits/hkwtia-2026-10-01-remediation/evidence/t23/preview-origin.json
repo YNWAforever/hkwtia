@@ -1,0 +1,18 @@
+{
+  "origin": "https://hkwtia-git-codex-full-remediation-8fa44c-ynwaforevers-projects.vercel.app",
+  "results": [
+    {
+      "key": "APP_URL",
+      "environment": "preview",
+      "branch": "codex/full-remediation-acceptance-20261001",
+      "exitCode": 0
+    },
+    {
+      "key": "NEXT_PUBLIC_SITE_URL",
+      "environment": "preview",
+      "branch": "codex/full-remediation-acceptance-20261001",
+      "exitCode": 0
+    }
+  ],
+  "production": false
+}

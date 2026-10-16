@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {LandingPartnerForm} from "@/components/admin/landing-partner-form";
 import type {AppLocale} from "@/i18n/routing";

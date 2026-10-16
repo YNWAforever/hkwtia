@@ -1,0 +1,13 @@
+{
+  "exitCode": 0,
+  "sourceSha": "d060f42352f4d7919ded0663a33a993b6ee47afe",
+  "passed": 6683,
+  "failed": 0,
+  "skipped": 540,
+  "filesPassed": 791,
+  "filesSkipped": 98,
+  "durationSeconds": 561.42,
+  "command": "npm.cmd test -- --maxWorkers=4 --reporter=default --reporter=json --outputFile=.playwright/full-fix-t10-full-bounded.json",
+  "originalTimeoutsUnchanged": true,
+  "skipsAreNotPasses": true
+}

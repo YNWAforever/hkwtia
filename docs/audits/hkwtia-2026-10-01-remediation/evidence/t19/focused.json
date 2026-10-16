@@ -1,0 +1,34 @@
+{
+  "sourceSha": "9539f5b4b9a7afd9f15ec55a9a9bfa4d8089a949",
+  "environment": "Disposable PostgreSQL16 full schema; unit/actor/UI; no live provider",
+  "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-support-handoff.test.ts tests/integration/audit-full-workspace.test.ts tests/unit/audit-full-support-form.test.tsx tests/unit/audit-full-support-status.test.tsx tests/unit/audit-full-admin-labels.test.ts tests/unit/inbox-repeat-reply.test.ts tests/unit/inbox-write-repository.test.ts tests/unit/inbox-action-core.test.ts tests/unit/inbox-thread-page.test.tsx tests/unit/inbox-repository.test.ts tests/unit/inbox-composer.test.tsx tests/unit/inbox-window.test.ts tests/unit/staff-tasks-admin.test.ts tests/unit/schema-contract.test.ts tests/unit/woztell-webhook-v2.test.ts tests/unit/woztell-consent-audit.test.ts tests/unit/whatsapp-opt-out.test.ts tests/unit/server-action-actor-boundary.test.ts --maxWorkers=1",
+  "counts": {
+    "passed": 265,
+    "skipped": 0,
+    "failed": 0,
+    "files": 18,
+    "actualSql": 25,
+    "unitActorUi": 240
+  },
+  "files": [
+    "tests/integration/audit-full-support-handoff.test.ts",
+    "tests/integration/audit-full-workspace.test.ts",
+    "tests/unit/audit-full-support-form.test.tsx",
+    "tests/unit/audit-full-support-status.test.tsx",
+    "tests/unit/audit-full-admin-labels.test.ts",
+    "tests/unit/inbox-repeat-reply.test.ts",
+    "tests/unit/inbox-write-repository.test.ts",
+    "tests/unit/inbox-action-core.test.ts",
+    "tests/unit/inbox-thread-page.test.tsx",
+    "tests/unit/inbox-repository.test.ts",
+    "tests/unit/inbox-composer.test.tsx",
+    "tests/unit/inbox-window.test.ts",
+    "tests/unit/staff-tasks-admin.test.ts",
+    "tests/unit/schema-contract.test.ts",
+    "tests/unit/woztell-webhook-v2.test.ts",
+    "tests/unit/woztell-consent-audit.test.ts",
+    "tests/unit/whatsapp-opt-out.test.ts",
+    "tests/unit/server-action-actor-boundary.test.ts"
+  ],
+  "providerAcceptance": false
+}

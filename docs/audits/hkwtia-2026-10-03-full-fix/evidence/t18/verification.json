@@ -1,0 +1,132 @@
+{
+  "baseSha": "a7d7abda123b260644762e57af10d6be193f1f08",
+  "branch": "codex/administrative-workspace-20261003",
+  "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+  "red": {
+    "search": {
+      "failed": 12,
+      "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-workspace-search.test.ts",
+      "reason": "WORKSPACE_SEARCH_NOT_IMPLEMENTED; actual behaviour, not missing import"
+    },
+    "ui": {
+      "failed": 8,
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit/full-fix-workspace-search.test.tsx"
+    },
+    "longProfileId": {
+      "failed": 1,
+      "reason": "shared sort-key slot capped ID at100 instead of ID slot200"
+    },
+    "initialFull": {
+      "passed": 6622,
+      "failed": 9,
+      "skipped": 441,
+      "productFailures": 8,
+      "productReason": "new protected route owner and explicit inventory count missing",
+      "environmentFailures": 1,
+      "environmentReason": "18-second npm ls Auth tree subprocess timeout during concurrent build; unchanged timeout; quiet focused pass"
+    }
+  },
+  "focused": {
+    "passed": 174,
+    "failed": 0,
+    "skipped": 0,
+    "files": 8,
+    "actualDisposablePostgresCases": 20,
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/full-fix-workspace-search.test.ts tests/integration/audit-full-workspace.test.ts tests/unit/full-fix-workspace-search.test.tsx tests/unit/audit-full-workspace.test.tsx tests/unit/admin-app-shell.test.tsx tests/unit/wisetech-route-parity.test.ts tests/unit/wisetech-protected-route-ownership.test.ts tests/unit/server-action-actor-boundary.test.ts"
+  },
+  "routeAndAuthGate": {
+    "passed": 46,
+    "failed": 0,
+    "skipped": 0
+  },
+  "full": {
+    "command": "npm test",
+    "passed": 6632,
+    "skipped": 442,
+    "failed": 0,
+    "exitCode": 0,
+    "durationSeconds": 326.03,
+    "sourceWorkingTreeBeforeCommits": true
+  },
+  "lint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 91,
+    "command": "npm run lint"
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "additionalSeedAndNativeFiles": "PASS"
+  },
+  "strings": {
+    "exitCode": 0,
+    "tsxFiles": 317,
+    "command": "npm run audit:strings"
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "newSearchRoute": "compiled",
+    "finalRefresh": "PASS"
+  },
+  "native": {
+    "command": "node --env-file=.env.local .playwright/full-fix-t18-run-native.mjs",
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 162,
+    "receipt": "native-28322fd3-worker-0.json",
+    "entryChecks": 17,
+    "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "realNeonPasswordAuth": true,
+    "screenshots": [
+      "en-search-desktop.png",
+      "en-search-mobile.png",
+      "zh-HK-search-desktop.png",
+      "zh-HK-search-mobile.png"
+    ],
+    "visualInspection": "EN desktop and HK390 mobile inspected; five result groups, labels and controls readable; no horizontal overflow",
+    "effectsDelta": 0,
+    "priorRun": {
+      "passed": 7,
+      "failed": 2,
+      "reason": "Five-entity query also matched152 scale-fixture members; first20 results correctly bounded. Fixture labels now disjoint; product query/limit/authorization unchanged."
+    }
+  },
+  "migration": {
+    "newRequired": false,
+    "isolatedLedger": 59,
+    "productionAppliedByThisTask": false
+  },
+  "privacy": {
+    "actorFreshDbRecheck": true,
+    "emailBasedPermissionMerge": false,
+    "privateAgentConversationsExcluded": true,
+    "messageBodiesContactsAndCountsProjected": false,
+    "emptyAndOversizedQueryDatabaseLoads": 0
+  },
+  "production": {
+    "deployed": false,
+    "sourceShaLastObserved": "36ebae1dac68a7e0e420870cf0df68fa166b7874"
+  },
+  "humanStaffPilot": "NOT_TESTED_OWNER_REQUIRED",
+  "realGoogleMagicLinkAiSenderPayments": "NOT_VERIFIED_BY_T18",
+  "originalEvidenceAndCaseResultsPreserved": true,
+  "ci": {
+    "runId": 37164254853,
+    "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "checksSucceeded": 7,
+    "passed": 6632,
+    "skipped": 442,
+    "workerPassed": 57,
+    "evidence": "ci-source.json"
+  },
+  "fixtureCorrection": {
+    "file": "scripts/seed-workspace-search-acceptance.ts",
+    "sha256": "706c16924ab49659df72c967b4b583b593d317f042a8df84b2a1cf5b77d5c1a9",
+    "typecheckExit": 0,
+    "applicationBytesUnchanged": true,
+    "noDeletedHistory": true
+  }
+}

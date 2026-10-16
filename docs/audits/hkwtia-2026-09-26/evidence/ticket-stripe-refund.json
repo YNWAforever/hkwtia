@@ -1,0 +1,65 @@
+{
+  "scope": "Synthetic ticket payment and staff refund; Stripe TEST; isolated DB/Auth; email test transport",
+  "steps": [
+    {
+      "case": "three-seat payment",
+      "result": "HKD75 provider paid; local paid; exactly three seats; pass HTTP200"
+    },
+    {
+      "case": "staff refund and replay",
+      "result": "bilingual confirmation; one Stripe succeeded full refund; three seats removed; both locale passes HTTP404; replay remains refunded with one audit/notice"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventId": "evt_1UKJddELEX4A1xsqFLrCOJcu",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKJddELEX4A1xsqFLrCOJcu",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    }
+  ],
+  "eventId": "8f4a7256-ba11-44de-b53c-477bc6bdcef6",
+  "orderId": "18da4e59-3b94-442e-8982-d38e5fa4ce32",
+  "sessionId": "cs_test_a172eoaduZoijQPCVqI4urP65aONtRtnCIYVM53zMEhWjsJhnmLN8xqtsw",
+  "payment": {
+    "amountHkdCents": 7500,
+    "status": "paid",
+    "livemode": false
+  },
+  "refund": {
+    "id": "re_3UKJdcELEX4A1xsq0pGiPHRZ",
+    "amount": 7500,
+    "currency": "hkd",
+    "status": "succeeded"
+  },
+  "databaseFacts": {
+    "refund_audits": 1,
+    "refund_notices": 1
+  },
+  "applicationSha": "1e4f6246ac42f3dd0249acad2be949aaf94a6aa6",
+  "recordedAt": "2026-09-27",
+  "environment": "Windows Node 24.18.0; localhost:3011; isolated Neon/Auth branch br-lingering-unit-azxl75s5; hkwtia_m2_audit; Stripe test; email test transport; no scheduled worker",
+  "executedSourceSha256": "77131ef08948ff81b7e1b158dda78b102a1f2f6de662ee3c54f7502da09466f8",
+  "reproduction": "scripts/verify-audit-ticket-refund.mjs",
+  "reproductionSha256": "08df992e755d6f07f77972bd6a5f0161be2930b06b5588a31a27f45c9fadde1a",
+  "reproductionChanges": "Formatted, import path relocated, diagnostic POST field-name log removed, production-mode guard added; exact executed source hash retained.",
+  "rawLogSha256": "3cf04bbc9ddaafede3c4496ea400915fdf73a82e6800f58a9b9444b89260582f",
+  "replayInterpretation": "Ticket webhook returns processed for both original and replay; persisted order remains refunded with exactly one refund audit/notice and one provider refund. No duplicate response discriminator is claimed.",
+  "limits": [
+    "Local web with real isolated hosted DB/Auth, not complete hosted staging",
+    "Email test transport; no provider receipt or real recipient",
+    "Synthetic test payment/refund only"
+  ]
+}

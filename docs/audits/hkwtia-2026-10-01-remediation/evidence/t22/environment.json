@@ -1,0 +1,40 @@
+{
+  "os": "Windows-11-10.0.26200-SP0",
+  "node": "v24.18.0",
+  "packages": {
+    "next": "16.3.6",
+    "react": "19.2.7",
+    "@playwright/test": "1.61.1",
+    "vitest": "3.2.7",
+    "drizzle-orm": "0.45.2",
+    "@neondatabase/serverless": "1.1.0",
+    "@neondatabase/auth": "0.5.0-beta",
+    "stripe": "22.3.1",
+    "@lhci/cli": "0.15.1"
+  },
+  "installedChromium": [
+    {
+      "name": "chromium",
+      "revision": "1228",
+      "browserVersion": "149.0.7827.55"
+    },
+    {
+      "name": "chromium-headless-shell",
+      "revision": "1228",
+      "browserVersion": "149.0.7827.55"
+    },
+    {
+      "name": "chromium-tip-of-tree",
+      "revision": "1432",
+      "browserVersion": "151.0.7886.0"
+    },
+    {
+      "name": "chromium-tip-of-tree-headless-shell",
+      "revision": "1432",
+      "browserVersion": "151.0.7886.0"
+    }
+  ],
+  "database": "Confirmed isolated Neon plus owned disposable PostgreSQL16 pgvector image",
+  "providerMode": "Stripe TEST / test email sink / live Woztell0; real delivery not verified",
+  "effects": "synthetic isolated only; R2 readonly approved logos"
+}

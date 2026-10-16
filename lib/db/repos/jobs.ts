@@ -10,8 +10,11 @@ import {
 } from "@/lib/auth/automation-actor";
 
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
+import type {CurrentSubscriptionState} from "@/lib/billing/stripe";
 import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journeyState, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
+import {contactsRepository} from "@/lib/db/repos/contacts";
+import {flipContactOnActivation} from "@/lib/membership/contact-member-flip";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 export type JobClaimResult =
@@ -66,8 +69,7 @@ function isStale(command: WebhookLifecycleCommand, latest: Record<string, unknow
   const latestCreated = Number(latest.stripe_created);
   const latestEventId = latest.event_id;
   if (!Number.isSafeInteger(latestCreated) || typeof latestEventId !== "string") throw new Error("WEBHOOK_AUDIT_INVALID");
-  return command.eventCreated < latestCreated
-    || (command.eventCreated === latestCreated && command.eventId <= latestEventId);
+  return command.eventCreated < latestCreated;
 }
 
 function lifecycleSources(command: WebhookLifecycleCommand): readonly string[] {
@@ -75,7 +77,7 @@ function lifecycleSources(command: WebhookLifecycleCommand): readonly string[] {
     case "active": return ["pending_payment", "pending_review", "active", "past_due", "cancel_at_period_end"];
     case "past_due": return ["active", "past_due", "cancel_at_period_end"];
     case "cancel_at_period_end": return ["active", "past_due", "cancel_at_period_end"];
-    case "cancelled": return ["pending_review", "active", "past_due", "cancel_at_period_end", "cancelled"];
+    case "cancelled": return ["pending_payment", "pending_review", "active", "past_due", "cancel_at_period_end", "cancelled"];
     default: return [];
   }
 }
@@ -150,6 +152,11 @@ export function createScheduledJobsRepository(
   loadDatabase: ScheduledJobsDatabaseLoader = defaultScheduledJobsDatabaseLoader,
 ) {
   return {
+    async inspectRun(actor:AutomationRepositoryActor,runKey:string):Promise<"processing"|"completed"|"failed"|null>{
+      requireAutomationCron(actor);if(!/^[A-Za-z0-9:-]{1,160}$/.test(runKey))throw Error("INVALID_JOB_RUN_KEY");
+      const db=await loadDatabase(),row=resultRow(await db.execute(sql`SELECT state FROM ${jobsTable} WHERE run_key=${runKey} LIMIT 1`));
+      if(!row)return null;if(row.state!=="processing"&&row.state!=="completed"&&row.state!=="failed")throw Error("INVALID_JOB_STATE");return row.state;
+    },
     async claim(
       actor: AutomationRepositoryActor,
       runKey: string,
@@ -215,6 +222,12 @@ export function createScheduledJobsRepository(
 
 const scheduledJobsRepository = createScheduledJobsRepository();
 
+export type ManualPaymentReconciliation = Readonly<{
+  actor: Extract<Actor, {kind: "superadmin"}>;
+  requestId: string;
+  reasonCode: "paid_not_active" | "subscription_mismatch" | "webhook_retry";
+}>;
+
 export const jobsRepository = {
   ...scheduledJobsRepository,
   async getByRunKey(actor: Actor, runKey: string): Promise<Job | null> {
@@ -224,12 +237,34 @@ export const jobsRepository = {
     return rows[0] ?? null;
   },
 
-  async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand): Promise<"processed" | "duplicate"> {
+  async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand, currentSubscription?: (subscriptionId: string) => Promise<CurrentSubscriptionState>, manual?: ManualPaymentReconciliation): Promise<"processed" | "duplicate"> {
     requireSystem(actor);
     const db = await getDb();
+    // Set inside the transaction when this delivery is what made the membership active; acted on
+    // only after the commit, so a rolled-back activation never flips a contact.
+    let activatedProfileId: string | null = null;
+    let outcome: "processed" | "duplicate";
     try {
-      return await db.transaction(async (tx) => {
-        const allowedSources = lifecycleSources(command);
+      outcome = await db.transaction(async (tx) => {
+        if (manual) {
+          if (manual.actor.kind !== "superadmin" || !/^[a-f0-9-]{36}$/i.test(manual.requestId) || !["paid_not_active", "subscription_mismatch", "webhook_retry"].includes(manual.reasonCode)) throw new Error("FORBIDDEN");
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${"billing-reconciliation:" + manual.actor.profileId + ":" + manual.requestId}))`);
+          const previous = resultRow(await tx.execute(sql`SELECT target_id, metadata FROM ${auditEvents}
+            WHERE action='membership.payment.reconciled' AND actor_user_id=${manual.actor.profileId} AND request_id=${manual.requestId} LIMIT 1`));
+          if (previous) {
+            const metadata = previous.metadata as Record<string, unknown>;
+            if (previous.target_id !== command.membershipId || metadata.eventId !== command.eventId || metadata.reasonCode !== manual.reasonCode) throw new Error("PAYMENT_RECONCILIATION_REQUEST_CONFLICT");
+            if (metadata.disposition !== "processed" && metadata.disposition !== "duplicate") throw new Error("PAYMENT_RECONCILIATION_RECEIPT_INVALID");
+            return metadata.disposition;
+          }
+        }
+        const recordManual = async (disposition: "processed" | "duplicate") => {
+          if (!manual) return;
+          await tx.execute(sql`INSERT INTO ${auditEvents} (actor_type,actor_user_id,action,target_type,target_id,request_id,metadata)
+            VALUES ('superadmin',${manual.actor.profileId},'membership.payment.reconciled','membership',${command.membershipId},${manual.requestId},
+              jsonb_build_object('eventId',${command.eventId}::text,'reasonCode',${manual.reasonCode}::text,'disposition',${disposition}::text))`);
+        };
+        const isCheckoutActivation = command.eventType === "checkout.session.completed" || command.eventType === "checkout.session.async_payment_succeeded";
         const claim = resultRow(await tx.execute(sql`INSERT INTO ${jobsTable}
           ("run_key", "kind", "state", "attempt_count")
           VALUES (${command.eventId}, ${command.eventType}, 'processing', 1)
@@ -238,7 +273,7 @@ export const jobsRepository = {
               "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
           WHERE ${jobsTable.state} = 'failed'
           RETURNING ${jobsTable.id} AS job_id`));
-        if (!claim) return "duplicate";
+        if (!claim) { await recordManual("duplicate"); return "duplicate"; }
         const jobId = requiredString(claim, "job_id");
 
         const membership = resultRow(await tx.execute(sql`SELECT ${memberships.id} AS membership_id, ${memberships.status} AS status,
@@ -249,10 +284,10 @@ export const jobsRepository = {
           WHERE ${memberships.id} = ${command.membershipId}
             AND ${memberships.applicationId} = ${command.applicationId}
             AND ${memberships.planCode} = ${command.planCode}
-            AND ((${command.eventType} = 'checkout.session.completed'
+            AND ((${isCheckoutActivation} = true
               AND (${memberships.stripeCustomerId} IS NULL OR ${memberships.stripeCustomerId} = ${command.stripeCustomerId})
               AND (${memberships.stripeSubscriptionId} IS NULL OR ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
-            OR (${command.eventType} <> 'checkout.session.completed'
+            OR (${isCheckoutActivation} = false
               AND ${memberships.stripeCustomerId} = ${command.stripeCustomerId}
               AND ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
           FOR UPDATE OF ${memberships}`));
@@ -265,9 +300,20 @@ export const jobsRepository = {
             AND ${auditEvents.action} IN ('stripe.webhook.processed', 'stripe.webhook.ignored_stale')
           ORDER BY stripe_created DESC, event_id DESC LIMIT 1`));
         const stale = isStale(command, latest);
+        let transition = command;
+        if (latest && Number(latest.stripe_created) === command.eventCreated) {
+          // Stripe event IDs do not order changes within one second. Read the
+          // current resource after the membership lock so concurrent deliveries
+          // cannot commit a stale snapshot after a newer one.
+          if (!currentSubscription) throw new Error("WEBHOOK_RECONCILIATION_UNAVAILABLE");
+          const current = await currentSubscription(command.stripeSubscriptionId);
+          if (current.stripeSubscriptionId !== command.stripeSubscriptionId ||
+              current.stripeCustomerId !== command.stripeCustomerId) throw new WebhookCorrelationError();
+          transition = {...command, ...current};
+        }
 
         let attemptId: string | null = null;
-        if (command.eventType === 'checkout.session.completed') {
+        if (isCheckoutActivation) {
           const attempt = resultRow(await tx.execute(sql`SELECT ${billingAttempts.id} AS attempt_id
             FROM ${billingAttempts}
             WHERE ${billingAttempts.membershipId} = ${command.membershipId}
@@ -279,15 +325,15 @@ export const jobsRepository = {
         }
 
         const currentStatus = requiredString(membership, "status");
-        if (!stale && !allowedSources.includes(currentStatus)) throw new WebhookCorrelationError();
+        if (!stale && !lifecycleSources(transition).includes(currentStatus)) throw new WebhookCorrelationError();
         if (!stale) {
           const updated = resultRow(await tx.execute(sql`UPDATE ${memberships}
-            SET "status" = ${command.nextStatus}::membership_status,
+            SET "status" = ${transition.nextStatus}::membership_status,
                 "stripe_customer_id" = ${command.stripeCustomerId},
                 "stripe_subscription_id" = ${command.stripeSubscriptionId},
-                "billing_period_start" = COALESCE(${command.billingPeriodStart}, ${memberships.billingPeriodStart}),
-                "billing_period_end" = COALESCE(${command.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
-                "cancel_at_period_end" = ${command.cancelAtPeriodEnd}, "updated_at" = now()
+                "billing_period_start" = COALESCE(${transition.billingPeriodStart}, ${memberships.billingPeriodStart}),
+                "billing_period_end" = COALESCE(${transition.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
+                "cancel_at_period_end" = ${transition.cancelAtPeriodEnd}, "updated_at" = now()
             WHERE ${memberships.id} = ${command.membershipId}
             RETURNING ${memberships.id} AS membership_id`));
           if (!updated) throw new Error("WEBHOOK_MUTATION_FAILED");
@@ -298,10 +344,22 @@ export const jobsRepository = {
               RETURNING ${billingAttempts.id} AS attempt_id`));
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
           }
-          await insertWebhookLifecycleEnrollment(actor, tx, command, membership);
+          await insertWebhookLifecycleEnrollment(actor, tx, transition, membership);
+          if (transition.nextStatus === "active") {
+            // Application completion commits with the verified entitlement, never
+            // through a later browser resubmission or a separate best-effort write.
+            await tx.execute(sql`UPDATE ${membershipApplications}
+              SET "status" = 'completed', "current_step" = 'complete', "updated_at" = now()
+              WHERE ${membershipApplications.id} = ${command.applicationId}
+                AND ${membershipApplications.planCode} = ${command.planCode}
+                AND ${membershipApplications.status} = 'pending_payment'`);
+            activatedProfileId = requiredString(membership, "profile_id");
+          }
         }
 
-        if (command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {
+        // A stale invoice is an ignored observation, including engagement metrics.
+        // Recording it as a new renewal would distort scoring despite unchanged entitlement.
+        if (!stale && command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {
           const profileId = requiredString(membership, "profile_id");
           const periodStart = command.billingPeriodStart?.toISOString();
           const periodEnd = command.billingPeriodEnd?.toISOString();
@@ -343,7 +401,7 @@ export const jobsRepository = {
         const audit = resultRow(await tx.execute(sql`INSERT INTO ${auditEvents}
           ("actor_type", "action", "target_type", "target_id", "request_id", "metadata")
           VALUES ('system', ${action}, 'membership', ${command.membershipId}, ${command.eventId},
-            jsonb_build_object('eventType', ${command.eventType}::text, 'stripeCreated', ${command.eventCreated}::bigint, 'eventId', ${command.eventId}::text, 'status', ${command.nextStatus}::text))
+            jsonb_build_object('eventType', ${command.eventType}::text, 'stripeCreated', ${command.eventCreated}::bigint, 'eventId', ${command.eventId}::text, 'status', ${transition.nextStatus}::text))
           RETURNING ${auditEvents.id} AS audit_id`));
         if (!audit) throw new Error("WEBHOOK_MUTATION_FAILED");
         const completed = resultRow(await tx.execute(sql`UPDATE ${jobsTable}
@@ -351,6 +409,7 @@ export const jobsRepository = {
           WHERE ${jobsTable.id} = ${jobId} AND ${jobsTable.state} = 'processing'
           RETURNING ${jobsTable.id} AS job_id`));
         if (!completed) throw new Error("WEBHOOK_MUTATION_FAILED");
+        await recordManual("processed");
         return "processed";
       }, {isolationLevel: "read committed"});
     } catch (error) {
@@ -368,6 +427,11 @@ export const jobsRepository = {
       } catch { /* Preserve the original transient error when failure recording is unavailable. */ }
       throw error;
     }
+    if (outcome === "processed" && activatedProfileId) {
+      const profileId = activatedProfileId;
+      await flipContactOnActivation(() => contactsRepository.markMemberForProfile(actor, profileId), command.membershipId);
+    }
+    return outcome;
   },
 };
 

@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-09-29T16:19:51.868Z",
+  "alias": "hkwtia.vercel.app",
+  "deploymentId": "dpl_5Xgjk74ximch2aUBugzHgWRfCgon",
+  "deploymentUrl": "hkwtia-ejx0uet7r-ynwaforevers-projects.vercel.app",
+  "aliasUpdatedAt": 1790698178625,
+  "sha": "ab568934471cde8aea18f493a5422653c5d719e0",
+  "target": "production",
+  "readyState": "READY",
+  "productionBranch": "release",
+  "rollbackDeploymentId": "dpl_8cr2En9xQhrs5nDpxny9GY3L4stx",
+  "rollbackSha": "0076981b203632da15ae8f881d3cb55287ccaa79"
+}

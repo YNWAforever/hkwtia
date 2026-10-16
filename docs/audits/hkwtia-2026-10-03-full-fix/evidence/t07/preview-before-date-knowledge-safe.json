@@ -1,0 +1,70 @@
+{
+  "sourceSha": "bc67ee2ea3acd70ddd7e5ef442a27fc44ff2d345",
+  "deploymentId": "dpl_FgWUPfRCpvnGyKKvC4kn41qFbLNv",
+  "origin": "https://hkwtia-ai-knowledge-20261003.vercel.app",
+  "observedAt": "2026-10-03T16:33:39.526Z",
+  "production": false,
+  "checks": [
+    {
+      "name": "staff knowledge workspace",
+      "privateCache": true
+    },
+    {
+      "name": "english knowledge accessibility",
+      "seriousOrCritical": 0
+    },
+    {
+      "name": "hong kong mobile knowledge",
+      "width": 390,
+      "seriousOrCritical": 0
+    },
+    {
+      "name": "native staff create two semantic chunks",
+      "draft": true,
+      "indexed": false,
+      "ownerFromServer": true
+    },
+    {
+      "name": "unconfigured staff cannot approve",
+      "stateUnchanged": true
+    },
+    {
+      "name": "separate synthetic approver reviews original body",
+      "approved": true,
+      "indexed": false,
+      "noSend": true
+    },
+    {
+      "name": "missing provider caps returns actionable recovery before claim",
+      "providerRequests": 0,
+      "budgetReservationsAdded": 0,
+      "indexClaim": null
+    },
+    {
+      "name": "native withdrawal retains source/history",
+      "withdrawn": true
+    },
+    {
+      "name": "keyboard focus visible",
+      "focusReceived": true
+    },
+    {
+      "name": "member denied private knowledge",
+      "denied": true
+    },
+    {
+      "name": "transactional content-free audits",
+      "actions": [
+        "knowledge_version_created",
+        "knowledge_version_approve",
+        "knowledge_version_withdraw"
+      ],
+      "noIndexOrSendAudit": true
+    }
+  ],
+  "realProviderIndexVerified": false,
+  "providerRequests": 0,
+  "paymentWrites": 0,
+  "syntheticSourceRetainedWithdrawn": true,
+  "sourceIdentityLogged": false
+}

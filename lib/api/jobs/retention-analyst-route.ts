@@ -15,7 +15,7 @@ import {jobRunners} from "@/lib/jobs/runners";
 import {automationEnv} from "@/lib/config/env";
 
 type RetentionAnalystRouteOptions = Readonly<{
-  candidates?: RetentionAnalystRepository;
+  candidates?: Pick<RetentionAnalystRepository,"listCandidates"> & Partial<Pick<RetentionAnalystRepository,"listCandidatePage">>;
   runner?: (now: Date) => Promise<unknown>;
   jobs?: JobHandlerRepository;
   now?: () => Date;
@@ -115,9 +115,13 @@ export function createRetentionAnalystPost(
       if (!Number.isFinite(asOf.getTime())) {
         return json({error: "JOB_RUN_FAILED"}, 500);
       }
-      const considered = (
-        await candidates.listCandidates(automationCronActor(), {asOf})
-      ).length;
+      let considered=0;
+      if(candidates.listCandidatePage){
+        let cursor:string|null=null;const visited=new Set<string>();
+        do{const page=await candidates.listCandidatePage(automationCronActor(),{asOf,cursor,limit:100});considered+=page.items.length;cursor=page.nextCursor;
+          if(cursor){if(visited.has(cursor))throw Error('RETENTION_CURSOR_NOT_ADVANCING');visited.add(cursor);}
+        }while(cursor);
+      }else considered=(await candidates.listCandidates(automationCronActor(),{asOf})).length;
       return json({
         dryRun: true,
         summary: {

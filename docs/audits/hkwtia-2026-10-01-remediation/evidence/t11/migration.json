@@ -1,0 +1,12 @@
+{
+  "environment": "confirmed isolated Neon branch; sentinel verified",
+  "migration": "0052_verified_worker_health",
+  "ledgerBefore": 51,
+  "ledgerAfter": 52,
+  "addedTables": [
+    "job_health"
+  ],
+  "membershipFingerprintUnchanged": true,
+  "production": false,
+  "command": "node --env-file=.env.local --import tsx .playwright/migrate-health-isolated.mts"
+}

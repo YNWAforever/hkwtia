@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-01T12:47:12.892Z",
+  "environment": "confirmed isolated DB/Auth; actual Stripe TEST checkout",
+  "syntheticPolicy": true,
+  "associationPolicyApproved": false,
+  "uncheckedAttempts": 0,
+  "uncheckedReceipts": 0,
+  "confirmedReceipts": 1,
+  "attempts": 1,
+  "providerSession": "cs_7115bb6094b3",
+  "providerMode": "test",
+  "membershipAfter": "pending_payment",
+  "keyboard": true,
+  "locales": [
+    "en",
+    "zh-HK"
+  ],
+  "mobileWidth": 390,
+  "providerMessages": false,
+  "production": false,
+  "cleanup": "exact newly created open TEST checkout expired; own application/membership/receipt deleted; source registry and local env restored by runner"
+}

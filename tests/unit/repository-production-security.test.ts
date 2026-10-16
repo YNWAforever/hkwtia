@@ -1,3 +1,4 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {drizzle} from "drizzle-orm/pg-proxy";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -5,17 +6,42 @@ const database = vi.hoisted(() => ({current: null as unknown}));
 
 vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/db/repos/common")>();
-  return {...original, getDb: async () => database.current};
+  return {...original, getDb: async () => {
+    const current = database.current as object;
+    // pg-proxy cannot open transactions. These tests inspect SQL only; the
+    // disposable PostgreSQL test proves the actual lock and commit behavior.
+    return new Proxy(current, {get(target, property, receiver) {
+      if (property !== "transaction") return Reflect.get(target, property, receiver);
+      return async (work: (tx: object) => Promise<unknown>) => work(new Proxy(current, {
+        get(txTarget, txProperty, txReceiver) {
+          if (txProperty !== "execute") return Reflect.get(txTarget, txProperty, txReceiver);
+          return async (query: Parameters<PgDialect["sqlToQuery"]>[0]) => {
+            const result = await Reflect.get(txTarget, "execute", txReceiver).call(txTarget, query);
+            const statement = new PgDialect().sqlToQuery(query).sql.toLowerCase();
+            if (statement.includes('from "company_members"') && statement.includes("for update")) {
+              return {rows: [{role: "admin"}]};
+            }
+            return result;
+          };
+        },
+      }));
+    }});
+  }};
 });
 
-import {companiesRepository} from "@/lib/db/repos/companies";
+import {companiesRepository, type CompanyUpdate} from "@/lib/db/repos/companies";
 import {createApprovalsRepository} from "@/lib/db/repos/approvals";
 import {createAgentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {createConversationsRepository} from "@/lib/db/repos/conversations";
+import {createInboxRepository} from "@/lib/db/repos/inbox";
 import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {createPostgresWoztellStore} from "@/lib/db/repos/woztell";
+import {createWoztellDeliveryStampRepository} from "@/lib/db/repos/woztell-delivery-stamp";
+import {createWoztellInboundEventsRepository} from "@/lib/db/repos/woztell-inbound-events";
+import {createWhatsAppTemplatesRepository, templateRegistryActor} from "@/lib/db/repos/whatsapp-templates";
+import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
@@ -67,6 +93,74 @@ function normalizedSql(statement: string | undefined): string {
   return (statement ?? "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/** Everything an UPDATE writes, without the scope predicate or the `RETURNING` column list. */
+function setClause(statement: string | undefined): string {
+  const normalized = normalizedSql(statement);
+  const start = normalized.indexOf(" set ");
+  const end = normalized.indexOf(" where ", start);
+  return start === -1 ? "" : normalized.slice(start, end === -1 ? undefined : end);
+}
+
+/**
+ * The payload `/portal/company` really posts. `updateCompanyAction` in
+ * `lib/portal/commands.ts` builds every one of these keys with
+ * `String(formData.get(…))`, so not one of them is ever `undefined`: pressing
+ * Save having edited nothing sends the whole row back. That is why the review
+ * demotion in `lib/db/repos/companies.ts` has to compare values — counting the
+ * keys an update carries would demote on every save.
+ */
+function portalCompanySave(overrides: CompanyUpdate = {}): CompanyUpdate {
+  return {
+    legalName: "Acme Limited",
+    displayName: "Acme",
+    website: null,
+    industry: null,
+    sizeBand: null,
+    description: null,
+    directoryVisible: false,
+    ...overrides,
+  };
+}
+
+/** The stored row those values were read out of, already through staff review. */
+const publishedCompanyColumns = {
+  public_profile_status: "published",
+  display_name: "Acme",
+  website: null,
+  industry: null,
+  size_band: null,
+  description: null,
+};
+
+/**
+ * A unit run has no Postgres to evaluate the demotion gate, and a no-op save and
+ * a rewrite build the *same* statement — they differ only in the values bound to
+ * it. So read the gate back out of the statement the repository built and apply
+ * it to a stored row, which is the only way those two cases are distinguishable
+ * without a database. It understands exactly the grammar `reviewResetFor` emits
+ * and throws, rather than passing quietly, if that grammar changes.
+ */
+function demotionGate(statement: string | undefined, parameters: readonly unknown[]) {
+  const clause = setClause(statement);
+  const gate = /(case when (?:"[a-z_]+"\.)?"public_profile_status" = 'published' and \((.+?)\)) then 'pending_review'/.exec(clause);
+  if (!gate) throw new Error(`the SET clause carries no value-compared demotion gate: ${clause}`);
+  const comparisons = [...gate[2].matchAll(/(?:"[a-z_]+"\.)?"([a-z_]+)" is distinct from \$(\d+)/g)];
+  if (comparisons.length === 0) throw new Error(`the demotion gate compares no column values: ${gate[2]}`);
+  // Each occurrence of the gate binds its own placeholders, so compare the
+  // occurrences with the numbers taken out.
+  const anonymised = (text: string) => text.replace(/\$\d+/g, "?");
+  return {
+    /** The columns whose value the gate actually looks at. */
+    columns: comparisons.map(([, column]) => column),
+    /** How many SET expressions the gate protects: the status plus the reviewer columns. */
+    guardedExpressions: anonymised(clause).split(anonymised(gate[1])).length - 1,
+    /** What Postgres would decide for `stored`. */
+    fires: (stored: Record<string, unknown>) =>
+      stored.public_profile_status === "published"
+      && comparisons.some(([, column, placeholder]) => stored[column] !== parameters[Number(placeholder) - 1]),
+  };
+}
+
 const membershipRow = [
   "membership-a",
   null,
@@ -103,6 +197,10 @@ const existingProfileRow = [
   new Date("2026-01-01T00:00:00.000Z"),
 ];
 
+// Positional, in `companies` column order: the proxy driver hands Drizzle a
+// raw tuple, so every column the table declares must be present. The tail is
+// the Phase B2 public-profile block (D-11); `tags` is NOT NULL, and Drizzle
+// maps it eagerly, so it has to be an array rather than null.
 const companyRow = [
   "company-b",
   "Acme Limited",
@@ -115,6 +213,17 @@ const companyRow = [
   false,
   new Date("2026-01-01T00:00:00.000Z"),
   new Date("2026-01-01T00:00:00.000Z"),
+  null,
+  null,
+  [],
+  null,
+  null,
+  null,
+  "hidden",
+  null,
+  null,
+  null,
+  null,
 ];
 
 const applicationRow = (overrides: {
@@ -135,6 +244,7 @@ function companyMembershipInput(overrides: Partial<Parameters<typeof memberships
     planCode: "corporate" as const,
     status: "pending_payment" as const,
     seatLimit: 10,
+    billingInterval: "annual" as const,
     ...overrides,
   };
 }
@@ -154,6 +264,7 @@ describe("production repository security boundaries", () => {
         planCode: "community",
         status: "active",
         seatLimit: 1,
+        billingInterval: "none",
       } satisfies Parameters<typeof membershipsRepository.create>[1],
     },
     {
@@ -250,6 +361,53 @@ describe("production repository security boundaries", () => {
     expect(statements.at(-1)?.toLowerCase()).toContain('insert into "memberships"');
   });
 
+  it("writes an explicit billingInterval on the insert instead of relying on the column default", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      const normalized = query.toLowerCase();
+      if (normalized.includes('from "company_members"') && !normalized.includes('"membership_applications"')) {
+        return {rows: [["company-b"]]};
+      }
+      if (normalized.includes('from "membership_applications"')) return {rows: [applicationRow()]};
+      if (normalized.includes('insert into "memberships"')) return {rows: [membershipRow]};
+      return {rows: []};
+    });
+
+    await membershipsRepository.create(actor, companyMembershipInput({billingInterval: "annual"}));
+
+    const insertIndex = statements.findIndex((query) => query.toLowerCase().includes('insert into "memberships"'));
+    expect(insertIndex).toBeGreaterThanOrEqual(0);
+    expect(parameters[insertIndex]).toContain("annual");
+  });
+
+  it('writes billingInterval "none" for a free/review-track membership instead of the "annual" column default', async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      const normalized = query.toLowerCase();
+      if (normalized.includes('from "membership_applications"')) {
+        return {rows: [applicationRow({companyId: null, planCode: "community"})]};
+      }
+      if (normalized.includes('insert into "memberships"')) return {rows: [membershipRow]};
+      return {rows: []};
+    });
+
+    await membershipsRepository.create(actor, {
+      ownerUserId: "user-a", companyId: null, applicationId: "application-b",
+      planCode: "community", status: "active", seatLimit: 1, billingInterval: "none",
+    });
+
+    const insertIndex = statements.findIndex((query) => query.toLowerCase().includes('insert into "memberships"'));
+    expect(insertIndex).toBeGreaterThanOrEqual(0);
+    expect(parameters[insertIndex]).toContain("none");
+    expect(parameters[insertIndex]).not.toContain("annual");
+  });
+
   it("requires an actor-scoped application check for a member-owned membership", async () => {
     const statements: string[] = [];
     database.current = drizzle(async (query) => {
@@ -267,7 +425,7 @@ describe("production repository security boundaries", () => {
     await expect(
       membershipsRepository.create(actor, {
         ownerUserId: "user-a", companyId: null, applicationId: "application-b",
-        planCode: "community", status: "active", seatLimit: 1,
+        planCode: "community", status: "active", seatLimit: 1, billingInterval: "none",
       }),
     ).resolves.toMatchObject({ownerUserId: "user-a", companyId: null, planCode: "community"});
     expect(statements.some((query) => query.toLowerCase().includes('from "membership_applications"'))).toBe(true);
@@ -409,6 +567,92 @@ describe("production repository security boundaries", () => {
     expect(sql).toContain('from "company_members"');
     expect(sql).toContain('"role"');
     expect(parameters.flat()).toEqual(expect.arrayContaining(["owner", "admin"]));
+  });
+
+  // Programme B-7: `companies.update` is the other writer of the columns
+  // `/members` and `/members/[slug]` render (lib/db/repos/company-profiles.ts's
+  // `directoryColumns`/`detailColumns` project display_name, website, industry,
+  // size_band and description). `companyProfilesRepository.updateProfile` sends a
+  // published profile back to `pending_review`; without the same rule here, the
+  // portal company form at /portal/company would let an approved company rewrite
+  // its public copy indefinitely — the profile stays `published`, the review
+  // queue (which selects only `pending_review`) never learns anything changed.
+  it.each(["displayName", "website", "industry", "sizeBand", "description"] as const)(
+    "sends a published member page back to review when a company update rewrites %s",
+    async (field) => {
+      const statements: string[] = [];
+      database.current = drizzle(async (query) => {
+        statements.push(query);
+        return {rows: [companyRow]};
+      });
+
+      await expect(companiesRepository.update(actor, "company-b", {[field]: "Unreviewed copy"}))
+        .resolves.toMatchObject({id: "company-b"});
+
+      // `RETURNING` names every column, so only the SET clause proves the rule.
+      const sql = setClause(statements.join("\n"));
+      expect(sql).toContain('"public_profile_status"');
+      expect(sql).toContain("'pending_review'");
+      expect(sql).toContain('"profile_reviewed_at"');
+      expect(sql).toContain('"profile_reviewed_by_profile_id"');
+      expect(sql).toContain('"profile_rejection_reason"');
+    },
+  );
+
+  it("leaves the review status alone for a company update that changes nothing /members renders", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: [companyRow]};
+    });
+
+    await expect(companiesRepository.update(actor, "company-b", {
+      legalName: "Acme Limited", directoryVisible: true, logoReference: "logo-1",
+    })).resolves.toMatchObject({id: "company-b"});
+
+    expect(setClause(statements.join("\n"))).not.toContain("public_profile_status");
+  });
+
+  // The three behaviours the demotion has to get right against the payload
+  // `/portal/company` actually sends, where every publicly rendered key is
+  // present on every save. Keying the demotion on "the key is present" would
+  // take a published company off `/members`, `/members/[slug]` and the sitemap
+  // for a legal-name correction or a Save with no edit at all, and null the
+  // reviewer columns with it, until a human re-approved.
+  describe.each([
+    ["saves the form back unchanged", portalCompanySave(), false],
+    ["changes only the legal name /members never renders", portalCompanySave({legalName: "Acme Group Limited"}), false],
+    ["rewrites the description /members renders", portalCompanySave({description: "Rewritten after approval"}), true],
+  ] as const)("when a published company %s", (_scenario, update, demotes) => {
+    async function updateAndReadGate() {
+      const calls: {query: string; params: unknown[]}[] = [];
+      database.current = drizzle(async (query: string, params: unknown[]) => {
+        calls.push({query, params});
+        return {rows: [companyRow]};
+      });
+      await expect(companiesRepository.update(actor, "company-b", update)).resolves.toMatchObject({id: "company-b"});
+      const statement = calls.find((call) => normalizedSql(call.query).startsWith("update"));
+      return {clause: setClause(statement?.query), gate: demotionGate(statement?.query, statement?.params ?? [])};
+    }
+
+    it(`${demotes ? "re-enters" : "stays out of"} review`, async () => {
+      const {gate} = await updateAndReadGate();
+      // `legal_name` is deliberately absent: no member page renders it.
+      expect(gate.columns).toEqual(["display_name", "website", "industry", "size_band", "description"]);
+      expect(gate.fires(publishedCompanyColumns)).toBe(demotes);
+    });
+
+    it(`${demotes ? "clears" : "keeps"} the reviewer columns`, async () => {
+      const {clause, gate} = await updateAndReadGate();
+      // The reviewer columns are reset by the same gate, so they move exactly
+      // when the status does rather than on every save.
+      for (const column of ["profile_reviewed_at", "profile_reviewed_by_profile_id", "profile_rejection_reason"]) {
+        expect(clause).toContain(`"${column}" = case when`);
+        expect(clause).not.toContain(`"${column}" = null`);
+      }
+      expect(gate.guardedExpressions).toBe(4);
+      expect(gate.fires(publishedCompanyColumns)).toBe(demotes);
+    });
   });
 
   it("preserves system company updates without member-role scoping", async () => {
@@ -666,6 +910,171 @@ describe("production repository security boundaries", () => {
     expect(loadDatabase).not.toHaveBeenCalled();
   });
 
+  /**
+   * Phase C1 S-14. The webhook route's HMAC is a gate on the ROUTE; these are
+   * the gates on the REPOSITORY, and they are not the same claim — Task 11 adds
+   * a backfill route with no HMAC in front of it that reaches the same table.
+   * The two legacy woztell modules authorize nothing and predate §9; they are
+   * the standing exceptions, not the precedent, so every new writer refuses a
+   * member, an admin and an anonymous actor before it opens the database.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // The shape a forged actor would take if `kind` alone were the check.
+    ["hand-rolled webhook shape", {kind: "woztell-webhook", userId: null}],
+  ] as const)(
+    "refuses a %s actor on every woztell inbound event writer before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const events = createWoztellInboundEventsRepository(
+        () => securityNow,
+        loadDatabase,
+      );
+
+      await expect(events.recordDeliveryStatus(forged as never, {
+        providerMessageId,
+        status: "delivered",
+        errorCode: null,
+        occurredAt: securityNow,
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(events.recordOutboundEcho(forged as never, {
+        recipient: "+85290000000",
+        text: "Thanks — someone will come back to you shortly.",
+        providerMessageId,
+        origin: "MANUAL",
+        sentAt: securityNow,
+      })).rejects.toThrow("FORBIDDEN");
+      // Task 4's two staff-task writers reach `staff_tasks` — the same table the
+      // admin panel resolves from — so they carry the same gate as the message
+      // writers, not a comment claiming the route's HMAC covers them.
+      await expect(events.notifyHumanLane(forged as never, {
+        conversationId: "11111111-1111-4111-8111-111111111111",
+        assignedToProfileId: null,
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(events.notifyMemberIdConflict(forged as never, {
+        whatsappMemberId: "member-9001",
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-14, Task 10. The stamp writes the provider id onto an outbound
+   * row, which is what makes every later delivery tick land somewhere; a caller
+   * that could choose the row could point a member's ticks at another thread's
+   * message. Its capability is a DIFFERENT `unique symbol` from the webhook's —
+   * one per entry point — so the webhook's own actor is in this list too.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled delivery shape", {kind: "woztell-delivery", userId: null}],
+    ["woztell webhook shape", {kind: "woztell-webhook", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the concierge delivery stamp before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const stamp = createWoztellDeliveryStampRepository(loadDatabase);
+
+      await expect(stamp.stampConciergeDelivery(forged as never, {
+        inboundProviderMessageId: providerMessageId,
+        providerId: "wamid.outbound.security",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-14, Task 11. The backfill is the second entry point into the
+   * `messages`/`conversations` rows the webhook writes, and it has NO HMAC in
+   * front of it. Its capability is a third `unique symbol`, distinct from the
+   * webhook's and the delivery stamp's, so the two entry points cannot reach
+   * each other's writers — which is why both of their actors are in this list.
+   * The host module's other methods are the standing pre-§9 exception and are
+   * deliberately not retrofitted here.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled backfill shape", {kind: "woztell-backfill", userId: null}],
+    ["woztell webhook shape", {kind: "woztell-webhook", userId: null}],
+    ["woztell delivery shape", {kind: "woztell-delivery", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the WOZTELL history importer before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const store = createPostgresWoztellStore(() => securityNow, loadDatabase);
+
+      await expect(store.importHistoricalInbound(forged as never, {
+        owner: {kind: "anonymous", anonymousOwnerHash},
+        profileId: null,
+        locale: "en",
+        memberName: "Member",
+        whatsappOptIn: true,
+        sender: "+85290000000",
+        providerMessageId,
+        receivedAt: securityNow,
+        content: "Hello from the backlog",
+        channel: "whatsapp",
+        whatsappMemberId: null,
+        contactId: null,
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C2 S-14, Task 2 (C-7). The registry decides which template may reach a
+   * member's phone at all, so its two principals are deliberately disjoint: the
+   * admin door refuses the capability actor, and the send gate's `approved` read
+   * refuses every session actor including an admin. A single door that accepted
+   * both would be reachable from a `"use server"` boundary with a forged actor —
+   * and approving a template is the one write in this phase that turns an
+   * unreviewed element name into something twenty people receive.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled registry shape", {kind: "template-registry", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the WhatsApp template approval read before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const templates = createWhatsAppTemplatesRepository(loadDatabase);
+
+      await expect(templates.approved(forged as never)).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["member", actor],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // The capability the send gate mints. It may READ the approved set and must
+    // never be able to change it — otherwise the gate could approve itself.
+    ["template registry capability", templateRegistryActor()],
+  ] as const)(
+    "refuses a %s actor on every WhatsApp template registry write before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const templates = createWhatsAppTemplatesRepository(loadDatabase);
+
+      await expect(templates.list(forged as never)).rejects.toThrow("FORBIDDEN");
+      await expect(templates.setStatus(forged as never, "renewal_14", "approved", null))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(templates.updatePreviews(forged as never, "renewal_14", {en: "Hello"}))
+        .rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
   it.each(["finish", "fail", "escalate", "disable"] as const)(
     "authorizes %s before validating attacker-controlled input or opening the database",
     async (method) => {
@@ -682,6 +1091,47 @@ describe("production repository security boundaries", () => {
         actor as never,
         inputByMethod[method] as never,
       )).rejects.toMatchObject({code: "FORBIDDEN"});
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-6. The inbox's write path is the first place in this repository
+   * where a row exists in order to be *sent to a member's phone*, so its gate
+   * belongs in this hand-maintained inventory and not only in the focused test.
+   * `requireAdmin` runs before the `.strict()` parse and before the loader, so a
+   * non-staff actor cannot reach the database even with input crafted to crash
+   * the parse first.
+   */
+  it.each([
+    ["member", actor],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // A concierge agent is a capability principal with a `profileId`; it must
+    // not be able to reply as staff into the thread it is handling.
+    ["concierge agent", agent],
+  ] as const)(
+    "refuses a %s actor on every inbox staff write before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const inbox = createInboxRepository(loadDatabase);
+      const conversationId = agent.conversationId;
+
+      await expect(inbox.queueStaffMessage(forged as never, {
+        conversationId,
+        kind: "session",
+        content: "Thanks — someone will come back to you shortly.",
+        outboundKey: `inbox:${conversationId}:${"a".repeat(32)}`,
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.settleStaffMessage(forged as never, {
+        outboundKey: `inbox:${conversationId}:${"a".repeat(32)}`,
+        outcome: {status: "sent", providerId: providerMessageId},
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.setHandling(forged as never, {conversationId, handling: "human"}))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(inbox.assign(forged as never, {conversationId, assignedToProfileId: "staff-a"}))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(inbox.markRead(forged as never, conversationId)).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.close(forged as never, conversationId)).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },
   );

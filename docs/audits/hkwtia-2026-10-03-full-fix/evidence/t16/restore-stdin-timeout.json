@@ -1,0 +1,1 @@
+{"result":"2 pass / 1 fail","stage":"actual pg_restore via Windows Docker stdin","error":"ETIMEDOUT","deadlineMs":40000,"production":false,"resolution":"direct custom backup file inside exact owned disposable container; same deadline, fingerprint and real pg_restore assertions"}

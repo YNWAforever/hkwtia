@@ -1,0 +1,51 @@
+import {createHash, randomUUID} from 'node:crypto';
+import {readFile, writeFile} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import sharp from 'sharp';
+import {S3Client} from '@aws-sdk/client-s3';
+import {createR2Storage, resolveR2Config, R2StorageError} from '../lib/media/r2-storage';
+import {normalizeImageUpload} from '../lib/media/image-upload';
+
+async function main() {
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') throw new Error('R2_ACCEPTANCE_PRODUCTION_PROHIBITED');
+  const path = process.argv[2];
+  if (!path) throw new Error('R2_ACCEPTANCE_ENV_REQUIRED');
+  const values = parseEnv(await readFile(path, 'utf8'));
+  const environment = Object.fromEntries(['R2_ACCOUNT_ID','R2_JURISDICTION','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET'].map(key => [key, values[key]]));
+  const config = resolveR2Config(environment);
+  if (config.bucket !== 'hkwtia-partner-acceptance-20260930' || config.jurisdiction !== 'default') throw new Error('R2_ACCEPTANCE_ISOLATED_BUCKET_REQUIRED');
+  const client = new S3Client({endpoint: config.endpoint, region: config.region, credentials: {accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey}, maxAttempts: 1});
+  const storage = createR2Storage({environment, send: async command => {
+    try { return await client.send(command as never); }
+    catch (error) {
+      const value = error as {name?: string; Code?: string; code?: string; $metadata?: {httpStatusCode?: number; attempts?: number}};
+      const safe = (input: unknown) => typeof input === 'string' && /^[a-zA-Z0-9_]{1,80}$/.test(input) ? input : undefined;
+      console.error(JSON.stringify({operation: command.constructor.name, providerError: safe(value.name), code: safe(value.Code ?? value.code), status: value.$metadata?.httpStatusCode, attempts: value.$metadata?.attempts}));
+      throw error;
+    }
+  }});
+  const png = await sharp({create: {width: 8, height: 8, channels: 4, background: '#176e90'}}).png().toBuffer();
+  const normalized = await normalizeImageUpload(png, 'image/png', {filename: 'synthetic-r2.png', altEn: 'Synthetic R2 acceptance image', altZh: '合成 R2 驗收圖片', focalX: '50', focalY: '50'});
+  const key = `acceptance/partner-logos/${randomUUID()}/synthetic.png`;
+  const evidence = {recordedAt: new Date().toISOString(), bucket: config.bucket, jurisdiction: config.jurisdiction, provider: 'Cloudflare R2 S3 API', synthetic: true, key, put: false, read: false, checksumMatched: false, dimensionsMatched: false, cleanup: false};
+  try {
+    const uploaded = await storage.put({key, bytes: normalized.bytes, contentType: normalized.contentType, sha256: normalized.sha256});
+    evidence.put = true;
+    const object = await storage.get({key, etag: uploaded.etag});
+    if (!object.body) throw new Error('R2_ACCEPTANCE_READ_BODY_MISSING');
+    const bytes = Buffer.from(await new Response(object.body).arrayBuffer());
+    evidence.read = true;
+    evidence.checksumMatched = createHash('sha256').update(bytes).digest('hex') === normalized.sha256 && object.sha256 === normalized.sha256;
+    const metadata = await sharp(bytes).metadata();
+    evidence.dimensionsMatched = metadata.width === 8 && metadata.height === 8 && metadata.format === 'png';
+    if (!evidence.checksumMatched || !evidence.dimensionsMatched || object.contentType !== 'image/png') throw new Error('R2_ACCEPTANCE_READ_VERIFICATION_FAILED');
+  } finally {
+    try { await storage.delete(key); evidence.cleanup = true; }
+    finally { await writeFile('.playwright/r2-provider-acceptance.json', JSON.stringify(evidence, null, 2) + '\n'); console.log(JSON.stringify(evidence)); }
+  }
+}
+main().catch(error => {
+  const reason = error instanceof R2StorageError ? error.reason : error instanceof Error && /^R2_ACCEPTANCE_[A-Z_]+$/.test(error.message) ? error.message : 'R2_ACCEPTANCE_FAILED';
+  console.error(reason);
+  process.exitCode = 1;
+});

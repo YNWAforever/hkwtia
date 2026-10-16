@@ -7,9 +7,6 @@ import type {AiOpsMonthlyMetric} from "@/lib/aiops/contracts";
 import type {AiOpsDashboardState} from "@/lib/aiops/dashboard";
 
 const labels: AiOpsDashboardLabels = {
-  eyebrow: "AI-Ops in public",
-  title: "Operational AI, measured in public",
-  description: "Hourly, privacy-safe evidence from WTIA's Concierge and scheduled agents.",
   currentMonth: "Current Hong Kong month",
   partialMonth: "Month to date",
   lastUpdated: "Last updated",
@@ -55,6 +52,15 @@ const labels: AiOpsDashboardLabels = {
   deployment: "Live deployment",
   acceptance: "M4 acceptance evidence",
   noBuildLogs: "No published build logs are available.",
+  buildLogsUnavailable: "Build logs are temporarily unavailable.",
+  operationsHeading: "Measured staff time savings",
+  operationsUnmeasured: "Not measured. The six-minute estimate is not an observed saving.",
+  operationsPeriod: "Measurement period",
+  operationsCases: "Unique cases",
+  operationsSamples: "Cases with timing samples",
+  operationsMissing: "Missing timing rate",
+  operationsMethodology: "Include bot outcomes, human handoffs and reopened cases. Measure human work, review and rework separately; waiting is not staff work. Fix a comparison group before the pilot.",
+
 };
 
 function monthStartAt(index: number) {
@@ -96,6 +102,7 @@ const freshState: AiOpsDashboardState = {
   current: months[11],
   months,
   ageMs: 60 * 60 * 1000,
+  operationsImpact: {status: "unmeasured", netMinutes: null, caseCount: null, sampleCount: 0, missingRate: null},
 };
 const buildLogs = [
   {
@@ -130,15 +137,13 @@ describe("public AI-Ops dashboard components", () => {
   it("renders the fresh KPI fixture with exact precision and denominator notes", () => {
     render(dashboard());
 
-    expect(screen.getByRole("heading", {name: labels.title})).toBeInTheDocument();
-    expect(screen.getByText(labels.eyebrow)).toBeInTheDocument();
-    expect(screen.getByText(labels.description)).toBeInTheDocument();
     expect(screen.getByText(labels.partialMonth)).toBeInTheDocument();
     expect(screen.getByText(labels.lastUpdated, {exact: false})).toBeInTheDocument();
+    expect(screen.getByRole("region", {name: labels.currentMonth})).toHaveClass("impact-metrics");
     expect(screen.getByText(labels.resolutionTarget)).toBeInTheDocument();
     expect(screen.getByText(labels.csatTarget)).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
-    expect(within(screen.getByRole("heading", {name: "Agent resolved"}).parentElement!).getByText("80.0%")).toBeInTheDocument();
+    expect(within(screen.getByText("Agent resolved").parentElement!).getByText("80.0%")).toBeInTheDocument();
     expect(screen.getByText("12 / 15")).toBeInTheDocument();
     expect(screen.getByText("20.0%")).toBeInTheDocument();
     expect(screen.getByText("0.0%")).toBeInTheDocument();
@@ -148,8 +153,8 @@ describe("public AI-Ops dashboard components", () => {
     expect(screen.getByText("10 responses")).toBeInTheDocument();
     expect(screen.getByText("1.20 hours")).toBeInTheDocument();
     expect(screen.getByText("US$0.068000")).toBeInTheDocument();
-    expect(screen.getByRole("heading", {name: "Escalation rate"})).toBeVisible();
-    expect(screen.getByRole("heading", {name: "Failure rate"})).toBeVisible();
+    expect(screen.getByText("Escalation rate")).toBeVisible();
+    expect(screen.getByText("Failure rate")).toBeVisible();
   });
 
   it("renders one accessible renewal SVG and the same twelve months in a semantic table", () => {

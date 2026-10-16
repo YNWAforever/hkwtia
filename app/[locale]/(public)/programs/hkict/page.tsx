@@ -1,17 +1,25 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
-import {ProgramDetail} from '@/components/marketing/program-detail';
+import {StorySection} from '@/components/marketing/story-section';
 import {
   localiseImages,
   localiseWinners,
   ProgramEditions
 } from '@/components/marketing/program-editions';
+import {StructuredData} from '@/components/seo/structured-data';
+import {PageHero} from '@/components/wt/page-hero';
+import {RichCompass} from '@/components/wt/rich-compass';
+import {siteConfig} from '@/config/site';
 import {programs} from '@/content/programs';
 import {AGENCIES} from '@/content/programs/agencies';
 import {hkict} from '@/content/programs/hkict';
 import type {AppLocale} from '@/i18n/routing';
-import {buildPageMetadata} from '@/lib/metadata';
+import {summarizeProgrammes} from '@/lib/home/programme-summaries';
+import {brandedTitle, buildPageMetadata} from '@/lib/metadata';
+import {buildProgrammeHeaderFacts} from '@/lib/programs/programme-header';
+import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
+import {buildBreadcrumbData, buildEventSeriesData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 const program = programs.find((item) => item.id === 'hkict')!;
@@ -19,7 +27,7 @@ const program = programs.find((item) => item.id === 'hkict')!;
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: program.namespace});
-  return buildPageMetadata({locale: locale as AppLocale, pathname: '/programs/hkict', title: t('title'), description: t('description'), image: program.image});
+  return buildPageMetadata({locale: locale as AppLocale, pathname: '/programs/hkict', title: brandedTitle(locale as AppLocale, t('title')), description: t('description'), image: program.image});
 }
 
 export default async function HkictPage({params}: Props) {
@@ -27,17 +35,35 @@ export default async function HkictPage({params}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: program.namespace});
   const tr = await getTranslations({locale, namespace: 'programs.record'});
+  const common = await getTranslations({locale, namespace: 'Common'});
+  // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+  const tRoot = await getTranslations({locale});
   const zh = locale === 'zh-HK';
+
+  const summary = summarizeProgrammes().find((item) => item.id === 'hkict')!;
+  const facts = buildProgrammeHeaderFacts(summary, tr, t('title'));
+  const mailto = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(facts.mailSubject)}`;
 
   return (
     <>
-      <ProgramDetail
-        program={program}
+      <PageHero
+        className="rich-page-hero"
+        eyebrow={facts.typeLabel}
         title={t('title')}
-        description={t('description')}
-        statusHeading={tr('statusHeading')}
-        status={t('status')}
+        lead={t('description')}
+        breadcrumb={{homeHref: '/', homeLabel: common('breadcrumbHome'), current: t('title')}}
+        breadcrumbLabel={common('breadcrumbLabel')}
       />
+      <RichCompass
+        items={[
+          {label: tr('compassFactLabel'), value: facts.fact},
+          {label: tr('compassAudienceLabel'), value: t('audience')},
+          {label: tr('compassActionLabel'), value: tr('askProgrammeTeam'), href: mailto}
+        ]}
+      />
+      <StorySection heading={tr('statusHeading')} tone="warm">
+        <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">{t('status')}</p>
+      </StorySection>
       <ProgramEditions
         categoryHeading={tr('categoryHeading')}
         editionsHeading={tr('editionsHeading')}
@@ -61,6 +87,8 @@ export default async function HkictPage({params}: Props) {
           images: localiseImages(edition.images, zh)
         }))}
       />
+      <StructuredData data={buildEventSeriesData({key: 'hkict', name: t('title'), description: t('description')}, locale as AppLocale)} />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/programs/hkict', tRoot))} />
     </>
   );
 }

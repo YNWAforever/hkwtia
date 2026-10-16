@@ -1,0 +1,123 @@
+{
+  "recordedAt": "2026-09-30T16:47:35.599Z",
+  "sourceCommit": "f46be17b35b8d688b6d0c8ae0706f28e377fda99",
+  "url": "https://github.com/YNWAforever/hkwtia/actions/runs/36746006758",
+  "status": "completed",
+  "conclusion": "success",
+  "environment": "GitHub Actions ubuntu-latest; Node 22; npm ci",
+  "jobs": [
+    {
+      "name": "tests (1)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ci",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npx vitest run --shard=1/2",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "tests (2)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ci",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npx vitest run --shard=2/2",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "checks",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ci",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ls --package-lock-only @neondatabase/auth @neondatabase/auth-ui better-auth better-call",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run audit:strings",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run lint",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run typecheck",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm audit --omit=dev --audit-level=high",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "quality",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Run test \"success\" = \"success\" && test \"success\" = \"success\" || exit 1",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "summaryLines": [
+    " Test Files  357 passed | 34 skipped (391)",
+    "      Tests  2872 passed | 95 skipped (2967)",
+    " Test Files  359 passed | 31 skipped (390)",
+    "      Tests  3225 passed | 76 skipped (3301)",
+    "✓ Generating static pages using 3 workers (267/267) in 5.0s",
+    "13 vulnerabilities (1 low, 12 moderate)"
+  ],
+  "installationAuditIncludingDev": [
+    "29 vulnerabilities (3 low, 17 moderate, 9 high)"
+  ],
+  "aggregateUnit": {
+    "passedFiles": 716,
+    "skippedFiles": 65,
+    "passedTests": 6097,
+    "skippedTests": 171
+  }
+}

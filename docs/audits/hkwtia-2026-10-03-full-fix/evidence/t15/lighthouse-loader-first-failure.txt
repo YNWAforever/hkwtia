@@ -1,0 +1,30 @@
+(node:30616) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30616) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+
+> hkwtia-platform@0.0.0 test:lighthouse
+> lhci autorun --config=.playwright/full-fix-t15-lighthouse-config.mjs
+
+cli.js autorun
+
+Run collect/assert/upload with sensible defaults
+
+Options:
+  --help                 Show help  [boolean]
+  --version              Show version number  [boolean]
+  --no-lighthouserc      Disables automatic usage of a .lighthouserc file.  [boolean]
+  --config               The lighthouserc.json file preferences.
+  --failOnUploadFailure  Exit with an error code if upload fails.  [boolean]
+  --collect              Overrides for the collect command. e.g. --collect.numberOfRuns=5
+  --assert               Overrides for the assert command. e.g. --assert.preset=lighthouse:all
+  --upload               Overrides for the upload command. e.g. --upload.token=$TOKEN
+
+Unexpected token 'i', "import con"... is not valid JSON
+{"error":"USABILITY_ACCEPTANCE_GATE_FAILED","stage":"native","sqlState":null,"production":false}

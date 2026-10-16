@@ -1,0 +1,487 @@
+{
+  "runUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/36324522776",
+  "commit": "69eba85f",
+  "environment": "Ubuntu GitHub runner, Node 22, production build on localhost:3000, provider-free lab",
+  "aggregation": "median",
+  "thresholds": {
+    "performance": 0.9,
+    "accessibility": 0.95,
+    "seo": 0.95
+  },
+  "reportCount": 30,
+  "medians": [
+    {
+      "url": "http://localhost:3000/",
+      "runs": 3,
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2489.4049999999997,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/membership",
+      "runs": 3,
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2243.9377999999997,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/events",
+      "runs": 3,
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2624.66875,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/programmes",
+      "runs": 3,
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2769.1738000000005,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/partners",
+      "runs": 3,
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2443.4101,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/zh",
+      "runs": 3,
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2398.68325,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/zh/membership",
+      "runs": 3,
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2233.8320000000003,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/zh/events",
+      "runs": 3,
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2640.1675,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/zh/programmes",
+      "runs": 3,
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2765.8320000000003,
+      "cls": 0
+    },
+    {
+      "url": "http://localhost:3000/zh/partners",
+      "runs": 3,
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2268.0837,
+      "cls": 0
+    }
+  ],
+  "reports": [
+    {
+      "artifact": "lhr-1790517945720.json",
+      "sha256": "af11579c9ad44ca81ec26901f31b666be49c8cbfc7e2e255f1cbcabaf9f411a5",
+      "url": "http://localhost:3000/",
+      "scores": {
+        "performance": 0.82,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 3999.352900000001,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790517960056.json",
+      "sha256": "f96712214f7b7a8de4286c994681517033b35010f760aef7820ba9ecc464037b",
+      "url": "http://localhost:3000/",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2489.4049999999997,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790517973630.json",
+      "sha256": "c942aa18f9ce52ca41912d8c45c005cf1d3c3f97b2b93d67451c31e5c926fc89",
+      "url": "http://localhost:3000/",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2407.44,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790517985854.json",
+      "sha256": "a4ebd02e3542c993d732eea1b86b15681ffb118ea32f1220853efedbba1cbe02",
+      "url": "http://localhost:3000/membership",
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2017.6819,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790517998120.json",
+      "sha256": "bfb1d9fd207a13392eae2d9ebf0cca8b612c34835e57f99bf491edded6a5fa82",
+      "url": "http://localhost:3000/membership",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2480.312,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518010329.json",
+      "sha256": "fd761c0514ee73eb16ae9e4615ed9dcf775903716f1a318dd9fab54c31cbfa0f",
+      "url": "http://localhost:3000/membership",
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2243.9377999999997,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518022750.json",
+      "sha256": "b687cd75ec5d028805093c8ec7a941ad5d728a205e687f62047567d268e9ec92",
+      "url": "http://localhost:3000/events",
+      "scores": {
+        "performance": 0.9,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 3437.2795,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518035140.json",
+      "sha256": "ea2e86e0db64aa4616e68dc69282a819576fc46dd564462852c60ded0f0dd89e",
+      "url": "http://localhost:3000/events",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2460.767875,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518047522.json",
+      "sha256": "3f0afaa3ea729f8d61d782ace161aa5eb61571bb437165dc297c16e6c9b9e62f",
+      "url": "http://localhost:3000/events",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2624.66875,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518060081.json",
+      "sha256": "19f7817e9dbaab1b8ed9fb4569e280f8aa3f7805e7b4b7cb19b94254e84abb6e",
+      "url": "http://localhost:3000/programmes",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2661.9475999999995,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518072650.json",
+      "sha256": "d244f70d50b9bb4e3c517e724f9b6ec7544044a17555c265aae63a0ab5d09a40",
+      "url": "http://localhost:3000/programmes",
+      "scores": {
+        "performance": 0.94,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 3056.1543749999996,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518085162.json",
+      "sha256": "6f5494b68bb237a7f47e7fa9391bc9e1e206bfef6b3a20fcf07569d881f4528a",
+      "url": "http://localhost:3000/programmes",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2769.1738000000005,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518097218.json",
+      "sha256": "101ef26ef6e3e10cd800b7ad3e9822fd0ba7fbc2c6435164f930ffd17d77fff6",
+      "url": "http://localhost:3000/partners",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2447.5092999999997,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518109263.json",
+      "sha256": "15351501666f0330bf79928aa13c47b248aee931eb82cdba2597848781431e04",
+      "url": "http://localhost:3000/partners",
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2016.362,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518121483.json",
+      "sha256": "7adc96bf9d80b235b21e17a12e1168f63557132e1495d7cea6baa3f2b9d6b777",
+      "url": "http://localhost:3000/partners",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2443.4101,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518135111.json",
+      "sha256": "1f82f5cc1d96065d383b93eb9c2da1f0e0ddbb6a469b2baa42d8c045afd85031",
+      "url": "http://localhost:3000/zh",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2398.68325,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518148677.json",
+      "sha256": "8d2c4d4a3b4538f10d51ea9763b91bbf92f442ab853b884d60ce20a6b551ee51",
+      "url": "http://localhost:3000/zh",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2387.83625,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518162187.json",
+      "sha256": "ec288cf77ea267b3f34113d3f5dcbacb0f050ddaa98b5d202ee33c4e22d5518e",
+      "url": "http://localhost:3000/zh",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2650.022375,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518174447.json",
+      "sha256": "ed64072298cfffcd208646ad149d1f3015182e5eae9182a9c1b6da828c81513c",
+      "url": "http://localhost:3000/zh/membership",
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2014.0906999999997,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518186745.json",
+      "sha256": "a7bd23442fee6a68c7303e9a64e18fcb93bfa4d6dc9e462b003b20d0bd0e124b",
+      "url": "http://localhost:3000/zh/membership",
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2255.703,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518199001.json",
+      "sha256": "4760fac6bccc2f4e8eaab608e0bd519a19014dbd5d0c7c7bb736a00b8fa48007",
+      "url": "http://localhost:3000/zh/membership",
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2233.8320000000003,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518211358.json",
+      "sha256": "180679fce0c8af7358e36fa2162f7c2a9c879c132e59cc0599e7581efc100417",
+      "url": "http://localhost:3000/zh/events",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2640.1675,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518223846.json",
+      "sha256": "72f9eefb695b5d905770af99d55d1a0dde28d9e7b69829f250bfa404613767e9",
+      "url": "http://localhost:3000/zh/events",
+      "scores": {
+        "performance": 0.91,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 3385.401,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518236317.json",
+      "sha256": "512e93c57dbe844fc2d26655625749f186b48aa5a261ce7f737ced3f0a5a9cfe",
+      "url": "http://localhost:3000/zh/events",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2491.1262500000003,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518248970.json",
+      "sha256": "5e87a5dfa137f8c7d2ac21dfa977943c4596dc04652ff8f9d95adabb82133279",
+      "url": "http://localhost:3000/zh/programmes",
+      "scores": {
+        "performance": 0.94,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2786.518,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518261527.json",
+      "sha256": "0ed4e7c8a123df5cdcef4a88e558ff2737712e479aa2cda08bcfc0b38758f89e",
+      "url": "http://localhost:3000/zh/programmes",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2617.4390000000003,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518274192.json",
+      "sha256": "d1acf3bc008f085aeb2ac9a5c8f4ad97038a31516f0895b268cd7e7dcdffe2a5",
+      "url": "http://localhost:3000/zh/programmes",
+      "scores": {
+        "performance": 0.96,
+        "accessibility": 0.96,
+        "seo": 1
+      },
+      "lcpMs": 2765.8320000000003,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518286322.json",
+      "sha256": "943a25335ff4d0a20cf1174ccac052e58b5f0bf535949102ff8862f87ddb1bcd",
+      "url": "http://localhost:3000/zh/partners",
+      "scores": {
+        "performance": 0.99,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2018.2687,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518298532.json",
+      "sha256": "58693bf1dee399efb75be2e1174142452441a4a379d84a16ffec485bf65e390b",
+      "url": "http://localhost:3000/zh/partners",
+      "scores": {
+        "performance": 0.98,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2268.0837,
+      "cls": 0
+    },
+    {
+      "artifact": "lhr-1790518310683.json",
+      "sha256": "9e5ae5a55b8855dee3123321e53a4d156f25f4bc9fbf6e1f240805255cd4087b",
+      "url": "http://localhost:3000/zh/partners",
+      "scores": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1
+      },
+      "lcpMs": 2449.05,
+      "cls": 0
+    }
+  ],
+  "scope": "Lab only; no production data or RUM; production workflow steps skipped."
+}

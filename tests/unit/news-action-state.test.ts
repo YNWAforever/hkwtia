@@ -9,6 +9,7 @@ const messages = {
   validationMessage: "Check the fields.",
   slugConflictMessage: "That URL slug is already taken.",
   errorMessage: "Something went wrong.",
+  conflictMessage: "Another editor saved this item. Reload and compare.",
 };
 
 function form(values: Record<string, string> = {}): FormData {
@@ -67,6 +68,28 @@ describe("news form action core", () => {
     expect(state.fieldErrors).toEqual({slug: "That URL slug is already taken."});
   });
 
+  it("gives a stale editor a specific recovery message and keeps entered text", async () => {
+    const state = await runNewsFormAction({}, form({titleEn: "Unsaved work"}), {
+      ...messages,
+      mutate: async () => {throw new Error("NEWS_EDIT_CONFLICT");},
+    });
+    expect(state.status).toBe("error");
+    expect(state.message).toBe("Another editor saved this item. Reload and compare.");
+    expect(state.values?.titleEn).toBe("Unsaved work");
+  });
+  it("carries the latest saved revision through a later validation error", async () => {
+    const revision = "2026-08-02T00:00:00.000Z";
+    const saved = await runNewsFormAction({}, form(), {
+      ...messages, mutate: async () => ({revision}),
+    });
+    expect(saved.revision).toBe(revision);
+    const failed = await runNewsFormAction(saved, form({titleEn: "Second edit"}), {
+      ...messages,
+      mutate: async () => {throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["titleEn"], message: "bad"}]);},
+    });
+    expect(failed.revision).toBe(revision);
+    expect(failed.values?.titleEn).toBe("Second edit");
+  });
   it("never leaks a domain error to the browser", async () => {
     const state = await runNewsFormAction({}, form(), {
       ...messages,

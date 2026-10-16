@@ -15,9 +15,13 @@ export const publicRoutes = [
   '/programs/hkict',
   '/programs/tct',
   '/programs/asa',
+  '/programmes',
   '/contact',
+  '/partners',
   '/privacy',
-  '/ai-transparency'
+  '/refund-policy',
+  '/ai-transparency',
+  '/members'
 ] as const;
 
 export type PublicRoute = (typeof publicRoutes)[number];

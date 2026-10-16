@@ -1,0 +1,80 @@
+(node:48428) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:30944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30944) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+  x  1 [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters (3.7s)
+(node:45748) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45748) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+  x  2 [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters (1.7s)
+
+
+  1) [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 280
+    Received:    124.375
+
+      110 |         expect(
+      111 |           await summary.evaluate((el) => el.getBoundingClientRect().width),
+    > 112 |         ).toBeGreaterThanOrEqual(280);
+          |           ^
+      113 |         await expect(
+      114 |           summary.getByText(m.Admin.members.planCodes.startup, { exact: true }),
+      115 |         ).toBeVisible();
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:112:11
+
+    Error Context: test-results\ai-admin-usability-actual--40f8b-able-state-deadline-filters-chromium\error-context.md
+
+    Error Context: test-results\ai-admin-usability-actual--40f8b-able-state-deadline-filters-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 280
+    Received:    146.078125
+
+      110 |         expect(
+      111 |           await summary.evaluate((el) => el.getBoundingClientRect().width),
+    > 112 |         ).toBeGreaterThanOrEqual(280);
+          |           ^
+      113 |         await expect(
+      114 |           summary.getByText(m.Admin.members.planCodes.startup, { exact: true }),
+      115 |         ).toBeVisible();
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\ai-admin-usability.spec.ts:112:11
+
+    Error Context: test-results\ai-admin-usability-actual--94e42-able-state-deadline-filters-chromium\error-context.md
+
+    Error Context: test-results\ai-admin-usability-actual--94e42-able-state-deadline-filters-chromium\error-context.md
+
+  2 failed
+    [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters 
+    [chromium] › tests\e2e\ai-admin-usability.spec.ts:80:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters 
+{"error":"USABILITY_ACCEPTANCE_GATE_FAILED","stage":"native","sqlState":null,"production":false}

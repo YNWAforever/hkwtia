@@ -1,0 +1,1348 @@
+{
+  "applicationSha": "092e73bb25cd9799902beacd9855fd484dfde48f",
+  "harnessCommit": "1185c782",
+  "environment": {
+    "os": "Windows",
+    "node": "v24.18.0",
+    "cpu": "Intel i5-12500, 6 cores/12 logical processors",
+    "server": "production Next build on loopback:3000, no auth/database/provider configuration",
+    "lighthouse": "12.6.1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
+    "formFactor": "mobile",
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "device": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "browser": "Playwright Chromium 1228, dedicated profile, extensions disabled",
+    "contention": "Full local Vitest run and unrelated work overlapped collection"
+  },
+  "command": "npm run test:lighthouse -- --config=.tmp/audit-release/lighthouse-matched.config.json",
+  "runCount": 30,
+  "allFinalUrlsMatch": true,
+  "thresholds": {
+    "performance": 0.9,
+    "accessibility": 0.95,
+    "seo": 0.95
+  },
+  "routes": [
+    {
+      "path": "/",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:33:57.712Z",
+          "sourceReportSha256": "b65f4cb171a52c03c7b750c8e48f75eaa79daff022ff5fed2e0492764cbcb132",
+          "requestedUrl": "http://localhost:3000/",
+          "finalUrl": "http://localhost:3000/",
+          "performance": 0.81,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 4128,
+          "tbtMs": 256.7,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "scriptEvaluation": 1210.96,
+            "styleLayout": 1155.92,
+            "other": 807.95,
+            "paintCompositeRender": 207.34,
+            "scriptParseCompile": 97.12,
+            "parseHTML": 32.51,
+            "garbageCollection": 31.37
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:34:29.538Z",
+          "sourceReportSha256": "0f0c8147f7f1de8e6dd1683749d4bf8e5be2a5c7a77bed994c26930996d95a5f",
+          "requestedUrl": "http://localhost:3000/",
+          "finalUrl": "http://localhost:3000/",
+          "performance": 0.94,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2401.96,
+          "tbtMs": 202,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1185.08,
+            "other": 676.23,
+            "scriptEvaluation": 622.63,
+            "paintCompositeRender": 170.64,
+            "scriptParseCompile": 94.53,
+            "parseHTML": 34.25,
+            "garbageCollection": 10.92
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:34:53.031Z",
+          "sourceReportSha256": "ae2bafd9693786f4acf6d5384fe82fe51d1d5cc65c31bfc4074d650f9c53c792",
+          "requestedUrl": "http://localhost:3000/",
+          "finalUrl": "http://localhost:3000/",
+          "performance": 0.95,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2593.72,
+          "tbtMs": 161,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 924.04,
+            "other": 625.34,
+            "scriptEvaluation": 600.17,
+            "paintCompositeRender": 157.82,
+            "scriptParseCompile": 82.55,
+            "parseHTML": 41.9,
+            "garbageCollection": 14.21
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.94,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2593.72,
+        "tbtMs": 202,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/membership",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:35:22.369Z",
+          "sourceReportSha256": "62ef704beb3a35e403675497a2773011aedb32a0dc19ffc69135c0103d3ef667",
+          "requestedUrl": "http://localhost:3000/membership",
+          "finalUrl": "http://localhost:3000/membership",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2417.11,
+          "tbtMs": 68.5,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "other": 12030.08,
+            "styleLayout": 584.06,
+            "scriptEvaluation": 503.39,
+            "scriptParseCompile": 78.5,
+            "parseHTML": 31.03,
+            "paintCompositeRender": 16.01,
+            "garbageCollection": 12.02
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:35:45.860Z",
+          "sourceReportSha256": "345afcee165482c6b5124b858adc1276615f1253a9cb929226fdb404c1a4e4d2",
+          "requestedUrl": "http://localhost:3000/membership",
+          "finalUrl": "http://localhost:3000/membership",
+          "performance": 0.98,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2257.94,
+          "tbtMs": 87.03,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 620.58,
+            "scriptEvaluation": 536.23,
+            "other": 407.98,
+            "scriptParseCompile": 73.41,
+            "parseHTML": 38.23,
+            "garbageCollection": 17.88,
+            "paintCompositeRender": 12.22
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:36:08.389Z",
+          "sourceReportSha256": "6ca58c966505c1a9b4b3d8a1a69851e610328875570a27d15ba95e4435078574",
+          "requestedUrl": "http://localhost:3000/membership",
+          "finalUrl": "http://localhost:3000/membership",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2449.19,
+          "tbtMs": 89.9,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 601.28,
+            "scriptEvaluation": 529.42,
+            "other": 331.46,
+            "scriptParseCompile": 81.41,
+            "parseHTML": 35.96,
+            "garbageCollection": 16.04,
+            "paintCompositeRender": 11.02
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2417.11,
+        "tbtMs": 87.03,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/events",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:36:29.977Z",
+          "sourceReportSha256": "71d5cabb7e4520870d05e26294206ed10a275a19c4936a0cd43a71ce74c20d75",
+          "requestedUrl": "http://localhost:3000/events",
+          "finalUrl": "http://localhost:3000/events",
+          "performance": 0.96,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2673.87,
+          "tbtMs": 73.5,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 779.29,
+            "scriptEvaluation": 555.04,
+            "other": 310.9,
+            "scriptParseCompile": 81.23,
+            "parseHTML": 39.67,
+            "paintCompositeRender": 32.21,
+            "garbageCollection": 15.93
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:36:53.789Z",
+          "sourceReportSha256": "35e123efd5f230199877b712726bef15b6290e5b4829a18635dc993585aae93d",
+          "requestedUrl": "http://localhost:3000/events",
+          "finalUrl": "http://localhost:3000/events",
+          "performance": 0.95,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2722.39,
+          "tbtMs": 97.5,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "scriptEvaluation": 4421.23,
+            "other": 2756.58,
+            "styleLayout": 721.82,
+            "garbageCollection": 229.54,
+            "scriptParseCompile": 77.76,
+            "parseHTML": 30.37,
+            "paintCompositeRender": 25.77
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:37:24.291Z",
+          "sourceReportSha256": "d1e4961d0fa36134f1e27550ec86ba850e4089e47c09ea24a444bcd42b3e3639",
+          "requestedUrl": "http://localhost:3000/events",
+          "finalUrl": "http://localhost:3000/events",
+          "performance": 0.96,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2669.98,
+          "tbtMs": 71,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 633.3,
+            "scriptEvaluation": 529.25,
+            "other": 250.84,
+            "scriptParseCompile": 75.32,
+            "parseHTML": 32.24,
+            "paintCompositeRender": 23.78,
+            "garbageCollection": 12.14
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.96,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2673.87,
+        "tbtMs": 73.5,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/programmes",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:37:43.522Z",
+          "sourceReportSha256": "1cadb2af0d8c1bf763203a7366f11e75998a292e01f08d7751652ecc110a84e3",
+          "requestedUrl": "http://localhost:3000/programmes",
+          "finalUrl": "http://localhost:3000/programmes",
+          "performance": 0.93,
+          "accessibility": 0.96,
+          "seo": 1,
+          "lcpMs": 2906.92,
+          "tbtMs": 162.5,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "other": 11302.83,
+            "styleLayout": 632.03,
+            "scriptEvaluation": 460.24,
+            "scriptParseCompile": 79.66,
+            "parseHTML": 32.68,
+            "paintCompositeRender": 24.86,
+            "garbageCollection": 10.18
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "color-contrast",
+              "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:38:05.576Z",
+          "sourceReportSha256": "016882ec242b5e3c7e55f065683020642d7b971dadfaf17a9ffcab44bdbf7d67",
+          "requestedUrl": "http://localhost:3000/programmes",
+          "finalUrl": "http://localhost:3000/programmes",
+          "performance": 0.95,
+          "accessibility": 0.96,
+          "seo": 1,
+          "lcpMs": 2935.32,
+          "tbtMs": 70.5,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 677.66,
+            "scriptEvaluation": 490.49,
+            "other": 206.85,
+            "scriptParseCompile": 74.27,
+            "parseHTML": 35.09,
+            "paintCompositeRender": 20.83,
+            "garbageCollection": 13.02
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "color-contrast",
+              "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:38:29.800Z",
+          "sourceReportSha256": "42e813c52ad1cf24a0e36ef8fc7e9df206b455675db286f81670f089a6f6b82b",
+          "requestedUrl": "http://localhost:3000/programmes",
+          "finalUrl": "http://localhost:3000/programmes",
+          "performance": 0.91,
+          "accessibility": 0.96,
+          "seo": 1,
+          "lcpMs": 2968.75,
+          "tbtMs": 191.19,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "scriptEvaluation": 4323.56,
+            "other": 2081.63,
+            "styleLayout": 773.97,
+            "garbageCollection": 293.16,
+            "scriptParseCompile": 102.35,
+            "parseHTML": 35.83,
+            "paintCompositeRender": 29.7
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "color-contrast",
+              "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.93,
+        "accessibility": 0.96,
+        "seo": 1,
+        "lcpMs": 2935.32,
+        "tbtMs": 162.5,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/partners",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:38:56.150Z",
+          "sourceReportSha256": "625e969f45fcebfece2c2ce3ddeb2b737b14e8f592e05e32afe91917f34bb5cd",
+          "requestedUrl": "http://localhost:3000/partners",
+          "finalUrl": "http://localhost:3000/partners",
+          "performance": 0.98,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2312.57,
+          "tbtMs": 91.5,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "scriptEvaluation": 4590.96,
+            "styleLayout": 835.53,
+            "other": 720.03,
+            "garbageCollection": 267.86,
+            "paintCompositeRender": 104.14,
+            "scriptParseCompile": 96.83,
+            "parseHTML": 63.5
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:39:18.442Z",
+          "sourceReportSha256": "2dc57d635e1d7eb60c8f5226be7cd6f1916e3ae787f401e564a62756a8d38d3c",
+          "requestedUrl": "http://localhost:3000/partners",
+          "finalUrl": "http://localhost:3000/partners",
+          "performance": 0.91,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 3104.08,
+          "tbtMs": 166,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "other": 5219.93,
+            "scriptEvaluation": 567.2,
+            "styleLayout": 545.29,
+            "scriptParseCompile": 74.34,
+            "parseHTML": 34.32,
+            "garbageCollection": 18.97,
+            "paintCompositeRender": 18.66
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:39:39.347Z",
+          "sourceReportSha256": "368b053918c5731b3b2c4768b70c3efa4aef1e7ef52a039129247db9ec0c40de",
+          "requestedUrl": "http://localhost:3000/partners",
+          "finalUrl": "http://localhost:3000/partners",
+          "performance": 0.94,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2581.41,
+          "tbtMs": 201,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "scriptEvaluation": 654.61,
+            "styleLayout": 507.36,
+            "other": 261.43,
+            "scriptParseCompile": 97.79,
+            "parseHTML": 42.84,
+            "paintCompositeRender": 17.76,
+            "garbageCollection": 10.19
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.94,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2581.41,
+        "tbtMs": 166,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/zh",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:39:57.097Z",
+          "sourceReportSha256": "081418d20b4b706b806efdbe16ebbb9660ea78bd294a0fe3f242e66b4eeb75c1",
+          "requestedUrl": "http://localhost:3000/zh",
+          "finalUrl": "http://localhost:3000/zh",
+          "performance": 0.83,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2721.01,
+          "tbtMs": 507.49,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 2091.72,
+            "scriptEvaluation": 838.09,
+            "other": 647.57,
+            "paintCompositeRender": 151.48,
+            "scriptParseCompile": 76.34,
+            "parseHTML": 38.94,
+            "garbageCollection": 32.74
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:40:18.953Z",
+          "sourceReportSha256": "0d319b82c065ae5b484e86b9202942e556138031eb032c1dca7bb13b6050383d",
+          "requestedUrl": "http://localhost:3000/zh",
+          "finalUrl": "http://localhost:3000/zh",
+          "performance": 0.83,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2667.68,
+          "tbtMs": 505.63,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "other": 8505.65,
+            "styleLayout": 1655.69,
+            "scriptEvaluation": 629.07,
+            "paintCompositeRender": 154.72,
+            "scriptParseCompile": 81.36,
+            "parseHTML": 33.75,
+            "garbageCollection": 18.68
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:40:41.285Z",
+          "sourceReportSha256": "efedc87c4861a165373516209423e39a741451b35a463f22a5e78185e30a89cb",
+          "requestedUrl": "http://localhost:3000/zh",
+          "finalUrl": "http://localhost:3000/zh",
+          "performance": 0.82,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2655.02,
+          "tbtMs": 582.89,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1840,
+            "scriptEvaluation": 686.94,
+            "other": 671.36,
+            "paintCompositeRender": 167.68,
+            "scriptParseCompile": 86.19,
+            "parseHTML": 36.28,
+            "garbageCollection": 16.96
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.83,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2667.68,
+        "tbtMs": 507.49,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/zh/membership",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:41:01.000Z",
+          "sourceReportSha256": "73c16ca18a20c3536ff4d8d1d646c6a71613ac9163cda388aac73076f56bfff5",
+          "requestedUrl": "http://localhost:3000/zh/membership",
+          "finalUrl": "http://localhost:3000/zh/membership",
+          "performance": 0.88,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2594.35,
+          "tbtMs": 386.32,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "other": 1594.76,
+            "styleLayout": 1174.42,
+            "scriptEvaluation": 625.14,
+            "scriptParseCompile": 169.46,
+            "parseHTML": 67.64,
+            "paintCompositeRender": 23.49,
+            "garbageCollection": 14.64
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:41:22.645Z",
+          "sourceReportSha256": "3bcfada8750b92a696079254c0cbe57710704ecb3686a4f87c3a7b4dc7349502",
+          "requestedUrl": "http://localhost:3000/zh/membership",
+          "finalUrl": "http://localhost:3000/zh/membership",
+          "performance": 0.95,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2426.27,
+          "tbtMs": 172.87,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 958.4,
+            "scriptEvaluation": 523.31,
+            "other": 308.93,
+            "scriptParseCompile": 72.93,
+            "parseHTML": 24.84,
+            "paintCompositeRender": 14.46,
+            "garbageCollection": 13.91
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:41:41.972Z",
+          "sourceReportSha256": "61ec9e13547b376db23419d53365d9bd2f910d90ecadba65f356532a0da680df",
+          "requestedUrl": "http://localhost:3000/zh/membership",
+          "finalUrl": "http://localhost:3000/zh/membership",
+          "performance": 0.72,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2687.73,
+          "tbtMs": 1224.5,
+          "cls": 0,
+          "warnings": [
+            "The tested device appears to have a slower CPU than  Lighthouse expects. This can negatively affect your performance score. Learn more about [calibrating an appropriate CPU slowdown multiplier](https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md#cpu-throttling)."
+          ],
+          "mainThreadMs": {
+            "styleLayout": 2521.52,
+            "scriptEvaluation": 718.14,
+            "other": 651.38,
+            "scriptParseCompile": 146.92,
+            "parseHTML": 68.74,
+            "garbageCollection": 40.68,
+            "paintCompositeRender": 14.8
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.88,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2594.35,
+        "tbtMs": 386.32,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/zh/events",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:42:01.969Z",
+          "sourceReportSha256": "f7dd3f3086e581d755cee0b70e6e8930eac8ba109fe0487735fc304636e14916",
+          "requestedUrl": "http://localhost:3000/zh/events",
+          "finalUrl": "http://localhost:3000/zh/events",
+          "performance": 0.87,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2427.56,
+          "tbtMs": 415.98,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1296.79,
+            "scriptEvaluation": 602.84,
+            "other": 534.58,
+            "scriptParseCompile": 82.04,
+            "parseHTML": 59.99,
+            "paintCompositeRender": 25.17,
+            "garbageCollection": 22.66
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:42:20.408Z",
+          "sourceReportSha256": "948ce2fad13657e53cc17655390d3ee77790f39414f9d4186bba44d0e6012460",
+          "requestedUrl": "http://localhost:3000/zh/events",
+          "finalUrl": "http://localhost:3000/zh/events",
+          "performance": 0.91,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2702.44,
+          "tbtMs": 248.03,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1084.11,
+            "scriptEvaluation": 626.06,
+            "other": 327.48,
+            "scriptParseCompile": 76.14,
+            "parseHTML": 34.43,
+            "garbageCollection": 31.76,
+            "paintCompositeRender": 15.85
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:42:39.343Z",
+          "sourceReportSha256": "3d797c09c21fa7551bf68491a009d271502de73d50f0a06450a19a9b421acd9a",
+          "requestedUrl": "http://localhost:3000/zh/events",
+          "finalUrl": "http://localhost:3000/zh/events",
+          "performance": 0.88,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2522.37,
+          "tbtMs": 376.45,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1170.29,
+            "scriptEvaluation": 622.16,
+            "other": 509.15,
+            "scriptParseCompile": 93.43,
+            "parseHTML": 27.92,
+            "paintCompositeRender": 20.64,
+            "garbageCollection": 17
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.88,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2522.37,
+        "tbtMs": 376.45,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/zh/programmes",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:43:02.332Z",
+          "sourceReportSha256": "ed74a730db468c60ee035853669021085c4e9c0239646448416cd1927502fbf7",
+          "requestedUrl": "http://localhost:3000/zh/programmes",
+          "finalUrl": "http://localhost:3000/zh/programmes",
+          "performance": 0.85,
+          "accessibility": 0.96,
+          "seo": 1,
+          "lcpMs": 2977.33,
+          "tbtMs": 401.34,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1394.44,
+            "scriptEvaluation": 547.18,
+            "other": 267.68,
+            "scriptParseCompile": 88.96,
+            "parseHTML": 44.96,
+            "paintCompositeRender": 17.67,
+            "garbageCollection": 13.89
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "color-contrast",
+              "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:43:28.920Z",
+          "sourceReportSha256": "b43ce751ea5263ccc911217222432c1db7b2e5193b3b48561207306e02e58b0e",
+          "requestedUrl": "http://localhost:3000/zh/programmes",
+          "finalUrl": "http://localhost:3000/zh/programmes",
+          "performance": 0.9,
+          "accessibility": 0.96,
+          "seo": 1,
+          "lcpMs": 2466.37,
+          "tbtMs": 309.81,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "other": 15748.92,
+            "styleLayout": 1306.53,
+            "scriptEvaluation": 598.34,
+            "scriptParseCompile": 77.26,
+            "parseHTML": 37.65,
+            "paintCompositeRender": 14.98,
+            "garbageCollection": 11.67
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "color-contrast",
+              "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:43:51.312Z",
+          "sourceReportSha256": "4d78b19b4e9af42fd3f0284bba3fa699b956e4d0daf062b9a041f61469a82773",
+          "requestedUrl": "http://localhost:3000/zh/programmes",
+          "finalUrl": "http://localhost:3000/zh/programmes",
+          "performance": 0.89,
+          "accessibility": 0.96,
+          "seo": 1,
+          "lcpMs": 2786.8,
+          "tbtMs": 302.6,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1255.3,
+            "scriptEvaluation": 597.78,
+            "other": 253.59,
+            "scriptParseCompile": 83.43,
+            "parseHTML": 39.69,
+            "paintCompositeRender": 16.09,
+            "garbageCollection": 12.19
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "color-contrast",
+              "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.89,
+        "accessibility": 0.96,
+        "seo": 1,
+        "lcpMs": 2786.8,
+        "tbtMs": 309.81,
+        "cls": 0
+      }
+    },
+    {
+      "path": "/zh/partners",
+      "runs": [
+        {
+          "fetchTime": "2026-09-27T10:44:12.193Z",
+          "sourceReportSha256": "22bb29c86a369bec7cca6b3e8e95ff503dd5611e30498319c3e0694b5050a603",
+          "requestedUrl": "http://localhost:3000/zh/partners",
+          "finalUrl": "http://localhost:3000/zh/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2257.75,
+          "tbtMs": 142.63,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 901.96,
+            "scriptEvaluation": 527.72,
+            "other": 304.03,
+            "scriptParseCompile": 80.29,
+            "parseHTML": 24.96,
+            "paintCompositeRender": 14.07,
+            "garbageCollection": 12.37
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:44:30.254Z",
+          "sourceReportSha256": "24a9a6219d283ce56b056485553c45285d64a03633570a17756d3975f812262f",
+          "requestedUrl": "http://localhost:3000/zh/partners",
+          "finalUrl": "http://localhost:3000/zh/partners",
+          "performance": 0.73,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2803.55,
+          "tbtMs": 1058.09,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 1637.11,
+            "scriptEvaluation": 1096.32,
+            "other": 570.66,
+            "scriptParseCompile": 137.54,
+            "parseHTML": 77.92,
+            "garbageCollection": 48.33,
+            "paintCompositeRender": 23.12
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "fetchTime": "2026-09-27T10:44:50.593Z",
+          "sourceReportSha256": "b374b921809ee3d478fa091705a3c8f78cb1ed794d1a5610c94d96d79440fbd4",
+          "requestedUrl": "http://localhost:3000/zh/partners",
+          "finalUrl": "http://localhost:3000/zh/partners",
+          "performance": 0.97,
+          "accessibility": 1,
+          "seo": 1,
+          "lcpMs": 2447.08,
+          "tbtMs": 81,
+          "cls": 0,
+          "warnings": [],
+          "mainThreadMs": {
+            "styleLayout": 826.1,
+            "scriptEvaluation": 558.76,
+            "other": 257.57,
+            "scriptParseCompile": 73.13,
+            "parseHTML": 36.92,
+            "paintCompositeRender": 17.14,
+            "garbageCollection": 11.47
+          },
+          "failedAudits": [
+            {
+              "id": "errors-in-console",
+              "title": "Browser errors were logged to the console",
+              "score": 0
+            },
+            {
+              "id": "label-content-name-mismatch",
+              "title": "Elements with visible text labels do not have matching accessible names.",
+              "score": 0
+            },
+            {
+              "id": "bf-cache",
+              "title": "Page prevented back/forward cache restoration",
+              "score": 0
+            }
+          ]
+        }
+      ],
+      "median": {
+        "performance": 0.97,
+        "accessibility": 1,
+        "seo": 1,
+        "lcpMs": 2447.08,
+        "tbtMs": 142.63,
+        "cls": 0
+      }
+    }
+  ],
+  "limits": [
+    "Local laboratory measurements, not Hong Kong RUM or a production baseline.",
+    "No authenticated or database-backed public content acceptance.",
+    "CPU contention and Lighthouse slowdown warnings limit comparisons.",
+    "Earlier runs were discarded due Windows cleanup failure, locale-cookie redirects or a local canonical-origin mismatch."
+  ]
+}

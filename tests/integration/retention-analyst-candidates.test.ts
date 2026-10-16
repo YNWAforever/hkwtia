@@ -21,6 +21,7 @@ describe("retention analyst candidate repository", () => {
       return {
         rows: [
           {
+            pending:false,consent_hash:"synthetic-consent",
             profile_id: "profile-z",
             membership_id: "22222222-2222-4222-8222-222222222222",
             locale: "en",
@@ -32,6 +33,7 @@ describe("retention analyst candidate repository", () => {
             last_login_at: new Date("2026-01-01T00:00:00.000Z"),
           },
           {
+            pending:false,consent_hash:"synthetic-consent",
             profile_id: "profile-a",
             membership_id: "11111111-1111-4111-8111-111111111111",
             locale: "unsupported",
@@ -87,7 +89,8 @@ describe("retention analyst candidate repository", () => {
       statements.push(query);
       return {
         rows: [{
-          profile_id: "profile-no-score",
+          pending:false,consent_hash:"synthetic-consent",
+            profile_id: "profile-no-score",
           membership_id: "33333333-3333-4333-8333-333333333333",
           locale: "en",
           plan_code: "startup",

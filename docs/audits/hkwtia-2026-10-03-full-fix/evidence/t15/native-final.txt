@@ -1,0 +1,39 @@
+(node:25136) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:8088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8088) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+  ok  1 [chromium] › tests\e2e\ai-admin-usability.spec.ts:90:5 › actual isolated administrative usability › en presents readable review facts and usable state/deadline filters (14.8s)
+  ok  2 [chromium] › tests\e2e\ai-admin-usability.spec.ts:90:5 › actual isolated administrative usability › zh-HK presents readable review facts and usable state/deadline filters (11.4s)
+  ok  3 [chromium] › tests\e2e\concierge-lazy-loading.spec.ts:18:3 › en closed concierge defers its dialog implementation until intent (1.6s)
+  ok  4 [chromium] › tests\e2e\concierge-lazy-loading.spec.ts:18:3 › zh-HK closed concierge defers its dialog implementation until intent (1.6s)
+  ok  5 [chromium] › tests\e2e\concierge-lazy-loading.spec.ts:77:3 › en a failed dialog download keeps manual journeys and can recover (836ms)
+  ok  6 [chromium] › tests\e2e\concierge-lazy-loading.spec.ts:77:3 › zh-HK a failed dialog download keeps manual journeys and can recover (719ms)
+  ok  7 [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › en streamed membership catalogue and event filters retain manual journeys (4.5s)
+  ok  8 [chromium] › tests\e2e\public-read-model-streaming.spec.ts:7:3 › zh-HK streamed membership catalogue and event filters retain manual journeys (3.8s)
+(node:3828) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  9 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 1440px real configuration failure keeps manual journeys available (1.8s)
+  ok 10 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 390px real configuration failure keeps manual journeys available (1.4s)
+  ok 11 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 1440px real configuration failure keeps manual journeys available (2.0s)
+  ok 12 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 390px real configuration failure keeps manual journeys available (1.3s)
+
+  12 passed (50.0s)
+{"sourceSha":"145443b69df74ad2f70af172c310d10e05803220","buildId":"5gfh3thCdYeh6P09ogzeq","buildSourceSha":"145443b69df74ad2f70af172c310d10e05803220","observedAt":"2026-10-04T19:57:23.696Z","nativeExit":0,"ledger":61,"dbSourcePositivelyProven":true,"googleVerified":false,"magicLinkVerified":false,"realProviderSends":0,"realDeliveryReceipt":false,"production":false}

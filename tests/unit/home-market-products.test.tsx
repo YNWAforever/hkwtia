@@ -1,0 +1,101 @@
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
+
+import {render, screen} from "@testing-library/react";
+import type {ReactNode} from "react";
+import {describe, expect, it, vi} from "vitest";
+
+const bundles = {
+  en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
+  "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
+} as const;
+
+function messageAt(locale: "en" | "zh-HK", namespace: string, key: string): unknown {
+  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
+  return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
+}
+
+const listPublished = vi.hoisted(() => vi.fn());
+const listMembers = vi.hoisted(() => vi.fn());
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
+    (key: string) => String(messageAt(locale, namespace, key))),
+}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+}));
+vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: {listPublished}}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listPublishedPage: listMembers}}));
+
+describe("MarketProducts", () => {
+  it("prints the donor's exact 'no live records' copy on both panels when nothing is published", async () => {
+    listPublished.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
+    const {MarketProducts} = await import("@/components/home/market-products");
+    render(await MarketProducts({locale: "en"}));
+
+    expect(screen.getByText(bundles.en.Home.marketProducts.directory.copyEmpty)).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Home.marketProducts.marketplace.copyEmpty)).toBeInTheDocument();
+    expect(showcaseRepositoryCalledWithBound()).toBe(true);
+
+    function showcaseRepositoryCalledWithBound() {
+      const [, options] = listPublished.mock.calls[0] as [unknown, {limit: number}];
+      return options.limit === 12;
+    }
+  });
+
+  it("uses independent directory and showcase availability and correct destinations", async () => {
+    listPublished.mockResolvedValueOnce([{}, {}]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
+    const {MarketProducts} = await import("@/components/home/market-products");
+    render(await MarketProducts({locale: "en"}));
+
+    expect(screen.getByText(bundles.en.Home.marketProducts.directory.copyEmpty)).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Home.marketProducts.marketplace.copyAvailable)).toBeInTheDocument();
+    expect(screen.queryByText(/^2$/)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.directory.action})).toHaveAttribute("href", "/members");
+    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/showcase");
+  });
+
+  it("embedded, is a labelled group whose headings sit under the ecosystem h2 (h3, then h4)", async () => {
+    listPublished.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
+    const {MarketProducts} = await import("@/components/home/market-products");
+    const {container} = render(await MarketProducts({locale: "en", embedded: true}));
+
+    expect(container.querySelector("section")).toBeNull();
+    expect(screen.getByRole("group", {name: bundles.en.Home.marketProducts.title})).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 3, name: bundles.en.Home.marketProducts.title})).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 4, name: bundles.en.Home.marketProducts.directory.title})).toBeInTheDocument();
+    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/showcase");
+  });
+
+  it("shows member directory availability without implying showcase listings exist", async () => {
+    listPublished.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [{}], nextCursor: null});
+    const {MarketProducts} = await import("@/components/home/market-products");
+    render(await MarketProducts({locale: "zh-HK"}));
+    expect(screen.getByText(bundles["zh-HK"].Home.marketProducts.directory.copyAvailable)).toBeInTheDocument();
+    expect(screen.getByText(bundles["zh-HK"].Home.marketProducts.marketplace.copyEmpty)).toBeInTheDocument();
+  });
+
+  it("describes an unavailable showcase read without claiming zero published records", async () => {
+    listPublished.mockRejectedValueOnce(new Error("db down"));
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
+    const {MarketProducts} = await import("@/components/home/market-products");
+    render(await MarketProducts({locale: "en"}));
+
+    expect(screen.getByText(bundles.en.Home.marketProducts.directory.copyEmpty)).toBeInTheDocument();
+    expect(screen.getByText("Solution listings are temporarily unavailable.")).toBeInTheDocument();
+  });
+
+  it("keeps the showcase available when only the directory read fails", async () => {
+    listPublished.mockResolvedValueOnce([{}]);
+    listMembers.mockRejectedValueOnce(new Error("db down"));
+    const {MarketProducts} = await import("@/components/home/market-products");
+    render(await MarketProducts({locale: "en"}));
+    expect(screen.getByText("Member profiles are temporarily unavailable.")).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Home.marketProducts.marketplace.copyAvailable)).toBeInTheDocument();
+  });
+});

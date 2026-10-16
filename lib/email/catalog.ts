@@ -27,6 +27,18 @@ export const EMAIL_TEMPLATE_IDS = [
   "lead_staff_notify",
   "approval_request",
   "campaign_generic",
+  "batch_membership_renewal",
+  "batch_profile_update",
+  "event_guest_confirmation",
+  "event_guest_waitlist",
+  "event_rsvp_cancelled",
+  "event_reminder_24h",
+  "event_ticket_confirmation",
+  "event_ticket_refunded",
+  "event_ticket_refund_failed",
+  "event_ticket_pass",
+  "lead_join_invite",
+  "lead_digest",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATE_IDS)[number];
@@ -79,6 +91,29 @@ const DEFAULT_CLASSIFICATION = {
   lead_staff_notify: "transactional",
   approval_request: "transactional",
   campaign_generic: "marketing",
+  batch_membership_renewal: "marketing",
+  batch_profile_update: "marketing",
+  // Guest RSVP receipt (Phase B1, B-4): a reply to the guest's own action, carrying
+  // their cancel link, so it is transactional and must never gain a marketing footer.
+  event_guest_confirmation: "transactional",
+  event_guest_waitlist: "transactional",
+  event_rsvp_cancelled: "transactional",
+  // 24-hour reminder for a seat the member booked (Phase B1, B-5): a service
+  // message about their own registration, so it ignores marketing suppression.
+  event_reminder_24h: "transactional",
+  // Ticket receipts (Phase D-4a): replies to the buyer's own purchase, so
+  // transactional and never given a marketing footer.
+  event_ticket_confirmation: "transactional",
+  event_ticket_refunded: "transactional",
+  event_ticket_refund_failed: "transactional",
+  // Per-attendee pass (Phase D-4b): one seat's own admission, so transactional
+  // and never given a marketing footer.
+  event_ticket_pass: "transactional",
+  // Staff-written personal invitation (Phase E): a one-to-one message from a named
+  // person, not a campaign, so transactional with no marketing footer.
+  lead_join_invite: "transactional",
+  // Daily staff digest of lead follow-ups (Phase E): an internal operational notice, no marketing footer.
+  lead_digest: "transactional",
 } as const satisfies Record<EmailTemplateId, MessageClassification>;
 
 function interpolate(message: string, variables: EmailVariables): string {

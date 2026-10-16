@@ -1,0 +1,16 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {chromium} from '@playwright/test';
+import {previewSessionPlan,previewStorageState,failureMessage} from '../scripts/vercel-preview-session.mjs';
+const secret=JSON.parse(await readFile('.playwright/partner-r2-preview-share.json','utf8'));
+const plan=previewSessionPlan({VERCEL_SHARE_URL:secret.shareUrl});
+if(plan.origin!=='https://hkwtia-partner-logos-20260930.vercel.app')throw Error('PREVIEW_ORIGIN_GUARD');
+const browser=await chromium.launch({headless:true});
+try {
+ const context=await browser.newContext();const page=await context.newPage();let response;
+ try{response=await page.goto(plan.shareUrl,{waitUntil:'domcontentloaded',timeout:120000})}catch{throw Error('VERCEL_SHARE_URL_NAVIGATION_FAILED')}
+ if(!response||response.status()>=400||new URL(page.url()).origin!==plan.origin)throw Error('VERCEL_SHARE_URL_DID_NOT_AUTHENTICATE');
+ const state=previewStorageState(await context.cookies(plan.origin));
+ if(!state.cookies.some(c=>c.name==='_vercel_jwt'))throw Error('VERCEL_SESSION_COOKIE_MISSING');
+ await writeFile('.playwright/partner-r2-preview-state.json',JSON.stringify(state),{mode:0o600});
+ console.log(JSON.stringify({origin:plan.origin,protectedPreviewAuthenticated:true,applicationSessionIncluded:false}));
+}catch(error){console.error(failureMessage(error));process.exitCode=1}finally{await browser.close()}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
@@ -49,7 +49,8 @@ export default async function BoardDraftPreviewPage({params}: Props) {
       <div><dt className="font-medium">{t("boardDraftAgentRunStatus")}</dt><dd className="text-muted-foreground">{status}</dd></div>
       <div><dt className="font-medium">{t("boardDraftAgentRunId")}</dt><dd className="break-all text-muted-foreground">{draft.agentRunId}</dd></div>
     </dl>
-    <SafeGeneratedContent content={draft.bodyMdx} tableHeaders={{
+    {locale === "zh-HK" && !draft.bodyMdxZhHk ? <p role="status">{t("boardDraftLegacyLanguage")}</p> : null}
+    <SafeGeneratedContent content={locale === "zh-HK" && draft.bodyMdxZhHk ? draft.bodyMdxZhHk : draft.bodyMdx} tableHeaders={{
       kpi: t("boardDraftKpi"),
       value: t("boardDraftValue"),
     }}/>

@@ -1,0 +1,89 @@
+{
+  "environment": "local jsdom; no provider calls",
+  "command": "node node_modules/vitest/vitest.mjs run tests/unit/locale-switcher.test.tsx tests/unit/m2-session-reuse.test.ts tests/unit/audit-full-media-picker.test.tsx --reporter=json",
+  "pass": 20,
+  "fail": 0,
+  "skip": 0,
+  "cases": [
+    {
+      "name": "finds one registered image among 79 while retaining the selected image and forbidding raw URL input",
+      "status": "passed"
+    },
+    {
+      "name": "retains the actual registered media selection after a successful form action",
+      "status": "passed"
+    },
+    {
+      "name": "retains native input selection until change when the parent rerenders with registry rows",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher keeps the ready server-rendered control disabled until client handlers are installed",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher cannot consume a click in the pending search-state fallback",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher retains every parsed Showcase filter and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher retains the selected Event status and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves the current fragment after path and query when switching locale",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves serialized query values when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher does not append a bare query separator when switching from English to Chinese without search state",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves an empty-valued query parameter when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves serialized query values when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher does not append a bare query separator when switching from Chinese to English without search state",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves an empty-valued query parameter when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher keeps the current locale when an unsaved editor rejects the switch",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher renders a 44px locale target in each Suspense state",
+      "status": "passed"
+    },
+    {
+      "name": "isolated browser session reuse rejects a cached session when identity API succeeds but the protected server page redirects",
+      "status": "passed"
+    },
+    {
+      "name": "isolated browser session reuse requires the server to confirm the same synthetic identity before reuse",
+      "status": "passed"
+    },
+    {
+      "name": "isolated browser session reuse rejects a different identity even when a cookie exists",
+      "status": "passed"
+    },
+    {
+      "name": "isolated browser session reuse rejects expired or unavailable sessions without trusting the local artifact",
+      "status": "passed"
+    }
+  ]
+}

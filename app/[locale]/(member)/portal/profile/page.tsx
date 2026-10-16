@@ -1,8 +1,11 @@
+import {PortalForm, PortalInput, PortalSubmit} from "@/components/portal/forms/portal-form";
+import {portalFormLabels} from "@/lib/portal/form-state";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {StatusLabel} from "@/components/wt/status-label";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
-import {getDashboard} from "@/lib/portal/queries";
+import {portalPageActor} from "@/lib/portal/page-actor";
+import {getSelfProfile} from "@/lib/portal/self-profile";
 import {updateProfileAction} from "@/lib/portal/commands";
 
 export const dynamic = "force-dynamic";
@@ -13,38 +16,63 @@ export default async function ProfilePage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
-  const dashboard = await getDashboard(actor);
+  const actor = await portalPageActor(locale, "/portal/profile");
+  const profile = await getSelfProfile(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
-  const profile = dashboard.profile;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("profile")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight">{t("profileTitle")}</h1>
-        <p className="text-muted-foreground">{t("profileDescription")}</p>
+    <div>
+      {/* The dashboard's heading scale and label; the description rides the lead line. */}
+      <header className="portal-welcome">
+        <StatusLabel as="p">{t("profile")}</StatusLabel>
+        <h1>{t("profileTitle")}</h1>
+        <p className="portal-welcome-lead">{t("profileDescription")}</p>
       </header>
-      <form action={updateProfileAction} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8">
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.displayName")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.displayName} name="displayName" required />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.phone")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.phone ?? ""} name="phone" type="tel" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.jobTitle")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.jobTitle ?? ""} name="jobTitle" />
-        </label>
-        <input name="locale" type="hidden" value={locale} />
-        <label className="flex items-center gap-3 text-sm font-medium sm:col-span-2">
-          <input defaultChecked={profile.directoryVisible} name="directoryVisible" type="checkbox" />
-          <span>{t("fields.directoryVisible")}</span>
-        </label>
-        <button className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:col-span-2 sm:justify-self-start" type="submit">{t("save")}</button>
-      </form>
+      <PortalForm action={updateProfileAction} labels={portalFormLabels(t)}>
+        <fieldset className="portal-fieldset">
+          <legend className="portal-fieldset-title">{t("profileGroups.contact")}</legend>
+          <div className="portal-field">
+            <label htmlFor="profile-displayName">{t("fields.displayName")}</label>
+            <PortalInput defaultValue={profile.displayName} id="profile-displayName" name="displayName" required />
+          </div>
+          <div className="portal-pair">
+            <div className="portal-field">
+              <label htmlFor="profile-jobTitle">{t("fields.jobTitle")}</label>
+              <PortalInput defaultValue={profile.jobTitle ?? ""} id="profile-jobTitle" name="jobTitle" />
+            </div>
+            <div className="portal-field">
+              <label htmlFor="profile-phone">{t("fields.phone")}</label>
+              <PortalInput defaultValue={profile.phone ?? ""} id="profile-phone" name="phone" type="tel" />
+            </div>
+          </div>
+        </fieldset>
+        <fieldset className="portal-fieldset">
+          <legend className="portal-fieldset-title">{t("profileGroups.whatsapp")}</legend>
+          <div className="portal-field">
+            <label htmlFor="profile-whatsappNumber">{t("fields.whatsappNumber")}</label>
+            <PortalInput defaultValue={profile.whatsappNumber ?? ""} id="profile-whatsappNumber" name="whatsappNumber" type="tel" />
+          </div>
+          <div className="portal-field portal-consent">
+            <StatusLabel as="p">{profile.whatsappOptIn ? t("whatsapp.status.on") : t("whatsapp.status.off")}</StatusLabel>
+            <label className="portal-consent-row">
+              <PortalInput aria-describedby="profile-whatsapp-consent" defaultChecked={profile.whatsappOptIn} name="whatsappOptIn" type="checkbox" />
+              <span>{t("whatsapp.optIn")}</span>
+            </label>
+            <p className="portal-field-help" id="profile-whatsapp-consent">{t("whatsapp.consent")}</p>
+          </div>
+        </fieldset>
+        <PortalInput name="locale" type="hidden" value={locale} />
+        <div className="portal-field portal-consent">
+          <label className="portal-consent-row">
+            <PortalInput aria-describedby="profile-directory-help" defaultChecked={profile.directoryVisible} name="directoryVisible" type="checkbox" />
+            <span>{t("fields.directoryVisible")}</span>
+          </label>
+          <p className="portal-field-help" id="profile-directory-help">{t("profileGroups.directoryHelp")}</p>
+        </div>
+        <div className="portal-form-actions">
+          <PortalSubmit />
+        </div>
+      </PortalForm>
     </div>
   );
 }

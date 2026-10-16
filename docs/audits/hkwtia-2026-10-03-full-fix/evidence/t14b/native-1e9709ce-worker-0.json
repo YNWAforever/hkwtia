@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-04T01:23:25.154Z",
+  "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+  "origin": "https://hkwtia-membership-lifecycle-20261003.vercel.app",
+  "checks": [
+    {
+      "locale": "en",
+      "case": "community interrupt/resume/submit/authoritative return",
+      "applicationRef": "1ab001b9da8b3146",
+      "memberships": 1,
+      "status": "active",
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "community interrupt/resume/submit/authoritative return",
+      "applicationRef": "1fbb9a0d57683362",
+      "memberships": 1,
+      "status": "active",
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "case": "patron approval boundary",
+      "status": "pending_review",
+      "paymentRequests": 0
+    },
+    {
+      "case": "company submit and forged success rejected",
+      "applicationRef": "8e76990de6c8caf0",
+      "status": "pending_payment",
+      "checkoutAttempts": 0
+    }
+  ],
+  "applicationRefs": [
+    "1ab001b9da8b3146",
+    "1fbb9a0d57683362",
+    "c3e6a70ae8d3def3",
+    "8e76990de6c8caf0"
+  ],
+  "actualPasswordAuth": true,
+  "syntheticMemberProfileFixtures": true,
+  "actualFreshPasswordSignups": 4,
+  "newVerifiedIdentityProvisioning": false,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "associationPolicyApproval": false,
+  "policyFlag": false,
+  "messagesBillingBudgetDelta": 0,
+  "providerRequests": 0,
+  "production": false,
+  "cleanup": "Owned synthetic applications/history retained; no production fixtures or history removed"
+}

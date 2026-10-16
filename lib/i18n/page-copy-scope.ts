@@ -18,7 +18,14 @@ export const pageCopyNamespaces = [
   "programs",
   "Membership",
   "Privacy",
+  "RefundPolicy",
   "AiTransparency",
+  "Programmes",
+  "Partners",
+  // WP-5: not a page namespace -- copy that renders sitewide but doesn't belong to
+  // the deliberately-excluded structural Footer namespace. Keep this small; it is
+  // not a place to route around Footer's own exclusion for anything else.
+  "MarketingExtras",
 ] as const;
 
 export type PageCopyNamespace = (typeof pageCopyNamespaces)[number];
@@ -29,7 +36,10 @@ export type PageCopyNamespace = (typeof pageCopyNamespaces)[number];
  * a typo would silently stop invalidation, so a test asserts the mapping.
  */
 export const pageCopyRoutes: Readonly<Record<PageCopyNamespace, readonly PublicRoute[]>> = {
-  Home: ["/"],
+  // WP-7: /programmes prerenders `Home.programmeShowcase` copy (the shared grid labels) and,
+  // unlike "/", is not `force-dynamic`, so a staff edit to Home must revalidate it too or the
+  // programmes index keeps serving the stale labels until its next deploy.
+  Home: ["/", "/programmes"],
   About: ["/about"],
   Chairman: ["/about/chairman"],
   Committees: ["/about/committees"],
@@ -37,7 +47,13 @@ export const pageCopyRoutes: Readonly<Record<PageCopyNamespace, readonly PublicR
   programs: ["/programs/cpai", "/programs/hkict", "/programs/tct", "/programs/asa"],
   Membership: ["/membership"],
   Privacy: ["/privacy"],
+  RefundPolicy: ["/refund-policy"],
   AiTransparency: ["/ai-transparency"],
+  Programmes: ["/programmes"],
+  Partners: ["/partners"],
+  // SiteFooter renders on every public route via the shared (public) layout, not
+  // just "/" -- a save here must invalidate all of them.
+  MarketingExtras: publicRoutes,
 };
 
 const namespaceSet: ReadonlySet<string> = new Set(pageCopyNamespaces);
@@ -49,4 +65,10 @@ export function isPageCopyNamespace(value: unknown): value is PageCopyNamespace 
 
 export function isPublicRoute(value: unknown): value is PublicRoute {
   return typeof value === "string" && routeSet.has(value);
+}
+
+/** Runtime loading/failure messages are product state, outside the agreed CMS copy surface. */
+export function isPageCopyKeyEditable(namespace: string, keyPath: string): boolean {
+  if (namespace === "Membership" && keyPath.startsWith("selfService.")) return false;
+  return namespace !== "Home" || (keyPath !== "openNow.loading" && !keyPath.startsWith("openNow.unavailable."));
 }

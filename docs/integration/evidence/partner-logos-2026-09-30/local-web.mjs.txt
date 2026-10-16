@@ -1,0 +1,15 @@
+import {readFile} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {spawn} from 'node:child_process';
+const values = parseEnv(await readFile(process.argv[2],'utf8'));
+if (!values.DATABASE_URL_TEST || new URL(values.DATABASE_URL_TEST).hostname !== 'ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech' || values.NEON_PROJECT_ID !== 'solitary-wave-52860119') throw new Error('ISOLATED_WEB_DATABASE_REQUIRED');
+const r2Values = parseEnv(await readFile(process.argv[3],'utf8'));
+if (r2Values.R2_BUCKET !== 'hkwtia-partner-acceptance-20260930' || r2Values.R2_JURISDICTION !== 'default') throw new Error('ISOLATED_WEB_BUCKET_REQUIRED');
+const environment = {...process.env};
+for (const key of ['NEON_AUTH_BASE_URL','NEON_AUTH_COOKIE_SECRET','RATE_LIMIT_KEY_SECRET','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','STRIPE_STARTUP_PRICE_ID','STRIPE_CORPORATE_PRICE_ID']) if (values[key]) environment[key]=values[key];
+if (!environment.STRIPE_SECRET_KEY?.startsWith('sk_test_')) throw new Error('ISOLATED_WEB_STRIPE_TEST_REQUIRED');
+for (const key of ['R2_ACCOUNT_ID','R2_JURISDICTION','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET']) environment[key]=r2Values[key];
+Object.assign(environment,{DATABASE_URL:values.DATABASE_URL_TEST,DATABASE_URL_TEST:values.DATABASE_URL_TEST,NODE_ENV:'development',VERCEL_ENV:'preview',APP_URL:'http://localhost:3017',NEXT_PUBLIC_SITE_URL:'http://localhost:3017',AUDIT_BATCH_WORKER_PAUSED:'true',EMAIL_DELIVERY_MODE:'test',RUN_LIVE_WOZTELL:'0'});
+const child=spawn(process.execPath,['node_modules/next/dist/bin/next','dev','--webpack','--hostname','localhost','--port','3017'],{env:environment,stdio:'inherit',windowsHide:true});
+child.on('exit',code=>process.exit(code??1));
+for (const signal of ['SIGINT','SIGTERM']) process.on(signal,()=>child.kill(signal));

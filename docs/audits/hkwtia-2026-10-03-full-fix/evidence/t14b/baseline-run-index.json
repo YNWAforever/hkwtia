@@ -1,0 +1,25 @@
+{
+  "fixtureCollisionRun": {
+    "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "passed": 1,
+    "failed": 3,
+    "reason": "shared M2 member already owns active personal entitlement; memberships_owner_live_unique correctly rejected another; test fixture corrected only",
+    "acceptancePass": false
+  },
+  "freshIdentityTargetRed": {
+    "sourceSha": "28322fd3bbf65b2286d77e2fcda4c0ed04932766",
+    "passed": 2,
+    "failed": 2,
+    "targetFailure": "completed-owned application returned new-application CTA instead of existing membership result",
+    "acceptancePass": false,
+    "partialNativeReceiptPrefix": "native-28322fd3-"
+  },
+  "candidateGreen": {
+    "sourceSha": "1e9709cece93182b0be6b283a15904ef073610ce",
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "receipt": "native-1e9709ce-worker-0.json"
+  },
+  "historicalEvidencePreserved": true
+}

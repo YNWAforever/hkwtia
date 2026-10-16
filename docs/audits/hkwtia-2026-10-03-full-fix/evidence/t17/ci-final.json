@@ -1,0 +1,45 @@
+{
+  "headSha": "802aeaf66b10b1a8b8350c11b821c28aa6f1af56",
+  "conclusion": "success",
+  "runId": 37170811003,
+  "checks": [
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37170811003/job/111343889509",
+      "name": "quality",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://vercel.com/github",
+      "name": "Vercel Preview Comments",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37170811003/job/111343212764",
+      "name": "tests (2)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37170811003/job/111343212692",
+      "name": "worker",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37170811003/job/111343212775",
+      "name": "checks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/YNWAforever/hkwtia/actions/runs/37170811003/job/111343212774",
+      "name": "tests (1)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://vercel.com/ynwaforevers-projects/hkwtia/4GuaeFY5veQkBQEH7p2LrRzbDLZB",
+      "name": "Vercel",
+      "state": "SUCCESS"
+    }
+  ],
+  "applicationBytesEqualNativeTested73272cc6": true,
+  "automatedThirdPartyReview": "skipped by provider usage quota; no blocking comments; sequential source/interface/lock self-review and actual regression performed",
+  "productionReleased": false
+}

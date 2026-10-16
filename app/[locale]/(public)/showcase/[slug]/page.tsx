@@ -8,7 +8,8 @@ import {ShowcaseViewBeacon} from "@/components/marketing/showcase-view-beacon";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
-import {buildPageMetadata} from "@/lib/metadata";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {toPublicListing} from "@/lib/showcase/contracts";
 import {softwareApplicationJsonLd} from "@/lib/showcase/public";
 import {requestIntroAction} from "@/lib/showcase/lead-request-action";
@@ -19,10 +20,24 @@ type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale: localeValue, slug} = await params;
   const locale = localeValue as AppLocale;
-  const row = await showcaseRepository.getPublishedBySlug(slug).catch(() => null);
-  if (!row) return buildPageMetadata({locale, pathname: `/showcase/${slug}`, title: "Showcase", description: "WTIA member showcase"});
+  const [row, t] = await Promise.all([
+    showcaseRepository.getPublishedBySlug(slug).catch(() => null),
+    getTranslations({locale, namespace: "Showcase"}),
+  ]);
+  if (!row) {
+    // Unknown or unpublished slug: the page 404s, but the metadata still renders, so it reads
+    // from the Showcase bundle (already branded there) instead of a hard-coded English pair.
+    return buildPageMetadata({locale, pathname: `/showcase/${slug}`, title: t("metaTitle"), description: t("detailFallbackDescription"), image: ogImagePath({kind: "showcase", title: t("metaTitle"), eyebrow: t("eyebrow"), imageUrl: null})});
+  }
   const listing = toPublicListing(row, locale);
-  return buildPageMetadata({locale, pathname: `/showcase/${listing.slug}`, title: `${listing.name} | WTIA Showcase`, description: listing.description});
+  return buildPageMetadata({
+    locale,
+    pathname: `/showcase/${listing.slug}`,
+    title: brandedTitle(locale, listing.name),
+    description: listing.description,
+    // The listing's logo, contained on a light ground rather than cropped under a scrim.
+    image: ogImagePath({kind: "showcase", title: listing.name, eyebrow: t("eyebrow"), imageUrl: listing.logo?.url ?? null}),
+  });
 }
 
 export default async function ShowcaseDetailPage({params}: Props) {

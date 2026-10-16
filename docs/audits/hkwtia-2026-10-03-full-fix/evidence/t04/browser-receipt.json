@@ -1,0 +1,75 @@
+{
+  "sourceSha": null,
+  "runtime": "next start / NODE_ENV=production",
+  "observedAt": "2026-10-03T09:55:16.944Z",
+  "productionDeployment": false,
+  "realProviderAcceptance": false,
+  "checks": [
+    {
+      "mode": "timing",
+      "exitCode": 0,
+      "agentRunDelta": 0,
+      "staffTaskDelta": 0,
+      "providerCalls": 0,
+      "providerCallBasis": "Agents disabled; test provider keys absent; no AI request made"
+    }
+  ],
+  "sourceInputManifest": "build-inputs.json",
+  "sourceDifferencesAfterBuild": {
+    "paths": [
+      "messages/en.json",
+      "messages/zh-HK.json"
+    ],
+    "reason": "serializer-only churn removed after the browser run",
+    "proof": "the formatting edit executed assert json.loads(reformatted) == parsed pre-edit data for both bundles",
+    "finalCandidateBuild": "PENDING"
+  },
+  "providerSuccessClaimed": false,
+  "authMethod": "Actual isolated Neon Auth synthetic staff email/password; not Google or magic link",
+  "cases": [
+    {
+      "title": "en 1440px staff records exclusive work while savings remain unmeasured",
+      "status": "passed",
+      "durationMs": 7947,
+      "screenshots": [
+        {
+          "path": "en-1440-staff-timing.png",
+          "sha256": "738cdfb0f82394ad351d5416af73f73b61e9107afc198035ad11b6009b590d0d"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 1440px staff records exclusive work while savings remain unmeasured",
+      "status": "passed",
+      "durationMs": 5150,
+      "screenshots": [
+        {
+          "path": "zh-HK-1440-staff-timing.png",
+          "sha256": "be08118d768f2b11d74c8d4cb145b1677256b0d0edab12b617019941eeccf7dd"
+        }
+      ]
+    },
+    {
+      "title": "en 390px staff records exclusive work while savings remain unmeasured",
+      "status": "passed",
+      "durationMs": 5660,
+      "screenshots": [
+        {
+          "path": "en-390-staff-timing.png",
+          "sha256": "a1fa72167cf3f0d0a1662f16785288ce78af196a93f08c6d4b5bfef2648549c1"
+        }
+      ]
+    },
+    {
+      "title": "zh-HK 390px staff records exclusive work while savings remain unmeasured",
+      "status": "passed",
+      "durationMs": 5659,
+      "screenshots": [
+        {
+          "path": "zh-HK-390-staff-timing.png",
+          "sha256": "dcc1ffae3edff92c1f5c72b50d4c069a0dd0da9c17179a5591277998496c3935"
+        }
+      ]
+    }
+  ]
+}

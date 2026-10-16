@@ -1,0 +1,127 @@
+
+> hkwtia-platform@0.0.0 test
+> vitest run tests/unit/admin-member-navigation.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/member-query-contract.test.ts --maxWorkers=2
+
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-member-navigation.test.tsx (8 tests | 4 failed) 412ms
+   × admin member navigation > keeps 'default' page size consistent in filter and navigation 147ms
+     → [
+  {
+    "code": "custom",
+    "path": [
+      "cursor"
+    ],
+    "message": "INVALID_CURSOR"
+  }
+]
+   × admin member navigation > keeps 'explicit twenty' page size consistent in filter and navigation 69ms
+     → [
+  {
+    "code": "custom",
+    "path": [
+      "cursor"
+    ],
+    "message": "INVALID_CURSOR"
+  }
+]
+   × admin member navigation > keeps 'filtered twenty' page size consistent in filter and navigation 89ms
+     → [
+  {
+    "code": "custom",
+    "path": [
+      "cursor"
+    ],
+    "message": "INVALID_CURSOR"
+  }
+]
+   ✓ admin member navigation > opens Member 360 from the name and a view link while preserving only local list filters 37ms
+   × admin member navigation > renders keyboard-usable previous and next links while preserving a validated search trail 37ms
+     → expected '<div class="space-y-6"><form class="s…' to contain 'href="/admin/members?q=acme"'
+   ✓ admin member navigation > renders operational filter controls from the same shareable query 25ms
+   ✓ admin member navigation > keeps the full member filter in a shareable local list and detail return URL 2ms
+   ✓ admin member navigation > rejects an external return hint and constructs only a local list URL 2ms
+ ✓ tests/unit/member-query-contract.test.ts (4 tests) 16ms
+ ❯ tests/unit/admin-presentational.test.tsx (12 tests | 2 failed) 424ms
+   ✓ admin presentation > localizes at-risk evidence, tier, status, date, and actions for 'en' 17ms
+   ✓ admin presentation > localizes at-risk evidence, tier, status, date, and actions for 'zh-HK' 3ms
+   ✓ admin presentation > renders one page heading, an accessible nav, a table caption, and translated empty state 111ms
+   ✓ admin presentation > renders one page heading, an accessible nav, a table caption, and translated empty state 47ms
+   × admin presentation > uses localized brand copy and preserves the query in next-page links without a false previous link 66ms
+     → expected '<div class="space-y-6"><form class="s…' to contain '?q=acme&amp;cursor=opaque-cursor'
+   × admin presentation > uses localized brand copy and preserves the query in next-page links without a false previous link 44ms
+     → expected '<div class="space-y-6"><form class="s…' to contain '?q=acme&amp;cursor=opaque-cursor'
+   ✓ admin presentation > renders accessible reconciled report cards in 'en' 11ms
+   ✓ admin presentation > renders accessible reconciled report cards in 'zh-HK' 4ms
+   ✓ admin presentation > passes a real Admin.reports.period value through toReportPeriodMessage untouched 2ms
+   ✓ admin presentation > falls back toReportPeriodMessage to a locale-neutral bare template when a value is missing a placeholder 0ms
+   ✓ admin presentation > renders a ticket seat's paid status from the door-list labels 91ms
+   ✓ admin presentation > renders a ticket seat's paid status from the door-list labels 25ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > keeps 'default' page size consistent in filter and navigation
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > keeps 'explicit twenty' page size consistent in filter and navigation
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > keeps 'filtered twenty' page size consistent in filter and navigation
+ZodError: [
+  {
+    "code": "custom",
+    "path": [
+      "cursor"
+    ],
+    "message": "INVALID_CURSOR"
+  }
+]
+ ❯ Object.get error [as error] node_modules/zod/v3/types.js:39:31
+ ❯ ZodEffects.parse node_modules/zod/v3/types.js:114:22
+ ❯ Object.transform lib/admin/member-query.ts:87:33
+     85| }).strict().transform(({q, history, ...rest}) => {
+     86|   void history;
+     87|   return adminMemberQuerySchema.parse({search: q, ...rest});
+       |                                 ^
+     88| });
+     89| 
+ ❯ ZodEffects._parse node_modules/zod/v3/types.js:3273:39
+ ❯ ZodEffects._parseSync node_modules/zod/v3/types.js:100:29
+ ❯ ZodEffects.safeParse node_modules/zod/v3/types.js:129:29
+ ❯ ZodEffects.parse node_modules/zod/v3/types.js:111:29
+ ❯ Module.parseAdminMemberRouteQuery lib/admin/member-query.ts:91:38
+ ❯ tests/unit/admin-member-navigation.test.tsx:24:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/unit/admin-member-navigation.test.tsx > admin member navigation > renders keyboard-usable previous and next links while preserving a validated search trail
+AssertionError: expected '<div class="space-y-6"><form class="s…' to contain 'href="/admin/members?q=acme"'
+
+Expected: "href="/admin/members?q=acme""
+Received: "<div class="space-y-6"><form class="space-y-4 rounded-md border border-border bg-card p-4" action="/admin/members" method="get"><nav aria-label="Default views" class="flex flex-wrap gap-2"><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active">Active</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active&amp;status=cancel_at_period_end&amp;renewalFrom=2026-10-04&amp;renewalTo=2026-11-03&amp;sort=renewal_asc">Due within 30 days</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active&amp;status=cancel_at_period_end&amp;renewalFrom=2026-10-04&amp;renewalTo=2026-12-03&amp;sort=renewal_asc">Due within 60 days</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active&amp;status=cancel_at_period_end&amp;renewalFrom=2026-10-04&amp;renewalTo=2027-01-02&amp;sort=renewal_asc">Due within 90 days</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=past_due">Past due</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=expired">Expired</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?completeness=incomplete">Missing details</a></nav><div class="flex flex-col gap-2 sm:flex-row sm:items-end"><label class="flex-1 space-y-1 text-sm font-medium" for="admin-member-search"><span>Search members</span><input class="min-h-11 w-full rounded-md border border-input bg-background px-3" id="admin-member-search" type="search" name="q" value="acme"/></label><button class="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">Apply filters</button><a class="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm" href="/admin/members">Clear filters</a></div><details class="space-y-4 rounded-md border p-3"><summary class="min-h-11 cursor-pointer py-2 text-sm font-medium">Advanced filters</summary><div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><fieldset class="space-y-1"><legend class="text-sm font-medium">Membership status</legend><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="pending_payment"/>Awaiting payment</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="pending_review"/>Pending review</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="active"/>Active</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="past_due"/>Past due</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="cancel_at_period_end"/>Ends at period end</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="cancelled"/>Cancelled</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="expired"/>Expired</label></fieldset><fieldset class="space-y-1"><legend class="text-sm font-medium">Plan</legend><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="community"/>Community</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="startup"/>Startup</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="corporate"/>Corporate</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="patron"/>Patron</label></fieldset><div class="space-y-3"><label class="block space-y-1 text-sm font-medium"><span>Renewal from (Hong Kong date)</span><input class="min-h-11 w-full rounded-md border border-input bg-background px-3" type="date" name="renewalFrom" value=""/></label><label class="block space-y-1 text-sm font-medium"><span>Renewal to (Hong Kong date)</span><input class="min-h-11 w-full rounded-md border border-input bg-background px-3" type="date" name="renewalTo" value=""/></label></div><div class="space-y-3"><div class="relative space-y-2"><label for="_R_1id_" class="block text-sm font-medium">Company name</label><input id="_R_1id_" role="combobox" autoComplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="_R_1id_-options" class="min-h-11 w-full rounded-md border border-input bg-background px-3" value=""/><input type="hidden" name="companyId" value=""/><ul hidden="" id="_R_1id_-options" role="listbox" aria-label="Company name" class="max-h-60 overflow-auto rounded-md border bg-background shadow-sm"><li class="p-3 text-sm text-muted-foreground">No matching companies.</li></ul></div><label class="block space-y-1 text-sm font-medium"><span>Preferred language</span><select class="min-h-11 w-full rounded-md border border-input bg-background px-3" name="locale"><option value="" selected="">Any</option><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div></div><div class="flex flex-wrap gap-4"><label class="space-y-1 text-sm font-medium"><span>Profile completeness</span><select class="block min-h-11 rounded-md border border-input bg-background px-3" name="completeness"><option value="any" selected="">Any</option><option value="complete">Complete</option><option value="incomplete">Missing contact details</option></select></label><label class="space-y-1 text-sm font-medium"><span>Sort by</span><select class="block min-h-11 rounded-md border border-input bg-background px-3" name="sort"><option value="name_asc" selected="">Name A–Z</option><option value="name_desc">Name Z–A</option><option value="renewal_asc">Renewal soonest</option></select></label></div></details><input type="hidden" name="limit" value="50"/></form><div class="space-y-4"><div class="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 p-3"><p aria-live="polite" class="text-sm font-medium" role="status">0 selected</p><p class="text-xs text-muted-foreground">Checked members only, across visited pages.</p><button class="min-h-11 rounded-md border border-border px-3 text-sm" type="button">Select all 2 matching</button><button class="min-h-11 rounded-md border border-border px-3 text-sm" type="button">Clear selection</button></div><p class="text-sm text-muted-foreground">Member export is not available in this environment.</p><div class="flex flex-wrap items-end gap-3 rounded-md border border-border p-3"><label class="grid gap-1 text-sm">Preferred language<select class="min-h-11 rounded-md border border-input bg-background px-3"><option value="en" selected="">English</option><option value="zh-HK">Traditional Chinese</option></select></label><label class="grid min-w-64 flex-1 gap-1 text-sm">Reason for correction<input class="min-h-11 rounded-md border border-input bg-background px-3" maxLength="500" minLength="3" required="" type="text" value=""/></label><button class="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled="" type="button">Preview correction</button></div><div class="overflow-x-auto rounded-md border border-border"><table class="min-w-full text-left text-sm"><caption class="caption-top px-4 py-3 text-left font-medium text-foreground">WTIA member list</caption><thead class="border-y border-border bg-muted/40 text-muted-foreground"><tr><th class="px-4 py-3" scope="col"><input aria-label="Select this page" type="checkbox"/></th><th class="px-4 py-3 font-medium" scope="col">Name</th><th class="px-4 py-3 font-medium" scope="col">Email</th><th class="px-4 py-3 font-medium" scope="col">Company</th><th class="px-4 py-3 font-medium" scope="col">Plan</th><th class="px-4 py-3 font-medium" scope="col">Status</th><th class="px-4 py-3 font-medium" scope="col">Renewal</th><th class="px-4 py-3 font-medium" scope="col">Score</th><th class="px-4 py-3 font-medium" scope="col">View</th></tr></thead><tbody></tbody></table><p class="px-4 py-6 text-muted-foreground">No members match this search.</p></div><nav aria-label="WTIA member list" class="flex justify-between text-sm"><a class="rounded-md border border-border px-3 py-2 hover:bg-muted focus-visible:outline" href="/admin/members?q=acme&amp;limit=20">Previous page</a></nav></div></div>"
+
+ ❯ tests/unit/admin-member-navigation.test.tsx:49:20
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/unit/admin-presentational.test.tsx > admin presentation > uses localized brand copy and preserves the query in next-page links without a false previous link
+ FAIL  tests/unit/admin-presentational.test.tsx > admin presentation > uses localized brand copy and preserves the query in next-page links without a false previous link
+AssertionError: expected '<div class="space-y-6"><form class="s…' to contain '?q=acme&amp;cursor=opaque-cursor'
+
+Expected: "?q=acme&amp;cursor=opaque-cursor"
+Received: "<div class="space-y-6"><form class="space-y-4 rounded-md border border-border bg-card p-4" action="/admin/members" method="get"><nav aria-label="Default views" class="flex flex-wrap gap-2"><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active">Active</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active&amp;status=cancel_at_period_end&amp;renewalFrom=2026-10-04&amp;renewalTo=2026-11-03&amp;sort=renewal_asc">Due within 30 days</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active&amp;status=cancel_at_period_end&amp;renewalFrom=2026-10-04&amp;renewalTo=2026-12-03&amp;sort=renewal_asc">Due within 60 days</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=active&amp;status=cancel_at_period_end&amp;renewalFrom=2026-10-04&amp;renewalTo=2027-01-02&amp;sort=renewal_asc">Due within 90 days</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=past_due">Past due</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?status=expired">Expired</a><a class="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted" href="/admin/members?completeness=incomplete">Missing details</a></nav><div class="flex flex-col gap-2 sm:flex-row sm:items-end"><label class="flex-1 space-y-1 text-sm font-medium" for="admin-member-search"><span>Search members</span><input class="min-h-11 w-full rounded-md border border-input bg-background px-3" id="admin-member-search" type="search" name="q" value="acme"/></label><button class="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">Apply filters</button><a class="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm" href="/admin/members">Clear filters</a></div><details class="space-y-4 rounded-md border p-3"><summary class="min-h-11 cursor-pointer py-2 text-sm font-medium">Advanced filters</summary><div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><fieldset class="space-y-1"><legend class="text-sm font-medium">Membership status</legend><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="pending_payment"/>Awaiting payment</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="pending_review"/>Pending review</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="active"/>Active</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="past_due"/>Past due</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="cancel_at_period_end"/>Ends at period end</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="cancelled"/>Cancelled</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="status" value="expired"/>Expired</label></fieldset><fieldset class="space-y-1"><legend class="text-sm font-medium">Plan</legend><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="community"/>Community</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="startup"/>Startup</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="corporate"/>Corporate</label><label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="planCode" value="patron"/>Patron</label></fieldset><div class="space-y-3"><label class="block space-y-1 text-sm font-medium"><span>Renewal from (Hong Kong date)</span><input class="min-h-11 w-full rounded-md border border-input bg-background px-3" type="date" name="renewalFrom" value=""/></label><label class="block space-y-1 text-sm font-medium"><span>Renewal to (Hong Kong date)</span><input class="min-h-11 w-full rounded-md border border-input bg-background px-3" type="date" name="renewalTo" value=""/></label></div><div class="space-y-3"><div class="relative space-y-2"><label for="_R_1id_" class="block text-sm font-medium">Company name</label><input id="_R_1id_" role="combobox" autoComplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="_R_1id_-options" class="min-h-11 w-full rounded-md border border-input bg-background px-3" value=""/><input type="hidden" name="companyId" value=""/><ul hidden="" id="_R_1id_-options" role="listbox" aria-label="Company name" class="max-h-60 overflow-auto rounded-md border bg-background shadow-sm"><li class="p-3 text-sm text-muted-foreground">No matching companies.</li></ul></div><label class="block space-y-1 text-sm font-medium"><span>Preferred language</span><select class="min-h-11 w-full rounded-md border border-input bg-background px-3" name="locale"><option value="" selected="">Any</option><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div></div><div class="flex flex-wrap gap-4"><label class="space-y-1 text-sm font-medium"><span>Profile completeness</span><select class="block min-h-11 rounded-md border border-input bg-background px-3" name="completeness"><option value="any" selected="">Any</option><option value="complete">Complete</option><option value="incomplete">Missing contact details</option></select></label><label class="space-y-1 text-sm font-medium"><span>Sort by</span><select class="block min-h-11 rounded-md border border-input bg-background px-3" name="sort"><option value="name_asc" selected="">Name A–Z</option><option value="name_desc">Name Z–A</option><option value="renewal_asc">Renewal soonest</option></select></label></div></details><input type="hidden" name="limit" value="50"/></form><div class="space-y-4"><p class="rounded-md border border-border p-3 text-sm text-muted-foreground" role="status">Batch operations are not available in this environment. You can still view members and batch history.</p><div class="overflow-x-auto rounded-md border border-border"><table class="min-w-full text-left text-sm"><caption class="caption-top px-4 py-3 text-left font-medium text-foreground">WTIA member list</caption><thead class="border-y border-border bg-muted/40 text-muted-foreground"><tr><th class="px-4 py-3 font-medium" scope="col">Name</th><th class="px-4 py-3 font-medium" scope="col">Email</th><th class="px-4 py-3 font-medium" scope="col">Company</th><th class="px-4 py-3 font-medium" scope="col">Plan</th><th class="px-4 py-3 font-medium" scope="col">Status</th><th class="px-4 py-3 font-medium" scope="col">Renewal</th><th class="px-4 py-3 font-medium" scope="col">Score</th><th class="px-4 py-3 font-medium" scope="col">View</th></tr></thead><tbody></tbody></table><p class="px-4 py-6 text-muted-foreground">No members match this search.</p></div><nav aria-label="WTIA member list" class="flex justify-between text-sm"><span></span><a class="rounded-md border border-border px-3 py-2 hover:bg-muted focus-visible:outline" href="/admin/members?q=acme&amp;limit=20&amp;cursor=opaque-cursor&amp;history=W251bGxd">Next page</a></nav></div></div>"
+
+ ❯ tests/unit/admin-presentational.test.tsx:89:19
+     87| 
+     88|     expect(nav).toContain(labels.brand);
+     89|     expect(table).toContain("?q=acme&amp;cursor=opaque-cursor");
+       |                   ^
+     90|     expect(table).not.toContain(labels.members.previous);
+     91|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  6 failed | 18 passed (24)
+   Start at  23:45:26
+   Duration  45.90s (transform 5.34s, setup 6.10s, collect 28.36s, tests 851ms, environment 29.05s, prepare 1.80s)
+

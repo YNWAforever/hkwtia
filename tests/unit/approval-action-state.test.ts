@@ -38,3 +38,8 @@ describe("safe approval action state", () => {
     expect(mutate).not.toHaveBeenCalled();
   });
 });
+
+it('shows an actionable localized stale-facts message without leaking membership or consent data',async()=>{
+ const mutate=async()=>{throw Error('APPROVAL_FACTS_STALE');};
+ await expect(runApprovalDecisionAction({},form('11111111-1111-4111-8111-111111111111','approved'),{messages:{...messages,stale:'Reload current facts.'},mutate})).resolves.toEqual({status:'error',message:'Reload current facts.'});
+});

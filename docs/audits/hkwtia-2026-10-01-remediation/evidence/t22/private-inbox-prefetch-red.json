@@ -1,0 +1,97 @@
+{
+  "sourceSha": "5b4ac2f4",
+  "route": "/admin/inbox",
+  "observationWindowMs": 8000,
+  "requests": [
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000015",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000014",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000013",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000012",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000011",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000015",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000014",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000013",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000012",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/inbox/50000010-0000-4000-8000-000000000011",
+      "prefetch": true
+    }
+  ],
+  "production": false,
+  "credentialsLogged": false
+}

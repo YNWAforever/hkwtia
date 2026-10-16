@@ -2,6 +2,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import type {Event} from "@/lib/db/server-schema";
 import {getPublicEventBySlug, registerForEvent, type EventRegistrationDependencies} from "@/lib/db/repos/events";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const eventId = "10000000-0000-4000-8000-000000000001";
@@ -10,7 +11,7 @@ const now = new Date("2030-01-01T10:00:00.000Z");
 const member: Actor = {kind: "member", userId: "member-user", profileId};
 
 function publicEvent(overrides: Partial<Event> = {}): Event {
-  return {
+  const row = {
     id: eventId,
     slug: "public-event",
     titleEn: "Public Event",
@@ -28,6 +29,7 @@ function publicEvent(overrides: Partial<Event> = {}): Event {
     updatedAt: now,
     ...overrides,
   };
+  return {...legacyDerivedEventColumns(row), ...row};
 }
 
 function registrationDependencies(overrides: Partial<{
@@ -45,6 +47,7 @@ function registrationDependencies(overrides: Partial<{
   const insertAudit = vi.fn(async () => { calls.push("audit"); });
   const dependencies: EventRegistrationDependencies = {
     now: () => now,
+    enrollReminder: async () => undefined,
     transaction: async (work) => work({lockEvent, hasEligibleMembership, getRegistration, countRegistered, upsertRegistration, insertAudit}),
   };
   return {calls, dependencies, lockEvent, hasEligibleMembership, getRegistration, countRegistered, upsertRegistration, insertAudit};

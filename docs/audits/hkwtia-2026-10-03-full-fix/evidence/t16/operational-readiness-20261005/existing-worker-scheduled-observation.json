@@ -1,0 +1,30 @@
+{
+  "startedAt": "2026-10-05T03:48:52.845Z",
+  "workerName": "hkwtia-m3-preview",
+  "activeBefore": {
+    "deploymentId": "00511ed9-5392-47b8-a256-6d6d87ff4092",
+    "versionId": "67abdfce-e2f3-4964-ad19-3468bf00fd89",
+    "percentage": 100
+  },
+  "records": [],
+  "jobTriggeredByThisExecution": false,
+  "deploymentOrCredentialOrScheduleChanged": false,
+  "rawLogsStored": false,
+  "secretValuesExported": false,
+  "bindingTargetProven": false,
+  "status": "NO_VERIFIED_TWO_NATIVE_WINDOWS",
+  "endedAt": "2026-10-05T03:51:07.862Z",
+  "stopReason": "TIME_BOUND_REACHED",
+  "tailProcess": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "stderrBytes": 0,
+  "activeAfter": {
+    "deploymentId": "00511ed9-5392-47b8-a256-6d6d87ff4092",
+    "versionId": "67abdfce-e2f3-4964-ad19-3468bf00fd89",
+    "percentage": 100
+  },
+  "nativeMinuteWindows": 0,
+  "versionStable": true
+}

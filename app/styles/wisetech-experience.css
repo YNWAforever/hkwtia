@@ -1,0 +1,1359 @@
+/*
+ * Experience layer: "Signal & Record" (2026-10 award-grade pass).
+ *
+ * Loaded after app/styles/wisetech.css (the byte-pinned donor port) and
+ * app/styles/wisetech-shell.css (fidelity corrections), so equal-specificity rules here win.
+ * Everything in this file is new presentation, not a donor correction: keeping it in its own
+ * sheet means the whole pass reverts by removing one import. The tokens and rationale are
+ * recorded in docs/design/DESIGN_SYSTEM.md.
+ */
+
+:root {
+  /* Signal palette: the donor's cyan family, lightened only where it sits on ink. */
+  --xp-signal: #8fc4e0;
+  --xp-signal-soft: rgba(143, 196, 224, 0.34);
+  --xp-ink-deep: #0a3d67;
+  --xp-on-ink-muted: rgba(255, 255, 255, 0.76);
+  --xp-text-muted: #4a6570; /* 6.20:1 on #fff, 5.74:1 on #f6f6f6 */
+  --xp-radius: 14px;
+  --xp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --xp-dur-draw: 620ms;
+  --xp-dur-ui: 180ms;
+  /* Han glyphs come from a sans face at every size: the serif stack has no Traditional
+     Chinese serif on Windows, so headings fell back to a thin, faux-bold PMingLiU next to
+     Palatino Latin. A single CJK sans keeps the two scripts the same colour on the page. */
+  --font-display-zh: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+}
+
+/* ─── Bilingual typography ────────────────────────────────────────────────────────────────
+ * The port tracks every h1/h2 at -0.045em, which is tuned for a Latin serif and crushes Han
+ * characters together. Han text also broke inside words: the zh-HK hero wrapped as
+ * 「香港如何引 / 領 AI+ 時代？」. `keep-all` makes the spaces and punctuation the
+ * translators already put in headings the preferred break points; `overflow-wrap: anywhere`
+ * keeps a long unspaced heading from overflowing a 320px screen. */
+.site-root:lang(zh-Hant-HK) :is(h1, h2, h3) {
+  font-family: var(--font-display-zh);
+  font-weight: 600;
+  letter-spacing: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+.site-root:lang(zh-Hant-HK) :is(h1, h2) { line-height: 1.16; }
+.site-root:lang(zh-Hant-HK) .hero h1 { font-size: clamp(42px, 6vw, 92px); }
+.site-root:lang(zh-Hant-HK) :is(p, li, dd) { line-break: strict; }
+.site-root :is(h1, h2, h3) { text-wrap: balance; }
+.site-root main p { text-wrap: pretty; }
+
+/* The homepage hero wraps its `fill` image in <picture> for the precomputed srcset; a static
+ * <picture> makes next/image warn on every render. Positioning it over the same box changes
+ * neither geometry (the img is already inset:0 to .hero) nor stacking (no z-index here). */
+.hero > picture { position: absolute; inset: 0; }
+
+/* ─── Page hero ───────────────────────────────────────────────────────────────────────────
+ * Only "/" uses the overlay header (lib/public-shell/hero-variant.ts); every page hero sits
+ * under the sticky in-flow header, so the port's 185px top padding -- sized to clear an
+ * overlay -- was empty navy. Compacting it brings each page's first real content above the
+ * fold on a 390x844 phone. */
+.page-hero,
+.inner-page-hero {
+  min-height: clamp(420px, 58vh, 560px);
+  padding-block: clamp(72px, 9vw, 120px) clamp(44px, 5vw, 64px);
+}
+.page-hero h1 { font-size: clamp(44px, 5.6vw, 84px); }
+@media (max-width: 820px) {
+  .page-hero,
+  .inner-page-hero { min-height: 0; padding-block: 64px 40px; }
+  .page-hero h1,
+  .inner-page-hero h1 { font-size: clamp(36px, 10vw, 48px); }
+}
+
+.page-hero-signal {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  width: min(52vw, 640px);
+  height: auto;
+  pointer-events: none;
+}
+.page-hero-signal .signal-arc { fill: none; stroke: var(--xp-signal-soft); stroke-width: 1.2; }
+.page-hero-signal .signal-arc:nth-child(odd) { stroke-dasharray: 2 7; }
+.page-hero-signal .signal-link { fill: none; stroke: rgba(143, 196, 224, 0.55); stroke-width: 1.2; }
+.page-hero-signal .signal-node { fill: var(--xp-signal); }
+.page-hero-signal .signal-source { fill: var(--wt-cyan); stroke: rgba(143, 196, 224, 0.4); stroke-width: 18; }
+@media (prefers-reduced-motion: no-preference) {
+  .page-hero-signal .signal-link {
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: xp-draw 1400ms var(--xp-ease-out) 200ms forwards;
+  }
+}
+@media (max-width: 820px) {
+  .page-hero-signal { width: 78vw; opacity: 0.55; }
+}
+
+@keyframes xp-draw { to { stroke-dashoffset: 0; } }
+
+/* ─── Header ──────────────────────────────────────────────────────────────────────────────
+ * The donor gives "Events & Programmes" (.event-first) a pill and an underline to promote it.
+ * That is exactly the shape of the "you are here" state (.current, wisetech-shell.css), so on
+ * /about two items claimed to be the current page. The promotion keeps its tint and becomes a
+ * dot; the underline belongs to `.current` alone. */
+.nav-button.event-first:after {
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--wt-cyan);
+  transform: translateX(-50%);
+}
+.nav-button.event-first:not(.current) { box-shadow: none; }
+
+/* ─── Concierge launcher ──────────────────────────────────────────────────────────────────
+ * On a phone the labelled pill (about 158x52) sat over content -- it covered the "Past
+ * events" tab on /events. Collapsed to its 52px mark it still meets the 44px target and
+ * keeps its aria-label. */
+@media (max-width: 520px) {
+  .concierge-trigger { padding-inline: 8px; }
+  .concierge-trigger-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* ─── Route finder (homepage signature interaction) ───────────────────────────────────────
+ * components/home/pathways.tsx. Radio inputs drive which route panel shows; no JavaScript. */
+.route-finder {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.78fr) minmax(0, 1.75fr);
+  gap: 28px;
+  align-items: stretch;
+}
+.route-picker {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.route-legend {
+  margin-bottom: 12px;
+  padding: 0;
+  color: var(--xp-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.route-choice { position: relative; }
+/* Visually hidden, never display:none -- the input is the focus target and the radio group
+ * owns arrow-key navigation. */
+.route-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.route-option {
+  display: grid;
+  min-height: 44px;
+  grid-template-columns: 30px 1fr;
+  column-gap: 12px;
+  align-items: baseline;
+  border: 1px solid var(--wt-line);
+  border-radius: 12px;
+  background: var(--wt-paper-bright);
+  color: var(--wt-ink);
+  cursor: pointer;
+  padding: 16px 18px;
+  transition: background-color var(--xp-dur-ui) ease, border-color var(--xp-dur-ui) ease, box-shadow var(--xp-dur-ui) ease;
+}
+.route-option:hover { border-color: rgba(15, 76, 129, 0.5); }
+.route-option-index {
+  grid-row: span 2;
+  color: var(--xp-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.route-option-title { font-family: var(--font-serif); font-size: 22px; line-height: 1.15; }
+.route-option-copy { grid-column: 2; margin-top: 6px; color: var(--xp-text-muted); font-size: 13px; line-height: 1.5; }
+.route-input:checked + .route-option {
+  border-color: var(--wt-ink);
+  background: var(--wt-ink);
+  box-shadow: 0 18px 44px rgba(15, 76, 129, 0.2);
+  color: #fff;
+}
+.route-input:checked + .route-option .route-option-index { color: var(--xp-signal); }
+.route-input:checked + .route-option .route-option-copy { color: var(--xp-on-ink-muted); }
+.route-input:focus-visible + .route-option { outline: 3px solid var(--wt-focus); outline-offset: 3px; }
+/* The chosen audience is joined to its panel: the line literally carries the route across. */
+.route-input:checked + .route-option::after {
+  position: absolute;
+  top: 50%;
+  right: -29px;
+  width: 29px;
+  height: 2px;
+  background: var(--wt-ink);
+  content: "";
+}
+
+.route-panels { display: grid; min-width: 0; gap: 16px; }
+.route-panel {
+  --route-accent: var(--xp-signal);
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.4fr);
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--wt-ink) 0%, var(--xp-ink-deep) 100%);
+  color: #fff;
+  overflow: hidden;
+}
+.route-panel.accent-jade { --route-accent: #a9c8e8; }
+.route-panel.accent-amber { --route-accent: var(--wt-amber); }
+.route-panel.accent-blue { --route-accent: #b8d0df; }
+.route-panel.accent-violet { --route-accent: #b3c9dc; }
+@supports selector(:has(*)) {
+  .route-panel { display: none; }
+  .route-finder:has(#route-corporates:checked) .route-panel[data-route="corporates"],
+  .route-finder:has(#route-smes:checked) .route-panel[data-route="smes"],
+  .route-finder:has(#route-startups:checked) .route-panel[data-route="startups"],
+  .route-finder:has(#route-professionals:checked) .route-panel[data-route="professionals"],
+  .route-finder:has(#route-gba:checked) .route-panel[data-route="gba"] { display: grid; }
+}
+/* Without :has() every route renders, so the joining line would point at nothing. */
+@supports not selector(:has(*)) {
+  .route-input:checked + .route-option::after { display: none; }
+}
+
+.route-origin {
+  position: relative;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(28px, 3vw, 40px);
+  isolation: isolate;
+}
+.route-signal { position: absolute; z-index: -1; top: 30px; left: 30px; width: 132px; height: 132px; }
+.route-signal i {
+  position: absolute;
+  border: 1px solid var(--route-accent);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+.route-signal i:nth-child(1) { inset: 0; opacity: 0.22; }
+.route-signal i:nth-child(2) { inset: 20%; opacity: 0.4; }
+.route-signal i:nth-child(3) { inset: 40%; border: 0; background: var(--route-accent); box-shadow: 0 0 24px var(--route-accent); opacity: 1; }
+.route-eyebrow {
+  margin: 0 0 10px;
+  color: var(--route-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.route-origin h3 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-family: var(--font-serif);
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 500;
+  line-height: 1.04;
+}
+.route-benefits { margin: 0 0 26px; color: var(--xp-on-ink-muted); font-size: 14px; line-height: 1.55; }
+.route-primary {
+  display: inline-flex;
+  min-height: 48px;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--wt-ink);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 18px;
+  text-decoration: none;
+  transition: transform var(--xp-dur-ui) ease;
+}
+.route-primary > span:first-child {
+  white-space: nowrap;
+  color: var(--xp-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.route-primary:hover { transform: translateY(-1px); }
+.route-primary:focus-visible,
+.route-destination:focus-visible { outline: 3px solid var(--wt-focus); outline-offset: 3px; }
+
+.route-destinations { display: flex; flex-direction: column; padding: clamp(28px, 3vw, 40px) clamp(24px, 3vw, 40px) clamp(28px, 3vw, 40px) 0; }
+.route-lead { margin: 0 0 18px 44px; color: var(--xp-on-ink-muted); font-size: 14px; line-height: 1.55; }
+.route-destinations ol {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-auto-rows: 1fr;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* The rail: one vertical line through the three node centres. */
+.route-destinations ol::before {
+  position: absolute;
+  top: calc(100% / 6);
+  bottom: calc(100% / 6);
+  left: 0;
+  width: 2px;
+  background: rgba(143, 196, 224, 0.4);
+  content: "";
+}
+.route-destinations li { position: relative; padding-left: 44px; }
+/* Each branch: rail to node. */
+.route-destinations li::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 44px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(143, 196, 224, 0.4), var(--route-accent));
+  content: "";
+  transform-origin: left center;
+}
+.route-destination {
+  position: relative;
+  display: grid;
+  height: 100%;
+  min-height: 44px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  column-gap: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  padding: 16px 20px;
+  text-decoration: none;
+  transition: background-color var(--xp-dur-ui) ease, border-color var(--xp-dur-ui) ease;
+}
+.route-destination strong { font-family: var(--font-serif); font-size: 21px; font-weight: 500; line-height: 1.2; }
+.route-destination > span:not(.route-node):not([aria-hidden]) { grid-column: 1; margin-top: 4px; color: var(--xp-on-ink-muted); font-size: 13px; line-height: 1.5; }
+.route-destination > span[aria-hidden="true"]:last-child { grid-column: 2; grid-row: 1 / span 2; align-self: center; transition: transform var(--xp-dur-ui) ease; }
+.route-destination:hover { border-color: var(--route-accent); background: rgba(255, 255, 255, 0.1); }
+.route-destination:hover > span[aria-hidden="true"]:last-child { transform: translate(2px, -2px); }
+.route-node {
+  position: absolute;
+  top: 50%;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--route-accent);
+  box-shadow: 0 0 0 5px rgba(143, 196, 224, 0.18);
+  transform: translateY(-50%);
+}
+.site-root:lang(zh-Hant-HK) :is(.route-option-title, .route-destination strong) { font-family: var(--font-display-zh); font-weight: 600; }
+
+/* The route draws itself when a panel appears: rings open, then each branch reaches its node.
+ * Animations restart whenever display flips from none, so every choice replays the draw --
+ * that replay is the feedback that the route changed. One iteration only; nothing loops. */
+@media (prefers-reduced-motion: no-preference) {
+  .route-panel .route-signal i { animation: xp-ring 700ms var(--xp-ease-out) both; }
+  .route-panel .route-signal i:nth-child(2) { animation-delay: 90ms; }
+  .route-panel .route-signal i:nth-child(3) { animation-delay: 180ms; }
+  .route-panel .route-destinations li::before { animation: xp-branch var(--xp-dur-draw) var(--xp-ease-out) both; }
+  .route-panel .route-destinations li:nth-child(1)::before { animation-delay: 160ms; }
+  .route-panel .route-destinations li:nth-child(2)::before { animation-delay: 260ms; }
+  .route-panel .route-destinations li:nth-child(3)::before { animation-delay: 360ms; }
+  .route-panel .route-destination { animation: xp-arrive 520ms var(--xp-ease-out) both; }
+  .route-panel li:nth-child(1) .route-destination { animation-delay: 260ms; }
+  .route-panel li:nth-child(2) .route-destination { animation-delay: 360ms; }
+  .route-panel li:nth-child(3) .route-destination { animation-delay: 460ms; }
+}
+@keyframes xp-ring { from { opacity: 0; transform: scale(0.55); } }
+@keyframes xp-branch { from { transform: scaleX(0); } }
+@keyframes xp-arrive { from { opacity: 0; transform: translateX(-8px); } }
+
+@media (max-width: 1120px) {
+  .route-finder { grid-template-columns: 1fr; }
+  .route-picker { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .route-legend { grid-column: 1 / -1; }
+  .route-option { height: 100%; grid-template-columns: 1fr; padding: 14px; }
+  .route-option-index { grid-row: auto; }
+  .route-option-title { font-size: 18px; }
+  .route-option-copy { display: none; }
+  .route-input:checked + .route-option::after { top: auto; right: auto; bottom: -15px; left: 50%; width: 2px; height: 15px; }
+}
+@media (max-width: 820px) {
+  .route-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route-choice:last-child { grid-column: 1 / -1; }
+  .route-option { min-height: 64px; align-content: center; }
+  .route-panel { grid-template-columns: 1fr; }
+  .route-origin { border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding: 26px 22px 24px; }
+  .route-signal { top: 18px; right: 18px; left: auto; width: 88px; height: 88px; }
+  .route-destinations { padding: 22px 20px 24px 22px; }
+  .route-lead { margin-left: 34px; }
+  .route-destinations li { padding-left: 34px; }
+  .route-destinations li::before { width: 34px; }
+  .route-destination { padding: 14px 16px; }
+  .route-destination strong { font-size: 18px; }
+  .route-input:checked + .route-option::after { display: none; }
+}
+
+/* ─── Readable type floor ─────────────────────────────────────────────────────────────────
+ * The port sets 178 font sizes below 13px, running copy included (10px membership
+ * dimension text, 11px footer links, 12px plan features) and a 7px header subtitle. A floor
+ * by role, not by selector-by-selector taste: running copy 14px, labels and metadata 12px,
+ * uppercase micro-labels 11px. Sizes the port already sets above a floor are untouched. */
+:is(.membership-dimensions p, .plan-grid p, .plan-grid li, .inner-card p, .intro-process p, .badge-grid p,
+  .event-stage-grid p, .archive-grid p, .journey-grid p, .pricing-note p, .detail-aside p, .event-card-body dd,
+  .event-calendar-view p, .proof-inner p, .concierge-answer, .audience-card p,
+  .event-interest .interest-form p:not(.eyebrow), .newsletter-success p, .event-results-head p,
+  .programme-groupings a, .programme-groupings li, .split-heading > p) {
+  font-size: 14px;
+  line-height: 1.6;
+}
+:is(.footer-links a, .footer-links address, .mega-feature-v2 p, .mega-column a, .mega-links > a) { font-size: 13px; }
+:is(.breadcrumb, .event-detail-meta, .event-card-body dt, .event-detail-facts span, .partner-record-card dt,
+  .practical-grid dt, .tag-row span, .impact-metrics small, .footer-bottom a, .footer-brand > small,
+  .legacy-logo-card > span, .partner-status, .event-status, .form-grid label, .event-filter-grid label,
+  .partner-form label, .directory-search label, .interest-grid label, .consent, .task-form label,
+  .hero-note, .event-image-note, .archive-photo-card figcaption > span, .benefit-line, .results-head span,
+  .event-results-head span, .directory-actions label) {
+  font-size: 12px;
+}
+:is(.card-index, .status-label, .inner-card-index, .membership-dimensions span, .mega-column h2,
+  .mega-column-title, .footer-links strong, .hero-scroll) { font-size: 11px; }
+/* Round 17: the descriptor and the phone route-map labels were the last text under the 11px
+   floor that every other label on the site already meets (10px and 9px). */
+.brand-copy small { font-size: 11px; letter-spacing: 0.04em; }
+@media (max-width: 1120px) { .brand-copy small { display: none; } }
+@media (max-width: 520px) { .route-map span { font-size: 11px; } }
+@media (min-width: 1321px) { .nav-button { font-size: 12px; } }
+
+/* ─── Events: open / past tabs ────────────────────────────────────────────────────────────
+ * The port sizes .event-quick-tabs for five tabs and, under 820px, spans the last one across
+ * the row. hkwtia has two, so on a phone "Past events" took a full row under a half-width
+ * "Open now". Two tabs, two equal columns, at every width. */
+.event-quick-tabs { grid-template-columns: repeat(2, minmax(0, 220px)); }
+.event-quick-tabs button:last-child { grid-column: auto; }
+@media (max-width: 820px) {
+  .event-quick-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .event-quick-tabs button { min-height: 52px; }
+}
+
+/* ─── Membership cards on a phone ─────────────────────────────────────────────────────────
+ * Plan and dimension cards keep their desktop minimum heights and the index's 90px gap in a
+ * single column, so each plan opened with ~300px of empty card before its name. */
+@media (max-width: 820px) {
+  .plan-grid article { min-height: 0; padding: 26px 22px; }
+  .plan-grid .card-index { margin-bottom: 28px; }
+  .membership-dimensions article { min-height: 0; padding: 22px; }
+  .membership-dimensions h3 { margin-top: 18px; }
+}
+
+/* ─── Directory filters (/members, shared grammar with /showcase) ─────────────────────────
+ * The search submit and both selects rendered as bare browser controls. */
+.directory-search > div > button {
+  min-height: 62px;
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  background: var(--wt-ink);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  padding-inline: 28px;
+}
+.directory-search > div > button:hover { background: var(--xp-ink-deep); }
+.directory-actions > span { display: grid; min-width: 220px; gap: 6px; }
+.directory-actions label { color: var(--xp-text-muted); font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.directory-actions select {
+  min-height: 48px;
+  border: 1px solid var(--wt-line);
+  border-radius: 10px;
+  background: var(--wt-paper-bright);
+  color: var(--wt-ink);
+  font-size: 15px;
+  padding: 10px 14px;
+}
+.directory-actions { align-items: flex-end; }
+.directory-actions > .button { min-height: 48px; }
+.directory-actions > .text-link { min-height: 48px; display: inline-flex; align-items: center; }
+:is(.directory-search input, .directory-actions select, .directory-search > div > button):focus-visible {
+  outline: 3px solid var(--wt-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 820px) {
+  .directory-search > div > button { min-height: 52px; width: 100%; }
+  .directory-actions { align-items: stretch; }
+  .directory-actions > span { min-width: 0; width: 100%; }
+}
+
+/* ─── Open now: the record behind an empty state ──────────────────────────────────────────
+ * components/home/open-now.tsx. Sits on the ink section under the honest-empty block. */
+.open-now-record {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 18px;
+  margin: 22px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  padding-top: 22px;
+  color: var(--xp-on-ink-muted);
+  font-size: 14px;
+}
+.open-now-record > span {
+  color: var(--xp-signal);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.open-now-record a {
+  display: inline-flex;
+  min-height: 44px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  color: #fff;
+  text-decoration: none;
+}
+.open-now-record strong { font-family: var(--font-serif); font-size: 20px; font-weight: 500; text-decoration: underline; text-decoration-color: rgba(143, 196, 224, 0.5); text-underline-offset: 5px; }
+.open-now-record a:hover strong { text-decoration-color: #fff; }
+.open-now-record time { color: var(--xp-on-ink-muted); }
+.open-now-record a:focus-visible { outline: 3px solid var(--wt-focus); outline-offset: 3px; }
+.site-root:lang(zh-Hant-HK) .open-now-record strong { font-family: var(--font-display-zh); font-weight: 600; }
+
+/* ─── Light cards inside the ink "Open now" section ───────────────────────────────────────
+ * `.opportunity-section` inverts its headings to white for the section title; the event cards
+ * it holds are white (`.service-link`), so every open event's title rendered white on white --
+ * 1:1, invisible. Latent in production only because no event was open on 2026-10-05; the
+ * isolated database, which has open events, shows it on every load. Pinned by
+ * tests/e2e/experience-contrast.spec.ts. */
+.opportunity-section .service-link h3 { color: var(--wt-ink); }
+
+/* ─── Index numerals on white ─────────────────────────────────────────────────────────────
+ * Three donor index styles colour their "01/02/03" numerals in the light accent blues, which
+ * pass on ink and fail on white: --wt-blue #729bb5 measures 2.97:1 (.programme-groupings on
+ * /programmes, .solution-needs on /showcase) and --wt-jade #5188bf 3.73:1 (.service-grid on
+ * /launchpad). axe flagged all three on production 2026-10-05. --wt-accent-text #315f82 keeps
+ * the blue family at 6.80:1. */
+.programme-groupings a span:first-child,
+.programme-groupings li span:first-child,
+.solution-needs button > span:first-child,
+.service-grid article > span { color: var(--wt-accent-text); }
+
+/* ─── Long tokens never widen the page ────────────────────────────────────────────────────
+ * Archive bodies carry bare URLs (http://contest2020.bestasiaapp.hk/) and event titles can
+ * carry slugs; one unbreakable token pushed nine /about/history entries and the open-event
+ * cards past a 320px screen, where .site-root's overflow clip cut the text off (WCAG 1.4.10).
+ * `anywhere` also lowers min-content, which is what lets the grid track shrink. */
+.site-root main :is(p, li, dd, h2, h3, a) { overflow-wrap: anywhere; }
+.service-grid, .service-grid > * { min-width: 0; }
+/* A flex row's input keeps its intrinsic min width, so between 521 and 820px the search box and
+ * its button overran the shell by ~38px. */
+.directory-search > div > input { min-width: 0; }
+
+/* The donor rule `.concierge-trigger span` (0,1,1) draws every span in the trigger as the 38px
+ * "W+" disc, so the wrapped label was squeezed into a second disc. Restore the label as text at
+ * (0,2,0); the phone collapse is restated at the same specificity after it so it still wins.
+ * Pinned by tests/e2e/experience-contrast.spec.ts. */
+.concierge-trigger .concierge-trigger-label {
+  display: inline;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+@media (max-width: 520px) {
+  .concierge-trigger .concierge-trigger-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* ─── Round 2 (2026-10-06): rhythm, the event journey, the CPAI card ──────────────────────
+ * Measured on production at 1440x900: the homepage ran 14,638px (17 screens) and 16,962px at
+ * 390x844 (21). Most of the excess was not content but gaps: two section paddings of ~122px
+ * back to back on the same paper colour, plus cards whose height came from empty margins. */
+
+/* Section rhythm. Consecutive sections share a background, so the two paddings read as one
+ * ~244px void; 96px a side still separates them clearly. */
+.section { padding-block: clamp(64px, 6.6vw, 104px); }
+.section-heading { margin-bottom: clamp(32px, 4vw, 56px); }
+@media (max-width: 520px) { .section { padding-block: 60px; } }
+
+/* Before / During / After was three bordered boxes with a 66px gap between the numeral and
+ * the title, so on a phone each stage was mostly blank. It is a sequence, so it is drawn as
+ * one: a signal line runs through a node per stage, the same grammar as the route finder. */
+.event-stage-grid {
+  position: relative;
+  border: 0;
+  gap: clamp(20px, 3vw, 48px);
+  counter-reset: none;
+}
+.event-stage-grid::before {
+  position: absolute;
+  top: 7px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--wt-ink), var(--xp-signal) 70%, rgba(143, 196, 224, 0.25));
+  content: "";
+}
+.event-stage-grid article {
+  position: relative;
+  min-height: 0;
+  border: 0;
+  padding: 44px 0 0;
+}
+.event-stage-grid article::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--wt-ink);
+  box-shadow: 0 0 0 6px rgba(143, 196, 224, 0.28);
+  content: "";
+}
+.event-stage-grid span {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+.event-stage-grid h3 { margin: 12px 0 10px; font-size: clamp(30px, 2.6vw, 40px); }
+.event-stage-grid p { max-width: 34ch; margin: 0; font-size: 15px; }
+@media (max-width: 820px) {
+  .event-stage-grid { gap: 0; padding-left: 36px; }
+  .event-stage-grid::before { top: 8px; bottom: 8px; left: 7px; width: 2px; height: auto; right: auto;
+    background: linear-gradient(180deg, var(--wt-ink), var(--xp-signal) 70%, rgba(143, 196, 224, 0.25)); }
+  .event-stage-grid article { min-height: 0; padding: 0 0 32px; }
+  .event-stage-grid article:last-child { padding-bottom: 0; }
+  .event-stage-grid article::before { top: 2px; left: -36px; }
+  .event-stage-grid h3 { margin-top: 6px; }
+}
+/* The line draws as the section scrolls in -- a load-time animation would finish long before
+ * anyone reaches section 4. Browsers without scroll timelines simply show the drawn line. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .event-stage-grid::before {
+      animation: xp-branch linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 45%;
+      transform-origin: left center;
+    }
+    @media (max-width: 820px) { .event-stage-grid::before { animation-name: xp-rail; transform-origin: center top; } }
+  }
+}
+@keyframes xp-rail { from { transform: scaleY(0); } }
+
+/* The CPAI feature card is two rows tall with its text bottom-aligned, which left ~350px of
+ * flat ink above it (and an empty first screen of the card on a phone). The emptiness is now
+ * the WTIA signal: the concentric rings already used by the hero mark and route finder. */
+.programme-card.feature {
+  overflow: hidden;
+  isolation: isolate;
+}
+.programme-card.feature::before {
+  position: absolute;
+  z-index: -1;
+  top: -18%;
+  right: -22%;
+  width: 92%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--xp-signal) 0 3.2%, rgba(143, 196, 224, 0.45) 3.4% 6%, transparent 6.2%),
+    repeating-radial-gradient(circle, transparent 0 11.4%, rgba(143, 196, 224, 0.2) 11.6% 11.9%, transparent 12.1% 16%);
+  content: "";
+  -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 71%);
+  mask-image: radial-gradient(circle, #000 35%, transparent 71%);
+}
+.programme-card.feature::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(10, 61, 103, 0.9) 78%);
+  content: "";
+  pointer-events: none;
+}
+@media (max-width: 820px) {
+  .programme-card.feature { min-height: 400px; }
+  .programme-card.feature::before { top: -30%; right: -35%; width: 120%; }
+}
+
+/* `h3 { margin: auto 0 17px }` bottom-aligns each title, but when a two-line title fills the
+ * card (HKICT Awards at 1440) the auto margin collapses to 0 and the title touched its
+ * eyebrow. A floor under the eyebrow row keeps them apart whatever the title length. On a
+ * phone the cards stack, so the bottom alignment only manufactured blank space. */
+.programme-card > div { margin-bottom: 24px; }
+@media (max-width: 820px) {
+  .programme-card:not(.feature) { min-height: 0; }
+  .programme-card:not(.feature) h3 { margin-top: 12px; }
+}
+
+/* The three sections that set their own padding instead of `.section` (the impact band ran
+ * 173px a side at 1440) follow the same rhythm. */
+.impact-section, .archive-proof, .legacy-network { padding-block: clamp(64px, 6.6vw, 104px); }
+@media (max-width: 520px) {
+  .impact-section, .archive-proof, .legacy-network { padding-block: 60px; }
+}
+
+/* Footer on a phone: four single-file columns with a 240px floor each ran ~3.5 screens at
+ * 390x844, longer than any content section above it. Two columns, height from content. The
+ * links already carry hkwtia's 44px target floor (min-h-11 in site-footer.tsx), so the 14px
+ * gap on top of it was pure air; dropping it leaves every target at 44px. */
+@media (max-width: 520px) {
+  .footer-links { grid-template-columns: 1fr 1fr; }
+  .footer-links > div { min-height: 0; gap: 0; padding: 24px 16px 20px; }
+  .footer-links strong { margin-bottom: 6px; }
+  .footer-links address { margin-top: 8px; }
+}
+
+/* ─── Round 3 (2026-10-06): the homepage hero ─────────────────────────────────────────────
+ * The photograph's own stage lettering ("AI for ALL", the summit banner) sits between 40% and
+ * 63% of the frame, exactly where the headline ends, and the donor scrim had already thinned to
+ * ~0.6 there, so two sets of display type competed in the first screen. The scrim now holds its
+ * density across the headline's measure and falls off over the speakers, who stay sharp. */
+@media (min-width: 821px) {
+  .hero-scrim {
+    background:
+      linear-gradient(90deg, rgba(7, 34, 57, 0.94) 0%, rgba(9, 48, 84, 0.88) 38%, rgba(15, 76, 129, 0.5) 60%, rgba(15, 76, 129, 0.14) 84%),
+      linear-gradient(0deg, rgba(7, 34, 57, 0.72), transparent 50%);
+  }
+  /* The pill repeated the eyebrow ("WiseTech Hong Kong") and the lead ("AI+ industry
+   * platform") in the corner the scroll cue and the concierge launcher already share; at
+   * 1440x900 it sat 2px from the launcher. Phones already hide it (wisetech.css:712). */
+  .hero-note { display: none; }
+}
+/* On a phone the copy stacks over the middle of the frame, so the lead ran across the stage's
+ * "Accelerating Innovation" line at ~0.6 scrim. Dense through the copy, open above it. */
+@media (max-width: 820px) {
+  .hero-scrim {
+    background: linear-gradient(0deg, rgba(7, 34, 57, 0.96) 0%, rgba(8, 40, 70, 0.9) 60%, rgba(15, 76, 129, 0.55) 82%, rgba(15, 76, 129, 0.3) 100%);
+  }
+}
+
+/* Entrance: the hero composes itself once -- eyebrow, headline, lead, actions -- in under a
+ * second. Only opacity and transform move, so nothing reflows, and the photograph (the LCP
+ * element) is never delayed or hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-content > * { animation: xp-rise 760ms var(--xp-ease-out) both; }
+  .hero-content > .eyebrow { animation-delay: 80ms; }
+  .hero-content > h1 { animation-delay: 160ms; }
+  .hero-content > p:not(.eyebrow) { animation-delay: 300ms; }
+  .hero-content > .hero-actions { animation-delay: 420ms; }
+  .hero-scroll { animation: xp-fade 900ms ease 700ms both; }
+}
+@keyframes xp-rise { from { opacity: 0; transform: translateY(18px); } }
+@keyframes xp-fade { from { opacity: 0; } }
+
+/* ─── Round 4 (2026-10-06): three chapters instead of six sections ───────────────────────
+ * The homepage ran 13 sections of one shape (eyebrow, display heading, lead on the right).
+ * Three pairs made one claim each and are now one chapter each; nothing was removed. */
+
+/* A. Ecosystem -> its entry points (components/home/market-products.tsx `embedded`). The two
+ * 600px product panels become a two-up rail under the industry board. */
+.ecosystem-entry { margin-top: clamp(40px, 5vw, 72px); }
+.ecosystem-entry-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; margin-bottom: 20px; }
+.ecosystem-entry-head .eyebrow { margin: 0; }
+.ecosystem-entry-head h3 {
+  margin: 0;
+  color: var(--wt-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 2.8vw, 42px);
+  font-weight: 500;
+  line-height: 1.05;
+}
+.ecosystem-entry .product-panel { min-height: 0; justify-content: flex-start; padding: clamp(26px, 3.2vw, 44px); }
+.ecosystem-entry .product-panel-head { position: static; margin-bottom: clamp(28px, 3vw, 48px); }
+.ecosystem-entry .product-panel-head > span:first-child { font-size: 26px; }
+.ecosystem-entry .product-panel h4 {
+  max-width: 560px;
+  margin: 0 0 4px;
+  color: var(--wt-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(30px, 3vw, 46px);
+  font-weight: 500;
+  line-height: 1.02;
+}
+.ecosystem-entry .product-panel > p { margin: 14px 0 18px; }
+
+/* B. Archive <- its evidence (components/home/impact-evidence.tsx `embedded`). The figures were
+ * a full ink band of 260px tiles; inside the archive they are one evidence line between the
+ * heading and the photographs, on the archive's own light ground. */
+.evidence-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.6fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
+  margin-bottom: clamp(40px, 5vw, 64px);
+  border-block: 1px solid var(--wt-line);
+  padding-block: clamp(30px, 3.6vw, 48px);
+}
+.evidence-strip h3 {
+  margin: 0 0 14px;
+  color: var(--wt-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 2.6vw, 40px);
+  font-weight: 500;
+  line-height: 1.05;
+}
+.evidence-strip > div:first-child > p:not(.eyebrow) { margin: 0; color: var(--xp-text-muted); font-size: 15px; line-height: 1.65; }
+.evidence-strip .impact-metrics { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.evidence-strip .impact-metrics > div {
+  min-height: 0;
+  justify-content: flex-start;
+  border-color: var(--wt-line);
+  background: var(--wt-paper-bright);
+  padding: 22px;
+}
+.evidence-strip .impact-metrics strong { color: var(--wt-ink); font-size: clamp(44px, 4vw, 60px); }
+.evidence-strip .impact-metrics span:not(.status-label) { color: var(--wt-ink); }
+.evidence-strip .impact-metrics small { color: var(--xp-text-muted); font-size: 12px; }
+/* The donor's `.impact-metrics span:not(.status-label)` (the tile label) also matches the two
+ * spans inside <small>, which turned the definition and period bold ink. */
+.evidence-strip .impact-metrics small span { margin: 0; color: inherit; font-size: inherit; font-weight: inherit; }
+.evidence-strip .impact-metrics .method-card { border-color: transparent; background: #8fc4e0; }
+.evidence-strip .impact-metrics .method-card p { margin-top: 18px; color: var(--xp-ink-deep); font-size: 20px; }
+@media (max-width: 820px) {
+  .evidence-strip { grid-template-columns: 1fr; }
+}
+
+/* C. The close. The membership / partnership choice and the footer's "what should Hong Kong
+ * build next?" are one ending; on paper-then-charcoal they read as two. The section takes the
+ * footer's charcoal so the page ends in one dark chapter. The panels stay white, so everything
+ * inside them keeps its measured colours; only the heading turns light. */
+.conversion-section { background: #363839; padding-bottom: clamp(48px, 5vw, 72px); }
+.conversion-section .section-heading h2 { color: #fff; }
+.conversion-section .section-heading .eyebrow { color: var(--xp-signal); }
+.conversion-section .section-heading p:not(.eyebrow) { color: rgba(255, 255, 255, 0.76); }
+.conversion-grid { border-color: transparent; background: var(--wt-paper-bright); }
+/* Round 27: the membership card's published fees, one ruled row per plan — name left, fee right
+ * (components/home/conversion-paths.tsx). */
+.conversion-fees { max-width: 62ch; margin: 18px 0 0; border-top: 1px solid var(--wt-line); }
+.conversion-fees > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 1px solid var(--wt-line); padding: 10px 0; }
+.conversion-fees dt { color: var(--wt-ink); font-size: 14px; font-weight: 700; }
+.conversion-fees dd { margin: 0; color: #536267; font-size: 14px; font-variant-numeric: tabular-nums; }
+.site-root:has(.conversion-section) .site-footer { border-top: 1px solid rgba(255, 255, 255, 0.12); }
+
+/* ─── Round 5 (2026-10-06): a chaptered page, one layout that breaks the rhythm ───────────
+ * After round 4 the homepage had ten sections, nine of them opening the same way: eyebrow,
+ * display heading, lead on the right, content below. */
+
+/* Chapter numbers. The homepage reads as one argument in nine chapters, so each eyebrow
+ * carries its place in it. Scoped to the homepage (the only page whose <main> starts with
+ * the hero). The numeral is decoration: the `/ ""` alternative text keeps screen readers
+ * from announcing "zero one" before every eyebrow.
+ * Not a CSS counter: every section after the hero is `content-visibility: auto`, whose
+ * implied style containment scopes counters to each section, so every chapter read "01".
+ * Position does the counting instead -- a section that renders nothing (no partners, no
+ * archive photographs) is simply not there, and the chapters after it close up. */
+main:has(> .hero) > section :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow { display: flex; align-items: center; gap: 12px; }
+main:has(> .hero) > section :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before {
+  flex: none;
+  padding-right: 12px;
+  border-right: 1px solid currentColor;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+main:has(> .hero) > section:nth-of-type(2) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "01"; content: "01" / ""; }
+main:has(> .hero) > section:nth-of-type(3) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "02"; content: "02" / ""; }
+main:has(> .hero) > section:nth-of-type(4) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "03"; content: "03" / ""; }
+main:has(> .hero) > section:nth-of-type(5) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "04"; content: "04" / ""; }
+main:has(> .hero) > section:nth-of-type(6) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "05"; content: "05" / ""; }
+main:has(> .hero) > section:nth-of-type(7) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "06"; content: "06" / ""; }
+main:has(> .hero) > section:nth-of-type(8) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "07"; content: "07" / ""; }
+main:has(> .hero) > section:nth-of-type(9) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "08"; content: "08" / ""; }
+main:has(> .hero) > section:nth-of-type(10) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "09"; content: "09" / ""; }
+main:has(> .hero) > section:nth-of-type(11) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "10"; content: "10" / ""; }
+main:has(> .hero) > section:nth-of-type(12) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "11"; content: "11" / ""; }
+main:has(> .hero) > section:nth-of-type(13) :is(.section-heading > div, .archive-proof-heading > div, .legacy-network-heading > div, .gba-copy) > .eyebrow::before { content: "12"; content: "12" / ""; }
+
+/* The event journey is a sequence, so on a wide screen it is laid out as one: the question
+ * on the left, the three stages descending the rail on the right (the phone layout's rail,
+ * given room). It is the one chapter that does not open heading-over-content. */
+@media (min-width: 1121px) {
+  #events-journey > .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: clamp(56px, 7vw, 120px);
+    align-items: start;
+  }
+  #events-journey > .shell > :not(.section-heading):not(.event-stage-grid) { grid-column: 1 / -1; margin-top: 56px; }
+  #events-journey .section-heading { position: sticky; top: 132px; grid-template-columns: 1fr; gap: 22px; margin-bottom: 0; }
+  #events-journey .section-heading h2 { font-size: clamp(44px, 4.4vw, 72px); }
+  #events-journey .event-stage-grid { grid-template-columns: 1fr; gap: 0; padding: 8px 0 0 52px; }
+  #events-journey .event-stage-grid::before {
+    top: 16px; right: auto; bottom: 16px; left: 7px; width: 2px; height: auto;
+    background: linear-gradient(180deg, var(--wt-ink), var(--xp-signal) 70%, rgba(143, 196, 224, 0.25));
+  }
+  #events-journey .event-stage-grid article { padding: 0 0 clamp(40px, 4vw, 64px); }
+  #events-journey .event-stage-grid article:last-child { padding-bottom: 0; }
+  #events-journey .event-stage-grid article::before { top: 2px; left: -52px; }
+  #events-journey .event-stage-grid h3 { margin-top: 8px; font-size: clamp(36px, 3.2vw, 52px); }
+  #events-journey .event-stage-grid p { font-size: 16px; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1121px) {
+    #events-journey .event-stage-grid::before { animation-name: xp-rail; transform-origin: center top; }
+  }
+}
+
+/* The closing cards on a phone: the donor's 90px above each title was the largest gap left
+ * in the last screen of the page. */
+@media (max-width: 520px) {
+  .conversion-grid h3 { margin-top: 24px; }
+}
+
+/* ─── Round 6 (2026-10-06): inner pages ───────────────────────────────────────────────────
+ * Walked /membership, /events and /about at 1440x900 and 390x844 on production. */
+
+/* Bare section headings. /membership's "Membership FAQ" and "What happens after you join" are
+ * plain <h2>s directly in the section shell; no donor class reaches them, so they rendered at
+ * the browser's 16px between 38px plan titles and a 94px closing heading. Every unclassed h2
+ * in that position now takes the inner-section heading scale. */
+.site-root main section > .shell > h2:not([class]) {
+  max-width: 900px;
+  margin: 0 0 clamp(24px, 3vw, 40px);
+  color: var(--wt-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 4vw, 60px);
+  font-weight: 500;
+  line-height: 1.02;
+}
+
+/* Breadcrumb on a phone: the round-1 `overflow-wrap: anywhere` rule reaches the "Home" link,
+ * and next to a long current-page title the flex row squeezed it to 31px, so it broke as
+ * "Hom / e". Each crumb but the last keeps its word whole. */
+.breadcrumb { flex-wrap: wrap; align-items: baseline; }
+.breadcrumb > :not(:last-child) { flex: none; overflow-wrap: normal; white-space: nowrap; }
+.breadcrumb > :last-child { flex: 1 1 12ch; min-width: 0; }
+
+/* Consent checkbox. The form field rule (full width, 52px tall) also sized the checkbox, so
+ * /events' WhatsApp opt-in rendered as a 325x52 empty box with its label pushed aside. */
+.consent { align-items: center; gap: 12px; }
+.consent input[type="checkbox"] {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--wt-ink);
+}
+
+/* "What happens after you join": 75px above each step title left most of every card blank,
+ * worst on a phone where the five stack. Same remedy as the homepage journey. */
+.intro-process article { min-height: 0; padding: 24px; }
+.intro-process h3 { margin-top: 28px; }
+@media (max-width: 520px) {
+  .intro-process article { min-height: 0; }
+  .intro-process h3 { margin-top: 14px; }
+}
+
+/* ─── Round 7 (2026-10-06): checkboxes in flex labels ─────────────────────────────────────
+ * /launchpad's application consent is a native checkbox in a Tailwind flex label; on a phone
+ * the long zh-HK consent sentence shrank it to 13x16px. A checkbox in any label row keeps its
+ * size and matches the 24px consent box from round 6. */
+.site-root main label:has(> input[type="checkbox"]) > input[type="checkbox"] {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--wt-ink);
+}
+
+/* ─── Round 8 (2026-10-06): record grids and the last sub-11px text ───────────────────────
+ * An automated pass over all 23 inner routes at 1440 and 390 (headings, type size, broken
+ * images, overflow, line length, axe), then the screens. */
+
+/* Record cards. /partners lists 79 records; each card carried a 470px minimum height and, on
+ * a phone, a 233px logo plate (the 320:202 aspect at full width) above its text, so the page
+ * ran 48,542px at 390 (about 57 screens) and 15,065px at 1440. Cards now take their content's
+ * height, and on a phone the plate is a 108px band and the two record facts sit side by side.
+ * A side-by-side card (logo left) was tried first and was shorter, but the logo files carry
+ * wide transparent margins, so a 72px column left most marks illegible; a full-width band
+ * keeps them readable. The image keeps its 100% box (not width:auto), so an unloaded lazy
+ * logo still reserves its space and nothing shifts when it arrives. The same card serves
+ * /members and /showcase; a showcase card without a logo is untouched. */
+.partner-record-card { min-height: 0; }
+.partner-record-card h3 { margin: 16px 0 14px; }
+@media (max-width: 520px) {
+  .partner-record-card > .partner-record-logo {
+    display: flex;
+    height: 108px;
+    aspect-ratio: auto;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+  }
+  .partner-record-card > .partner-record-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .partner-record-card > .partner-record-body { padding: 14px 18px; }
+  .partner-record-card > .text-link { margin: 0 18px 14px; }
+  .partner-record-card h3 { margin: 12px 0 10px; font-size: 22px; line-height: 1.15; }
+  .partner-record-card dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; }
+  .partner-record-card dl > div { padding-block: 8px; }
+}
+
+/* Round 18: /partners shows logo tiles. Every card used to repeat its group's badge,
+ * relationship and status, which made the page 30,016px tall on phones and 14,777px on desktop;
+ * that copy is now said once under each group heading (.partner-record-summary) and a tile keeps
+ * only what is its own. Scoped to .partner-tile so the /members and /showcase cards that share
+ * .partner-record-card are untouched. */
+.partner-record-summary { display: grid; gap: 6px; }
+.partner-record-summary p { max-width: 58ch; margin: 0; color: #536267; font-size: 14px; line-height: 1.5; }
+.partner-tile-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1200px) { .partner-tile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.partner-tile { min-height: 0; }
+.partner-tile > .partner-record-logo { aspect-ratio: 16 / 9; padding: 14px 18px; }
+.partner-tile > .partner-record-body { gap: 6px; padding: 14px 16px 16px; }
+.partner-tile h3 { margin: 0; font-size: 20px; line-height: 1.15; overflow-wrap: anywhere; }
+.partner-tile-meta { margin: 0; color: #58676d; font-size: 12px; line-height: 1.4; }
+.partner-tile-link {
+  display: inline-flex; min-height: 24px; max-width: 100%; align-items: center;
+  overflow: hidden; color: var(--wt-blue); font-size: 12px; text-overflow: ellipsis; white-space: nowrap;
+}
+@media (max-width: 900px) { .partner-tile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .partner-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+@media (max-width: 520px) {
+  .partner-tile > .partner-record-logo { height: auto; aspect-ratio: 16 / 9; padding: 10px 12px; }
+  .partner-tile > .partner-record-body { padding: 10px 12px 12px; }
+  .partner-tile h3 { margin: 0; font-size: 16px; }
+}
+
+/* The last text under 11px. The rich-page "related" links (About WTIA, Since 2001, ...) were
+ * 9px and the compass labels (Founding year, Track record, ...) 10px on /about, /about/history,
+ * /about/chairman, /about/committees and every programme page; the step numerals on
+ * /membership and /launchpad were 10px; two links people press ("View programme", the news
+ * "Subscribe") were 11px. */
+/* `:first-child` on the related label: it matches the donor's own selector (wisetech.css:968,
+ * which a bare `> span` loses to), and leaves the 20px arrow, the card's last span, alone. */
+.rich-related-grid > a > span:first-child, .rich-compass-grid > div > span { font-size: 11px; }
+.intro-process > article > span, .service-grid > article > span { font-size: 12px; }
+.programme-card > a, .footer-newsletter > a { font-size: 13px; }
+
+/* ─── Round 9 (2026-10-07): the programme history list ───────────────────────────────────
+ * /programmes "Built on programmes with lasting value" is a <ul class="programme-groupings">
+ * whose items are index · name · span-of-years. The grid it shares with the nav links above
+ * is 34px 1fr 20px -- the 20px track is the links' arrow -- so in the list the years-and-
+ * editions line fell into the arrow track and rendered one or two characters per line
+ * ("Cr/ed/en/tia/l", "20/25"), 20px wide and up to 537px tall, at every width. The list
+ * items have no arrow: two tracks, the span of years under the name. */
+ul.programme-groupings > li {
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-content: center;
+  row-gap: 6px;
+  padding-block: 20px;
+}
+ul.programme-groupings > li > span:last-child:not(:first-child) {
+  grid-column: 2;
+  color: var(--xp-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ─── Round 10 (2026-10-07): homepage small print, the scrolled header, tap targets ───────
+ * The homepage was the last page with text under 11px: the industry list's index and arrow
+ * (10px), the selected industry's three chips (10px) and the partner tabs' record counts
+ * (9px, inside a 35px ring that has room for far more). The industry names themselves were
+ * 14px in rows 106px tall, so each row read as an empty band with a caption in it. */
+.industry-button > span { font-size: 12px; }
+.industry-button > span[aria-hidden="true"] { font-size: 15px; }
+.industry-button b { font-size: 17px; line-height: 1.3; }
+.industry-focus li { font-size: 12px; }
+.legacy-tabs b { font-size: 12px; }
+
+/* The header's descriptor is three lines of 10px type beside the logo. At the top of a page it
+ * introduces the platform; once the header is pinned over the content it repeats on every
+ * screen and crowds the navigation, so the pinned header shows the name alone. It collapses
+ * in height only: `display: none` narrowed the brand column and the whole navigation jumped
+ * 37px left on the first scroll, so the line keeps its width and gives up its height. */
+.brand-copy small { max-height: 4.5em; overflow: hidden; transition: max-height 240ms ease, opacity 180ms ease; }
+.site-header.scrolled .brand-copy small { max-height: 0; opacity: 0; visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .brand-copy small { transition: none; } }
+
+/* Under the 24px target minimum (WCAG 2.5.8): the breadcrumb's Home link (19px tall, on every
+ * inner page), the partner note's "View all partners" link (22px) and the hero's vertical
+ * "Discover WiseTech" link (17px wide). Padding grows the hit area without moving the text. */
+.breadcrumb > a { display: inline-block; padding-block: 3px; }
+.legacy-network-note a { min-height: 24px; align-items: center; font-size: 13px; }
+/* .hero-scroll is rotated 90deg about its right-centre, so its on-screen width is its local height. */
+.hero-scroll { padding-block: 4px; }
+
+/* The sourcing note's serif quote kept the donor's 1.15 leading at 20px over two lines. */
+.evidence-strip .impact-metrics .method-card p { line-height: 1.3; }
+
+/* An even number of archive stories leaves the last one without a partner in the two-column
+ * grid; components/home/archive-stories.tsx promotes it to a second feature, mirrored so the
+ * section opens image-left and closes image-right. Below 1120px both features stack. */
+@media (min-width: 1121px) {
+  .archive-photo-feature-reverse { grid-template-columns: .58fr 1.42fr; }
+  .archive-photo-feature-reverse > .archive-photo-media { order: 2; }
+}
+
+/* Round 23 (owner decision 2026-10-09): stacked on a phone, the four stories were 3,443px of the
+ * 17,712px homepage. Below 760px they are one swipe row — each card 86% wide so the next one's
+ * edge invites the swipe, snapping per card, full text kept. Each card's title is a link, so
+ * keyboard users reach every card and the row scrolls to the focused one. */
+@media (max-width: 760px) {
+  .archive-photo-grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 10px;
+  }
+  /* In one row every card takes the tallest card's height; the feature card's grid then pushed
+     its caption to the bottom, leaving a gap under the photo. Top-down flex keeps photo and text
+     together and lets any spare height fall below the text. */
+  .archive-photo-grid > .archive-photo-card { display: flex; flex-direction: column; scroll-snap-align: start; }
+}
+
+/* Round 25 (owner decision 2026-10-10): on a phone the homepage partner strip ran two tiles a row,
+ * each at least 258px tall (wisetech.css:782, :883) — 1,353px for 12 logos. Three compact tiles a
+ * row keep all 12 in view in about half that; names stay at the 11px floor and wrap rather than
+ * truncate. */
+@media (max-width: 520px) {
+  .legacy-logo-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .legacy-logo-card { min-height: 0; padding: 8px; }
+  .legacy-logo-card h3 { margin: 8px 0 0; font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+}
+
+/* Round 26 (owner decision 2026-10-10), phones only.
+ * The six industry rows (82px each, wisetech.css:296) took 492px before the panel they switch,
+ * so a tap changed something off screen. Two columns of compact tiles, index above name, put the
+ * panel straight under them. The panel keeps its 520px floor so switching never moves the page.
+ * The arrow goes: these buttons switch the panel, they do not navigate.
+ * The homepage's four programme cards stacked to 1,390px; like the archive stories (round 23)
+ * they become one swipe row, links aligned along the bottom. Scoped to the homepage section —
+ * /programmes is the index of these cards and keeps them stacked. */
+@media (max-width: 520px) {
+  .industry-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .industry-button {
+    min-height: 72px;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 4px;
+    border-right: 1px solid var(--wt-line);
+    padding: 12px 14px;
+  }
+  .industry-button:nth-child(2n) { border-right: 0; }
+  .industry-button:nth-last-child(-n + 2) { border-bottom: 0; }
+  .industry-button:hover, .industry-button.active { padding-left: 14px; }
+  .industry-button > span { font-size: 11px; }
+  .industry-button > span[aria-hidden="true"] { display: none; }
+  .industry-button b { font-size: 15px; line-height: 1.25; overflow-wrap: anywhere; }
+
+  #programmes .programme-grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 10px;
+  }
+  #programmes .programme-card { min-height: 0; scroll-snap-align: start; }
+  #programmes .programme-card.feature { min-height: 0; justify-content: flex-start; }
+  #programmes .programme-card h3 { margin-top: 12px; }
+  #programmes .programme-card > a { margin-top: auto; }
+  #programmes .programme-card small { margin-bottom: 24px; }
+  /* A scroll row clips vertically too, so the cards' 5px hover lift would lose their top edge. */
+  #programmes .programme-card:hover { transform: none; }
+}
+
+/* Round 29 (owner decision 2026-10-10): on a phone the selected route panel was 778px. The rail
+ * indent (34px), card padding and arrow column left the destination copy ~220px, so each card ran
+ * three lines and the equal-height rows took the tallest — 136px apiece. A narrower rail, tighter
+ * cards and a 17px title give the copy two lines: cards 86px, panel 587px. Targets stay ≥48px. */
+@media (max-width: 520px) {
+  .route-origin { padding: 22px 18px 20px; }
+  .route-benefits { margin-bottom: 18px; }
+  .route-destinations { padding: 16px 14px 18px 16px; }
+  .route-lead { margin: 0 0 12px 24px; }
+  .route-destinations ol { gap: 8px; }
+  .route-destinations li { padding-left: 24px; }
+  .route-destinations li::before { width: 24px; }
+  .route-destination { column-gap: 10px; padding: 11px 12px 12px 14px; }
+  .route-destination strong { font-size: 17px; line-height: 1.25; }
+  .route-destination > span:not(.route-node):not([aria-hidden]) { margin-top: 2px; line-height: 1.45; }
+}
+
+/* Round 31 (owner decision 2026-10-11): on a phone the Member Directory and AI Solutions
+ * Marketplace panels stacked inside one bordered box — 691px. Like the programmes (round 26) and
+ * archive stories (round 23) they become one swipe row: each panel its own bordered card, 86% wide
+ * so the next card's edge invites the swipe, links aligned along the bottom. Panels 355px. */
+@media (max-width: 520px) {
+  .ecosystem-entry .product-split {
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    border: 0;
+    border-radius: 0;
+    padding-bottom: 10px;
+  }
+  .ecosystem-entry .product-panel { scroll-snap-align: start; border: 1px solid var(--wt-line); border-radius: 14px; padding: 22px 20px; }
+  .ecosystem-entry .product-panel + .product-panel { border: 1px solid var(--wt-line); }
+  .ecosystem-entry .product-panel-head { margin-bottom: 20px; }
+  .ecosystem-entry .product-panel > a { margin-top: auto; }
+}
+
+/* ─── Round 11 (2026-10-07): /partners category counts ───────────────────────────────────
+ * The homepage partner tabs' counts went to 12px in round 10; the same counts in the
+ * /partners category nav (a 38px ring) stayed at the donor's 11px. One size for one idea. */
+.partner-category-nav b { font-size: 12px; }
+
+/* Under 520px the rich-page "related" cards stack one per row but keep the desktop
+ * composition: a 240px minimum and an 80px gap above the title, which left a ~90px blank
+ * band in each of the three cards closing /about, /about/history and every programme page.
+ * Stacked, the label leads straight into the title. */
+@media (max-width: 520px) {
+  .rich-related-grid > a { min-height: 0; padding: 24px; }
+  .rich-related-grid h3 { margin-top: 28px; font-size: 30px; }
+}
+
+/* ─── Round 12 (2026-10-07): phone grids that kept a desktop composition ──────────────────
+ * /events: the three recommendation cards stayed two-up at 390px -- wisetech.css:690 sets
+ * repeat(2) under 1120px after the port's single-column phone rule -- so "Membership" broke
+ * as "Members/hip" in a 150px column and the third card sat alone. The three activity links
+ * above them (Open events, Launch Pad, Showcase) were two-up as well, one beside a blank cell. */
+@media (max-width: 640px) {
+  .inner-card-grid, .activity-type-strip { grid-template-columns: minmax(0, 1fr); }
+  .activity-type-strip a { min-height: 56px; }
+  .inner-card { min-height: 0; }
+  .inner-card h3 { margin-top: 24px; }
+  /* Without the min-height the link row no longer pushes away from the copy above it. */
+  .inner-card > p { margin-bottom: 18px; }
+}
+
+/* /launchpad services, card-grid links and principle cards: stacked on a phone, each kept a
+ * 280px box with an 80px gap above its title -- ~1,100px for four one-line services. */
+@media (max-width: 520px) {
+  :is(.service-grid article, .service-link, .principle-grid article) { min-height: 0; padding: 24px; }
+  :is(.service-grid, .service-link, .principle-grid) h3 { margin-top: 28px; font-size: 30px; }
+}
+
+/* ─── Round 13 (2026-10-07): /launchpad in the site's grammar ────────────────────────────
+ * The page's sections now use the split heading (app/[locale]/(public)/launchpad/page.tsx).
+ * The programme outcome was a bare 18px paragraph standing in for a subheading; it is a
+ * ruled h3 block under the heading. */
+.launchpad-outcome { max-width: 760px; margin-top: clamp(32px, 4vw, 56px); border-top: 1px solid var(--wt-line); padding-top: 24px; }
+.launchpad-outcome h3 { margin: 0 0 10px; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(24px, 2.2vw, 30px); font-weight: 500; line-height: 1.15; }
+.launchpad-outcome p { margin: 0; color: var(--xp-text-muted); font-size: 15px; line-height: 1.65; }
+
+/* Funding results (components/marketing/funding-wizard.tsx) were the one block on the site in
+ * bold blue sans titles and browser-underlined links, with the same disclaimer printed in all
+ * five cards. Cards now speak the record-card language: status eyebrow, serif title, muted
+ * meta, the site's text link. An odd last card closes the grid full width. */
+.funding-results > h3 { margin: 0; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(28px, 2.6vw, 38px); font-weight: 500; line-height: 1.1; }
+.funding-results-note { max-width: 62ch; margin: 10px 0 0; color: var(--xp-text-muted); font-size: 14px; line-height: 1.6; }
+.funding-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 28px; }
+.funding-result-grid > .funding-result:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.funding-result { display: flex; flex-direction: column; border: 1px solid var(--wt-line); border-radius: 14px; background: #fff; padding: clamp(22px, 2.4vw, 32px); }
+.funding-result h4 { margin: 14px 0 12px; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(22px, 1.9vw, 27px); font-weight: 500; line-height: 1.15; }
+.funding-result > p:not([class]) { max-width: 68ch; margin: 0; color: #4f5b60; font-size: 15px; line-height: 1.65; }
+.funding-result-meta { margin: 14px 0 0; color: var(--xp-text-muted); font-size: 13px; line-height: 1.55; }
+.funding-result > p:last-of-type { margin-bottom: 16px; }
+.funding-result > .text-link { align-self: flex-start; margin-top: auto; }
+@media (max-width: 820px) {
+  .funding-result-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ─── Round 14 (2026-10-07): the funding questionnaire ───────────────────────────────────
+ * components/marketing/funding-wizard.tsx now uses the /events filter form. Its questions
+ * are sentences, not one-word filters, so they read in sentence case at 13px; the
+ * instruction line above them is a muted note. */
+.funding-form-note { margin: 0 0 22px; color: var(--xp-text-muted); font-size: 14px; line-height: 1.6; }
+.funding-form .event-filter-grid label > span { font-size: 13px; font-weight: 700; letter-spacing: 0; line-height: 1.4; }
+/* The filter selects' heavy display weight suits one-word values ("Any format"); these answers
+ * run to a full clause, and in that weight a phone-width select cut them after a few words. */
+.funding-form select { font-size: 15px; font-weight: 600; letter-spacing: 0; text-overflow: ellipsis; }
+
+/* ─── Round 15 (2026-10-07): /membership's twelve dimensions on a phone ──────────────────
+ * Stacked one per row, each dimension was a 157px card -- marker, a 25px title 18px below
+ * it, then one or two lines of copy -- and the twelve ran ~1,810px at 390. A phone reads them
+ * as a list of terms and definitions: the name on the left, what it covers on the right. */
+@media (max-width: 520px) {
+  .membership-dimensions article {
+    display: grid;
+    /* A fixed name column, sized to the longest single-word names (Programmes, Governance) so
+     * no name breaks mid-word and every definition starts on the same line. */
+    grid-template-columns: 118px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+    padding: 18px 20px;
+  }
+  .membership-dimensions article > span:empty { display: none; }
+  .membership-dimensions article > span { grid-column: 1; }
+  .membership-dimensions h3 { grid-column: 1; margin: 0; font-size: 20px; line-height: 1.15; overflow-wrap: normal; }
+  .membership-dimensions p { grid-column: 2; grid-row: 1 / span 2; margin: 2px 0 0; }
+}
+
+/* ─── Round 16 (2026-10-07): /contact, and grids that left cells empty ───────────────────
+ * /contact's direct channels were a 24px heading over an unlabelled run of body-size lines,
+ * and the prepared-email composer a select floating beside a button. The channels now lead
+ * in the display serif; the composer is a framed form like the site's other forms. */
+.contact-direct { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: clamp(40px, 6vw, 96px); align-items: start; }
+.contact-channels { font-style: normal; }
+.contact-channels h2 { margin: 0 0 28px; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(36px, 4vw, 56px); font-weight: 500; line-height: 1.05; }
+.contact-channel-primary { display: block; width: fit-content; margin-bottom: 6px; border-bottom: 1px solid transparent; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(24px, 2.4vw, 34px); line-height: 1.3; transition: border-color 180ms ease; }
+.contact-channel-primary:hover, .contact-channel-primary:focus-visible { border-bottom-color: currentColor; }
+.contact-channels .text-link { margin-top: 14px; }
+.contact-channels p { max-width: 40ch; margin: 18px 0 0; color: var(--xp-text-muted); font-size: 15px; line-height: 1.6; }
+.prepared-email-form { display: grid; gap: 12px; border: 1px solid var(--wt-line); border-radius: 14px; background: var(--wt-paper-bright); padding: clamp(24px, 2.6vw, 34px); }
+.prepared-email-form label { color: #4c5d63; font-size: 13px; font-weight: 700; }
+.prepared-email-form select { width: 100%; min-height: 52px; border: 1px solid var(--wt-line); border-radius: 8px; background: #fff; color: var(--wt-ink); font-size: 15px; font-weight: 600; padding: 0 14px; }
+.prepared-email-form .button { justify-self: start; margin-top: 10px; }
+@media (max-width: 820px) {
+  .contact-direct { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Fixed four-up grids with three or six items left cells empty: /contact's six routes ran 4+2,
+ * /events' three recommendations and /programmes' three catalogue links stopped a quarter
+ * short. Counts that divide by three get three columns. */
+@media (min-width: 821px) {
+  .inner-card-grid:has(> :last-child:nth-child(3)),
+  .inner-card-grid:has(> :last-child:nth-child(6)),
+  nav.programme-groupings:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

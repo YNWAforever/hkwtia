@@ -1,0 +1,12 @@
+{
+  "candidateSourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "configuredWorkerRevision": "510d7db243d67b0e362ce952e91b30d34a9c6083",
+  "workerRuntimeSourceDiffFiles": [],
+  "configSha256": "b33a620c08cadf3897dde1ecd64fb91a119726693d482b00339ae695f51ea9c6",
+  "configMode": "reviewed dry-run only; dedicated target; job allowlist none",
+  "cloudDeploymentVerified": false,
+  "scheduledWindowsVerified": 0,
+  "providerCalls": 0,
+  "serviceAccessSecretAvailable": false,
+  "productionChanged": false
+}

@@ -1,0 +1,21 @@
+{
+  "environment": "confirmed isolated DB/Auth; actual Chromium",
+  "locale": "en",
+  "viewport": 390,
+  "http": 200,
+  "getWrites": 0,
+  "caseRows": 1,
+  "caseAudits": 1,
+  "owner": "synthetic ExCo",
+  "dueHKT": "2026-10-02 14:30",
+  "missing": [
+    "companyWebsite"
+  ],
+  "nextAction": "await_documents",
+  "stale": "conflict without overwrite",
+  "membership": "pending_review unchanged",
+  "application": "pending_review unchanged",
+  "keyboard": true,
+  "providerSend": false,
+  "production": false
+}

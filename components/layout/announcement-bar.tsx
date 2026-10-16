@@ -1,10 +1,10 @@
-"use client";
-
-import {X} from "lucide-react";
-import {useState} from "react";
-
+import {AnnouncementDismiss} from "@/components/layout/announcement-dismiss";
+import {Arrow} from "@/components/wt/arrow";
 import {Link} from "@/i18n/navigation";
 import type {AnnouncementBarView} from "@/lib/public-shell/announcement";
+
+/** The dismiss island targets the bar by id; the header modifier is keyed off the same state. */
+const ANNOUNCEMENT_ELEMENT_ID = "site-announcement";
 
 type AnnouncementBarProps = {
   announcement: AnnouncementBarView | null;
@@ -12,25 +12,32 @@ type AnnouncementBarProps = {
   dismissLabel: string;
 };
 
+// Donor shell markup (commit f91ecc5, announcement block) :376-381 — an ink bar with an amber
+// dot, the message, a CTA with the arrow, and a round × on the right. hkwtia keeps the <aside>
+// landmark and the polite live region the donor's plain <div> lacks (spec §2.9 accessibility
+// floor). The donor filename is deliberately not spelled out here:
+// tests/unit/wisetech-shell-boundary.test.ts scans this file for exactly that literal string.
 export function AnnouncementBar({announcement, label, dismissLabel}: AnnouncementBarProps) {
-  const [dismissedId, setDismissedId] = useState<string | null>(null);
-  if (!announcement || dismissedId === announcement.id) return null;
+  if (!announcement) return null;
 
   return (
-    <aside className="bg-shell-navy text-white" aria-label={label} aria-live="polite" aria-atomic="true">
-      <div className="mx-auto flex min-h-11 max-w-shell items-center justify-center gap-3 px-4 py-2 text-center text-sm">
-        <Link className="inline-flex min-h-11 min-w-11 flex-1 items-center justify-center gap-2 break-all font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" href={announcement.href}>
-          <span>{announcement.text}</span><span>{announcement.ctaLabel}</span>
-        </Link>
-        <button
-          type="button"
-          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          aria-label={dismissLabel}
-          onClick={() => setDismissedId(announcement.id)}
-        >
-          <X className="h-4 w-4" aria-hidden="true" />
-        </button>
-      </div>
+    <aside
+      id={ANNOUNCEMENT_ELEMENT_ID}
+      className="announcement"
+      aria-label={label}
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span className="announcement-dot" aria-hidden="true" />
+      <span className="announcement-text">{announcement.text}</span>
+      <Link href={announcement.href}>
+        {announcement.ctaLabel} <Arrow />
+      </Link>
+      <AnnouncementDismiss
+        announcementId={announcement.id}
+        label={dismissLabel}
+        barId={ANNOUNCEMENT_ELEMENT_ID}
+      />
     </aside>
   );
 }

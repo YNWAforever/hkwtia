@@ -1,0 +1,23 @@
+{
+  "scope": "Actual focused local execution; synthetic input; skipped is not passed",
+  "pass": 3,
+  "fail": 0,
+  "skip": 0,
+  "cases": [
+    {
+      "file": "audit-full-media-picker.test.tsx",
+      "title": "finds one registered image among 79 while retaining the selected image and forbidding raw URL input",
+      "status": "passed"
+    },
+    {
+      "file": "audit-full-media-picker.test.tsx",
+      "title": "retains the actual registered media selection after a successful form action",
+      "status": "passed"
+    },
+    {
+      "file": "audit-full-media-picker.test.tsx",
+      "title": "retains native input selection until change when the parent rerenders with registry rows",
+      "status": "passed"
+    }
+  ]
+}

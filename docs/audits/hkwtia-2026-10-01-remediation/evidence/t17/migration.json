@@ -1,0 +1,24 @@
+{
+  "publicCopyUnchanged": true,
+  "privateDraftTable": true,
+  "publicationSequence": true,
+  "environment": "confirmed isolated Neon; sentinel verified",
+  "migration": "0056_page_copy_private_drafts",
+  "sqlSha256": "de7d19e165a210b21287595bd734f063f1d76dcf88c60afc50e9ebb83d87c770",
+  "ledgerBefore": 55,
+  "ledgerAfter": 56,
+  "statuses": [
+    "pending",
+    "paid",
+    "expired",
+    "failed",
+    "refunded",
+    "refund_failed",
+    "refund_pending"
+  ],
+  "membershipFingerprintUnchanged": true,
+  "orderFingerprintUnchanged": true,
+  "production": false,
+  "command": "node --env-file=.env.local --import tsx .playwright/migrate-copy-isolated.mts (guard then actual scripts/db-migrate.ts)",
+  "sourceSha": "7e64f35502e140f600dc8446cbc75cceb95c2c70"
+}

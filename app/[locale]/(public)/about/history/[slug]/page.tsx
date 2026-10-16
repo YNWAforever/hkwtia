@@ -2,68 +2,70 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
-import {InstitutionalPageIntro} from "@/components/marketing/institutional-page-intro";
 import {MediaGallery} from "@/components/marketing/media-gallery";
-import {StorySection} from "@/components/marketing/story-section";
+import {PageHero} from "@/components/wt/page-hero";
+import {RichCompass} from "@/components/wt/rich-compass";
+import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
+import {Section} from "@/components/wt/section";
+import {SectionHeading} from "@/components/wt/section-heading";
 import {milestones} from "@/content/milestones";
 import type {MilestoneRecord} from "@/content/schemas";
 import type {AppLocale} from "@/i18n/routing";
-import {featuredOnly, findBySlug, milestonesOnly} from "@/lib/history/milestones";
-import {buildPageMetadata} from "@/lib/metadata";
+import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
+import {findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
+import {readableMilestoneBody} from "@/lib/history/readable-body";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 
-/**
- * Only `kind: "milestone"` belongs in WTIA's own record -- member stories and
- * press releases have their own homes (see milestonesOnly's comment in
- * lib/history/milestones), neither is WTIA's own institutional history -- and
- * only `featured` entries are substantial enough to earn a standalone page. A
- * two-sentence entry would be thin content, which is exactly what
- * /about/history's inline timeline rendering exists to avoid.
- */
 export function generateStaticParams() {
-  return featuredOnly(milestonesOnly(milestones)).map(({slug}) => ({slug}));
+  // Every milestone, not only the featured six: 45 records of bilingual association
+  // history had a timeline entry but no page of their own. Must stay in lockstep with
+  // app/sitemap.ts -- a sitemap wider than this route publishes urls that 404.
+  return milestonesOnly(milestones).map(({slug}) => ({slug}));
 }
 
-/**
- * Shared by generateMetadata and the page. `kind` and `featured` are
- * re-checked here rather than trusted from generateStaticParams because
- * dynamicParams defaults to true: a direct request for a real but
- * non-featured milestone, or for a member-story/press-release slug, still
- * reaches this function and must fail to resolve rather than render a page
- * the timeline never links to.
- */
-function resolveFeaturedMilestone(slug: string): MilestoneRecord | null {
+function resolveMilestone(slug: string): MilestoneRecord | null {
   const milestone = findBySlug(milestones, slug);
-  return milestone && milestone.kind === "milestone" && milestone.featured ? milestone : null;
+  return milestone && milestone.kind === "milestone" ? milestone : null;
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const milestone = resolveFeaturedMilestone(slug);
+  const milestone = resolveMilestone(slug);
   if (!milestone) return {};
 
+  const t = await getTranslations({locale, namespace: "History"});
+  const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   return buildPageMetadata({
     locale: locale as AppLocale,
     pathname: `/about/history/${slug}`,
-    title: locale === "zh-HK" ? milestone.titleZh : milestone.titleEn,
-    description: (locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).slice(0, 160),
+    title: brandedTitle(locale as AppLocale, title),
+    description: readableMilestoneBody(locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).join(" ").slice(0, 160),
+    // Milestone records carry images, but the card is editorial: the archive photographs are
+    // not a consistent 1200x630 hero, so the unadorned editorial treatment is the honest one.
+    image: ogImagePath({kind: "milestone", title, eyebrow: t("eyebrow"), imageUrl: null}),
   });
 }
 
-// No `dynamic` export: like /about/history, this reads typed content bundled
-// at build time, not a database, so static prerendering is correct and can
-// never go stale.
+// No `dynamic` export: like /about/history, this reads typed content bundled at build time.
 export default async function HistoryDetailPage({params}: Props) {
   const {locale, slug} = await params;
-  const milestone = resolveFeaturedMilestone(slug);
+  const milestone = resolveMilestone(slug);
   if (!milestone) notFound();
   setRequestLocale(locale);
   const t = await getTranslations("History");
+  const common = await getTranslations({locale, namespace: "Common"});
+  // Decision 1: identical hero/compass treatment to the list page, so the same real facts.
+  // historyCompassFacts filters to milestonesOnly internally -- no need to pre-filter here.
+  const facts = historyCompassFacts(milestones);
+  const related = await buildOtherAboutRoutes(locale as AppLocale, "history");
 
   const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
-  const paragraphs = body.split("\n\n");
+  const paragraphs = readableMilestoneBody(body);
+  const storyParagraphs = paragraphs.slice(1);
   const images = milestone.images.map((image) => ({
     alt: locale === "zh-HK" ? image.altZh : image.altEn,
     src: image.src,
@@ -71,25 +73,46 @@ export default async function HistoryDetailPage({params}: Props) {
 
   return (
     <>
-      <InstitutionalPageIntro
+      <PageHero
+        className="rich-page-hero"
         eyebrow={String(milestone.year)}
-        lead={paragraphs[0] ?? body}
         title={title}
+        lead={paragraphs[0] ?? body}
+        breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: title}}
+        breadcrumbLabel={common("breadcrumbLabel")}
       />
-      <StorySection heading={t("storyTitle")} tone="plain">
-        <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
-          {paragraphs.slice(1).map((paragraph, index) => (
-            // Paragraphs belong to one frozen content record and never
-            // reorder, so an index key is stable for this page's lifetime.
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
-        {images.length > 0 ? (
-          <div className="mt-12">
-            <MediaGallery images={images} />
-          </div>
-        ) : null}
-      </StorySection>
+      <RichCompass
+        items={[
+          {label: t("compass.foundedLabel"), value: t("compass.foundedValue", {year: facts.foundingYear})},
+          {label: t("compass.milestonesLabel"), value: t("compass.milestonesValue", {count: facts.milestoneCount})},
+          {label: t("compass.latestLabel"), value: t("compass.latestValue", {year: facts.latestYear})},
+        ]}
+      />
+      {/* paragraphs[0] is already the hero lead, so the story body is what follows it,
+          and a single-paragraph record has nothing to put here. Both halves of this
+          section are optional, so the section itself is: a heading reading "Milestone
+          story" over an empty container is worse than no section at all. A record with
+          one paragraph and no images -- which `featured` can create with a single flag
+          flip -- would otherwise render exactly that. */}
+      {storyParagraphs.length > 0 || images.length > 0 ? (
+        <Section labelledBy="history-story-title">
+          <SectionHeading eyebrow={t("eyebrow")} title={t("storyTitle")} headingId="history-story-title" variant="stacked" />
+          {storyParagraphs.length > 0 ? (
+            <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
+              {storyParagraphs.map((paragraph, index) => (
+                // Paragraphs belong to one frozen content record and never reorder.
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          ) : null}
+          {images.length > 0 ? (
+            <div className="mt-12">
+              <MediaGallery images={images} />
+            </div>
+          ) : null}
+        </Section>
+      ) : null}
+      <RichRelatedRoutes items={related} />
     </>
   );
 }

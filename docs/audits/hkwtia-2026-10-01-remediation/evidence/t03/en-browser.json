@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-01T08:49:32.587Z",
+  "environment": "confirmed isolated localhost DB/Auth",
+  "locale": "en",
+  "count": 51,
+  "pageLengths": [
+    50,
+    1
+  ],
+  "uniqueRows": 51,
+  "previousRoundTrip": true,
+  "filterReset": true,
+  "draftAndLimitRetained": true,
+  "provider": "synthetic password",
+  "production": false
+}

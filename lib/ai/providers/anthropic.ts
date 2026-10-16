@@ -1,3 +1,6 @@
+import {receiptAwareFetch} from "@/lib/ai/providers/request-receipt";
+import "server-only";
+import {createAdminModelRegistry, validateModelRoute, type ModelRoute} from "@/lib/ai/providers/registry";
 import {
   createAnthropic,
   type AnthropicProviderSettings,
@@ -31,13 +34,17 @@ export type AnthropicAgentProviderDependencies =
 export function createAnthropicAgentProvider(
   apiKey: string,
   dependencies: AnthropicAgentProviderDependencies = {},
+  configuredRoute: ModelRoute = createAdminModelRegistry("anthropic:claude-sonnet-4-6").concierge,
 ): AgentProvider {
+  const route = validateModelRoute(configuredRoute);
+  if (route.provider !== "anthropic") throw new Error("AI_ROUTE_PROVIDER_MISMATCH");
   const providerFactory = dependencies.createProvider
     ?? createProductionAnthropicProvider;
-  const provider = providerFactory({apiKey});
+  const provider = dependencies.createProvider ? providerFactory({apiKey}) : undefined;
 
   return createAiSdkAgentProvider(
-    (modelId) => provider(modelId),
+    (modelId, receipt) => (provider ?? createProductionAnthropicProvider({apiKey, fetch: receiptAwareFetch(receipt)}))(modelId),
     dependencies,
+    route,
   );
 }

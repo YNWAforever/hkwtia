@@ -291,8 +291,30 @@ describe("WiseTech protected route ownership", () => {
     const codeFiles = repositoryProtectedFiles();
     const inventoryFiles = protectedRouteOwnershipInventory.map(({filePath}) => filePath).sort();
 
-    expect(codeFiles).toHaveLength(45);
-    expect(inventoryFiles).toHaveLength(45);
+    // Phase A (audit F2) added /admin/inbox, /admin/inbox/[id] and /admin/tasks: 45 + 3 = 48.
+    // Phase B1 Task 4 (S-3) added /api/portal/media/upload: 48 + 1 = 49.
+    // Phase B1 Task 6 (B-4) added /api/events/guest/cancel: 49 + 1 = 50.
+    // Phase B1 Task 7 (B-4) added /api/admin/events/[id]/attendees.csv: 50 + 1 = 51.
+    // Phase B2 Task 4 (B-7) added /admin/profiles-review: 51 + 1 = 52.
+    // Phase C1 Task 11 (C-3) added /api/admin/woztell/backfill: 52 + 1 = 53.
+    // Phase C2 Task 2 (C-7) added /admin/templates: 53 + 1 = 54.
+    // Phase C2 Task 4 (C-4) added /admin/contacts: 54 + 1 = 55.
+    // Phase C2 Task 9 (C-5) added /admin/campaigns and /admin/campaigns/[id]: 55 + 2 = 57.
+    // Phase C2 Task 10 (C-5, D-10) added /api/jobs/whatsapp-send-queue: 57 + 1 = 58.
+    // Phase D Task 8 added /api/og: 58 + 1 = 59.
+    // Phase D-4b Task 5 added /admin/check-in/[token]: 59 + 1 = 60.
+    // Phase D-4d Task 2 added /api/jobs/event-cancellation-refunds: 60 + 1 = 61.
+    // Showcase lead recovery and ticket email delivery each add a protected cron endpoint.
+    // Audit remediation adds checkout recovery, membership checkout status, and event notifications.
+    // Full remediation T10 adds the authenticated application case detail: 79 + 1 = 80.
+    // Full remediation T15 adds the actor-owned correction report: 80 + 1 = 81.
+    // T17 adds an own-editor private preview under /admin using the public layout.
+    // Full remediation T07 adds the authenticated knowledge version workspace.
+    // T18 adds the actor-scoped global workspace search read page.
+    // Phase E Task 10 adds /admin/reports/leads: 87 + 1 = 88.
+    expect(codeFiles).toContain("app/[locale]/(admin)/admin/ai-review/page.tsx");
+    expect(codeFiles).toHaveLength(88);
+    expect(inventoryFiles).toHaveLength(88);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -307,12 +329,30 @@ describe("WiseTech protected route ownership", () => {
       protectedRouteOwnershipInventory.filter((owner) => owner.classification === classification).length
     );
 
-    expect(count("admin-page")).toBe(26);
-    expect(count("api-handler")).toBe(8);
+    // Phase C2 Task 2 (C-7) added the WhatsApp template registry: 30 + 1 = 31.
+    // Phase C2 Task 4 (C-4) added the contacts pipeline: 31 + 1 = 32.
+    // Phase C2 Task 9 (C-5) added the campaign wizard and its detail page: 32 + 2 = 34.
+    // Phase D-4b Task 5 added the scan-reached door check-in page: 34 + 1 = 35.
+    // Full fix T18 adds search; T10 adds one role-checked existing draft review page.
+    // Phase E Task 10 added the lead conversion report: 47 + 1 = 48.
+    expect(count("admin-page")).toBe(48);
+    // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
+    // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
+    // session, and there is no HMAC in front of it — which is exactly why its
+    // repository method carries its own capability actor (plan S-14).
+    // Phase D Task 8 added the public /api/og card renderer: 12 + 1 = 13.
+    // Audit remediation adds scoped checkout endpoints and the actor-owned batch status read.
+    // T15 adds the private correction report.
+    expect(count("api-handler")).toBe(19);
     expect(count("webhook-handler")).toBe(2);
-    expect(count("job-handler")).toBe(9);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(26);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(19);
+    // Phase C2 Task 10 (C-5, D-10) added the ten-minute WhatsApp send queue: 9 + 1 = 10.
+    // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
+    // Showcase lead recovery and ticket email delivery add two authenticated jobs.
+    // Audit remediation adds the cancellation notification job.
+    // Phase E Task 9 adds the daily lead-reminders digest job.
+    expect(count("job-handler")).toBe(19);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(48);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(40);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

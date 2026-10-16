@@ -36,9 +36,29 @@ function formDate(formData: FormData, name: "startsAt" | "endsAt", optional = fa
   }
 }
 
+/**
+ * HKD is a two-decimal currency but staff price in whole dollars, so the form
+ * takes dollars and the boundary converts to cents. A price on a non-ticketed
+ * event is discarded rather than carried: the repository refuses it too, but
+ * nulling it here keeps the form and the database answering the same question.
+ */
+export function parseTicketPrice(input: Readonly<{mode: string; price: string}>): number | null {
+  if (input.mode !== "ticketed") return null;
+  const trimmed = input.price.trim();
+  const dollars = Number(trimmed);
+  if (!trimmed || !Number.isFinite(dollars) || dollars <= 0) {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "a ticketed event needs a positive price"}]);
+  }
+  return Math.round(dollars * 100);
+}
+
 export function eventFormInput(formData: FormData) {
   const capacity = String(formData.get("capacity") ?? "").trim();
   const optional = (name: string) => String(formData.get(name) ?? "").trim() || null;
+  const registrationMode = String(formData.get("registrationMode") ?? "rsvp");
+  const format = String(formData.get("format") ?? "in_person");
+  const visibility = String(formData.get("visibility") ?? (formData.get("memberOnly") === "on" ? "members_only" : "public"));
+  const tags = String(formData.get("tags") ?? "").split(/[,\n]/).map((tag) => tag.trim()).filter(Boolean);
   return {
     slug: formData.get("slug"),
     titleEn: formData.get("titleEn"),
@@ -47,10 +67,20 @@ export function eventFormInput(formData: FormData) {
     descriptionZh: optional("descriptionZh"),
     startsAt: formDate(formData, "startsAt"),
     endsAt: formDate(formData, "endsAt", true),
-    venue: optional("venue"),
+    venue: format === "online" ? null : optional("venue"),
     capacity: capacity ? Number(capacity) : null,
-    memberOnly: formData.get("memberOnly") === "on",
+    format,
+    onlineUrl: format === "online" || format === "hybrid" ? optional("onlineUrl") : null,
+    tags,
+    visibility,
+    memberOnly: visibility !== "public",
     published: formData.get("published") === "on",
     heroMediaId: optional("heroMediaId"),
+    registrationMode,
+    externalRegistrationUrl: registrationMode === "external" ? optional("externalRegistrationUrl") : null,
+    ticketPriceHkdCents: parseTicketPrice({
+      mode: registrationMode,
+      price: String(formData.get("ticketPriceHkdCents") ?? ""),
+    }),
   };
 }

@@ -1,0 +1,13 @@
+{
+  "environment": "confirmed isolated DB/Auth; Chromium",
+  "sameApplication": true,
+  "savedProfileFields": true,
+  "existingConsentCheckboxPreserved": true,
+  "savedCompanyFields": true,
+  "applicationCount": 1,
+  "applicantUpdate": "same application; only submitted website changed",
+  "membership": "pending_payment; not activated",
+  "companyOwner": "unchanged",
+  "fixtureMessages": false,
+  "production": false
+}

@@ -1,6 +1,6 @@
 import {Pool} from "pg";
 
-import {M2_UUIDS, seedM2} from "@/scripts/seed-m2";
+import {M2_MEMBERSHIP_ROWS, M2_PROFILE_ROWS, M2_REFERENCE_INSTANT, M2_UUIDS, seedM2} from "@/scripts/seed-m2";
 
 type ResetConnection = Readonly<{
   query: (sql: string, values?: readonly unknown[]) => Promise<unknown>;
@@ -63,7 +63,7 @@ async function resetKnownBrowserMutations(connection: ResetConnection): Promise<
   await connection.query("DELETE FROM audit_events WHERE action IN ('approval.approved','approval.rejected') AND target_type='approval' AND target_id=$1", [approvalId]);
 }
 
-export async function resetM2AuthenticatedFixtures(environment: ResetEnvironment = process.env, injected?: ResetDependencies): Promise<"skipped" | "reset"> {
+export async function resetM2AuthenticatedFixtures(environment: ResetEnvironment = process.env, injected?: ResetDependencies, operationalReference?: Date): Promise<"skipped" | "reset"> {
   const databaseUrl = isolatedDatabaseUrl(environment);
   if (!databaseUrl) return "skipped";
 
@@ -91,6 +91,30 @@ export async function resetM2AuthenticatedFixtures(environment: ResetEnvironment
     }
 
     await dependencies.seed();
+    if (operationalReference) {
+      // The immutable July seed is also used by historical report assertions.
+      // Only a caller explicitly exercising today's operational queues opts in.
+      // Derive from the seed every time, never add an offset to already shifted rows.
+      const offset = operationalReference.getTime() - M2_REFERENCE_INSTANT.getTime();
+      if (!Number.isFinite(offset)) throw new Error("M2_OPERATIONAL_REFERENCE_INVALID");
+      const shifted = (value: string | null) => value === null ? null : new Date(new Date(value).getTime() + offset).toISOString();
+      const profiles = M2_PROFILE_ROWS.map(row => ({id: row.id, last_login_at: shifted(row.lastLoginAt)}));
+      const memberships = M2_MEMBERSHIP_ROWS.map(row => ({id: row.id, billing_period_start: shifted(row.billingPeriodStart), billing_period_end: shifted(row.billingPeriodEnd)}));
+      const dated = await dependencies.connect();
+      try {
+        await dated.query("BEGIN");
+        await dated.query(`UPDATE profiles AS target SET last_login_at=fixture.last_login_at
+          FROM jsonb_to_recordset($1::jsonb) AS fixture(id text, last_login_at timestamptz)
+          WHERE target.id=fixture.id`, [JSON.stringify(profiles)]);
+        await dated.query(`UPDATE memberships AS target SET billing_period_start=fixture.billing_period_start, billing_period_end=fixture.billing_period_end
+          FROM jsonb_to_recordset($1::jsonb) AS fixture(id uuid, billing_period_start timestamptz, billing_period_end timestamptz)
+          WHERE target.id=fixture.id`, [JSON.stringify(memberships)]);
+        await dated.query("COMMIT");
+      } catch (error) {
+        try { await dated.query("ROLLBACK"); } catch { /* Preserve the fixture failure. */ }
+        throw error;
+      } finally { dated.release(); }
+    }
     return "reset";
   } finally {
     await pool?.end();

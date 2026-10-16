@@ -1,0 +1,34 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+(node:12016) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/integration/ai-operations-metrics.test.ts (6 tests) 3303ms
+   ✓ actual isolated administrative work observations > records one content-free audit receipt despite concurrent duplicate submissions  708ms
+   ✓ actual isolated administrative work observations > rejects conflicting receipts and source references without altering the original  590ms
+   ✓ actual isolated administrative work observations > rejects overlapping work for the same staff and case before inflating the timing sample  371ms
+(node:45100) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/integration/operations-baseline.test.ts (3 tests) 3153ms
+   ✓ actual isolated immutable timing baseline > freezes one server-derived digest despite concurrent submission and refuses edits  766ms
+   ✓ actual isolated immutable timing baseline > blocks late manual samples and only compares post-baseline assisted work  824ms
+
+ Test Files  2 passed (2)
+      Tests  9 passed (9)
+   Start at  04:32:42
+   Duration  11.92s (transform 658ms, setup 564ms, collect 3.42s, tests 6.46s, environment 1ms, prepare 371ms)
+

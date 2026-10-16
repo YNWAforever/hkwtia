@@ -29,7 +29,7 @@ const deliveryRequirements = [
   "Preview must be independent from production",
   "rollback by reverting its independently deployable PR/commit",
   "Fail closed",
-  "No production database, provider, deploy, migration, or seed action was performed.",
+  "owner-directed bypasses of the gate sequence below",
 ] as const;
 const checklistItems = [
   "Focused RED evidence", "Focused GREEN evidence", "npm.cmd run audit:strings", "npm.cmd test", "npm.cmd run lint", "npm.cmd run typecheck", "npm.cmd run build", "npm.cmd audit --omit=dev --audit-level=high", "Route/content parity", "Database/provider gates", "Rollback notes", "GitHub branch protection", "isolated Neon/test identities/providers", "Preview/UAT", "production approval", "6 September 2026 unsubscribe fallback deadline", "Do not mark an external gate as passed without recorded evidence.",
@@ -288,8 +288,8 @@ describe("WiseTech corrected source-state documentation", () => {
     }
     expect(docs.delivery).not.toMatch(/Site source archive transfer: NOT PASSED|archive reconciliation and required GitHub branch protection|Obtain the authoritative Site v13 archive/i);
     expect(readRequired(paths.template, "pull-request template")).not.toContain("Site source archive transfer");
-    expect(docs.routes).toContain("133 entries: route 116, CTA 5, form 3, locale 1 and asset 8");
-    expect(docs.routes).toContain("retain 47, redirect 4, merge 67 and retire 15");
+    expect(docs.routes).toContain("134 entries: route 117, CTA 5, form 3, locale 1 and asset 8");
+    expect(docs.routes).toContain("retain 50, redirect 4, merge 67 and retire 13");
     expect(docs.routes).toContain("6 direct `site-v13-source` evidence rows");
     expect(docs.routes).toContain("all 67 sitemap routes");
   });
@@ -302,7 +302,7 @@ describe("WiseTech corrected source-state documentation", () => {
       ["component unavailable", {...baseline, components: baseline.components + "\nThe archive itself is unavailable.\n"}],
       ["content blocked", {...baseline, content: baseline.content + "\nSite content transfer remains blocked.\n"}],
       ["archive gate", {...baseline, delivery: baseline.delivery + "\n| Site source archive transfer | Site source archive transfer: NOT PASSED | required |\n"}],
-      ["stale totals", {...baseline, routes: baseline.routes.replace("133 entries: route 116", "127 entries: route 110")}],
+      ["stale totals", {...baseline, routes: baseline.routes.replace("134 entries: route 117", "127 entries: route 110")}],
     ] as const;
     for (const [label, hostile] of staleVariants) expect(validateCorrectedSourceState(hostile), label).not.toEqual([]);
   });
@@ -316,7 +316,7 @@ function validateCorrectedSourceState(docs: Record<string, string>) {
     if (/No current manifest entry uses this label|The archive is unavailable|The archive itself is unavailable|Site content transfer remains blocked/i.test(document)) errors.push(`${label}: stale authoritative-source state`);
   }
   if (/Site source archive transfer: NOT PASSED|archive reconciliation and required GitHub branch protection|Obtain the authoritative Site v13 archive/i.test(docs.delivery)) errors.push("delivery: archive transfer is wrongly external");
-  for (const current of ["133 entries: route 116, CTA 5, form 3, locale 1 and asset 8", "retain 47, redirect 4, merge 67 and retire 15", "6 direct `site-v13-source` evidence rows", "all 67 sitemap routes"]) if (!docs.routes.includes(current)) errors.push(`routes: missing ${current}`);
+  for (const current of ["134 entries: route 117, CTA 5, form 3, locale 1 and asset 8", "retain 50, redirect 4, merge 67 and retire 13", "6 direct `site-v13-source` evidence rows", "all 67 sitemap routes"]) if (!docs.routes.includes(current)) errors.push(`routes: missing ${current}`);
   return errors;
 }
 

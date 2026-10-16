@@ -1,0 +1,10 @@
+{
+  "candidateHead": "a1ab93318d054f827034c456682156470dc0da14",
+  "equivalentApplicationWorkerTestAndMigrationSource": "4747bed8c121c23e01cdd6949b551a3e28574a4a",
+  "changedPaths": [
+    "docs/audits/hkwtia-2026-10-03-merge/ci-build-dependencies.md",
+    "package-lock.json",
+    "package.json"
+  ],
+  "onlyDependencyScopeAndEvidenceChanged": true
+}

@@ -1,0 +1,28 @@
+{
+  "runId": 37190719601,
+  "sourceSha": "79d3d582cbfa5729a8cc369da4d699f258331420",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "tests (2)",
+      "conclusion": "success"
+    },
+    {
+      "name": "checks",
+      "conclusion": "success"
+    },
+    {
+      "name": "tests (1)",
+      "conclusion": "success"
+    },
+    {
+      "name": "worker",
+      "conclusion": "success"
+    },
+    {
+      "name": "quality",
+      "conclusion": "success"
+    }
+  ],
+  "runtimeAndTestsUnchangedFrom": "d060f42352f4d7919ded0663a33a993b6ee47afe"
+}

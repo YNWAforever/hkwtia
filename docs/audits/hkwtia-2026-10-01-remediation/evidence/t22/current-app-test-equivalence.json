@@ -1,0 +1,17 @@
+{
+  "testedApplicationSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "candidateTestSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "applicationAndWorkerDiffFiles": [],
+  "onlyNewCommit": "99d5b119 fixes native test readiness; waits enabled/non-inert control, no app change",
+  "currentNativeReceipts": [
+    "browser-current-paced.json",
+    "browser-targeted-after-quota.json",
+    "credential-free-current.json",
+    "lighthouse-current.json",
+    "../t23/preview-runtime-current.json",
+    "browser-99-single.json",
+    "browser-99-targeted.json"
+  ],
+  "singleFullGreenRun": false,
+  "production": false
+}

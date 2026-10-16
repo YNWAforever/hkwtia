@@ -1,0 +1,16 @@
+{
+  "sourceBaseSha": "189c075e",
+  "sourceRelation": "root/private catalog working tree; exact application content committed next",
+  "command": "T22_LEGACY_BROWSER_FLAG=1 node .playwright/t22-run-isolated.mjs .playwright/t22-e2e.mjs tests/e2e/admin-private-navigation.spec.ts --workers=1",
+  "stats": {
+    "startTime": "2026-10-02T19:40:22.930Z",
+    "duration": 51187.063,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "environment": "owned built Next; exact G0 Auth/DB; synthetic staff; en/zh private filtered routes; no provider mock",
+  "wrongFlagCollection": "separate prior 5 guarded skips with true; not passes",
+  "production": false
+}

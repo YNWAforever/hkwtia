@@ -1,0 +1,52 @@
+{
+  "taskId": "T00",
+  "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+  "observedAt": "2026-10-03T07:21:05.075073+00:00",
+  "inputZipSha256": "e3ee89685af39ea46bc20550e4cb6c43ff90cdb4fd1a71e3649fb9a36680ae62",
+  "outerSha256": "59d4544cc2c2b547bd14915cbfe991cbdebf34052345cbd126a2870999dd8fcf",
+  "planSha256": "3f33a96998af6eb74f5f25ec50c50ad70fcee05e85836df7592748bf945b7359",
+  "innerManifest": {
+    "entries": 91,
+    "verified": 91,
+    "crc": "PASS"
+  },
+  "outerManifest": {
+    "entries": 8,
+    "verified": 8,
+    "crc": "PASS"
+  },
+  "planMatchesPack": true,
+  "baselineTreeDiffFiles": 0,
+  "production": {
+    "deploymentId": "dpl_9jPwBRj3Cy5Wcan9N76mgRRXKkvN",
+    "state": "READY",
+    "target": "production",
+    "sourceSha": "36ebae1dac68a7e0e420870cf0df68fa166b7874",
+    "sourceRef": "main",
+    "regions": [
+      "iad1"
+    ],
+    "createdAt": 1791004248860,
+    "url": "hkwtia-lu7sngpr9-ynwaforevers-projects.vercel.app"
+  },
+  "findings": 28,
+  "tasks": 22,
+  "cases": 64,
+  "sourceMapSymbols": 47,
+  "isolatedDb": {
+    "projectId": "solitary-wave-52860119",
+    "branchId": "br-lingering-unit-azxl75s5",
+    "primary": false,
+    "default": false,
+    "protected": false,
+    "expiresAt": "2026-10-04T12:00:00Z",
+    "dbHost": "ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech",
+    "authHost": "ep-plain-mouse-azm8pl2j.neonauth.c-3.ap-southeast-1.aws.neon.tech",
+    "sentinels": 1,
+    "migrationLedgerCount": 56,
+    "profileCount": 5932,
+    "outsideReservedTestDomains": 0,
+    "readOnly": true
+  },
+  "selectedSourceBlobsVerifiedAgainstCurrentHead": 58
+}

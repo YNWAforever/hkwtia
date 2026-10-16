@@ -1,0 +1,299 @@
+{
+  "applicationSha": "27832bdcd58dfde1f512697277960df6958fc02d",
+  "command": "npm.cmd --prefix workers test -- --reporter=json",
+  "passed": 57,
+  "failed": 0,
+  "skipped": 0,
+  "production": false,
+  "tests": [
+    {
+      "test": "Board Reporter Worker schedule dispatches the dedicated monthly cron to only Board Reporter",
+      "status": "passed",
+      "durationMs": 31.48249999999996
+    },
+    {
+      "test": "Board Reporter Worker schedule uses 240 seconds for every retry while reusing the same monthly endpoint",
+      "status": "passed",
+      "durationMs": 4.400100000000066
+    },
+    {
+      "test": "Board Reporter Worker schedule configures the production Worker monthly cron trigger",
+      "status": "passed",
+      "durationMs": 0.7115999999999758
+    },
+    {
+      "test": "chat retention Worker schedule dispatches chat retention only for the dedicated 03:00 UTC cron",
+      "status": "passed",
+      "durationMs": 30.6099999999999
+    },
+    {
+      "test": "chat retention Worker schedule preserves the existing M3 dispatch for 0 * * * *",
+      "status": "passed",
+      "durationMs": 1.4847999999999502
+    },
+    {
+      "test": "chat retention Worker schedule preserves the existing M3 dispatch for 0 2 * * *",
+      "status": "passed",
+      "durationMs": 0.6825000000000045
+    },
+    {
+      "test": "chat retention Worker schedule preserves the existing M3 dispatch for 0 18 * * *",
+      "status": "passed",
+      "durationMs": 0.4350000000000591
+    },
+    {
+      "test": "chat retention Worker schedule declares scheduled triggers wrangler can read",
+      "status": "passed",
+      "durationMs": 0.711400000000026
+    },
+    {
+      "test": "Retention Analyst Worker schedule dispatches the dedicated 18:15 UTC cron to only Retention Analyst",
+      "status": "passed",
+      "durationMs": 31.99490000000003
+    },
+    {
+      "test": "Retention Analyst Worker schedule uses 240 seconds for every retry while reusing the same server-keyed endpoint",
+      "status": "passed",
+      "durationMs": 4.545500000000061
+    },
+    {
+      "test": "Retention Analyst Worker schedule configures the production Worker cron without Board Reporter",
+      "status": "passed",
+      "durationMs": 0.5380000000000109
+    },
+    {
+      "test": "worker success reflects completed polling does not report unresolved HTTP200 processing as a successful poll",
+      "status": "passed",
+      "durationMs": 29.597999999999956
+    },
+    {
+      "test": "worker success reflects completed polling does not report unresolved HTTP200 stale as a successful poll",
+      "status": "passed",
+      "durationMs": 0.6090000000000373
+    },
+    {
+      "test": "worker success reflects completed polling does not report unresolved HTTP200 null as a successful poll",
+      "status": "passed",
+      "durationMs": 0.4497000000000071
+    },
+    {
+      "test": "worker success reflects completed polling keeps a disabled successful route distinct from healthy work",
+      "status": "passed",
+      "durationMs": 0.4556999999999789
+    },
+    {
+      "test": "worker success reflects completed polling reports completion only with the server's explicit completed outcome",
+      "status": "passed",
+      "durationMs": 0.4782000000000153
+    },
+    {
+      "test": "worker success reflects completed polling pins each invocation to the worker revision for server verification",
+      "status": "passed",
+      "durationMs": 0.5082000000001017
+    },
+    {
+      "test": "restricts an existing cron to an explicit registered job scope, without invoking sends",
+      "status": "passed",
+      "durationMs": 1.013900000000035
+    },
+    {
+      "test": "Worker package runtime contract keeps the package and lockfile Node engine aligned with Wrangler",
+      "status": "passed",
+      "durationMs": 2.456700000000069
+    },
+    {
+      "test": "Worker package runtime contract keeps exactly one hourly cron trigger",
+      "status": "passed",
+      "durationMs": 1.3498999999999342
+    },
+    {
+      "test": "actual workerd entry boot boots the declared entry without invoking a scheduler, provider or database",
+      "status": "passed",
+      "durationMs": 5752.0521
+    },
+    {
+      "test": "actual workerd entry boot detects the named constant exports that broke the prior entry",
+      "status": "passed",
+      "durationMs": 1487.0282000000007
+    },
+    {
+      "test": "Cloudflare automation scheduler schedules every declared WorkerJob on at least one cron",
+      "status": "passed",
+      "durationMs": 3.133299999999963
+    },
+    {
+      "test": "Cloudflare automation scheduler keeps wrangler's cron triggers and the scheduled job map in step",
+      "status": "passed",
+      "durationMs": 0.43200000000001637
+    },
+    {
+      "test": "Cloudflare automation scheduler maps 0 * * * * to only the jobs owned by that cron event",
+      "status": "passed",
+      "durationMs": 30.381700000000023
+    },
+    {
+      "test": "Cloudflare automation scheduler maps 0 2 * * * to only the jobs owned by that cron event",
+      "status": "passed",
+      "durationMs": 0.6421000000000276
+    },
+    {
+      "test": "Cloudflare automation scheduler maps 0 18 * * * to only the jobs owned by that cron event",
+      "status": "passed",
+      "durationMs": 0.7212000000000671
+    },
+    {
+      "test": "Cloudflare automation scheduler maps 15 18 * * * to only the jobs owned by that cron event",
+      "status": "passed",
+      "durationMs": 0.6093999999999369
+    },
+    {
+      "test": "Cloudflare automation scheduler maps 30 0 1 * * to only the jobs owned by that cron event",
+      "status": "passed",
+      "durationMs": 0.44849999999996726
+    },
+    {
+      "test": "Cloudflare automation scheduler lets overlapping hourly and 0 2 * * * events run each owned job once",
+      "status": "passed",
+      "durationMs": 1.340599999999995
+    },
+    {
+      "test": "Cloudflare automation scheduler lets overlapping hourly and 0 18 * * * events run each owned job once",
+      "status": "passed",
+      "durationMs": 0.8075999999999794
+    },
+    {
+      "test": "Cloudflare automation scheduler safely logs and performs no fetch for an unknown cron",
+      "status": "passed",
+      "durationMs": 1.5376999999999725
+    },
+    {
+      "test": "Cloudflare automation scheduler registers one waitUntil promise and settles every due job independently",
+      "status": "passed",
+      "durationMs": 1.130200000000059
+    },
+    {
+      "test": "Cloudflare automation scheduler joins APP_URL canonically and invokes jobs with bearer POST and no body",
+      "status": "passed",
+      "durationMs": 1.0875999999999522
+    },
+    {
+      "test": "Cloudflare automation scheduler adds the Vercel automation bypass header when Preview protection is configured",
+      "status": "passed",
+      "durationMs": 1.2504999999999882
+    },
+    {
+      "test": "Cloudflare automation scheduler never follows a cross-origin job redirect or sends its bearer to the redirect target",
+      "status": "passed",
+      "durationMs": 1.652300000000082
+    },
+    {
+      "test": "Cloudflare automation scheduler treats an alert redirect as failure without following or leaking the bearer",
+      "status": "passed",
+      "durationMs": 1.015100000000075
+    },
+    {
+      "test": "Cloudflare automation scheduler aborts each hanging job request at the fixed deadline and reports JOB_TIMEOUT",
+      "status": "passed",
+      "durationMs": 4.06389999999999
+    },
+    {
+      "test": "Cloudflare automation scheduler aborts each hanging AI-Ops attempt after exactly 10 seconds",
+      "status": "passed",
+      "durationMs": 1.7736000000001013
+    },
+    {
+      "test": "Cloudflare automation scheduler aborts a hanging event-cancellation sweep at its own 30 seconds",
+      "status": "passed",
+      "durationMs": 1.316599999999994
+    },
+    {
+      "test": "Cloudflare automation scheduler aborts a hanging alert and emits one bounded timeout log with no timers left",
+      "status": "passed",
+      "durationMs": 1.1631999999999607
+    },
+    {
+      "test": "Cloudflare automation scheduler makes exactly three non-2xx attempts with 250ms and 1000ms delays",
+      "status": "passed",
+      "durationMs": 1.8348000000000866
+    },
+    {
+      "test": "Cloudflare automation scheduler retries only a failed AI-Ops refresh before sending one exact final alert",
+      "status": "passed",
+      "durationMs": 0.6261999999999261
+    },
+    {
+      "test": "Cloudflare automation scheduler alerts on the first failed refund batch even when later retry batches succeed",
+      "status": "passed",
+      "durationMs": 0.6609999999999445
+    },
+    {
+      "test": "Cloudflare automation scheduler counts fetch exceptions in the same three-attempt budget",
+      "status": "passed",
+      "durationMs": 0.8507000000000744
+    },
+    {
+      "test": "Cloudflare automation scheduler does not retry a successful 200 response",
+      "status": "passed",
+      "durationMs": 0.5833000000000084
+    },
+    {
+      "test": "Cloudflare automation scheduler does not retry a successful 204 response",
+      "status": "passed",
+      "durationMs": 0.32940000000007785
+    },
+    {
+      "test": "Cloudflare automation scheduler does not retry a successful 299 response",
+      "status": "passed",
+      "durationMs": 0.23500000000001364
+    },
+    {
+      "test": "Cloudflare automation scheduler sends the exact strict alert payload with canonical UTC time after final HTTP failure",
+      "status": "passed",
+      "durationMs": 1.0462999999999738
+    },
+    {
+      "test": "Cloudflare automation scheduler distinguishes network and timeout failures using the Task 9 allowlist",
+      "status": "passed",
+      "durationMs": 0.823099999999954
+    },
+    {
+      "test": "Cloudflare automation scheduler logs one bounded sanitized record and never recursively alerts when the alert endpoint is unavailable",
+      "status": "passed",
+      "durationMs": 0.7482000000001108
+    },
+    {
+      "test": "Cloudflare automation scheduler does not issue requests for invalid Worker environment",
+      "status": "passed",
+      "durationMs": 0.38589999999999236
+    },
+    {
+      "test": "Cloudflare automation scheduler does not issue requests for invalid Worker environment",
+      "status": "passed",
+      "durationMs": 0.2804999999999609
+    },
+    {
+      "test": "Cloudflare automation scheduler does not issue requests for invalid Worker environment",
+      "status": "passed",
+      "durationMs": 0.25290000000006785
+    },
+    {
+      "test": "Cloudflare automation scheduler does not issue requests for invalid Worker environment",
+      "status": "passed",
+      "durationMs": 0.21300000000007913
+    },
+    {
+      "test": "Cloudflare automation scheduler permits HTTP only for local development URLs",
+      "status": "passed",
+      "durationMs": 0.28910000000007585
+    },
+    {
+      "test": "records worker transport failure and recovery with pinned versions and no secrets",
+      "status": "passed",
+      "durationMs": 0.8252999999999702
+    }
+  ],
+  "typecheck": {
+    "command": "npm.cmd --prefix workers run typecheck",
+    "exitCode": 0
+  }
+}

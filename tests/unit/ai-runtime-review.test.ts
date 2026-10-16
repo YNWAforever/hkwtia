@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import {describe, expect, it, vi} from "vitest";
 
 import {
@@ -90,7 +91,7 @@ function createRuntime(
     .mockReturnValueOnce(STARTED_AT)
     .mockReturnValue(COMPLETED_AT),
 ) {
-  return createAgentRuntime({
+  return createAgentRuntime({budget: syntheticAiBudget(),
     agentRuns,
     providerFactories,
     createRunId: () => RUN_ID,
@@ -139,6 +140,8 @@ describe("review hardening: start-first lifecycle", () => {
         inputTokens: 0,
         outputTokens: 0,
         costUsd: "0.000000",
+        usageState: "not_dispatched",
+        pricingVersion: "verified-2026-10-03",
       },
     );
     expect(openaiFactory).not.toHaveBeenCalled();
@@ -285,6 +288,8 @@ describe("review hardening: failure usage accounting", () => {
         inputTokens: 1_234,
         outputTokens: 567,
         costUsd: "0.001401",
+        usageState: "known",
+        pricingVersion: "verified-2026-10-03",
       },
     );
     expect(agentRuns.finish).not.toHaveBeenCalled();

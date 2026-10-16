@@ -1,0 +1,12 @@
+{
+  "phase": "RED",
+  "sourceSha": "f7599e89",
+  "pass": 1,
+  "fail": 1,
+  "skip": 0,
+  "failedTitles": [
+    "streamed header focus boundary removes every temporary header control from focus and accessibility until replacement"
+  ],
+  "targetBehaviour": "temporary controls must be inert and hidden from accessibility tree",
+  "production": false
+}

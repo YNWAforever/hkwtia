@@ -1,9 +1,10 @@
-import Link from "next/link";
+import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import {
   AutomationRetryForm,
   type RetryAutomationAction,
 } from "@/components/admin/automation-retry-form";
+import type {JobHealth, JobHealthReasonCode} from "@/lib/jobs/health";
 import type {AutomationDashboard} from "@/lib/admin/automations";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
@@ -11,9 +12,6 @@ import {localizedPath} from "@/lib/urls";
 export type {RetryAutomationAction};
 
 export type AutomationDashboardLabels = Readonly<{
-  eyebrow: string;
-  title: string;
-  description: string;
   evaluatedAt: string;
   countsLabel: string;
   due: string;
@@ -41,14 +39,19 @@ export type AutomationDashboardLabels = Readonly<{
   retryScheduled: string;
   retryValidation: string;
   retryUnavailable: string;
+  retryReconciliation: string;
   retryError: string;
   notAvailable: string;
   next: string;
 }>;
 
+export type JobHealthLabels=Readonly<{heading:string;description:string;job:string;state:string;reason:string;reasons:Readonly<Record<JobHealthReasonCode,string>>;lastStarted:string;lastSuccess:string;nextExpected:string;oldestPending:string;failed:string;uncertain:string;deployment:string;unobserved:string;states:Readonly<Record<JobHealth["state"],string>>;jobs:Readonly<Record<string,string>>}>;
+
 type AutomationDashboardViewProps = Readonly<{
   action: RetryAutomationAction;
   dashboard: AutomationDashboard;
+  health?:readonly JobHealth[];
+  healthLabels?:JobHealthLabels;
   labels: AutomationDashboardLabels;
   locale: AppLocale;
 }>;
@@ -56,6 +59,8 @@ type AutomationDashboardViewProps = Readonly<{
 export function AutomationDashboardView({
   action,
   dashboard,
+  health,
+  healthLabels,
   labels,
   locale,
 }: AutomationDashboardViewProps) {
@@ -90,19 +95,27 @@ export function AutomationDashboardView({
 
   return (
     <div className="space-y-8">
-      <header className="max-w-3xl space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-          {labels.eyebrow}
-        </p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">
-          {labels.title}
-        </h1>
-        <p className="text-lg text-muted-foreground">{labels.description}</p>
-        <p className="text-sm text-muted-foreground">
-          {labels.evaluatedAt}{" "}
-          <time dateTime={dashboard.asOf}>{displayDate(dashboard.asOf)}</time>
-        </p>
-      </header>
+      <p className="max-w-3xl text-sm text-muted-foreground">
+        {labels.evaluatedAt}{" "}
+        <time dateTime={dashboard.asOf}>{displayDate(dashboard.asOf)}</time>
+      </p>
+
+      {health&&healthLabels?<section className="glass-card space-y-4 p-5 sm:p-8" aria-labelledby="verified-worker-health">
+        <h2 id="verified-worker-health" className="font-serif text-2xl font-semibold">{healthLabels.heading}</h2>
+        <div className="overflow-x-auto rounded-md border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" role="group" aria-label={healthLabels.heading} tabIndex={0}>
+          <table className="min-w-full text-left text-sm"><caption className="p-3 text-left text-muted-foreground">{healthLabels.description}</caption>
+           <thead><tr>{[healthLabels.job,healthLabels.state,healthLabels.reason,healthLabels.lastStarted,healthLabels.lastSuccess,healthLabels.nextExpected,healthLabels.oldestPending,healthLabels.failed,healthLabels.uncertain,healthLabels.deployment].map(label=><th scope="col" key={label} className="whitespace-nowrap border-y bg-muted/40 px-3 py-3">{label}</th>)}</tr></thead>
+           <tbody>{health.map(job=><tr key={job.jobKey} className="border-b last:border-0">
+            <th scope="row" className="px-3 py-3 font-medium">{healthLabels.jobs[job.jobKey]}</th>
+            <td className="px-3 py-3"><span className="whitespace-nowrap rounded-md bg-muted px-2 py-1">{healthLabels.states[job.state]}</span></td>
+            <td className="px-3 py-3">{healthLabels.reasons[job.reasonCode]}</td>
+            {[job.lastStartedAt,job.lastVerifiedAt,job.nextExpectedAt,job.oldestPendingAt].map((date,index)=><td key={index} className="whitespace-nowrap px-3 py-3">{date?<time dateTime={date}>{displayDate(date)}</time>:healthLabels.unobserved}</td>)}
+            <td className="px-3 py-3 tabular-nums">{job.failedCount===null?healthLabels.unobserved:job.failedCount}</td><td className="px-3 py-3 tabular-nums">{job.uncertainCount===null?healthLabels.unobserved:job.uncertainCount}</td>
+            <td className="px-3 py-3">{job.deploymentSha?<code title={job.deploymentSha}>{job.deploymentSha.slice(0,12)}</code>:healthLabels.unobserved}</td>
+           </tr>)}</tbody>
+          </table>
+        </div>
+       </section>:null}
 
       <section aria-label={labels.countsLabel}>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

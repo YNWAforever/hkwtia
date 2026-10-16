@@ -89,6 +89,16 @@ describe("Concierge SSE route", () => {
     ].join(""));
   });
 
+  it("reads a bounded request stream without calling the unbounded text reader", async () => {
+    const deps = routeDependencies();
+    const oversized = request({message: "x".repeat(8_193), locale: "en"});
+    const text = vi.spyOn(oversized, "text");
+    const response = await createConciergePostHandler(deps)(oversized);
+    expect(response.status).toBe(400);
+    expect(text).not.toHaveBeenCalled();
+    expect(deps.service.startTurn).not.toHaveBeenCalled();
+  });
+
   it("validates and maps fallback contact email without promoting it to confirmed identity", async () => {
     const deps = routeDependencies();
     const response = await createConciergePostHandler(deps)(request({
@@ -267,6 +277,12 @@ describe("Concierge SSE route", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("APP_URL", "https://www.hkwtia.org");
     vi.stubEnv("CONCIERGE_COOKIE_SECRET", SECRET);
+    // This test exercises a configured route factory, with a mocked provider service.
+    vi.stubEnv("AGENTS_ENABLED", "true");
+    vi.stubEnv("OPENAI_API_KEY", "synthetic-configured-provider-key");
+    vi.stubEnv("AI_BUDGET_RUN_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_DAY_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_MONTH_MICROUSD", "1000000");
 
     const startTurn = vi.fn(async ({owner}: {owner: unknown}) => ({
       conversationId: CONVERSATION_ID,
@@ -406,6 +422,12 @@ describe("owned Concierge feedback route", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("APP_URL", "https://www.hkwtia.org");
     vi.stubEnv("CONCIERGE_COOKIE_SECRET", SECRET);
+    // This test exercises a configured route factory, with a mocked provider service.
+    vi.stubEnv("AGENTS_ENABLED", "true");
+    vi.stubEnv("OPENAI_API_KEY", "synthetic-configured-provider-key");
+    vi.stubEnv("AI_BUDGET_RUN_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_DAY_MICROUSD", "1000000");
+    vi.stubEnv("AI_BUDGET_MONTH_MICROUSD", "1000000");
 
     const recordFeedback = vi.fn(async () => ({id: RUN_ID, csatScore: 5}));
 

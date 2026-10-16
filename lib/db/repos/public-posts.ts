@@ -1,4 +1,5 @@
 import "server-only";
+import {unstable_cache} from "next/cache";
 
 import {and, asc, desc, eq, isNotNull, isNull, lte, sql} from "drizzle-orm";
 import {z} from "zod";
@@ -55,13 +56,13 @@ export function createPublicPostsRepository(loadDatabase: DatabaseLoader = getDb
   return {
     async listPublishedBuildLogs(asOf = new Date()) {
       const database = await loadDatabase();
-      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf))).orderBy(desc(posts.publishedAt), asc(posts.slug));
+      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf), isNull(posts.archivedAt))).orderBy(desc(posts.publishedAt), asc(posts.slug));
       return publishedBuildLogSummaryRowSchema.array().parse(rows);
     },
     async getPublishedBuildLogBySlug(slug, asOf = new Date()) {
       const parsedSlug = parsePublishedBuildLogSlug(slug);
       const database = await loadDatabase();
-      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author, bodyMdx: posts.bodyMdx}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf), eq(posts.slug, parsedSlug))).limit(1);
+      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author, bodyMdx: posts.bodyMdx}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf), isNull(posts.archivedAt), eq(posts.slug, parsedSlug))).limit(1);
       return rows[0] ? publishedBuildLogDetailRowSchema.parse(rows[0]) : null;
     },
     async listPublishedNews(locale, asOf = new Date(), options = {}) {
@@ -83,5 +84,15 @@ export function createPublicPostsRepository(loadDatabase: DatabaseLoader = getDb
 export const publicPostsRepository = createPublicPostsRepository();
 export function listPublishedBuildLogs(asOf?: Date): Promise<readonly PublishedBuildLogSummary[]> { return publicPostsRepository.listPublishedBuildLogs(asOf); }
 export function getPublishedBuildLogBySlug(slug: string, asOf?: Date): Promise<PublishedBuildLogDetail | null> { return publicPostsRepository.getPublishedBuildLogBySlug(slug, asOf); }
-export function listPublishedNews(locale: AppLocale, asOf?: Date, options?: PublicReadOptions): Promise<readonly PublishedNewsSummary[]> { return publicPostsRepository.listPublishedNews(locale, asOf, options); }
+// Cache only the anonymous published projection, with locale and bounded limit in the key.
+// The JSON cache transport turns Date into string; hydrate at this boundary for callers.
+const cachedNews = unstable_cache(async (locale: AppLocale, limit: number | null) => {
+  const rows = await publicPostsRepository.listPublishedNews(locale, undefined, limit === null ? {} : {limit});
+  return rows.map(row => ({...row, publishedAt: row.publishedAt.toISOString()}));
+}, ["public-news-v1"], {tags: ["public-news"], revalidate: 60});
+export async function listPublishedNews(locale: AppLocale, asOf?: Date, options?: PublicReadOptions): Promise<readonly PublishedNewsSummary[]> {
+  if (asOf) return publicPostsRepository.listPublishedNews(locale, asOf, options);
+  const rows = await cachedNews(locale, readLimit(options) ?? null);
+  return rows.map(row => ({...row, publishedAt: new Date(row.publishedAt)}));
+}
 export function getPublishedNewsBySlug(locale: AppLocale, slug: string, asOf?: Date): Promise<PublishedNewsDetail | null> { return publicPostsRepository.getPublishedNewsBySlug(locale, slug, asOf); }

@@ -115,7 +115,7 @@ describe("GET /api/media/[id]", () => {
     expect(get).not.toHaveBeenCalled();
   });
 
-  it("uses stored ETag and streams verified bytes with exact private headers", async () => {
+  it("uses stored ETag and streams verified bytes with exact delivery headers", async () => {
     const row = uploadedRow();
     const get = vi.fn(async () => ({
       body: bodyStream(row.bytes), etag: row.storageEtag, contentLength: row.byteSize,
@@ -127,12 +127,26 @@ describe("GET /api/media/[id]", () => {
     });
     expect(get).toHaveBeenCalledWith({key: row.storageKey, etag: row.storageEtag});
     expect(response.status).toBe(200);
+    // Round 21 (owner decision 2026-10-09): verified bytes may sit in Vercel's CDN for 5 minutes
+    // (s-maxage=300); browsers always revalidate (max-age=0). no-store made every logo a 1-2.4s
+    // function call. An archived item can therefore be served for at most 5 minutes after archiving.
     expect(Object.fromEntries(response.headers)).toMatchObject({
-      "cache-control": "no-store", "content-disposition": "inline", "content-length": String(row.byteSize),
+      "cache-control": "public, max-age=0, s-maxage=300, must-revalidate", "content-disposition": "inline", "content-length": String(row.byteSize),
       "content-type": "image/png", etag: row.storageEtag, "x-content-type-options": "nosniff",
     });
     expect(response.headers.get("content-disposition")).toBe("inline");
     expect(await response.text()).toBe(row.bytes.toString());
+  });
+
+  it("never lets a CDN cache the not-found answer for archived or unknown media", async () => {
+    const get = vi.fn();
+    const handler = createMediaGet({load: vi.fn(async () => null), storage: {get} as never});
+    const response = await handler(new Request(`https://www.hkwtia.org/api/media/${mediaId}`), {
+      params: Promise.resolve({id: mediaId}),
+    });
+    expect(response.status).toBe(404);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(get).not.toHaveBeenCalled();
   });
 
   it.each([

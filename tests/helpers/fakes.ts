@@ -1,6 +1,8 @@
 import type {Actor} from "@/lib/membership/lifecycle";
 import type {
   CheckoutSessionInput,
+  CurrentSubscriptionState,
+  EventTicketSessionInput,
   InvoiceRecord,
   PortalSessionInput,
   StripeBillingAdapter,
@@ -42,15 +44,51 @@ export function createFakeRepositories() {
 
 export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   readonly checkoutRequests: CheckoutSessionInput[] = [];
+  readonly ticketRequests: EventTicketSessionInput[] = [];
   readonly portalRequests: PortalSessionInput[] = [];
+  readonly refundedPaymentIntents: string[] = [];
+  readonly refundStateQueries: Array<{paymentIntentId: string; expectedAmountHkdCents: number}> = [];
+  paymentIntentId: string | null = "pi_test_intent";
   invoices: InvoiceRecord[] = [];
   checkoutSessionId = "cs_test_session";
   checkoutUrl = "https://checkout.stripe.test/session";
+  ticketSessionId = "cs_test_ticket";
+  ticketUrl = "https://checkout.stripe.test/ticket";
+  ticketStatus: "open" | "complete" | "expired" = "open";
   portalUrl = "https://billing.stripe.test/session";
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}> {
     this.checkoutRequests.push(structuredClone(input));
     return {id: this.checkoutSessionId, url: this.checkoutUrl};
+  }
+
+  async currentSubscription(subscriptionId: string): Promise<CurrentSubscriptionState> {
+    return {stripeSubscriptionId: subscriptionId, stripeCustomerId: "cus_test", nextStatus: "active",
+      cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null};
+  }
+  async createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}> {
+    this.ticketRequests.push(structuredClone(input));
+    return {id: this.ticketSessionId, url: this.ticketUrl};
+  }
+
+  async ticketSessionStatus(sessionId: string): Promise<"open" | "complete" | "expired"> {
+    void sessionId;
+    return this.ticketStatus;
+  }
+
+  async paymentIntentForSession(_sessionId: string): Promise<string | null> {
+    return this.paymentIntentId;
+  }
+
+  async ticketOrderIdForPaymentIntent(paymentIntentId: string): Promise<string | null> { void paymentIntentId; return null; }
+
+  async refundPaymentIntent(paymentIntentId: string, _idempotencyKey: string): Promise<void> {
+    this.refundedPaymentIntents.push(paymentIntentId);
+  }
+
+  async fullyRefundedPaymentIntent(paymentIntentId: string, expectedAmountHkdCents: number): Promise<boolean> {
+    this.refundStateQueries.push({paymentIntentId, expectedAmountHkdCents});
+    return false;
   }
 
   async createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}> {

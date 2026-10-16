@@ -1,8 +1,11 @@
+import {portalAccessNotice} from "@/components/portal/access-notice";
+import {readPortalPage} from "@/lib/portal/access-state";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DocumentList} from "@/components/portal/document-list";
+import {PortalPageHeader} from "@/components/portal/page-header";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {portalPageActor} from "@/lib/portal/page-actor";
 import {getDocuments} from "@/lib/portal/content";
 
 export const dynamic = "force-dynamic";
@@ -13,18 +16,30 @@ export default async function DocumentsPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
-  const documents = await getDocuments(actor);
+  const actor = await portalPageActor(locale, "/portal/documents");
+  const result = await readPortalPage(() => getDocuments(actor));
+  if (!result.ok) return portalAccessNotice(locale, result.access);
+  const documents = result.value;
   const t = await getTranslations({locale, namespace: "Portal"});
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("documents.title")}</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("documents.title")}</h1>
-        <p className="text-lg text-muted-foreground">{t("documents.description")}</p>
-      </header>
-      <DocumentList locale={locale} items={documents} empty={t("documents.empty")} labels={{receipt: t("documents.receipt"), resource: t("documents.resource"), open: t("documents.open")}} />
+    <div>
+      <PortalPageHeader eyebrow={t("navGroups.benefits")} lead={t("documents.description")} title={t("documents.title")} />
+      <DocumentList
+        items={documents}
+        labels={{
+          receiptsHeading: t("documents.receiptsHeading"),
+          receiptTitle: (amount) => (amount ? t("documents.receiptTitle", {amount}) : t("documents.receiptTitleNoAmount")),
+          resourcesHeading: t("documents.resourcesHeading"),
+          openReceipt: t("documents.openReceipt"),
+          openDocument: t("documents.openDocument"),
+          newTab: t("common.newTab"),
+          empty: t("documents.empty"),
+          emptyLine: t("documents.emptyLine"),
+          emptyAction: t("documents.emptyAction"),
+        }}
+        locale={locale}
+      />
     </div>
   );
 }

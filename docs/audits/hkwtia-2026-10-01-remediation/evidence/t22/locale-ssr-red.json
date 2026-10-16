@@ -1,0 +1,61 @@
+{
+  "environment": "local jsdom; no provider calls",
+  "command": "node node_modules/vitest/vitest.mjs run tests/unit/locale-switcher.test.tsx --reporter=json",
+  "pass": 12,
+  "fail": 1,
+  "skip": 0,
+  "cases": [
+    {
+      "name": "LocaleSwitcher keeps the ready server-rendered control disabled until client handlers are installed",
+      "status": "failed"
+    },
+    {
+      "name": "LocaleSwitcher cannot consume a click in the pending search-state fallback",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher retains every parsed Showcase filter and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher retains the selected Event status and fragment through the real switcher",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves the current fragment after path and query when switching locale",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves serialized query values when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher does not append a bare query separator when switching from English to Chinese without search state",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves an empty-valued query parameter when switching from English to Chinese",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves serialized query values when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher does not append a bare query separator when switching from Chinese to English without search state",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher preserves an empty-valued query parameter when switching from Chinese to English",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher keeps the current locale when an unsaved editor rejects the switch",
+      "status": "passed"
+    },
+    {
+      "name": "LocaleSwitcher renders a 44px locale target in each Suspense state",
+      "status": "passed"
+    }
+  ]
+}

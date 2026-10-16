@@ -1,0 +1,766 @@
+{
+  "applicationSha": "27832bdcd58dfde1f512697277960df6958fc02d",
+  "stats": {
+    "startTime": "2026-10-02T03:46:46.091Z",
+    "duration": 1769246.284,
+    "expected": 42,
+    "skipped": 425,
+    "unexpected": 20,
+    "flaky": 0
+  },
+  "complete": false,
+  "maxFailures": 20,
+  "production": false,
+  "tests": [
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts / has no serious or critical accessibility violations",
+      "status": "failed",
+      "durationMs": 3118,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\accessibility.spec.ts",
+          "column": 59,
+          "line": 17
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /events has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 3028,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /membership has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1519,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /news has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1194,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /about has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1329,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /about/chairman has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1015,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1310,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /programs/asa has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1183,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh has no serious or critical accessibility violations",
+      "status": "failed",
+      "durationMs": 2421,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\accessibility.spec.ts",
+          "column": 59,
+          "line": 17
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/events has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 2985,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/membership has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1458,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/news has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1363,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/about has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1165,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/about/chairman has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1225,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1239,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 21,
+      "test": "accessibility.spec.ts /zh/programs/asa has no serious or critical accessibility violations",
+      "status": "passed",
+      "durationMs": 1180,
+      "errorCategories": []
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 27,
+      "test": "accessibility.spec.ts open desktop and mobile navigation surfaces pass axe",
+      "status": "failed",
+      "durationMs": 2662,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\accessibility.spec.ts",
+          "column": 59,
+          "line": 17
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 70,
+      "test": "accessibility.spec.ts the current mobile group passes axe and keeps AA contrast on the donor gradient",
+      "status": "failed",
+      "durationMs": 2001,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\accessibility.spec.ts",
+          "column": 59,
+          "line": 17
+        }
+      ]
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "line": 141,
+      "test": "accessibility.spec.ts skip link targets the sole main content landmark",
+      "status": "passed",
+      "durationMs": 438,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "line": 17,
+      "test": "admin-batches.spec.ts en: ten selected members, two controlled failures, retry only failures",
+      "status": "timedOut",
+      "durationMs": 180055,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\admin-batches.spec.ts",
+          "column": 137,
+          "line": 23
+        }
+      ]
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "line": 17,
+      "test": "admin-batches.spec.ts zh-HK: ten selected members, two controlled failures, retry only failures",
+      "status": "timedOut",
+      "durationMs": 180087,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\admin-batches.spec.ts",
+          "column": 137,
+          "line": 23
+        }
+      ]
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "line": 19,
+      "test": "admin-event-authoring.spec.ts en: staff event modes survive create, edit and public rendering",
+      "status": "timedOut",
+      "durationMs": 180073,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\admin-event-authoring.spec.ts",
+          "column": 61,
+          "line": 42
+        }
+      ]
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "line": 19,
+      "test": "admin-event-authoring.spec.ts zh-HK: staff event modes survive create, edit and public rendering",
+      "status": "timedOut",
+      "durationMs": 180052,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\admin-event-authoring.spec.ts",
+          "column": 61,
+          "line": 42
+        }
+      ]
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "line": 15,
+      "test": "admin-grants.spec.ts en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "status": "skipped",
+      "durationMs": 4,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "line": 15,
+      "test": "admin-grants.spec.ts zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "status": "skipped",
+      "durationMs": 1,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "line": 18,
+      "test": "admin-imports.spec.ts en: import reviews differences and commits only two eligible synthetic rows",
+      "status": "skipped",
+      "durationMs": 100,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "line": 18,
+      "test": "admin-imports.spec.ts zh-HK: import reviews differences and commits only two eligible synthetic rows",
+      "status": "skipped",
+      "durationMs": 153,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-members-bulk.spec.ts",
+      "line": 12,
+      "test": "admin-members-bulk.spec.ts isolated member batch recovery staff can find, reopen and safely interpret synthetic batch jobs",
+      "status": "skipped",
+      "durationMs": 69,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "line": 11,
+      "test": "admin-members.spec.ts en: member search, detail and return retain the filter",
+      "status": "passed",
+      "durationMs": 5524,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "line": 11,
+      "test": "admin-members.spec.ts zh-HK: member search, detail and return retain the filter",
+      "status": "passed",
+      "durationMs": 5400,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 11,
+      "test": "admin-shell.spec.ts isolated admin workspace shell staff can navigate all original destinations, use the mobile drawer and sign out",
+      "status": "failed",
+      "durationMs": 21727,
+      "errorCategories": [
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\admin-shell.spec.ts",
+          "column": 69,
+          "line": 16
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 38,
+      "test": "admin-shell.spec.ts isolated admin workspace shell member detail keeps the Members destination current",
+      "status": "passed",
+      "durationMs": 2075,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 44,
+      "test": "admin-shell.spec.ts isolated admin workspace shell zh-HK superadmin keeps locale and authorized navigation",
+      "status": "failed",
+      "durationMs": 21327,
+      "errorCategories": [
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\admin-shell.spec.ts",
+          "column": 69,
+          "line": 48
+        }
+      ]
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 56,
+      "test": "admin-shell.spec.ts isolated admin workspace shell removing a synthetic staff role denies the next server request",
+      "status": "skipped",
+      "durationMs": 216,
+      "errorCategories": []
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "line": 85,
+      "test": "admin-shell.spec.ts isolated admin workspace shell member identity sees denial and no workspace links",
+      "status": "passed",
+      "durationMs": 1906,
+      "errorCategories": []
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "test": "audit-20260929-anonymous-entries.spec.ts anonymous member-login-en-desktop renders for audit evidence",
+      "status": "passed",
+      "durationMs": 434,
+      "errorCategories": []
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "test": "audit-20260929-anonymous-entries.spec.ts anonymous member-login-zh-mobile renders for audit evidence",
+      "status": "passed",
+      "durationMs": 430,
+      "errorCategories": []
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "line": 13,
+      "test": "audit-20260929-anonymous-entries.spec.ts anonymous join-zh-desktop renders for audit evidence",
+      "status": "passed",
+      "durationMs": 454,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "test": "auth-methods.spec.ts en member: method readiness and safe continuation render",
+      "status": "passed",
+      "durationMs": 331,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "test": "auth-methods.spec.ts en member: sent-state recovery keeps resend waiting",
+      "status": "timedOut",
+      "durationMs": 180017,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\auth-methods.spec.ts",
+          "column": 79,
+          "line": 51
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "test": "auth-methods.spec.ts en member: provider-error return offers email recovery",
+      "status": "passed",
+      "durationMs": 519,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "test": "auth-methods.spec.ts en admin: method readiness and safe continuation render",
+      "status": "passed",
+      "durationMs": 301,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "test": "auth-methods.spec.ts en admin: sent-state recovery keeps resend waiting",
+      "status": "timedOut",
+      "durationMs": 180022,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\auth-methods.spec.ts",
+          "column": 79,
+          "line": 51
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "test": "auth-methods.spec.ts en admin: provider-error return offers email recovery",
+      "status": "passed",
+      "durationMs": 563,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "test": "auth-methods.spec.ts zh-HK member: method readiness and safe continuation render",
+      "status": "passed",
+      "durationMs": 338,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "test": "auth-methods.spec.ts zh-HK member: sent-state recovery keeps resend waiting",
+      "status": "timedOut",
+      "durationMs": 180021,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\auth-methods.spec.ts",
+          "column": 79,
+          "line": 51
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "test": "auth-methods.spec.ts zh-HK member: provider-error return offers email recovery",
+      "status": "passed",
+      "durationMs": 635,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 32,
+      "test": "auth-methods.spec.ts zh-HK admin: method readiness and safe continuation render",
+      "status": "passed",
+      "durationMs": 343,
+      "errorCategories": []
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 44,
+      "test": "auth-methods.spec.ts zh-HK admin: sent-state recovery keeps resend waiting",
+      "status": "timedOut",
+      "durationMs": 180028,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\auth-methods.spec.ts",
+          "column": 79,
+          "line": 51
+        }
+      ]
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "line": 56,
+      "test": "auth-methods.spec.ts zh-HK admin: provider-error return offers email recovery",
+      "status": "passed",
+      "durationMs": 561,
+      "errorCategories": []
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "concierge.spec.ts desktop en real-route mock provider cites sources and keeps continuity",
+      "status": "failed",
+      "durationMs": 710,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\concierge.spec.ts",
+          "column": 35,
+          "line": 70
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "concierge.spec.ts desktop zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "failed",
+      "durationMs": 811,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\concierge.spec.ts",
+          "column": 35,
+          "line": 70
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "concierge.spec.ts mobile en real-route mock provider cites sources and keeps continuity",
+      "status": "failed",
+      "durationMs": 661,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\concierge.spec.ts",
+          "column": 35,
+          "line": 70
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 40,
+      "test": "concierge.spec.ts mobile zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "failed",
+      "durationMs": 569,
+      "errorCategories": [
+        "ASSERTION"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\concierge.spec.ts",
+          "column": 35,
+          "line": 70
+        }
+      ]
+    },
+    {
+      "file": "concierge.spec.ts",
+      "line": 102,
+      "test": "concierge.spec.ts authenticated member can use the real Concierge route from the member portal",
+      "status": "failed",
+      "durationMs": 22364,
+      "errorCategories": [
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\concierge.spec.ts",
+          "column": 24,
+          "line": 115
+        }
+      ]
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "test": "core-pages.spec.ts / renders one English heading",
+      "status": "passed",
+      "durationMs": 800,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "test": "core-pages.spec.ts /zh renders one Chinese heading",
+      "status": "passed",
+      "durationMs": 374,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "test": "core-pages.spec.ts /about renders one English heading",
+      "status": "passed",
+      "durationMs": 356,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "test": "core-pages.spec.ts /zh/about renders one Chinese heading",
+      "status": "passed",
+      "durationMs": 316,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "test": "core-pages.spec.ts /about/chairman renders one English heading",
+      "status": "passed",
+      "durationMs": 392,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "test": "core-pages.spec.ts /zh/about/chairman renders one Chinese heading",
+      "status": "passed",
+      "durationMs": 400,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "test": "core-pages.spec.ts /about/committees renders one English heading",
+      "status": "passed",
+      "durationMs": 298,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "test": "core-pages.spec.ts /zh/about/committees renders one Chinese heading",
+      "status": "passed",
+      "durationMs": 318,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "test": "core-pages.spec.ts /membership renders one English heading",
+      "status": "passed",
+      "durationMs": 438,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "test": "core-pages.spec.ts /zh/membership renders one Chinese heading",
+      "status": "passed",
+      "durationMs": 485,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 4,
+      "test": "core-pages.spec.ts /ai-ops renders one English heading",
+      "status": "passed",
+      "durationMs": 288,
+      "errorCategories": []
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "line": 11,
+      "test": "core-pages.spec.ts /zh/ai-ops renders one Chinese heading",
+      "status": "passed",
+      "durationMs": 475,
+      "errorCategories": []
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "test": "event-check-in.spec.ts en: staff finds and checks in a confirmed guest at 390px",
+      "status": "skipped",
+      "durationMs": 1,
+      "errorCategories": []
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "line": 18,
+      "test": "event-check-in.spec.ts zh-HK: staff finds and checks in a confirmed guest at 390px",
+      "status": "skipped",
+      "durationMs": 0,
+      "errorCategories": []
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "line": 12,
+      "test": "full-import-export.spec.ts en: row decisions, private correction report and exact import commit",
+      "status": "timedOut",
+      "durationMs": 180033,
+      "errorCategories": [
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "errorLocations": [
+        {
+          "file": "C:\\Users\\laich\\.codex\\worktrees\\full-remediation-20261001\\hkwtia\\tests\\e2e\\full-import-export.spec.ts",
+          "column": 3,
+          "line": 19
+        }
+      ]
+    }
+  ],
+  "rawMessagesExcluded": true
+}

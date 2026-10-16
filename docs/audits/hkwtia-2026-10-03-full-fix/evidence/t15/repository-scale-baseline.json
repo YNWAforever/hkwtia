@@ -1,0 +1,12 @@
+{
+  "sourceSha": null,
+  "environment": "owned disposable loopback pgvector PostgreSQL16; all61 migrations; Node v24.18.0",
+  "syntheticOnly": true,
+  "externalEffects": 0,
+  "production": false,
+  "coldDatabase": false,
+  "regionalPerformanceVerified": false,
+  "rumVerified": false,
+  "operationIdScope": "measurement request and SQL only; actual model/provider receipt requires its separate authorized acceptance",
+  "measurements": []
+}

@@ -1,0 +1,8 @@
+{
+  "target": "two authenticated server actions",
+  "intentionallyBypassedAuthentication": true,
+  "behaviorRedExit": 1,
+  "restored": true,
+  "restoredSha256": "6481b02fd6c2a52429dd8f501c1d88e60fcc64692b1ba6787586bb3612f113a5",
+  "deploymentPerformed": false
+}

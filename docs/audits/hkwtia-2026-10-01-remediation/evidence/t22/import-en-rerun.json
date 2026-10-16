@@ -1,0 +1,20 @@
+{
+  "scope": "Actual confirmed isolated built Chromium; synthetic fixtures; not Production",
+  "stats": {
+    "startTime": "2026-10-02T12:26:06.368Z",
+    "duration": 65236.590000000004,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "full-import-export.spec.ts",
+      "title": "en: row decisions, private correction report and exact import commit",
+      "statuses": [
+        "passed"
+      ]
+    }
+  ]
+}

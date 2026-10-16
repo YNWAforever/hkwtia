@@ -1,0 +1,694 @@
+{
+  "sourceSha": "ce60f21089fff659a43acfa2472c8f98c198cf4b",
+  "environment": "owned disposable PG16; cloud URLs explicitly blank",
+  "pass": 120,
+  "fail": 1,
+  "skip": 16,
+  "cases": [
+    {
+      "file": "admin-batch-browser-fixture.test.ts",
+      "test": "settles eight, retries exactly two with stable keys, and writes one audit per target",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-concurrency.test.ts",
+      "test": "fences an expired worker and commits one profile update and audit row",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-export.test.ts",
+      "test": "materializes exact selected profiles and settles each item once",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-history.test.ts",
+      "test": "returns only batches the actor can open, including a resumable preview and partial progress",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-history.test.ts",
+      "test": "uses a stable tied-time cursor and binds cursors to filters",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-history.test.ts",
+      "test": "does not claim a failure whose code only resembles the transient prefix",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-profile-cleanup.test.ts",
+      "test": "previews tags and staff owner and writes metadata, profile version and audit atomically",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-profile-cleanup.test.ts",
+      "test": "skips an owner demoted after preview without metadata or profile audit",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-snapshot.test.ts",
+      "test": "materializes the filtered membership selection once, honors exclusions, and rejects foreign and tampered commits",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-snapshot.test.ts",
+      "test": "reads exact 5000-item totals but only 50 details and detects a retryable failure off-page",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-snapshot.test.ts",
+      "test": "retries only one actor-owned transient item without changing effect keys or uncertain outcomes",
+      "status": "passed"
+    },
+    {
+      "file": "admin-batch-ticket-resend.test.ts",
+      "test": "queues one pass per stable item key, then skips a revoked ticket without sending",
+      "status": "passed"
+    },
+    {
+      "file": "admin-pagination.test.ts",
+      "test": "visits member, guest and paid-seat rows with identical name and ID exactly once",
+      "status": "passed"
+    },
+    {
+      "file": "admin-pagination.test.ts",
+      "test": "paginates same-time orders and notes without missing or repeating rows",
+      "status": "passed"
+    },
+    {
+      "file": "admin-pagination.test.ts",
+      "test": "rejects unbounded pages and member access before any timeline data",
+      "status": "passed"
+    },
+    {
+      "file": "audit-migration-upgrade.test.ts",
+      "test": "demonstrates the historical timestamp bug using a temporary journal and disposable database only",
+      "status": "passed"
+    },
+    {
+      "file": "audit-migration-upgrade.test.ts",
+      "test": "applies grants after an imports-only deployment and preserves indefinite historical rows",
+      "status": "passed"
+    },
+    {
+      "file": "auth-last-login.test.ts",
+      "test": "does not rewrite a recent login, updates stale login, and stays actor-scoped",
+      "status": "passed"
+    },
+    {
+      "file": "auth-shared-rate-limit.test.ts",
+      "test": "shares one address quota across direct action and route instances with consistent retry timing",
+      "status": "passed"
+    },
+    {
+      "file": "auth-shared-rate-limit.test.ts",
+      "test": "keeps the ten-per-hour IP and twenty-per-five-minute credential ceilings",
+      "status": "passed"
+    },
+    {
+      "file": "auth-shared-rate-limit.test.ts",
+      "test": "refuses email and credential effects on store outage while leaving social and session paths alone",
+      "status": "passed"
+    },
+    {
+      "file": "bulk-communication-eligibility.test.ts",
+      "test": "registers both gated operations instead of rejecting every authorized request",
+      "status": "passed"
+    },
+    {
+      "file": "bulk-communication-eligibility.test.ts",
+      "test": "shows exact membership scopes and blocks two renewal scopes for one person in one batch",
+      "status": "passed"
+    },
+    {
+      "file": "bulk-communication-eligibility.test.ts",
+      "test": "pins the exact company membership and skips a renewal that changed after preview",
+      "status": "passed"
+    },
+    {
+      "file": "bulk-communication-eligibility.test.ts",
+      "test": "materializes one reviewed campaign, freezes its audience at review, and rechecks consent/language/renewal at send",
+      "status": "passed"
+    },
+    {
+      "file": "bulk-communication-eligibility.test.ts",
+      "test": "refuses review while recipients are still being materialized; invitations use the existing authenticated profile flow",
+      "status": "passed"
+    },
+    {
+      "file": "bulk-communication-eligibility.test.ts",
+      "test": "blocks shared addresses and missing locale templates",
+      "status": "passed"
+    },
+    {
+      "file": "cohort-role-revocation-postgres.test.ts",
+      "test": "denies a new application after seat revocation wins the membership lock",
+      "status": "passed"
+    },
+    {
+      "file": "company-profile-review-version-postgres.test.ts",
+      "test": "refuses stale approve after pending content changes",
+      "status": "passed"
+    },
+    {
+      "file": "company-profile-review-version-postgres.test.ts",
+      "test": "refuses stale reject after pending content changes",
+      "status": "passed"
+    },
+    {
+      "file": "company-profile-review-version-postgres.test.ts",
+      "test": "publishes the current snapshot and records one audit row",
+      "status": "passed"
+    },
+    {
+      "file": "company-profile-role-revocation-postgres.test.ts",
+      "test": "keeps the profile hidden after seat revocation wins the membership lock",
+      "status": "passed"
+    },
+    {
+      "file": "company-profile-role-revocation-postgres.test.ts",
+      "test": "blocks a portal company rewrite behind revocation and keeps its public copy unchanged",
+      "status": "passed"
+    },
+    {
+      "file": "company-profile-role-revocation-postgres.test.ts",
+      "test": "allows a manager to edit a join-stage company without a membership row",
+      "status": "passed"
+    },
+    {
+      "file": "event-attendee-batch-export.test.ts",
+      "test": "builds one private artifact in the worker, downloads without attendee reads and expires it",
+      "status": "passed"
+    },
+    {
+      "file": "event-attendee-batch-export.test.ts",
+      "test": "rejects a changed preview and disables materialization when the flag is revoked",
+      "status": "passed"
+    },
+    {
+      "file": "event-attendee-batch-export.test.ts",
+      "test": "materializes and serves 500 synthetic attendees with fixed snapshot counts",
+      "status": "passed"
+    },
+    {
+      "file": "event-cancellation-notices.test.ts",
+      "test": "atomically snapshots member, guest and waitlist recipients once",
+      "status": "passed"
+    },
+    {
+      "file": "event-cancellation-notices.test.ts",
+      "test": "rolls back event status, intent and notices when the cancellation audit fails",
+      "status": "passed"
+    },
+    {
+      "file": "event-cancellation-notices.test.ts",
+      "test": "blocks a known hard bounce and divides simultaneous claims without overlap",
+      "status": "passed"
+    },
+    {
+      "file": "event-edit-version-postgres.test.ts",
+      "test": "accepts one of two stale editors and audits exactly the accepted write",
+      "status": "passed"
+    },
+    {
+      "file": "guest-check-in.test.ts",
+      "test": "admits once, with one audit row, and rejects other statuses and targets",
+      "status": "passed"
+    },
+    {
+      "file": "guest-check-in.test.ts",
+      "test": "rolls back attendance when its audit row is refused",
+      "status": "passed"
+    },
+    {
+      "file": "join-resume.test.ts",
+      "test": "serializes concurrent starts in the unassigned scope",
+      "status": "skipped"
+    },
+    {
+      "file": "join-resume.test.ts",
+      "test": "separates plans and verified companies, and maps pending steps",
+      "status": "skipped"
+    },
+    {
+      "file": "join-resume.test.ts",
+      "test": "preserves a pending payment when explicitly starting another application",
+      "status": "skipped"
+    },
+    {
+      "file": "login-profile-provision-postgres.test.ts",
+      "test": "creates one member for a verified subject and never promotes an existing role",
+      "status": "passed"
+    },
+    {
+      "file": "login-profile-provision-postgres.test.ts",
+      "test": "requires recovery for a same-email different-subject account and never links its role",
+      "status": "passed"
+    },
+    {
+      "file": "login-profile-provision-postgres.test.ts",
+      "test": "serializes simultaneous same-email subjects so only one can create a profile",
+      "status": "passed"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "creates the ten required M2 tables and exact fixture counts idempotently",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "preserves mapped auth identities while restoring every other mutable seeded profile field",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "enforces note replacement SET NULL and indexes renewal windows in PostgreSQL",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "returns exactly the engineered canonical segment and production at-risk order",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "proves production member search matching, nonmatching, and stable cursor semantics",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "correlates suppression to each outer campaign candidate",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "composes a non-empty production Member 360 fixture",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "seeds one supported pending approval for the browser decision flow",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "matches committed hand-calculated Task 10 report values",
+      "status": "skipped"
+    },
+    {
+      "file": "m2-acceptance.test.ts",
+      "test": "contains no personal or production-looking email domain",
+      "status": "skipped"
+    },
+    {
+      "file": "member-360-purchases.test.ts",
+      "test": "returns only trusted buyer-profile orders, including seat and refund state",
+      "status": "passed"
+    },
+    {
+      "file": "member-360-purchases.test.ts",
+      "test": "denies a member actor before querying staff purchase history",
+      "status": "passed"
+    },
+    {
+      "file": "member-application-queues.test.ts",
+      "test": "keeps each application distinct, paginates tied timestamps, and scopes the cursor to the queue",
+      "status": "skipped"
+    },
+    {
+      "file": "member-application-queues.test.ts",
+      "test": "reads the exact linked membership and latest billing attempt without treating either as a profile ID",
+      "status": "skipped"
+    },
+    {
+      "file": "member-application-queues.test.ts",
+      "test": "requires staff and searches literal input without widening wildcard scope",
+      "status": "skipped"
+    },
+    {
+      "file": "member-event-review-version-postgres.test.ts",
+      "test": "refuses stale approve after a member changes pending content",
+      "status": "passed"
+    },
+    {
+      "file": "member-event-review-version-postgres.test.ts",
+      "test": "refuses stale reject after a member changes pending content",
+      "status": "passed"
+    },
+    {
+      "file": "member-event-review-version-postgres.test.ts",
+      "test": "publishes the current snapshot with one audit row",
+      "status": "passed"
+    },
+    {
+      "file": "member-event-role-revocation-postgres.test.ts",
+      "test": "denies a submission after seat revocation wins the membership lock",
+      "status": "passed"
+    },
+    {
+      "file": "member-filter-selection.test.ts",
+      "test": "requires status and plan to match the same membership row",
+      "status": "passed"
+    },
+    {
+      "file": "member-filter-selection.test.ts",
+      "test": "returns every matching company membership ID instead of the representative row ID",
+      "status": "passed"
+    },
+    {
+      "file": "member-filter-selection.test.ts",
+      "test": "interprets renewal days as Hong Kong half-open UTC windows",
+      "status": "passed"
+    },
+    {
+      "file": "member-filter-selection.test.ts",
+      "test": "does not broaden an intersection into an OR or pass an invalid cursor to another filter",
+      "status": "passed"
+    },
+    {
+      "file": "member-import-commit.test.ts",
+      "test": "stages only exact-ID updates and new contacts, preserves conflicts, and reuses a matching file run",
+      "status": "passed"
+    },
+    {
+      "file": "member-import-commit.test.ts",
+      "test": "commits confirmed rows through batch items without merging identities or granting a plan",
+      "status": "passed"
+    },
+    {
+      "file": "member-import-commit.test.ts",
+      "test": "skips a profile changed after preview without a mutation or import audit",
+      "status": "passed"
+    },
+    {
+      "file": "member-import-retention.test.ts",
+      "test": "dry runs then scrubs expired payloads, preserves active batch evidence and audit, and is repeatable",
+      "status": "passed"
+    },
+    {
+      "file": "member-import-retention.test.ts",
+      "test": "does not load storage while disabled or for an unauthorized actor",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-batch.test.ts",
+      "test": "previews concrete targets, blocks existing memberships and commits only eligible profiles",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-batch.test.ts",
+      "test": "previews and executes company targets through the same gated grant service",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-batch.test.ts",
+      "test": "skips a company grant when its capability is disabled after preview",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-benefits.test.ts",
+      "test": "excludes future and expired personal grants from directory candidates while retaining historic memberships",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-benefits.test.ts",
+      "test": "gates company seats, invitations and the public plan badge for a future grant",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-benefits.test.ts",
+      "test": "gates company seats, invitations and the public plan badge for a expired grant",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant-benefits.test.ts",
+      "test": "gates company seats, invitations and the public plan badge for a current grant",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant.test.ts",
+      "test": "refuses an existing live membership with no grant or audit write",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant.test.ts",
+      "test": "writes one reasoned finite grant, plan seats and audit, with no Stripe identity",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant.test.ts",
+      "test": "allows only one grant when two requests race for the same profile",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant.test.ts",
+      "test": "supports explicitly enabled company grants with catalog seats and one atomic audit",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant.test.ts",
+      "test": "refuses a nonexistent company even with its capability explicitly enabled",
+      "status": "passed"
+    },
+    {
+      "file": "membership-grant.test.ts",
+      "test": "expires only due grant rows, never a paid membership, and audits once",
+      "status": "passed"
+    },
+    {
+      "file": "news-edit-version-postgres.test.ts",
+      "test": "allows one of two stale editors, rejects the other, and audits exactly one edit",
+      "status": "passed"
+    },
+    {
+      "file": "page-copy-edit-concurrency-postgres.test.ts",
+      "test": "allows only one first write across both locales and records one audit",
+      "status": "passed"
+    },
+    {
+      "file": "public-directory-availability-postgres.test.ts",
+      "test": "reproduces the old-schema failure and recovers through the shipped additive migration",
+      "status": "passed"
+    },
+    {
+      "file": "public-directory-pagination.test.ts",
+      "test": "visits each published row once with a stable same-name tie break",
+      "status": "passed"
+    },
+    {
+      "file": "public-directory-pagination.test.ts",
+      "test": "binds the cursor to filters and bounds its SQL result size",
+      "status": "passed"
+    },
+    {
+      "file": "refund-actor-postgres.test.ts",
+      "test": "commits paid using the application profile and retains exactly one audit/notice",
+      "status": "passed"
+    },
+    {
+      "file": "refund-actor-postgres.test.ts",
+      "test": "commits refund_failed using the application profile and retains exactly one audit/notice",
+      "status": "passed"
+    },
+    {
+      "file": "shared-rate-limit.test.ts",
+      "test": "shares five attempts across instances, survives a cold start and resets after TTL",
+      "status": "passed"
+    },
+    {
+      "file": "shared-rate-limit.test.ts",
+      "test": "rejects rather than allowing a request when the shared store is unavailable",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-contact-postgres.test.ts",
+      "test": "links one prospect contact to one lead and creates no orphan on replay",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-contact-postgres.test.ts",
+      "test": "rolls back the lead and contact when notification enqueue fails",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-contact-postgres.test.ts",
+      "test": "rolls back the lead when contact capture fails",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "claims each due notice once and fences a stale settlement after retry",
+      "status": "failed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "delivers both notices through the real repository and settles them once",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "blocks an exhausted send and opens one staff task in the same transaction",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "stops an expired uncertain send after the provider dedupe window and opens one staff task",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-manager-revocation-postgres.test.ts",
+      "test": "does not write after manager access was revoked following preflight",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-manager-revocation-postgres.test.ts",
+      "test": "waits for a concurrent seat revocation and refuses the write",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-manager-revocation-postgres.test.ts",
+      "test": "lets a current manager save a draft",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-review-transition-postgres.test.ts",
+      "test": "refuses a stale staff decision after a member resubmits pending content",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-review-transition-postgres.test.ts",
+      "test": "does not publish after a concurrent member draft wins the listing lock",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-review-transition-postgres.test.ts",
+      "test": "does not reject after a concurrent member draft wins the listing lock",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-review-transition-postgres.test.ts",
+      "test": "pages 51 synthetic pending listings without duplicates and scopes the cursor to the filter",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-checkout-recovery-postgres.test.ts",
+      "test": "issues one digest-bound record and returns a summary without storing the token",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-checkout-recovery-postgres.test.ts",
+      "test": "refuses issuing a capability for a mismatched owner or attempt",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-eligibility-postgres.test.ts",
+      "test": "allows one public guest order and refuses the last-seat competitor",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-eligibility-postgres.test.ts",
+      "test": "refuses an anonymous, expired, or revoked-seat buyer on a private event",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-eligibility-postgres.test.ts",
+      "test": "refuses future and expired company grants without relying on the expiry job",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-eligibility-postgres.test.ts",
+      "test": "rejects buyer profile forgery in the repository write service",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-eligibility-postgres.test.ts",
+      "test": "holds exactly ten seats across concurrent retries of one legitimate group attempt",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-capacity.test.ts",
+      "test": "reports the pending backlog and oldest age without recipient data",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-capacity.test.ts",
+      "test": "recovers a provider outage without duplicate sends at the current batch limit",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-outbox-postgres.test.ts",
+      "test": "claims separate notices concurrently and fences a stale settlement",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-outbox-postgres.test.ts",
+      "test": "keeps a day-old unverified refund queued and opens one staff task",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-outbox-postgres.test.ts",
+      "test": "resolves a pending-provider task when a stale refund notice is suppressed",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-outbox-postgres.test.ts",
+      "test": "replaces a pending-provider task when a refund notice becomes blocked",
+      "status": "passed"
+    },
+    {
+      "file": "ticket-email-outbox-postgres.test.ts",
+      "test": "closes a pending-provider task when the safe provider retry window expires",
+      "status": "passed"
+    },
+    {
+      "file": "writer-quota-postgres.test.ts",
+      "test": "admits only one of eight simultaneous requests for the final slot",
+      "status": "passed"
+    },
+    {
+      "file": "writer-quota-postgres.test.ts",
+      "test": "still admits an unlimited Patron run after a finite cap is full",
+      "status": "passed"
+    },
+    {
+      "file": "task10-postgres-integration.test.ts",
+      "test": "executes production JSONB aggregates with exact HK boundaries and hand-reconciled facts",
+      "status": "passed"
+    },
+    {
+      "file": "task10-postgres-integration.test.ts",
+      "test": "returns zero financial facts and N/A ratios for an empty real ledger",
+      "status": "passed"
+    },
+    {
+      "file": "task7-postgres-integration.test.ts",
+      "test": "preserves the existing OR risk rules at 19/20 and -1ms/0/120d/+1ms while a segment keeps its explicit 60-day scope",
+      "status": "passed"
+    },
+    {
+      "file": "task7-postgres-integration.test.ts",
+      "test": "uses the production jobs transaction for concurrent replay and stateful renewal ordinals despite poisoned legacy JSON",
+      "status": "passed"
+    },
+    {
+      "file": "task8-postgres-integration.test.ts",
+      "test": "does not oversubscribe the last seat and creates one attendance fact/audit under double check-in",
+      "status": "passed"
+    },
+    {
+      "file": "task9-postgres-integration.test.ts",
+      "test": "permits exactly one concurrent decision with one audit and rolls back a decision when audit insertion fails",
+      "status": "passed"
+    },
+    {
+      "file": "task9-postgres-integration.test.ts",
+      "test": "returns a safe DTO and refuses a direct decision for an unsupported opaque row",
+      "status": "passed"
+    },
+    {
+      "file": "webhook-postgres-concurrency.test.ts",
+      "test": "waits on the membership lock, then sees the winner audit in a fresh READ COMMITTED statement",
+      "status": "passed"
+    }
+  ]
+}

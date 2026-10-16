@@ -1,0 +1,125 @@
+{
+  "origin": "https://hkwtia-mizk4mnqo-ynwaforevers-projects.vercel.app",
+  "sourceSha": "86c37d7e950736de5609c8e50c4c1a5e71099cb5",
+  "mergedSha": "ab568934471cde8aea18f493a5422653c5d719e0",
+  "checks": [
+    {
+      "locale": "en",
+      "reviewOrder": true,
+      "desktopThreeByTwo": true,
+      "applicationProgressLink": true
+    },
+    {
+      "locale": "en",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "width": 1024,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "width": 1280,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "locale": "en",
+      "width": 1920,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "en",
+      "applicationProgressNavigation": true
+    },
+    {
+      "locale": "/zh",
+      "reviewOrder": true,
+      "desktopThreeByTwo": true,
+      "applicationProgressLink": true
+    },
+    {
+      "locale": "/zh",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "width": 390,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "locale": "/zh",
+      "width": 768,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "width": 1024,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "width": 1280,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "width": 1440,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "width": 1440,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "locale": "/zh",
+      "width": 1920,
+      "noHorizontalOverflow": true
+    },
+    {
+      "locale": "/zh",
+      "applicationProgressNavigation": true
+    }
+  ],
+  "screenshots": [
+    "dashboard-en-390.png",
+    "dashboard-en-1440.png",
+    "dashboard-zh-390.png",
+    "dashboard-zh-1440.png"
+  ],
+  "errors": [],
+  "passed": true
+}

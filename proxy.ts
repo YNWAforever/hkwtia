@@ -1,9 +1,170 @@
+import type {NextRequest} from "next/server";
+import {NextResponse} from "next/server";
 import createMiddleware from "next-intl/middleware";
+import {
+  handleAuthProxyRequest,
+  NEON_AUTH_SESSION_COOKIE_NAME,
+} from "@neondatabase/auth/server";
 
+import {authEnv} from "@/lib/config/env";
+import {allowedAdminDestination} from "@/lib/auth/login-destination";
+import {isPortalContinuation} from "@/lib/portal/continuation";
+import {localizedPath} from "@/lib/urls";
 import {routing} from "./i18n/routing";
 
-export default createMiddleware(routing);
+/**
+ * The query parameter Neon's hosted backend appends to `callbackURL` when it
+ * redirects a verified magic link back to us (values look like `ml-<hex>`).
+ *
+ * Spelled out here because the SDK does not export the constant: it lives in
+ * an internal chunk, reachable only through `processAuthMiddleware`, whose own
+ * consumer (`exchangeOAuthToken`) additionally requires an OAuth
+ * session-challenge cookie. That cookie is never issued for a magic-link
+ * sign-in -- confirmed against production on 2026-09-12 by requesting a link
+ * through both the Server Action and the SDK's own `/api/auth` proxy and
+ * observing zero cookies on our origin either way -- so that path can never
+ * fire for this flow, and the verifier would otherwise have no consumer at all.
+ */
+const NEON_AUTH_SESSION_VERIFIER_PARAM = "neon_auth_session_verifier";
+
+export type NeonAuthExchangeRunner = (config: {
+  request: NextRequest;
+  path: string;
+  baseUrl: string;
+  cookieSecret: string;
+  sessionDataTtl: number;
+}) => Promise<Response>;
+
+/**
+ * Completes a magic-link sign-in.
+ *
+ * Neon verifies the emailed token on its own host, then redirects to our
+ * `callbackURL` with a one-time verifier attached. That verifier is a promise
+ * of a session, not a session: the real cookie has to be minted on *our*
+ * origin, and only something that may write cookies can do it. A Server
+ * Component may not, which is why `lib/auth/server.ts`'s `getSession` sends
+ * `disableRefresh` and reads that failure as signed out -- so until this ran,
+ * nothing completed the sign-in and `/member-login` re-rendered its own form
+ * with a spent token still in the URL, indistinguishable from "stuck".
+ *
+ * Exchanging it means asking Neon for the session with the verifier on the
+ * URL and relaying the `Set-Cookie` it answers with. Deliberately *not*
+ * `processAuthMiddleware`: its exchange is gated on an OAuth challenge cookie
+ * that magic-link sign-in never mints (see the constant above), and its own
+ * route-protection verdict treats every path outside
+ * `DEFAULT_AUTH_SKIP_ROUTES` as login-required -- which matches none of this
+ * app's routes and would have put the whole public site behind a login wall.
+ * Route protection stays where it already works: `/admin` hides behind
+ * `notFound()`, `/portal` redirects from its own layout.
+ *
+ * Returns `null` -- leaving the request to ordinary routing -- whenever there
+ * is nothing to exchange, and also when Neon declines to mint a session for
+ * the verifier, so a refused exchange degrades to today's behaviour rather
+ * than a redirect loop.
+ */
+export function createNeonAuthExchange(
+  runExchange: NeonAuthExchangeRunner,
+  resolveEnv: () => {neonAuthBaseUrl: string; neonAuthCookieSecret: string} = authEnv,
+) {
+  return async function neonAuthExchange(request: NextRequest): Promise<NextResponse | null> {
+    if (!request.nextUrl.searchParams.has(NEON_AUTH_SESSION_VERIFIER_PARAM)) return null;
+    // Already signed in: the verifier is a leftover on a shared or re-opened
+    // link, and re-spending it would replace a good session with a worse one.
+    if (request.cookies.has(NEON_AUTH_SESSION_COOKIE_NAME)) return null;
+
+    let environment: {neonAuthBaseUrl: string; neonAuthCookieSecret: string};
+    try {
+      environment = resolveEnv();
+    } catch {
+      // A misconfigured Neon Auth pair must never take the site down; every
+      // request passes through here.
+      return null;
+    }
+
+    let cookies: readonly string[];
+    try {
+      const response = await runExchange({
+        request,
+        path: "get-session",
+        baseUrl: environment.neonAuthBaseUrl,
+        cookieSecret: environment.neonAuthCookieSecret,
+        sessionDataTtl: 300,
+      });
+      cookies = response.ok ? response.headers.getSetCookie() : [];
+    } catch {
+      // An upstream outage must not turn the login page into an error page.
+      return null;
+    }
+    // No cookie means no session was minted. Redirecting anyway would strip the
+    // verifier and land the visitor on the same form having silently spent it.
+    if (cookies.length === 0) {
+      // The one case worth a word. An exchange that falls through without any
+      // signal is what made the original failure take a full session to find:
+      // from outside it is indistinguishable from never having run.
+      console.warn("[neon-auth] session exchange refused: verifier present, no session minted");
+      return null;
+    }
+
+    const redirectUrl = new URL(request.url);
+    redirectUrl.searchParams.delete(NEON_AUTH_SESSION_VERIFIER_PARAM);
+    const response = NextResponse.redirect(redirectUrl);
+    for (const cookie of cookies) response.headers.append("Set-Cookie", cookie);
+    return response;
+  };
+}
+
+const neonAuthExchange = createNeonAuthExchange(
+  ({request, ...config}) => handleAuthProxyRequest({request, ...config}),
+);
+const intlMiddleware = createMiddleware(routing);
+
+export function anonymousAdminLoginRedirect(request: NextRequest): NextResponse | null {
+  if (request.cookies.has(NEON_AUTH_SESSION_COOKIE_NAME)) return null;
+  const pathname = request.nextUrl.pathname;
+  const locale = pathname === "/zh" || pathname.startsWith("/zh/") ? "zh-HK" : "en";
+  const internalPath = locale === "zh-HK" ? pathname.slice(3) || "/" : pathname;
+  const destination = allowedAdminDestination(`${internalPath}${request.nextUrl.search}`);
+  if (!destination) return null;
+  const login = new URL(localizedPath(locale, "/admin-login"), request.url);
+  login.searchParams.set("next", destination);
+  return NextResponse.redirect(login, 307);
+}
+
+/**
+ * The member-portal twin of `anonymousAdminLoginRedirect`. The portal layout redirects signed-out
+ * visitors too, but on a direct visit it cannot see the requested path (there is no `next-url`
+ * header), so it always returned the member to `/portal` after sign-in. Only paths already on the
+ * portal continuation allowlist are intercepted; the seat-invitation accept page is not on it.
+ */
+export function anonymousPortalLoginRedirect(request: NextRequest): NextResponse | null {
+  if (request.cookies.has(NEON_AUTH_SESSION_COOKIE_NAME)) return null;
+  const pathname = request.nextUrl.pathname;
+  const locale = pathname === "/zh" || pathname.startsWith("/zh/") ? "zh-HK" : "en";
+  const internalPath = locale === "zh-HK" ? pathname.slice(3) || "/" : pathname;
+  if (!isPortalContinuation(internalPath)) return null;
+  const login = new URL(localizedPath(locale, "/member-login"), request.url);
+  login.searchParams.set("next", internalPath);
+  return NextResponse.redirect(login, 307);
+}
+
+export default async function middleware(request: NextRequest): Promise<NextResponse> {
+  const response=(await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? anonymousPortalLoginRedirect(request) ?? intlMiddleware(request);
+  if(/(?:^|\/)admin\/cms-preview(?:\/|$)/.test(request.nextUrl.pathname)) {
+    response.headers.set("Cache-Control","private, no-store, max-age=0");
+    response.headers.set("X-Robots-Tag","noindex, nofollow");
+  }
+  return response;
+}
 
 export const config = {
-  matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+  matcher: [
+    "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+    // Signed tickets use payload.signature. These are application routes even
+    // though their capability contains a dot; token and staff checks stay in
+    // the existing pages/repositories. Static files retain the exclusion above.
+    "/pass/:token",
+    "/zh/pass/:token",
+    "/admin/check-in/:token",
+    "/zh/admin/check-in/:token",
+  ],
 };

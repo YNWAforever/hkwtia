@@ -18,6 +18,12 @@ vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {
   update: async (_actor: unknown, id: string) => { repoState.profileIds.push(id); return {}; },
   ensure: async (_actor: unknown, input: {id: string}) => { repoState.profileIds.push(input.id); return {}; },
 }}));
+// Phase C2 Task 5: the join profile step fires the contact merge (S-16).
+// Mocked so this suite stays about profile identity and never reaches `getDb()`.
+vi.mock("@/lib/db/repos/contacts", () => ({
+  contactWriterActor: (source: string) => ({kind: "contact-writer", userId: null, source}),
+  contactsRepository: {linkProfile: async () => ({linked: null, matchedBy: null, candidates: []})},
+}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {
   getById: async () => repoState.application,
   update: async () => repoState.application,

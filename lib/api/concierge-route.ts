@@ -1,3 +1,5 @@
+import {publicConciergeFactsReader} from "@/lib/db/repos/ai-public-facts";
+import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
 import {
@@ -11,6 +13,7 @@ import {
   type AnonymousOwnership,
 } from "@/lib/ai/conversation-cookie";
 import {createOpenAIEmbeddingAdapter} from "@/lib/ai/embeddings";
+import {getAiReadiness} from "@/lib/ai/readiness";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {
   createM4AAcceptanceBoundary,
@@ -28,6 +31,7 @@ import {
   type ConversationOwner,
 } from "@/lib/db/repos/conversations";
 import {actorContactEmail} from "@/lib/db/repos/profile-identities";
+import {readBoundedText} from "@/lib/security/bounded-body";
 import {
   clientIpFromHeaders,
   isSameOrigin,
@@ -120,15 +124,7 @@ function cookieValue(request: Request, name: string): string | null {
 }
 
 async function parseRequestBody(request: Request): Promise<unknown> {
-  const declared = request.headers.get("content-length");
-  if (declared && Number(declared) > MAX_BODY_BYTES) {
-    throw new Error("REQUEST_BODY_TOO_LARGE");
-  }
-  const text = await request.text();
-  if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) {
-    throw new Error("REQUEST_BODY_TOO_LARGE");
-  }
-  return JSON.parse(text);
+  return JSON.parse(await readBoundedText(request, MAX_BODY_BYTES));
 }
 
 function authorizationDenied(error: unknown): boolean {
@@ -291,10 +287,16 @@ async function productionHandler(request: Request): Promise<Response> {
     ) {
       headers.set("x-real-ip", "127.0.0.1");
     }
+    let body: string;
+    try {
+      body = await readBoundedText(request, MAX_BODY_BYTES);
+    } catch {
+      return jsonError("INVALID_REQUEST", 400);
+    }
     const acceptanceRequest = new Request(request.url, {
       method: request.method,
       headers,
-      body: await request.text(),
+      body,
     });
     return createConciergePostHandler({
       expectedOrigin: acceptanceOrigin,
@@ -305,8 +307,26 @@ async function productionHandler(request: Request): Promise<Response> {
       service: m4aAcceptanceBoundary.service,
     })(acceptanceRequest);
   }
-  const env = aiEnv();
-  const expectedOrigin = appEnv().appUrl || new URL(request.url).origin;
+  const readiness = getAiReadiness();
+  const unavailable = (error: "AI_DISABLED" | "AI_CONFIGURATION_UNAVAILABLE", diagnostic = readiness) => {
+    const requestId = randomUUID();
+    console.warn("CONCIERGE_READINESS", {requestId, code: diagnostic.code, missingKeys: diagnostic.missingKeys});
+    return Response.json({error, requestId}, {
+      status: 503,
+      headers: {"cache-control": "no-store", "x-request-id": requestId},
+    });
+  };
+  if (readiness.state !== "ready") {
+    return unavailable(readiness.state === "disabled" ? "AI_DISABLED" : "AI_CONFIGURATION_UNAVAILABLE");
+  }
+  let env: ReturnType<typeof aiEnv>;
+  let expectedOrigin: string;
+  try {
+    env = aiEnv();
+    expectedOrigin = appEnv().appUrl || new URL(request.url).origin;
+  } catch {
+    return unavailable("AI_CONFIGURATION_UNAVAILABLE", {state: "misconfigured", code: "CONFIG_INVALID", missingKeys: []});
+  }
   const service = createConciergeService({
     agentsEnabled: env.agentsEnabled,
     model: env.agentModelConcierge,
@@ -320,6 +340,7 @@ async function productionHandler(request: Request): Promise<Response> {
     },
     appOrigin: expectedOrigin,
     conversations: conversationsRepository,
+    getApprovedFacts: publicConciergeFactsReader,
     agentTools: agentToolsRepository,
     getRuntime: (runId) => createAgentRuntime({
       agentRuns: agentRunsRepository,

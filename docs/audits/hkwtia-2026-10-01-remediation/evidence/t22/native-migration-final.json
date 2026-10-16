@@ -1,0 +1,13 @@
+{
+  "environment": "new owned PostgreSQL16, two empty DBs",
+  "facts": [
+    {
+      "lane": "installed programmatic Drizzle migrator",
+      "success": true
+    },
+    {
+      "lane": "direct installed Drizzle CLI",
+      "exitCode": 0
+    }
+  ]
+}

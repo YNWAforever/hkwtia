@@ -1,0 +1,118 @@
+{
+  "sourceSha": "55c2d036",
+  "profile": "supplementary devtools; English Accept-Language; fresh owned browser profile; canonical target not configured; unchanged thresholds; assertion failed",
+  "production": false,
+  "actualEnglishVerified": true,
+  "reports": [
+    {
+      "requested": "http://localhost:3450/",
+      "final": "http://localhost:3450/",
+      "performance": 0.86,
+      "accessibility": 0.97,
+      "seo": 0.92,
+      "lcpMs": 2107.716,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/)"
+    },
+    {
+      "requested": "http://localhost:3450/events",
+      "final": "http://localhost:3450/events",
+      "performance": 0.75,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 3090.851,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/events)"
+    },
+    {
+      "requested": "http://localhost:3450/membership",
+      "final": "http://localhost:3450/membership",
+      "performance": 0.93,
+      "accessibility": 0.97,
+      "seo": 0.92,
+      "lcpMs": 2118.126,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/membership)"
+    },
+    {
+      "requested": "http://localhost:3450/partners",
+      "final": "http://localhost:3450/partners",
+      "performance": 0.77,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 2546.368,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/partners)"
+    },
+    {
+      "requested": "http://localhost:3450/programmes",
+      "final": "http://localhost:3450/programmes",
+      "performance": 0.7,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 2945.265,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/programmes)"
+    },
+    {
+      "requested": "http://localhost:3450/zh",
+      "final": "http://localhost:3450/zh",
+      "performance": 0.7,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 2736.874,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh)"
+    },
+    {
+      "requested": "http://localhost:3450/zh/events",
+      "final": "http://localhost:3450/zh/events",
+      "performance": 0.42,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 5416.907,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/events)"
+    },
+    {
+      "requested": "http://localhost:3450/zh/membership",
+      "final": "http://localhost:3450/zh/membership",
+      "performance": 0.59,
+      "accessibility": 0.97,
+      "seo": 0.92,
+      "lcpMs": 3934.233,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/membership)"
+    },
+    {
+      "requested": "http://localhost:3450/zh/partners",
+      "final": "http://localhost:3450/zh/partners",
+      "performance": 0.52,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 4297.352,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/partners)"
+    },
+    {
+      "requested": "http://localhost:3450/zh/programmes",
+      "final": "http://localhost:3450/zh/programmes",
+      "performance": 0.79,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 3179.273,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/programmes)"
+    }
+  ]
+}

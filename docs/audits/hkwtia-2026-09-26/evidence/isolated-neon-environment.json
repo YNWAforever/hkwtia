@@ -1,0 +1,23 @@
+{
+  "recordedAt": "2026-09-27T12:19:33.129Z",
+  "projectId": "solitary-wave-52860119",
+  "projectName": "hkwtia-m2-preview",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "branchName": "codex-audit-20260927",
+  "parentBranchId": "br-dark-forest-az0shpz9",
+  "expiresAt": "2026-10-04T12:00:00Z",
+  "region": "ap-southeast-1",
+  "migrationCount": 50,
+  "syntheticM2ProfilesAfterSeed": 30,
+  "realAuthSyntheticIdentities": 5,
+  "authEmailVerification": false,
+  "web": "localhost:3011 Next development server",
+  "worker": "not deployed or connected to this branch; fixture driver only",
+  "enabledCapabilities": [
+    "ADMIN_BATCH_ENABLED",
+    "MEMBER_IMPORT_ENABLED",
+    "MEMBERSHIP_GRANTS_ENABLED"
+  ],
+  "remainingPaymentGate": "STRIPE_TEST_SECRET_KEY absent; no provider payment called",
+  "limits": "Isolated branch only. See isolated browser evidence for the journeys actually run; this is not production release."
+}

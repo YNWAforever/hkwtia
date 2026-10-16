@@ -1,0 +1,10 @@
+{
+  "id": "dpl_H48GCDUfEmB8n97VsgBoNPQArbwN",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "fe92e533f8634f084b0105b3fb58b056d7091203",
+  "gitRef": "codex/event-payment-recovery-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-event-payment-20261003.vercel.app",
+  "production": false
+}

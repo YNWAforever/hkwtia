@@ -60,7 +60,13 @@ describe("M5 Showcase schema contract", () => {
     );
 
     const leadColumns = new Map(lead.columns.map((column) => [column.name, column]));
-    expect(leadColumns.get("listing_id")?.notNull).toBe(true);
+    // Phase B2 (D-11) widened the funnel: a lead may now come from a member
+    // page rather than a showcase listing, so `listing_id` is nullable and
+    // `leads_identity_check` keeps every row attached to a listing, a
+    // contact, or both.
+    expect(leadColumns.get("listing_id")?.notNull).toBe(false);
+    expect(leadColumns.get("contact_id")).toBeDefined();
+    expect(lead.checks.map((check) => check.name)).toContain("leads_identity_check");
     expect(leadColumns.get("email")?.notNull).toBe(true);
     expect(leadColumns.get("message")?.notNull).toBe(false);
     expect(lead.indexes.map((index) => index.config.name)).toContain(

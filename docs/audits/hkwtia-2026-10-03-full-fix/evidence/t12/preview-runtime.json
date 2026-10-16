@@ -1,0 +1,175 @@
+{
+  "sourceSha": "d348c5e4d9bfa1d15b8aa657428803dd65a67f35",
+  "deploymentId": "dpl_KanJ2mYufTN1FYUHFvVkbHjcfa2G",
+  "origin": "https://hkwtia-content-drafts-20261003.vercel.app",
+  "observedAt": "2026-10-04T12:46:37.133Z",
+  "production": false,
+  "ledger": 61,
+  "checks": [
+    {
+      "routeKind": "unique synthetic news",
+      "status": 200,
+      "markerRefSha256": "b30eaacc00a2269ef872abd3e3be7385a6395fbd7afa5d462e6e2d91ad492202",
+      "dbSourcePositivelyProven": true
+    },
+    {
+      "routeKind": "synthetic en news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "routeKind": "synthetic zh news",
+      "status": 200,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/zh",
+      "status": 200
+    },
+    {
+      "route": "/membership",
+      "status": 200
+    },
+    {
+      "route": "/zh/membership",
+      "status": 200
+    },
+    {
+      "route": "/partners",
+      "status": 200
+    },
+    {
+      "route": "/zh/partners",
+      "status": 200
+    },
+    {
+      "route": "/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "route": "/zh/ai-ops",
+      "status": 200,
+      "metrics": 8,
+      "seriousOrCriticalAxe": 0
+    },
+    {
+      "role": "anonymous",
+      "adminLoginRequired": true
+    },
+    {
+      "role": "staff",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "route": "/admin/batches",
+      "status": 200,
+      "flagsDisabled": true,
+      "historyStillReadable": true
+    },
+    {
+      "route": "/admin/automations#verified-worker-health",
+      "status": 200,
+      "anchorVisible": true,
+      "scheduledWindowVerified": false
+    },
+    {
+      "task": "T12",
+      "locale": "en",
+      "kind": "event",
+      "actualPasswordAuth": true,
+      "staffReviewActionVerified": true,
+      "humanPilotVerified": false,
+      "copyOnly": true,
+      "businessAndPublicationUnchanged": true,
+      "staleFactsBlocked": true,
+      "externalModelCalls": 0,
+      "mobile390": true,
+      "keyboard": true,
+      "axeViolations": 0
+    },
+    {
+      "task": "T12",
+      "locale": "en",
+      "kind": "news",
+      "actualPasswordAuth": true,
+      "staffReviewActionVerified": true,
+      "humanPilotVerified": false,
+      "copyOnly": true,
+      "businessAndPublicationUnchanged": true,
+      "staleFactsBlocked": true,
+      "externalModelCalls": 0,
+      "mobile390": true,
+      "keyboard": true,
+      "axeViolations": 0
+    },
+    {
+      "task": "T12",
+      "locale": "en",
+      "kind": "board",
+      "distinctLocalizedBody": true,
+      "literalRenderer": true,
+      "mobile390": true,
+      "axeViolations": 0
+    },
+    {
+      "task": "T12",
+      "locale": "zh-HK",
+      "kind": "event",
+      "actualPasswordAuth": true,
+      "staffReviewActionVerified": true,
+      "humanPilotVerified": false,
+      "copyOnly": true,
+      "businessAndPublicationUnchanged": true,
+      "staleFactsBlocked": true,
+      "externalModelCalls": 0,
+      "mobile390": true,
+      "keyboard": true,
+      "axeViolations": 0
+    },
+    {
+      "task": "T12",
+      "locale": "zh-HK",
+      "kind": "news",
+      "actualPasswordAuth": true,
+      "staffReviewActionVerified": true,
+      "humanPilotVerified": false,
+      "copyOnly": true,
+      "businessAndPublicationUnchanged": true,
+      "staleFactsBlocked": true,
+      "externalModelCalls": 0,
+      "mobile390": true,
+      "keyboard": true,
+      "axeViolations": 0
+    },
+    {
+      "task": "T12",
+      "locale": "zh-HK",
+      "kind": "board",
+      "distinctLocalizedBody": true,
+      "literalRenderer": true,
+      "mobile390": true,
+      "axeViolations": 0
+    },
+    {
+      "role": "superadmin",
+      "authenticatedAdmin": true,
+      "privateCache": true
+    },
+    {
+      "role": "member",
+      "adminDenied": true,
+      "loginRequired": true
+    }
+  ],
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "providerSends": 0,
+  "paymentWrites": 0
+}

@@ -1,0 +1,201 @@
+
+> hkwtia-platform@0.0.0 build
+> next build --webpack
+
+▲ Next.js 16.3.6 (webpack)
+- Environments: .env.local
+✓ Running next.config.ts took 674ms
+
+  Creating an optimized production build ...
+⚠ The Edge Runtime is deprecated. You can use the "nodejs" runtime instead. Learn more: https://nextjs.org/docs/messages/edge-runtime-deprecated
+✓ Compiled successfully in 47s
+  Running TypeScript ...
+  Finished TypeScript in 40s ...
+  Collecting page data using 11 workers ...
+⚠ Using edge runtime on a page currently disables static generation for that page
+  Generating static pages using 11 workers (0/273) ...
+  Generating static pages using 11 workers (68/273) 
+  Generating static pages using 11 workers (136/273) 
+  Generating static pages using 11 workers (204/273) 
+✓ Generating static pages using 11 workers (273/273) in 11.2s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /_not-found
+├ ƒ /[locale]
+├   /[locale]/about
+│ ├ ● /en/about
+│ └ ● /zh-HK/about
+├   /[locale]/about/chairman
+│ ├ ● /en/about/chairman
+│ └ ● /zh-HK/about/chairman
+├   /[locale]/about/committees
+│ ├ ● /en/about/committees
+│ └ ● /zh-HK/about/committees
+├   /[locale]/about/history
+│ ├ ● /en/about/history
+│ └ ● /zh-HK/about/history
+├   /[locale]/about/history/[slug]
+│ ├ ● /en/about/history/2001-establishment-of-wtia
+│ ├ ● /en/about/history/2002-the-1st-wtia-panel-discussion-inter-operator-sms
+│ ├ ● /en/about/history/2003-opening-of-hong-kong-wireless-development-centre-at-cyberport
+│ └ ● [+99 more paths]
+├ ƒ /[locale]/admin
+├ ƒ /[locale]/admin-login
+├ ƒ /[locale]/admin/ai-review
+├ ƒ /[locale]/admin/announcements
+├ ƒ /[locale]/admin/announcements/[id]
+├ ƒ /[locale]/admin/approvals
+├ ƒ /[locale]/admin/at-risk
+├ ƒ /[locale]/admin/automations
+├ ƒ /[locale]/admin/batches
+├ ƒ /[locale]/admin/batches/[id]
+├ ƒ /[locale]/admin/campaigns
+├ ƒ /[locale]/admin/campaigns/[id]
+├ ƒ /[locale]/admin/check-in/[token]
+├ ƒ /[locale]/admin/cms-preview/[draftId]
+├ ƒ /[locale]/admin/cohorts
+├ ƒ /[locale]/admin/cohorts/[id]
+├ ƒ /[locale]/admin/contacts
+├ ƒ /[locale]/admin/events-mgmt
+├ ƒ /[locale]/admin/events-mgmt/[id]
+├ ƒ /[locale]/admin/inbox
+├ ƒ /[locale]/admin/inbox/[id]
+├ ƒ /[locale]/admin/knowledge
+├ ƒ /[locale]/admin/landing-partners
+├ ƒ /[locale]/admin/landing-partners/[id]
+├ ƒ /[locale]/admin/listings-review
+├ ƒ /[locale]/admin/media
+├ ƒ /[locale]/admin/media/[id]
+├ ƒ /[locale]/admin/members
+├ ƒ /[locale]/admin/members/[id]
+├ ƒ /[locale]/admin/members/communications
+├ ƒ /[locale]/admin/members/grants
+├ ƒ /[locale]/admin/members/import
+├ ƒ /[locale]/admin/members/queue
+├ ƒ /[locale]/admin/members/queue/[id]
+├ ƒ /[locale]/admin/news
+├ ƒ /[locale]/admin/news/[id]
+├ ƒ /[locale]/admin/page-copy
+├ ƒ /[locale]/admin/page-copy/[namespace]
+├ ƒ /[locale]/admin/partners
+├ ƒ /[locale]/admin/partners/[id]
+├ ƒ /[locale]/admin/profiles-review
+├ ƒ /[locale]/admin/reports
+├ ƒ /[locale]/admin/reports/board-drafts/[id]
+├ ƒ /[locale]/admin/search
+├ ƒ /[locale]/admin/segments
+├ ƒ /[locale]/admin/tasks
+├ ƒ /[locale]/admin/templates
+├   /[locale]/ai-ops
+│ ├ ● /en/ai-ops
+│ └ ● /zh-HK/ai-ops
+├   /[locale]/ai-transparency
+│ ├ ● /en/ai-transparency
+│ └ ● /zh-HK/ai-transparency
+├ ƒ /[locale]/contact
+├ ƒ /[locale]/events
+├ ƒ /[locale]/events/[slug]
+├ ƒ /[locale]/events/guest-cancel
+├ ƒ /[locale]/join
+├ ƒ /[locale]/join/checkout
+├ ƒ /[locale]/join/company
+├ ƒ /[locale]/join/complete
+├ ƒ /[locale]/join/profile
+├ ƒ /[locale]/launchpad
+├ ƒ /[locale]/member-login
+├ ƒ /[locale]/members
+├ ƒ /[locale]/members/[slug]
+├ ƒ /[locale]/membership
+├ ƒ /[locale]/news
+├ ƒ /[locale]/news/[slug]
+├ ƒ /[locale]/partners
+├ ƒ /[locale]/pass/[token]
+├ ƒ /[locale]/portal
+├ ƒ /[locale]/portal/billing
+├ ƒ /[locale]/portal/company
+├ ƒ /[locale]/portal/company/listing
+├ ƒ /[locale]/portal/company/seats
+├ ƒ /[locale]/portal/company/seats/accept
+├ ƒ /[locale]/portal/directory
+├ ƒ /[locale]/portal/documents
+├ ƒ /[locale]/portal/events
+├ ƒ /[locale]/portal/events/[id]/edit
+├ ƒ /[locale]/portal/events/new
+├ ƒ /[locale]/portal/profile
+├ ƒ /[locale]/portal/tools
+├ ƒ /[locale]/portal/tools/[key]
+├   /[locale]/privacy
+│ ├ ● /en/privacy
+│ └ ● /zh-HK/privacy
+├   /[locale]/programmes
+│ ├ ● /en/programmes
+│ └ ● /zh-HK/programmes
+├   /[locale]/programs/asa
+│ ├ ● /en/programs/asa
+│ └ ● /zh-HK/programs/asa
+├   /[locale]/programs/cpai
+│ ├ ● /en/programs/cpai
+│ └ ● /zh-HK/programs/cpai
+├   /[locale]/programs/hkict
+│ ├ ● /en/programs/hkict
+│ └ ● /zh-HK/programs/hkict
+├   /[locale]/programs/tct
+│ ├ ● /en/programs/tct
+│ └ ● /zh-HK/programs/tct
+├   /[locale]/refund-policy
+│ ├ ● /en/refund-policy
+│ └ ● /zh-HK/refund-policy
+├ ƒ /[locale]/showcase
+├ ƒ /[locale]/showcase/[slug]
+├ ƒ /[locale]/unsubscribe
+├ ƒ /api/admin/batches/[id]/export
+├ ƒ /api/admin/batches/[id]/status
+├ ƒ /api/admin/events/[id]/attendees.csv
+├ ƒ /api/admin/media/upload
+├ ƒ /api/admin/members/import/[id]/errors
+├ ƒ /api/admin/members/import/upload
+├ ƒ /api/admin/segments/[id]/export
+├ ƒ /api/admin/woztell/backfill
+├ ƒ /api/ai/concierge
+├ ƒ /api/ai/conversations/[id]/feedback
+├ ƒ /api/auth/[...path]
+├ ƒ /api/events/checkout-recovery
+├ ƒ /api/events/guest/cancel
+├ ƒ /api/jobs/admin-batches
+├ ƒ /api/jobs/aiops-metrics
+├ ƒ /api/jobs/approvals-expirer
+├ ƒ /api/jobs/board-reporter
+├ ƒ /api/jobs/chat-retention
+├ ƒ /api/jobs/engagement-score
+├ ƒ /api/jobs/event-cancellation-refunds
+├ ƒ /api/jobs/event-notifications
+├ ƒ /api/jobs/journey-runner
+├ ƒ /api/jobs/member-import-retention
+├ ƒ /api/jobs/membership-grant-expiry
+├ ƒ /api/jobs/rate-limit-cleanup
+├ ƒ /api/jobs/renewal-runner
+├ ƒ /api/jobs/retention-analyst
+├ ƒ /api/jobs/showcase-lead-emails
+├ ƒ /api/jobs/ticket-emails
+├ ƒ /api/jobs/whatsapp-send-queue
+├ ƒ /api/jobs/worker-alert
+├ ƒ /api/media/[id]
+├ ƒ /api/membership/checkout-status
+├ ƒ /api/og
+├ ƒ /api/portal/media/upload
+├ ƒ /api/showcase/[slug]/view
+├ ƒ /api/stripe/webhook
+├ ƒ /api/unsubscribe
+├ ƒ /api/webhooks/woztell
+├ ○ /robots.txt
+└ ƒ /sitemap.xml
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,21 @@
+{
+  "sourceSha": "92fa8e338bf0dab773490d38f0bbc86d73b0926e",
+  "command": "npm.cmd test -- --maxWorkers=4 --reporter=default --reporter=json --outputFile=.playwright/full-fix-t11-full.json",
+  "passed": 6696,
+  "failed": 2,
+  "skipped": 555,
+  "durationSeconds": 851.35,
+  "failures": [
+    {
+      "test": "private-link-boundary",
+      "cause": "new approvals handoff imported eager Next Link instead of existing private unsaved guard",
+      "classification": "source regression"
+    },
+    {
+      "test": "repository-boundary",
+      "cause": "scanner exceeded original30000ms while build and other gates consumed resources",
+      "classification": "scheduling timeout; unchanged deadline; standalone32cases pass"
+    }
+  ],
+  "production": false
+}

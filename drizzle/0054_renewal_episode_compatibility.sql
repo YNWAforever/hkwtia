@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "journey_state_renewal_episode_unique" ON "journey_state" USING btree ("membership_id","step",regexp_replace("instance_key",'^period:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:','period:')) WHERE "journey_state"."journey"='renewal' AND "journey_state"."membership_id" IS NOT NULL;

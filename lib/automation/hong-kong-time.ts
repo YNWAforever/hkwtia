@@ -23,3 +23,10 @@ export function hongKongDateKey(instant: Date): string {
 /** Hong Kong uses UTC+08:00 year-round, so calendar-day offsets are exact whole days. */
 export const addHongKongDays = (instant: Date, days: number): Date =>
   new Date(instant.getTime() + days * WHOLE_DAY_MILLISECONDS);
+
+/** First instant of the calendar month containing an instant in Hong Kong. */
+export function startOfHongKongMonth(now: Date): Date {
+  const offsetMs = HONG_KONG_UTC_OFFSET_MINUTES * 60_000;
+  const shifted = new Date(now.getTime() + offsetMs);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), 1) - offsetMs);
+}

@@ -1,0 +1,92 @@
+{
+  "scope": "synthetic fixture identities; confirmed isolated Neon for Chromium; disposable PostgreSQL16 for transactional regression tests",
+  "productionMutation": false,
+  "migrationRequired": false,
+  "red": [
+    "claim counters remained pending=1 running=0",
+    "expired attempt=5 lease remained running",
+    "BATCH_TOO_LARGE left preparation stuck",
+    "commit accepted after export flag disabled",
+    "TRANSIENT_PROVIDER_ACCEPTANCE_UNCERTAIN accepted for retry",
+    "UI offered retry for transient-prefixed uncertainty",
+    "runner took 50 leases before any effect",
+    "mobile table collapsed to356px"
+  ],
+  "focused": {
+    "tests": 168,
+    "passed": 168,
+    "skipped": 0,
+    "failed": 0,
+    "actualSqlCases": 17,
+    "files": 10,
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-batch-failures.test.ts tests/integration/admin-batch-concurrency.test.ts tests/integration/admin-batch-snapshot.test.ts tests/unit/admin-batch-lease.test.ts tests/unit/admin-batch-preview-recovery.test.tsx tests/unit/admin-batch-runner.test.ts tests/unit/admin-batch-contract.test.ts tests/unit/audit-full-batch-capabilities.test.tsx tests/unit/server-action-actor-boundary.test.ts tests/unit/repository-boundary.test.ts --maxWorkers=1"
+  },
+  "browser": {
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "languages": [
+      "en",
+      "zh-HK"
+    ],
+    "viewports": [
+      "desktop Chromium",
+      "390x844"
+    ],
+    "keyboard": "Space checks required commit confirmation",
+    "effects": "10 profiles changed once each;8 first success+2 controlled safe failures+2 scoped retries;10 profile.updated audits; stable per-item effect keys",
+    "provider": "controlled fixture failures only; no external send or provider acceptance receipt",
+    "command": "PLAYWRIGHT_BASE_URL=http://localhost:3450 ADMIN_BATCH_ENABLED=true AUDIT_ISOLATED_ACCEPTANCE=true NODE_OPTIONS=--max-old-space-size=4096 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/admin-batches.spec.ts --project=chromium --workers=1 --reporter=line"
+  },
+  "limits": {
+    "details": 50,
+    "maximumSnapshot": 5000,
+    "claimCeilingPerTick": 50,
+    "claimedAtOnce": 1,
+    "timeBudgetMs": 6000,
+    "hardDeadlineClaim": false,
+    "budgetContract": "stop taking new work; already started DB transaction may finish; exact web/worker timeout continues to be tracked by T11 health",
+    "manualRecovery": "expired final/cancelled lease retains effect key, receipt and attempts; no automatic resend"
+  },
+  "screenshots": {
+    "batch-en-desktop.png": "e9c474265244b113a80a6ae1708fe6e2de5a676758cc85da4704af6814ae96bb",
+    "batch-en-mobile.png": "3d7c22660aa33a70ead795c24bbf99b730226c43c9f55d93dcc8f3c2b77c9a2f",
+    "batch-zh-HK-desktop.png": "5ccf197fb8aef3526bc24f26ee07ff403be37f2861d8be0df5b3c51ee935eee4",
+    "batch-zh-HK-mobile.png": "0648ab863b43dae8807465240918fcc718a950b1209b53e34656730a51f364e8"
+  },
+  "remaining": [
+    "real provider accepted-timeout reconciliation requires approved test transport/recipient",
+    "8-operation effect matrix completed across T15/T16/T22",
+    "50/500/5000 execution throughput and full-schema cold/remote performance T21/T22",
+    "tagged isolated cloud worker/Preview and Production release remain separate gates"
+  ],
+  "sourceSha": "3f2a5f71b9c53154767fe53392ff97e86f758afd",
+  "repositoryGates": {
+    "full": {
+      "passed": 6238,
+      "skipped": 253,
+      "failed": 0,
+      "passFiles": 737,
+      "allSkipFiles": 77,
+      "elapsedSeconds": 455.57,
+      "skipEvidence": "evidence/gates/t14-skips.json"
+    },
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "existingWarnings": 67
+    },
+    "typecheck": {
+      "exitCode": 0
+    },
+    "visibleStrings": {
+      "exitCode": 0,
+      "tsxFiles": 301
+    },
+    "build": {
+      "exitCode": 0,
+      "next": "16.3.6",
+      "staticPages": 267
+    }
+  }
+}

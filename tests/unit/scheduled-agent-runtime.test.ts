@@ -244,3 +244,9 @@ describe("scheduled agent JSON runtime", () => {
     expect(finalize).not.toHaveBeenCalled();
   });
 });
+
+it('passes the durable dispatch fence and provider receipt into the existing runtime',async()=>{
+ const {runtime,agentConfig}=harness();const beforeDispatch=vi.fn(async()=>{}),onProviderReceipt=vi.fn(async()=>{});
+ await runScheduledJson({actor,agentConfig,prompt:'Synthetic',outputSchema:z.object({summary:z.string()}),beforeDispatch,onProviderReceipt});
+ expect(runtime.stream).toHaveBeenCalledWith(expect.objectContaining({beforeDispatch,onProviderReceipt}));
+});

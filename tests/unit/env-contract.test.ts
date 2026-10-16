@@ -10,6 +10,7 @@ import {
   parseDatabaseEnv,
   parseEmailEnv,
   parseAutomationEnv,
+  parseMemberToolsEnv,
   parseServerEnv,
   publicEnv,
   serverEnv,
@@ -124,6 +125,56 @@ describe("runtime environment contract", () => {
     );
   });
 
+  // Programme C-9 (C1 open question O-8). `RUN_LIVE_WOZTELL` and
+  // `WOZTELL_APPROVED_TEMPLATE_KEYS` were the two variables read from bare
+  // `process.env` — the two that decide whether a real WhatsApp message leaves
+  // the building, and the two with no parse and no owner. The failure they used
+  // to have is the worst available one: a typo finds no live credentials, so
+  // every send answers {status:"sent", providerId:"mock:…"} and journey, dunning
+  // and blast messages are recorded as delivered while nothing is sent.
+  it("parses the live-WhatsApp switch strictly and the approved-key fallback loosely", () => {
+    expect(parseAiEnv({RUN_LIVE_WOZTELL: "1"})).toMatchObject({runLiveWoztell: "1"});
+    expect(parseAiEnv({RUN_LIVE_WOZTELL: "0"})).toMatchObject({runLiveWoztell: "0"});
+    expect(parseAiEnv({
+      WOZTELL_APPROVED_TEMPLATE_KEYS: "renewal_14,dunning_3",
+    })).toMatchObject({woztellApprovedTemplateKeys: "renewal_14,dunning_3"});
+  });
+
+  it.each(["true", "TRUE", "yes", "on", "2", " 1"])(
+    "refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=%s",
+    (typo) => {
+      expect(() => parseAiEnv({RUN_LIVE_WOZTELL: typo}))
+        .toThrow(/RUN_LIVE_WOZTELL/);
+    },
+  );
+
+  // `.env.example` ships `RUN_LIVE_WOZTELL=` and an empty Vercel variable
+  // arrives as "". Blank has always meant "not live" and must keep meaning it,
+  // or this contract turns every developer who copied the example file into a
+  // boot failure.
+  it.each([undefined, "", "   "])(
+    "reads a blank live switch as absent, not as a typo",
+    (blank) => {
+      const parsed = parseAiEnv(blank === undefined ? {} : {RUN_LIVE_WOZTELL: blank});
+      expect(parsed).not.toHaveProperty("runLiveWoztell");
+    },
+  );
+
+  // The two fields are deliberately NOT part of the legacy aggregate: a hard
+  // boot requirement there is how a transitive env pull once took /sitemap.xml,
+  // /events, /showcase and /launchpad down.
+  it("keeps the live switch out of the aggregate server contract", () => {
+    const values = parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+      RUN_LIVE_WOZTELL: "1",
+      WOZTELL_APPROVED_TEMPLATE_KEYS: "renewal_14",
+    });
+    expect(values).not.toHaveProperty("runLiveWoztell");
+    expect(values).not.toHaveProperty("woztellApprovedTemplateKeys");
+  });
+
   it("rejects a deployed runtime without server credentials", () => {
     expect(() =>
       parseServerEnv({
@@ -172,6 +223,7 @@ describe("runtime environment contract", () => {
       appUrl: "https://www.example.test",
       agentsEnabled: false,
       agentModelConcierge: "openai:gpt-4.1-mini",
+      agentModelWriter: "openai:gpt-4.1-mini",
     });
     expect(values).not.toHaveProperty("NEXT_PUBLIC_SITE_URL");
   });
@@ -204,6 +256,7 @@ describe("runtime environment contract", () => {
       appUrl: "",
       agentsEnabled: false,
       agentModelConcierge: "openai:gpt-4.1-mini",
+      agentModelWriter: "openai:gpt-4.1-mini",
     });
   });
 
@@ -401,6 +454,40 @@ describe("runtime environment contract", () => {
       TURNSTILE_SITE_KEY: "turnstile-site-key",
       UNSUBSCRIBE_TOKEN_SECRET: "too-short",
     })).toThrow("UNSUBSCRIBE_TOKEN_SECRET must be at least 32 bytes");
+  });
+
+  it("reads a blank member-tool token as absent, never as configured", () => {
+    expect(parseMemberToolsEnv({})).toEqual({});
+    expect(parseMemberToolsEnv({MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: "   "})).toEqual({});
+    expect(parseMemberToolsEnv({MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: "  tool-token  "})).toEqual({
+      contentCalendarToken: "tool-token",
+    });
+  });
+
+  // The token is optional by design: a portal page that renders an unconfigured tool is a
+  // degradation, and a hard boot requirement here is how a transitive env pull once took
+  // /sitemap.xml, /events and /showcase down.
+  it("keeps the member-tool token out of the aggregate server contract", () => {
+    const values = parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+      MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: "tool-token",
+    });
+
+    expect(values).not.toHaveProperty("contentCalendarToken");
+    expect(() => parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+    })).not.toThrow();
+  });
+
+  it("gives the writer its own model, defaulted so a missing value degrades rather than blocks", () => {
+    expect(parseAiEnv({}).agentModelWriter).toBe("openai:gpt-4.1-mini");
+    expect(parseAiEnv({AGENT_MODEL_WRITER: "anthropic:claude-sonnet-4-6"}).agentModelWriter)
+      .toBe("anthropic:claude-sonnet-4-6");
+    expect(() => parseAiEnv({AGENT_MODEL_WRITER: "nonsense"})).toThrow("AGENT_MODEL_INVALID");
   });
 });
 

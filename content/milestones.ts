@@ -31,7 +31,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/2001-The-Inauguration-of-WTIA-1024x683-1.jpg', altEn: '2001 - Establishment of WTIA (photo 1)', altZh: '2001年－WTIA成立（相片 1）'}
     ],
     legacyPath: '/2001/01/2001-establishment-of-wtia/',
-    featured: false,
+    featured: true,
   },
   {
     slug: '2002-the-1st-wtia-panel-discussion-inter-operator-sms',
@@ -248,7 +248,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/10548114_546835835416447_7807130283769467394_o-1024x683-1.jpg', altEn: '2014 - Wi-Fi.HK (photo 1)', altZh: '2014年－Wi-Fi.HK（相片 1）'}
     ],
     legacyPath: '/2014/01/2014-wi-fi-hk/',
-    featured: false,
+    featured: true,
   },
   {
     slug: '2015-asia-smartphone-apps-contest-summit-2015',
@@ -873,8 +873,13 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '09',
     titleEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner',
     titleZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮',
-    bodyEn: 'This year marks the 20+1st year of establishment of WTIA.Throughout these years, WTIA keeps on taking the role of a super-connector in the Wireless Communication Industry, to bridge up the gap between government, enterprises, service providers and associations. Bring on the cheer with our 20+1st Anniversary celebration and Inauguration, we are going to organize a Gala Dinner on 29 September 2022.\n\nLook forward to seeing you at the party. *Seats Limited, will be on first come first serve basis\n\nDate: Thursday, 29 September 2022 Time: 7:00pm – 10:00 pm (Registration at 6:45pm) Venue: The Mira Hong Kong (118-130 Nathan Rd, Tsim Sha Tsui) Ticket: $1,750 per seat / $7,000 for half table(4 seats)\n\n*20% off discount for WTIA Platinum Member *10% off discount for WTIA Corporate and Startup Member\n\nRegistration: https://lnkd.in/g4_HjUry',
-    bodyZh: 'WTIA 香港無線科技商會〈20 + 1 週年慶祝晚宴〉暨新一屆執行委員會就職典禮\n\n為慶賀香港無線科技商會（WTIA） 成立 20 週年， WTIA 將舉辦 20 + 1 週年慶祝晚宴暨新一屆執行委員會就職典禮，在此歡迎各位與我們聚首一堂，歡慶及見證本會跨越二十載的里程碑。\n\n誠邀各位出席，期待慶典當晚見到大家。 *名額有限，報名先到先得\n\n日期：9 月 29 日（星期四） 時間： 晚上 7 時至 10 時 地點：美麗華酒店（尖沙咀彌敦道118-130號）\n\n費用： HKD$ 1,750/ 位 或 HKD$ 7,000/半席（4 位） *白金會員（Platinum）可享 8 折優惠 *企業會員(Corporate)及初創會員(Startup) 可享 9 折優惠\n\n報名：https://form.jotform.com/222562739025456',
+    // Rewritten from the 2022 announcement's own words into the past tense. The
+    // migrated copy was a verbatim scrape of an open invitation -- future tense,
+    // "*Seats Limited", ticket prices and a live registration URL -- and this is a
+    // featured milestone, so it was still selling seats to a 2022 dinner from the
+    // homepage archive card and its own /about/history page four years on.
+    bodyEn: 'WTIA marked its 20+1st anniversary with a celebration and inauguration gala dinner at The Mira Hong Kong on Thursday, 29 September 2022, where the new Executive Committee was inaugurated.\n\nThe anniversary recognised two decades in which WTIA has taken the role of a super-connector in the wireless communication industry, bridging government, enterprises, service providers and associations.',
+    bodyZh: '香港無線科技商會（WTIA）於 2022 年 9 月 29 日假尖沙咀美麗華酒店舉行〈20 + 1 週年慶祝晚宴〉暨新一屆執行委員會就職典禮。\n\n晚宴標誌著本會跨越二十載的里程碑，見證 WTIA 多年來擔當業界「超級聯繫人」的角色，連繫政府、企業、服務供應商及各友會。',
     images: [
       {src: '/images/history/21.jpg', altEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner (photo 1)', altZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮（相片 1）'},
       {src: '/images/history/304987776_4955423924557594_1709697925414704627_n-1-770x1024.jpg', altEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner (photo 2)', altZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮（相片 2）'}
@@ -941,6 +946,6 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/562333706_1252562953570355_3640544314971024985_n-3-1.jpg', altEn: 'Asia Smart Innovation Awards 2025 (photo 1)', altZh: '2025 亞洲智慧創新大獎（相片 1）'}
     ],
     legacyPath: '/2025/11/2025-%e4%ba%9e%e6%b4%b2%e6%99%ba%e6%85%a7%e5%89%b5%e6%96%b0%e5%a4%a7%e7%8d%8e-asia-smart-innovation-awards-2025/',
-    featured: false,
+    featured: true,
   },
 ]);

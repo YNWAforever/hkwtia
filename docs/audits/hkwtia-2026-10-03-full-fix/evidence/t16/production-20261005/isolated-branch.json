@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-10-05T01:48:36.571Z",
+  "project": "solitary-wave-52860119",
+  "branch": {
+    "id": "br-lingering-unit-azxl75s5",
+    "name": "codex-audit-20260927",
+    "primary": false,
+    "default": false,
+    "protected": false,
+    "current_state": "ready",
+    "expires_at": "2026-10-05T12:00:00Z",
+    "parent_id": "br-dark-forest-az0shpz9"
+  },
+  "validForRemainingTests": true,
+  "metadataReadOnly": true
+}

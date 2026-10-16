@@ -14,6 +14,18 @@ export default {
       },
     },
     extend: {
+      screens: {
+        // Donor breakpoints are max-width (design-fidelity spec §4.2), so the utilities
+        // read "at or below", matching the media queries in app/styles/wisetech.css.
+        "wt-xl": {max: "1320px"},
+        "wt-lg": {max: "1120px"},
+        "wt-md": {max: "820px"},
+        "wt-sm": {max: "520px"},
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+        serif: ["var(--font-serif)"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -69,6 +81,22 @@ export default {
           blue: "hsl(var(--shell-blue))",
           accent: "hsl(var(--shell-accent))",
           border: "hsl(var(--shell-border))",
+        },
+        // Bare var() references keep the donor hexes verbatim, so Tailwind cannot apply
+        // an opacity modifier to them (bg-wt-ink/50 drops the /50 silently). Use the
+        // --shell-* HSL triplets when alpha is needed (design-fidelity errata E-12).
+        wt: {
+          ink: "var(--wt-ink)",
+          inkSoft: "var(--wt-ink-soft)",
+          paper: "var(--wt-paper)",
+          paperBright: "var(--wt-paper-bright)",
+          stone: "var(--wt-stone)",
+          steel: "var(--wt-steel)",
+          cyan: "var(--wt-cyan)",
+          jade: "var(--wt-jade)",
+          amber: "var(--wt-amber)",
+          blue: "var(--wt-blue)",
+          violet: "var(--wt-violet)",
         },
       },
       borderRadius: {

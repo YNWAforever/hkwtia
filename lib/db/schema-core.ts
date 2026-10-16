@@ -1,6 +1,7 @@
 import {
   type AnyPgColumn,
   boolean,
+  bigint,
   check,
   customType,
   date,
@@ -22,6 +23,7 @@ import {
 import {sql} from "drizzle-orm";
 
 import {publicRoutes} from "@/config/public-routes";
+import {HEALTH_JOB_KEYS} from "@/lib/jobs/health-registry";
 import {M3_AUTOMATION_JOB_KIND_SQL_LIST} from "@/lib/jobs/kinds";
 import {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES} from "@/lib/membership/constants";
 
@@ -56,22 +58,52 @@ export const billingAttemptStateEnum = pgEnum("billing_attempt_state", ["active"
 export const userRoleEnum = pgEnum("user_role", ["member", "staff", "exco", "superadmin"]);
 export const billingIntervalEnum = pgEnum("billing_interval", ["annual", "monthly", "none"]);
 export const registrationStatusEnum = pgEnum("registration_status", ["registered", "waitlist", "cancelled", "attended", "no_show"]);
-export const campaignStatusEnum = pgEnum("campaign_status", ["queued", "processing", "completed", "cancelled"]);
+// Programme C-5. The five Phase C states are APPENDED, never interleaved, so
+// drizzle-kit emits plain `ALTER TYPE … ADD VALUE` rather than the `… BEFORE …`
+// form. Nothing in migrations 0031-0034 may USE one of them — no DEFAULT, no
+// CHECK, no backfill — because `db:migrate` applies every pending file in one
+// transaction and Postgres refuses a value added by ALTER TYPE inside it (S-2,
+// pinned by tests/unit/phase-c-schema-contract.test.ts). `sending` is added for
+// spec parity and deliberately never written: the in-flight campaign state is
+// spelled `processing` by three statements in campaign-recipient-delivery.ts.
+export const campaignStatusEnum = pgEnum("campaign_status", [
+  "queued",
+  "processing",
+  "completed",
+  "cancelled",
+  "draft",
+  "review",
+  "scheduled",
+  "sending",
+  "failed",
+]);
 export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued", "processing", "sent", "failed", "suppressed"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approved", "rejected", "expired"]);
 export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
 export const staffTaskStatusEnum = pgEnum("staff_task_status", ["open", "resolved"]);
 export const conversationStatusEnum = pgEnum("conversation_status", ["active", "closed", "deleted"]);
-export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool"]);
+// Programme C-2: 'staff' is appended at the END so drizzle-kit emits a plain
+// `ALTER TYPE … ADD VALUE 'staff'` rather than 0008's `… BEFORE …` form.
+// `npm run db:migrate` runs EVERY pending migration inside ONE transaction
+// (drizzle-orm/pg-core/dialect.cjs:62), and PostgreSQL forbids using a value
+// added by ALTER TYPE in the transaction that added it. So no migration in this
+// release may name 'staff' — not in a DEFAULT, a CHECK or a backfill. Runtime
+// inserts commit in a later transaction and are unaffected.
+export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool", "staff"]);
 export const messageChannelEnum = pgEnum("message_channel", ["web", "whatsapp"]);
+// These three are CREATE TYPE, not ADD VALUE, so 0031 may use them freely.
+export const messageDirectionEnum = pgEnum("message_direction", ["inbound", "outbound"]);
+export const messageDeliveryStatusEnum = pgEnum("message_delivery_status", ["queued", "sent", "delivered", "read", "failed"]);
+export const conversationHandlingEnum = pgEnum("conversation_handling", ["bot", "human", "closed"]);
 export const agentRunStatusEnum = pgEnum("agent_run_status", ["running", "disabled", "completed", "failed", "escalated"]);
 export const agentNameEnum = pgEnum("agent_name", [
   "concierge",
   "retention_analyst",
   "board_reporter",
+  "writer",
 ]);
 export const postKindEnum = pgEnum("post_kind", ["news", "buildlog", "page"]);
-export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled"]);
+export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled", "portal"]);
 export const showcaseListingStatusEnum = pgEnum("showcase_listing_status", [
   "draft",
   "pending_review",
@@ -91,7 +123,34 @@ export const landingPartnerMouStatusEnum = pgEnum("landing_partner_mou_status", 
 export const partnerCategoryEnum = pgEnum("partner_category", [
   "supporting", "media", "regional", "programme", "sponsor",
 ]);
+export const contactSourceEnum = pgEnum("contact_source", [
+  "whatsapp", "event_guest", "showcase_intro", "join_abandoned", "interest_form", "import",
+]);
+export const contactStageEnum = pgEnum("contact_stage", [
+  "new", "contacted", "qualified", "applied", "member", "closed",
+]);
+export const contactActivityKindEnum = pgEnum("contact_activity_kind", [
+  "note", "stage_change", "owner_change", "next_step", "invite_sent", "invite_opened", "applied", "became_member",
+]);
+export const eventStatusEnum = pgEnum("event_status", [
+  "draft", "pending_review", "published", "rejected", "cancelled",
+]);
+export const eventVisibilityEnum = pgEnum("event_visibility", ["public", "members_only", "invite_only"]);
+export const eventFormatEnum = pgEnum("event_format", ["in_person", "online", "hybrid"]);
+export const registrationModeEnum = pgEnum("registration_mode", ["rsvp", "external", "ticketed"]);
+export const eventOrderStatusEnum = pgEnum("event_order_status", ["pending", "paid", "expired", "failed", "refunded", "refund_failed", "refund_pending"]);
+export const eventRefundReasonEnum = pgEnum("event_refund_reason", ["oversold", "staff", "cancelled"]);
+export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", [
+  "registered", "waitlist", "cancelled", "attended",
+]);
+// Programme D-11: a company's public member page is opt-in and staff-reviewed,
+// so the lifecycle mirrors the showcase one instead of a single boolean.
+export const publicProfileStatusEnum = pgEnum("public_profile_status", [
+  "hidden", "pending_review", "published", "rejected",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
+export type ConversationHandling = (typeof conversationHandlingEnum.enumValues)[number];
+export type MessageDeliveryStatus = (typeof messageDeliveryStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
   dataType() {
@@ -117,6 +176,13 @@ export const profiles = pgTable("profiles", {
   updatedAt: updatedAt("updated_at"),
   whatsappOptIn: boolean("whatsapp_opt_in").default(false).notNull(),
   whatsappNumber: text("whatsapp_number"),
+  // Programme D-7: consent is only useful if it can be shown. Source values:
+  // join | portal | rsvp | interest_form | whatsapp_inbound. Text version pins
+  // the wording the person agreed to (lib/whatsapp/consent.ts).
+  whatsappConsentAt: timestamp("whatsapp_consent_at", {withTimezone: true}),
+  whatsappConsentSource: text("whatsapp_consent_source"),
+  whatsappConsentTextVersion: text("whatsapp_consent_text_version"),
+  marketingConsentAt: timestamp("marketing_consent_at", {withTimezone: true}),
 });
 
 export const companies = pgTable("companies", {
@@ -131,7 +197,35 @@ export const companies = pgTable("companies", {
   directoryVisible: boolean("directory_visible").default(false).notNull(),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
-});
+  // Programme D-11: the public member page. Opt-in, reviewed, hidden by default.
+  // 0029 derives the first slug from `display_name`; owners edit it afterwards.
+  slug: text("slug"),
+  // `media` is declared after `companies`, so the reference has to be a typed
+  // lazy callback or TypeScript infers a circular type.
+  logoMediaId: uuid("logo_media_id").references((): AnyPgColumn => media.id, {onDelete: "set null"}),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  taglineEn: text("tagline_en"),
+  taglineZhHk: text("tagline_zh_hk"),
+  descriptionZhHk: text("description_zh_hk"),
+  publicProfileStatus: publicProfileStatusEnum("public_profile_status").default("hidden").notNull(),
+  publicProfilePublishedAt: timestamp("public_profile_published_at", {withTimezone: true}),
+  profileReviewedAt: timestamp("profile_reviewed_at", {withTimezone: true}),
+  profileReviewedByProfileId: text("profile_reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  profileRejectionReason: text("profile_rejection_reason"),
+}, (table) => [
+  // Partial so the legacy rows that never get a slug cannot collide on NULL.
+  uniqueIndex("companies_slug_unique").on(table.slug).where(sql`${table.slug} IS NOT NULL`),
+  index("companies_public_profile_idx").on(table.publicProfileStatus, table.displayName),
+  // `published` means an addressable /members/[slug] exists, so the slug is
+  // part of the status, not repository etiquette: the submit path checks it,
+  // but the reviewer's `pending_review -> published` transition does not, and
+  // this is the last moment the constraint is free to add. Same class as
+  // `events_online_url_check` and `leads_identity_check` below.
+  check(
+    "companies_public_profile_slug_check",
+    sql`${table.publicProfileStatus} <> 'published' OR ${table.slug} IS NOT NULL`,
+  ),
+]);
 
 export const companyMembers = pgTable(
   "company_members",
@@ -180,6 +274,46 @@ export const seatInvitations = pgTable(
   ],
 );
 
+export const portalSeatBatches = pgTable("portal_seat_batches", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id").notNull().references(() => companies.id, {onDelete: "cascade"}),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  actorAuthUserId: text("actor_auth_user_id").notNull(),
+  locale: text("locale").$type<"en" | "zh-HK">().notNull(),
+  state: text("state").$type<"preview" | "committed">().default("preview").notNull(),
+  requestId: uuid("request_id"),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("portal_seat_batches_request_unique").on(table.actorProfileId, table.requestId),
+  index("portal_seat_batches_company_idx").on(table.companyId, table.createdAt),
+  check("portal_seat_batches_state_check", sql`${table.state} IN ('preview', 'committed')`),
+  check("portal_seat_batches_locale_check", sql`${table.locale} IN ('en', 'zh-HK')`),
+]);
+
+export const portalSeatBatchItems = pgTable("portal_seat_batch_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  batchId: uuid("batch_id").notNull().references(() => portalSeatBatches.id, {onDelete: "cascade"}),
+  position: integer("position").notNull(),
+  email: varchar("email", {length: 254}).notNull(),
+  role: companyMemberRoleEnum("role").notNull(),
+  state: text("state").$type<"preview" | "blocked" | "pending" | "delivery_pending" | "sending" | "succeeded" | "skipped" | "failed" | "uncertain">().notNull(),
+  errorCode: text("error_code"),
+  invitationId: uuid("invitation_id").references(() => seatInvitations.id, {onDelete: "set null"}),
+  // Private delivery outbox payload. Never selected into a member-facing DTO or log.
+  deliveryToken: text("delivery_token"),
+  claimId: uuid("claim_id"),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  finishedAt: timestamp("finished_at", {withTimezone: true}),
+}, (table) => [
+  uniqueIndex("portal_seat_batch_items_position_unique").on(table.batchId, table.position),
+  index("portal_seat_batch_items_state_idx").on(table.batchId, table.state, table.position),
+  check("portal_seat_batch_items_state_check", sql`${table.state} IN ('preview', 'blocked', 'pending', 'delivery_pending', 'sending', 'succeeded', 'skipped', 'failed', 'uncertain')`),
+  check("portal_seat_batch_items_position_check", sql`${table.position} BETWEEN 1 AND 50`),
+  check("portal_seat_batch_items_attempt_check", sql`${table.attemptCount} BETWEEN 0 AND 5`),
+]);
+
 export const membershipPlans = pgTable("membership_plans", {
   code: membershipPlanCodeEnum("code").primaryKey(),
   audience: text("audience").notNull(),
@@ -206,6 +340,9 @@ export const membershipApplications = pgTable(
     companyId: uuid("company_id").references(() => companies.id, {onDelete: "set null"}),
     currentStep: membershipApplicationStepEnum("current_step").default("profile").notNull(),
     status: membershipApplicationStatusEnum("status").default("draft").notNull(),
+    // Phase E: written when the application is submitted (the invite is consumed), not at
+    // draft creation. Callback form because join_invites.application_id points back here.
+    inviteId: uuid("invite_id").references((): AnyPgColumn => joinInvites.id, {onDelete: "set null"}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
@@ -232,6 +369,10 @@ export const memberships = pgTable(
     stripeSubscriptionId: text("stripe_subscription_id"),
     billingPeriodStart: timestamp("billing_period_start", {withTimezone: true}),
     billingPeriodEnd: timestamp("billing_period_end", {withTimezone: true}),
+    grantEffectiveAt: timestamp("grant_effective_at", {withTimezone: true}),
+    grantExpiresAt: timestamp("grant_expires_at", {withTimezone: true}),
+    grantReason: text("grant_reason"),
+    grantActorProfileId: text("grant_actor_profile_id"),
     cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
@@ -242,15 +383,35 @@ export const memberships = pgTable(
       sql`(${table.ownerUserId} IS NOT NULL AND ${table.companyId} IS NULL) OR (${table.ownerUserId} IS NULL AND ${table.companyId} IS NOT NULL)`,
     ),
     check("memberships_seat_limit_check", sql`${table.seatLimit} >= 0`),
+    check("memberships_grant_window_check", sql`(${table.grantEffectiveAt} IS NULL AND ${table.grantExpiresAt} IS NULL AND ${table.grantReason} IS NULL AND ${table.grantActorProfileId} IS NULL) OR (${table.grantEffectiveAt} IS NOT NULL AND ${table.grantExpiresAt} IS NOT NULL AND ${table.grantReason} IS NOT NULL AND length(trim(${table.grantReason})) >= 10 AND ${table.grantActorProfileId} IS NOT NULL AND ${table.grantEffectiveAt} < ${table.grantExpiresAt})`),
     uniqueIndex("memberships_stripe_subscription_unique")
       .on(table.stripeSubscriptionId)
       .where(sql`${table.stripeSubscriptionId} IS NOT NULL`),
     uniqueIndex("memberships_application_unique")
       .on(table.applicationId)
       .where(sql`${table.applicationId} IS NOT NULL`),
+    // One membership in play per owner. `cancelled` and `expired` are terminal in
+    // `allowedTransitions`, so rows in those states are history and may accumulate; every
+    // other status can still reach `active`, and a second row alongside one of them is a
+    // duplicate membership for the same person. Partial rather than plain unique so a
+    // lapsed member can be given a new membership.
+    uniqueIndex("memberships_owner_live_unique")
+      .on(table.ownerUserId)
+      .where(sql`${table.ownerUserId} IS NOT NULL AND ${table.status} NOT IN ('cancelled', 'expired')`),
+    // The company twin. getSeatOverview already joins memberships on company_id, filters
+    // to live statuses and takes LIMIT 1 -- so a second live row would not be rejected,
+    // it would be silently picked between, and the company's seat limit would depend on
+    // which row won. The invariant was already assumed; this is the first thing to
+    // enforce it.
+    uniqueIndex("memberships_company_live_unique")
+      .on(table.companyId)
+      .where(sql`${table.companyId} IS NOT NULL AND ${table.status} NOT IN ('cancelled', 'expired')`),
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
     index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),
+    index("memberships_renewal_window_idx").on(table.billingPeriodEnd,table.id)
+      .where(sql`${table.billingPeriodEnd} IS NOT NULL AND ${table.status} IN ('active','past_due') AND ${table.cancelAtPeriodEnd}=false AND ${table.billingInterval}<>'none' AND ${table.grantEffectiveAt} IS NULL AND ${table.grantExpiresAt} IS NULL`),
+    index("memberships_grant_expires_at_idx").on(table.grantExpiresAt),
   ],
 );
 
@@ -369,6 +530,10 @@ export const journeyState = pgTable("journey_state", {
 }, (table) => [
   unique("journey_state_profile_instance_step_unique").on(table.profileId, table.journey, table.instanceKey, table.step),
   unique("journey_state_delivery_key_unique").on(table.deliveryKey),
+  // Normalize old/new period keys without changing retained delivery receipts or retry clocks.
+  uniqueIndex("journey_state_renewal_episode_unique").on(table.membershipId,table.step,
+    sql`regexp_replace(${table.instanceKey},'^period:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:','period:')`)
+    .where(sql`${table.journey}='renewal' AND ${table.membershipId} IS NOT NULL`),
   index("journey_state_due_idx").on(table.status, table.scheduledAt),
   index("journey_state_profile_idx").on(table.profileId, table.createdAt),
   index("journey_state_admin_recent_idx")
@@ -388,11 +553,18 @@ export const emailLog = pgTable("email_log", {
   classification: text("classification").default("transactional").notNull(),
   attemptCount: integer("attempt_count").default(0).notNull(),
   errorCode: text("error_code"),
+  // S-8. A dispatch to a prospect logged an anonymous row before this column:
+  // both log tables keyed only on profile_id, and a contact has no profile.
+  // message_suppressions is deliberately NOT widened — the prospect lane stays
+  // contacts.whatsapp_opt_in / whatsapp_opted_out_at, and one repository
+  // (messageEligibilityRepository) owns reading both sources.
+  contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
 }, (table) => [
   unique("email_log_idempotency_key_unique").on(table.idempotencyKey),
   index("email_log_profile_created_idx").on(table.profileId, table.createdAt),
   index("email_log_journey_state_idx").on(table.journeyStateId),
+  index("email_log_contact_created_idx").on(table.contactId, table.createdAt),
 ]);
 
 export const whatsappLog = pgTable("whatsapp_log", {
@@ -407,11 +579,15 @@ export const whatsappLog = pgTable("whatsapp_log", {
   classification: text("classification").default("transactional").notNull(),
   attemptCount: integer("attempt_count").default(0).notNull(),
   errorCode: text("error_code"),
+  // S-8, as on email_log above: a prospect has no profile, and a marketing
+  // message to one has to be attributable to the row that consented.
+  contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
 }, (table) => [
   unique("whatsapp_log_idempotency_key_unique").on(table.idempotencyKey),
   index("whatsapp_log_profile_created_idx").on(table.profileId, table.createdAt),
   index("whatsapp_log_journey_state_idx").on(table.journeyStateId),
+  index("whatsapp_log_contact_created_idx").on(table.contactId, table.createdAt),
 ]);
 
 export const messageSuppressions = pgTable("message_suppressions", {
@@ -431,6 +607,23 @@ export const kbDocuments = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     namespace: text("namespace").notNull(),
+    sourceId: uuid("source_id").defaultRandom().notNull(),
+    version: integer("version").default(1).notNull(),
+    approvalState: text("approval_state").default("unverified").notNull(),
+    audience: text("audience").default("public").notNull(),
+    ownerProfileId: text("owner_profile_id").references(() => profiles.id, {onDelete:"restrict"}),
+    approvedBy: text("approved_by").references(() => profiles.id, {onDelete:"restrict"}),
+    effectiveFrom: timestamp("effective_from",{withTimezone:true}),
+    effectiveTo: timestamp("effective_to",{withTimezone:true}),
+    reviewDue: timestamp("review_due",{withTimezone:true}),
+    contentHash: text("content_hash"),
+    originalContent: text("original_content"),
+    chunkStart: integer("chunk_start"),
+    chunkEnd: integer("chunk_end"),
+    structuredFacts: jsonb("structured_facts").$type<Record<string,string|number|boolean|null>>().default({}).notNull(),
+    supersedesVersion: integer("supersedes_version"),
+    indexState: text("index_state").default("unindexed").notNull(),
+    indexAttemptId: uuid("index_attempt_id"),
     locale: varchar("locale", {length: 10}).notNull(),
     title: text("title").notNull(),
     url: text("url").notNull(),
@@ -443,6 +636,14 @@ export const kbDocuments = pgTable(
   (table) => [
     index("kb_documents_namespace_locale_idx").on(table.namespace, table.locale),
     index("kb_documents_created_idx").on(table.createdAt),
+    uniqueIndex("kb_documents_source_chunk_version_idx").on(table.sourceId,table.locale,table.version,table.chunkStart).where(sql`${table.chunkStart} IS NOT NULL`),
+    index("kb_documents_approved_scope_idx").on(table.namespace,table.locale,table.audience,table.approvalState,table.indexState,table.effectiveFrom,table.effectiveTo,table.reviewDue),
+    index("kb_documents_source_versions_idx").on(table.sourceId,table.locale,table.version),
+    check("kb_documents_governance_states",sql`${table.approvalState} IN ('unverified','draft','approved','withdrawn') AND ${table.audience} IN ('public','staff') AND ${table.indexState} IN ('unindexed','indexing','ready','failed')`),
+    check("kb_documents_version_valid",sql`${table.version}>0 AND (${table.supersedesVersion} IS NULL OR ${table.supersedesVersion}<${table.version})`),
+    check("kb_documents_effective_range",sql`${table.effectiveTo} IS NULL OR ${table.effectiveFrom} IS NOT NULL AND ${table.effectiveTo}>${table.effectiveFrom}`),
+    check("kb_documents_approved_provenance",sql`${table.approvalState}<>'approved' OR (${table.ownerProfileId} IS NOT NULL AND ${table.approvedBy} IS NOT NULL AND ${table.approvedBy}<>${table.ownerProfileId} AND ${table.effectiveFrom} IS NOT NULL AND ${table.reviewDue} IS NOT NULL AND ${table.reviewDue}>${table.effectiveFrom} AND ${table.contentHash} IS NOT NULL AND ${table.contentHash} ~ '^[a-f0-9]{64}$' AND ${table.originalContent} IS NOT NULL AND ${table.contentHash}=encode(sha256(convert_to(${table.originalContent},'UTF8')),'hex') AND ${table.chunkStart} IS NOT NULL AND ${table.chunkEnd} IS NOT NULL AND ${table.chunkStart}>=0 AND ${table.chunkEnd}>${table.chunkStart} AND substring(${table.originalContent} FROM ${table.chunkStart}+1 FOR ${table.chunkEnd}-${table.chunkStart})=${table.content})`),
+    check("kb_documents_ready_approved",sql`${table.indexState}<>'ready' OR ${table.approvalState}='approved'`),
   ],
 );
 
@@ -459,6 +660,28 @@ export const conversations = pgTable(
     status: conversationStatusEnum("status").default("active").notNull(),
     lastMessageAt: timestamp("last_message_at", {withTimezone: true}),
     expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    // Programme C-1/C-2. `channel` was derived from the newest message until now
+    // (see lib/db/repos/inbox.ts) — a derivation that calls a WhatsApp thread
+    // "web" the moment a web reply lands on it, and that the send path cannot
+    // trust. `handling` is the interlock between the concierge and a person:
+    // 'human' makes the webhook persist and notify without starting a bot turn.
+    channel: messageChannelEnum("channel").default("web").notNull(),
+    handling: conversationHandlingEnum("handling").default("bot").notNull(),
+    // D-6 keeps anonymous_owner_hash as the OWNER key, so this is a link, not an
+    // owner arm: conversations_owner_check stays two-armed and untouched.
+    contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
+    assignedToProfileId: text("assigned_to_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    whatsappMemberId: text("whatsapp_member_id"),
+    // The 24-hour customer-service window is measured from here. NOT from
+    // last_message_at, which every outbound reply bumps and which would restart
+    // the window on every bot answer.
+    lastInboundAt: timestamp("last_inbound_at", {withTimezone: true}),
+    lastStaffReadAt: timestamp("last_staff_read_at", {withTimezone: true}),
+    // RESERVED. §6 lists it and no task in Phase C1 or C2 writes or reads it —
+    // stated here rather than discovered as a puzzling always-NULL column. The
+    // obvious future writer is a thread title on the composer; until one exists,
+    // do not add a read that would render an empty string as a title.
+    subject: text("subject"),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
@@ -479,6 +702,8 @@ export const conversations = pgTable(
       table.agentKind,
       table.expiresAt,
     ),
+    index("conversations_handling_assigned_idx").on(table.handling, table.assignedToProfileId),
+    index("conversations_contact_idx").on(table.contactId),
   ],
 );
 
@@ -495,6 +720,33 @@ export const messages = pgTable(
     providerMessageId: text("provider_message_id"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
     citations: jsonb("citations").$type<Array<Record<string, unknown>>>().default([]).notNull(),
+    // Programme C-1. Default 'inbound' deliberately (plan S-4): an inbound row is
+    // inert — it never carries a delivery_status and never triggers a send — so a
+    // writer that forgets the field cannot push a row into the send ledger.
+    // conversations.last_inbound_at is written explicitly by the webhook and is
+    // never derived from this column, so a mislabelled row cannot reopen the
+    // 24-hour window.
+    direction: messageDirectionEnum("direction").default("inbound").notNull(),
+    // NULL for every web row and every inbound row: "this message has no delivery
+    // state", not "unknown". Only outbound WhatsApp rows carry one.
+    deliveryStatus: messageDeliveryStatusEnum("delivery_status"),
+    sentByProfileId: text("sent_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    templateKey: text("template_key"),
+    errorCode: text("error_code"),
+    deliveredAt: timestamp("delivered_at", {withTimezone: true}),
+    readAt: timestamp("read_at", {withTimezone: true}),
+    // Plan S-8. The write-ahead row has no provider id yet, so
+    // messages_provider_message_id_unique cannot dedupe a retried staff send.
+    // This key is deterministic in (conversation, kind, content, template) and is
+    // what makes the send action idempotent.
+    outboundKey: text("outbound_key"),
+    // Plan S-8, second half. outbound_key dedupes the ROW; this dedupes the SEND.
+    // Two concurrent submits of one draft both find (or create) the same row, and
+    // without a lease the loser calls the adapter anyway: one messages row, one
+    // audit row, two WhatsApp messages to the member. A caller may call the
+    // adapter only if it holds a live claim. Cleared by settleStaffMessage; a
+    // stale claim on a non-`queued` row is inert.
+    sendClaimExpiresAt: timestamp("send_claim_expires_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
   },
   (table) => [
@@ -503,6 +755,12 @@ export const messages = pgTable(
       .where(sql`${table.providerMessageId} IS NOT NULL`),
     index("messages_conversation_created_idx").on(table.conversationId, table.createdAt),
     index("messages_created_at_idx").on(table.createdAt),
+    uniqueIndex("messages_outbound_key_unique")
+      .on(table.outboundKey)
+      .where(sql`${table.outboundKey} IS NOT NULL`),
+    index("messages_delivery_status_idx")
+      .on(table.deliveryStatus)
+      .where(sql`${table.deliveryStatus} IS NOT NULL`),
   ],
 );
 
@@ -520,7 +778,11 @@ export const agentRuns = pgTable(
     model: text("model"),
     inputTokens: integer("input_tokens").default(0).notNull(),
     outputTokens: integer("output_tokens").default(0).notNull(),
-    costUsd: numeric("cost_usd", {precision: 12, scale: 6}).default("0").notNull(),
+    costUsd: numeric("cost_usd", {precision: 12, scale: 6}).default("0"),
+    costMicrousd: bigint("cost_microusd",{mode:"bigint"}),
+    usageState: text("usage_state").default("legacy_unknown").notNull(),
+    cacheReadTokens: bigint("cache_read_tokens",{mode:"bigint"}), cacheWriteTokens: bigint("cache_write_tokens",{mode:"bigint"}),
+    reasoningTokens: bigint("reasoning_tokens",{mode:"bigint"}), pricingVersion: text("pricing_version"),
     latencyMs: integer("latency_ms"),
     summary: text("summary"),
     errorCode: text("error_code"),
@@ -531,6 +793,8 @@ export const agentRuns = pgTable(
     updatedAt: updatedAt("updated_at"),
   },
   (table) => [
+    check("agent_runs_usage_state_check", sql`${table.usageState} IN ('known','unknown','not_dispatched','legacy_unknown')`),
+    check("agent_runs_cost_microusd_check", sql`${table.costMicrousd} >= 0 AND ${table.costMicrousd} <= 9007199254740991`),
     check("agent_runs_csat_score_check", sql`${table.csatScore} IS NULL OR (${table.csatScore} >= 1 AND ${table.csatScore} <= 5)`),
     index("agent_runs_conversation_created_idx").on(table.conversationId, table.createdAt),
     index("agent_runs_profile_idx").on(table.profileId),
@@ -546,7 +810,21 @@ export const staffTasks = pgTable("staff_tasks", {
   summaryCode: text("summary_code").notNull(),
   context: jsonb("context")
     .$type<{
+      applicationId?: string | null;
+      caseVersion?: string;
+      supportVersion?: string;
+      billingAttemptId?: string|null;
+      supportReference?: string|null;
+      handoffNote?: string;
+      handling?: "bot"|"human"|"closed";
+      closeReason?: "resolved"|"member_withdrew"|"duplicate"|"escalated"|null;
+      ownerProfileId?: string | null;
+      dueAt?: string | null;
+      missingFields?: readonly string[];
+      nextActionCode?: string;
       contactEmail?: string;
+      orderId?: string;
+      noticeKind?: "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";
       conversationId?: string;
       agentRunId?: string;
       reasonCode?: string;
@@ -576,22 +854,191 @@ export const savedSegments = pgTable("saved_segments", {
   updatedAt: updatedAt("updated_at"),
 });
 
+/** Staff member workspace views stay separate from campaign audience segments. */
+export const adminMemberViews = pgTable("admin_member_views", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ownerProfileId: text("owner_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  name: text("name").notNull(),
+  filterVersion: integer("filter_version").default(1).notNull(),
+  query: jsonb("query").$type<Record<string, unknown>>().notNull(),
+  shared: boolean("shared").default(false).notNull(),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_member_views_owner_name_unique").on(table.ownerProfileId, table.name),
+  index("admin_member_views_shared_updated_idx").on(table.shared, table.updatedAt),
+]);
+
+/** Durable, actor-owned admin batch previews and execution records. Text CHECKs avoid same-transaction enum migration traps. */
+export const adminBatches = pgTable("admin_batches", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  operation: text("operation").notNull(),
+  validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  beforeSnapshot: jsonb("before_snapshot").$type<Record<string, unknown>>().default({}).notNull(),
+  selectionSnapshot: jsonb("selection_snapshot").$type<Record<string, unknown>>().notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  requestDigest: text("request_digest").notNull(),
+  state: text("state").default("preparing").notNull(),
+  previewDigest: text("preview_digest"),
+  previewExpiresAt: timestamp("preview_expires_at", {withTimezone: true}),
+  preparationLeaseOwner: text("preparation_lease_owner"),
+  preparationLeaseExpiresAt: timestamp("preparation_lease_expires_at", {withTimezone: true}),
+  preparationToken: integer("preparation_token").default(0).notNull(),
+  counters: jsonb("counters").$type<Record<string, number>>().default(sql`'{}'::jsonb`).notNull(),
+  createdAt: createdAt("created_at"),
+  preparedAt: timestamp("prepared_at", {withTimezone: true}),
+  committedAt: timestamp("committed_at", {withTimezone: true}),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_batches_actor_key_unique").on(table.actorProfileId, table.idempotencyKey),
+  index("admin_batches_preparing_idx").on(table.state, table.preparationLeaseExpiresAt, table.createdAt),
+  index("admin_batches_owner_recent_idx").on(table.actorProfileId, table.createdAt),
+  check("admin_batches_state_check", sql`${table.state} IN ('preparing','ready','queued','running','completed','completed_with_errors','cancelled','expired')`),
+  check("admin_batches_operation_check", sql`${table.operation} IN ('profile_patch','import_commit','membership_grant','renewal_reminder','profile_update_invite','ticket_resend','export_members','export_event_attendees')`),
+]);
+
+export const adminBatchItems = pgTable("admin_batch_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  batchId: uuid("batch_id").notNull().references(() => adminBatches.id, {onDelete: "restrict"}),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+  expectedVersion: text("expected_version").notNull(),
+  beforeSummary: jsonb("before_summary").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  afterSummary: jsonb("after_summary").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  previewStatus: text("preview_status").notNull(),
+  state: text("state").default("pending").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}),
+  leaseOwner: text("lease_owner"),
+  leaseExpiresAt: timestamp("lease_expires_at", {withTimezone: true}),
+  leaseToken: integer("lease_token").default(0).notNull(),
+  effectKey: text("effect_key").notNull().unique(),
+  resultRef: text("result_ref"),
+  errorCode: text("error_code"),
+  reasonCode: text("reason_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_batch_items_target_unique").on(table.batchId, table.targetType, table.targetId),
+  index("admin_batch_items_claim_idx").on(table.state, table.nextAttemptAt, table.leaseExpiresAt),
+  index("admin_batch_items_batch_state_idx").on(table.batchId, table.state),
+  check("admin_batch_items_preview_check", sql`${table.previewStatus} IN ('eligible','skipped','blocked')`),
+  check("admin_batch_items_state_check", sql`${table.state} IN ('pending','running','succeeded','skipped','failed')`),
+  check("admin_batch_items_attempt_check", sql`${table.attemptCount} >= 0 AND ${table.leaseToken} >= 0`),
+]);
+
+/** Private parsed upload. Original bytes are discarded immediately after bounded parsing. */
+export const memberImportUploads = pgTable("member_import_uploads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  fileDigest: text("file_digest").notNull(),
+  format: text("format").notNull(),
+  parsedSnapshot: jsonb("parsed_snapshot").$type<Record<string, unknown>>().notNull(),
+  rowCount: integer("row_count").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  index("member_import_uploads_owner_created_idx").on(table.actorProfileId, table.createdAt),
+  check("member_import_uploads_format_check", sql`${table.format} IN ('csv','xlsx')`),
+  check("member_import_uploads_rows_check", sql`${table.rowCount} >= 0 AND ${table.rowCount} <= 5000`),
+]);
+
+export const memberImportRuns = pgTable("member_import_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  uploadId: uuid("upload_id").notNull().references(() => memberImportUploads.id, {onDelete: "restrict"}),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  fileDigest: text("file_digest").notNull(),
+  mappingDigest: text("mapping_digest").notNull(),
+  mapping: jsonb("mapping").$type<Record<string, unknown>>().notNull(),
+  state: text("state").default("validated").notNull(),
+  summary: jsonb("summary").$type<Record<string, number>>().notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  confirmedAt: timestamp("confirmed_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("member_import_runs_digest_unique").on(table.actorProfileId, table.fileDigest, table.mappingDigest),
+  index("member_import_runs_owner_created_idx").on(table.actorProfileId, table.createdAt),
+  check("member_import_runs_state_check", sql`${table.state} IN ('validated','confirmed','committed','expired')`),
+]);
+
+export const memberImportRows = pgTable("member_import_rows", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  runId: uuid("run_id").notNull().references(() => memberImportRuns.id, {onDelete: "restrict"}),
+  rowNumber: integer("row_number").notNull(),
+  validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  beforeSnapshot: jsonb("before_snapshot").$type<Record<string, unknown>>().default({}).notNull(),
+  validationStatus: text("validation_status").notNull(),
+  matchTargetId: text("match_target_id"),
+  conflictReason: text("conflict_reason"),
+  expectedVersion: text("expected_version"),
+  confirmed: boolean("confirmed").default(false).notNull(),
+  batchItemId: uuid("batch_item_id").references(() => adminBatchItems.id, {onDelete: "set null"}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("member_import_rows_number_unique").on(table.runId, table.rowNumber),
+  index("member_import_rows_status_idx").on(table.runId, table.validationStatus),
+  check("member_import_rows_status_check", sql`${table.validationStatus} IN ('create','update','unchanged','duplicate','conflict','invalid')`),
+]);
+
+export const memberOperationsMetadata = pgTable("member_operations_metadata", {
+  profileId: text("profile_id").primaryKey().references(() => profiles.id, {onDelete: "cascade"}),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  ownerProfileId: text("owner_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  updatedAt: updatedAt("updated_at"),
+});
+
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),
   segmentId: uuid("segment_id").notNull().references(() => savedSegments.id, {onDelete: "restrict"}),
   createdByProfileId: text("created_by_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
-  template: text("template").notNull(),
+  // S-5: two template columns with two vocabularies. `template` stays the email
+  // source template (`renewal-reminder｜member-update｜membership_renewal`,
+  // interpreted by campaignTemplateMap) and becomes nullable because a WhatsApp
+  // campaign has none; `templateKey` names a whatsapp_templates row.
+  template: text("template"),
   localeStrategy: text("locale_strategy").default("profile").notNull(),
   status: campaignStatusEnum("status").default("queued").notNull(),
   idempotencyKey: text("idempotency_key").notNull().unique(),
+  name: text("name"),
+  // Programme C-5. Text + CHECK rather than a pgEnum: a value added by
+  // ALTER TYPE cannot be used in the transaction that adds it, and
+  // `db:migrate` runs every pending file in one (S-2/S-3).
+  channel: text("channel").default("email").notNull(),
+  templateKey: text("template_key").references((): AnyPgColumn => whatsappTemplates.key, {onDelete: "restrict"}),
+  variablesTemplate: jsonb("variables_template").$type<Record<string, string>>().default({}).notNull(),
+  scheduledAt: timestamp("scheduled_at", {withTimezone: true}),
+  // S-7: the reviewer triple. A campaign is reviewed by an admin who is not its
+  // creator, so two-person control is a property of the row, not of a screen.
+  reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
+  reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  rejectionReason: text("rejection_reason"),
+  completedAt: timestamp("completed_at", {withTimezone: true}),
   createdAt: createdAt("created_at"),
-});
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("campaigns_channel_check", sql`${table.channel} IN ('email', 'whatsapp')`),
+  // The database enforces this and not only the repository, because a blast
+  // with no template is the one mistake that reaches members (D-9: blasts
+  // are template-only outside the 24-hour window).
+  check("campaigns_whatsapp_template_check", sql`${table.channel} <> 'whatsapp' OR ${table.templateKey} IS NOT NULL`),
+  check("campaigns_email_template_check", sql`${table.channel} <> 'email' OR ${table.template} IS NOT NULL`),
+  index("campaigns_status_scheduled_idx").on(table.status, table.scheduledAt),
+]);
 
 export const campaignRecipients = pgTable("campaign_recipients", {
   id: uuid("id").defaultRandom().primaryKey(),
   campaignId: uuid("campaign_id").notNull().references(() => campaigns.id, {onDelete: "cascade"}),
-  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
-  email: text("email").notNull(),
+  // S-4: a recipient is a member OR a prospect, never both and never neither.
+  // Both identity columns are nullable so the check below can be the single
+  // statement of that rule; the two partial unique indexes are what keeps
+  // de-duplication working, because Postgres treats NULLs as distinct and a
+  // plain UNIQUE (campaign_id, profile_id) stops de-duplicating the moment
+  // profile_id may be null.
+  profileId: text("profile_id").references(() => profiles.id, {onDelete: "restrict"}),
+  contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "restrict"}),
+  email: text("email"),
+  whatsappNumber: text("whatsapp_number"),
   locale: varchar("locale", {length: 10}).notNull(),
   variables: jsonb("variables").$type<Record<string, string>>().notNull(),
   status: recipientStatusEnum("status").default("queued").notNull(),
@@ -599,9 +1046,34 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   claimedAt: timestamp("claimed_at", {withTimezone: true}),
   claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
   errorCode: text("error_code"),
+  providerMessageId: text("provider_message_id"),
+  sentAt: timestamp("sent_at", {withTimezone: true}),
+  deliveredAt: timestamp("delivered_at", {withTimezone: true}),
+  readAt: timestamp("read_at", {withTimezone: true}),
+  blockedReason: text("blocked_reason"),
+  // The table has never carried a timestamp, so a stalled blast had nothing to
+  // order against. Existing rows take the migration instant; that is stated,
+  // not hidden (S-4).
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
 }, (table) => [
-  unique("campaign_recipients_campaign_profile_unique").on(table.campaignId, table.profileId),
+  // Deliberately NOT named "campaign_recipients_campaign_profile_unique".
+  // Postgres backs a unique CONSTRAINT with an index carrying the
+  // constraint's name, so reusing it would make the generated file's
+  // DROP CONSTRAINT / CREATE UNIQUE INDEX ordering load-bearing — and if
+  // drizzle-kit emitted them the wrong way round, the only repair would be
+  // hand-editing the SQL, which desynchronises drizzle/meta/0033_snapshot.json
+  // from what was actually applied. A new name makes the ordering irrelevant.
+  uniqueIndex("campaign_recipients_campaign_profile_idx").on(table.campaignId, table.profileId).where(sql`${table.profileId} IS NOT NULL`),
+  uniqueIndex("campaign_recipients_campaign_contact_idx").on(table.campaignId, table.contactId).where(sql`${table.contactId} IS NOT NULL`),
   index("campaign_recipients_due_idx").on(table.status, table.claimExpiresAt),
+  index("campaign_recipients_campaign_status_idx").on(table.campaignId, table.status),
+  // Phase C2 Task 10's delivery-status fall-through looks a recipient up by the
+  // provider's id when the `messages` UPDATE matches nothing. Not unique: two
+  // recipients in different campaigns could in principle carry one id, and a
+  // unique index here would turn that into a webhook 500.
+  index("campaign_recipients_provider_message_idx").on(table.providerMessageId),
+  check("campaign_recipients_identity_check", sql`(${table.profileId} IS NOT NULL) <> (${table.contactId} IS NOT NULL)`),
 ]);
 
 export const events = pgTable("events", {
@@ -620,9 +1092,37 @@ export const events = pgTable("events", {
   heroMediaId: uuid("hero_media_id").references(() => media.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
+  // Programme B-1 (D-12): the enums are the new truth. Task 2 of the Phase B1
+  // plan (`derivedEventFlags` in lib/events/status.ts) makes every repository
+  // write derive `published`/`member_only` from these enums; readers move
+  // over during Phase B. Backfilled by 0027.
+  organiserCompanyId: uuid("organiser_company_id").references(() => companies.id, {onDelete: "set null"}),
+  submittedByProfileId: text("submitted_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  submittedAt: timestamp("submitted_at", {withTimezone: true}),
+  status: eventStatusEnum("status").default("draft").notNull(),
+  visibility: eventVisibilityEnum("visibility").default("public").notNull(),
+  format: eventFormatEnum("format").default("in_person").notNull(),
+  onlineUrl: text("online_url"),
+  registrationMode: registrationModeEnum("registration_mode").default("rsvp").notNull(),
+  externalRegistrationUrl: text("external_registration_url"),
+  // Programme D-4a: the ticket price in HKD cents, staff-set. Integer because a
+  // price must never be a float, and Stripe's `unit_amount` is the same integer.
+  ticketPriceHkdCents: integer("ticket_price_hkd_cents"),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  publishedAt: timestamp("published_at", {withTimezone: true}),
+  reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
+  reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  rejectionReason: text("rejection_reason"),
 }, (table) => [
   index("events_published_starts_idx").on(table.published, table.startsAt),
   index("events_hero_media_idx").on(table.heroMediaId),
+  index("events_status_visibility_starts_idx").on(table.status, table.visibility, table.startsAt),
+  // Quota count (plan S-4) filters organiser_company_id = ? AND submitted_at
+  // in quarter, then status; keep equality column first.
+  index("events_organiser_idx").on(table.organiserCompanyId, table.submittedAt),
+  check("events_online_url_check", sql`${table.format} = 'in_person' OR ${table.onlineUrl} IS NOT NULL`),
+  check("events_external_registration_check", sql`${table.registrationMode} <> 'external' OR ${table.externalRegistrationUrl} IS NOT NULL`),
+  check("events_ticketed_price_check", sql`${table.registrationMode} <> 'ticketed' OR (${table.ticketPriceHkdCents} IS NOT NULL AND ${table.ticketPriceHkdCents} > 0)`),
 ]);
 
 export const eventRegistrations = pgTable("event_registrations", {
@@ -633,6 +1133,146 @@ export const eventRegistrations = pgTable("event_registrations", {
 }, (table) => [
   primaryKey({columns: [table.eventId, table.profileId]}),
   index("event_registrations_profile_idx").on(table.profileId),
+]);
+
+export const eventOrders = pgTable("event_orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id").notNull().references(() => events.id, {onDelete: "cascade"}),
+  buyerProfileId: text("buyer_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  buyerName: text("buyer_name").notNull(),
+  buyerEmail: text("buyer_email").notNull(),
+  // The webhook has no request context to read a locale from, so the buyer's
+  // chosen language is persisted at checkout and read back when the receipt is
+  // sent. Without it every receipt would go out in whatever the webhook defaults to.
+  buyerLocale: text("buyer_locale").notNull(),
+  amountHkdCents: integer("amount_hkd_cents").notNull(),
+  currency: text("currency").default("hkd").notNull(),
+  status: eventOrderStatusEnum("status").default("pending").notNull(),
+  stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+  // Stored, not derived: a repeated idempotency key must return the exact url
+  // this order's session minted, and a session id alone cannot reconstruct it.
+  stripeCheckoutUrl: text("stripe_checkout_url"),
+  idempotencyKey: text("idempotency_key").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  paidAt: timestamp("paid_at", {withTimezone: true}),
+  refundedAt: timestamp("refunded_at", {withTimezone: true}),
+  refundReason: eventRefundReasonEnum("refund_reason"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("event_orders_session_unique").on(table.stripeCheckoutSessionId).where(sql`${table.stripeCheckoutSessionId} IS NOT NULL`),
+  uniqueIndex("event_orders_idempotency_unique").on(table.idempotencyKey),
+  index("event_orders_event_status_idx").on(table.eventId, table.status),
+  check("event_orders_amount_check", sql`${table.amountHkdCents} > 0`),
+]);
+
+export const eventCheckoutRecoveries = pgTable("event_checkout_recoveries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  recoveryDigest: text("recovery_digest").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  invalidatedAt: timestamp("invalidated_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  unique("event_checkout_recoveries_order_unique").on(table.orderId),
+  unique("event_checkout_recoveries_digest_unique").on(table.recoveryDigest),
+  index("event_checkout_recoveries_expiry_idx").on(table.expiresAt),
+  check("event_checkout_recoveries_digest_check", sql`${table.recoveryDigest} ~ '^[a-f0-9]{64}$'`),
+]);
+
+export const eventOrderSeats = pgTable("event_order_seats", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  position: integer("position").notNull(),
+  attendeeName: text("attendee_name").notNull(),
+  attendeeEmail: text("attendee_email").notNull(),
+  // D-4b's check-in writes this; D-4a leaves it null.
+  checkedInAt: timestamp("checked_in_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("event_order_seats_position_unique").on(table.orderId, table.position),
+]);
+
+export type TicketEmailPayload = Readonly<{
+  to: string;
+  from: string;
+  subject: string;
+  html: string;
+  text: string;
+  headers: Readonly<Record<string, string>>;
+  idempotencyKey: string;
+}>;
+
+export const ticketEmailOutbox = pgTable("ticket_email_outbox", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  seatId: uuid("seat_id").references(() => eventOrderSeats.id, {onDelete: "cascade"}),
+  kind: text("kind").notNull(),
+  status: text("status").default("queued").notNull(),
+  payload: jsonb("payload").$type<TicketEmailPayload>(),
+  eventKey: text("event_key").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+  providerId: text("provider_id"),
+  errorCode: text("error_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  unique("ticket_email_outbox_event_key_unique").on(table.eventKey),
+  check("ticket_email_outbox_kind_check", sql`${table.kind} IN ('confirmation', 'pass', 'refund', 'refund_failed')`),
+  check("ticket_email_outbox_status_check", sql`${table.status} IN ('queued', 'sending', 'sent', 'blocked', 'uncertain', 'suppressed')`),
+  check("ticket_email_outbox_attempt_check", sql`${table.attemptCount} >= 0`),
+  check("ticket_email_outbox_seat_check", sql`(${table.kind} = 'pass') = (${table.seatId} IS NOT NULL)`),
+  index("ticket_email_outbox_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+]);
+export const eventCancellationIntents = pgTable("event_cancellation_intents", {
+  eventId: uuid("event_id").primaryKey().references(() => events.id, {onDelete: "restrict"}),
+  revision: integer("revision").default(1).notNull(),
+  cancelledAt: timestamp("cancelled_at", {withTimezone: true}).defaultNow().notNull(),
+  actorProfileId: text("actor_profile_id").notNull(),
+}, (table) => [check("event_cancellation_intents_revision_check", sql`${table.revision} = 1`)]);
+
+export const eventCancellationNotifications = pgTable("event_cancellation_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id").notNull().references(() => eventCancellationIntents.eventId, {onDelete: "restrict"}),
+  revision: integer("revision").default(1).notNull(),
+  registrationKind: text("registration_kind").notNull(),
+  registrationId: text("registration_id").notNull(),
+  channel: text("channel").default("email").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientEmail: text("recipient_email"),
+  recipientLocale: text("recipient_locale").notNull(),
+  status: text("status").default("pending").notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+  providerId: text("provider_id"),
+  errorCode: text("error_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("event_cancellation_notifications_kind_check", sql`${table.registrationKind} IN ('member', 'guest')`),
+  check("event_cancellation_notifications_channel_check", sql`${table.channel} = 'email'`),
+  check("event_cancellation_notifications_status_check", sql`${table.status} IN ('pending', 'queued', 'sending', 'accepted', 'blocked', 'failed', 'uncertain')`),
+  check("event_cancellation_notifications_attempt_check", sql`${table.attemptCount} >= 0`),
+  unique("event_cancellation_notifications_scope_unique").on(table.eventId, table.revision, table.registrationKind, table.registrationId, table.channel),
+  unique("event_cancellation_notifications_key_unique").on(table.idempotencyKey),
+  index("event_cancellation_notifications_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+]);
+
+export const emailAddressBlocks = pgTable("email_address_blocks", {
+  email: text("email").primaryKey(),
+  reasonCode: text("reason_code").notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  check("email_address_blocks_reason_check", sql`${table.reasonCode} IN ('hard_bounce', 'invalid_address', 'manual')`),
+  check("email_address_blocks_lowercase_check", sql`${table.email} = lower(${table.email})`),
 ]);
 
 export const approvals = pgTable("approvals", {
@@ -650,6 +1290,7 @@ export const approvals = pgTable("approvals", {
     .on(table.requestKey)
     .where(sql`${table.requestKey} IS NOT NULL`),
   index("approvals_status_requested_idx").on(table.status, table.requestedAt),
+  index("approvals_pending_retention_profile").on(sql`(${table.payload}->>'profileId')`).where(sql`${table.actionType}='agent.retention_outreach' AND ${table.status}='pending'`),
 ]);
 
 export const posts = pgTable(
@@ -869,6 +1510,25 @@ export const pageCopy = pgTable(
   ],
 );
 
+/** Private editor snapshots; only published page_copy feeds public messages. */
+export const pageCopyDrafts = pgTable("page_copy_drafts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ownerProfileId: text("owner_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  namespace: text("namespace").notNull(),
+  baseRevision: varchar("base_revision", {length: 64}).notNull(),
+  revision: varchar("revision", {length: 64}).notNull(),
+  entries: jsonb("entries").$type<readonly {locale: "en" | "zh-HK"; keyPath: string; value: string}[]>().notNull(),
+  baseEntries: jsonb("base_entries").$type<readonly {locale: "en" | "zh-HK"; keyPath: string; value: string}[]>().notNull(),
+  previousEntries: jsonb("previous_entries").$type<readonly {locale: "en" | "zh-HK"; keyPath: string; value: string}[]>(),
+  publishedAt: timestamp("published_at", {withTimezone: true}),
+  publicationSequence: bigint("publication_sequence", {mode: "number"}),
+  createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, table => [
+  uniqueIndex("page_copy_one_open_draft").on(table.ownerProfileId, table.namespace).where(sql`${table.publishedAt} IS NULL`),
+  index("page_copy_publication_history").on(table.namespace, table.publicationSequence).where(sql`${table.publishedAt} IS NOT NULL`),
+  check("page_copy_draft_publication_pair", sql`(${table.publishedAt} IS NULL) = (${table.publicationSequence} IS NULL)`),
+]);
+
 export const showcaseListings = pgTable(
   "showcase_listings",
   {
@@ -995,9 +1655,12 @@ export const leads = pgTable(
   "leads",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    listingId: uuid("listing_id")
-      .notNull()
-      .references(() => showcaseListings.id, {onDelete: "cascade"}),
+    // Programme D-6/D-11: a lead may now arrive from a member page or an
+    // interest form rather than a showcase listing, so the listing is
+    // optional and a contact can stand in its place. The check below keeps
+    // every row attached to at least one of the two.
+    listingId: uuid("listing_id").references(() => showcaseListings.id, {onDelete: "cascade"}),
+    contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
     contactName: text("contact_name").notNull(),
     email: text("email").notNull(),
     organization: text("organization"),
@@ -1011,8 +1674,214 @@ export const leads = pgTable(
   (table) => [
     unique("leads_idempotency_key_unique").on(table.idempotencyKey),
     index("leads_listing_created_idx").on(table.listingId, table.createdAt),
+    check("leads_identity_check", sql`${table.listingId} IS NOT NULL OR ${table.contactId} IS NOT NULL`),
   ],
 );
+
+/** The exact provider request is frozen before the first send. Resend only
+ * deduplicates an idempotency key for 24 hours and only for the same payload.
+ */
+export type ShowcaseLeadEmailPayload = Readonly<{
+  to: string;
+  from: string;
+  subject: string;
+  html: string;
+  text: string;
+  headers: Readonly<Record<string, string>>;
+  idempotencyKey: string;
+}>;
+
+export const showcaseLeadEmailOutbox = pgTable(
+  "showcase_lead_email_outbox",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id").notNull().references(() => leads.id, {onDelete: "cascade"}),
+    kind: text("kind").notNull(),
+    status: text("status").default("queued").notNull(),
+    payload: jsonb("payload").$type<ShowcaseLeadEmailPayload>(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    attemptCount: integer("attempt_count").default(0).notNull(),
+    nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+    claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+    firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+    providerId: text("provider_id"),
+    errorCode: text("error_code"),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("showcase_lead_email_outbox_kind_check", sql`${table.kind} IN ('ack', 'staff')`),
+    check("showcase_lead_email_outbox_status_check",
+      sql`${table.status} IN ('queued', 'sending', 'sent', 'blocked', 'uncertain')`),
+    check("showcase_lead_email_outbox_attempt_check", sql`${table.attemptCount} >= 0`),
+    unique("showcase_lead_email_outbox_lead_kind_unique").on(table.leadId, table.kind),
+    unique("showcase_lead_email_outbox_idempotency_key_unique").on(table.idempotencyKey),
+    index("showcase_lead_email_outbox_due_idx")
+      .on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+  ],
+);
+
+/**
+ * The funnel spine (programme D-6). A contact is anyone WTIA may need to
+ * reach who is not, or not yet, a profile: a WhatsApp sender we do not
+ * recognise, an interest-form submitter, an event guest, an abandoned join.
+ * When a contact later signs in, `profile_id` links the two; nothing is
+ * merged away. Numbers are stored to reply; marketing consent is separate
+ * and off by default.
+ */
+export const contacts = pgTable(
+  "contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    companyId: uuid("company_id").references(() => companies.id, {onDelete: "set null"}),
+    displayName: text("display_name"),
+    email: text("email"),
+    phoneE164: text("phone_e164"),
+    whatsappMemberId: text("whatsapp_member_id"),
+    source: contactSourceEnum("source").notNull(),
+    stage: contactStageEnum("stage").default("new").notNull(),
+    ownerProfileId: text("owner_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    whatsappOptIn: boolean("whatsapp_opt_in").default(false).notNull(),
+    whatsappConsentAt: timestamp("whatsapp_consent_at", {withTimezone: true}),
+    whatsappConsentSource: text("whatsapp_consent_source"),
+    whatsappConsentTextVersion: text("whatsapp_consent_text_version"),
+    whatsappOptedOutAt: timestamp("whatsapp_opted_out_at", {withTimezone: true}),
+    lastInboundAt: timestamp("last_inbound_at", {withTimezone: true}),
+    // Phase E follow-up: one next step per lead, and the last time staff touched it.
+    nextStep: text("next_step"),
+    nextStepDueAt: timestamp("next_step_due_at", {withTimezone: true}),
+    lastTouchAt: timestamp("last_touch_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("contacts_phone_unique").on(table.phoneE164).where(sql`${table.phoneE164} IS NOT NULL`),
+    uniqueIndex("contacts_whatsapp_member_unique").on(table.whatsappMemberId).where(sql`${table.whatsappMemberId} IS NOT NULL`),
+    uniqueIndex("contacts_profile_unique").on(table.profileId).where(sql`${table.profileId} IS NOT NULL`),
+    index("contacts_stage_owner_idx").on(table.stage, table.ownerProfileId),
+    index("contacts_email_idx").on(table.email),
+    check("contacts_identity_check", sql`${table.email} IS NOT NULL OR ${table.phoneE164} IS NOT NULL OR ${table.whatsappMemberId} IS NOT NULL`),
+  ],
+);
+
+/**
+ * Phase E lead timeline. Append-only: the application never edits or deletes a
+ * row, so the feed is a faithful history. A null actor means a system event.
+ */
+export const contactActivities = pgTable(
+  "contact_activities",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    contactId: uuid("contact_id").notNull().references(() => contacts.id, {onDelete: "cascade"}),
+    actorProfileId: text("actor_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    kind: contactActivityKindEnum("kind").notNull(),
+    body: text("body"),
+    meta: jsonb("meta").$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: createdAt("created_at"),
+  },
+  (table) => [
+    index("contact_activities_contact_created_idx").on(table.contactId, table.createdAt.desc()),
+  ],
+);
+
+/**
+ * Phase E join invites. Only the SHA-256 digest of the token is stored, so a
+ * database read cannot mint a working link. `application_id` and
+ * `membership_applications.invite_id` reference each other, hence the callback.
+ */
+export const joinInvites = pgTable(
+  "join_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    contactId: uuid("contact_id").notNull().references(() => contacts.id, {onDelete: "cascade"}),
+    planCode: membershipPlanCodeEnum("plan_code")
+      .notNull()
+      .references(() => membershipPlans.code, {onDelete: "restrict"}),
+    createdByProfileId: text("created_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    tokenDigest: text("token_digest").notNull(),
+    expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    openedAt: timestamp("opened_at", {withTimezone: true}),
+    consumedAt: timestamp("consumed_at", {withTimezone: true}),
+    supersededAt: timestamp("superseded_at", {withTimezone: true}),
+    applicationId: uuid("application_id").references((): AnyPgColumn => membershipApplications.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+  },
+  (table) => [
+    unique("join_invites_token_digest_unique").on(table.tokenDigest),
+    index("join_invites_contact_idx").on(table.contactId),
+  ],
+);
+
+/**
+ * Guest RSVPs (programme B-4). A guest is a contact, not a profile; the row
+ * carries what the check-in desk needs, a cancel token digest for the
+ * one-click cancel link, and an idempotency key so a double submit is one
+ * row. One registration per event and email.
+ */
+export const eventGuestRegistrations = pgTable(
+  "event_guest_registrations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventId: uuid("event_id").notNull().references(() => events.id, {onDelete: "cascade"}),
+    contactId: uuid("contact_id").references(() => contacts.id, {onDelete: "set null"}),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    whatsappNumber: text("whatsapp_number"),
+    organisation: text("organisation"),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    status: guestRegistrationStatusEnum("status").default("registered").notNull(),
+    marketingConsentAt: timestamp("marketing_consent_at", {withTimezone: true}),
+    cancelTokenDigest: text("cancel_token_digest").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    checkedInAt: timestamp("checked_in_at", {withTimezone: true}),
+    cancelledAt: timestamp("cancelled_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("event_guest_registrations_event_email_unique").on(table.eventId, table.email),
+    uniqueIndex("event_guest_registrations_idempotency_unique").on(table.idempotencyKey),
+    index("event_guest_registrations_event_status_idx").on(table.eventId, table.status),
+  ],
+);
+
+/**
+ * Programme C-7. "Approved" stops being an environment variable and becomes
+ * a row a named admin approved on a date. `status` defaults to 'pending', so
+ * an unseeded or half-migrated registry can send nothing (S-14).
+ *
+ * Declared here, after eventGuestRegistrations, and never between
+ * campaignRecipients and `export const events`: the slice
+ * tests/unit/campaign-recipient-lease-schema.test.ts reads is delimited by
+ * exactly those two markers, so a table declared inside it would silently
+ * widen what that test believes it is asserting.
+ */
+export const whatsappTemplates = pgTable("whatsapp_templates", {
+  key: text("key").primaryKey(),
+  elementName: text("element_name").notNull(),
+  languageCode: text("language_code").notNull(),
+  category: text("category").default("utility").notNull(),
+  variables: text("variables").array().default(sql`'{}'::text[]`).notNull(),
+  previews: jsonb("previews").$type<Record<string, string>>().default({}).notNull(),
+  status: text("status").default("pending").notNull(),
+  approvedAt: timestamp("approved_at", {withTimezone: true}),
+  reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  rejectionReason: text("rejection_reason"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("whatsapp_templates_element_language_unique").on(table.elementName, table.languageCode),
+  check("whatsapp_templates_status_check", sql`${table.status} IN ('pending', 'approved', 'rejected', 'disabled')`),
+  check("whatsapp_templates_category_check", sql`${table.category} IN ('marketing', 'utility', 'authentication')`),
+  // An approval with no date is an approval nobody can audit, and the audit is
+  // the whole point of moving the allowlist out of an environment variable.
+  check("whatsapp_templates_approved_at_check", sql`${table.status} <> 'approved' OR ${table.approvedAt} IS NOT NULL`),
+]);
+export type WhatsAppTemplateStatus = "pending" | "approved" | "rejected" | "disabled";
+export type WhatsAppTemplateCategory = "marketing" | "utility" | "authentication";
 
 /**
  * The marker that makes "this database is disposable" checkable rather than
@@ -1090,6 +1959,7 @@ export const aiopsMonthlyMetrics = pgMaterializedView(
     FROM months
     INNER JOIN conversations
       ON conversations.agent_kind = 'concierge'
+     AND conversations.handling = 'bot'
      AND conversations.created_at >= months.month_from
      AND conversations.created_at < months.month_to
   ),
@@ -1339,4 +2209,146 @@ export type LandingPartner = typeof landingPartners.$inferSelect;
 export type NewLandingPartner = typeof landingPartners.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+export type Contact = typeof contacts.$inferSelect;
+export type NewContact = typeof contacts.$inferInsert;
 export type AcceptanceSentinel = typeof acceptanceSentinel.$inferSelect;
+export type EventGuestRegistration = typeof eventGuestRegistrations.$inferSelect;
+export type NewEventGuestRegistration = typeof eventGuestRegistrations.$inferInsert;
+export type EventStatus = (typeof eventStatusEnum.enumValues)[number];
+export type EventVisibility = (typeof eventVisibilityEnum.enumValues)[number];
+export type EventFormat = (typeof eventFormatEnum.enumValues)[number];
+export type RegistrationMode = (typeof registrationModeEnum.enumValues)[number];
+export type GuestRegistrationStatus = (typeof guestRegistrationStatusEnum.enumValues)[number];
+export type PublicProfileStatus = (typeof publicProfileStatusEnum.enumValues)[number];
+
+
+/** T17: one atomic 5/15-minute bucket per server-keyed digest and public operation. */
+export const rateLimitBuckets = pgTable("rate_limit_buckets", {
+  scope: text("scope").notNull(),
+  keyHash: text("key_hash").notNull(),
+  windowStartedAt: timestamp("window_started_at", {withTimezone: true}).notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  count: integer("count").notNull(),
+}, (table) => [
+  primaryKey({columns: [table.scope, table.keyHash]}),
+  index("rate_limit_buckets_expiry_idx").on(table.expiresAt),
+  check("rate_limit_buckets_scope_check", sql`${table.scope} IN ('guest-rsvp','ticket-checkout','auth-send-ip','auth-send-email','auth-credential-ip')`),
+  check("rate_limit_buckets_hash_check", sql`${table.keyHash} ~ '^[a-f0-9]{64}$'`),
+  check("rate_limit_buckets_window_check", sql`${table.expiresAt} > ${table.windowStartedAt}`),
+  check("rate_limit_buckets_count_check", sql`${table.count} BETWEEN 1 AND 20`),
+]);
+
+/** Private materialized export; download authorization/expiry is checked before returning bytes. */
+export const adminBatchExportArtifacts = pgTable("admin_batch_export_artifacts", {
+  batchId: uuid("batch_id").primaryKey().references(() => adminBatches.id, {onDelete: "restrict"}),
+  csv: text("csv").notNull(),
+  rowCount: integer("row_count").notNull(),
+  createdAt: createdAt("created_at"),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+}, table => [index("admin_batch_export_artifacts_expiry_idx").on(table.expiresAt), check("admin_batch_export_artifacts_bounds", sql`${table.rowCount} BETWEEN 1 AND 5000 AND octet_length(${table.csv}) <= 10485760`)]);
+
+/** Current verified worker poll observation. Job ownership/idempotency stays in jobs. */
+export const jobHealth = pgTable("job_health", {
+ jobKey:text("job_key").primaryKey(),workerRevision:text("worker_revision").notNull(),webRevision:text("web_revision"),pollId:uuid("poll_id").notNull(),
+ lastStartedAt:timestamp("last_started_at",{withTimezone:true}).notNull(),lastFinishedAt:timestamp("last_finished_at",{withTimezone:true}),lastSucceededAt:timestamp("last_succeeded_at",{withTimezone:true}),
+ outcome:text("outcome").$type<"processing"|"completed"|"disabled"|"failed"|"uncertain">().notNull(),elapsedMs:integer("elapsed_ms"),errorCode:text("error_code"),counts:jsonb("counts").$type<Record<string,number>>().default({}).notNull(),
+},table=>[
+ check("job_health_registered_key",sql`${table.jobKey} IN (${sql.raw(HEALTH_JOB_KEYS.map(key=>"'"+key+"'").join(","))})`),
+ check("job_health_revision",sql`${table.workerRevision} ~ '^[a-f0-9]{40}$' AND (${table.webRevision} IS NULL OR ${table.webRevision} ~ '^[a-f0-9]{40}$')`),
+ check("job_health_outcome",sql`${table.outcome} IN ('processing','completed','disabled','failed','uncertain')`),
+ check("job_health_elapsed",sql`${table.elapsedMs} IS NULL OR ${table.elapsedMs}>=0`),
+ check("job_health_counts",sql`jsonb_typeof(${table.counts})='object' AND octet_length(${table.counts}::text)<=2048`),
+]);
+
+/** Shared admission lock and conservative liability ledger; retained on application rollback. */
+export const aiBudgetControl = pgTable("ai_budget_control", {
+ id: boolean("id").default(true).primaryKey(), halted: boolean("halted").default(false).notNull(),
+ reasonCode: text("reason_code"), updatedAt: updatedAt("updated_at"),
+}, t => [check("ai_budget_control_id_check", sql`${t.id}`)]);
+export const aiBudgetReservations = pgTable("ai_budget_reservations", {
+ id: uuid("id").defaultRandom().primaryKey(), runKey: uuid("run_key").notNull().unique(), scope: text("scope").notNull(),
+ maxMicrousd: bigint("max_microusd", {mode:"bigint"}).notNull(), chargedMicrousd: bigint("charged_microusd", {mode:"bigint"}).notNull(),
+ actualMicrousd: bigint("actual_microusd", {mode:"bigint"}), usageState: text("usage_state").default("held").notNull(),
+ pricingVersion: text("pricing_version").notNull(), expiresAt: timestamp("expires_at",{withTimezone:true}).notNull(),
+ acceptedAt: timestamp("accepted_at",{withTimezone:true}), dispatchedAt: timestamp("dispatched_at",{withTimezone:true}), providerRequestId: text("provider_request_id"),
+ createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, t => [
+ index("ai_budget_created_idx").on(t.createdAt),
+ index("ai_budget_unresolved_idx").on(t.usageState).where(sql`${t.usageState} IN ('held','unknown')`),
+ check("ai_budget_reservations_scope_check", sql`${t.scope} IN ('concierge','writer','application','support','renewal','board','content','evaluation','embedding','judge')`),
+ check("ai_budget_reservations_max_microusd_check", sql`${t.maxMicrousd} >= 0 AND ${t.maxMicrousd} <= 9007199254740991`),
+ check("ai_budget_reservations_charged_microusd_check", sql`${t.chargedMicrousd} >= 0 AND ${t.chargedMicrousd} <= 9007199254740991`),
+ check("ai_budget_reservations_actual_microusd_check", sql`${t.actualMicrousd} >= 0 AND ${t.actualMicrousd} <= 9007199254740991`),
+ check("ai_budget_reservations_usage_state_check", sql`${t.usageState} IN ('held','unknown','known','released')`),
+ check("ai_budget_reservations_provider_request_id_check", sql`${t.providerRequestId} IS NULL OR ${t.providerRequestId} ~ '^[A-Za-z0-9_.:-]{1,200}$'`),
+ check("ai_budget_reservations_check", sql`${t.expiresAt} > ${t.createdAt}`),
+ check("ai_budget_reservations_check1", sql`(${t.usageState} = 'known' AND ${t.actualMicrousd} IS NOT NULL AND ${t.chargedMicrousd} = ${t.actualMicrousd}) OR (${t.usageState} IN ('held','unknown') AND ${t.actualMicrousd} IS NULL AND ${t.chargedMicrousd} = ${t.maxMicrousd}) OR (${t.usageState} = 'released' AND ${t.actualMicrousd} IS NULL AND ${t.chargedMicrousd} = 0 AND ${t.dispatchedAt} IS NULL)`),
+]);
+
+export const aiBudgetProviderReceipts = pgTable("ai_budget_provider_receipts", {
+ reservationId: uuid("reservation_id").notNull().references(()=>aiBudgetReservations.id),
+ providerRequestId: text("provider_request_id").notNull(), observedAt: timestamp("observed_at",{withTimezone:true}).notNull(),
+},t=>[
+ primaryKey({columns:[t.reservationId,t.providerRequestId]}),
+ check("ai_budget_provider_receipts_provider_request_id_check", sql`${t.providerRequestId} ~ '^[A-Za-z0-9_.:-]{1,200}$'`),
+]);
+
+// T08: durable review evidence, independent of approval/send business effects.
+export const aiReviewDrafts = pgTable("ai_review_drafts", {
+ id: uuid("id").defaultRandom().primaryKey(), version: integer("version").notNull().default(1),
+ kind: text("kind").notNull(), caseId: text("case_id").notNull(), locale: text("locale").notNull(), factsHash: text("facts_hash").notNull(),
+ ownerProfileId: text("owner_profile_id").references(() => profiles.id,{onDelete:"restrict"}), dueAt: timestamp("due_at",{withTimezone:true}),
+ sourceRefs: jsonb("source_refs").notNull(), claims: jsonb("claims").notNull(), body: text("body").notNull(), renderedBody: text("rendered_body").notNull(),
+ state: text("state").notNull(), violations: jsonb("violations").notNull(), modelRoute: text("model_route").notNull(), promptVersion: text("prompt_version").notNull(),
+ runId: uuid("run_id").notNull().references(() => agentRuns.id,{onDelete:"restrict"}),
+ approvedBy: text("approved_by").references(() => profiles.id,{onDelete:"restrict"}), approvedAt: timestamp("approved_at",{withTimezone:true}), approvedVersion: integer("approved_version"),
+ createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, table => [index("ai_review_drafts_queue").on(table.state,table.updatedAt.desc(),table.id),index("ai_review_drafts_case").on(table.kind,table.caseId,table.createdAt.desc()),index("ai_review_drafts_owner_queue").on(table.ownerProfileId,table.state,table.updatedAt.desc(),table.id),
+ check("ai_review_drafts_version_check", sql`${table.version}>0`),
+ check("ai_review_drafts_kind_check", sql`${table.kind} IN ('application','support','renewal','board','content')`),
+ check("ai_review_drafts_case_id_check", sql`length(${table.caseId}) BETWEEN 1 AND 255`),
+ check("ai_review_drafts_locale_check", sql`${table.locale} IN ('en','zh-HK')`),
+ check("ai_review_drafts_facts_hash_check", sql`${table.factsHash} ~ '^[a-f0-9]{64}$'`),
+ check("ai_review_drafts_source_refs_check", sql`jsonb_typeof(${table.sourceRefs})='array'`),
+ check("ai_review_drafts_claims_check", sql`jsonb_typeof(${table.claims})='array'`),
+ check("ai_review_drafts_body_check", sql`length(${table.body}) BETWEEN 1 AND 20000`),
+ check("ai_review_drafts_state_check", sql`${table.state} IN ('proposed','needs_review','approved','rejected','stale')`),
+ check("ai_review_drafts_violations_check", sql`jsonb_typeof(${table.violations})='array'`),
+ check("ai_review_drafts_model_route_check", sql`length(${table.modelRoute}) BETWEEN 1 AND 120`),
+ check("ai_review_drafts_prompt_version_check", sql`length(${table.promptVersion}) BETWEEN 1 AND 80`),
+ check("ai_review_drafts_approved", sql`${table.state}<>'approved' OR (${table.approvedBy} IS NOT NULL AND ${table.approvedAt} IS NOT NULL AND ${table.approvedVersion} IS NOT NULL AND ${table.approvedVersion}=${table.version} AND jsonb_array_length(${table.violations})=0)`),
+ check("ai_review_drafts_unapproved", sql`${table.state}='approved' OR (${table.approvedBy} IS NULL AND ${table.approvedAt} IS NULL AND ${table.approvedVersion} IS NULL)`),
+]);
+export const aiDraftRevisions = pgTable("ai_draft_revisions", {
+ draftId: uuid("draft_id").notNull().references(() => aiReviewDrafts.id,{onDelete:"restrict"}), version: integer("version").notNull(), snapshot: jsonb("snapshot").notNull(),
+ actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id,{onDelete:"restrict"}), createdAt: createdAt("created_at"),
+}, table => [primaryKey({columns:[table.draftId,table.version]}),
+ check("ai_draft_revisions_version_check", sql`${table.version}>0`),
+ check("ai_draft_revisions_snapshot_check", sql`jsonb_typeof(${table.snapshot})='object'`),
+]);
+export const aiDraftReviews = pgTable("ai_draft_reviews", {
+ id: uuid("id").defaultRandom().primaryKey(), draftId: uuid("draft_id").notNull().references(() => aiReviewDrafts.id,{onDelete:"restrict"}),
+ expectedVersion: integer("expected_version").notNull(), resultingVersion: integer("resulting_version").notNull(), decision: text("decision").notNull(),
+ reviewerProfileId: text("reviewer_profile_id").notNull().references(() => profiles.id,{onDelete:"restrict"}), reason: text("reason"), factsHash: text("facts_hash").notNull(), createdAt: createdAt("created_at"),
+}, table => [unique("ai_draft_reviews_draft_id_expected_version_key").on(table.draftId,table.expectedVersion),
+ check("ai_draft_reviews_expected_version_check", sql`${table.expectedVersion}>0`),
+ check("ai_draft_reviews_resulting_version_check", sql`${table.resultingVersion}=${table.expectedVersion}+1`),
+ check("ai_draft_reviews_decision_check", sql`${table.decision} IN ('approve','reject')`),
+ check("ai_draft_reviews_reason_check", sql`length(${table.reason})<=1000`),
+ check("ai_draft_reviews_facts_hash_check", sql`${table.factsHash} ~ '^[a-f0-9]{64}$'`),
+]);
+export const aiDraftWork = pgTable("ai_draft_work", {
+ runId: uuid("run_id").defaultRandom().primaryKey(), kind: text("kind").notNull(), caseId: text("case_id").notNull(), factsHash: text("facts_hash").notNull(),
+ agentVersion: text("agent_version").notNull(), idempotencyKey: text("idempotency_key").notNull(), state: text("state").notNull(), claimToken: uuid("claim_token").notNull(),
+ leaseUntil: timestamp("lease_until",{withTimezone:true}).notNull(), requestStartedAt: timestamp("request_started_at",{withTimezone:true}),
+ draftId: uuid("draft_id").references(() => aiReviewDrafts.id,{onDelete:"restrict"}), approvalId: uuid("approval_id").references(() => approvals.id,{onDelete:"restrict"}), postId: uuid("post_id").references(() => posts.id,{onDelete:"restrict"}), providerRequestId: text("provider_request_id"), createdAt: createdAt("created_at"), updatedAt: updatedAt("updated_at"),
+}, table => [unique("ai_draft_work_scope_key").on(table.kind,table.caseId,table.factsHash,table.agentVersion,table.idempotencyKey),index("ai_draft_work_pending").on(table.state,table.leaseUntil),
+ check("ai_draft_work_kind_check", sql`${table.kind} IN ('application','support','renewal','board','content')`),
+ check("ai_draft_work_case_id_check", sql`length(${table.caseId}) BETWEEN 1 AND 255`),
+ check("ai_draft_work_facts_hash_check", sql`${table.factsHash} ~ '^[a-f0-9]{64}$'`),
+ check("ai_draft_work_agent_version_check", sql`length(${table.agentVersion}) BETWEEN 1 AND 120`),
+ check("ai_draft_work_idempotency_key_check", sql`length(${table.idempotencyKey}) BETWEEN 1 AND 255`),
+ check("ai_draft_work_state_check", sql`${table.state} IN ('claimed','requesting','succeeded','unknown','failed_before_request')`),
+ check("ai_draft_work_provider_request_id_check", sql`length(${table.providerRequestId}) BETWEEN 1 AND 255`),
+ check("ai_draft_work_effect_state", sql`(${table.state} IN ('claimed','failed_before_request') AND ${table.requestStartedAt} IS NULL AND ${table.draftId} IS NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NULL) OR (${table.state} IN ('requesting','unknown') AND ${table.requestStartedAt} IS NOT NULL AND ${table.draftId} IS NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NULL) OR (${table.state}='succeeded' AND ${table.requestStartedAt} IS NOT NULL AND ((${table.draftId} IS NOT NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NULL) OR (${table.kind}='renewal' AND ${table.draftId} IS NULL AND ${table.approvalId} IS NOT NULL AND ${table.postId} IS NULL) OR (${table.kind}='board' AND ${table.draftId} IS NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NOT NULL)))`),
+]);

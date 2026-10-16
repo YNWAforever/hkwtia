@@ -1,0 +1,60 @@
+{
+  "origin": "https://hkwtia-ejx0uet7r-ynwaforevers-projects.vercel.app",
+  "mode": "stage",
+  "sha": "ab568934471cde8aea18f493a5422653c5d719e0",
+  "at": "2026-09-29T16:04:02.696Z",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/zh",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/member-login",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/zh/member-login",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/admin-login",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/zh/admin-login",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/members",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/zh/members",
+      "status": 200,
+      "rendered": true
+    },
+    {
+      "path": "/admin",
+      "status": 307,
+      "deniedAnonymous": true
+    },
+    {
+      "path": "/zh/admin",
+      "status": 307,
+      "deniedAnonymous": true
+    }
+  ],
+  "pageErrors": [],
+  "passed": true
+}

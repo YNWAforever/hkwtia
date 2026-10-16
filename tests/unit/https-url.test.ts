@@ -25,4 +25,30 @@ describe("canonical HTTPS URL policy", () => {
     expect(() => canonicalHttpsUrl(prefix + "a".repeat(2049 - prefix.length)))
       .toThrow("HTTPS_URL_INVALID");
   });
+
+  // `{allowQuery: true}` exists for a member's own organisation website
+  // (lib/db/repos/company-profiles.ts), which legitimately carries a language
+  // variant or a landing-page parameter. It relaxes the search/hash clause and
+  // nothing else, so a caller that opts in still gets every host guarantee.
+  it("keeps the query and fragment only when the caller opts in", () => {
+    expect(canonicalHttpsUrl("https://example.com/en?ref=wtia#about", {allowQuery: true}))
+      .toBe("https://example.com/en?ref=wtia#about");
+    expect(() => canonicalHttpsUrl("https://example.com/en?ref=wtia")).toThrow("HTTPS_URL_INVALID");
+  });
+
+  it.each([
+    "http://example.com/?q=1", "https://user@example.com/?q=1", "https://user:pw@example.com/?q=1",
+    "https://example.com:443/?q=1", "https://example.com:8443/?q=1", "https://127.0.0.1/?q=1",
+    "https://[::1]/?q=1", "https://localhost/?q=1", "https://sub.localhost/path?q=1",
+    `https://example.com/${String.fromCodePoint(0x202e)}bad?q=1`, " https://example.com/?q=1",
+  ])("still rejects %j with allowQuery", (value) => {
+    expect(() => canonicalHttpsUrl(value, {allowQuery: true})).toThrow("HTTPS_URL_INVALID");
+  });
+
+  it("applies the same 2048-code-point bound with allowQuery", () => {
+    const prefix = "https://example.com/?q=";
+    expect(canonicalHttpsUrl(prefix + "a".repeat(2048 - prefix.length), {allowQuery: true})).toHaveLength(2048);
+    expect(() => canonicalHttpsUrl(prefix + "a".repeat(2049 - prefix.length), {allowQuery: true}))
+      .toThrow("HTTPS_URL_INVALID");
+  });
 });

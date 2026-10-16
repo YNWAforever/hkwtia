@@ -1,0 +1,16 @@
+{
+  "sourceSha": "a4b3e90d8f3ed22f47be984dd6efa1acf35c6824",
+  "buildId": "7b2y1C8JYD0tC1xWMgaq3",
+  "observedAt": "2026-10-04T12:10:05.154Z",
+  "nativeExit": 1,
+  "ledger": 61,
+  "dbSourcePositivelyProven": true,
+  "googleVerified": false,
+  "magicLinkVerified": false,
+  "realProviderSends": 0,
+  "realDeliveryReceipt": false,
+  "production": false,
+  "passed": 1,
+  "failed": 1,
+  "classification": "English generic heading selector matched both page header and literal report heading; all event/news cases had already reached board. Scope to actual page header; no product rule relaxed."
+}

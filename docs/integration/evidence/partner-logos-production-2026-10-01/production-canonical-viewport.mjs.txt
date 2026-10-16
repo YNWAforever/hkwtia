@@ -1,0 +1,19 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {chromium,expect} from '@playwright/test';
+const release=JSON.parse(await readFile('.playwright/partner-production-r2-promotion.json','utf8'));
+const acceptance=JSON.parse(await readFile('.playwright/partner-production-browser-canonical/evidence.json','utf8'));
+if(release.deploymentId!=='dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV'||release.sourceCommit!=='e7fa4add247489f525f015007460fb522fb1531b'||release.phase!=='promoted'||!acceptance.passed)throw Error('PRODUCTION_CAPTURE_GUARD');
+const origin='https://hkwtia.vercel.app';
+const browser=await chromium.launch({headless:true});const captures=[];
+try{
+ for(const item of [{locale:'en',path:'/',width:1440,height:1000},{locale:'zh',path:'/zh',width:390,height:844}]){
+  const context=await browser.newContext({viewport:{width:item.width,height:item.height}});const page=await context.newPage();
+  const response=await page.goto(origin+item.path,{waitUntil:'domcontentloaded',timeout:90000});expect(response.status()).toBe(200);const network=page.locator('.legacy-network');await expect(network).toBeVisible();
+  const top=await network.evaluate(e=>e.getBoundingClientRect().top+window.scrollY);await page.evaluate(y=>window.scrollTo({top:Math.max(0,y-120),behavior:'instant'}),top);
+  await expect(network.locator('.legacy-tabs button').first().locator('b')).toHaveText('58');
+  await page.waitForFunction(()=>[...document.querySelectorAll('.legacy-network img[src^="/api/media/"]')].filter(e=>{const r=e.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0}).every(i=>i.complete&&i.naturalWidth>0));
+  const filename=`home-${item.locale}-${item.width===1440?'desktop':'mobile'}-viewport.png`;await page.screenshot({path:'.playwright/partner-production-browser-canonical/'+filename,animations:'disabled'});
+  captures.push({filename,viewport:{width:item.width,height:item.height},path:item.path,origin});await context.close();
+ }
+ await writeFile('.playwright/partner-production-browser-canonical/viewport-captures.json',JSON.stringify({recordedAt:new Date().toISOString(),deploymentId:release.deploymentId,sourceCommit:release.sourceCommit,anonymous:true,applicationSession:false,passed:true,captures},null,2)+'\n');console.log(JSON.stringify({normalViewportCaptures:captures.length,passed:true}));
+}catch(error){console.error(JSON.stringify({error:error.name,code:'PRODUCTION_CAPTURE_FAILED'}));process.exitCode=1}finally{await browser.close()}

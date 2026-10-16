@@ -1,0 +1,17 @@
+import {expect,test} from "@playwright/test";
+import {writeFileSync} from "node:fs";
+for (const locale of ["en", "zh-HK"] as const) {
+ test(`${locale} public HTML does not serialize private client message catalogs`, async ({page,baseURL}) => {
+  expect(new URL(baseURL!).hostname).toBe("localhost");
+  await page.context().addCookies([{name:"NEXT_LOCALE",value:locale,url:baseURL!}]);
+  const response=await page.goto(locale === "en" ? "/" : "/zh");
+  const html=await response!.text();
+  const normalized=html.replaceAll(String.fromCharCode(92), "");
+  const adminNamespaceSerialized=normalized.includes('"Admin":');
+  const errorNamespaceSerialized=normalized.includes('"Error":');
+  writeFileSync(`.playwright/t22-public-message-${locale}-safe.json`,JSON.stringify({observedAt:new Date().toISOString(),locale,htmlBytes:Buffer.byteLength(html),adminNamespaceSerialized,errorNamespaceSerialized,production:false,bodyLogged:false},null,2));
+  expect(adminNamespaceSerialized).toBe(false);
+  expect(errorNamespaceSerialized).toBe(true);
+  await expect(page.locator("#hero-title")).toBeVisible();
+ });
+}

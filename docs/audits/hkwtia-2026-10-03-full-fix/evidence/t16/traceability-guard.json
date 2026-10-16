@@ -1,0 +1,9 @@
+{
+  "observedAt": "2026-10-04T20:31:31.270776+00:00",
+  "mutation": "alter original UC payload while case id and baseline result are unchanged",
+  "expectedFailure": "ORIGINAL_AUDIT_CASES_CHANGED",
+  "negativeExit": 1,
+  "restoredExactBytes": true,
+  "positiveExit": 0,
+  "originalArchiveModified": false
+}

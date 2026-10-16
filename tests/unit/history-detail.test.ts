@@ -2,6 +2,7 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {render, screen, within} from "@testing-library/react";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {
@@ -10,7 +11,10 @@ import {
   generateStaticParams,
 } from "@/app/[locale]/(public)/about/history/[slug]/page";
 import {milestones} from "@/content/milestones";
-import {findBySlug} from "@/lib/history/milestones";
+import {findBySlug, milestonesOnly} from "@/lib/history/milestones";
+import {brandedTitle} from "@/lib/metadata";
+import {readableMilestoneBody} from "@/lib/history/readable-body";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -38,19 +42,42 @@ const {buildPageMetadataSpy, notFoundSpy, setRequestLocaleSpy, translationState}
   };
 });
 
-vi.mock("@/lib/metadata", () => ({buildPageMetadata: buildPageMetadataSpy}));
+// Only buildPageMetadata is spied; brandedTitle stays real so the D-1 suffix is asserted below.
+vi.mock("@/lib/metadata", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/metadata")>()),
+  buildPageMetadata: buildPageMetadataSpy,
+}));
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async (namespace: string) => (key: string) => {
-    let value: unknown = translationState.messages[translationState.locale]?.[namespace];
-    for (const part of key.split(".")) value = (value as Record<string, unknown> | undefined)?.[part];
-    if (typeof value !== "string") {
-      throw new Error(`Missing test message: ${translationState.locale}.${namespace}.${key}`);
-    }
-    return value;
+  // Accepts both call forms next-intl allows: a bare namespace string (locale implied by
+  // setRequestLocale) and {locale, namespace} (used for a namespace read ahead of
+  // setRequestLocale, e.g. the shared Common breadcrumb label -- see about/page.tsx).
+  getTranslations: vi.fn(async (input: string | {locale?: string; namespace: string}) => {
+    const namespace = typeof input === "string" ? input : input.namespace;
+    const locale = typeof input === "string" ? translationState.locale : ((input.locale ?? translationState.locale) as Locale);
+    return (key: string) => {
+      let value: unknown = translationState.messages[locale]?.[namespace];
+      for (const part of key.split(".")) value = (value as Record<string, unknown> | undefined)?.[part];
+      if (typeof value !== "string") {
+        throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
+      }
+      return value;
+    };
   }),
   setRequestLocale: setRequestLocaleSpy,
 }));
 vi.mock("next/navigation", () => ({notFound: notFoundSpy}));
+// PageHero's breadcrumb Link and RichRelatedRoutes' Links come from @/i18n/navigation,
+// which wraps next-intl's createNavigation -- that pulls in next/navigation exports this
+// file's mock above doesn't provide (redirect, usePathname, ...), crashing at module init.
+// Mocking @/i18n/navigation directly with a plain anchor sidesteps that, matching the
+// convention already used in tests/unit/wt-pages/event-detail-page.test.tsx.
+vi.mock("@/i18n/navigation", async () => {
+  const {createElement} = await vi.importActual<typeof import("react")>("react");
+  return {
+    Link: ({children, href, ...props}: {children: ReactNode; href: string}) =>
+      createElement("a", {href, ...props}, children),
+  };
+});
 vi.mock("next/image", async () => {
   const {createElement} = await vi.importActual<typeof import("react")>("react");
   return {
@@ -59,11 +86,13 @@ vi.mock("next/image", async () => {
   };
 });
 
-const featuredSlugs = [
-  "the-strategies-for-expanding-global-internet-of-things-iot-markets",
-  "new-term-of-executive-committee-2022-2024",
-  "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
-] as const;
+// Every milestone-kind record has a detail page now, not only the featured six.
+// `featured` still drives the homepage archive grid and which timeline entries show a
+// "Read more" link, but it no longer decides whether a page exists.
+const allMilestoneSlugs = milestonesOnly(milestones).map(({slug}) => slug);
+// A milestone-kind record that is deliberately not featured: it used to have no page, and
+// was the fixture for the 404 and empty-metadata cases. It must now resolve like any other.
+const unfeaturedSlug = "2002-the-1st-wtia-panel-discussion-inter-operator-sms";
 const gallerySlug = "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner";
 
 describe("history detail pages", () => {
@@ -77,11 +106,14 @@ describe("history detail pages", () => {
     ["en", en],
     ["zh-HK", zh],
   ] as const)("pins the %s structural story heading in the message bundle", (locale, messages) => {
-    expect((messages.History as Record<string, string>).storyTitle).toBe(approvedStoryTitle[locale]);
+    expect((messages.History as {storyTitle: string}).storyTitle).toBe(approvedStoryTitle[locale]);
   });
 
-  it("generates exactly the three pinned featured milestone params in content order", () => {
-    expect(generateStaticParams()).toEqual(featuredSlugs.map((slug) => ({slug})));
+  it("generates a param for every milestone-kind record, in content order", () => {
+    // 45 of these were previously unpageable. The sitemap lists the same set, so a route
+    // narrower than the sitemap would publish urls that 404.
+    expect(allMilestoneSlugs.length).toBeGreaterThan(6);
+    expect(generateStaticParams()).toEqual(allMilestoneSlugs.map((slug) => ({slug})));
   });
 
   it("every generated slug resolves to its pinned milestone record", () => {
@@ -90,9 +122,9 @@ describe("history detail pages", () => {
     }
   });
 
-  it("generates no param for member stories, press releases, or non-featured milestones", () => {
+  it("generates no param for member stories or press releases", () => {
     const generated = new Set(generateStaticParams().map(({slug}) => slug));
-    const excluded = milestones.filter(({kind, featured}) => kind !== "milestone" || !featured);
+    const excluded = milestones.filter(({kind}) => kind !== "milestone");
 
     expect(excluded.length).toBeGreaterThan(0);
     for (const entry of excluded) expect(generated.has(entry.slug), entry.slug).toBe(false);
@@ -137,7 +169,25 @@ describe("history detail pages", () => {
     expect(document.querySelector("main")).not.toBeInTheDocument();
   });
 
-  it("preserves exact localized metadata inputs and returns empty metadata for a disallowed slug", async () => {
+  // Until 2001/2014/2025 were featured, every featured record had a multi-paragraph
+  // body, so the single-paragraph path had never rendered. Its whole body is the hero
+  // lead, leaving the story section with only the gallery to show -- and it must not
+  // print the lead twice or head an empty container.
+  it("renders a single-paragraph milestone once, in the hero, with the gallery still shown", async () => {
+    const milestone = findBySlug(milestones, "2001-establishment-of-wtia");
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+    expect(milestone.bodyEn).not.toContain("\n\n");
+    expect(milestone.images.length).toBeGreaterThan(0);
+
+    render(await HistoryDetailPage({params: Promise.resolve({locale: "en", slug: milestone.slug})}));
+
+    expect(screen.getAllByText(milestone.bodyEn)).toHaveLength(1);
+    expect(screen.getByRole("heading", {level: 2, name: approvedStoryTitle.en})).toBeVisible();
+    expect(within(screen.getByRole("list")).getAllByRole("img")).toHaveLength(milestone.images.length);
+  });
+
+  it("preserves exact localized metadata inputs for a milestone page", async () => {
     const milestone = findBySlug(milestones, gallerySlug);
     expect(milestone).not.toBeNull();
     if (!milestone) return;
@@ -146,25 +196,47 @@ describe("history detail pages", () => {
       buildPageMetadataSpy.mockClear();
       const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
       const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
+      const eyebrow = locale === "zh-HK" ? zh.History.eyebrow : en.History.eyebrow;
+      // D-1: a record title carries no suffix of its own, so the page brands it at runtime.
       const expected = {
         locale,
         pathname: `/about/history/${gallerySlug}`,
-        title,
-        description: body.slice(0, 160),
+        title: brandedTitle(locale, title),
+        // Built from the readable paragraphs: the raw body carried "\n\n" breaks and, in eight
+        // migrated records, `[pdf-embedder …]` shortcodes into the meta description.
+        description: readableMilestoneBody(body).join(" ").slice(0, 160),
+        // Phase D: every detail page now points its metadata at its own share card.
+        image: ogImagePath({kind: "milestone", title, eyebrow, imageUrl: null}),
       };
 
       expect(await generateMetadata({params: Promise.resolve({locale, slug: gallerySlug})})).toEqual(expected);
       expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
+      expect(expected.title.endsWith(locale === "zh-HK" ? "｜WiseTech Hong Kong" : " | WiseTech Hong Kong")).toBe(true);
     }
-
-    buildPageMetadataSpy.mockClear();
-    expect(await generateMetadata({
-      params: Promise.resolve({locale: "en", slug: "2001-establishment-of-wtia"}),
-    })).toEqual({});
-    expect(buildPageMetadataSpy).not.toHaveBeenCalled();
   });
 
-  it("404s direct requests for non-milestone, non-featured, and unknown slugs", async () => {
+  // Previously non-featured: the page must now carry real metadata rather than {}.
+  it("returns real metadata for a milestone that is no longer excluded", async () => {
+    const milestone = findBySlug(milestones, unfeaturedSlug);
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+
+    buildPageMetadataSpy.mockClear();
+    const expected = {
+      locale: "en",
+      pathname: `/about/history/${unfeaturedSlug}`,
+      title: brandedTitle("en", milestone.titleEn),
+      description: milestone.bodyEn.slice(0, 160),
+      image: ogImagePath({kind: "milestone", title: milestone.titleEn, eyebrow: en.History.eyebrow, imageUrl: null}),
+    };
+
+    expect(await generateMetadata({
+      params: Promise.resolve({locale: "en", slug: unfeaturedSlug}),
+    })).toEqual(expected);
+    expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
+  });
+
+  it("404s direct requests for non-milestone kinds and unknown slugs", async () => {
     const memberStory = milestones.find(({kind}) => kind === "member-story");
     const pressRelease = milestones.find(({kind}) => kind === "press-release");
     expect(memberStory).toBeDefined();
@@ -173,7 +245,6 @@ describe("history detail pages", () => {
     for (const slug of [
       memberStory!.slug,
       pressRelease!.slug,
-      "2001-establishment-of-wtia",
       "unknown-history-record",
     ]) {
       notFoundSpy.mockClear();
@@ -185,16 +256,70 @@ describe("history detail pages", () => {
     }
   });
 
-  it("keeps the detail route server-only and composed from all three Task 4 primitives", () => {
+  // The page must actually render for a record that used to 404 -- the sitemap lists it,
+  // so an unresolved param here is a published url that 404s.
+  it("renders a previously non-featured milestone", async () => {
+    const milestone = findBySlug(milestones, unfeaturedSlug);
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+
+    render(await HistoryDetailPage({params: Promise.resolve({locale: "en", slug: unfeaturedSlug})}));
+
+    expect(screen.getByRole("heading", {level: 1, name: milestone.titleEn})).toBeVisible();
+  });
+
+  // The 20+1 anniversary record shipped as a verbatim scrape of its own 2022
+  // announcement -- future tense, "*Seats Limited", ticket prices and a live
+  // registration URL -- so it spent four years inviting readers to a dinner that had
+  // already happened.
+  //
+  // Scope note: `featured` is NOT the line between public and private. The timeline at
+  // /about/history renders every NON-featured milestone's full body inline (see
+  // components/marketing/milestone-timeline.tsx) and replaces a featured one with a
+  // "Read more" link, so all 61 bodies publish -- featuring adds a second page, it does
+  // not create the first. The link guard therefore covers every milestone-kind record.
+  it("solicits no event registration in any milestone body", () => {
+    const registrationLink = /jotform\.com|lnkd\.in|eventbrite|forms\.gle|docs\.google\.com\/forms/i;
+    const records = milestonesOnly(milestones);
+
+    expect(records.length).toBeGreaterThan(0);
+    for (const {slug, bodyEn, bodyZh} of records) {
+      for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
+        expect(registrationLink.test(body), `${slug} (${locale}) registration link`).toBe(false);
+      }
+    }
+  });
+
+  // Prices stay scoped to featured records, and deliberately so: a currency figure is
+  // only a red flag where the layout reads it as an offer -- a hero lead and a homepage
+  // card. In the archive at large it is ordinary history, and widening this to every
+  // record would reject two truthful entries: `2005-the-1st-wtia-sms-donation-campaign`
+  // ("raised HK $2 million for the victims of the 2004 Indian Ocean earthquake and
+  // tsunami") and `it-sme-anti-epidemic-fund-appeal` (the HK$137.5 billion Anti-epidemic
+  // Fund and its HK$9,000 wage-subsidy cap). Those are facts worth publishing, not
+  // ticketing copy. Do not "fix" this scope without re-reading those two bodies.
+  it("quotes no ticket price in a featured milestone body", () => {
+    const ticketPrice = /(?:HKD?|US)?\$\s?[\d,]+(?:\.\d{2})?/;
+    const featured = milestonesOnly(milestones).filter(({featured: isFeatured}) => isFeatured);
+
+    expect(featured.length).toBeGreaterThan(0);
+    for (const {slug, bodyEn, bodyZh} of featured) {
+      for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
+        expect(ticketPrice.test(body), `${slug} (${locale}) ticket price`).toBe(false);
+      }
+    }
+  });
+
+  it("keeps the detail route server-only, composed from PageHero, RichCompass and MediaGallery", () => {
     const source = readFileSync(
       resolve(process.cwd(), "app/[locale]/(public)/about/history/[slug]/page.tsx"),
       "utf8",
     );
 
-    expect(source).toContain("InstitutionalPageIntro");
-    expect(source).toContain("StorySection");
+    expect(source).toContain("PageHero");
+    expect(source).toContain("RichCompass");
     expect(source).toContain("MediaGallery");
-    expect(source).not.toContain('from "next/image"');
+    expect(source).not.toContain("InstitutionalPageIntro");
     expect(source).not.toMatch(/["']use client["']/);
     expect(source).not.toMatch(/<main\b/);
     expect(source).not.toMatch(/\buse(?:State|Effect|LayoutEffect|Memo|Callback|Reducer|Ref|Context|Transition|DeferredValue|SyncExternalStore)\b/);

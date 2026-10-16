@@ -1,12 +1,13 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {createEvent, registerForEvent, updateEvent, type EventMutationDependencies, type EventRegistrationDependencies} from "@/lib/db/repos/events";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const staff: Actor = {kind: "staff", userId: "auth-staff", profileId: "profile-staff"};
 const member = (profileId: string): Actor => ({kind: "member", userId: `auth-${profileId}`, profileId});
 const createInput = {slug: "member-mixer", titleEn: "Member mixer", titleZh: "會員交流會", descriptionEn: "Meet the community.", descriptionZh: "與社群交流。", startsAt: "2099-09-01T10:00:00.000Z", endsAt: "2099-09-01T12:00:00.000Z", venue: "WTIA", capacity: 1, memberOnly: true, published: true, heroMediaId: null};
-const eventLock = {id: "11111111-1111-4111-8111-111111111111", capacity: 1, published: true, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt)};
+const eventLock = {id: "11111111-1111-4111-8111-111111111111", capacity: 1, published: true, registrationMode: "rsvp", visibility: "members_only", startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt)} as const;
 
 describe("admin Event mutations and registration capacity", () => {
   it("requires an admin and appends the audit in the same create transaction", async () => {
@@ -18,16 +19,70 @@ describe("admin Event mutations and registration capacity", () => {
     expect(audited).toHaveBeenCalledWith(expect.objectContaining({actorUserId: "profile-staff", action: "event.created", targetType: "event"}));
   });
 
+  it("normalises admin-authored tags at the write boundary so the public ?tag= predicate can match them (B-6)", async () => {
+    const inserted = vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input}));
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: inserted, lockEvent: vi.fn(), updateEvent: vi.fn(), lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)})};
+    await expect(createEvent(staff, {...createInput, tags: ["AI", "Machine Learning", "ai", "###"]}, dependencies)).resolves.toMatchObject({tags: ["ai", "machine-learning"]});
+    expect(inserted).toHaveBeenCalledWith(expect.objectContaining({tags: ["ai", "machine-learning"]}));
+  });
+
   it("serializes capacity decisions and deterministically waitlists overflow registrations", async () => {
     const registrations = new Map<string, "registered" | "waitlist" | "cancelled">();
     const audits: unknown[] = [];
-    const dependencies: EventRegistrationDependencies = {now: () => new Date("2099-01-01T00:00:00.000Z"), transaction: async (work) => work({lockEvent: async () => eventLock, hasEligibleMembership: async () => true, getRegistration: async (_eventId, profileId) => registrations.has(profileId) ? {status: registrations.get(profileId)!} : null, countRegistered: async () => [...registrations.values()].filter((status) => status === "registered").length, upsertRegistration: async (_eventId, profileId, status) => { registrations.set(profileId, status); }, insertAudit: async (input) => { audits.push(input); }})};
+    const enrollReminder = vi.fn(async () => undefined);
+    const dependencies: EventRegistrationDependencies = {now: () => new Date("2099-01-01T00:00:00.000Z"), enrollReminder, transaction: async (work) => work({lockEvent: async () => eventLock, hasEligibleMembership: async () => true, getRegistration: async (_eventId, profileId) => registrations.has(profileId) ? {status: registrations.get(profileId)!} : null, countRegistered: async () => [...registrations.values()].filter((status) => status === "registered").length, upsertRegistration: async (_eventId, profileId, status) => { registrations.set(profileId, status); }, insertAudit: async (input) => { audits.push(input); }})};
     await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies)).resolves.toMatchObject({disposition: "registered"});
     await expect(registerForEvent(member("profile-b"), {eventId: eventLock.id}, dependencies)).resolves.toMatchObject({disposition: "waitlist"});
     await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies)).resolves.toMatchObject({disposition: "already_registered"});
     expect(registrations.get("profile-a")).toBe("registered");
     expect(registrations.get("profile-b")).toBe("waitlist");
     expect(audits).toHaveLength(2);
+    // B-5: only the confirmed seat gets the 24-hour reminder; the waitlisted member has nothing to attend yet.
+    expect(enrollReminder).toHaveBeenCalledTimes(1);
+    expect(enrollReminder).toHaveBeenCalledWith({profileId: "profile-a", eventId: eventLock.id, startsAt: eventLock.startsAt});
+  });
+
+  it.each(["ticketed", "external"] as const)("refuses free RSVP for a %s event before checking membership", async (registrationMode) => {
+    const hasEligibleMembership = vi.fn(async () => true);
+    const upsertRegistration = vi.fn(async () => undefined);
+    const dependencies: EventRegistrationDependencies = {
+      transaction: async (work) => work({
+        lockEvent: async () => ({...eventLock, registrationMode}),
+        hasEligibleMembership,
+        getRegistration: async () => null,
+        countRegistered: async () => 0,
+        upsertRegistration,
+        insertAudit: async () => undefined,
+      }),
+    };
+    await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies))
+      .rejects.toThrow("EVENT_REGISTRATION_NOT_RSVP");
+    expect(hasEligibleMembership).not.toHaveBeenCalled();
+    expect(upsertRegistration).not.toHaveBeenCalled();
+  });
+
+  it("hides invite-only events from direct member RSVP calls", async () => {
+    const hasEligibleMembership = vi.fn(async () => true);
+    const dependencies: EventRegistrationDependencies = {
+      transaction: async (work) => work({
+        lockEvent: async () => ({...eventLock, registrationMode: "rsvp", visibility: "invite_only"}),
+        hasEligibleMembership,
+        getRegistration: async () => null,
+        countRegistered: async () => 0,
+        upsertRegistration: async () => undefined,
+        insertAudit: async () => undefined,
+      }),
+    };
+    await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies))
+      .rejects.toThrow("EVENT_NOT_FOUND");
+    expect(hasEligibleMembership).not.toHaveBeenCalled();
+  });
+
+  it("keeps a registration that succeeded when the reminder enrolment fails", async () => {
+    const enrollReminder = vi.fn(async () => { throw new Error("journey unavailable"); });
+    const dependencies: EventRegistrationDependencies = {now: () => new Date("2099-01-01T00:00:00.000Z"), enrollReminder, transaction: async (work) => work({lockEvent: async () => eventLock, hasEligibleMembership: async () => true, getRegistration: async () => null, countRegistered: async () => 0, upsertRegistration: async () => undefined, insertAudit: async () => undefined})};
+    await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies)).resolves.toEqual({disposition: "registered"});
+    expect(enrollReminder).toHaveBeenCalledTimes(1);
   });
 
   it("checks Event closure before membership under the row lock", async () => {
@@ -38,10 +93,54 @@ describe("admin Event mutations and registration capacity", () => {
   });
 
   it("rejects Event updates whose resulting end is not after the start", async () => {
-    const current = {id: eventLock.id, ...createInput, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const base = {id: eventLock.id, ...createInput, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const current = {...base, ...legacyDerivedEventColumns(base)};
     const update = vi.fn();
     const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn()})};
-    await expect(updateEvent(staff, current.id, {endsAt: "2099-09-01T09:00:00.000Z"}, dependencies)).rejects.toThrow("endsAt must be after startsAt");
+    await expect(updateEvent(staff, current.id, {endsAt: "2099-09-01T09:00:00.000Z"}, dependencies, current.updatedAt)).rejects.toThrow("endsAt must be after startsAt");
     expect(update).not.toHaveBeenCalled();
   });
+  it("refuses a stale event editor revision under the row lock without writing", async () => {
+    const base = {
+      id: eventLock.id, ...createInput,
+      startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt),
+      createdAt: new Date("2026-08-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-08-02T00:00:00.000Z"),
+    };
+    const current = {...base, ...legacyDerivedEventColumns(base)};
+    const update = vi.fn();
+    const audit = vi.fn();
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({
+      insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update,
+      lockActiveMedia: vi.fn(), insertAudit: audit,
+    })};
+    await expect(updateEvent(
+      staff, current.id, {descriptionEn: "Stale edit"}, dependencies,
+      new Date("2026-08-01T00:00:00.000Z"),
+    )).rejects.toThrow("EVENT_EDIT_CONFLICT");
+    expect(update).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
+  });
+  it("does not revive a cancelled event from a stale admin form submission", async () => {
+    const base = {id: eventLock.id, ...createInput, published: false, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const current = {...base, ...legacyDerivedEventColumns(base), status: "cancelled" as const};
+    const update = vi.fn();
+    const audit = vi.fn();
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: audit})};
+
+    await expect(updateEvent(staff, current.id, {published: true}, dependencies, current.updatedAt)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
+    expect(update).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
+  });
+
+  it.each([{slug: "changed-event"}, {memberOnly: true}])("keeps a cancelled event's receipt route stable after an admin edit", async (change) => {
+    const base = {id: eventLock.id, ...createInput, memberOnly: false, published: false, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const current = {...base, ...legacyDerivedEventColumns(base), status: "cancelled" as const};
+    const update = vi.fn();
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn()})};
+
+    await expect(updateEvent(staff, current.id, change, dependencies, current.updatedAt)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
+    expect(update).not.toHaveBeenCalled();
+  });
+
 });

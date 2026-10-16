@@ -1,10 +1,11 @@
 import "server-only";
 
-import {and, eq, exists, isNull, or, sql} from "drizzle-orm";
+import {and, desc, eq, isNull, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {dunningLapseRepository} from "@/lib/db/repos/dunning-lapse";
 
 export {
@@ -13,19 +14,18 @@ export {
   type DunningLapseInput,
 } from "@/lib/db/repos/dunning-lapse";
 
-export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "applicationId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
+export type MembershipInput = Pick<Membership, "planCode" | "seatLimit" | "billingInterval"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "applicationId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 export type MembershipUpdate = Partial<Pick<Membership, "planCode" | "status" | "seatLimit" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 
+// `EXISTS (…)` written out rather than built with Drizzle's `exists()`, which
+// pastes a raw `sql` fragment in without parentheses and so emits the syntax
+// error `EXISTS SELECT …`. See the note in `lib/db/repos/companies.ts`.
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
-  );
+  return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL)`;
 }
 
 function companyBillingManagerScope(actor: Extract<Actor, {kind: "member"}>) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
-  );
+  return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL)`;
 }
 
 function applicationAccessScope(actor: Extract<Actor, {kind: "member"}>, applicationId: string) {
@@ -33,9 +33,7 @@ function applicationAccessScope(actor: Extract<Actor, {kind: "member"}>, applica
     eq(membershipApplications.id, applicationId),
     or(
       eq(membershipApplications.applicantUserId, actor.profileId),
-      exists(
-        sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplications.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
-      ),
+      sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplications.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL)`,
     ),
   );
 }
@@ -132,6 +130,16 @@ export const membershipsRepository = {
     return rows[0];
   },
 
+  /** Billing history has its own scope; entitlement expiry never expands it. */
+  async listBilling(actor: Actor): Promise<Membership[]> {
+    if (actor.kind !== "member") forbidden();
+    const db = await getDb();
+    return db.select().from(membershipsTable).where(or(
+      eq(membershipsTable.ownerUserId, actor.profileId),
+      and(sql`${membershipsTable.companyId} IS NOT NULL`, companyBillingManagerScope(actor)),
+    )).orderBy(desc(membershipsTable.createdAt), desc(membershipsTable.id)).limit(50);
+  },
+
   async list(actor: Actor): Promise<Membership[]> {
     if (actor.kind === "anonymous") return [];
     if (actor.kind === "system") requireSystem(actor);
@@ -141,7 +149,7 @@ export const membershipsRepository = {
     return db
       .select()
       .from(membershipsTable)
-      .where(or(eq(membershipsTable.ownerUserId, actor.profileId), companyMembershipScope(actor)));
+      .where(and(or(eq(membershipsTable.ownerUserId, actor.profileId), companyMembershipScope(actor)), membershipGrantValiditySql()));
   },
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {

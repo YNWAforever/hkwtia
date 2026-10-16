@@ -1,0 +1,15 @@
+{
+  "sourceBaseSha": "f7599e89",
+  "phase": "RED",
+  "pass": 1,
+  "fail": 4,
+  "skip": 0,
+  "targetBehaviour": "root recovery catalog only; authorized private layouts preserve full catalog",
+  "failedTitles": [
+    "client translation payload boundaries keeps only usable recovery messages in the en public root payload",
+    "client translation payload boundaries keeps only usable recovery messages in the zh-HK public root payload",
+    "client translation payload boundaries preserves the full en client catalog within authorized private layouts",
+    "client translation payload boundaries preserves the full zh-HK client catalog within authorized private layouts"
+  ],
+  "production": false
+}

@@ -1,0 +1,30 @@
+{
+  "sourceCommitPending": false,
+  "existingActualPostgres": {
+    "passed": 23,
+    "skipped": 0,
+    "files": 5,
+    "command": "RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/admin-batch-profile-cleanup.test.ts tests/integration/admin-batch-export.test.ts tests/integration/admin-batch-concurrency.test.ts tests/integration/audit-full-batch-failures.test.ts tests/integration/audit-full-import-export.test.ts --maxWorkers=1"
+  },
+  "fixed100": {
+    "passed": 1,
+    "skipped": 0,
+    "command": "RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/full-fix-batch-snapshot-100.test.ts --maxWorkers=1",
+    "receipt": "fixed100.json"
+  },
+  "scaleMatrix": {
+    "passed": 24,
+    "skipped": 0,
+    "files": 1,
+    "durationSeconds": 985.77,
+    "receipt": "batch-scale-matrix.json",
+    "command": "RUN_POSTGRES_INTEGRATION=1 RUN_AUDIT_FULL_MATRIX=1 npx vitest run tests/integration/audit-full-batch-scale-matrix.test.ts --maxWorkers=1",
+    "providerCalls": 0
+  },
+  "productionDeployment": false,
+  "liveSenderVerified": false,
+  "paymentProviderVerified": false,
+  "cloudWorkerOperational": false,
+  "releaseGate": "T02 per-operation readiness and T16 authorized capability-specific rollout",
+  "verifiedCodeCommit": "f73f66316836dea53193dc8aaf2a710d278afa39"
+}

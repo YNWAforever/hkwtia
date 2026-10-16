@@ -1,0 +1,18 @@
+{
+  "commands": [
+    "node node_modules/vitest/vitest.mjs run tests/unit/retention-analyst-service.test.ts tests/unit/retention-analyst-candidates.test.ts tests/unit/retention-analyst-contracts.test.ts tests/integration/retention-analyst-candidates.test.ts tests/integration/retention-analyst-route.test.ts tests/integration/retention-analyst-idempotency.test.ts tests/unit/approval-list.test.tsx tests/unit/approval-action-state.test.ts tests/unit/scheduled-agent-runtime.test.ts tests/unit/retention-capability-gate.test.ts tests/unit/ai-draft-work-boundary.test.ts tests/unit/audit-full-job-health.test.ts",
+    "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run --maxWorkers=1 tests/integration/ai-retention-batch.test.ts tests/integration/ai-draft-review.test.ts tests/integration/ai-budget-concurrency.test.ts",
+    "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/ai-budget-concurrency.test.ts -t \"0057 applies forward\"",
+    "node node_modules/vitest/vitest.mjs run tests/unit/private-link-boundary.test.tsx tests/unit/approval-list.test.tsx tests/unit/approval-action-state.test.ts tests/unit/repository-boundary.test.ts",
+    "npm.cmd run lint",
+    "npm.cmd run typecheck",
+    "npm.cmd run audit:strings",
+    "npm.cmd run build",
+    "node --experimental-strip-types --env-file=.env.local .playwright/full-fix-t11-migrate-isolated.mjs",
+    "node --experimental-strip-types --env-file=.env.local scripts/verify-full-retention-drafts.mjs --workers=1",
+    "node --env-file=.env.local .playwright/full-fix-t11-preview-runtime.mjs",
+    "gh run view 37195649773 --repo YNWAforever/hkwtia --log"
+  ],
+  "PGEnvSyntax": "PowerShell $env:RUN_POSTGRES_INTEGRATION then removed after run; no secrets",
+  "currentFull": "Actual repository CI commands in full.json; local fail not called green"
+}

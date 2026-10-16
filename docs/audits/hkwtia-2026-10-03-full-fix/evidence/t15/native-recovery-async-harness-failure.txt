@@ -1,0 +1,84 @@
+(node:31292) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 1 worker
+
+(node:35132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 1440px real configuration failure keeps manual journeys available (4.5s)
+(node:29944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 390px real configuration failure keeps manual journeys available (874ms)
+(node:20332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 1440px real configuration failure keeps manual journeys available (1.2s)
+(node:21548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  4 [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 390px real configuration failure keeps manual journeys available (789ms)
+
+
+  1) [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 1440px real configuration failure keeps manual journeys available 
+
+    Error: page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\concierge-readiness.spec.ts:19:31
+
+    Error Context: test-results\concierge-readiness-en-144-c24ef-s-manual-journeys-available-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 390px real configuration failure keeps manual journeys available 
+
+    Error: page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\concierge-readiness.spec.ts:19:31
+
+    Error Context: test-results\concierge-readiness-en-390-43f61-s-manual-journeys-available-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 1440px real configuration failure keeps manual journeys available 
+
+    Error: page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\concierge-readiness.spec.ts:19:31
+
+    Error Context: test-results\concierge-readiness-zh-HK--3d327-s-manual-journeys-available-chromium\error-context.md
+
+  4) [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 390px real configuration failure keeps manual journeys available 
+
+    Error: page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:303:30), <anonymous>:5:24)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\laich\.codex\worktrees\full-remediation-20261001\hkwtia\tests\e2e\concierge-readiness.spec.ts:19:31
+
+    Error Context: test-results\concierge-readiness-zh-HK--8c388-s-manual-journeys-available-chromium\error-context.md
+
+  4 failed
+    [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 1440px real configuration failure keeps manual journeys available 
+    [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › en 390px real configuration failure keeps manual journeys available 
+    [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 1440px real configuration failure keeps manual journeys available 
+    [chromium] › tests\e2e\concierge-readiness.spec.ts:10:3 › zh-HK 390px real configuration failure keeps manual journeys available 
+{"error":"USABILITY_ACCEPTANCE_GATE_FAILED","stage":"native","sqlState":null,"production":false}

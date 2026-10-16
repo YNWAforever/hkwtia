@@ -1,0 +1,10 @@
+{
+  "id": "dpl_CuFLbAqA13cFyoKfe2UcGJDooLoh",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "sourceSha": "7c4adaafdf984a7259cb30a1d07cc1f588ad2846",
+  "gitRef": "codex/application-triage-20261003",
+  "state": "READY",
+  "target": null,
+  "origin": "https://hkwtia-application-triage-20261003.vercel.app",
+  "production": false
+}

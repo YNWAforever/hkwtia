@@ -4,7 +4,7 @@ import {automationCronActor} from "@/lib/auth/automation-actor";
 import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
 import {runScheduledJson, type AgentConfig} from "@/lib/ai/scheduled-runtime";
 import type {RetentionCandidate} from "@/lib/ai/retention-analyst/candidates";
-import {runRetentionAnalyst} from "@/lib/ai/retention-analyst/service";
+import {runRetentionAnalyst,type RetentionAnalystServiceDependencies} from "@/lib/ai/retention-analyst/service";
 import type {RetentionOutreachApprovalInput} from "@/lib/db/repos/approvals";
 import {scheduledRuntimeHarness} from "@/tests/fixtures/scheduled-runtime-harness";
 
@@ -370,4 +370,33 @@ describe("retention analyst service", () => {
     expect(runJson).toHaveBeenCalledTimes(6);
     expect(maximumActive).toBe(3);
   });
+});
+
+
+describe('bounded retention page orchestration',()=>{
+ it('processes all pages and batch-read pending flags without per-candidate pending reads',async()=>{
+  const a={...candidate,profileId:'page-a',pending:true,factsHash:'a'.repeat(64)},b={...candidate,profileId:'page-b',pending:false,factsHash:'b'.repeat(64)},c={...candidate,profileId:'page-c',pending:false,factsHash:'c'.repeat(64)};
+  const listCandidatePage=vi.fn(async(_actor:unknown,input:{cursor?:string|null})=>input.cursor?{items:[c],nextCursor:null}:{items:[a,b],nextCursor:'synthetic-page-two'});
+  const listCandidates=vi.fn(async()=>{throw Error('UNBOUNDED_LEGACY_READ')});
+  const hasPendingRetentionOutreach=vi.fn(async()=>{throw Error('PER_CANDIDATE_PENDING_READ')});
+  const createRetentionOutreachOnce=vi.fn(async()=>({approvalId:'33333333-3333-4333-8333-333333333333',created:true}));
+  const runJson=vi.fn(async(input)=>{const value={subject:'Manual renewal review',body:'Please review current membership.',reasonCodes:['inactive_before_renewal']as ('inactive_before_renewal')[]};await input.commit?.(value);return value;});
+  const input={candidates:{listCandidates,listCandidatePage},approvals:{hasPendingRetentionOutreach,createRetentionOutreachOnce},agentRuns:{start:vi.fn(async()=>({}))},runJson,createRunId:()=>crypto.randomUUID()};
+  await expect(runRetentionAnalyst(automationCronActor(),{asOf:new Date("2027-04-01T00:00:00Z"),agentConfig},input as Parameters<typeof runRetentionAnalyst>[2])).resolves.toMatchObject({considered:3,skippedPending:1,drafted:2,failed:0});
+  expect(listCandidates).not.toHaveBeenCalled();expect(hasPendingRetentionOutreach).not.toHaveBeenCalled();expect(listCandidatePage).toHaveBeenCalledTimes(2);expect(runJson).toHaveBeenCalledTimes(2);
+ });
+});
+
+// Two independent schedulers must acquire durable work before creating runs or calling a provider.
+it('admits one provider caller across two workers and a cross-day rerun',async()=>{
+ const {createHash}=await import('node:crypto');let claimed=false;let succeeded=false;
+ const runId='11111111-1111-4111-8111-111111111111',claimToken='77777777-7777-4777-8777-777777777777';
+ const item={...candidate,pending:false,factsHash:createHash('sha256').update('same-facts').digest('hex')};
+ const work:NonNullable<RetentionAnalystServiceDependencies['work']>={claimDraftWork:vi.fn(async()=>{if(succeeded)return {runId,claimToken:null,draftId:null,disposition:'reuse'as const};if(claimed)return {runId,claimToken:null,draftId:null,disposition:'busy'as const};claimed=true;return {runId,claimToken,draftId:null,disposition:'claimed'as const};}),markDraftRequestStarted:vi.fn(async()=>{}),recordDraftProviderReceipt:vi.fn(async()=>{}),finishDraftWork:vi.fn(async()=>{succeeded=true;})};
+ const runJson=vi.fn(async(input:Parameters<RetentionAnalystServiceDependencies['runJson']>[0])=>{await input.beforeDispatch?.();await input.onProviderReceipt?.('synthetic-request');const draft={subject:'Stay in touch',body:'Please contact our team to discuss your membership.',reasonCodes:['inactive_before_renewal']as ('inactive_before_renewal')[]};await input.commit?.(draft);return draft;});
+ const start=vi.fn(async()=>({}));
+ const deps={candidates:{listCandidates:vi.fn(async()=>{throw Error('UNBOUNDED_READ');}),listCandidatePage:vi.fn(async()=>({items:[item],nextCursor:null})),getCurrentCandidate:vi.fn(async()=>item)},approvals:{hasPendingRetentionOutreach:vi.fn(async()=>false),createRetentionOutreachOnce:vi.fn(async()=>({approvalId:'33333333-3333-4333-8333-333333333333',created:true}))},agentRuns:{start},runJson,createRunId:()=>runId,work};
+ await Promise.all([runRetentionAnalyst(automationCronActor(),{asOf:new Date('2027-04-01'),agentConfig},deps),runRetentionAnalyst(automationCronActor(),{asOf:new Date('2027-04-01'),agentConfig},deps)]);
+ await runRetentionAnalyst(automationCronActor(),{asOf:new Date('2027-04-02'),agentConfig},deps);
+ expect(runJson).toHaveBeenCalledTimes(1);expect(start).toHaveBeenCalledTimes(1);expect(work.claimDraftWork).toHaveBeenCalledTimes(3);
 });

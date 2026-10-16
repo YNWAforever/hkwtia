@@ -1,3 +1,4 @@
+import {syntheticAiBudget} from "../helpers/ai-budget";
 import type {LanguageModel} from "ai";
 import {z} from "zod";
 import {describe, expect, it, vi} from "vitest";
@@ -90,7 +91,7 @@ function runtimeRequest(overrides: Record<string, unknown> = {}) {
 describe("provider-neutral AI runtime", () => {
   it("supports a precreated run with explicit deferred finalization", async () => {
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -129,7 +130,7 @@ describe("provider-neutral AI runtime", () => {
 
   it("preserves a scheduled agent identity through the full run lifecycle", async () => {
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -206,7 +207,7 @@ describe("provider-neutral AI runtime", () => {
       order.push("factory");
       return provider;
     });
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {openai: openaiFactory, anthropic: vi.fn()},
       createRunId: () => RUN_ID,
@@ -247,6 +248,8 @@ describe("provider-neutral AI runtime", () => {
         inputTokens: 1_000,
         outputTokens: 500,
         costUsd: "0.001200",
+        usageState: "known",
+        pricingVersion: "verified-2026-10-03",
       },
     );
   });
@@ -268,7 +271,7 @@ describe("provider-neutral AI runtime", () => {
       url: "javascript:alert(1)",
     });
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -307,7 +310,7 @@ describe("provider-neutral AI runtime", () => {
     const openaiFactory = vi.fn();
     const anthropicFactory = vi.fn();
     const toolExecute = vi.fn();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: openaiFactory,
@@ -347,6 +350,8 @@ describe("provider-neutral AI runtime", () => {
         inputTokens: 0,
         outputTokens: 0,
         costUsd: "0.000000",
+        usageState: "not_dispatched",
+        pricingVersion: "verified-2026-10-03",
       },
     );
     expect(openaiFactory).not.toHaveBeenCalled();
@@ -357,7 +362,7 @@ describe("provider-neutral AI runtime", () => {
   it("starts then reports a stable configuration error when the selected key is missing", async () => {
     const agentRuns = createAgentRunsFake();
     const openaiFactory = vi.fn();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {openai: openaiFactory, anthropic: vi.fn()},
       createRunId: () => RUN_ID,
@@ -379,6 +384,8 @@ describe("provider-neutral AI runtime", () => {
         inputTokens: 0,
         outputTokens: 0,
         costUsd: "0.000000",
+        usageState: "not_dispatched",
+        pricingVersion: "verified-2026-10-03",
       },
     );
     expect(openaiFactory).not.toHaveBeenCalled();
@@ -387,7 +394,7 @@ describe("provider-neutral AI runtime", () => {
   it("rejects unknown models after start and before provider construction", async () => {
     const agentRuns = createAgentRunsFake();
     const openaiFactory = vi.fn();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {openai: openaiFactory, anthropic: vi.fn()},
       createRunId: () => RUN_ID,
@@ -409,7 +416,7 @@ describe("provider-neutral AI runtime", () => {
 
   it("defends the provider-neutral boundary against more than eight reported steps", async () => {
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -441,7 +448,7 @@ describe("provider-neutral AI runtime", () => {
 
   it("escalates an exhausted eight-step tool loop with a repository-safe code", async () => {
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -479,6 +486,8 @@ describe("provider-neutral AI runtime", () => {
         inputTokens: 1_000,
         outputTokens: 500,
         costUsd: "0.001200",
+        usageState: "known",
+        pricingVersion: "verified-2026-10-03",
       },
     );
     expect(agentRuns.finish).not.toHaveBeenCalled();
@@ -491,7 +500,7 @@ describe("provider-neutral AI runtime", () => {
       new Error("secret provider response body"),
       {statusCode: 429},
     );
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -521,7 +530,7 @@ describe("provider-neutral AI runtime", () => {
 
   it("maps a provider error finish reason to a stable failed lifecycle", async () => {
     const agentRuns = createAgentRunsFake();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: () => ({
@@ -562,7 +571,7 @@ describe("provider-neutral AI runtime", () => {
     });
     const openaiFactory = vi.fn(() => ({stream: openaiStream}));
     const anthropicFactory = vi.fn();
-    const runtime = createAgentRuntime({
+    const runtime = createAgentRuntime({budget: syntheticAiBudget(),
       agentRuns,
       providerFactories: {
         openai: openaiFactory,

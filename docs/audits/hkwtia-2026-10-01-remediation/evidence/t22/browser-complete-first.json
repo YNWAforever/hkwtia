@@ -1,0 +1,2936 @@
+{
+  "stats": {
+    "startTime": "2026-10-02T11:06:52.080Z",
+    "duration": 1914565.421,
+    "expected": 302,
+    "skipped": 150,
+    "unexpected": 35,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/ has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/events has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/membership has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/news has no serious or critical accessibility violations",
+      "status": "unexpected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/about has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/about/chairman has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/programs/asa has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/events has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/membership has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/news has no serious or critical accessibility violations",
+      "status": "unexpected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/about has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/about/chairman has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "/zh/programs/asa has no serious or critical accessibility violations",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "open desktop and mobile navigation surfaces pass axe",
+      "status": "expected",
+      "line": 48
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "the current mobile group passes axe and keeps AA contrast on the donor gradient",
+      "status": "expected",
+      "line": 95
+    },
+    {
+      "file": "accessibility.spec.ts",
+      "name": "skip link targets the sole main content landmark",
+      "status": "expected",
+      "line": 167
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "name": "en: ten selected members, two controlled failures, retry only failures",
+      "status": "expected",
+      "line": 17
+    },
+    {
+      "file": "admin-batches.spec.ts",
+      "name": "zh-HK: ten selected members, two controlled failures, retry only failures",
+      "status": "expected",
+      "line": 17
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "name": "en: staff event modes survive create, edit and public rendering",
+      "status": "expected",
+      "line": 19
+    },
+    {
+      "file": "admin-event-authoring.spec.ts",
+      "name": "zh-HK: staff event modes survive create, edit and public rendering",
+      "status": "expected",
+      "line": 19
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "name": "en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "status": "expected",
+      "line": 15
+    },
+    {
+      "file": "admin-grants.spec.ts",
+      "name": "zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+      "status": "expected",
+      "line": 15
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "name": "en: import reviews differences and commits only two eligible synthetic rows",
+      "status": "expected",
+      "line": 18
+    },
+    {
+      "file": "admin-imports.spec.ts",
+      "name": "zh-HK: import reviews differences and commits only two eligible synthetic rows",
+      "status": "expected",
+      "line": 18
+    },
+    {
+      "file": "admin-members-bulk.spec.ts",
+      "name": "staff can find, reopen and safely interpret synthetic batch jobs",
+      "status": "skipped",
+      "line": 12
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "name": "en: member search, detail and return retain the filter",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "admin-members.spec.ts",
+      "name": "zh-HK: member search, detail and return retain the filter",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "name": "staff can navigate all original destinations, use the mobile drawer and sign out",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "name": "member detail keeps the Members destination current",
+      "status": "unexpected",
+      "line": 38
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "name": "zh-HK superadmin keeps locale and authorized navigation",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "name": "removing a synthetic staff role denies the next server request",
+      "status": "skipped",
+      "line": 56
+    },
+    {
+      "file": "admin-shell.spec.ts",
+      "name": "member identity sees denial and no workspace links",
+      "status": "expected",
+      "line": 85
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "name": "anonymous member-login-en-desktop renders for audit evidence",
+      "status": "expected",
+      "line": 13
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "name": "anonymous member-login-zh-mobile renders for audit evidence",
+      "status": "expected",
+      "line": 13
+    },
+    {
+      "file": "audit-20260929-anonymous-entries.spec.ts",
+      "name": "anonymous join-zh-desktop renders for audit evidence",
+      "status": "expected",
+      "line": 13
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "en member: method readiness and safe continuation render",
+      "status": "expected",
+      "line": 32
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "en member: sent-state recovery keeps resend waiting",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "en member: provider-error return offers email recovery",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "en admin: method readiness and safe continuation render",
+      "status": "expected",
+      "line": 32
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "en admin: sent-state recovery keeps resend waiting",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "en admin: provider-error return offers email recovery",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "zh-HK member: method readiness and safe continuation render",
+      "status": "expected",
+      "line": 32
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "zh-HK member: sent-state recovery keeps resend waiting",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "zh-HK member: provider-error return offers email recovery",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "zh-HK admin: method readiness and safe continuation render",
+      "status": "expected",
+      "line": 32
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "zh-HK admin: sent-state recovery keeps resend waiting",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "auth-methods.spec.ts",
+      "name": "zh-HK admin: provider-error return offers email recovery",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "name": "private bilingual CMS draft, real layout, second editor conflict and explicit publication revert",
+      "status": "expected",
+      "line": 13
+    },
+    {
+      "file": "cms-publish.spec.ts",
+      "name": "registered media search over 79 real static fixture images in bilingual event forms",
+      "status": "expected",
+      "line": 329
+    },
+    {
+      "file": "concierge.spec.ts",
+      "name": "desktop en real-route mock provider cites sources and keeps continuity",
+      "status": "unexpected",
+      "line": 40
+    },
+    {
+      "file": "concierge.spec.ts",
+      "name": "desktop zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "unexpected",
+      "line": 40
+    },
+    {
+      "file": "concierge.spec.ts",
+      "name": "mobile en real-route mock provider cites sources and keeps continuity",
+      "status": "unexpected",
+      "line": 40
+    },
+    {
+      "file": "concierge.spec.ts",
+      "name": "mobile zh-HK real-route mock provider cites sources and keeps continuity",
+      "status": "unexpected",
+      "line": 40
+    },
+    {
+      "file": "concierge.spec.ts",
+      "name": "authenticated member can use the real Concierge route from the member portal",
+      "status": "unexpected",
+      "line": 102
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/ renders one English heading",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/zh renders one Chinese heading",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/about renders one English heading",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/zh/about renders one Chinese heading",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/about/chairman renders one English heading",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/zh/about/chairman renders one Chinese heading",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/about/committees renders one English heading",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/zh/about/committees renders one Chinese heading",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/membership renders one English heading",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/zh/membership renders one Chinese heading",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/ai-ops renders one English heading",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "core-pages.spec.ts",
+      "name": "/zh/ai-ops renders one Chinese heading",
+      "status": "expected",
+      "line": 11
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "name": "en: staff finds and checks in a confirmed guest at 390px",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "event-check-in.spec.ts",
+      "name": "zh-HK: staff finds and checks in a confirmed guest at 390px",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "full-admin-daily-work.spec.ts",
+      "name": "en scope, company keyboard, history and Member360 facts",
+      "status": "expected",
+      "line": 110
+    },
+    {
+      "file": "full-admin-daily-work.spec.ts",
+      "name": "zh-HK scope, company keyboard, history and Member360 facts",
+      "status": "expected",
+      "line": 110
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "name": "zh-HK staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "skipped",
+      "line": 35
+    },
+    {
+      "file": "full-application-cases.spec.ts",
+      "name": "en staff assigns, follows up and rejects a stale tab without changing rights",
+      "status": "skipped",
+      "line": 35
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "name": "fresh login resumes the same company application with valid saved fields",
+      "status": "skipped",
+      "line": 48
+    },
+    {
+      "file": "full-application-resume.spec.ts",
+      "name": "another applicant cannot read company draft even with a legitimate seat in that company",
+      "status": "skipped",
+      "line": 78
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "name": "zh-HK GET is read-only; final draft and stale/current two-person approval",
+      "status": "skipped",
+      "line": 23
+    },
+    {
+      "file": "full-campaign-review.spec.ts",
+      "name": "en GET is read-only; final draft and stale/current two-person approval",
+      "status": "skipped",
+      "line": 23
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "name": "zh-HK recovers bilingual edits after real browser history",
+      "status": "skipped",
+      "line": 10
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "name": "en recovers bilingual edits after real browser history",
+      "status": "skipped",
+      "line": 10
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "name": "denied storage warns truthfully and keeps edits in the form",
+      "status": "skipped",
+      "line": 27
+    },
+    {
+      "file": "full-cms-history.spec.ts",
+      "name": "another authorized synthetic identity cannot see the prior identity draft",
+      "status": "skipped",
+      "line": 34
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "name": "STAFF has no indefinite grant entry",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "name": "EXCO has no indefinite grant entry",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "full-grant-governance.spec.ts",
+      "name": "SUPERADMIN has no indefinite grant entry",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "name": "en: row decisions, private correction report and exact import commit",
+      "status": "unexpected",
+      "line": 12
+    },
+    {
+      "file": "full-import-export.spec.ts",
+      "name": "zh-HK: row decisions, private correction report and exact import commit",
+      "status": "expected",
+      "line": 12
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "name": "zh-HK presents unknown/disabled/verified polling separately",
+      "status": "skipped",
+      "line": 44
+    },
+    {
+      "file": "full-job-health.spec.ts",
+      "name": "en presents unknown/disabled/verified polling separately",
+      "status": "skipped",
+      "line": 44
+    },
+    {
+      "file": "full-member-payment-reconciliation.spec.ts",
+      "name": "provider paid invoice → root replays original event → one activation and visible receipt",
+      "status": "skipped",
+      "line": 38
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "name": "expired history remains accessible without entitlements",
+      "status": "skipped",
+      "line": 23
+    },
+    {
+      "file": "full-member-renewal.spec.ts",
+      "name": "cancelled history remains accessible without entitlements",
+      "status": "skipped",
+      "line": 23
+    },
+    {
+      "file": "full-membership-policy.spec.ts",
+      "name": "unchecked server submission writes no payment; keyboard confirmation records one receipt and reaches real TEST checkout",
+      "status": "skipped",
+      "line": 58
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "name": "en public login, partner assets and publication scope",
+      "status": "expected",
+      "line": 23
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "name": "en existing signed-in staff returns to admin",
+      "status": "expected",
+      "line": 41
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "name": "zh public login, partner assets and publication scope",
+      "status": "expected",
+      "line": 23
+    },
+    {
+      "file": "full-public-content.spec.ts",
+      "name": "zh existing signed-in staff returns to admin",
+      "status": "expected",
+      "line": 41
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "name": "zh-HK traverses 101 rows and retains context on previous and filter reset",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "full-segment-pagination.spec.ts",
+      "name": "en traverses 51 rows and retains context on previous and filter reset",
+      "status": "skipped",
+      "line": 18
+    },
+    {
+      "file": "full-support-handoff.spec.ts",
+      "name": "en stale handoff, keyboard, owner scope and truthful delivery",
+      "status": "expected",
+      "line": 89
+    },
+    {
+      "file": "full-support-handoff.spec.ts",
+      "name": "zh stale handoff, keyboard, owner scope and truthful delivery",
+      "status": "expected",
+      "line": 89
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "name": "en: empty RSVP and a lost action response stay on the form",
+      "status": "skipped",
+      "line": 11
+    },
+    {
+      "file": "guest-rsvp-recovery.spec.ts",
+      "name": "zh-HK: empty RSVP and a lost action response stay on the form",
+      "status": "skipped",
+      "line": 11
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "name": "en join shows localized progress and a single heading",
+      "status": "expected",
+      "line": 19
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "name": "zh-HK join shows localized progress and a single heading",
+      "status": "expected",
+      "line": 19
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "name": "a forged completion status still renders anonymous authentication",
+      "status": "expected",
+      "line": 37
+    },
+    {
+      "file": "join-auth.spec.ts",
+      "name": "a Startup join link never exposes a payment or portal state before authentication",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "join-resume.spec.ts",
+      "name": "en: signed-in join start and return are resumable across tabs",
+      "status": "expected",
+      "line": 14
+    },
+    {
+      "file": "join-resume.spec.ts",
+      "name": "zh-HK: signed-in join start and return are resumable across tabs",
+      "status": "expected",
+      "line": 14
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 390px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 768px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 1024px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 1280px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 1366px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 1440px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/ login visible and keyboard reachable at 1920px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 390px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 768px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 1024px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 1280px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 1366px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 1440px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "/zh login visible and keyboard reachable at 1920px",
+      "status": "expected",
+      "line": 8
+    },
+    {
+      "file": "login-entry.spec.ts",
+      "name": "anonymous admin deep link opens staff login and preserves the allowed filter",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "M1 join remains available in en",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "M1 join remains available in zh-HK",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "Startup join -> deterministic Checkout adapter -> signed webhook state is under five minutes",
+      "status": "expected",
+      "line": 6
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "Community and Patron plans use deterministic non-checkout branches",
+      "status": "expected",
+      "line": 23
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "signed webhook verification feeds the real processor and exact replay is a duplicate",
+      "status": "expected",
+      "line": 32
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "deterministic seat and Billing Portal contracts enforce capacity and ownership",
+      "status": "expected",
+      "line": 42
+    },
+    {
+      "file": "m1-acceptance.spec.ts",
+      "name": "live Neon/Stripe acceptance is explicitly unimplemented when isolated credentials are absent",
+      "status": "skipped",
+      "line": 55
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "anonymous admin requests require the discoverable staff login",
+      "status": "expected",
+      "line": 66
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "public presentation and protected portal routes remain available without credentials",
+      "status": "expected",
+      "line": 73
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "staff searches Member 360 and appends a note through the real auth and database seams",
+      "status": "expected",
+      "line": 97
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "the canonical segment has exact rows and CSV headers and its draft entry cannot queue on GET",
+      "status": "expected",
+      "line": 115
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "the operational at-risk queue contains exactly the three engineered members in order",
+      "status": "expected",
+      "line": 151
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "the report reconciles current ledger stock and committed July flow before browser mutations",
+      "status": "expected",
+      "line": 164
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "event check-in appends exactly one event_attended engagement",
+      "status": "expected",
+      "line": 189
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "staff records one supported approval decision and persists its audit fact",
+      "status": "expected",
+      "line": 202
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "representative authenticated admin routes have no serious or critical axe violations",
+      "status": "expected",
+      "line": 213
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "Traditional Chinese admin routes render localized headings and segment recovery state",
+      "status": "expected",
+      "line": 222
+    },
+    {
+      "file": "m2-admin-crm.spec.ts",
+      "name": "anonymous, member, and company-admin identities require login or receive access denied on every admin route",
+      "status": "expected",
+      "line": 237
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "name": "staff sees the English and Traditional Chinese automation consoles",
+      "status": "skipped",
+      "line": 93
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "name": "staff sees seeded automation history in Member 360",
+      "status": "skipped",
+      "line": 113
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "name": "a member receives a real 404 for both automation console locales",
+      "status": "skipped",
+      "line": 141
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "name": "confirms marketing unsubscribe in en",
+      "status": "skipped",
+      "line": 177
+    },
+    {
+      "file": "m3-automations.spec.ts",
+      "name": "confirms marketing unsubscribe in zh-HK",
+      "status": "skipped",
+      "line": 177
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "name": "staff sees three approval-only drafts and one inert board preview",
+      "status": "skipped",
+      "line": 86
+    },
+    {
+      "file": "m4b-agents.spec.ts",
+      "name": "member identities receive real 404s for both staff queues",
+      "status": "skipped",
+      "line": 139
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "name": "en exposes the complete privacy-safe dashboard",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "name": "zh-HK exposes the complete privacy-safe dashboard",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "m4c-aiops.spec.ts",
+      "name": "sitemap publishes the canonical AI-Ops route",
+      "status": "expected",
+      "line": 142
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "name": "preserves every public filter in a stable shareable query",
+      "status": "expected",
+      "line": 27
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "name": "projects only public SoftwareApplication JSON-LD fields",
+      "status": "expected",
+      "line": 32
+    },
+    {
+      "file": "m5-showcase.spec.ts",
+      "name": "live Preview browser scenarios are explicitly gated",
+      "status": "skipped",
+      "line": 39
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "name": "maps each fixture answer set to exactly one eligible scheme",
+      "status": "expected",
+      "line": 85
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "name": "member submits through the real route and the application survives a reload",
+      "status": "skipped",
+      "line": 104
+    },
+    {
+      "file": "m6-launch-pad.spec.ts",
+      "name": "staff performs legal stage moves, proves audit persistence, and sees the real Showcase projection",
+      "status": "skipped",
+      "line": 129
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "name": "en: company billing manager can reach billing without starting payment",
+      "status": "skipped",
+      "line": 27
+    },
+    {
+      "file": "member-billing-entry.spec.ts",
+      "name": "zh-HK: company billing manager can reach billing without starting payment",
+      "status": "skipped",
+      "line": 27
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "name": "en: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "status": "skipped",
+      "line": 16
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "name": "zh-HK: cancellation returns to summary, status stays owner-scoped, same attempt resumes",
+      "status": "skipped",
+      "line": 16
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "name": "en: native membership form reaches Stripe before hydration",
+      "status": "skipped",
+      "line": 51
+    },
+    {
+      "file": "membership-checkout.spec.ts",
+      "name": "zh-HK: native membership form reaches Stripe before hydration",
+      "status": "skipped",
+      "line": 51
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "name": "en: bare /join renders the plan chooser with four plans",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "name": "en: /events interest form acknowledges a submission",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "name": "zh-HK: bare /join renders the plan chooser with four plans",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "name": "zh-HK: /events interest form acknowledges a submission",
+      "status": "expected",
+      "line": 44
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "name": "en: /admin/inbox and /admin/tasks render for staff",
+      "status": "expected",
+      "line": 65
+    },
+    {
+      "file": "phase-a-funnel.spec.ts",
+      "name": "zh-HK: /admin/inbox and /admin/tasks render for staff",
+      "status": "expected",
+      "line": 65
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "en: /events filter panel round-trips the format filter",
+      "status": "expected",
+      "line": 83
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "en: guest RSVP form rejects a malformed address before writing",
+      "status": "skipped",
+      "line": 97
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "zh-HK: /events filter panel round-trips the format filter",
+      "status": "expected",
+      "line": 83
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "zh-HK: guest RSVP form rejects a malformed address before writing",
+      "status": "skipped",
+      "line": 97
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "the guest cancel link lands on /events for token \"not-a-token\"",
+      "status": "expected",
+      "line": 135
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "the guest cancel link lands on /events for token \"000000000000\"",
+      "status": "expected",
+      "line": 135
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "en: a submitted event reaches /events with its organiser once staff approve it",
+      "status": "expected",
+      "line": 149
+    },
+    {
+      "file": "phase-b1-member-events.spec.ts",
+      "name": "zh-HK: a submitted event reaches /events with its organiser once staff approve it",
+      "status": "expected",
+      "line": 149
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "en: /members renders the directory heading and its filter form",
+      "status": "expected",
+      "line": 53
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "en: the industry filter round-trips through the URL",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "en: a member page carries Organization and BreadcrumbList JSON-LD",
+      "status": "skipped",
+      "line": 75
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "zh-HK: /members renders the directory heading and its filter form",
+      "status": "expected",
+      "line": 53
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "zh-HK: the industry filter round-trips through the URL",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "zh-HK: a member page carries Organization and BreadcrumbList JSON-LD",
+      "status": "skipped",
+      "line": 75
+    },
+    {
+      "file": "phase-b2-member-directory.spec.ts",
+      "name": "a company admin submits their public page and staff publishes it",
+      "status": "expected",
+      "line": 102
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "en: /admin/inbox is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 84
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "en: the inbox description no longer promises a read-only inbox",
+      "status": "expected",
+      "line": 95
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "zh-HK: /admin/inbox is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 84
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "zh-HK: the inbox description no longer promises a read-only inbox",
+      "status": "expected",
+      "line": 95
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "en: /admin/inbox renders its heading, both filter rows and the reply-capable description",
+      "status": "expected",
+      "line": 109
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "zh-HK: /admin/inbox renders its heading, both filter rows and the reply-capable description",
+      "status": "expected",
+      "line": 109
+    },
+    {
+      "file": "phase-c1-whatsapp-human-lane.spec.ts",
+      "name": "staff take a WhatsApp thread over, reply inside the window and hand it back",
+      "status": "skipped",
+      "line": 135
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "en: /admin/templates is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 87
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "en: /admin/contacts is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 87
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "en: /admin/campaigns is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 87
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "zh-HK: /admin/templates is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 87
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "zh-HK: /admin/contacts is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 87
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "zh-HK: /admin/campaigns is hidden from anyone who is not staff",
+      "status": "expected",
+      "line": 87
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "the send queue refuses a request with no bearer",
+      "status": "expected",
+      "line": 99
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "en: /admin/templates lists every seeded key with its category and approval state",
+      "status": "expected",
+      "line": 117
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "en: /admin/contacts round-trips the stage and source filters through the URL",
+      "status": "expected",
+      "line": 157
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "en: /admin/segments can address the contacts audience",
+      "status": "skipped",
+      "line": 176
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "zh-HK: /admin/templates lists every seeded key with its category and approval state",
+      "status": "expected",
+      "line": 117
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "zh-HK: /admin/contacts round-trips the stage and source filters through the URL",
+      "status": "expected",
+      "line": 157
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "zh-HK: /admin/segments can address the contacts audience",
+      "status": "skipped",
+      "line": 176
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "approving a template makes it sendable",
+      "status": "expected",
+      "line": 209
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "a contact with a thread links to the inbox conversation it wrote from",
+      "status": "skipped",
+      "line": 226
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "the wizard refuses a blank template variable and previews a real eligibility partition",
+      "status": "expected",
+      "line": 240
+    },
+    {
+      "file": "phase-c2-campaigns-and-contacts.spec.ts",
+      "name": "a second POST inside the same ten minutes is a duplicate",
+      "status": "skipped",
+      "line": 347
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "name": "en: the member tools list renders",
+      "status": "skipped",
+      "line": 39
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "name": "en: an entitled member's tools page embeds the configured tool with its token",
+      "status": "skipped",
+      "line": 46
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "name": "zh-HK: the member tools list renders",
+      "status": "skipped",
+      "line": 39
+    },
+    {
+      "file": "phase-d2-member-tools.spec.ts",
+      "name": "zh-HK: an entitled member's tools page embeds the configured tool with its token",
+      "status": "skipped",
+      "line": 46
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "name": "staff price a ticketed event and a buyer reaches Stripe Checkout (en)",
+      "status": "unexpected",
+      "line": 39
+    },
+    {
+      "file": "phase-d4a-ticket-checkout.spec.ts",
+      "name": "staff price a ticketed event and a buyer reaches Stripe Checkout (zh-HK)",
+      "status": "unexpected",
+      "line": 39
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "name": "en: a pass renders, admits once, reports the second scan, and is undone",
+      "status": "skipped",
+      "line": 50
+    },
+    {
+      "file": "phase-d4b-passes-and-check-in.spec.ts",
+      "name": "zh-HK: a pass renders, admits once, reports the second scan, and is undone",
+      "status": "skipped",
+      "line": 50
+    },
+    {
+      "file": "phase-d4c-refunds.spec.ts",
+      "name": "staff refund the seeded order, and both locales lose the seats",
+      "status": "skipped",
+      "line": 117
+    },
+    {
+      "file": "phase-d4d-event-cancellation.spec.ts",
+      "name": "staff cancel the seeded event, and every public surface explains it",
+      "status": "skipped",
+      "line": 102
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "name": "en protects the member portal with a locale-aware continuation",
+      "status": "unexpected",
+      "line": 9
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "name": "zh-HK protects the member portal with a locale-aware continuation",
+      "status": "unexpected",
+      "line": 9
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "name": "portal navigation does not expose a private dashboard to an anonymous user",
+      "status": "unexpected",
+      "line": 18
+    },
+    {
+      "file": "portal-dashboard.spec.ts",
+      "name": "an anonymous portal never exposes company controls",
+      "status": "unexpected",
+      "line": 26
+    },
+    {
+      "file": "portal-membership-recovery.spec.ts",
+      "name": "a signed-in member with no current membership sees bilingual recovery and can sign out",
+      "status": "skipped",
+      "line": 12
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "en protects the localized member directory route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "en protects the localized member events route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "en protects the localized member documents route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "en protects the localized member billing route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "zh-HK protects the localized member directory route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "zh-HK protects the localized member events route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "zh-HK protects the localized member documents route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "portal-secondary-pages.spec.ts",
+      "name": "zh-HK protects the localized member billing route",
+      "status": "unexpected",
+      "line": 10
+    },
+    {
+      "file": "public-cache-isolation.spec.ts",
+      "name": "member A, company member B and guest see only the public bilingual news projection",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "public-cache-isolation.spec.ts",
+      "name": "private bilingual drafts stay out of warmed public cache; explicit publish and revert invalidate it",
+      "status": "expected",
+      "line": 70
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "en: home destinations, member directory, showcase and answered FAQ",
+      "status": "expected",
+      "line": 10
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "en: public home and membership fit 390px",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "en: public home and membership fit 768px",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "en: public home and membership fit 1440px",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "en: membership FAQ and navigation have no serious axe findings",
+      "status": "expected",
+      "line": 38
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "/zh: home destinations, member directory, showcase and answered FAQ",
+      "status": "expected",
+      "line": 10
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "/zh: public home and membership fit 390px",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "/zh: public home and membership fit 768px",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "/zh: public home and membership fit 1440px",
+      "status": "expected",
+      "line": 26
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "/zh: membership FAQ and navigation have no serious axe findings",
+      "status": "expected",
+      "line": 38
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "en: member login keeps safe return and recovery paths",
+      "status": "expected",
+      "line": 49
+    },
+    {
+      "file": "public-navigation.spec.ts",
+      "name": "/zh: member login keeps safe return and recovery paths",
+      "status": "expected",
+      "line": 49
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "a pending real database read preserves the discovery anchor",
+      "status": "expected",
+      "line": 10
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "en page hero image requests are eager and high priority",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "en hero request is explicitly eager and high priority",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "en streamed opening section does not move the first viewport",
+      "status": "expected",
+      "line": 77
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "zh-HK page hero image requests are eager and high priority",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "zh-HK hero request is explicitly eager and high priority",
+      "status": "expected",
+      "line": 64
+    },
+    {
+      "file": "public-performance.spec.ts",
+      "name": "zh-HK streamed opening section does not move the first viewport",
+      "status": "expected",
+      "line": 77
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "en: long home sections defer layout and reveal on keyboard focus",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "en: programme anchors reveal their sections and print includes the full page",
+      "status": "expected",
+      "line": 36
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "en: membership FAQ remains available on direct fragment navigation",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "/zh: long home sections defer layout and reveal on keyboard focus",
+      "status": "expected",
+      "line": 4
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "/zh: programme anchors reveal their sections and print includes the full page",
+      "status": "expected",
+      "line": 36
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "/zh: membership FAQ remains available on direct fragment navigation",
+      "status": "expected",
+      "line": 56
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "en: streamed home shell keeps the footer below the first viewport",
+      "status": "expected",
+      "line": 67
+    },
+    {
+      "file": "public-rendering.spec.ts",
+      "name": "/zh: streamed home shell keeps the footer below the first viewport",
+      "status": "expected",
+      "line": 67
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/showcase renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/showcase renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/launchpad renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/launchpad renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/ai-ops renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/ai-ops renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/events renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/events renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/news renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/news renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/programmes renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/programmes renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/partners renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/partners renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/chairman renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/chairman renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/committees renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/committees renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history/2001-establishment-of-wtia renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history/2001-establishment-of-wtia renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history/2014-wi-fi-hk renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history/2014-wi-fi-hk renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history/new-term-of-executive-committee-2022-2024 renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history/new-term-of-executive-committee-2022-2024 renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/about/history/asia-smart-innovation-awards-2025 renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/about/history/asia-smart-innovation-awards-2025 renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/programs/cpai renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/programs/cpai renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/programs/hkict renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/programs/hkict renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/programs/tct renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/programs/tct renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/programs/asa renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/programs/asa renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/contact renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/contact renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/privacy renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/privacy renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/ai-transparency renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-route-matrix.spec.ts",
+      "name": "/zh/ai-transparency renders one public heading",
+      "status": "expected",
+      "line": 21
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "desktop navigation supports trigger traversal, open, Escape, active state, and focus return",
+      "status": "expected",
+      "line": 3
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "mobile Sheet traps focus, resets Accordion, closes on navigation, and restores the trigger",
+      "status": "unexpected",
+      "line": 46
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "captures all four open desktop menu shapes",
+      "status": "expected",
+      "line": 80
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "captures / mobile Sheet review evidence",
+      "status": "expected",
+      "line": 97
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "captures /zh mobile Sheet review evidence",
+      "status": "expected",
+      "line": 97
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/ shell fits 320px and keeps 44px controls",
+      "status": "unexpected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/zh shell fits 320px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/ shell fits 375px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/zh shell fits 375px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/ shell fits 768px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/zh shell fits 768px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/ shell fits 1120px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/zh shell fits 1120px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/ shell fits 1440px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/zh shell fits 1440px and keeps 44px controls",
+      "status": "expected",
+      "line": 108
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "locale switch preserves path, repeated query values, and fragment",
+      "status": "unexpected",
+      "line": 148
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/events marks Events & Programmes as the active group",
+      "status": "expected",
+      "line": 162
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/showcase marks Membership & Ecosystem as the active group",
+      "status": "expected",
+      "line": 162
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/ai-ops marks Impact & Insights as the active group",
+      "status": "expected",
+      "line": 162
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "/about/history marks About WTIA as the active group",
+      "status": "expected",
+      "line": 162
+    },
+    {
+      "file": "public-shell.spec.ts",
+      "name": "the header floats over the hero, then goes solid past 56px",
+      "status": "unexpected",
+      "line": 169
+    },
+    {
+      "file": "seat-management.spec.ts",
+      "name": "company seat route is protected and localized",
+      "status": "unexpected",
+      "line": 4
+    },
+    {
+      "file": "seat-management.spec.ts",
+      "name": "Chinese company seat route is protected",
+      "status": "unexpected",
+      "line": 11
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "name": "en: seat count, same-browser checkout recovery and owner boundary",
+      "status": "unexpected",
+      "line": 13
+    },
+    {
+      "file": "ticket-checkout-recovery.spec.ts",
+      "name": "zh-HK: seat count, same-browser checkout recovery and owner boundary",
+      "status": "unexpected",
+      "line": 13
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/ renders the WP-3 hero over the real homepage sections",
+      "status": "expected",
+      "line": 93
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/ fits 375px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/ fits 768px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/ fits 1024px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/ fits 1440px with 44px hero actions clear of Concierge",
+      "status": "unexpected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh renders the WP-3 hero over the real homepage sections",
+      "status": "expected",
+      "line": 93
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh fits 375px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh fits 768px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh fits 1024px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh fits 1440px with 44px hero actions clear of Concierge",
+      "status": "expected",
+      "line": 112
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/about preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/about preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/about/chairman preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/about/chairman preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/about/committees preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/about/committees preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/about/history preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/about/history preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/programs/asa preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/programs/asa preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/programs/cpai preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/programs/cpai preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/programs/hkict preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/programs/hkict preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/programs/tct preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "/zh/programs/tct preserves the PR3 public route contract",
+      "status": "expected",
+      "line": 199
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "captures PR3 Home and programme review evidence at 375px",
+      "status": "expected",
+      "line": 212
+    },
+    {
+      "file": "wisetech-pr3-public-pages.spec.ts",
+      "name": "captures PR3 Home and programme review evidence at 1440px",
+      "status": "expected",
+      "line": 212
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "name": "preserves Event status and Showcase filters across locale switches",
+      "status": "unexpected",
+      "line": 64
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "name": "keeps the bilingual Membership catalog honest without repository credentials",
+      "status": "unexpected",
+      "line": 82
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "name": "opens Contact Concierge, focuses the message, and restores the launcher after Escape",
+      "status": "expected",
+      "line": 117
+    },
+    {
+      "file": "wisetech-pr5-public-journeys.spec.ts",
+      "name": "renders exact own-origin private Event and partner media without optimization",
+      "status": "unexpected",
+      "line": 147
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/why-wisetech resolves to /about",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/en/why-wisetech resolves to /about",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/zh/why-wisetech resolves to /zh/about",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/programmes/launchpad resolves to /launchpad",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/zh/join/success resolves to /zh/join/complete",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/request-introduction resolves to /showcase",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-redirects.spec.ts",
+      "name": "/zh/solutions/anything resolves to /zh/showcase/anything",
+      "status": "expected",
+      "line": 29
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/ renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/ renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/ renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/ renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/events renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/showcase renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/membership renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/about renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/contact renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programs/asa renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/news renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/launchpad renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/programmes renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-visual-baseline.spec.ts",
+      "name": "/zh/partners renders the visual baseline",
+      "status": "skipped",
+      "line": 95
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/join renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/about renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/about/chairman renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/about/committees renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/about/history renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/membership renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/showcase renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/launchpad renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/ai-ops renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/events renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/news renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/programs/cpai renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/programs/hkict renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/programs/tct renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/programs/asa renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/programmes renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/contact renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/partners renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/privacy renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/refund-policy renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/ai-transparency renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    },
+    {
+      "file": "wisetech-zh-walk.spec.ts",
+      "name": "/zh/members renders in Chinese without leaks",
+      "status": "expected",
+      "line": 30
+    }
+  ],
+  "production": false,
+  "statement": "Complete collection attempt failed; all 35 failures retained and disposition follows. 150 skips are not passes."
+}

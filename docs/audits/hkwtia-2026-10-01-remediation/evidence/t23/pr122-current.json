@@ -1,0 +1,59 @@
+{
+  "baseRefName": "codex/full-remediation-performance-20261001",
+  "headRefName": "codex/full-remediation-acceptance-20261001",
+  "headRefOid": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "isDraft": true,
+  "state": "OPEN",
+  "statusCheckRollup": [
+    {
+      "name": "checks",
+      "context": null,
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "state": null
+    },
+    {
+      "name": "tests (1)",
+      "context": null,
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "state": null
+    },
+    {
+      "name": "tests (2)",
+      "context": null,
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "state": null
+    },
+    {
+      "name": "worker",
+      "context": null,
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "state": null
+    },
+    {
+      "name": "quality",
+      "context": null,
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "state": null
+    },
+    {
+      "name": null,
+      "context": "Vercel",
+      "status": null,
+      "conclusion": null,
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Vercel Preview Comments",
+      "context": null,
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "state": null
+    }
+  ],
+  "url": "https://github.com/YNWAforever/hkwtia/pull/122"
+}

@@ -1,0 +1,25 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/audit-full-migration-recovery.test.ts (3 tests | 1 failed) 68865ms
+   ✓ full clean and baseline migration recovery > migrates a clean database and repeats without losing additive schema or ledger  18361ms
+   ✓ full clean and baseline migration recovery > rolls back an interrupted baseline upgrade, then preserves historical rights, paid transactions and CMS history across compatible rollback  25653ms
+   × full clean and baseline migration recovery > restores baseline56 backup, upgrades to current ledger, preserves unknown effects through another restore and executes actual historical repository reads/writes 24849ms
+     → insert or update on table "audit_events" violates foreign key constraint "audit_events_actor_user_id_profiles_id_fk"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/audit-full-migration-recovery.test.ts > full clean and baseline migration recovery > restores baseline56 backup, upgrades to current ledger, preserves unknown effects through another restore and executes actual historical repository reads/writes
+error: insert or update on table "audit_events" violates foreign key constraint "audit_events_actor_user_id_profiles_id_fk"
+ ❯ node_modules/pg-pool/index.js:45:11
+ ❯ tests/integration/audit-full-migration-recovery.test.ts:297:9
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  01:23:06
+   Duration  74.99s (transform 955ms, setup 437ms, collect 4.02s, tests 68.86s, environment 0ms, prepare 235ms)
+

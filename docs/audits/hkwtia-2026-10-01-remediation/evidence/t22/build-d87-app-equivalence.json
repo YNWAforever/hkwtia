@@ -1,0 +1,38 @@
+{
+  "currentSourceSha": "d87f05b8fcea33eb7bb03e9ca95e2d0eac0738ac",
+  "buildBaseApplicationSha": "999e6b7811bad163d9e5d2cef88b2b34aa337c7e",
+  "applicationTreeDifference": [],
+  "buildExitCode": 0,
+  "buildEnvironment": "owned loopback canonical build, confirmed isolated DB/Auth/TEST Stripe",
+  "files": [
+    {
+      "path": "lib/auth/server.ts",
+      "sha256": "f787c25f4e97f7edcaf99ec356d279947e19e6d7e7ef109956af494bf291545a"
+    },
+    {
+      "path": "components/layout/site-header.tsx",
+      "sha256": "f0344f1bbc2d9b6a1cd5eac0f4a7a2af76728e923d41c0776ccb361213b7e0e0"
+    },
+    {
+      "path": "app/[locale]/layout.tsx",
+      "sha256": "bb442247c30c5e631fa7590a4a88351651c656e46ba89d451556bd74fabd4a94"
+    },
+    {
+      "path": "app/[locale]/(admin)/admin/layout.tsx",
+      "sha256": "46f9668db48835880169441ef2f9e84c5f0db8cdb8630f2cb1a210c5af8801c9"
+    },
+    {
+      "path": "app/[locale]/(member)/portal/layout.tsx",
+      "sha256": "1b51eb651d183ffd314f587728a6bf4c227ad191516f9e04b0c7090648f67d51"
+    },
+    {
+      "path": "components/layout/dual-brand-lockup.tsx",
+      "sha256": "885de0e93c305c16a56a0d5148e2127a2858dd7c174fbfed0609dcbdbc6562e7"
+    },
+    {
+      "path": "components/internal-shell/private-link.tsx",
+      "sha256": "c75da7d26562bc7fb8d96117f58c5fdcf9363baf58bab15b2852ac3b729df051"
+    }
+  ],
+  "production": false
+}

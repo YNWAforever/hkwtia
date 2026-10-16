@@ -1,4 +1,12 @@
+import {readFileSync} from "node:fs";
+
 import {expect, test} from "@playwright/test";
+
+// Strings only the signed-in dashboard renders, read from the bundle so a copy change cannot leave
+// this guard asserting the absence of text that no longer exists anywhere (it once checked the
+// retired "Membership status", which made the assertion pass vacuously).
+const en = JSON.parse(readFileSync(new URL("../../messages/en.json", import.meta.url), "utf8")) as typeof import("../../messages/en.json");
+const privateDashboardText = [en.Portal.nextStep.label, en.Portal.glance.title];
 
 const locales = [
   {
@@ -28,7 +36,9 @@ for (const locale of locales) {
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByRole("heading", {level: 1, name: locale.heading})).toBeVisible();
     for (const step of locale.steps) await expect(page.getByText(step, {exact: true})).toBeVisible();
-    expect(consoleErrors).toEqual([]);
+    const appErrors = consoleErrors.filter(message =>
+      !/^Framing 'https:\/\/vercel\.live\/' violates the following Content Security Policy directive: "frame-src /.test(message));
+    expect(appErrors).toEqual([]);
   });
 }
 
@@ -43,6 +53,6 @@ test("a Startup join link never exposes a payment or portal state before authent
   await page.goto("/join?plan=startup");
 
   await expect(page.getByText("Sign in", {exact: true})).toBeVisible();
-  await expect(page.getByText("Membership status", {exact: true})).toHaveCount(0);
+  for (const text of privateDashboardText) await expect(page.getByText(text, {exact: true})).toHaveCount(0);
   await expect(page.getByRole("link", {name: /billing portal/i})).toHaveCount(0);
 });

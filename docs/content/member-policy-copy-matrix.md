@@ -1,0 +1,19 @@
+# T-MP10 — membership policy and self-service copy
+
+Status: navigation/copy hygiene implemented; substantive policy approval and five-person wayfinding acceptance outstanding.
+
+Evidence baseline: `e8254bab79cff5945da4abe995a7c075d0ce3d57`; implementation task T-MP10. `config/membership-policies.ts` contains **no approved versions**. `lib/membership/policy.ts` requires version, effective date, approval date, approver, approval reference, bilingual content and content hash; this change does not populate that registry, enable policy acceptance, or overwrite historical accepted terms. Provider configuration and deployed CMS overrides have not been inspected.
+
+| policyId / proposed copy revision | Evidence and approval state | English | 繁體中文 | Placement / destination |
+|---|---|---|---|---|
+| self-service-navigation / copy-2026-10-14 | Code-backed navigation; no new policy promise | Already a member? Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements. | 已是會員？登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。 | Membership page; locale-aware `/portal/billing` and `/contact`; protected continuation preserves billing destination |
+| checkout-amount / copy-2026-10-14 | Existing public catalogue and checkout; remove internal price-reference terminology | Review the total and subscription terms at secure checkout before confirming payment. | 請在安全結帳頁核對總額及訂閱條款，再確認付款。 | `Membership.pricing.readyCopy`; existing approved-copy mechanism remains in place |
+| seats / existing | Catalogue/entitlements currently expose Startup 5 and Corporate 25; no new commercial approval inferred | Keep existing seat allowance wording and figures. | 保留現有席位說明及數字。 | Membership tier cards and FAQs; no change to 5/25 or annual prices |
+| automatic-renewal / approval-required | Billing code can represent renewal; **not evidence of WTIA policy approval** | Draft instruction: publish the approved renewal rule, notice period and applicable plans after an approval reference exists. | 草稿指示：取得批准記錄後，刊登適用計劃、自動續會規則及通知期限。 | Membership FAQ + billing guidance; draft instruction is documentation only |
+| cancellation-effective-date / approval-required | `cancel_at_period_end` is a system state; policy registry empty | Draft instruction: specify the effective date, eligible action and confirmation receipt from approved terms. | 草稿指示：根據已批准條款，列明取消生效日期、可用操作及確認通知。 | FAQ + provider entry help; no cancellation promise added |
+| refunds / approval-required | Existing `/refund-policy` link is retained; no newly supplied approval evidence | Draft instruction: reconcile refund scope, time limit, exceptions and contact method with approved policy. | 草稿指示：按已批准政策核對退款範圍、期限、例外及聯絡方法。 | Existing refund-policy page; no invented entitlement or automatic refund action |
+| post-expiry-history / code-observed | Own billing authorization supports historical access independently of benefits; provider availability still matters | Use billing to view the history available for your account. | 前往帳單頁查看此帳戶可用的紀錄。 | Existing portal billing and recovery links; no access to another member's receipts |
+
+Approval owner to record: WTIA membership operations, with reference to the authoritative bilingual terms. Approval must identify policy version, affected plans, effective date, translated wording and publication locations. CMS text may override shipped message values; review those overrides before release, without silently overwriting approved content.
+
+Acceptance: five representative people should independently locate renewal help, cancellation arrangements and invoice history in their preferred language. Record participant role, task, route, outcome and difficulty. No participant sessions were conducted here; automated continuation, billing and string checks do not replace them.

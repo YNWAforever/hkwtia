@@ -1,0 +1,100 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/integration/admin-workflow-performance.test.ts (26 tests | 4 failed | 22 skipped) 20073ms
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 synthetic profiles: seed and measure search, keyset and aggregate report
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-0 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-1 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-2 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-3 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-4 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-5 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: filter-6 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: descending keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 profiles: renewal keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 1000 synthetic drafts: bounded queue, filters, current actor and keyset coverage
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 synthetic profiles: seed and measure search, keyset and aggregate report
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-0 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-1 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-2 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-3 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-4 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-5 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: filter-6 keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: descending keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 profiles: renewal keyset has no omissions or duplicates
+   ↓ T15 actual full-schema synthetic administrative scale > 10000 synthetic drafts: bounded queue, filters, current actor and keyset coverage
+   × T15 actual full-schema synthetic administrative scale > 50-row defaults and 100-row inbox cap are enforced by actual repositories 39ms
+     → expected [ …(20) ] to have a length of 50 but got 20
+   × T15 actual full-schema synthetic administrative scale > default draft review queue returns50 of55 actual drafts 75ms
+     → expected [ { …(6) }, { …(6) }, { …(6) }, …(17) ] to have a length of 50 but got 20
+   × T15 actual full-schema synthetic administrative scale > inbox refuses a request above100 rows before querying 16ms
+     → promise resolved "[]" instead of rejecting
+   × T15 actual full-schema synthetic administrative scale > set visibility preserves owned overlap, active seats, revoked-seat exclusion and matching membership IDs 47ms
+     → new row for relation "memberships" violates check constraint "memberships_target_check"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > 50-row defaults and 100-row inbox cap are enforced by actual repositories
+AssertionError: expected [ …(20) ] to have a length of 50 but got 20
+
+- Expected
++ Received
+
+- 50
++ 20
+
+ ❯ tests/integration/admin-workflow-performance.test.ts:383:119
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > default draft review queue returns50 of55 actual drafts
+AssertionError: expected [ { …(6) }, { …(6) }, { …(6) }, …(17) ] to have a length of 50 but got 20
+
+- Expected
++ Received
+
+- 50
++ 20
+
+ ❯ tests/integration/admin-workflow-performance.test.ts:389:57
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > inbox refuses a request above100 rows before querying
+AssertionError: promise resolved "[]" instead of rejecting
+
+- Expected: 
+Error {
+  "message": "rejected promise",
+}
+
++ Received: 
+[]
+
+ ❯ tests/integration/admin-workflow-performance.test.ts:394:61
+    392|       // The fixture's real Drizzle executor is used; its unused schem…
+    393|       const repo=createInboxRepository(async()=>f.database as never);
+    394|       await expect(repo.listConversations(actor,{limit:101})).rejects.…
+       |                                                             ^
+    395|     });
+    396|     it("set visibility preserves owned overlap, active seats, revoked-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/integration/admin-workflow-performance.test.ts > T15 actual full-schema synthetic administrative scale > set visibility preserves owned overlap, active seats, revoked-seat exclusion and matching membership IDs
+error: new row for relation "memberships" violates check constraint "memberships_target_check"
+ ❯ node_modules/pg-pool/index.js:45:11
+ ❯ tests/integration/admin-workflow-performance.test.ts:401:7
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 22 skipped (26)
+   Start at  23:04:19
+   Duration  23.64s (transform 999ms, setup 391ms, collect 2.44s, tests 20.07s, environment 0ms, prepare 262ms)
+

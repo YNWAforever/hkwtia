@@ -1,0 +1,71 @@
+{
+  "sourceSha": "99d5b11974644c06318da4f91d20bf39a8615b9a",
+  "applicationSourceSha": "3bc4c136db20c4e27a1ba9e652a811eb9fcaf96f",
+  "sourceEquivalence": "current-app-test-equivalence.json; CI tests run exact99",
+  "lint": {
+    "exitCode": 0,
+    "receipt": "CI named lint check and3bc local gates"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "receipt": "CI named typecheck check and3bc local gates"
+  },
+  "strings": {
+    "exitCode": 0,
+    "receipt": "CI named strings check and3bc local gates"
+  },
+  "build": {
+    "exitCode": 0,
+    "receipt": "CI named build check and3bc local built server"
+  },
+  "fullUnit": {
+    "pass": 6346,
+    "fail": 0,
+    "skip": 329,
+    "total": 6675
+  },
+  "worker": {
+    "pass": 57,
+    "fail": 0,
+    "skip": 0,
+    "runtime": "native Workerd CI"
+  },
+  "fullBrowser": {
+    "pass": 332,
+    "unexpected": 4,
+    "skip": 162,
+    "flaky": 0,
+    "collectionErrors": 0,
+    "fullGreen": false,
+    "receipt": "browser-99-single.json"
+  },
+  "localDatabaseRegression": {
+    "pass": 137,
+    "fail": 0,
+    "skip": 0,
+    "files": 52,
+    "environment": "owned PG16"
+  },
+  "nativePreview": {
+    "pass": 17,
+    "fail": 0,
+    "scope": "../t23/preview-runtime-current.json"
+  },
+  "Lighthouse": {
+    "routes": 10,
+    "originalThresholdsPassed": true,
+    "receipt": "lighthouse-current.json",
+    "rumVerified": false
+  },
+  "production": false,
+  "genuineSkipsArePass": false,
+  "targetedOriginalFailures": {
+    "pass": 4,
+    "fail": 0,
+    "skip": 0,
+    "getSession200": 90,
+    "getSession429": 0,
+    "receipt": "browser-99-targeted.json",
+    "singleFullGreen": false
+  }
+}

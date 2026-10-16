@@ -1,0 +1,50 @@
+[
+  {
+    "phase": "goto",
+    "path": "/zh/events",
+    "query": "?status=past",
+    "hash": "#results"
+  },
+  {
+    "phase": "hydrated",
+    "path": "/zh/events",
+    "query": "?status=past",
+    "hash": "#results"
+  },
+  {
+    "phase": "scrollEnd",
+    "path": "/zh/events",
+    "query": "?status=past",
+    "hash": "#results"
+  },
+  {
+    "phase": "scrollButton",
+    "path": "/zh/events",
+    "query": "?status=past",
+    "hash": "#results"
+  },
+  {
+    "phase": "afterPointer",
+    "path": "/events",
+    "query": "?status=past",
+    "hash": ""
+  },
+  {
+    "phase": "otherHydrated",
+    "path": "/events",
+    "query": "?status=past",
+    "hash": ""
+  },
+  {
+    "phase": "focusOther",
+    "path": "/events",
+    "query": "?status=past",
+    "hash": ""
+  },
+  {
+    "phase": "afterKeyboard",
+    "path": "/zh/events",
+    "query": "?status=past",
+    "hash": "#results"
+  }
+]

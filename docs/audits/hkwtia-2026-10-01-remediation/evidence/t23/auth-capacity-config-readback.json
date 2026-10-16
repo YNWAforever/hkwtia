@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-02T22:44:46.719Z",
+  "branchId": "br-lingering-unit-azxl75s5",
+  "projectId": "solitary-wave-52860119",
+  "configurationChanged": false,
+  "numericOrBooleanRateFields": [],
+  "notes": {
+    "notFound": false,
+    "notProvisioned": false,
+    "unsupported": false
+  },
+  "jsonParsed": true,
+  "textBlocks": 1,
+  "thresholdExposed": false,
+  "credentialValuesLogged": false,
+  "production": false,
+  "observedSessionStatuses": {
+    "200": 597,
+    "429": 3
+  },
+  "observedMaxGetSessionRolling60s": 13,
+  "retryAfterProvidedFor429": false,
+  "dedicatedAcceptanceCapacityVerified": false,
+  "gateOwner": "Neon/Auth operator",
+  "requiredEvidence": "confirmed isolated branch quota scope/window/reset or dedicated acceptance capacity; rerun original complete collection after capacity is known"
+}

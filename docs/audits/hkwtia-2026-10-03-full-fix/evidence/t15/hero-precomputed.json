@@ -1,0 +1,32 @@
+{
+  "input": "public/archive/tech-connect-ai-leaders.webp",
+  "inputSha256": "90de344357a757a9cbae1b6df4f92959476fc9ccd125b2ffeb676b29b901fd75",
+  "inputBytes": 107830,
+  "originalPinnedBytesUnchanged": true,
+  "quality": 75,
+  "resize": "maintain aspect ratio; no enlargement",
+  "sharpVersion": "0.35.4",
+  "outputs": [
+    {
+      "file": "public/archive/tech-connect-ai-leaders-480.webp",
+      "width": 480,
+      "height": 270,
+      "bytes": 15960,
+      "sha256": "2280369a4dd678cf51d4f8887e201ca004c47583e0e995965207ef2f8c6f3cab"
+    },
+    {
+      "file": "public/archive/tech-connect-ai-leaders-960.webp",
+      "width": 960,
+      "height": 540,
+      "bytes": 41426,
+      "sha256": "2b95613875607170792b4c3baf9aac61ef5e9734bf12ea7ce8a826af644ae824"
+    },
+    {
+      "file": "public/archive/tech-connect-ai-leaders-1800.webp",
+      "width": 1800,
+      "height": 1013,
+      "bytes": 99442,
+      "sha256": "6fb8021cc58094f901130a331073e2f631acf65cf3b1a12c0e2b9de3f69995e8"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "environment": "confirmed isolated Neon DB/Auth",
+  "source": "T07 source following 035dd800",
+  "production": false,
+  "providerSend": false,
+  "commands": [
+    "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integration/audit-full-campaign-entry.test.ts",
+    "node node_modules/vitest/vitest.mjs run tests/unit/campaign-queue.test.ts tests/unit/campaign-action.test.ts tests/unit/campaign-review-boundary.test.ts tests/unit/campaign-wizard.test.ts tests/unit/campaign-server-action-boundary.test.ts tests/unit/campaign-server-action-auth.test.ts tests/unit/campaign-repository-boundary.test.ts tests/unit/campaign-queue-form.test.tsx tests/unit/wt-pages/campaigns-page.test.tsx",
+    "node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-campaign-review.spec.ts --reporter=line (PLAYWRIGHT_BASE_URL=http://localhost:3450)"
+  ],
+  "results": {
+    "actualSql": {
+      "passed": 13,
+      "skipped": 0,
+      "failed": 0
+    },
+    "firstFocused": {
+      "passed": 71,
+      "skipped": 0
+    },
+    "deliveryAndActorFocused": {
+      "passed": 156,
+      "skipped": 0
+    },
+    "finalContentAndRunnerFocused": {
+      "passed": 81,
+      "skipped": 0
+    },
+    "finalChromium": {
+      "passed": 2,
+      "skipped": 0,
+      "seconds": 43.9
+    }
+  },
+  "red": [
+    "4 actual SQL legacy/direct-queued/tampered approval cases",
+    "read-only draft link missing",
+    "4 actual SQL draft append, legacy/changed worker claim and promotion cases",
+    "registered template change did not invalidate revision",
+    "stale warning remained after successful approval; authored details absent"
+  ],
+  "preserved": [
+    "two-person approval",
+    "contacts/both contact filters fail closed for member records",
+    "fresh STOP from both consent stores",
+    "business notices remain on independent outbox",
+    "existing campaign/audit architecture"
+  ],
+  "gate": [
+    "real email/WhatsApp provider acceptance and dedicated isolated worker T11/T22",
+    "Preview acceptance",
+    "Production release plus pending legacy campaign review inventory"
+  ],
+  "rollout": "new claim code holds queued/scheduled rows without current versioned approval; never backfill fabricated approval"
+}

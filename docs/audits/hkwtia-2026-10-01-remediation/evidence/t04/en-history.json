@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-01T09:18:01.413Z",
+  "environment": "confirmed isolated DB/Auth",
+  "locale": "en",
+  "width": 390,
+  "field": "hero.title",
+  "nativeBackForward": true,
+  "explicitRestoreAfterReload": true,
+  "bilingualRecovered": true,
+  "published": false
+}

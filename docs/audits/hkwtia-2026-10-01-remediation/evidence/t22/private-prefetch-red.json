@@ -1,0 +1,128 @@
+{
+  "observedAt": "2026-10-02T16:50:02.922Z",
+  "role": "synthetic staff",
+  "visibleNavigationLinks": 25,
+  "observationWindowMs": 8000,
+  "prefetches": [
+    {
+      "pathname": "/admin/tasks",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/at-risk",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/batches",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/contacts",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/segments",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/listings-review",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/profiles-review",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/cohorts",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/events-mgmt",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/page-copy/Home",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/tasks",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/members/queue",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/at-risk",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/batches",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/contacts",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/segments",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/listings-review",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/profiles-review",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/cohorts",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/events-mgmt",
+      "prefetch": true
+    },
+    {
+      "pathname": "/admin/page-copy/Home",
+      "prefetch": true
+    }
+  ],
+  "credentialsLogged": false,
+  "production": false,
+  "sourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "redTarget": "No idle/hover private route prefetch; actual 29 protected-route prefetch requests before intentional navigation"
+}

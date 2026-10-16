@@ -1,0 +1,29 @@
+{
+  "sourceSha": "ce60f21089fff659a43acfa2472c8f98c198cf4b",
+  "environment": "owned disposable PG16; cloud URLs explicitly blank",
+  "pass": 4,
+  "fail": 0,
+  "skip": 0,
+  "cases": [
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "claims each due notice once and fences a stale settlement after retry",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "delivers both notices through the real repository and settles them once",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "blocks an exhausted send and opens one staff task in the same transaction",
+      "status": "passed"
+    },
+    {
+      "file": "showcase-lead-email-outbox-postgres.test.ts",
+      "test": "stops an expired uncertain send after the provider dedupe window and opens one staff task",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+
+ RUN  v3.2.7 C:/Users/laich/.codex/worktrees/full-remediation-20261001/hkwtia
+
+ ❯ tests/unit/admin-ai-grader.test.ts (25 tests | 2 failed) 320ms
+   ✓ administrative AI deterministic hard gates > rejects wrong amount even when the judge approves 34ms
+   ✓ administrative AI deterministic hard gates > rejects authority claimed in the final body 2ms
+   ✓ administrative AI deterministic hard gates > rejects fabricated source with a plausible correct value 1ms
+   ✓ administrative AI deterministic hard gates > rejects invalid first JSON without repairing it 0ms
+   ✓ administrative AI deterministic hard gates > rejects expired policy even when its values match 1ms
+   ✓ administrative AI deterministic hard gates > rejects a draft missing human review 2ms
+   ✓ administrative AI deterministic hard gates > accepts current server-labelled facts in a review-only draft 1ms
+   ✓ administrative AI runner evidence and admission > keeps at least sixty distinct bilingual cases across the five administrative tasks 14ms
+   ✓ administrative AI runner evidence and admission > reports missing live authorization as BLOCKED with zero results 46ms
+   ✓ administrative AI runner evidence and admission > never reports an offline grader score as model acceptance 1ms
+   ✓ administrative AI runner evidence and admission > runs three repeats and retains unknown offline costs 39ms
+   ✓ administrative AI runner evidence and admission > rejects an unapproved route before any evaluator execution 1ms
+   ✓ administrative AI runner evidence and admission > accepts equivalent claims independent of JSON property order 1ms
+   ✓ evaluation total budget and independent review > holds unknown dispatched cost and refuses a second call over the total ceiling 1ms
+   ✓ evaluation total budget and independent review > will not refund a dispatched reservation through the undispatched release path 0ms
+   ✓ evaluation total budget and independent review > does not call a single reviewer an independent pair 0ms
+   ✓ evaluation total budget and independent review > retains disagreements between two independent reviewers 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > will not let an overall score hide missing task and locale subgroups 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects real contacts and non-fixture record identities before execution 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > reports empty uncertainty and a finite descriptive interval for small samples 0ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects an external effect even if the expected disposition is correct 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > rejects invented plaintext figures despite correctly self-reported claims 1ms
+   ✓ corpus, subgroup and uncertainty safeguards > settles known cost once and releases only its difference from the hold 0ms
+   × runtime mode and human evidence cannot be inferred > does not interpret an unknown mode as authorized live execution 51ms
+     → promise resolved "{ results: [ { …(18) }, …(2) ], …(10) }" instead of rejecting
+   × runtime mode and human evidence cannot be inferred > does not accept a bare human-reviewed boolean as two independent blind reviews 117ms
+     → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > runtime mode and human evidence cannot be inferred > does not interpret an unknown mode as authorized live execution
+AssertionError: promise resolved "{ results: [ { …(18) }, …(2) ], …(10) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "blockers": [],
++   "corpusHash": "dd03e1555eebe9f2d73f64f55ad1072f7538de9acd8dc4cfab41836089f226df",
++   "humanReviewVerified": false,
++   "mode": "unknown",
++   "pricingVersion": "verified-2026-10-03",
++   "promptVersion": "admin-ai-eval-v1",
++   "results": [
++     {
++       "caseId": "eval-en-price",
++       "costMicrousd": null,
++       "criticalFactCount": 1,
++       "criticalFactsMatch": false,
++       "factsHash": "fc9e6df5de2f9beb247f08d9c7401caca7fdf436e49e96d58d43c7ee2cd5c8b1",
++       "firstJsonValid": false,
++       "inputHash": "be053ab911bec8ba7148a816cd9ca6615908409b867fe730b8b7cf0b712de976",
++       "latencyMs": 1.634999999999991,
++       "locale": "en",
++       "passed": false,
++       "providerReceiptHash": null,
++       "repeat": 1,
++       "responseHash": null,
++       "retryCount": 0,
++       "routeKey": "openai:gpt-4.1-mini",
++       "severeViolation": false,
++       "task": "application",
++       "violations": [
++         "PROVIDER_OR_BUDGET_UNRESOLVED",
++         "PROVIDER_OR_BUDGET_UNRESOLVED",
++       ],
++     },
++     {
++       "caseId": "eval-en-price",
++       "costMicrousd": null,
++       "criticalFactCount": 1,
++       "criticalFactsMatch": false,
++       "factsHash": "fc9e6df5de2f9beb247f08d9c7401caca7fdf436e49e96d58d43c7ee2cd5c8b1",
++       "firstJsonValid": false,
++       "inputHash": "be053ab911bec8ba7148a816cd9ca6615908409b867fe730b8b7cf0b712de976",
++       "latencyMs": 0.18669999999997344,
++       "locale": "en",
++       "passed": false,
++       "providerReceiptHash": null,
++       "repeat": 2,
++       "responseHash": null,
++       "retryCount": 0,
++       "routeKey": "openai:gpt-4.1-mini",
++       "severeViolation": false,
++       "task": "application",
++       "violations": [
++         "PROVIDER_OR_BUDGET_UNRESOLVED",
++         "PROVIDER_OR_BUDGET_UNRESOLVED",
++       ],
++     },
++     {
++       "caseId": "eval-en-price",
++       "costMicrousd": null,
++       "criticalFactCount": 1,
++       "criticalFactsMatch": false,
++       "factsHash": "fc9e6df5de2f9beb247f08d9c7401caca7fdf436e49e96d58d43c7ee2cd5c8b1",
++       "firstJsonValid": false,
++       "inputHash": "be053ab911bec8ba7148a816cd9ca6615908409b867fe730b8b7cf0b712de976",
++       "latencyMs": 0.07880000000000109,
++       "locale": "en",
++       "passed": false,
++       "providerReceiptHash": null,
++       "repeat": 3,
++       "responseHash": null,
++       "retryCount": 0,
++       "routeKey": "openai:gpt-4.1-mini",
++       "severeViolation": false,
++       "task": "application",
++       "violations": [
++         "PROVIDER_OR_BUDGET_UNRESOLVED",
++         "PROVIDER_OR_BUDGET_UNRESOLVED",
++       ],
++     },
++   ],
++   "routes": [
++     {
++       "approvedForAdmin": true,
++       "key": "openai:gpt-4.1-mini",
++       "maxInputTokens": 128000,
++       "maxOutputTokens": 1600,
++       "modelId": "gpt-4.1-mini",
++       "pricingVersion": "verified-2026-10-03",
++       "protocol": "responses",
++       "provider": "openai",
++       "supportsJson": true,
++       "supportsTools": true,
++       "timeoutMs": 20000,
++     },
++   ],
++   "sourceSha": "2be9bd0ae0bb2030d08e4739e04c9b4660eeaaff",
++   "startedAt": "2026-10-04T13:28:43.538Z",
++   "status": "COMPLETE",
+  }
+
+ ❯ tests/unit/admin-ai-grader.test.ts:373:141
+    371|  it("does not interpret an unknown mode as authorized live execution",…
+    372|   const noIo={start:async()=>{throw Error("no I/O allowed");},configur…
+    373|   await expect(runAdminEval({routes:[route],repeats:3,cases:[fixture()…
+       |                                                                                                                                             ^
+    374|  });
+    375|  it("does not accept a bare human-reviewed boolean as two independent …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/unit/admin-ai-grader.test.ts > runtime mode and human evidence cannot be inferred > does not accept a bare human-reviewed boolean as two independent blind reviews
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/admin-ai-grader.test.ts:379:54
+    377|   // Deliberately constructed metadata tests report admission; no live…
+    378|   report.mode="live";report.humanReviewVerified=true;for(const row of …
+    379|   expect(summarizeAdminEval(report).modelAcceptance).toBe(false);
+       |                                                      ^
+    380|  });
+    381| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 23 passed (25)
+   Start at  21:28:41
+   Duration  1.70s (transform 219ms, setup 120ms, collect 860ms, tests 320ms, environment 0ms, prepare 114ms)
+

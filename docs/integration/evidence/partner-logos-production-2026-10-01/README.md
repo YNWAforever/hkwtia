@@ -1,0 +1,15 @@
+# Production partner-logo rollout evidence
+
+**Completed:**79 approved logos are published on hkwtia.vercel.app, source e7fa4add247489f525f015007460fb522fb1531b / deployment dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV. Final receipt:production-release-final.json. The current release supersedes the dated operator/config/publication gates while preserving their raw history.
+
+manifest.json indexes every execution artifact except this README and itself, using normalized Git blobs. The final package contains successful three-value Production config/build/promotion,79 deployed images,12 prepublication cases,publication/237 audits,independent SQL,immutable/canonical8+8 postpublication cases,selected actual screenshots and no-secret script archives. No connection,credential,cookie,protection link,application session or private operator identity file is included.
+
+Earlier files retain expected missing-operator refusal,zero-record pre-import checks,successful unpublished import,first deployed404 and automatic-review rejection before explicit Production credential authority. They are historical receipts, not the current status. production-publication-final.json separates the initial unpublished state from final79-per-locale publication. Raw browser codeSource:d9b75111 is inherited harness metadata; guarded candidateCommit:e7fa4add and deploymentId identify actual tested Production code.
+
+All16 final cases exercised real images/links. Each target captured16 images;selected captures are archived,plus2 new anonymous normal-viewport captures. The complete per-case receipts include filenames for unarchived supplementary local screenshots. Normal viewport screenshots were inspected; element/full-page screenshots may capture fixed-header/focus layers within their own geometry and were not altered.
+
+Archived scripts restore to matching ignored .playwright filenames and require the operator's private connection/credential/approved identity/run-owned state files and existing repository helpers. Do not replay mutations as a generic seed. production-import-publish-runner.mts.txt includes exact-ID unpublish rollback; state with selected actor and Production object keys remains private. Successful media verifier is a prepublication guard and should not be rerun against published state without an independently scoped read-only verifier.
+
+[Full receipt, exact commands, historical failures and rollback](../../partner-logo-production-release-2026-10-01.md). Latest packaged CI is36802683917 at70a5d6b7:6097 tests passed/171 skipped; final docs-head CI is reported in PR106. No skipped test is provider acceptance. Lower dependency findings remain documented.
+
+No Production migration,new flag/worker,role creation,Auth/Stripe change,payment/refund or member send occurred. No Production rollback/full Preview cleanup ran. Preview fixtures are retained for review and their branch expires2026-10-04 20:00HKT; shared-bucket teardown must preserve Production keys. Broader provider/policy gates are unchanged.

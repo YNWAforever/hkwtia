@@ -1,0 +1,196 @@
+{
+  "scope": "isolated acceptance only; no production release",
+  "sourceCommit": "d9b75111",
+  "securityPatchedCandidate": "f46be17b35b8d688b6d0c8ae0706f28e377fda99",
+  "nextVersion": "16.3.6",
+  "donorCommit": "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
+  "files": [
+    {
+      "filename": "README.md",
+      "bytes": 6490,
+      "sha256": "367964c940bf3a0e675db2085fdbdea853aa82047e8995b9bfa98f95a4ae4c7c"
+    },
+    {
+      "filename": "brace-patch-local-unit.json",
+      "bytes": 499,
+      "sha256": "eba38638f9fc854ad6792c09d3167948dd37dec5e09a11f25d2da17112993898"
+    },
+    {
+      "filename": "browser-acceptance.mjs.txt",
+      "bytes": 5892,
+      "sha256": "39a3905fdfb452ef81e77d105cb3ea84b4c83aca97ae776a9d599c8e6d0909fa"
+    },
+    {
+      "filename": "cleanup-check.json",
+      "bytes": 622,
+      "sha256": "90bf106e1c2fb9fed980ce8ff1ea5d63246a502b1aa17559ef900b68d32c37fc"
+    },
+    {
+      "filename": "cms-acceptance.mjs.txt",
+      "bytes": 3260,
+      "sha256": "6c5eb481d8a318d118149f193baf533b51c3a75852e925b4c6d3a38431c426c3"
+    },
+    {
+      "filename": "home-en-desktop.png",
+      "bytes": 242983,
+      "sha256": "f59e6702032cbef43970aeb947629d937daf11777501926c50f50c2a1ad82d0b"
+    },
+    {
+      "filename": "home-zh-mobile.png",
+      "bytes": 54884,
+      "sha256": "2d30c208e5685383ede0f405039db4a9fc5a15c5ee447bac0b4aca7772b3cc75"
+    },
+    {
+      "filename": "isolated-fixture.mts.txt",
+      "bytes": 17558,
+      "sha256": "ba4eabe743abe5ec250c7c3105595823184c99ff4aa529953e93be79d5ddd493"
+    },
+    {
+      "filename": "isolated-import.json",
+      "bytes": 1067,
+      "sha256": "e0554e15d6cb3efe5672e6f6c5b36f3f1e72a1acacfd4fb4ef0d4ed474872ebf"
+    },
+    {
+      "filename": "local-browser.json",
+      "bytes": 4589,
+      "sha256": "5436bc3f59f099e7e39bb643e2ade447eedbfb54ec9d45b6daddb48a1264b5b8"
+    },
+    {
+      "filename": "local-cms.json",
+      "bytes": 331,
+      "sha256": "fe1b33d679ce5fc2127cb46a1e1c8425cc8af37aab94b931a20d2e7c94662242"
+    },
+    {
+      "filename": "local-web.mjs.txt",
+      "bytes": 1819,
+      "sha256": "6892bc33de28b313cf0d38296fa206f71d93fcb81e0db6b392af1038e8c82d29"
+    },
+    {
+      "filename": "next-patch-browser.json",
+      "bytes": 4681,
+      "sha256": "c07fb184a27802751657b8d69a982cd28999bd7b12194fad0441263d6e5d6989"
+    },
+    {
+      "filename": "next-patch-browser.mjs.txt",
+      "bytes": 6277,
+      "sha256": "9659de30b57c803d703adf099e2460603627da6f125a10c58f7fd3bafcd4f670"
+    },
+    {
+      "filename": "next-patch-ci.json",
+      "bytes": 3171,
+      "sha256": "30146498aaebe6cf745e63b9cfb4ba8bd339479082731dce3170b514c495159f"
+    },
+    {
+      "filename": "next-patch-cms.json",
+      "bytes": 467,
+      "sha256": "71bdf536facac43bf38f112f58d564ec8311430b2b58bd794089cc255dc6c9cd"
+    },
+    {
+      "filename": "next-patch-home-en-desktop.png",
+      "bytes": 162447,
+      "sha256": "59239666f8e8bf54f36048dfce0e8835f6c19473d60f499f6a06364d1635e6e5"
+    },
+    {
+      "filename": "partners-en-desktop.png",
+      "bytes": 2633011,
+      "sha256": "52f260d7f742341a8dd778c9a84ba88ee61357fb42e0ef539f774cba3b98cb40"
+    },
+    {
+      "filename": "partners-zh-mobile.png",
+      "bytes": 3013250,
+      "sha256": "c2b1d31c3bf9fdfa493cb78341743e9fde6492b180ac8f1b995f8aa90a5ad48d"
+    },
+    {
+      "filename": "preview-auth-origin.json",
+      "bytes": 622,
+      "sha256": "3067fea92ac193d3116f61ced4375530f492ece19a4c6d1b81d34ab2206f7d5e"
+    },
+    {
+      "filename": "preview-bootstrap.mjs.txt",
+      "bytes": 1389,
+      "sha256": "93a3d47f9937edb39beb9023ae9d9847c4b8feceda296c5f0ca731b320c31393"
+    },
+    {
+      "filename": "preview-browser.json",
+      "bytes": 4751,
+      "sha256": "1be7598ef7d5944ea4f22384a559d5c9ad12e18ebd5933dabf2d1d169f6dd6d9"
+    },
+    {
+      "filename": "preview-browser.mjs.txt",
+      "bytes": 6404,
+      "sha256": "a7d1e05578579262601b160814cfa47f1c8f793782580058acde5d483276b2ad"
+    },
+    {
+      "filename": "preview-capture.mjs.txt",
+      "bytes": 2103,
+      "sha256": "c406016c2a7b6178ddb0d74c7dbad5ca8c6614baf0f0f91cff84f66ec2c8af71"
+    },
+    {
+      "filename": "preview-cms-invalid-origin.json",
+      "bytes": 650,
+      "sha256": "8f125b978633efcaa1319cdd0fae3582f30fb230bf66c732872166fe666d4788"
+    },
+    {
+      "filename": "preview-cms.json",
+      "bytes": 565,
+      "sha256": "29ebb310ef977b6a1add95eabbd8f901f58c58a690d6c747afe74920febded66"
+    },
+    {
+      "filename": "preview-cms.mjs.txt",
+      "bytes": 4401,
+      "sha256": "184dfdd904dbd745c925ceb259f34e1c15ce7ab5868d886008980e30446ae6bb"
+    },
+    {
+      "filename": "preview-deploy.mjs.txt",
+      "bytes": 5953,
+      "sha256": "abc1fadb6e641b97c2d5c43cd8d7b6ac0f97d1d0507fc9951652a6b8639cac3a"
+    },
+    {
+      "filename": "preview-deployment.json",
+      "bytes": 2350,
+      "sha256": "e355a73662c4a41a27547a42d9644960c59fbe03aaed381296ddb09bf17a4d7d"
+    },
+    {
+      "filename": "preview-home-en-desktop.png",
+      "bytes": 164019,
+      "sha256": "aa1faeb970d8f994aafc5f5a2d91de2ddb019b6996e283454625767190e00a3c"
+    },
+    {
+      "filename": "preview-home-zh-mobile.png",
+      "bytes": 53458,
+      "sha256": "407082a08d89668da1e84345112862f7480ccf2a9d454b8fe970ef28ff4d66b5"
+    },
+    {
+      "filename": "preview-partners-en-desktop.png",
+      "bytes": 2630847,
+      "sha256": "dbe208ce37f0305874126d9e62ad1725d9eefb34e38829e0f5ad5697d427d435"
+    },
+    {
+      "filename": "preview-staff-editor.png",
+      "bytes": 98741,
+      "sha256": "25f6bca2d8b2cf9e620473e079bff079af95820f99fb3c2628ecf2660e83a195"
+    },
+    {
+      "filename": "preview-viewport-captures.json",
+      "bytes": 514,
+      "sha256": "349921649f72e27112e105932b0cfd4fcf378019b446dc0c412f9e22025f7e40"
+    },
+    {
+      "filename": "production-r2-names.json",
+      "bytes": 364,
+      "sha256": "28b549f6de21e5a96befdd1ac38e0e610b1f5e20274b8308eca0df7a9f317b6d"
+    },
+    {
+      "filename": "provider-probe.mts.txt",
+      "bytes": 3933,
+      "sha256": "bdfc06e50736fe65ca0c03b077439972b1b717945ddbf3fbb0e1f58dc6476edd"
+    },
+    {
+      "filename": "r2-provider.json",
+      "bytes": 379,
+      "sha256": "dfa08485ea4eac907a287a77c7635a26276bb2b0e711d679ad51f2d8887b1c6d"
+    }
+  ],
+  "previewSourceCommit": "68faa7be95abfa09710e871e68a6db501585559c",
+  "previewDeploymentId": "dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg"
+}
