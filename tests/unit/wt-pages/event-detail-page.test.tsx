@@ -5,9 +5,11 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const events = vi.hoisted(() => ({getPublicBySlug: vi.fn()}));
 const auth = vi.hoisted(() => ({getActor: vi.fn(async () => null as unknown)}));
 const profiles = vi.hoisted(() => ({getById: vi.fn(async () => null as unknown)}));
+const registrations = vi.hoisted(() => ({getMyRegistrationStatuses: vi.fn(async () => ({}))}));
 
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: profiles}));
+vi.mock("@/lib/portal/my-events", () => registrations);
 // registration-action.ts (still imported for the member form) reads requireActor from the same module.
 vi.mock("@/lib/auth/actor", () => ({getActor: auth.getActor, requireActor: vi.fn()}));
 vi.mock("@/lib/events/guest-registration-action", () => ({submitGuestRsvpAction: vi.fn()}));
@@ -103,6 +105,10 @@ describe("event detail page donor markup", () => {
 
     expect(rendered).toContain('data-registration-form="true"');
     expect(rendered).not.toContain('data-guest-rsvp-form="true"');
+    expect(registrations.getMyRegistrationStatuses).toHaveBeenCalledWith(
+      {kind: "member", userId: "u", profileId: "p"},
+      ["10000000-0000-4000-8000-000000000001"],
+    );
   });
 
   it("falls back to the guest form when the session read fails rather than 500ing the public page", async () => {

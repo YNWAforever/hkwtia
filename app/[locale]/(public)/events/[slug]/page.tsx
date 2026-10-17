@@ -15,6 +15,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import {getMyRegistrationStatuses} from "@/lib/portal/my-events";
 import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
 import {deriveEventDisplayStatus} from "@/lib/events/status";
 import {formatEventDate} from "@/lib/home/format-event-date";
@@ -114,6 +115,18 @@ export default async function EventPage({params}: Props) {
       : actor === null && displayEvent.registrationMode === "rsvp"
         ? {kind: "guest" as const}
         : {kind: "member" as const};
+  let savedRegistration: Awaited<ReturnType<typeof getMyRegistrationStatuses>>[string] | undefined;
+  let registrationUnavailable = false;
+  if (actor?.kind === "member" && displayEvent.registrationMode === "rsvp" && !past && !displayEvent.cancelled) {
+    try {
+      savedRegistration = (await getMyRegistrationStatuses(actor, [displayEvent.id]))[displayEvent.id];
+    } catch {
+      registrationUnavailable = true;
+    }
+  }
+  const savedRegistrationLabel = savedRegistration
+    ? (await getTranslations({locale, namespace: "Portal"}))(`myEvents.rsvpStatus.${savedRegistration}`)
+    : undefined;
   const guestLabels = {
     title: t("guest.title"), name: t("guest.name"), email: t("guest.email"), organisation: t("guest.organisation"), whatsappNumber: t("guest.whatsappNumber"),
     marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
@@ -205,8 +218,10 @@ export default async function EventPage({params}: Props) {
                 <a className="button" href={registration.url} rel="noopener noreferrer" target="_blank">{t("detail.registerExternally")}</a>
               ) : registration.kind === "guest" ? (
                 <GuestRsvpForm action={submitGuestRsvpAction} eventId={displayEvent.id} labels={guestLabels} locale={appLocale} />
+              ) : registrationUnavailable ? (
+                <p className="portal-status-note" role="alert">{t("guest.unavailable")}</p>
               ) : (
-                <EventRegistrationForm action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
+                <EventRegistrationForm key={`${displayEvent.id}:${savedRegistration ?? "new"}`} initialStatus={savedRegistration} statusLabel={savedRegistrationLabel} action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
               )}
             </div>
           </div>
