@@ -54,7 +54,9 @@ export default async function ApplicationCasePage({
   const t = await getTranslations({ locale, namespace: "Admin" });
   const labels: ApplicationCaseLabels = {
     title: t("applicationCase.followUp"),
-    description: t("applicationCase.description"),
+    description: t("applicationCase.descriptionFor", {
+      name: record.application.name,
+    }),
     owner: t("applicationCase.owner"),
     unassigned: t("applicationCase.unassigned"),
     due: t("applicationCase.due"),
@@ -207,6 +209,11 @@ export default async function ApplicationCasePage({
     timeStyle: "short",
     timeZone: "Asia/Hong_Kong",
   });
+  const factualMissing = triageProposal?.triage.missingFields ?? record.missingFields;
+  const onboardingStep = `applicationQueue.steps.${record.profile.onboardingState}`;
+  const onboardingStateLabel = t.has(onboardingStep as never)
+    ? t(onboardingStep as never)
+    : record.profile.onboardingState;
   return (
     <div className="space-y-6">
       <Link
@@ -261,6 +268,111 @@ export default async function ApplicationCasePage({
           </dd>
         </div>
       </dl>
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-md border p-5">
+          <h2 className="font-serif text-2xl">
+            {t("applicationCase.applicantDetails")}
+          </h2>
+          <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="font-medium">{t("applicationCase.name")}</dt>
+              <dd>{record.application.name}</dd>
+            </div>
+            <div>
+              <dt className="font-medium">{t("applicationCase.email")}</dt>
+              <dd className="break-all">
+                {record.profile.email ?? t("applicationCase.notProvided")}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium">{t("applicationCase.phone")}</dt>
+              <dd>
+                {record.profile.phone ?? t("applicationCase.notProvided")}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium">{t("applicationCase.jobTitle")}</dt>
+              <dd>
+                {record.profile.jobTitle ?? t("applicationCase.notProvided")}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium">
+                {t("applicationCase.preferredLanguage")}
+              </dt>
+              <dd>{record.profile.locale}</dd>
+            </div>
+            <div>
+              <dt className="font-medium">
+                {t("applicationCase.onboardingState")}
+              </dt>
+              <dd>{onboardingStateLabel}</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="rounded-md border p-5">
+          <h2 className="font-serif text-2xl">
+            {t("applicationCase.companyDetails")}
+          </h2>
+          {record.company ? (
+            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="font-medium">{t("applicationCase.companyDisplayName")}</dt>
+                <dd>{record.company.displayName}</dd>
+              </div>
+              <div>
+                <dt className="font-medium">{t("applicationCase.companyLegalName")}</dt>
+                <dd>{record.company.legalName}</dd>
+              </div>
+              <div>
+                <dt className="font-medium">{t("applicationCase.companyWebsite")}</dt>
+                <dd className="break-all">
+                  {record.company.website ?? t("applicationCase.notProvided")}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium">{t("applicationCase.companyIndustry")}</dt>
+                <dd>{record.company.industry ?? t("applicationCase.notProvided")}</dd>
+              </div>
+              <div>
+                <dt className="font-medium">{t("applicationCase.companySize")}</dt>
+                <dd>{record.company.sizeBand ?? t("applicationCase.notProvided")}</dd>
+              </div>
+              <div className="sm:col-span-2">
+                <dt className="font-medium">
+                  {t("applicationCase.companyDescription")}
+                </dt>
+                <dd className="whitespace-pre-wrap">
+                  {record.company.description ?? t("applicationCase.notProvided")}
+                </dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="mt-4 text-sm text-muted-foreground">
+              {t("applicationCase.companyNotCreated")}
+            </p>
+          )}
+        </div>
+      </section>
+      <section className="rounded-md border p-5 text-sm">
+        <h2 className="font-medium">{t("applicationCase.missingData")}</h2>
+        <p className="mt-2">
+          {factualMissing.length
+            ? factualMissing
+                .map((field) =>
+                  t(`applicationCase.missingFields.${field}` as never),
+                )
+                .join("、")
+            : t("applicationCase.missingNone")}
+        </p>
+        <p className="mt-3 text-muted-foreground">
+          {t("applicationCase.applicationCreated")}:{" "}
+          {date.format(new Date(record.application.createdAt))}
+          {" · "}
+          {t("applicationCase.applicationUpdated")}:{" "}
+          {date.format(new Date(record.application.updatedAt))}
+        </p>
+      </section>
       <p className="text-sm text-muted-foreground">
         {t("applicationCase.independent")}
       </p>
@@ -320,6 +432,12 @@ export default async function ApplicationCasePage({
                 {item.note ? (
                   <p className="whitespace-pre-wrap text-sm">{item.note}</p>
                 ) : null}
+                <p className="text-sm text-muted-foreground">
+                  {t("applicationCase.performedBy")}:{" "}
+                  {item.actorName ??
+                    item.actorUserId ??
+                    item.actorType}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {t("applicationCase.owner")}:{" "}
                   {owners.find((owner) => owner.id === item.case.ownerProfileId)

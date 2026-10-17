@@ -15,9 +15,9 @@ function fakeDatabase() {
     statements.push({sql: rendered.sql, params: rendered.params as readonly unknown[]});
     if (/select .* as id from "events"/i.test(rendered.sql)) return {rows: [{id: eventId}]};
     return {rows: [
-      {kind: "guest", profile_id: null, guest_id: "guest-1", seat_id: null, order_id: null, display_name: "Ada", email: "a@example.test", organisation: null, status: "registered", checked_in_at: null, item_id: "guest-1"},
-      {kind: "member", profile_id: "member-1", guest_id: null, seat_id: null, order_id: null, display_name: "Ada", sort_name: "database-sort-key", email: "b@example.test", organisation: null, status: "registered", checked_in_at: null, item_id: "member-1"},
-      {kind: "ticket", profile_id: null, guest_id: null, seat_id: "seat-1", order_id: "order-1", display_name: "Ada", email: "c@example.test", organisation: null, status: "paid", checked_in_at: null, item_id: "seat-1"},
+      {kind: "guest", profile_id: null, guest_id: "guest-1", seat_id: null, order_id: null, display_name: "Ada", email: "a@example.test", organisation: null, status: "registered", checked_in_at: null, item_id: "guest-1", total_matching: 7},
+      {kind: "member", profile_id: "member-1", guest_id: null, seat_id: null, order_id: null, display_name: "Ada", sort_name: "database-sort-key", email: "b@example.test", organisation: null, status: "registered", checked_in_at: null, item_id: "member-1", total_matching: 7},
+      {kind: "ticket", profile_id: null, guest_id: null, seat_id: "seat-1", order_id: "order-1", display_name: "Ada", email: "c@example.test", organisation: null, status: "paid", checked_in_at: null, item_id: "seat-1", total_matching: 7},
     ]};
   });
   return {database: {execute}, statements};
@@ -28,6 +28,7 @@ describe("admin attendee cursor page", () => {
     const fake = fakeDatabase();
     const page = await listEventAttendeePage(staff, eventId, {limit: 2, search: "Ada", cursor: null}, {loadDatabase: async () => fake.database as never});
     expect(page?.items.map((item) => item.kind)).toEqual(["guest", "member"]);
+    expect(page?.totalMatching).toBe(7);
     expect(page?.nextCursor).toBeTruthy();
     expect(fake.statements).toHaveLength(2);
     expect(fake.statements[1].sql).toMatch(/order by lower\(display_name\) asc, kind asc, item_id asc/i);

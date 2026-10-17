@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 // pulling `authEnv()` in at module scope (CLAUDE.md boundary 4).
 const legacyGet = createAttendeesCsvGet({
   actor: requireAdminActor,
-  list: (actor, eventId) => eventsRepository.listAttendees(actor, eventId),
+  list: (actor, eventId, search) =>
+    eventsRepository.listAttendeesForExport(actor, eventId, search),
   audit: async (actor, eventId, rowCount) => {
     await auditEventsRepository.append(actor, {action: "event.attendees.exported", targetType: "event", targetId: eventId, metadata: {rowCount}});
   },

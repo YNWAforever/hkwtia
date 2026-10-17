@@ -20,6 +20,22 @@ export const applicationCaseContextSchema = z.object({
 export type ApplicationCasePatch = z.infer<typeof applicationCasePatchSchema>;
 export type ApplicationCaseContext = z.infer<typeof applicationCaseContextSchema>;
 export type ApplicationCase = Readonly<{
+    profile: Readonly<{
+        email: string | null;
+        phone: string | null;
+        jobTitle: string | null;
+        locale: string;
+        onboardingState: string;
+    }>;
+    company: Readonly<{
+        id: string;
+        legalName: string;
+        displayName: string;
+        website: string | null;
+        industry: string | null;
+        sizeBand: string | null;
+        description: string | null;
+    }> | null;
     application: Readonly<{
         id: string;
         profileId: string;
@@ -29,6 +45,8 @@ export type ApplicationCase = Readonly<{
         planCode: string;
         status: string;
         step: string;
+        createdAt: string;
+        updatedAt: string;
     }>;
     membership: Readonly<{
         id: string;
@@ -47,6 +65,8 @@ export type ApplicationCase = Readonly<{
         id: string;
         at: string;
         actorType: string;
+        actorUserId: string | null;
+        actorName: string | null;
         note: string | null;
         case: ApplicationCaseContext;
     }>[];

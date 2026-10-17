@@ -28,6 +28,8 @@ describe.skipIf(!enabled)("application and payment operation queues", () => {
     await fixture.pool.query("UPDATE memberships SET application_id=$1,status='pending_payment' WHERE owner_user_id='a'", [ids.payment]);
     await fixture.pool.query("UPDATE memberships SET application_id=$1,status='pending_review' WHERE owner_user_id='b'", [ids.review]);
     await fixture.pool.query("INSERT INTO billing_attempts (id,membership_id,attempt_number,state) VALUES ($1,'11111111-1111-4111-8111-111111111111',1,'expired'),($2,'11111111-1111-4111-8111-111111111111',2,'active')", [ids.oldAttempt, ids.activeAttempt]);
+    await fixture.pool.query("UPDATE membership_applications SET updated_at='2026-10-01T00:00:00Z' WHERE id=$1", [ids.draft]);
+    await fixture.pool.query("UPDATE membership_applications SET updated_at='2026-10-02T00:00:00Z' WHERE id=$1", [ids.draft2]);
   }, 60_000);
   afterAll(async () => {if (fixture) await fixture.close();}, 40_000);
 
@@ -36,11 +38,18 @@ describe.skipIf(!enabled)("application and payment operation queues", () => {
     expect(first.items).toHaveLength(1);
     expect(first.items[0]?.profileId).toBe("a");
     expect(first.items[0]?.applicationId).not.toBe("a");
+    expect(first.items[0]?.applicationId).toBe(ids.draft2);
+    expect(first.totalMatching).toBe(2);
+    expect(first.counts).toEqual({draft: 2, pending_payment: 1, pending_review: 1});
     expect(first.nextCursor).not.toBeNull();
     const next = await adminMembersRepository.getApplicationQueuePage(actor, {status: "draft", limit: 1, cursor: first.nextCursor});
     expect(new Set([...first.items, ...next.items].map((row) => row.applicationId))).toEqual(new Set([ids.draft, ids.draft2]));
     expect(next.nextCursor).toBeNull();
     await expect(adminMembersRepository.getApplicationQueuePage(actor, {status: "pending_payment", cursor: first.nextCursor})).rejects.toThrow("INVALID_CURSOR");
+    const oldest = await adminMembersRepository.getApplicationQueuePage(actor, {status: "draft", limit: 1, sort: "updated_asc"});
+    expect(oldest.items[0]?.applicationId).toBe(ids.draft);
+    expect(oldest.totalMatching).toBe(2);
+    await expect(adminMembersRepository.getApplicationQueuePage(actor, {status: "draft", sort: "updated_desc", cursor: oldest.nextCursor})).rejects.toThrow("INVALID_CURSOR");
   });
   it("reads the exact linked membership and latest billing attempt without treating either as a profile ID", async () => {
     const payment = await adminMembersRepository.getApplicationQueuePage(actor, {status: "pending_payment"});
@@ -50,6 +59,7 @@ describe.skipIf(!enabled)("application and payment operation queues", () => {
     // Real persisted app state changes queue membership; a stale membership status cannot retain it.
     await fixture.pool.query("UPDATE membership_applications SET status='completed' WHERE id=$1", [ids.payment]);
     expect((await adminMembersRepository.getApplicationQueuePage(actor, {status: "pending_payment"})).items).toEqual([]);
+    expect((await adminMembersRepository.getApplicationQueuePage(actor, {status: "pending_payment"})).counts.pending_payment).toBe(0);
   });
   it("requires staff and searches literal input without widening wildcard scope", async () => {
     await expect(adminMembersRepository.getApplicationQueuePage({kind: "member", userId: "a", profileId: "a"}, {status: "draft"})).rejects.toThrow("FORBIDDEN");
