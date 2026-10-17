@@ -626,6 +626,62 @@ const attendeeRowSchema = z.object({
   status: z.string(),
   checked_in_at: z.coerce.date().nullable(),
 });
+const attendeeSearchSchema = z.string().trim().max(120).default("");
+
+/** The page and both CSV paths must use one literal, case-insensitive filter. */
+function attendeeSearchPredicate(raw: string): SQL {
+  const search = raw.toLocaleLowerCase("en");
+  return search
+    ? sql`(position(${search} in lower(display_name)) > 0 OR position(${search} in lower(coalesce(email, ''))) > 0 OR position(${search} in lower(coalesce(organisation, ''))) > 0 OR position(${search} in coalesce(order_id::text, '')) > 0 OR position(${search} in coalesce(seat_id::text, '')) > 0)`
+    : sql`TRUE`;
+}
+
+function attendeeRowsCte(eventId: string): SQL {
+  return sql`
+    WITH attendee_rows AS (
+      SELECT 'member'::text AS kind, ${eventRegistrations.profileId} AS profile_id,
+        NULL::uuid AS guest_id, NULL::uuid AS seat_id, NULL::uuid AS order_id,
+        ${profiles.displayName} AS display_name, ${profiles.email} AS email,
+        NULL::text AS organisation, ${eventRegistrations.status}::text AS status,
+        ${eventRegistrations.checkedInAt} AS checked_in_at,
+        ${eventRegistrations.profileId}::text AS item_id
+      FROM ${eventRegistrations}
+      JOIN ${profiles} ON ${profiles.id} = ${eventRegistrations.profileId}
+      WHERE ${eventRegistrations.eventId} = ${eventId}
+      UNION ALL
+      SELECT 'guest'::text, NULL::text, ${eventGuestRegistrations.id}, NULL::uuid,
+        NULL::uuid, ${eventGuestRegistrations.name}, ${eventGuestRegistrations.email},
+        ${eventGuestRegistrations.organisation}, ${eventGuestRegistrations.status}::text,
+        ${eventGuestRegistrations.checkedInAt}, ${eventGuestRegistrations.id}::text
+      FROM ${eventGuestRegistrations}
+      WHERE ${eventGuestRegistrations.eventId} = ${eventId}
+      UNION ALL
+      SELECT 'ticket'::text, NULL::text, NULL::uuid, ${eventOrderSeats.id},
+        ${eventOrders.id}, ${eventOrderSeats.attendeeName},
+        ${eventOrderSeats.attendeeEmail}, NULL::text, ${eventOrders.status}::text,
+        ${eventOrderSeats.checkedInAt}, ${eventOrderSeats.id}::text
+      FROM ${eventOrderSeats}
+      JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId}
+      WHERE ${eventOrders.eventId} = ${eventId} AND ${eventOrders.status} = 'paid'
+    )
+  `;
+}
+
+function toEventAttendee(row: unknown): EventAttendee {
+  const parsed = attendeeRowSchema.parse(row);
+  return {
+    kind: parsed.kind,
+    profileId: parsed.profile_id,
+    guestId: parsed.guest_id,
+    seatId: parsed.seat_id,
+    orderId: parsed.order_id,
+    displayName: parsed.display_name,
+    email: parsed.email,
+    organisation: parsed.organisation,
+    status: parsed.status,
+    checkedInAt: parsed.checked_in_at,
+  };
+}
 
 /**
  * `null` means the event id doesn't exist, so the CSV export
@@ -633,49 +689,36 @@ const attendeeRowSchema = z.object({
  * nonexistent target.
  */
 export async function listEventAttendees(actor: Actor, eventIdInput: unknown, deps: MemberEventDependencies = {}): Promise<EventAttendee[] | null> {
+  return listEventAttendeesMatching(actor, eventIdInput, "", deps);
+}
+
+/** CSV export uses the same filter as the visible door list. */
+export async function listEventAttendeesForExport(actor: Actor, eventIdInput: unknown, searchInput: unknown, deps: MemberEventDependencies = {}): Promise<EventAttendee[] | null> {
+  return listEventAttendeesMatching(actor, eventIdInput, searchInput, deps);
+}
+
+async function listEventAttendeesMatching(actor: Actor, eventIdInput: unknown, searchInput: unknown, deps: MemberEventDependencies): Promise<EventAttendee[] | null> {
   requireAdmin(actor);
   const eventId = eventIdSchema.parse(eventIdInput);
+  const search = attendeeSearchSchema.parse(searchInput);
   const database = await memberDatabase(deps);
   const existing = executedRows(await database.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
   if (existing.length === 0) return null;
-  // A UNION rather than three reads so the list arrives in one stable order and
-  // the CSV export (lib/admin/event-attendees.ts) sees exactly what the page
-  // shows. `profile_id` is text and the ids uuid, hence the typed NULLs.
   const rows = executedRows(await database.execute(sql`
-    SELECT 'member' AS kind, ${eventRegistrations.profileId} AS profile_id, NULL::uuid AS guest_id, NULL::uuid AS seat_id, NULL::uuid AS order_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email, NULL::text AS organisation, ${eventRegistrations.status}::text AS status, ${eventRegistrations.checkedInAt} AS checked_in_at
-    FROM ${eventRegistrations} JOIN ${profiles} ON ${profiles.id} = ${eventRegistrations.profileId}
-    WHERE ${eventRegistrations.eventId} = ${eventId}
-    UNION ALL
-    SELECT 'guest', NULL::text, ${eventGuestRegistrations.id}, NULL::uuid, NULL::uuid, ${eventGuestRegistrations.name}, ${eventGuestRegistrations.email}, ${eventGuestRegistrations.organisation}, ${eventGuestRegistrations.status}::text, ${eventGuestRegistrations.checkedInAt}
-    FROM ${eventGuestRegistrations}
-    WHERE ${eventGuestRegistrations.eventId} = ${eventId}
-    UNION ALL
-    -- Only a paid order is on the door list; a refunded order's seats are not
-    -- admitted and must not appear here.
-    SELECT 'ticket', NULL::text, NULL::uuid, ${eventOrderSeats.id}, ${eventOrders.id}, ${eventOrderSeats.attendeeName}, ${eventOrderSeats.attendeeEmail}, NULL::text, ${eventOrders.status}::text, ${eventOrderSeats.checkedInAt}
-    FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId}
-    WHERE ${eventOrders.eventId} = ${eventId} AND ${eventOrders.status} = 'paid'
-    ORDER BY display_name ASC, kind ASC, profile_id ASC NULLS LAST, guest_id ASC NULLS LAST, seat_id ASC NULLS LAST
+    ${attendeeRowsCte(eventId)}
+    SELECT * FROM attendee_rows
+    WHERE ${attendeeSearchPredicate(search)}
+    ORDER BY lower(display_name) ASC, kind ASC, item_id ASC
   `));
-  return rows.map((row) => {
-    const parsed = attendeeRowSchema.parse(row);
-    return {
-      kind: parsed.kind,
-      profileId: parsed.profile_id,
-      guestId: parsed.guest_id,
-      seatId: parsed.seat_id,
-      orderId: parsed.order_id,
-      displayName: parsed.display_name,
-      email: parsed.email,
-      organisation: parsed.organisation,
-      status: parsed.status,
-      checkedInAt: parsed.checked_in_at,
-    };
-  });
+  return rows.map(toEventAttendee);
 }
 
-/** Bounded door list; CSV export keeps its independent full-stream contract. */
-export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown, queryInput: unknown, deps: MemberEventDependencies = {}): Promise<CursorPage<EventAttendee> | null> {
+export type EventAttendeePage = CursorPage<EventAttendee> & Readonly<{
+  totalMatching: number;
+}>;
+
+/** Bounded door list with a total computed from the same search predicate. */
+export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown, queryInput: unknown, deps: MemberEventDependencies = {}): Promise<EventAttendeePage | null> {
   requireAdmin(actor);
   const eventId = eventIdSchema.parse(eventIdInput);
   const query = parsePageQuery(queryInput);
@@ -686,33 +729,26 @@ export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown,
   const existing = executedRows(await database.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
   if (existing.length === 0) return null;
   const rows = executedRows(await database.execute(sql`
-    WITH attendee_rows AS (
-      SELECT 'member'::text AS kind, ${eventRegistrations.profileId} AS profile_id, NULL::uuid AS guest_id, NULL::uuid AS seat_id, NULL::uuid AS order_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email, NULL::text AS organisation, ${eventRegistrations.status}::text AS status, ${eventRegistrations.checkedInAt} AS checked_in_at, ${eventRegistrations.profileId}::text AS item_id
-      FROM ${eventRegistrations} JOIN ${profiles} ON ${profiles.id} = ${eventRegistrations.profileId}
-      WHERE ${eventRegistrations.eventId} = ${eventId}
-      UNION ALL
-      SELECT 'guest'::text, NULL::text, ${eventGuestRegistrations.id}, NULL::uuid, NULL::uuid, ${eventGuestRegistrations.name}, ${eventGuestRegistrations.email}, ${eventGuestRegistrations.organisation}, ${eventGuestRegistrations.status}::text, ${eventGuestRegistrations.checkedInAt}, ${eventGuestRegistrations.id}::text
-      FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${eventId}
-      UNION ALL
-      SELECT 'ticket'::text, NULL::text, NULL::uuid, ${eventOrderSeats.id}, ${eventOrders.id}, ${eventOrderSeats.attendeeName}, ${eventOrderSeats.attendeeEmail}, NULL::text, ${eventOrders.status}::text, ${eventOrderSeats.checkedInAt}, ${eventOrderSeats.id}::text
-      FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId}
-      WHERE ${eventOrders.eventId} = ${eventId} AND ${eventOrders.status} = 'paid'
+    ${attendeeRowsCte(eventId)},
+    filtered_attendees AS (
+      SELECT attendee_rows.*, lower(display_name) AS sort_name,
+        count(*) OVER() AS total_matching
+      FROM attendee_rows
+      WHERE ${attendeeSearchPredicate(query.search)}
     )
-    SELECT attendee_rows.*, lower(display_name) AS sort_name FROM attendee_rows
-    WHERE ${search ? sql`(position(${search} in lower(display_name)) > 0 OR position(${search} in lower(coalesce(email, ''))) > 0 OR position(${search} in lower(coalesce(organisation, ''))) > 0 OR position(${search} in coalesce(order_id::text, '')) > 0 OR position(${search} in coalesce(seat_id::text, '')) > 0)` : sql`TRUE`}
+    SELECT * FROM filtered_attendees
+    WHERE TRUE
       AND ${cursor ? sql`(lower(display_name), kind, item_id) > (${cursor[0]}, ${cursor[1]}, ${cursor[2]})` : sql`TRUE`}
     ORDER BY lower(display_name) ASC, kind ASC, item_id ASC
     LIMIT ${query.limit + 1}
   `));
   const hasNext = rows.length > query.limit;
   const pageRows = rows.slice(0, query.limit);
-  const items = pageRows.map((row) => {
-    const parsed = attendeeRowSchema.parse(row);
-    return {kind: parsed.kind, profileId: parsed.profile_id, guestId: parsed.guest_id, seatId: parsed.seat_id, orderId: parsed.order_id, displayName: parsed.display_name, email: parsed.email, organisation: parsed.organisation, status: parsed.status, checkedInAt: parsed.checked_in_at};
-  });
+  const items = pageRows.map(toEventAttendee);
   const last = pageRows.at(-1);
   const nextCursor = hasNext && last ? encodeScopedCursor(scope, [String(last.sort_name), String(last.kind), String(last.item_id)]) : null;
-  return {items, nextCursor};
+  const totalMatching = z.coerce.number().int().nonnegative().parse(rows[0]?.total_matching ?? 0);
+  return {items, nextCursor, totalMatching};
 }
 
 // ---------------------------------------------------------------------------
@@ -1180,6 +1216,7 @@ export const eventsRepository = {
   update: updateEvent,
   register: registerForEvent,
   listAttendees: listEventAttendees,
+  listAttendeesForExport: listEventAttendeesForExport,
   listAttendeePage: listEventAttendeePage,
   saveMemberDraft: saveMemberEventDraft,
   submitMember: submitMemberEvent,

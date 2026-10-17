@@ -7,7 +7,11 @@ const reads = vi.hoisted(() => ({
 }));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
-  getTranslations: async () => Object.assign((key: string) => key, {raw: (key: string) => key}),
+  getTranslations: async () => Object.assign(
+    (key: string, values?: {count?: number}) =>
+      values?.count === undefined ? key : `${key}:${values.count}`,
+    {raw: (key: string) => key},
+  ),
 }));
 vi.mock("next/navigation", () => ({notFound: () => {throw new Error("NEXT_NOT_FOUND");}}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: async () => ({kind: "staff", userId: "staff", profileId: "staff"})}));
@@ -35,7 +39,7 @@ beforeEach(() => {
   reads.byId.mockResolvedValue(event);
   reads.all.mockResolvedValue([event]);
   reads.attendees.mockResolvedValue([]);
-  reads.attendeePage.mockResolvedValue({items: [], nextCursor: null});
+  reads.attendeePage.mockResolvedValue({items: [], nextCursor: null, totalMatching: 0});
   reads.orderPage.mockResolvedValue({items: [], nextCursor: null});
   reads.allOrders.mockResolvedValue([]);
   reads.media.mockResolvedValue([]);
@@ -76,6 +80,25 @@ describe("admin event detail tabs", () => {
       const page=await AdminEventDetailPage({params:Promise.resolve({locale:"zh-HK",id}),searchParams:Promise.resolve({tab:"attendees",q:"Synthetic"})});
       const html=renderToStaticMarkup(page);expect(html).toContain('data-export-search="Synthetic"');expect(html).not.toContain('attendees.csv');expect(reads.attendees).not.toHaveBeenCalled();
     }finally{vi.unstubAllEnvs();}
+  });
+  it("shows the filtered total and carries the same search into the legacy CSV link", async () => {
+    reads.attendeePage.mockResolvedValue({
+      items: [],
+      nextCursor: null,
+      totalMatching: 3,
+    });
+    const page = await AdminEventDetailPage({
+      params: Promise.resolve({locale: "en", id}),
+      searchParams: Promise.resolve({
+        tab: "attendees",
+        q: "Synthetic search",
+      }),
+    });
+    const html = renderToStaticMarkup(page);
+    expect(html).toContain("attendeeTotal:3");
+    expect(html).toContain(
+      `/api/admin/events/${id}/attendees.csv?q=Synthetic+search`,
+    );
   });
   it("loads only the bounded order page on the orders tab", async () => {
     expect(await markup("orders")).toContain('data-tab="orders"');

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { applicationQueueReturnHref } from "@/lib/admin/application-return";
 describe("case back navigation preserves only validated queue scope", () => {
-  it("retains status, search, bounded page size and cursor across bilingual case navigation", () => {
+  it("retains status, search, sort, bounded page size and cursor across bilingual case navigation", () => {
     const result = new URL(
       applicationQueueReturnHref(
         "zh-HK",
-        "/admin/members/queue?status=pending_payment&q=Synthetic&limit=10&cursor=opaque",
+        "/admin/members/queue?status=pending_payment&q=Synthetic&sort=updated_asc&limit=10&cursor=opaque",
       ),
       "https://example.test",
     );
@@ -13,6 +13,7 @@ describe("case back navigation preserves only validated queue scope", () => {
     expect(Object.fromEntries(result.searchParams)).toEqual({
       status: "pending_payment",
       q: "Synthetic",
+      sort: "updated_asc",
       limit: "10",
       cursor: "opaque",
     });
@@ -21,6 +22,7 @@ describe("case back navigation preserves only validated queue scope", () => {
     "https://evil.test/admin/members/queue?status=pending_review",
     "//evil.test/admin/members/queue",
     "/admin/members/queue?status=active",
+    "/admin/members/queue?sort=name",
     "/admin/members/queue?limit=5000",
     "/admin/members/queue?status=draft&status=pending_review",
     "/admin/members/queue?actor=superadmin",

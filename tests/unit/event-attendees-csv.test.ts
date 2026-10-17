@@ -12,8 +12,10 @@ const rows: EventAttendee[] = [
   {kind: "ticket", profileId: null, guestId: null, seatId: "s1", orderId: "o1", displayName: "Cleo", email: "cleo@x.hk", organisation: null, status: "paid", checkedInAt: null},
 ];
 
-function request() {
-  return new Request(`https://x/api/admin/events/${EVENT}/attendees.csv`);
+function request(search = "") {
+  return new Request(
+    `https://x/api/admin/events/${EVENT}/attendees.csv${search}`,
+  );
 }
 
 describe("attendee CSV (programme B-4)", () => {
@@ -53,7 +55,7 @@ describe("attendee CSV (programme B-4)", () => {
     const bytes = new Uint8Array(await response.arrayBuffer());
     expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     expect(new TextDecoder().decode(bytes)).toBe(attendeesCsv(rows).slice(1));
-    expect(list).toHaveBeenCalledWith(staff, EVENT);
+    expect(list).toHaveBeenCalledWith(staff, EVENT, "");
   });
 
   it("404s for an unknown event and never audits it", async () => {
@@ -62,7 +64,7 @@ describe("attendee CSV (programme B-4)", () => {
     const get = createAttendeesCsvGet({actor: async () => staff, list, audit});
     const response = await get(request(), {params: Promise.resolve({id: EVENT})});
     expect(response.status).toBe(404);
-    expect(list).toHaveBeenCalledWith(staff, EVENT);
+    expect(list).toHaveBeenCalledWith(staff, EVENT, "");
     expect(audit).not.toHaveBeenCalled();
   });
 
@@ -75,6 +77,28 @@ describe("attendee CSV (programme B-4)", () => {
 
     const failing = createAttendeesCsvGet({actor: async () => staff, list: async () => rows, audit: async () => { throw new Error("AUDIT_DOWN"); }});
     await expect(failing(request(), {params: Promise.resolve({id: EVENT})})).rejects.toThrow("AUDIT_DOWN");
+  });
+
+  it("passes the page search to the export and never widens it to the full list", async () => {
+    const list = vi.fn(async (
+      _actor: Actor,
+      _eventId: string,
+      search: string,
+    ) => rows.filter((row) =>
+      [row.displayName, row.email, row.organisation, row.seatId, row.orderId]
+        .some((value) => value?.toLocaleLowerCase("en").includes(search.toLocaleLowerCase("en"))),
+    ));
+    const audit = vi.fn(async () => undefined);
+    const get = createAttendeesCsvGet({actor: async () => staff, list, audit});
+    const response = await get(request("?q=Ada"), {
+      params: Promise.resolve({id: EVENT}),
+    });
+    expect(response.status).toBe(200);
+    expect(list).toHaveBeenCalledWith(staff, EVENT, "Ada");
+    const csv = await response.text();
+    expect(csv).toContain("Ada");
+    expect(csv).not.toContain("Bob");
+    expect(audit).toHaveBeenCalledWith(staff, EVENT, 1);
   });
 });
 

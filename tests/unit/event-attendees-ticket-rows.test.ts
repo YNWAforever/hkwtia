@@ -76,7 +76,7 @@ describe("the door list", () => {
     expect(union).toMatch(/"event_orders"\."event_id"\s*=\s*\$\d+/);
     expect(union).toMatch(/"event_orders"\."status"\s*=\s*'paid'/);
     expect(union).toMatch(/FROM\s+"event_order_seats"\s+JOIN\s+"event_orders"\s+ON\s+"event_orders"\."id"\s*=\s*"event_order_seats"\."order_id"/);
-    expect(union).toMatch(/SELECT\s+'ticket',\s*NULL::text,\s*NULL::uuid,\s*"event_order_seats"\."id",\s*"event_orders"\."id"/);
+    expect(union).toMatch(/SELECT\s+'ticket'(?:::text)?,\s*NULL::text,\s*NULL::uuid,\s*"event_order_seats"\."id",\s*"event_orders"\."id"/);
   });
 });
 

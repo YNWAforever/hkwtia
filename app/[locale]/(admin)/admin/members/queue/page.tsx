@@ -7,6 +7,7 @@ import {
 import type { AppLocale } from "@/i18n/routing";
 import { requireAdminPageActor } from "@/lib/admin/page-auth";
 import {
+  APPLICATION_QUEUE_STATUSES,
   adminMembersRepository,
   applicationQueueQuerySchema,
 } from "@/lib/db/repos/admin-members";
@@ -33,11 +34,31 @@ export default async function AdminApplicationQueuePage({
   const query = applicationQueueQuerySchema.safeParse({
     status: raw.status,
     search: raw.q,
+    sort: raw.sort,
     limit: raw.limit,
     cursor: raw.cursor ?? null,
   });
   const base = localizedPath(locale, "/admin/members/queue");
-  const states = ["draft", "pending_payment", "pending_review"] as const;
+  const selectedStatus = query.success ? query.data.status : "draft";
+  const selectedSearch = query.success ? query.data.search : "";
+  const selectedSort = query.success ? query.data.sort : "updated_desc";
+  const selectedLimit = query.success ? query.data.limit : 20;
+  const queueHref = (input: {
+    status?: (typeof APPLICATION_QUEUE_STATUSES)[number];
+    search?: string;
+    sort?: "updated_desc" | "updated_asc";
+    limit?: number;
+    cursor?: string | null;
+  }) => {
+    const params = new URLSearchParams({
+      status: input.status ?? selectedStatus,
+      q: input.search ?? selectedSearch,
+      sort: input.sort ?? selectedSort,
+      limit: String(input.limit ?? selectedLimit),
+    });
+    if (input.cursor) params.set("cursor", input.cursor);
+    return `${base}?${params}`;
+  };
   let page: Awaited<
     ReturnType<typeof adminMembersRepository.getApplicationQueuePage>
   > | null = null;
@@ -91,19 +112,11 @@ export default async function AdminApplicationQueuePage({
       ]),
     ),
   };
-  const next =
-    query.success && page?.nextCursor
-      ? `${base}?${new URLSearchParams({ status: query.data.status, q: query.data.search, limit: String(query.data.limit), cursor: page.nextCursor })}`
-      : null;
+  const next = query.success && page?.nextCursor
+    ? queueHref({cursor: page.nextCursor})
+    : null;
   const returnTo = query.success
-    ? base +
-      "?" +
-      new URLSearchParams({
-        status: query.data.status,
-        q: query.data.search,
-        limit: String(query.data.limit),
-        ...(query.data.cursor ? { cursor: query.data.cursor } : {}),
-      })
+    ? queueHref({cursor: query.data.cursor})
     : base;
   return (
     <div className="space-y-6">
@@ -125,16 +138,17 @@ export default async function AdminApplicationQueuePage({
         aria-label={t("applicationQueue.views")}
         className="flex flex-wrap gap-3"
       >
-        {states.map((state) => (
+        {APPLICATION_QUEUE_STATUSES.map((state) => (
           <Link
             aria-current={
-              query.success && query.data.status === state ? "page" : undefined
+              selectedStatus === state ? "page" : undefined
             }
             className="min-h-11 rounded-md border px-3 py-2"
-            href={`${base}?status=${state}`}
+            href={queueHref({status: state})}
             key={state}
           >
             {t(`applicationQueue.viewsLabels.${state}`)}
+            {page ? ` (${page.counts[state]})` : null}
           </Link>
         ))}
       </nav>
@@ -146,17 +160,46 @@ export default async function AdminApplicationQueuePage({
         <input
           name="status"
           type="hidden"
-          value={query.success ? query.data.status : "draft"}
+          value={selectedStatus}
         />
         <label className="grid gap-1">
           {t("applicationQueue.search")}
           <input
             className="min-h-11 rounded-md border bg-background px-3"
-            defaultValue={query.success ? query.data.search : ""}
+            defaultValue={selectedSearch}
             maxLength={120}
             name="q"
             type="search"
           />
+        </label>
+        <label className="grid gap-1">
+          {t("applicationQueue.sort")}
+          <select
+            className="min-h-11 rounded-md border bg-background px-3"
+            defaultValue={selectedSort}
+            name="sort"
+          >
+            <option value="updated_desc">
+              {t("applicationQueue.sortNewest")}
+            </option>
+            <option value="updated_asc">
+              {t("applicationQueue.sortOldest")}
+            </option>
+          </select>
+        </label>
+        <label className="grid gap-1">
+          {t("applicationQueue.pageSize")}
+          <select
+            className="min-h-11 rounded-md border bg-background px-3"
+            defaultValue={String(selectedLimit)}
+            name="limit"
+          >
+            {[10, 20, 50].map((limit) => (
+              <option key={limit} value={limit}>
+                {limit}
+              </option>
+            ))}
+          </select>
         </label>
         <button className="min-h-11 rounded-md border px-4" type="submit">
           {t("members.search")}
@@ -170,12 +213,19 @@ export default async function AdminApplicationQueuePage({
       ) : !page ? (
         <p role="alert">{t("applicationQueue.unavailable")}</p>
       ) : (
-        <ApplicationQueueTable
-          returnTo={returnTo}
-          locale={locale}
-          items={page.items}
-          labels={labels}
-        />
+        <>
+          <p className="text-sm text-muted-foreground" role="status">
+            {t("applicationQueue.totalMatching", {
+              count: page.totalMatching,
+            })}
+          </p>
+          <ApplicationQueueTable
+            returnTo={returnTo}
+            locale={locale}
+            items={page.items}
+            labels={labels}
+          />
+        </>
       )}
       {next ? (
         <Link

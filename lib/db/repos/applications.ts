@@ -283,8 +283,12 @@ export function createApplicationCasesRepository(
     const applicationId = z.string().uuid().parse(id);
     const db = await load();
     const result = await db.execute(sql`
-      SELECT app.id, app.applicant_user_id, p.display_name, app.company_id,
-        c.display_name AS company_name, app.plan_code, app.status, app.current_step,
+      SELECT app.id, app.applicant_user_id, p.display_name, p.email, p.phone,
+        p.job_title, p.locale, p.onboarding_state, app.company_id,
+        c.display_name AS company_name, c.legal_name AS company_legal_name,
+        c.website AS company_website, c.industry AS company_industry,
+        c.size_band AS company_size_band, c.description AS company_description,
+        app.plan_code, app.status, app.current_step, app.created_at, app.updated_at,
         m.id AS membership_id, m.status AS membership_status,
         attempt.id AS attempt_id, attempt.state AS attempt_state, task.context
       FROM membership_applications app JOIN profiles p ON p.id=app.applicant_user_id
@@ -302,10 +306,44 @@ export function createApplicationCasesRepository(
     if (context && context.applicationId !== applicationId)
       throw Error("APPLICATION_CASE_CONTEXT_INVALID");
     const audits =
-      await db.execute(sql`SELECT id,created_at,actor_type,metadata FROM audit_events
-      WHERE target_type='membership_application' AND target_id=${applicationId}
-        AND action='membership.application.case.updated' ORDER BY created_at DESC,id DESC LIMIT 50`);
+      await db.execute(sql`SELECT audit.id,audit.created_at,audit.actor_type,audit.actor_user_id,
+        actor.display_name AS actor_name,audit.metadata
+      FROM audit_events audit LEFT JOIN profiles actor ON actor.id=audit.actor_user_id
+      WHERE audit.target_type='membership_application' AND audit.target_id=${applicationId}
+        AND audit.action='membership.application.case.updated'
+      ORDER BY audit.created_at DESC,audit.id DESC LIMIT 50`);
     return {
+      profile: {
+        email: row.email === null ? null : String(row.email),
+        phone: row.phone === null ? null : String(row.phone),
+        jobTitle: row.job_title === null ? null : String(row.job_title),
+        locale: String(row.locale),
+        onboardingState: String(row.onboarding_state),
+      },
+      company:
+        row.company_id === null
+          ? null
+          : {
+              id: String(row.company_id),
+              legalName: String(row.company_legal_name),
+              displayName: String(row.company_name),
+              website:
+                row.company_website === null
+                  ? null
+                  : String(row.company_website),
+              industry:
+                row.company_industry === null
+                  ? null
+                  : String(row.company_industry),
+              sizeBand:
+                row.company_size_band === null
+                  ? null
+                  : String(row.company_size_band),
+              description:
+                row.company_description === null
+                  ? null
+                  : String(row.company_description),
+            },
       application: {
         id: applicationId,
         profileId: String(row.applicant_user_id),
@@ -316,6 +354,8 @@ export function createApplicationCasesRepository(
         planCode: String(row.plan_code),
         status: String(row.status),
         step: String(row.current_step),
+        createdAt: new Date(String(row.created_at)).toISOString(),
+        updatedAt: new Date(String(row.updated_at)).toISOString(),
       },
       membership: row.membership_id
         ? {
@@ -345,6 +385,10 @@ export function createApplicationCasesRepository(
           id: String(audit.id),
           at: new Date(String(audit.created_at)).toISOString(),
           actorType: String(audit.actor_type),
+          actorUserId:
+            audit.actor_user_id === null ? null : String(audit.actor_user_id),
+          actorName:
+            audit.actor_name === null ? null : String(audit.actor_name),
           note: metadata.note,
           case: metadata.case,
         };
