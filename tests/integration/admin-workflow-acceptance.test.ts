@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createApplicationCasesRepository } from "@/lib/db/repos/applications";
 import type { Database } from "@/lib/db/repos/common";
+import { encodeScopedCursor } from "@/lib/admin/pagination";
 import {
   listEventAttendeePage,
   listEventAttendeesForExport,
@@ -192,6 +193,19 @@ describe.skipIf(!enabled)("isolated admin workflow acceptance", () => {
         `${row.kind}:${row.profileId ?? row.guestId}`,
       )).size,
     ).toBe(2);
+    const stale = encodeScopedCursor(`event:${eventId}:attendees:ada`, [
+      "zzzz",
+      "ticket",
+      "zzzz",
+    ]);
+    const stalePage = await listEventAttendeePage(
+      staffA,
+      eventId,
+      {search: "Ada", limit: 1, cursor: stale},
+      {loadDatabase: async () => fixture.database},
+    );
+    expect(stalePage?.items).toEqual([]);
+    expect(stalePage?.totalMatching).toBe(2);
 
     const exported = await listEventAttendeesForExport(
       staffA,
