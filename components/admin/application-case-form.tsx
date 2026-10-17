@@ -74,6 +74,15 @@ export function ApplicationCaseForm({
     }>;
   }>;
 }>) {
+  const form = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const element = form.current;
+    if (!element) return;
+    // React restores uncontrolled fields after delegated form actions.
+    const retainReviewFields = (event: Event) => event.preventDefault();
+    element.addEventListener("reset", retainReviewFields);
+    return () => element.removeEventListener("reset", retainReviewFields);
+  }, []);
   const sequence = useRef(0),
     [dirty, setDirty] = useState(false),
     guard = useAdminUnsavedChanges();
@@ -171,6 +180,7 @@ export function ApplicationCaseForm({
   return (
     <form
       action={submit}
+      ref={form}
       onChange={markDirty}
       className="glass-card space-y-5 p-5 sm:p-6"
     >
