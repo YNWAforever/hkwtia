@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ApplicationCaseForm } from "@/components/admin/application-case-form";
 import type { ApplicationCase } from "@/lib/admin/application-case-types";
@@ -56,12 +62,17 @@ const action = async () => ({
 });
 describe("application case editor snapshot", () => {
   it("does not dispatch a second review while the first save is still pending", async () => {
+    let completeSave:
+      | ((value: { status: "saved"; version: string }) => void)
+      | undefined;
     const save = vi.fn(
       () =>
         new Promise<{
           status: "saved";
           version: string;
-        }>(() => undefined),
+        }>((resolve) => {
+          completeSave = resolve;
+        }),
     );
     render(
       <ApplicationCaseForm
@@ -76,11 +87,23 @@ describe("application case editor snapshot", () => {
       target: { value: "Synthetic single-save note" },
     });
     const form = screen.getByRole("button", { name: "Save" }).closest("form")!;
-    fireEvent.submit(form);
-    fireEvent.submit(form);
+    await act(async () => {
+      form.requestSubmit();
+    });
     await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
-    expect(screen.getByRole("button", { name: "Saving" })).toBeDisabled();
+    const saving = screen.getByRole("button", { name: "Saving" });
+    expect(saving).toBeDisabled();
+    fireEvent.click(saving);
     expect(save).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      completeSave?.({
+        status: "saved",
+        version: "10000000-0000-4000-8000-000000000003",
+      });
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save" })).toBeEnabled(),
+    );
   });
 
   it("an external refresh cannot upgrade the CAS version attached to unsaved fields", () => {
@@ -114,6 +137,60 @@ describe("application case editor snapshot", () => {
       container.querySelector('input[name="expectedVersion"]'),
     ).toHaveValue(original.version);
   });
+});
+
+describe("application case recovery after a failed save", () => {
+  it.each(["conflict", "error"] as const)(
+    "retains the review fields and retry state after a %s result",
+    async (status) => {
+      const save = vi.fn(async () => ({ status }));
+      render(
+        <ApplicationCaseForm
+          record={original}
+          owners={[{ id: "synthetic-owner", name: "Synthetic owner" }]}
+          labels={labels}
+          action={save}
+          refreshHref="/admin/members/queue/example"
+        />,
+      );
+      fireEvent.change(screen.getByLabelText("Owner"), {
+        target: { value: "synthetic-owner" },
+      });
+      fireEvent.change(screen.getByLabelText("Due"), {
+        target: { value: "2030-12-01T10:00" },
+      });
+      fireEvent.change(screen.getByLabelText("Next action"), {
+        target: { value: "await_documents" },
+      });
+      fireEvent.click(screen.getByRole("checkbox", { name: "Website" }));
+      fireEvent.change(screen.getByLabelText("Note"), {
+        target: { value: "Synthetic recovery note" },
+      });
+      const form = screen.getByRole("button", { name: "Save" }).closest("form")!;
+      await act(async () => {
+        form.requestSubmit();
+      });
+      await waitFor(() =>
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          status === "conflict" ? "Conflict" : "Error",
+        ),
+      );
+      expect(save).toHaveBeenCalledTimes(1);
+      expect(screen.getByLabelText("Owner")).toHaveValue("synthetic-owner");
+      expect(screen.getByLabelText("Due")).toHaveValue("2030-12-01T10:00");
+      expect(screen.getByLabelText("Next action")).toHaveValue(
+        "await_documents",
+      );
+      expect(screen.getByRole("checkbox", { name: "Website" })).toBeChecked();
+      expect(screen.getByLabelText("Note")).toHaveValue(
+        "Synthetic recovery note",
+      );
+      expect(
+        form.querySelector('input[name="expectedVersion"]'),
+      ).toHaveValue(original.version);
+      expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+    },
+  );
 });
 
 const proposal = {
