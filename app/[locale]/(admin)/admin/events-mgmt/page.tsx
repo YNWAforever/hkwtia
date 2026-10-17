@@ -1,6 +1,7 @@
 import {PrivateLink as Link} from "@/components/internal-shell/private-link";
 
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {z} from "zod";
 
 import {EventForm} from "@/components/admin/event-form";
 import {EventReviewTable, type ReviewRow} from "@/components/admin/event-review-table";
@@ -13,9 +14,12 @@ import {eventsRepository} from "@/lib/db/repos/events";
 import {mediaRepository} from "@/lib/db/repos/media";
 import {localizedPath} from "@/lib/urls";
 
-type Props = Readonly<{params: Promise<{locale: string}>}>;
+type Props = Readonly<{
+  params: Promise<{locale: string}>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}>;
 
-export default async function AdminEventsPage({params}: Props) {
+export default async function AdminEventsPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
@@ -28,6 +32,20 @@ export default async function AdminEventsPage({params}: Props) {
     eventsRepository.listForReview(actor).catch(() => null),
     getTranslations({locale, namespace: "Admin.eventsMgmt"}),
   ]);
+  const rawQuery = searchParams ? await searchParams : {};
+  const parsedSearch = z.string().trim().max(120).safeParse(rawQuery.q ?? "");
+  const search = parsedSearch.success ? parsedSearch.data : "";
+  const searchNeedle = search.toLocaleLowerCase(locale);
+  const matchingEvents = searchNeedle
+    ? events.filter((event) =>
+        [
+          event.titleEn,
+          event.titleZh,
+          event.slug,
+          event.venue,
+        ].some((value) => value?.toLocaleLowerCase(locale).includes(searchNeedle)),
+      )
+    : events;
   const path = "/" + locale + "/admin/events-mgmt";
   const createActionMessages = {successMessage: t("createSuccess"), validationMessage: t("validation"), errorMessage: t("error"), conflictMessage: t("editConflict")};
   const createAction = createEventAction.bind(null, path, createActionMessages);
@@ -39,5 +57,5 @@ export default async function AdminEventsPage({params}: Props) {
     submittedAt: row.submitted_at, format: row.format, visibility: row.visibility,
   }));
   const reviewLabels = {caption: t("review.caption"), event: t("review.event"), organiser: t("review.organiser"), starts: t("review.starts"), submitted: t("review.submitted"), format: t("review.format"), visibility: t("review.visibility"), approve: t("review.approve"), reject: t("review.reject"), rejectionReason: t("review.rejectionReason"), empty: t("review.empty")};
-  return <div className="space-y-8"><header><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{t("title")}</h1><p className="text-muted-foreground">{t("description")}</p></header><section className="glass-card p-6"><h2 className="font-serif text-2xl font-semibold">{t("review.title")}</h2>{reviewRows === null ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-destructive" role="alert">{t("review.error")}</p> : <EventReviewTable approveAction={approveMemberEventAction.bind(null, path)} labels={reviewLabels} locale={locale} rejectAction={rejectMemberEventAction.bind(null, path)} rows={reviewRows}/>}</section><EventForm action={createAction} labels={labels} mediaRows={mediaRows}/><section className="glass-card p-6"><h2 className="font-serif text-2xl font-semibold">{t("existing")}</h2>{events.length ? <ul className="divide-y">{events.map((event) => <li className="py-3" key={event.id}><Link className="underline" href={localizedPath(locale, `/admin/events-mgmt/${event.id}`)}>{locale === "zh-HK" && event.titleZh ? event.titleZh : event.titleEn}</Link></li>)}</ul> : <p>{t("empty")}</p>}</section></div>;
+  return <div className="space-y-8"><header><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{t("title")}</h1><p className="text-muted-foreground">{t("description")}</p></header><section className="glass-card p-6"><h2 className="font-serif text-2xl font-semibold">{t("review.title")}</h2>{reviewRows === null ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-destructive" role="alert">{t("review.error")}</p> : <EventReviewTable approveAction={approveMemberEventAction.bind(null, path)} labels={reviewLabels} locale={locale} rejectAction={rejectMemberEventAction.bind(null, path)} rows={reviewRows}/>}</section><EventForm action={createAction} labels={labels} mediaRows={mediaRows}/><section className="glass-card p-6"><h2 className="font-serif text-2xl font-semibold">{t("existing")}</h2><form action={localizedPath(locale, "/admin/events-mgmt")} className="my-4 flex flex-wrap items-end gap-3" method="get"><label className="block text-sm">{t("searchEvents")}<input className="mt-2 block min-h-11 rounded-md border px-3" defaultValue={search} maxLength={120} name="q" type="search"/></label><button className="min-h-11 rounded-md border px-4" type="submit">{t("searchSubmit")}</button>{search ? <Link className="min-h-11 px-3 py-2 text-primary underline" href={localizedPath(locale, "/admin/events-mgmt")}>{t("clearSearch")}</Link> : null}</form>{matchingEvents.length ? <ul className="divide-y">{matchingEvents.map((event) => <li className="flex flex-wrap items-center justify-between gap-3 py-3" key={event.id}><Link className="underline" href={localizedPath(locale, `/admin/events-mgmt/${event.id}`)}>{locale === "zh-HK" && event.titleZh ? event.titleZh : event.titleEn}</Link><Link className="text-sm text-primary underline" href={localizedPath(locale, `/admin/events-mgmt/${event.id}`) + "?tab=attendees"}>{t("manageAttendees")}</Link></li>)}</ul> : <p>{search ? t("eventNoMatches") : t("empty")}</p>}</section></div>;
 }

@@ -24,7 +24,7 @@ export type AttendeesCsvDependencies = Readonly<{
   /** Resolves the session; rejects when there is none. Wired to `requireAdminActor` by the route. */
   actor: () => Promise<Actor>;
   /** `null` means the event id does not exist; the route 404s before auditing. */
-  list: (actor: Actor, eventId: string) => Promise<readonly EventAttendee[] | null>;
+  list: (actor: Actor, eventId: string, search: string) => Promise<readonly EventAttendee[] | null>;
   /** Writes the `event.attendees.exported` audit row; awaited before any byte leaves. */
   audit: (actor: Actor, eventId: string, rowCount: number) => Promise<void>;
 }>;
@@ -35,7 +35,7 @@ export type AttendeesCsvDependencies = Readonly<{
  * which event ids exist to someone probing without a staff session.
  */
 export function createAttendeesCsvGet(deps: AttendeesCsvDependencies) {
-  return async function GET(_request: Request, context: Readonly<{params: Promise<{id: string}>}>): Promise<Response> {
+  return async function GET(request: Request, context: Readonly<{params: Promise<{id: string}>}>): Promise<Response> {
     let actor: Actor;
     try {
       actor = await deps.actor();
@@ -45,7 +45,11 @@ export function createAttendeesCsvGet(deps: AttendeesCsvDependencies) {
     }
     const parsed = eventIdSchema.safeParse((await context.params).id);
     if (!parsed.success) return new Response("Not found", {status: 404});
-    const rows = await deps.list(actor, parsed.data);
+    const search = z.string().trim().max(120).safeParse(
+      new URL(request.url).searchParams.get("q") ?? "",
+    );
+    if (!search.success) return new Response("Invalid search", {status: 400});
+    const rows = await deps.list(actor, parsed.data, search.data);
     // `null` means the event id doesn't exist: 404 before auditing so there's
     // no `event.attendees.exported` row for a target that was never real.
     if (rows === null) return new Response("Not found", {status: 404});

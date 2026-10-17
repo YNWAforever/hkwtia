@@ -50,7 +50,7 @@ describe.skipIf(!enabled)("join resume scope on disposable PostgreSQL", () => {
       CREATE TABLE company_members (company_id uuid NOT NULL, user_id text NOT NULL, revoked_at timestamptz);
       CREATE TABLE membership_applications (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(), applicant_user_id text NOT NULL,
-        plan_code text NOT NULL, company_id uuid, current_step text NOT NULL DEFAULT 'profile',
+        plan_code text NOT NULL, company_id uuid, invite_id uuid, current_step text NOT NULL DEFAULT 'profile',
         status text NOT NULL DEFAULT 'draft', created_at timestamptz NOT NULL DEFAULT now(),
         updated_at timestamptz NOT NULL DEFAULT now()
       );

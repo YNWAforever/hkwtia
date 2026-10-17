@@ -22,7 +22,7 @@ export function applicationQueueReturnHref(
     if (
       [...url.searchParams.keys()].some(
         (key) =>
-          !["status", "q", "limit", "cursor"].includes(key) ||
+          !["status", "q", "sort", "limit", "cursor"].includes(key) ||
           url.searchParams.getAll(key).length !== 1,
       )
     )
@@ -31,6 +31,7 @@ export function applicationQueueReturnHref(
     const parsed = applicationQueueQuerySchema.safeParse({
       status: url.searchParams.get("status") ?? undefined,
       search: url.searchParams.get("q") ?? undefined,
+      sort: url.searchParams.get("sort") ?? undefined,
       limit: url.searchParams.get("limit") ?? undefined,
       cursor: url.searchParams.get("cursor") ?? null,
     });
@@ -38,6 +39,7 @@ export function applicationQueueReturnHref(
     const query = new URLSearchParams({
       status: parsed.data.status,
       q: parsed.data.search,
+      sort: parsed.data.sort,
       limit: String(parsed.data.limit),
     });
     if (parsed.data.cursor) query.set("cursor", parsed.data.cursor);
