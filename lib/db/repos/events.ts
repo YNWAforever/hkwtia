@@ -728,11 +728,18 @@ export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown,
   const database = await memberDatabase(deps);
   const existing = executedRows(await database.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
   if (existing.length === 0) return null;
+  const totalMatching = z.coerce.number().int().nonnegative().parse(
+    executedRows(await database.execute(sql`
+      ${attendeeRowsCte(eventId)}
+      SELECT count(*)::int AS total_matching
+      FROM attendee_rows
+      WHERE ${attendeeSearchPredicate(query.search)}
+    `))[0]?.total_matching,
+  );
   const rows = executedRows(await database.execute(sql`
     ${attendeeRowsCte(eventId)},
     filtered_attendees AS (
-      SELECT attendee_rows.*, lower(display_name) AS sort_name,
-        count(*) OVER() AS total_matching
+      SELECT attendee_rows.*, lower(display_name) AS sort_name
       FROM attendee_rows
       WHERE ${attendeeSearchPredicate(query.search)}
     )
@@ -747,7 +754,6 @@ export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown,
   const items = pageRows.map(toEventAttendee);
   const last = pageRows.at(-1);
   const nextCursor = hasNext && last ? encodeScopedCursor(scope, [String(last.sort_name), String(last.kind), String(last.item_id)]) : null;
-  const totalMatching = z.coerce.number().int().nonnegative().parse(rows[0]?.total_matching ?? 0);
   return {items, nextCursor, totalMatching};
 }
 
