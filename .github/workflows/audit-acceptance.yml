@@ -33,12 +33,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Cache application case PostgreSQL image before timed fixtures
+        timeout-minutes: 5
+        run: docker pull postgres:16
       - name: Verify disposable PostgreSQL transactions and concurrency
         env:
           RUN_POSTGRES_INTEGRATION: "1"
         run: >-
           npx vitest run
           tests/integration/admin-batch-snapshot.test.ts
+          tests/integration/application-case-outcomes.test.ts
           tests/integration/admin-batch-concurrency.test.ts
           tests/integration/admin-batch-browser-fixture.test.ts
           tests/integration/member-import-commit.test.ts

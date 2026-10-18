@@ -5,6 +5,7 @@ import { useAdminUnsavedChanges } from "@/components/admin/unsaved-changes-guard
 import type { ApplicationDraftState } from "@/lib/admin/application-draft-actions";
 import type { ApplicationTriage } from "@/lib/ai/application-triage";
 import type { ApplicationCaseState } from "@/lib/admin/application-case-actions";
+import { newAttemptId } from "@/lib/random-id";
 export type ApplicationCaseLabels = Readonly<{
   title: string;
   description: string;
@@ -20,6 +21,12 @@ export type ApplicationCaseLabels = Readonly<{
   conflict: string;
   error: string;
   refresh: string;
+  unknown: string;
+  checkResult: string;
+  checking: string;
+  changed: string;
+  savedRefreshRequired: string;
+  reference: string;
   missingFields: Readonly<Record<string, string>>;
   nextActions: Readonly<Record<string, string>>;
 }>;
@@ -45,6 +52,8 @@ export function ApplicationCaseForm({
   owners,
   labels,
   action,
+  checkOutcome,
+  initialRequestId,
   refreshHref,
   triageProposal,
   draftRequest,
@@ -59,6 +68,8 @@ export function ApplicationCaseForm({
     state: ApplicationCaseState,
     data: FormData,
   ) => Promise<ApplicationCaseState>;
+  checkOutcome?: (requestId: string) => Promise<ApplicationCaseState>;
+  initialRequestId?: string;
   refreshHref: string;
   triageProposal?: ApplicationTriageProposal | null;
   draftRequest?: Readonly<{
@@ -84,26 +95,73 @@ export function ApplicationCaseForm({
     return () => element.removeEventListener("reset", retainReviewFields);
   }, []);
   const sequence = useRef(0),
+    submitting = useRef(false),
+    [acknowledgedVersion, setAcknowledgedVersion] = useState(record.version),
+    request = useRef({ id: initialRequestId ?? "", submittedSequence: 0, savedSequence: -1, blocked: false }),
     [dirty, setDirty] = useState(false),
+    [checked, setChecked] = useState<ApplicationCaseState | null>(null),
+    [checking, setChecking] = useState(false),
     guard = useAdminUnsavedChanges();
   const { setDirty: guardSetDirty } = guard;
   const markDirty = () => {
     sequence.current++;
     setDirty(true);
   };
-  const [state, submit, pending] = useActionState<
+  const [actionState, submit, pending] = useActionState<
     ApplicationCaseState,
     FormData
   >(
     async (previous, data) => {
-      const version = sequence.current,
-        result = await action(previous, data);
-      if (result.status === "saved" && sequence.current === version)
-        setDirty(false);
-      return result;
+      const version = sequence.current;
+      request.current.submittedSequence = version;
+      let dispatched = false;
+      try {
+        if (!request.current.id || request.current.savedSequence >= 0) {
+          request.current.id = newAttemptId();
+          request.current.savedSequence = -1;
+        }
+        data.set("requestId", request.current.id);
+        dispatched = true;
+        const result = await action(previous, data);
+        request.current.blocked = result.status === "unknown" || result.status === "conflict";
+        if (result.status === "saved") {
+          setAcknowledgedVersion(current => result.version ?? current);
+          request.current.savedSequence = version;
+          if (sequence.current === version) setDirty(false);
+        }
+        return result;
+      } catch {
+        request.current.blocked = dispatched;
+        return dispatched
+          ? { status: "unknown", requestId: request.current.id }
+          : { status: "error" };
+      } finally {
+        submitting.current = false;
+      }
     },
     { status: "idle" },
   );
+  const state = checked ?? actionState;
+  async function checkSavedResult() {
+    if (!checkOutcome || checking || submitting.current) return;
+    submitting.current = true;
+    setChecking(true);
+    try {
+      const result = await checkOutcome(request.current.id);
+      setChecked(result);
+      if (result.status === "saved") {
+        request.current.blocked = false;
+        setAcknowledgedVersion(current => result.version ?? current);
+        request.current.savedSequence = request.current.submittedSequence;
+        if (sequence.current === request.current.submittedSequence) setDirty(false);
+      }
+    } catch {
+      setChecked({ status: "unknown", requestId: request.current.id });
+    } finally {
+      submitting.current = false;
+      setChecking(false);
+    }
+  }
   useEffect(() => {
     guardSetDirty(dirty);
     return () => guardSetDirty(false);
@@ -126,7 +184,7 @@ export function ApplicationCaseForm({
   // Keep unsaved fields attached to the version loaded when editing began.
   const [loadedVersion] = useState(record.version);
   const staleCase =
-    record.version !== loadedVersion && record.version !== state.version;
+    record.version !== loadedVersion && record.version !== acknowledgedVersion;
   const [selectedMissing, setSelectedMissing] = useState<readonly string[]>(
     record.missingFields,
   );
@@ -181,6 +239,15 @@ export function ApplicationCaseForm({
     <form
       action={submit}
       ref={form}
+      onSubmit={(event) => {
+        if (submitting.current || request.current.blocked || staleCase || state.status === "unknown" ||
+          state.status === "conflict" || request.current.savedSequence === sequence.current) {
+          event.preventDefault();
+          return;
+        }
+        submitting.current = true;
+        setChecked(null);
+      }}
       onChange={markDirty}
       className="glass-card space-y-5 p-5 sm:p-6"
     >
@@ -280,8 +347,9 @@ export function ApplicationCaseForm({
       <input
         type="hidden"
         name="expectedVersion"
-        value={state.version ?? loadedVersion}
+        value={acknowledgedVersion}
       />
+      <input type="hidden" name="requestId" value={initialRequestId ?? ""} />
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
           {labels.owner}
@@ -360,9 +428,9 @@ export function ApplicationCaseForm({
           className="rounded-md border bg-background p-3"
         />
       </label>
-      {staleCase && state.status !== "conflict" ? (
+      {staleCase && !pending && state.status !== "conflict" && state.status !== "unknown" ? (
         <p role="alert">
-          {labels.conflict}
+          {labels.changed}
           <a
             className="ml-3 inline-flex min-h-11 items-center text-primary underline"
             href={refreshHref}
@@ -371,10 +439,16 @@ export function ApplicationCaseForm({
           </a>
         </p>
       ) : null}
-      {state.status !== "idle" ? (
+      {state.status !== "idle" && !pending ? (
         <p role={state.status === "saved" ? "status" : "alert"}>
           {labels[state.status]}
-          {state.status === "conflict" ? (
+          {state.status === "saved" && state.refreshRequired ? (
+            <span className="ml-3">{labels.savedRefreshRequired}</span>
+          ) : null}
+          {state.requestId ? (
+            <span className="ml-3">{labels.reference}: {state.requestId}</span>
+          ) : null}
+          {state.status === "conflict" || (state.status === "saved" && state.refreshRequired) ? (
             <a
               className="ml-3 inline-flex min-h-11 items-center text-primary underline"
               href={refreshHref}
@@ -384,9 +458,15 @@ export function ApplicationCaseForm({
           ) : null}
         </p>
       ) : null}
+      {state.status === "unknown" && checkOutcome ? (
+        <button type="button" onClick={checkSavedResult} disabled={checking}
+          className="min-h-11 rounded-md border px-4 py-2 disabled:opacity-50">
+          {checking ? labels.checking : labels.checkResult}
+        </button>
+      ) : null}
       <button
         type="submit"
-        disabled={pending || staleCase}
+        disabled={pending || staleCase || state.status === "unknown" || state.status === "conflict"}
         className="min-h-11 rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
       >
         {pending ? labels.saving : labels.save}
