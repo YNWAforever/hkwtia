@@ -52,6 +52,7 @@ export default async function PortalPage({params}: Props) {
       <h1 className="sr-only">{t("dashboard")}</h1>
       <HonestEmpty variant="inner" title={t("membershipUnavailableTitle")} copy={t("membershipUnavailableDescription")} />
       <div className="flex flex-wrap items-center gap-3">
+        <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/applications")}>{t("applications.nav")}</PrivateLink>
         <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/profile")}>{t("profile")}</PrivateLink>
         <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/billing")}>{t("billing.title")}</PrivateLink>
         <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />
@@ -76,7 +77,10 @@ export default async function PortalPage({params}: Props) {
   let nextStep: ComponentProps<typeof NextStep> | null = null;
   if (step) {
     const key = step.kind === "billing" ? step.reason : step.kind === "review" ? "pending_review" : step.step;
-    const href = step.kind === "billing" ? "/portal/billing" : step.kind === "onboarding" ? `/portal/${step.step}` : null;
+    const href = step.kind === "billing" ? "/portal/billing"
+      : step.kind === "onboarding" ? `/portal/${step.step}`
+      : step.kind === "review" ? "/portal/applications"
+      : null;
     nextStep = {
       label: t("nextStep.label"),
       title: t(`nextStep.${key}.title`),

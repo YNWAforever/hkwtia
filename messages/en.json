@@ -2395,13 +2395,60 @@
     "navigation": "Member portal navigation",
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
+    "applications": {
+      "nav": "My applications",
+      "title": "My applications",
+      "description": "Track each membership application, what needs attention and what to do next.",
+      "updated": "Last updated {date}",
+      "viewDetails": "View application details",
+      "back": "Back to my applications",
+      "emptyTitle": "No membership applications",
+      "emptyCopy": "You have no saved membership applications. Start one from the membership plans.",
+      "emptyAction": "View membership plans",
+      "retry": "Try again",
+      "unavailableTitle": "Application status is unavailable",
+      "unavailableCopy": "We could not load your application status. No changes were made. Try again or return to your dashboard.",
+      "dashboard": "Back to dashboard",
+      "reference": "Application reference",
+      "createdLabel": "Created",
+      "updatedLabel": "Last updated",
+      "stepLabel": "Saved step",
+      "missingTitle": "Information to complete",
+      "missingNone": "No further information is needed from you.",
+      "missing": {
+        "profile": "Complete or confirm your profile details.",
+        "company": "Complete your company details."
+      },
+      "nextTitle": "Next step",
+      "nextAction": {
+        "resume": {"title": "Continue your saved application", "action": "Continue application"},
+        "billing": {"title": "Payment is still required", "action": "Open billing"},
+        "wait": {"title": "Wait for WTIA review", "body": "No further action is required from you right now."},
+        "complete": {"title": "Application complete", "body": "No further action is required."},
+        "new": {"title": "This application is closed", "action": "Start a new application"}
+      },
+      "status": {
+        "draft": "Draft",
+        "pending_payment": "Awaiting payment",
+        "pending_review": "Under review",
+        "completed": "Complete",
+        "abandoned": "Closed"
+      },
+      "step": {
+        "profile": "Profile details",
+        "company": "Company details",
+        "checkout": "Payment",
+        "review": "Review",
+        "complete": "Complete"
+      }
+    },
     "dashboard": "Dashboard",
     "nextStep": {
       "otherMemberships": "Other memberships needing attention",
       "label": "Your next step",
       "past_due": {"title": "Update your payment details", "body": "Your last payment did not go through. Update billing to keep your membership active.", "action": "Go to billing"},
       "pending_payment": {"title": "Complete your payment", "body": "Your membership activates once payment is complete.", "action": "Go to billing"},
-      "pending_review": {"title": "Your application is under review", "body": "WTIA will contact you when the review is complete."},
+      "pending_review": {"title": "Your application is under review", "body": "WTIA will contact you when the review is complete.", "action": "View application details"},
       "profile": {"title": "Complete your profile", "body": "Add your role and contact preferences so WTIA can reach you.", "action": "Open profile"},
       "company": {"title": "Add your company details", "body": "Your company details are used for your membership, seats and showcase listing.", "action": "Open company"}
     },

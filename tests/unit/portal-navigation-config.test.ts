@@ -11,6 +11,7 @@ describe("portal navigation groups", () => {
     expect(groups.map((group) => group.id)).toEqual(["me", "company", "benefits"]);
     expect(groups.flatMap((group) => group.links.map((link) => link.id))).toEqual([
       "dashboard",
+      "my-applications",
       "profile",
       "my-events",
       "company",
@@ -36,5 +37,12 @@ describe("portal navigation groups", () => {
     for (const id of ["me", "company", "benefits"] as const) {
       expect(bundle.Portal.navGroups[id].length).toBeGreaterThan(0);
     }
+  });
+
+  it.each([
+    ["en", en],
+    ["zh-HK", zhHK],
+  ])("has a non-empty %s label for the application link", (_locale, bundle) => {
+    expect(bundle.Portal.applications.nav.length).toBeGreaterThan(0);
   });
 });

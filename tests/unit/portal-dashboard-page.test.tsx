@@ -233,6 +233,19 @@ describe("portal dashboard page", () => {
     expect(step?.querySelectorAll("li")).toHaveLength(2);
   });
 
+  it("makes an application under review actionable without exposing application internals", async () => {
+    state.dashboard = dashboard({
+      primaryStatus: "pending_review",
+      onboarding: {completedSteps: 2, totalSteps: 2, nextAction: "none", profileComplete: true, companyComplete: true},
+    });
+    const doc = new DOMParser().parseFromString(await render(), "text/html");
+    const step = doc.querySelector(".portal-next-step");
+    expect(step?.textContent).toContain("nextStep.pending_review.title");
+    expect(step?.querySelector('a[href="/portal/applications"]')?.textContent).toContain("nextStep.pending_review.action");
+    expect(step?.textContent).not.toContain("staff");
+    expect(step?.textContent).not.toContain("audit");
+  });
+
   it("omits unknown company and renewal date instead of borrowing them from another membership", async () => {
     const active = {...dashboard().memberships[0], id: "active", companyId: "not-returned"};
     state.dashboard = dashboard({memberships: [{...active, id: "other", billingPeriodEnd: new Date("2027-01-15T00:00:00Z")}, active], primaryMembership: active, companies: [company("unrelated", "Unrelated Company")]});
@@ -265,5 +278,6 @@ describe("portal dashboard page", () => {
     expect(html).toContain("membershipUnavailableTitle");
     expect(html).toContain("signOut");
     expect(html).toContain('href="/membership"');
+    expect(html).toContain('href="/portal/applications"');
   });
 });

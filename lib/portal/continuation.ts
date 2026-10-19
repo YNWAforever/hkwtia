@@ -1,6 +1,7 @@
 // Note: /portal/company/seats/accept deliberately excluded—it's a one-time, token-gated invitation route, not a generic continuation target.
 export const PORTAL_CONTINUATIONS = [
   "/portal",
+  "/portal/applications",
   "/portal/profile",
   "/portal/company",
   "/portal/company/listing",
@@ -23,6 +24,7 @@ const MEMBER_EVENT_CONTINUATION =
   /^\/portal\/events\/(?:new|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?:\/edit)?)$/i;
 const MEMBER_ORDER_CONTINUATION = /^\/portal\/orders\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MEMBER_APPLICATION_CONTINUATION = /^\/portal\/applications\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type CompanyPath = "/portal/company" | "/portal/company/listing" | "/portal/company/seats";
 function isCompanyContinuation(path: string): boolean {
   const [base, query, extra] = path.split("?");
@@ -38,14 +40,15 @@ export type PortalContinuation =
   | "/portal/events/new"
   | `/portal/events/${string}`
   | `/portal/orders/${string}`
-  | `/portal/events/${string}/edit`;
+  | `/portal/events/${string}/edit`
+  | `/portal/applications/${string}`;
 // Company context has its own narrow runtime validator; arbitrary query strings stay rejected.
 export type CompanyContinuation = `${CompanyPath}?${string}`;
 
 const DEFAULT_PORTAL_CONTINUATION: PortalContinuation = "/portal";
 
 export function isPortalContinuation(path: string): path is PortalContinuation | CompanyContinuation {
-  return (PORTAL_CONTINUATIONS as readonly string[]).includes(path) || MEMBER_EVENT_CONTINUATION.test(path) || MEMBER_ORDER_CONTINUATION.test(path) || isCompanyContinuation(path);
+  return (PORTAL_CONTINUATIONS as readonly string[]).includes(path) || MEMBER_EVENT_CONTINUATION.test(path) || MEMBER_ORDER_CONTINUATION.test(path) || MEMBER_APPLICATION_CONTINUATION.test(path) || isCompanyContinuation(path);
 }
 
 export function parsePortalContinuation(

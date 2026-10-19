@@ -7,9 +7,10 @@ import {
 } from "@/lib/portal/continuation";
 
 describe("PORTAL_CONTINUATIONS", () => {
-  it("lists exactly the Portal's 11 static destinations", () => {
+  it("lists exactly the Portal's 12 static destinations", () => {
     expect(PORTAL_CONTINUATIONS).toEqual([
       "/portal",
+      "/portal/applications",
       "/portal/profile",
       "/portal/company",
       "/portal/company/listing",
@@ -102,5 +103,21 @@ describe("member event deep links", () => {
     expect(isPortalContinuation("/portal/events/new/../../admin")).toBe(false);
     // Version nibble must be 4: a uuid-shaped but non-v4 id is not one of ours.
     expect(isPortalContinuation("/portal/events/22222222-2222-1222-8222-222222222222/edit")).toBe(false);
+  });
+});
+
+describe("member application deep links", () => {
+  const APPLICATION = "33333333-3333-4333-8333-333333333333";
+
+  it("returns a signed-out member to the exact application detail they requested", () => {
+    expect(parsePortalContinuation(`/portal/applications/${APPLICATION}`)).toBe(`/portal/applications/${APPLICATION}`);
+    expect(isPortalContinuation(`/portal/applications/${APPLICATION.toUpperCase()}`)).toBe(true);
+  });
+
+  it("rejects malformed or non-v4 application destinations", () => {
+    expect(parsePortalContinuation("/portal/applications/not-a-uuid")).toBe("/portal");
+    expect(isPortalContinuation("/portal/applications/33333333-3333-1333-8333-333333333333")).toBe(false);
+    expect(isPortalContinuation(`/portal/applications/${APPLICATION}/edit`)).toBe(false);
+    expect(isPortalContinuation(`/portal/applications/${APPLICATION}?next=/admin`)).toBe(false);
   });
 });
