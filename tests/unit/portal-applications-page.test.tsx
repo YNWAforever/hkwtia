@@ -9,6 +9,8 @@ import type {MemberApplicationView} from "@/lib/portal/applications";
 const state = vi.hoisted(() => ({
   list: vi.fn(),
   detail: vi.fn(),
+  continuation: "",
+  expired: false,
 }));
 
 function portalCopy(locale: string) {
@@ -36,7 +38,11 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("@/lib/portal/page-actor", () => ({
-  portalPageActor: async () => ({kind: "member", userId: "auth-a", profileId: "profile-a"}),
+  portalPageActor: async (_locale: string, continuation: string) => {
+    state.continuation = continuation;
+    if (state.expired) throw new Error("NEXT_REDIRECT");
+    return {kind: "member", userId: "auth-a", profileId: "profile-a"};
+  },
 }));
 vi.mock("@/lib/portal/applications", () => ({
   getMemberApplications: state.list,
@@ -79,6 +85,8 @@ describe("member application status pages", () => {
   beforeEach(() => {
     state.list.mockReset().mockResolvedValue([view]);
     state.detail.mockReset().mockResolvedValue(view);
+    state.continuation = "";
+    state.expired = false;
   });
 
   it.each(["en", "zh-HK"] as const)("renders the member-owned list and responsive detail link in %s", async (locale) => {
@@ -171,6 +179,18 @@ describe("member application status pages", () => {
   it("returns not found for a foreign or invalid application without rendering its id", async () => {
     state.detail.mockResolvedValueOnce(null);
     await expect(ApplicationDetailPage(detailProps("en", "22222222-2222-4222-8222-222222222222"))).rejects.toThrow("NOT_FOUND");
+  });
+
+  it("redirects an expired session to the page-specific member login and performs no application read", async () => {
+    state.expired = true;
+    await expect(ApplicationsPage(listProps("zh-HK"))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.continuation).toBe("/portal/applications");
+    expect(state.list).not.toHaveBeenCalled();
+
+    state.list.mockClear();
+    await expect(ApplicationDetailPage(detailProps("zh-HK"))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.continuation).toBe(`/portal/applications/${view.id}`);
+    expect(state.detail).not.toHaveBeenCalled();
   });
 
   it("keeps the detail link keyboard focusable and leaves Enter to native link navigation", async () => {

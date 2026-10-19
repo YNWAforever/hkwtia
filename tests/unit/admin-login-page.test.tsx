@@ -1,5 +1,6 @@
-import {render, screen} from "@testing-library/react";
+import {render, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
+import {renderToStaticMarkup} from "react-dom/server";
 
 const state = vi.hoisted(() => ({actor: null as null | {kind: string; userId: string; profileId: string}, failure: false, redirected: ""}));
 vi.mock("next-intl/server", () => ({
@@ -20,9 +21,10 @@ vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {childre
 import AdminLoginPage from "@/app/[locale]/admin-login/page";
 
 const props = (next?: string) => ({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve(next ? {next} : {})});
+const queryProps = (searchParams: Record<string, string>) => ({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve(searchParams)});
 
 describe("public staff login page", () => {
-  beforeEach(() => {state.actor = null; state.failure = false; state.redirected = "";});
+  beforeEach(() => {state.actor = null; state.failure = false; state.redirected = ""; sessionStorage.clear();});
 
   it("offers an email login form with a validated return path", async () => {
     render(await AdminLoginPage(props("/admin/members?q=Acme")));
@@ -54,5 +56,26 @@ describe("public staff login page", () => {
     render(await AdminLoginPage(props()));
     expect(screen.getByRole("alert")).toHaveTextContent("identityUnavailable");
     expect(screen.queryByTestId("admin-login-form")).not.toBeInTheDocument();
+  });
+
+  it("disables resend with a safe fallback when the staff rate-limit wait is missing", async () => {
+    render(await AdminLoginPage(queryProps({error: "rate_limited"})));
+    expect(screen.getByRole("alert")).toHaveTextContent("errors.rateLimited");
+    expect(screen.getByRole("button", {name: "submit"})).toBeDisabled();
+    expect(screen.getByText(/waitSeconds/)).toHaveTextContent("300");
+  });
+
+  it("keeps an expired server outcome expired after staff login is reloaded", async () => {
+    render(await AdminLoginPage(queryProps({error: "rate_limited", wait: "120", until: String(Date.now() - 1_000)})));
+    await waitFor(() => expect(screen.getByRole("button", {name: "submit"})).toBeEnabled());
+  });
+
+  it("server-renders the expired staff wait without blocking a non-hydrated form", async () => {
+    const page = await AdminLoginPage(queryProps({error: "rate_limited", wait: "120", until: String(Date.now() - 1_000)}));
+    const html = new DOMParser().parseFromString(renderToStaticMarkup(page), "text/html");
+    const button = html.querySelector('form button[type="submit"]');
+    expect(button).not.toBeNull();
+    expect(button!.hasAttribute("disabled")).toBe(false);
+    expect(html.querySelector("form")!.textContent).not.toContain("waitSeconds");
   });
 });
