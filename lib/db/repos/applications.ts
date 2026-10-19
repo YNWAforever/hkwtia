@@ -61,6 +61,7 @@ export const applicationsRepository = {
   getApplicationCase: applicationCases.getApplicationCase,
   getApplicationTriage: applicationCases.getApplicationTriage,
   updateApplicationCase: applicationCases.updateApplicationCase,
+  getApplicationCaseSaveResult: applicationCases.getApplicationCaseSaveResult,
   /** Applicant-owned applications only; company access never grants join-resume authority. */
   async listOwned(
     actor: Actor,
@@ -406,7 +407,13 @@ export function createApplicationCasesRepository(
       updateApplicationCaseInTransaction(actor, id, patch, tx),
     );
   }
-  return { getApplicationCase, updateApplicationCase, getApplicationTriage };
+  async function getApplicationCaseSaveResult(actor: Actor, id: string, requestId: string) {
+    requireAdmin(actor);
+    const db = await load();
+    const receipt = await readCaseSaveReceipt(actor, z.string().uuid().parse(id), z.string().uuid().parse(requestId), db);
+    return receipt ? { version: receipt.version } : null;
+  }
+  return { getApplicationCase, updateApplicationCase, getApplicationTriage, getApplicationCaseSaveResult };
 }
 
 export type ApplicationFactsExecutor = Readonly<{
@@ -422,6 +429,34 @@ function applicationFactRows(result: unknown): Record<string, unknown>[] {
   )
     return result.rows as Record<string, unknown>[];
   throw Error("APPLICATION_FACT_SQL_RESULT_INVALID");
+}
+async function readCaseSaveReceipt(actor: Actor, id: string, requestId: string, tx: ApplicationFactsExecutor) {
+  requireAdmin(actor);
+  const row = applicationFactRows(await tx.execute(sql`
+    SELECT metadata FROM audit_events
+    WHERE target_type='membership_application' AND target_id=${id}
+      AND action='membership.application.case.updated' AND actor_user_id=${actor.profileId}
+      AND metadata->>'requestId'=${requestId}
+    LIMIT 1
+  `))[0];
+  if (!row) return null;
+  const receipt = z.object({
+    requestHash: z.string().regex(/^[a-f0-9]{64}$/),
+    case: applicationCaseContextSchema,
+  }).parse(row.metadata);
+  if (receipt.case.applicationId !== id) throw Error("APPLICATION_CASE_CONTEXT_INVALID");
+  return { version: receipt.case.caseVersion, hash: receipt.requestHash };
+}
+
+function caseRequestHash(patch: ApplicationCasePatch) {
+  return createHash("sha256").update(JSON.stringify({
+    expectedVersion: patch.expectedVersion,
+    ownerProfileId: patch.ownerProfileId,
+    dueAt: patch.dueAt,
+    missingFields: patch.missingFields?.slice().sort(),
+    nextActionCode: patch.nextActionCode,
+    note: patch.note,
+  })).digest("hex");
 }
 /** Reads the same application case in its caller's transaction. Only minimal states, field decisions and hashes leave this boundary. */
 export async function readApplicationTriageSource(
@@ -559,6 +594,16 @@ export async function updateApplicationCaseInTransaction(
     ),
   )[0];
   if (!app) throw Error("APPLICATION_NOT_FOUND");
+  // Serialize receipts under the same application lock as the case CAS.
+  // An exact replay acknowledges its original commit; another tab still uses CAS.
+  const requestHash = parsed.requestId ? caseRequestHash(parsed) : undefined;
+  if (parsed.requestId) {
+    const receipt = await readCaseSaveReceipt(actor, applicationId, parsed.requestId, tx);
+    if (receipt) {
+      if (receipt.hash !== requestHash) throw Error("APPLICATION_CASE_REQUEST_MISMATCH");
+      return { version: receipt.version };
+    }
+  }
   const key = "membership-application:" + applicationId;
   const task = applicationFactRows(
     await tx.execute(
@@ -607,6 +652,6 @@ export async function updateApplicationCaseInTransaction(
       sql`INSERT INTO staff_tasks(profile_id,kind,dedupe_key,summary_code,context,status,resolved_at,resolved_by_profile_id) VALUES(${app.applicant_user_id},'membership_application',${key},${context.nextActionCode},${encoded}::jsonb,CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN 'resolved'::staff_task_status ELSE 'open'::staff_task_status END,CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN now() ELSE NULL END,CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN ${actor.profileId} ELSE NULL END)`,
     );
   await tx.execute(sql`INSERT INTO audit_events(actor_type,actor_user_id,action,target_type,target_id,metadata)
-        VALUES(${actor.kind},${actor.profileId},'membership.application.case.updated','membership_application',${applicationId},${JSON.stringify({ previousVersion: parsed.expectedVersion, case: context, note: parsed.note ?? null })}::jsonb)`);
+        VALUES(${actor.kind},${actor.profileId},'membership.application.case.updated','membership_application',${applicationId},${JSON.stringify({ previousVersion: parsed.expectedVersion, case: context, note: parsed.note ?? null, ...(parsed.requestId ? { requestId: parsed.requestId, requestHash } : {}) })}::jsonb)`);
   return { version: context.caseVersion };
 }

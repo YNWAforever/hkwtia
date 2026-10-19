@@ -6,12 +6,13 @@ const versionSchema = z.union([z.literal("0"), z.string().uuid()]);
 const missingSchema = z.array(z.enum(APPLICATION_MISSING_FIELDS)).max(APPLICATION_MISSING_FIELDS.length).refine(values => new Set(values).size === values.length);
 export const applicationCasePatchSchema = z.object({
     expectedVersion: versionSchema,
+    requestId: z.string().uuid().optional(),
     ownerProfileId: z.string().trim().min(1).max(255).nullable().optional(),
     dueAt: z.string().datetime({ offset: true }).nullable().optional(),
     missingFields: missingSchema.optional(),
     nextActionCode: z.enum(APPLICATION_NEXT_ACTIONS).optional(),
     note: z.string().trim().min(1).max(1000).optional(),
-}).strict().refine(value => Object.keys(value).length > 1, "CASE_CHANGE_REQUIRED");
+}).strict().refine(value => Object.keys(value).some(key => key !== "expectedVersion" && key !== "requestId"), "CASE_CHANGE_REQUIRED");
 export const applicationCaseContextSchema = z.object({
     applicationId: z.string().uuid(), caseVersion: z.string().uuid(),
     ownerProfileId: z.string().min(1).max(255).nullable(), dueAt: z.string().datetime({ offset: true }).nullable(),
