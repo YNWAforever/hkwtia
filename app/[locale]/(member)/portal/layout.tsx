@@ -31,6 +31,7 @@ import {localizedPath} from "@/lib/urls";
 type PortalNavLinkId = (typeof portalNavigationGroups)[number]["links"][number]["id"];
 const linkLabelKeys = {
   dashboard: "dashboard",
+  "my-applications": "applications.nav",
   profile: "profile",
   "my-events": "myEvents.title",
   company: "company",

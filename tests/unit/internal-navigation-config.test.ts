@@ -14,10 +14,11 @@ const portalGroups: readonly InternalNavGroupConfig[] = portalNavigationGroups;
 const adminGroups: readonly InternalNavGroupConfig[] = adminNavigationGroups;
 
 describe("internal navigation config", () => {
-  it("defines the Portal's 11 nav links, with own history under me and Seats under company", () => {
+  it("defines the Portal's 12 nav links, with own applications and history under me and Seats under company", () => {
     const links = portalGroups.flatMap((group) => group.links);
     expect(links.map((link) => link.href)).toEqual([
       "/portal",
+      "/portal/applications",
       "/portal/profile",
       "/portal/events/my",
       "/portal/company",
