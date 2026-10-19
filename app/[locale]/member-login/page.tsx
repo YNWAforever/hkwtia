@@ -9,6 +9,7 @@ import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
 import type {AppLocale} from "@/i18n/routing";
 import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
+import {loginRetryDeadlineFromNow, parseLoginRetryUntil, rateLimitWaitSeconds, remainingWaitSecondsFromNow, SENT_LOGIN_WAIT_SECONDS} from "@/lib/auth/rate-limit-wait";
 import {provisionMemberProfileAction} from "./provision-action";
 import {allowedMemberDestination, parseLoginDestination} from "@/lib/auth/login-destination";
 import {localizedPath} from "@/lib/urls";
@@ -60,6 +61,8 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   if (resolution.kind === "allowed") redirect(localizedPath(locale, resolution.destination.path));
   const sent = queryValue(query.sent) === "1";
   const errorKey = errorMessageKey(queryValue(query.error));
+  const waitSeconds = rateLimitWaitSeconds(queryValue(query.error), queryValue(query.wait));
+  const retryUntil = waitSeconds > 0 || sent ? parseLoginRetryUntil(queryValue(query.until)) : undefined;
   const rawReference = queryValue(query.reference);
   const profileReference = rawReference && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rawReference)
     ? rawReference : null;
@@ -75,6 +78,10 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
       target.set("error", result.error);
     }
     if (!result.ok && result.retryAfterSeconds) target.set("wait", String(result.retryAfterSeconds));
+    if (result.ok || result.error === "rate_limited") {
+      const seconds = result.ok ? SENT_LOGIN_WAIT_SECONDS : rateLimitWaitSeconds(result.error, String(result.retryAfterSeconds ?? ""));
+      target.set("until", String(loginRetryDeadlineFromNow(seconds)));
+    }
     redirect(`${localizedPath(locale, "/member-login")}?${target.toString()}`);
   }
 
@@ -112,7 +119,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
           {resolution.kind === "signed-out" && errorKey ? <p className="mt-4 text-sm text-destructive" role="alert">{t(errorKey)}</p> : null}
           {resolution.kind === "signed-out" ? <SignInForm
             action={submitMemberLogin} destination={continuation} googleEnabled={process.env.AUTH_GOOGLE_ENABLED === "true"}
-            intent="member" locale={locale} sent={sent} retryAfterSeconds={Math.min(3600, Math.max(0, Number(queryValue(query.wait)) || 0))}
+            intent="member" locale={locale} sent={sent} retryAfterSeconds={waitSeconds}
+            retryUntil={retryUntil}
+            initialRemainingSeconds={retryUntil === undefined ? undefined : remainingWaitSecondsFromNow(retryUntil)}
             labels={{email: t("emailLabel"), send: t("submit"), resend: t("resend"), sending: t("sending"),
               google: t("google"), separator: t("separator"), changeEmail: t("changeEmail"), sent: t("sent"),
               googleUnavailable: t("googleUnavailable"), providerError: t("errors.auth"), maskedTo: t("maskedTo"), waitSeconds: t("waitSeconds")}}

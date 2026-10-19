@@ -12,6 +12,7 @@ import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
 import {parseLoginDestination} from "@/lib/auth/login-destination";
+import {loginRetryDeadlineFromNow, parseLoginRetryUntil, rateLimitWaitSeconds, remainingWaitSecondsFromNow, SENT_LOGIN_WAIT_SECONDS} from "@/lib/auth/rate-limit-wait";
 import {localizedPath} from "@/lib/urls";
 import {requestAdminLoginLink} from "@/app/[locale]/member-login/actions";
 
@@ -44,6 +45,9 @@ export default async function AdminLoginPage({params, searchParams}: Props) {
   setRequestLocale(locale);
   const query = await searchParams;
   const destination = parseLoginDestination(scalar(query.next), "admin").path;
+  const waitSeconds = rateLimitWaitSeconds(scalar(query.error), scalar(query.wait));
+  const sent = scalar(query.sent) === "1";
+  const retryUntil = waitSeconds > 0 || sent ? parseLoginRetryUntil(scalar(query.until)) : undefined;
   const [t, tNav] = await Promise.all([
     getTranslations({locale, namespace: "AdminLogin"}),
     getTranslations({locale, namespace: "Navigation"}),
@@ -58,6 +62,10 @@ export default async function AdminLoginPage({params, searchParams}: Props) {
     const target = new URLSearchParams({next: destination});
     target.set(result.ok ? "sent" : "error", result.ok ? "1" : result.error);
     if (!result.ok && result.retryAfterSeconds) target.set("wait", String(result.retryAfterSeconds));
+    if (result.ok || result.error === "rate_limited") {
+      const seconds = result.ok ? SENT_LOGIN_WAIT_SECONDS : rateLimitWaitSeconds(result.error, String(result.retryAfterSeconds ?? ""));
+      target.set("until", String(loginRetryDeadlineFromNow(seconds)));
+    }
     redirect(`${localizedPath(locale, "/admin-login")}?${target.toString()}`);
   }
 
@@ -89,7 +97,9 @@ export default async function AdminLoginPage({params, searchParams}: Props) {
           <p className="mt-3 text-muted-foreground">{t("help")}</p>
           {errorKey(scalar(query.error)) ? <p className="mt-4 text-sm text-destructive" role="alert">{t(errorKey(scalar(query.error))!)}</p> : null}
           <SignInForm action={submitAdminLogin} destination={destination} googleEnabled={process.env.AUTH_GOOGLE_ENABLED === "true"}
-            intent="admin" locale={locale} sent={scalar(query.sent) === "1"} retryAfterSeconds={Math.min(3600, Math.max(0, Number(scalar(query.wait)) || 0))}
+            intent="admin" locale={locale} sent={sent} retryAfterSeconds={waitSeconds}
+            retryUntil={retryUntil}
+            initialRemainingSeconds={retryUntil === undefined ? undefined : remainingWaitSecondsFromNow(retryUntil)}
             labels={{email: t("emailLabel"), send: t("submit"), resend: t("resend"), sending: t("sending"),
               google: t("google"), separator: t("separator"), changeEmail: t("changeEmail"), sent: t("sent"),
               googleUnavailable: t("googleUnavailable"), providerError: t("errors.auth"), maskedTo: t("maskedTo"), waitSeconds: t("waitSeconds")}}/>
