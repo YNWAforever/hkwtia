@@ -24,7 +24,8 @@ import {
   adoptApplicationDraftAction,
 } from "@/lib/admin/application-draft-actions";
 import { getApplicationTriage } from "@/lib/admin/application-case-service";
-import { updateApplicationCaseAction } from "@/lib/admin/application-case-actions";
+import { randomUUID } from "node:crypto";
+import { checkApplicationCaseSaveAction, updateApplicationCaseAction } from "@/lib/admin/application-case-actions";
 import {
   ApplicationCaseForm,
   type ApplicationCaseLabels,
@@ -69,6 +70,12 @@ export default async function ApplicationCasePage({
     conflict: t("applicationCase.conflict"),
     error: t("applicationCase.error"),
     refresh: t("applicationCase.refresh"),
+    unknown: t("applicationCase.unknown"),
+    checkResult: t("applicationCase.checkResult"),
+    checking: t("applicationCase.checking"),
+    changed: t("applicationCase.changed"),
+    savedRefreshRequired: t("applicationCase.savedRefreshRequired"),
+    reference: t("applicationCase.reference"),
     missingFields: Object.fromEntries(
       APPLICATION_MISSING_FIELDS.map((key) => [
         key,
@@ -388,6 +395,8 @@ export default async function ApplicationCasePage({
         owners={owners}
         labels={labels}
         action={updateApplicationCaseAction.bind(null, id, locale)}
+        checkOutcome={checkApplicationCaseSaveAction.bind(null, id)}
+        initialRequestId={randomUUID()}
         refreshHref={href}
       />
       {reviewUnavailable ? <p role="status">{tt("draftUnavailable")}</p> : null}

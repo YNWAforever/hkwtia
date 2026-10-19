@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import {Component, type ReactNode} from "react";
 import { ApplicationCaseForm } from "@/components/admin/application-case-form";
 import type { ApplicationCase } from "@/lib/admin/application-case-types";
 const labels = {
@@ -23,6 +24,12 @@ const labels = {
   conflict: "Conflict",
   error: "Error",
   refresh: "Reload",
+  unknown: "Save result needs verification",
+  checkResult: "Check saved result",
+  checking: "Checking saved result",
+  changed: "Newer case version; compare before saving",
+  savedRefreshRequired: "Saved; refresh is unavailable",
+  reference: "Save reference",
   missingFields: { companyWebsite: "Website" },
   nextActions: { none: "None", await_documents: "Await documents" },
 };
@@ -188,7 +195,10 @@ describe("application case recovery after a failed save", () => {
       expect(
         form.querySelector('input[name="expectedVersion"]'),
       ).toHaveValue(original.version);
-      expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+      if (status === "conflict")
+        expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+      else
+        expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
     },
   );
 });
@@ -446,4 +456,150 @@ it("a refreshed case cannot save old fields and offers explicit reload without c
     "/admin/members/queue/current",
   );
   expect(screen.getByLabelText("Note")).toHaveValue("Keep this unsaved note");
+});
+
+class SaveFailureBoundary extends Component<{children: ReactNode}, {failed: boolean}> {
+  state = {failed: false};
+  static getDerivedStateFromError() { return {failed: true}; }
+  render() {
+    return this.state.failed ? <p role="alert">Unhandled action failure</p> : this.props.children;
+  }
+}
+
+describe("save outcome and request identity", () => {
+  it("suppresses two form handlers before the pending button can repaint", async () => {
+    const save = vi.fn(action);
+    render(<ApplicationCaseForm record={original} owners={[]} labels={labels}
+      action={save} refreshHref="/admin/members/queue/example"/>);
+    fireEvent.change(screen.getByLabelText("Note"), {target: {value: "One logical save"}});
+    const form = screen.getByRole("button", {name: "Save"}).closest("form")!;
+    await act(async () => {form.requestSubmit(); form.requestSubmit();});
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved"));
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not show a rejection while the same pending save refreshes the server record", async () => {
+    let finish!: (value: Awaited<ReturnType<typeof action>>) => void;
+    const save = () => new Promise<Awaited<ReturnType<typeof action>>>(resolve => {finish = resolve;});
+    const {rerender} = render(<ApplicationCaseForm record={original} owners={[]} labels={labels}
+      action={save} refreshHref="/admin/members/queue/example"/>);
+    fireEvent.change(screen.getByLabelText("Note"), {target: {value: "Pending commit"}});
+    const form = screen.getByRole("button", {name: "Save"}).closest("form")!;
+    await act(async () => {form.requestSubmit();});
+    rerender(<ApplicationCaseForm record={{...original, version:"10000000-0000-4000-8000-000000000003"}}
+      owners={[]} labels={labels} action={save} refreshHref="/admin/members/queue/example"/>);
+    try {
+      expect(screen.queryByText("Conflict")).not.toBeInTheDocument();
+    } finally {
+      await act(async () => {finish(await action());});
+    }
+    expect(screen.getByRole("status")).toHaveTextContent("Saved");
+  });
+
+  it("keeps a confirmed save successful when a newer external record is subsequently read", async () => {
+    const {rerender} = render(<ApplicationCaseForm record={original} owners={[]} labels={labels}
+      action={action} refreshHref="/admin/members/queue/example"/>);
+    fireEvent.change(screen.getByLabelText("Note"), {target:{value:"Confirmed save"}});
+    await act(async () => {screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    rerender(<ApplicationCaseForm record={{...original,version:"10000000-0000-4000-8000-000000000099"}}
+      owners={[]} labels={labels} action={action} refreshHref="/admin/members/queue/example"/>);
+    expect(screen.getByRole("status")).toHaveTextContent("Saved");
+    expect(screen.queryByText("Conflict")).not.toBeInTheDocument();
+    expect(screen.getByRole("button",{name:"Save"})).toBeDisabled();
+  });
+
+  it("retains all fields after a lost response and reconciles by reading rather than rewriting", async () => {
+    const save = vi.fn(async () => {throw new Error("SYNTHETIC_RESPONSE_LOST");});
+    const checkOutcome = vi.fn(async () => action());
+    render(<SaveFailureBoundary><ApplicationCaseForm record={original}
+      owners={[{id:"synthetic-owner",name:"Synthetic owner"}]} labels={labels}
+      action={save} refreshHref="/admin/members/queue/example"
+      {...{checkOutcome}}/></SaveFailureBoundary>);
+    fireEvent.change(screen.getByLabelText("Owner"),{target:{value:"synthetic-owner"}});
+    fireEvent.change(screen.getByLabelText("Due"),{target:{value:"2030-12-01T10:00"}});
+    fireEvent.click(screen.getByRole("checkbox",{name:"Website"}));
+    fireEvent.change(screen.getByLabelText("Next action"),{target:{value:"await_documents"}});
+    fireEvent.change(screen.getByLabelText("Note"),{target:{value:"Keep uncertain draft"}});
+    await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    await waitFor(()=>expect(screen.getByRole("alert")).toHaveTextContent(labels.unknown));
+    expect(screen.getByLabelText("Owner")).toHaveValue("synthetic-owner");
+    expect(screen.getByLabelText("Due")).toHaveValue("2030-12-01T10:00");
+    expect(screen.getByRole("checkbox",{name:"Website"})).toBeChecked();
+    expect(screen.getByLabelText("Next action")).toHaveValue("await_documents");
+    expect(screen.getByLabelText("Note")).toHaveValue("Keep uncertain draft");
+    expect(screen.getByRole("button",{name:"Save"})).toBeDisabled();
+    fireEvent.click(screen.getByRole("button",{name:labels.checkResult}));
+    await waitFor(()=>expect(screen.getByRole("status")).toHaveTextContent("Saved"));
+    expect(checkOutcome).toHaveBeenCalledTimes(1);
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps one request identity until confirmation and issues a new one for a new edit", async () => {
+    const sent: {id: FormDataEntryValue | null; version: FormDataEntryValue | null}[]=[];
+    const save=vi.fn(async (_previous: unknown,data: FormData)=>{
+      sent.push({id:data.get("requestId"),version:data.get("expectedVersion")});
+      return action();
+    });
+    render(<ApplicationCaseForm record={original} owners={[]} labels={labels}
+      action={save} refreshHref="/admin/members/queue/example"/>);
+    fireEvent.change(screen.getByLabelText("Note"),{target:{value:"First intent"}});
+    await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    expect(save).toHaveBeenCalledTimes(1);
+    fireEvent.change(screen.getByLabelText("Note"),{target:{value:"Second intent"}});
+    await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(sent[0].id).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(sent[1].id).not.toBe(sent[0].id);
+    expect(sent[1].version).toBe("10000000-0000-4000-8000-000000000003");
+  });
+  it("retains the last acknowledged version after a later validation error", async () => {
+    const sent: (FormDataEntryValue | null)[] = [];
+    const save = vi.fn(async (_state: unknown,data: FormData) => {
+      sent.push(data.get("expectedVersion"));
+      return sent.length === 2 ? {status:"error" as const} : action();
+    });
+    render(<ApplicationCaseForm record={original} owners={[]} labels={labels}
+      action={save} refreshHref="/admin/members/queue/example"/>);
+    for (const note of ["First save","Invalid owner edit","Corrected owner edit"]) {
+      fireEvent.change(screen.getByLabelText("Note"),{target:{value:note}});
+      await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    }
+    expect(sent).toEqual([original.version,"10000000-0000-4000-8000-000000000003","10000000-0000-4000-8000-000000000003"]);
+  });
+  it("does not present the previous success as the result of a new pending save", async () => {
+    let finish!: (value: Awaited<ReturnType<typeof action>>) => void;
+    const save=vi.fn().mockImplementationOnce(action).mockImplementationOnce(
+      ()=>new Promise<Awaited<ReturnType<typeof action>>>(resolve=>{finish=resolve;}));
+    render(<ApplicationCaseForm record={original} owners={[]} labels={labels}
+      action={save} refreshHref="/admin/members/queue/example"/>);
+    fireEvent.change(screen.getByLabelText("Note"),{target:{value:"First save"}});
+    await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    fireEvent.change(screen.getByLabelText("Note"),{target:{value:"New pending save"}});
+    await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+    try { expect(screen.queryByRole("status")).not.toBeInTheDocument(); }
+    finally { await act(async()=>{finish(await action());}); }
+  });
+  it("can save a subsequent edit when crypto.randomUUID is unavailable", async () => {
+    const sent: (FormDataEntryValue | null)[] = [];
+    const save=vi.fn(async (_state: unknown,data: FormData)=>{
+      sent.push(data.get("requestId")); return action();
+    });
+    const unavailable=vi.spyOn(globalThis.crypto,"randomUUID").mockImplementation(()=>{
+      throw new Error("SYNTHETIC_RANDOM_UUID_UNAVAILABLE");
+    });
+    try {
+      render(<SaveFailureBoundary><ApplicationCaseForm record={original} owners={[]} labels={labels}
+        initialRequestId="70000000-0000-4000-8000-000000000001"
+        action={save} refreshHref="/admin/members/queue/example"/></SaveFailureBoundary>);
+      for(const note of ["First save","Next save"]) {
+        fireEvent.change(screen.getByLabelText("Note"),{target:{value:note}});
+        await act(async()=>{screen.getByRole("button",{name:"Save"}).closest("form")!.requestSubmit();});
+      }
+      expect(save).toHaveBeenCalledTimes(2);
+      expect(sent[1]).toMatch(/^[0-9a-f-]{36}$/i);
+      expect(sent[1]).not.toBe(sent[0]);
+      expect(screen.getByRole("status")).toHaveTextContent("Saved");
+    } finally { unavailable.mockRestore(); }
+  });
 });

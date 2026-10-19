@@ -26,6 +26,9 @@ export async function updateApplicationCase(
 export function getApplicationTriage(actor: Actor, id: string) {
   return applicationsRepository.getApplicationTriage(actor, id);
 }
+export function getApplicationCaseSaveResult(actor: Actor, id: string, requestId: string) {
+  return applicationsRepository.getApplicationCaseSaveResult(actor, id, requestId);
+}
 
 const adoptionInput = z
   .object({
