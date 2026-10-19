@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {formatPortalAmount, formatPortalDate, portalDateParts} from "@/lib/portal/format-date";
+import {formatPortalAmount, formatPortalDate, formatPortalDateTime, portalDateParts} from "@/lib/portal/format-date";
 
 // A fixed clock: the year on a date block depends on "now", and the wall clock moves.
 const NOW = new Date("2026-10-08T04:00:00Z");
@@ -13,6 +13,11 @@ describe("portal date formatting", () => {
 
   it("accepts a Date", () => {
     expect(formatPortalDate("en", new Date("2026-11-12T02:00:00Z"))).toBe("12 November 2026");
+  });
+
+  it("formats an application update timestamp in Hong Kong time", () => {
+    expect(formatPortalDateTime("en", "2026-10-02T02:30:00Z")).toBe("2 Oct 2026, 10:30");
+    expect(formatPortalDateTime("zh-HK", "2026-10-02T02:30:00Z")).toBe("2026年10月2日 上午10:30");
   });
 
   it("omits the year within the current Hong Kong year", () => {

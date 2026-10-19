@@ -14,6 +14,14 @@ export function formatPortalDate(locale: AppLocale, value: string | Date): strin
   return new Intl.DateTimeFormat(INTL_LOCALE[locale], {day: 'numeric', month: 'long', year: 'numeric', timeZone: TIME_ZONE}).format(toDate(value));
 }
 
+export function formatPortalDateTime(locale: AppLocale, value: string | Date): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: TIME_ZONE,
+  }).format(toDate(value));
+}
+
 function hongKongYear(date: Date): string {
   return new Intl.DateTimeFormat('en-GB', {year: 'numeric', timeZone: TIME_ZONE}).format(date);
 }
