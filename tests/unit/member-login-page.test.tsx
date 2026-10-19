@@ -1,5 +1,6 @@
-import {render, screen} from "@testing-library/react";
+import {render, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
+import {renderToStaticMarkup} from "react-dom/server";
 
 const state = vi.hoisted(() => ({redirectUrl: null as string | null, resolution: {kind: "signed-out"} as {kind: string; destination?: {intent: "member"; path: string}}}));
 
@@ -22,6 +23,7 @@ describe("MemberLoginPage", () => {
   beforeEach(() => {
     state.redirectUrl = null;
     state.resolution = {kind: "signed-out"};
+    sessionStorage.clear();
   });
 
   // Regression: clicking the magic-link email landed an authenticated actor
@@ -69,6 +71,46 @@ describe("MemberLoginPage", () => {
     render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({sent: "1", next: "/portal/billing"})}));
     expect(screen.getByTestId("member-login-form")).toHaveAttribute("data-continuation", "/portal/billing");
     expect(screen.getByRole("button", {name: "resend"})).toBeInTheDocument();
+  });
+
+  it("uses a bounded wait when a rate-limit response has no valid Retry-After value", async () => {
+    render(await MemberLoginPage({
+      params: Promise.resolve({locale: "zh-HK"}),
+      searchParams: Promise.resolve({error: "rate_limited", wait: "not-a-number"}),
+    }));
+    expect(screen.getByRole("alert")).toHaveTextContent("errors.rateLimited");
+    expect(screen.getByRole("button", {name: "submit"})).toBeDisabled();
+    expect(screen.getByText(/waitSeconds/)).toHaveTextContent("300");
+  });
+
+  it("does not apply a rate-limit cooldown to a validation error", async () => {
+    render(await MemberLoginPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({error: "invalid_email", wait: "120"}),
+    }));
+    expect(screen.getByRole("alert")).toHaveTextContent("errors.email");
+    expect(screen.getByRole("button", {name: "submit"})).toBeEnabled();
+    expect(screen.queryByText(/waitSeconds/)).not.toBeInTheDocument();
+  });
+
+  it("uses the original outcome deadline when a rate-limited page is reopened after the wait", async () => {
+    render(await MemberLoginPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({error: "rate_limited", wait: "120", until: String(Date.now() - 1_000)}),
+    }));
+    await waitFor(() => expect(screen.getByRole("button", {name: "submit"})).toBeEnabled());
+  });
+
+  it("server-renders an expired outcome ready for manual retry before client hydration", async () => {
+    const page = await MemberLoginPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({error: "rate_limited", wait: "120", until: String(Date.now() - 1_000)}),
+    });
+    const html = new DOMParser().parseFromString(renderToStaticMarkup(page), "text/html");
+    const button = html.querySelector('form button[type="submit"]');
+    expect(button).not.toBeNull();
+    expect(button!.hasAttribute("disabled")).toBe(false);
+    expect(html.querySelector("form")!.textContent).not.toContain("waitSeconds");
   });
 
   it("shows the bounded support reference after profile creation fails", async () => {

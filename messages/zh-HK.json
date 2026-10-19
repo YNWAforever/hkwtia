@@ -1118,7 +1118,7 @@
     "switchAccount": "使用其他帳戶",
     "switchAccountError": "未能切換帳戶，請再試一次。",
     "maskedTo": "已傳送至",
-    "waitSeconds": "重新傳送前請稍候：",
+    "waitSeconds": "可於以下秒數後手動重試：",
     "googleUnavailable": "完成登入服務設定驗證後，即可使用 Google 登入。",
     "sending": "傳送中…",
     "identityUnavailable": "職員登入暫時無法使用。參考編號：{reference}。",
@@ -1128,7 +1128,7 @@
     "errors": {
       "email": "請輸入有效電郵地址。",
       "invalidContinuation": "職員平台連結無效，請從職員登入頁重新開始。",
-      "rateLimited": "登入電郵請求過於頻繁，請稍後再試。",
+      "rateLimited": "此連線的登入嘗試次數過多，請稍候再試。",
       "limiterUnavailable": "登入暫時無法使用，請稍後重試。",
       "auth": "暫時無法傳送登入連結，請再試一次。"
     }
@@ -1166,14 +1166,14 @@
     "switchAccount": "使用其他帳戶",
     "switchAccountError": "未能切換帳戶，請再試一次。",
     "maskedTo": "已傳送至",
-    "waitSeconds": "重新傳送前請稍候：",
+    "waitSeconds": "可於以下秒數後手動重試：",
     "googleUnavailable": "完成登入服務設定驗證後，即可使用 Google 登入。",
     "sending": "傳送中…",
     "identityUnavailable": "登入暫時無法使用。參考編號：{reference}。",
     "retry": "重試登入",
     "errors": {
       "email": "請輸入有效電郵地址。",
-      "rateLimited": "登入電郵要求次數過多，請等待數分鐘後再試。",
+      "rateLimited": "此連線的登入嘗試次數過多，請稍候再試。",
       "limiterUnavailable": "登入暫時無法使用，請稍後重試。",
       "auth": "未能傳送登入連結，請再試一次。",
       "invalidContinuation": "此登入連結無效，請從會員專區重新開始。"
