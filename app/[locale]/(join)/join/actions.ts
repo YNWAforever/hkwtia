@@ -148,6 +148,8 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
   try {
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
+    // Validate a resumed draft before profile/consent writes or contact linking.
+    const resumed = applicationId ? await startJoin(actor, {plan, applicationId}) : null;
     if(policyAcceptanceEnabled()){
       const policy=requireCurrentMembershipPolicy();
       if(formData.get("policyAccepted")!=="on"){
@@ -179,7 +181,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
       email: saved?.email ?? existing?.email ?? null,
       phoneE164: parsed.data.whatsappNumber,
     }).catch(() => undefined);
-    const application = await startJoin(actor, {plan, applicationId});
+    const application = resumed ?? await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
     if(policyAcceptanceEnabled()&&formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId:id,policyVersion:String(formData.get("policyVersion"))});
     const companyPlan = ["startup", "corporate"].includes(plan);
