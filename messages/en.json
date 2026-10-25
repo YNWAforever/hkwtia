@@ -375,8 +375,7 @@
         "heading": "Your refund needs further attention",
         "body": "The refund of HK${amount} for order {orderId} ({eventTitle}) did not complete. Our team is reviewing it. Please contact us if you need help.",
         "cta": "Contact WTIA"
-      },
-      "event_ticket_pass": {
+      },      "event_ticket_pass": {
         "subject": "Your pass for {eventTitle}",
         "preview": "Your personal entry pass, {attendeeName}.",
         "heading": "Your pass, {attendeeName}",
@@ -602,11 +601,7 @@
       "intro": "Six industry pathways connect practical questions to technology, knowledge, programmes and market access.",
       "selectedLabel": "Selected industry pathway",
       "enterAction": "Enter this ecosystem",
-      "focusAreas": [
-        "Industry challenges",
-        "Relevant solution categories",
-        "Programmes + events"
-      ],
+      "focusAreas": ["Industry challenges", "Relevant solution categories", "Programmes + events"],
       "items": {
         "commerce": {
           "name": "Commerce + Professional Services",
@@ -720,11 +715,7 @@
         "label": "Membership",
         "title": "Build an active route into the ecosystem.",
         "copy": "Compare currently available plans and fees on the membership page. Ask WTIA about eligibility and arrangements that differ from the published catalog.",
-        "points": [
-          "Relevant activities and knowledge",
-          "Profile and visibility choices",
-          "A practical first-90-day journey"
-        ],
+        "points": ["Relevant activities and knowledge", "Profile and visibility choices", "A practical first-90-day journey"],
         "primaryAction": "Compare Membership",
         "secondaryAction": "Prepare a membership enquiry"
       },
@@ -732,11 +723,7 @@
         "label": "Partnership",
         "title": "Co-create a useful industry initiative.",
         "copy": "Work with the Association on a business challenge, programme, knowledge initiative, event or market-access pathway with a defined purpose.",
-        "points": [
-          "Purpose and audience defined first",
-          "Roles and public claims agreed",
-          "Next steps and outcomes made clear"
-        ],
+        "points": ["Purpose and audience defined first", "Roles and public claims agreed", "Next steps and outcomes made clear"],
         "primaryAction": "Start a Partnership",
         "secondaryAction": "Meet the Network"
       }
@@ -817,12 +804,7 @@
     }
   },
   "Membership": {
-    "selfService": {
-      "title": "Already a member?",
-      "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.",
-      "billing": "Manage membership and billing",
-      "support": "Contact membership support"
-    },
+    "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
     "metaTitle": "Membership | WiseTech Hong Kong",
     "metaDescription": "Compare WTIA membership tiers and benefits.",
     "eyebrow": "Membership",
@@ -837,30 +819,10 @@
       "visibility": "WTIA visibility opportunities"
     },
     "tierBenefits": {
-      "community": [
-        "Directory card on /members",
-        "RSVP to public WTIA events",
-        "Activity updates by email or WhatsApp"
-      ],
-      "startup": [
-        "Full member profile page with logo",
-        "Submit up to 2 events per quarter for WTIA review",
-        "1 showcase listing",
-        "WhatsApp updates and standard support"
-      ],
-      "corporate": [
-        "Featured member profile and logo wall",
-        "Unlimited reviewed event publishing",
-        "3 showcase listings",
-        "Priority WhatsApp support lane",
-        "Member tools included"
-      ],
-      "patron": [
-        "Everything in Corporate",
-        "Featured placement on the homepage",
-        "Co-branded WTIA events",
-        "Dedicated WhatsApp support"
-      ]
+      "community": ["Directory card on /members", "RSVP to public WTIA events", "Activity updates by email or WhatsApp"],
+      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
+      "corporate": ["Featured member profile and logo wall", "Unlimited reviewed event publishing", "3 showcase listings", "Priority WhatsApp support lane", "Member tools included"],
+      "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"]
     },
     "tiers": {
       "community": {
@@ -920,10 +882,7 @@
         "answer": "Your personal profile remains separate from a company membership. Company owners or administrators can invite seats; your own application and history stay attached to your profile."
       }
     },
-    "faqLinks": {
-      "refund": "Read event ticket refund policy",
-      "contact": "Ask WTIA about membership terms"
-    },
+    "faqLinks": {"refund": "Read event ticket refund policy", "contact": "Ask WTIA about membership terms"},
     "priceLabels": {
       "free": "Free",
       "review": "Contact us"
@@ -951,79 +910,28 @@
       "fallbackCopy": "Some fees are unavailable on this page. Contact the membership team to confirm the current rate before applying."
     },
     "dimensions": {
-      "network": {
-        "title": "Network",
-        "copy": "Community and networking access across the ecosystem."
-      },
-      "programmes": {
-        "title": "Programmes",
-        "copy": "Participation in WTIA programmes (ASA, TCT, HKICT, CPAI)."
-      },
-      "visibility": {
-        "title": "Visibility",
-        "copy": "Opportunities to be seen by other members and partners."
-      },
-      "events": {
-        "title": "Events",
-        "copy": "Access to WTIA events, from open sessions to member-only sessions."
-      },
-      "showcase": {
-        "title": "Showcase",
-        "copy": "Eligibility to list a solution on the public Showcase."
-      },
-      "committees": {
-        "title": "Committees",
-        "copy": "Eligibility to join WTIA committees and working groups."
-      },
-      "seats": {
-        "title": "Seats",
-        "copy": "Number of individual seats included under one membership."
-      },
-      "billing": {
-        "title": "Billing",
-        "copy": "Billing cadence and available payment options."
-      },
-      "onboarding": {
-        "title": "Onboarding",
-        "copy": "What to expect in your first 90 days as a member."
-      },
-      "governance": {
-        "title": "Governance",
-        "copy": "Voting rights and involvement in WTIA governance, where applicable."
-      },
-      "support": {
-        "title": "Support",
-        "copy": "Direct access to WTIA staff for enquiries and introductions."
-      },
-      "renewal": {
-        "title": "Renewal",
-        "copy": "How and when membership is reviewed and renewed."
-      }
+      "network": {"title": "Network", "copy": "Community and networking access across the ecosystem."},
+      "programmes": {"title": "Programmes", "copy": "Participation in WTIA programmes (ASA, TCT, HKICT, CPAI)."},
+      "visibility": {"title": "Visibility", "copy": "Opportunities to be seen by other members and partners."},
+      "events": {"title": "Events", "copy": "Access to WTIA events, from open sessions to member-only sessions."},
+      "showcase": {"title": "Showcase", "copy": "Eligibility to list a solution on the public Showcase."},
+      "committees": {"title": "Committees", "copy": "Eligibility to join WTIA committees and working groups."},
+      "seats": {"title": "Seats", "copy": "Number of individual seats included under one membership."},
+      "billing": {"title": "Billing", "copy": "Billing cadence and available payment options."},
+      "onboarding": {"title": "Onboarding", "copy": "What to expect in your first 90 days as a member."},
+      "governance": {"title": "Governance", "copy": "Voting rights and involvement in WTIA governance, where applicable."},
+      "support": {"title": "Support", "copy": "Direct access to WTIA staff for enquiries and introductions."},
+      "renewal": {"title": "Renewal", "copy": "How and when membership is reviewed and renewed."}
     },
     "first90": {
       "eyebrow": "First 90 days",
       "heading": "What happens after you join",
       "steps": {
-        "0": {
-          "title": "Join",
-          "copy": "Choose a tier and complete payment or review."
-        },
-        "1": {
-          "title": "Orientation",
-          "copy": "Meet the WTIA team and get access to your member tools."
-        },
-        "2": {
-          "title": "First event",
-          "copy": "Attend your first WTIA event as a member."
-        },
-        "3": {
-          "title": "First introduction",
-          "copy": "Make your first connection through the network."
-        },
-        "4": {
-          "title": "Review",
-          "copy": "WTIA checks in on how membership is working for you."
-        }
+        "0": {"title": "Join", "copy": "Choose a tier and complete payment or review."},
+        "1": {"title": "Orientation", "copy": "Meet the WTIA team and get access to your member tools."},
+        "2": {"title": "First event", "copy": "Attend your first WTIA event as a member."},
+        "3": {"title": "First introduction", "copy": "Make your first connection through the network."},
+        "4": {"title": "Review", "copy": "WTIA checks in on how membership is working for you."}
       }
     },
     "closing": {
@@ -1069,42 +977,8 @@
       "required": "Please review and acknowledge the current approved membership terms before continuing.",
       "stale": "The membership terms have changed. Reload this page and review the current version."
     },
-    "resume": {
-      "title": "Continue your membership application",
-      "description": "Choose a saved application or start another one. Your payment and review history stays with each application.",
-      "lastSaved": "Last saved {date}",
-      "continue": "Continue application",
-      "start": "Start application",
-      "new": "Start a new application",
-      "account": "Open member portal",
-      "statusUnavailable": "Application status is temporarily unavailable. Please try again.",
-      "steps": {
-        "profile": "Your profile",
-        "company": "Company details",
-        "checkout": "Awaiting payment",
-        "review": "Under review",
-        "complete": "Complete"
-      }
-    },
-    "checkoutSummary": {
-      "processing": "We are waiting for payment confirmation. This page will update when your membership status changes.",
-      "title": "Membership checkout",
-      "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.",
-      "plan": "Plan",
-      "fee": "Annual fee",
-      "feeAtProvider": "Exact amount confirmed at secure checkout",
-      "status": "Status",
-      "pending": "Awaiting payment",
-      "continuePayment": "Continue to secure payment",
-      "later": "Finish later",
-      "changeDetails": "Change company details",
-      "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.",
-      "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.",
-      "openPortal": "Open member portal",
-      "reviewNext": "View application progress",
-      "checkAgain": "Check status again",
-      "contactSupport": "Contact WTIA"
-    },
+    "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
+    "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "invite": {
       "metaTitle": "Your personal invitation | WiseTech Hong Kong",
       "welcomeNamed": "Welcome, {name}",
@@ -1196,10 +1070,7 @@
       "whatsappNumber": "Enter a valid WhatsApp number with country code"
     },
     "status": {
-      "failed": {
-        "title": "Payment needs attention",
-        "description": "We could not confirm an active membership. Please check your billing status or contact WTIA."
-      },
+      "failed": {"title": "Payment needs attention", "description": "We could not confirm an active membership. Please check your billing status or contact WTIA."},
       "complete": {
         "title": "Welcome to WTIA",
         "description": "Your membership is active. Open your member portal to complete your profile and explore member benefits."
@@ -1952,11 +1823,7 @@
     "detail": {
       "format": "Format",
       "onlineUrl": "Join online",
-      "formats": {
-        "in_person": "In person",
-        "online": "Online",
-        "hybrid": "Hybrid"
-      },
+      "formats": {"in_person": "In person", "online": "Online", "hybrid": "Hybrid"},
       "date": "Date and time",
       "venue": "Venue",
       "capacity": "Capacity",
@@ -2038,11 +1905,7 @@
     "total": "Total",
     "paymentNature": "One-time ticket payment. Seats are confirmed after payment.",
     "eventDate": "Event date and time",
-    "fieldErrors": {
-      "required": "This field is required.",
-      "invalid": "Enter a valid value.",
-      "extra": "Remove the extra attendee details."
-    },
+    "fieldErrors": {"required": "This field is required.", "invalid": "Enter a valid value.", "extra": "Remove the extra attendee details."},
     "recoveryLoading": "Checking for an existing checkout…",
     "recoveryTitle": "Pending checkout",
     "recoverySummary": "Reserved seats and amount",
@@ -2434,9 +2297,7 @@
       "browseEvents": "Browse events",
       "retry": "Try again"
     },
-    "paging": {
-      "cursorReset": "The page link is no longer valid for this search. Showing the first page."
-    },
+    "paging": {"cursorReset": "The page link is no longer valid for this search. Showing the first page."},
     "myEvents": {
       "title": "My registrations and orders",
       "description": "Your recorded registrations and ticket purchases, including past events.",
@@ -2527,25 +2388,13 @@
     },
     "forms": {
       "readOnlyNote": "Only company owners and admins can edit these details.",
-      "image": {
-        "empty": "No logo yet",
-        "previewAlt": "Current logo",
-        "external": "Linked image",
-        "remove": "Remove"
-      },
+      "image": {"empty": "No logo yet", "previewAlt": "Current logo", "external": "Linked image", "remove": "Remove"},
       "commaHelp": "Separate with commas",
       "tagCounter": "{count} / {max} selected"
     },
     "navigation": "Member portal navigation",
-    "navGroups": {
-      "me": "Me",
-      "company": "My company",
-      "benefits": "Membership benefits"
-    },
-    "shell": {
-      "portalLabel": "Member portal",
-      "backToSite": "Back to public site"
-    },
+    "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
+    "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "applications": {
       "nav": "My applications",
       "title": "My applications",
@@ -2572,26 +2421,11 @@
       },
       "nextTitle": "Next step",
       "nextAction": {
-        "resume": {
-          "title": "Continue your saved application",
-          "action": "Continue application"
-        },
-        "billing": {
-          "title": "Payment is still required",
-          "action": "Open billing"
-        },
-        "wait": {
-          "title": "Wait for WTIA review",
-          "body": "No further action is required from you right now."
-        },
-        "complete": {
-          "title": "Application complete",
-          "body": "No further action is required."
-        },
-        "new": {
-          "title": "This application is closed",
-          "action": "Start a new application"
-        }
+        "resume": {"title": "Continue your saved application", "action": "Continue application"},
+        "billing": {"title": "Payment is still required", "action": "Open billing"},
+        "wait": {"title": "Wait for WTIA review", "body": "No further action is required from you right now."},
+        "complete": {"title": "Application complete", "body": "No further action is required."},
+        "new": {"title": "This application is closed", "action": "Start a new application"}
       },
       "status": {
         "draft": "Draft",
@@ -2612,36 +2446,13 @@
     "nextStep": {
       "otherMemberships": "Other memberships needing attention",
       "label": "Your next step",
-      "past_due": {
-        "title": "Update your payment details",
-        "body": "Your last payment did not go through. Update billing to keep your membership active.",
-        "action": "Go to billing"
-      },
-      "pending_payment": {
-        "title": "Complete your payment",
-        "body": "Your membership activates once payment is complete.",
-        "action": "Go to billing"
-      },
-      "pending_review": {
-        "title": "Your application is under review",
-        "body": "WTIA will contact you when the review is complete.",
-        "action": "View application details"
-      },
-      "profile": {
-        "title": "Complete your profile",
-        "body": "Add your role and contact preferences so WTIA can reach you.",
-        "action": "Open profile"
-      },
-      "company": {
-        "title": "Add your company details",
-        "body": "Your company details are used for your membership, seats and showcase listing.",
-        "action": "Open company"
-      }
+      "past_due": {"title": "Update your payment details", "body": "Your last payment did not go through. Update billing to keep your membership active.", "action": "Go to billing"},
+      "pending_payment": {"title": "Complete your payment", "body": "Your membership activates once payment is complete.", "action": "Go to billing"},
+      "pending_review": {"title": "Your application is under review", "body": "WTIA will contact you when the review is complete.", "action": "View application details"},
+      "profile": {"title": "Complete your profile", "body": "Add your role and contact preferences so WTIA can reach you.", "action": "Open profile"},
+      "company": {"title": "Add your company details", "body": "Your company details are used for your membership, seats and showcase listing.", "action": "Open company"}
     },
-    "onboardingSteps": {
-      "profile": "Profile",
-      "company": "Company"
-    },
+    "onboardingSteps": {"profile": "Profile", "company": "Company"},
     "glance": {
       "title": "Membership at a glance",
       "plan": "Plan",
@@ -2654,18 +2465,9 @@
     "benefits": {
       "title": "Your benefits",
       "action": "Open",
-      "events": {
-        "title": "Events",
-        "copy": "Register for WTIA events and manage your registrations."
-      },
-      "directory": {
-        "title": "Member directory",
-        "copy": "Find and contact other WTIA members."
-      },
-      "tools": {
-        "title": "Member tools",
-        "copy": "Use the tools included with your membership."
-      }
+      "events": {"title": "Events", "copy": "Register for WTIA events and manage your registrations."},
+      "directory": {"title": "Member directory", "copy": "Find and contact other WTIA members."},
+      "tools": {"title": "Member tools", "copy": "Use the tools included with your membership."}
     },
     "profile": "My profile",
     "company": "Company",
@@ -2683,14 +2485,8 @@
     },
     "onboardingProgress": "{completed} of {total} steps complete",
     "status": {
-      "expired": {
-        "label": "Expired",
-        "description": "Your membership has expired."
-      },
-      "cancelled": {
-        "label": "Cancelled",
-        "description": "Your membership has been cancelled."
-      },
+      "expired": {"label": "Expired", "description": "Your membership has expired."},
+      "cancelled": {"label": "Cancelled", "description": "Your membership has been cancelled."},
       "active": {
         "label": "Active",
         "title": "Your membership is active",
@@ -2719,11 +2515,7 @@
     },
     "profileTitle": "My profile",
     "profileDescription": "Keep your personal details and directory preference up to date.",
-    "profileGroups": {
-      "contact": "Contact",
-      "whatsapp": "WhatsApp updates",
-      "directoryHelp": "Lets other members find you in the WTIA directory."
-    },
+    "profileGroups": {"contact": "Contact", "whatsapp": "WhatsApp updates", "directoryHelp": "Lets other members find you in the WTIA directory."},
     "companyTitle": "Company details",
     "companyDescription": "Owners and admins can update details for their company.",
     "companyEmpty": "Your current membership does not include a company profile.",
@@ -2731,10 +2523,7 @@
     "whatsapp": {
       "optIn": "Send me WTIA activity updates and reminders on WhatsApp",
       "consent": "WTIA may message this number about events, programmes and membership. Reply STOP at any time to opt out.",
-      "status": {
-        "on": "WhatsApp updates: on",
-        "off": "WhatsApp updates: off"
-      }
+      "status": {"on": "WhatsApp updates: on", "off": "WhatsApp updates: off"}
     },
     "fields": {
       "displayName": "Display name",
@@ -2754,22 +2543,11 @@
       "title": "Publish your company story",
       "description": "Share a clear, buyer-friendly view of your product with the WTIA network.",
       "formTitle": "Listing details",
-      "groups": {
-        "basics": "Basics",
-        "nameTagline": "Name and tagline",
-        "descriptions": "Descriptions",
-        "details": "Details",
-        "links": "Links and media"
-      },
+      "groups": {"basics": "Basics", "nameTagline": "Name and tagline", "descriptions": "Descriptions", "details": "Details", "links": "Links and media"},
       "saveDraft": "Save draft",
       "submit": "Submit for review",
       "logoHelp": "Used in search and social previews. WTIA chooses the logo shown on the showcase.",
-      "statusLabel": {
-        "draft": "Draft",
-        "pending_review": "Pending review",
-        "published": "Published",
-        "rejected": "Needs changes"
-      },
+      "statusLabel": {"draft": "Draft", "pending_review": "Pending review", "published": "Published", "rejected": "Needs changes"},
       "statusNote": {
         "draft": "Visible only to your company team.",
         "pending_review": "WTIA staff will review this submission.",
@@ -3149,22 +2927,10 @@
     "launcher": "Ask WiseTech",
     "transparency": "How this assistant works",
     "prompts": {
-      "home": [
-        "How can WiseTech help my organisation?",
-        "Show the AI+ industry pathways"
-      ],
-      "membership": [
-        "Which membership suits my organisation?",
-        "What benefits do startups receive?"
-      ],
-      "showcase": [
-        "Find providers serving SMEs",
-        "How do introductions work?"
-      ],
-      "events": [
-        "Which event is relevant to retail?",
-        "Show Cantonese events"
-      ]
+      "home": ["How can WiseTech help my organisation?", "Show the AI+ industry pathways"],
+      "membership": ["Which membership suits my organisation?", "What benefits do startups receive?"],
+      "showcase": ["Find providers serving SMEs", "How do introductions work?"],
+      "events": ["Which event is relevant to retail?", "Show Cantonese events"]
     },
     "title": "WTIA Concierge",
     "description": "Ask about WTIA membership, events, programmes and support.",
@@ -3345,9 +3111,7 @@
       "error": "Unable to reconcile. Confirm the event reference and correlated records with technical support before retrying."
     },
     "brandShort": "WTIA",
-    "unsavedChanges": {
-      "confirm": "You have unsaved changes. Leave this page and discard them?"
-    },
+    "unsavedChanges": {"confirm": "You have unsaved changes. Leave this page and discard them?"},
     "shell": {
       "menu": "Open workspace menu",
       "closeMenu": "Close workspace menu",
@@ -3392,15 +3156,8 @@
       "companySeats": "Unrevoked company seats"
     },
     "navigation": {
-      "knowledge": "Knowledge and policies",
-      "groups": {
-        "workspace": "Daily work",
-        "membersOrganizations": "Members & organisations",
-        "events": "Events and payments",
-        "communicationsFollowUp": "Messages and support",
-        "contentSettings": "Site content",
-        "systemAudit": "System and audit"
-      },
+      "knowledge": "Knowledge and policies", "groups": {"workspace": "Daily work", "membersOrganizations": "Members & organisations", "events": "Events and payments", "communicationsFollowUp": "Messages and support", "contentSettings": "Site content",
+        "systemAudit": "System and audit"},
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
       "inbox": "Inbox",
@@ -3534,21 +3291,8 @@
       "error": "We could not load the contacts pipeline.",
       "saved": "Contact updated.",
       "board": {
-        "view": {
-          "label": "View",
-          "list": "List",
-          "board": "Board"
-        },
-        "filters": {
-          "owner": "Owner",
-          "anyone": "Everyone",
-          "mine": "Mine",
-          "source": "Source",
-          "anySource": "Any source",
-          "overdueOnly": "Overdue next steps only",
-          "includeClosed": "Show closed",
-          "apply": "Apply"
-        },
+        "view": {"label": "View", "list": "List", "board": "Board"},
+        "filters": {"owner": "Owner", "anyone": "Everyone", "mine": "Mine", "source": "Source", "anySource": "Any source", "overdueOnly": "Overdue next steps only", "includeClosed": "Show closed", "apply": "Apply"},
         "columnCount": "{count} in this stage",
         "emptyColumn": "Nobody in this stage.",
         "unnamed": "Unnamed contact",
@@ -3588,11 +3332,7 @@
         "invite": {
           "title": "Personal join link",
           "plan": "Plan",
-          "plans": {
-            "community": "Community",
-            "startup": "Startup",
-            "corporate": "Corporate"
-          },
+          "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate"},
           "create": "Create a join link",
           "linkLabel": "Join link (shown once)",
           "copy": "Copy link",
@@ -3609,13 +3349,7 @@
           "supersedeConfirm": "I understand the earlier link will stop working",
           "latest": "Latest link: {state}",
           "none": "No link created yet.",
-          "state": {
-            "live": "Not opened yet",
-            "opened": "Opened",
-            "consumed": "Used",
-            "expired": "Expired",
-            "superseded": "Replaced by a newer link"
-          }
+          "state": {"live": "Not opened yet", "opened": "Opened", "consumed": "Used", "expired": "Expired", "superseded": "Replaced by a newer link"}
         },
         "timeline": {
           "title": "Timeline",
@@ -3881,14 +3615,7 @@
       "eyebrow": "Escalations",
       "title": "Staff tasks",
       "description": "Concierge hand-offs and automation follow-ups waiting for a person.",
-      "columns": {
-        "kind": "Kind",
-        "summary": "Summary",
-        "member": "Member",
-        "conversation": "Conversation",
-        "created": "Created",
-        "actions": "Actions"
-      },
+      "columns": {"kind": "Kind", "summary": "Summary", "member": "Member", "conversation": "Conversation", "created": "Created", "actions": "Actions"},
       "resolve": "Mark resolved",
       "openConversation": "Open conversation",
       "empty": "Nothing is waiting for a person.",
@@ -3915,9 +3642,7 @@
       "caption": "Company listings",
       "filterLabel": "Listing status",
       "filterPending": "Awaiting review",
-      "filterAll": "All listings",
-      "pagination": "Showcase review pages",
-      "next": "Next 50 listings",
+      "filterAll": "All listings", "pagination": "Showcase review pages", "next": "Next 50 listings",
       "company": "Company",
       "slug": "Slug",
       "logo": "Logo",
@@ -4016,224 +3741,85 @@
         "rejected": "Rejected"
       }
     },
-    "applicationQueue": {
-      "title": "Applications and payments",
-      "description": "Each row is one application. Its membership and latest billing attempt are shown separately so unfinished applications and payment reconciliation remain visible.",
-      "caption": "Application operations queue",
-      "applicant": "Applicant",
-      "application": "Application",
-      "step": "Saved step",
-      "membership": "Linked membership",
-      "billing": "Latest billing attempt",
-      "updated": "Updated (Hong Kong time)",
-      "none": "No record",
-      "empty": "No applications match this queue.",
-      "back": "Back to members",
-      "views": "Application queues",
-      "viewsLabels": {
-        "draft": "Unfinished join",
-        "pending_payment": "Awaiting payment",
-        "pending_review": "Awaiting review",
-        "submitted": "Submitted"
-      },
-      "search": "Name, email, company or application ID",
-      "sort": "Sort",
-      "sortNewest": "Newest updated",
-      "sortOldest": "Oldest updated",
-      "pageSize": "Rows per page",
-      "totalMatching": "{count} applications match this search and status.",
-      "invalid": "The queue filter or cursor is invalid. Clear the filters and retry.",
-      "unavailable": "The application queue is unavailable. Try again shortly.",
-      "loading": "Loading applications…",
-      "draft": "Draft",
-      "steps": {
-        "profile": "Profile",
-        "company": "Company",
-        "checkout": "Checkout",
-        "complete": "Complete",
-        "review": "Review"
-      },
-      "billingStates": {
-        "active": "Open attempt",
-        "completed": "Completed attempt",
-        "abandoned": "Abandoned attempt",
-        "expired": "Expired attempt"
-      }
-    },
-    "batchGrants": {
-      "title": "Membership grants",
-      "formTitle": "Prepare finite grants",
-      "description": "Choose explicit targets, dates and a reason. Review each target and its conflicts before committing. No payment is recorded.",
-      "back": "Back to members",
-      "plan": "Plan",
-      "start": "Starts (Hong Kong time)",
-      "expiry": "Expires (Hong Kong time)",
-      "reason": "Reason for grant",
-      "preview": "Preview grants",
-      "kind": "Target type",
-      "profile": "Individual profiles",
-      "company": "Companies",
-      "ids": "Target IDs",
-      "help": "Enter one trusted profile or company ID per line, up to 5000 targets. The preview shows names, plan seats and conflicts. Dates apply to every target.",
-      "disabled": "Bulk grants are not enabled for this environment.",
-      "success": "Grant prepared.",
-      "invalid": "Check the target IDs, plan, dates and reason.",
-      "duplicate": "A target already has a live membership.",
-      "error": "Could not prepare grants. Check your permissions and try again."
-    },
+    "applicationQueue": {"title":"Applications and payments","description":"Each row is one application. Its membership and latest billing attempt are shown separately so unfinished applications and payment reconciliation remain visible.","caption":"Application operations queue","applicant":"Applicant","application":"Application","step":"Saved step","membership":"Linked membership","billing":"Latest billing attempt","updated":"Updated (Hong Kong time)","none":"No record","empty":"No applications match this queue.","back":"Back to members","views":"Application queues","viewsLabels":{"submitted":"Submitted","draft":"Unfinished join","pending_payment":"Awaiting payment","pending_review":"Awaiting review"},"search":"Name, email, company or application ID","sort":"Sort","sortNewest":"Newest updated","sortOldest":"Oldest updated","pageSize":"Rows per page","totalMatching":"{count} applications match this search and status.","invalid":"The queue filter or cursor is invalid. Clear the filters and retry.","unavailable":"The application queue is unavailable. Try again shortly.","loading":"Loading applications…","draft":"Draft","steps":{"profile":"Profile","company":"Company","checkout":"Checkout","complete":"Complete","review":"Review"},"billingStates":{"active":"Open attempt","completed":"Completed attempt","abandoned":"Abandoned attempt","expired":"Expired attempt"}},
+    "batchGrants": {"title":"Membership grants","formTitle":"Prepare finite grants","description":"Choose explicit targets, dates and a reason. Review each target and its conflicts before committing. No payment is recorded.","back":"Back to members","plan":"Plan","start":"Starts (Hong Kong time)","expiry":"Expires (Hong Kong time)","reason":"Reason for grant","preview":"Preview grants","kind":"Target type","profile":"Individual profiles","company":"Companies","ids":"Target IDs","help":"Enter one trusted profile or company ID per line, up to 5000 targets. The preview shows names, plan seats and conflicts. Dates apply to every target.","disabled":"Bulk grants are not enabled for this environment.","success":"Grant prepared.","invalid":"Check the target IDs, plan, dates and reason.","duplicate":"A target already has a live membership.","error":"Could not prepare grants. Check your permissions and try again."},
     "imports": {
-      "title": "Import members",
-      "disabled": "Member imports are not enabled for this environment.",
-      "back": "Back to members",
-      "steps": {
-        "upload": "Upload",
-        "map": "Map columns",
-        "validate": "Validate",
-        "preview": "Review differences",
-        "submit": "Prepare batch"
-      },
-      "upload": "Upload file",
-      "chooseFile": "Choose CSV or XLSX file",
-      "next": "Next page",
-      "error": "Import could not continue. Check the file, mapping and permissions, then retry.",
-      "fields": {
-        "profileId": "Trusted member ID",
-        "displayName": "Name",
-        "email": "Email",
-        "locale": "Preferred language",
-        "planCode": "Plan recommendation",
-        "renewalAt": "Renewal date recommendation",
-        "tags": "Operations tags",
-        "ownerProfileId": "Staff owner ID"
-      },
-      "skip": "Do not map",
-      "validate": "Validate rows",
-      "preview": "Review row differences",
-      "confirm": "Confirm selected rows",
-      "prepare": "Prepare batch preview",
-      "selectAll": "Select all eligible rows",
-      "selected": "{count} rows selected",
-      "before": "Current values",
-      "incoming": "Incoming values",
-      "status": "Status",
-      "reason": "Reason",
-      "row": "Row",
-      "total": "Total",
-      "create": "New CRM contact",
-      "update": "Member correction",
-      "conflict": "Manual conflict",
-      "invalid": "Invalid",
-      "duplicate": "Duplicate",
-      "unchanged": "Unchanged",
-      "limits": "CSV or single-sheet XLSX, up to 10 MiB and 5000 rows. New contacts are not active members; plan recommendations do not grant benefits.",
-      "downloadErrors": "Download row issues",
-      "identityBoundary": "Imported email is not a verified login identity and does not activate membership or grant marketing consent. Data update invitations follow the existing approval process.",
-      "unknownReason": "Review this row against the original file.",
-      "reasons": {
-        "PROFILE_ID_INVALID": "Member ID is invalid.",
-        "DISPLAY_NAME_INVALID": "Name is too long or invalid.",
-        "EMAIL_INVALID": "Email address is invalid.",
-        "DUPLICATE_EMAIL": "The same email occurs earlier in this file. Review both rows.",
-        "IDENTITY_MISSING": "Map a member ID or email column.",
-        "LOCALE_INVALID": "Use en or zh-HK for language.",
-        "PLAN_INVALID": "Plan recommendation is unknown; it cannot grant membership.",
-        "DATE_INVALID": "Use a valid YYYY-MM-DD date.",
-        "TAGS_INVALID": "Use up to ten tags, each at most 30 characters.",
-        "OWNER_INVALID": "Staff owner ID is invalid.",
-        "OWNER_NOT_STAFF": "The selected owner must be an existing staff member.",
-        "EMAIL_CANDIDATE_REVIEW": "This email matches an existing identity or contact. Review it without merging identities.",
-        "PROFILE_ID_NOT_MEMBER": "The ID does not identify an existing member profile.",
-        "EMAIL_IDENTITY_CONFLICT": "Email does not match this member ID. Review the original record.",
-        "NAME_REQUIRES_REVIEW": "Review name changes in the member profile; this import cannot change identity details.",
-        "RECOMMENDATION_ONLY": "Plan and renewal date are recommendations; no entitlement will change.",
-        "NO_ALLOWED_CHANGE": "No permitted field changes were found."
-      }
-    },
-    "before": "Current",
-    "incoming": "Incoming",
+  "title": "Import members",
+  "disabled": "Member imports are not enabled for this environment.",
+  "back": "Back to members",
+  "steps": {
+    "upload": "Upload",
+    "map": "Map columns",
+    "validate": "Validate",
+    "preview": "Review differences",
+    "submit": "Prepare batch"
+  },
+  "upload": "Upload file",
+  "chooseFile": "Choose CSV or XLSX file",
+  "next": "Next page",
+  "error": "Import could not continue. Check the file, mapping and permissions, then retry.",
+  "fields": {
+    "profileId": "Trusted member ID",
+    "displayName": "Name",
+    "email": "Email",
+    "locale": "Preferred language",
+    "planCode": "Plan recommendation",
+    "renewalAt": "Renewal date recommendation",
+    "tags": "Operations tags",
+    "ownerProfileId": "Staff owner ID"
+  },
+  "skip": "Do not map",
+  "validate": "Validate rows",
+  "preview": "Review row differences",
+  "confirm": "Confirm selected rows",
+  "prepare": "Prepare batch preview",
+  "selectAll": "Select all eligible rows",
+  "selected": "{count} rows selected",
+  "before": "Current values",
+  "incoming": "Incoming values",
+  "status": "Status",
+  "reason": "Reason",
+  "row": "Row",
+  "total": "Total",
+  "create": "New CRM contact",
+  "update": "Member correction",
+  "conflict": "Manual conflict",
+  "invalid": "Invalid",
+  "duplicate": "Duplicate",
+  "unchanged": "Unchanged",
+  "limits": "CSV or single-sheet XLSX, up to 10 MiB and 5000 rows. New contacts are not active members; plan recommendations do not grant benefits.",
+  "downloadErrors": "Download row issues",
+  "identityBoundary": "Imported email is not a verified login identity and does not activate membership or grant marketing consent. Data update invitations follow the existing approval process.",
+  "unknownReason": "Review this row against the original file.",
+  "reasons": {
+    "PROFILE_ID_INVALID": "Member ID is invalid.",
+    "DISPLAY_NAME_INVALID": "Name is too long or invalid.",
+    "EMAIL_INVALID": "Email address is invalid.",
+    "DUPLICATE_EMAIL": "The same email occurs earlier in this file. Review both rows.",
+    "IDENTITY_MISSING": "Map a member ID or email column.",
+    "LOCALE_INVALID": "Use en or zh-HK for language.",
+    "PLAN_INVALID": "Plan recommendation is unknown; it cannot grant membership.",
+    "DATE_INVALID": "Use a valid YYYY-MM-DD date.",
+    "TAGS_INVALID": "Use up to ten tags, each at most 30 characters.",
+    "OWNER_INVALID": "Staff owner ID is invalid.",
+    "OWNER_NOT_STAFF": "The selected owner must be an existing staff member.",
+    "EMAIL_CANDIDATE_REVIEW": "This email matches an existing identity or contact. Review it without merging identities.",
+    "PROFILE_ID_NOT_MEMBER": "The ID does not identify an existing member profile.",
+    "EMAIL_IDENTITY_CONFLICT": "Email does not match this member ID. Review the original record.",
+    "NAME_REQUIRES_REVIEW": "Review name changes in the member profile; this import cannot change identity details.",
+    "RECOMMENDATION_ONLY": "Plan and renewal date are recommendations; no entitlement will change.",
+    "NO_ALLOWED_CHANGE": "No permitted field changes were found."
+  }
+},
+"before": "Current",
+"incoming": "Incoming",
     "batches": {
-      "downloadCsv": "Download CSV",
-      "title": "Batch preview and progress",
-      "description": "Review every item before committing. Changes and failures remain visible here.",
-      "back": "Back to members",
-      "states": {
-        "preparing": "Preparing snapshot",
-        "ready": "Ready for review",
-        "queued": "Queued",
-        "running": "Running",
-        "completed": "Completed",
-        "completed_with_errors": "Completed with errors",
-        "cancelled": "Cancelled",
-        "expired": "Preview expired",
-        "pending": "Pending",
-        "succeeded": "Succeeded",
-        "skipped": "Skipped",
-        "failed": "Failed"
-      },
-      "counters": {
-        "pending": "Pending",
-        "running": "Running",
-        "succeeded": "Succeeded",
-        "skipped": "Skipped",
-        "failed": "Failed"
-      },
-      "total": "Total",
-      "eligible": "Eligible",
-      "blocked": "Blocked",
-      "operation": "State",
-      "target": "Target",
-      "before": "Before",
-      "after": "After",
-      "reason": "Reason or error",
-      "attempts": "Attempts",
-      "result": "Result",
-      "commit": "Commit batch",
-      "retry": "Retry failed items",
-      "cancel": "Cancel remaining",
-      "expires": "Preview expires (Hong Kong time)",
-      "empty": "No items in this snapshot.",
-      "more": "Next 50 items",
-      "allItems": "All items",
-      "failedItems": "Failed items",
-      "retryItem": "Retry this item",
-      "itemFilter": "Batch item filter",
-      "progressUnavailable": "Progress is temporarily unavailable. This page will retry.",
-      "change": "Changes",
-      "noChange": "No changed fields",
-      "idLabel": "Technical ID",
-      "targetTypes": {
-        "profile": "Member",
-        "membership": "Membership",
-        "company": "Company",
-        "ticket_seat": "Ticket seat",
-        "import_row": "Import row",
-        "event": "Event"
-      },
-      "fieldNames": {
-        "locale": "Language",
-        "tags": "Tags",
-        "ownerProfileId": "Staff owner",
-        "targetName": "Name",
-        "displayName": "Name",
-        "companyName": "Company",
-        "memberName": "Member",
-        "planCode": "Plan",
-        "seatLimit": "Seats",
-        "effectiveAt": "Effective date",
-        "expiresAt": "Expiry date",
-        "channel": "Channel",
-        "classification": "Classification",
-        "result": "Result",
-        "fields": "Fields"
-      },
-      "reasonUncertain": "Reconcile the outcome before taking further action. Do not resend.",
-      "preparationFailed": "The preview could not be prepared. Correct the selection or configuration and create a new preview.",
-      "cancelPartial": "Cancellation stops pending work. An operation already started may finish; completed results and receipts are retained.",
-      "confirm": "I have reviewed the scope, changes, skipped and blocked items before submitting.",
-      "reasonTransient": "Temporary provider issue",
-      "reasonChanged": "Changed since preview",
-      "reasonUnchanged": "No change needed",
-      "reasonOther": "Review this outcome",
+      "downloadCsv": "Download CSV","title": "Batch preview and progress", "description": "Review every item before committing. Changes and failures remain visible here.", "back": "Back to members", "states": {"preparing": "Preparing snapshot", "ready": "Ready for review", "queued": "Queued", "running": "Running", "completed": "Completed", "completed_with_errors": "Completed with errors", "cancelled": "Cancelled", "expired": "Preview expired", "pending": "Pending", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "counters": {"pending": "Pending", "running": "Running", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "total": "Total", "eligible": "Eligible", "blocked": "Blocked", "operation": "State", "target": "Target", "before": "Before", "after": "After", "reason": "Reason or error", "attempts": "Attempts", "result": "Result", "commit": "Commit batch", "retry": "Retry failed items", "cancel": "Cancel remaining", "expires": "Preview expires (Hong Kong time)", "empty": "No items in this snapshot.", "more": "Next 50 items", "allItems": "All items", "failedItems": "Failed items", "retryItem": "Retry this item", "itemFilter": "Batch item filter", "progressUnavailable": "Progress is temporarily unavailable. This page will retry.",
+      "change": "Changes", "noChange": "No changed fields", "idLabel": "Technical ID", "targetTypes": {"profile": "Member", "membership": "Membership", "company": "Company", "ticket_seat": "Ticket seat", "import_row": "Import row", "event": "Event"}, "fieldNames": {"locale": "Language", "tags": "Tags", "ownerProfileId": "Staff owner", "targetName": "Name", "displayName": "Name", "companyName": "Company", "memberName": "Member", "planCode": "Plan", "seatLimit": "Seats", "effectiveAt": "Effective date", "expiresAt": "Expiry date", "channel": "Channel", "classification": "Classification", "result": "Result", "fields": "Fields"}, "reasonUncertain": "Reconcile the outcome before taking further action. Do not resend.",
+      "change": "Changes", "noChange": "No changed fields", "idLabel": "Technical ID", "targetTypes": {"profile": "Member", "membership": "Membership", "company": "Company", "ticket_seat": "Ticket seat", "import_row": "Import row", "event": "Event"}, "fieldNames": {"locale": "Language", "tags": "Tags", "ownerProfileId": "Staff owner", "targetName": "Name", "displayName": "Name", "companyName": "Company", "memberName": "Member", "planCode": "Plan", "seatLimit": "Seats", "effectiveAt": "Effective date", "expiresAt": "Expiry date", "channel": "Channel", "classification": "Classification", "result": "Result", "fields": "Fields"}, "preparationFailed": "The preview could not be prepared. Correct the selection or configuration and create a new preview.",
+      "change": "Changes", "noChange": "No changed fields", "idLabel": "Technical ID", "targetTypes": {"profile": "Member", "membership": "Membership", "company": "Company", "ticket_seat": "Ticket seat", "import_row": "Import row", "event": "Event"}, "fieldNames": {"locale": "Language", "tags": "Tags", "ownerProfileId": "Staff owner", "targetName": "Name", "displayName": "Name", "companyName": "Company", "memberName": "Member", "planCode": "Plan", "seatLimit": "Seats", "effectiveAt": "Effective date", "expiresAt": "Expiry date", "channel": "Channel", "classification": "Classification", "result": "Result", "fields": "Fields"}, "cancelPartial": "Cancellation stops pending work. An operation already started may finish; completed results and receipts are retained.",
+      "change": "Changes", "noChange": "No changed fields", "idLabel": "Technical ID", "targetTypes": {"profile": "Member", "membership": "Membership", "company": "Company", "ticket_seat": "Ticket seat", "import_row": "Import row", "event": "Event"}, "fieldNames": {"locale": "Language", "tags": "Tags", "ownerProfileId": "Staff owner", "targetName": "Name", "displayName": "Name", "companyName": "Company", "memberName": "Member", "planCode": "Plan", "seatLimit": "Seats", "effectiveAt": "Effective date", "expiresAt": "Expiry date", "channel": "Channel", "classification": "Classification", "result": "Result", "fields": "Fields"}, "confirm": "I have reviewed the scope, changes, skipped and blocked items before submitting.",
+      "change": "Changes", "noChange": "No changed fields", "idLabel": "Technical ID", "targetTypes": {"profile": "Member", "membership": "Membership", "company": "Company", "ticket_seat": "Ticket seat", "import_row": "Import row", "event": "Event"}, "fieldNames": {"locale": "Language", "tags": "Tags", "ownerProfileId": "Staff owner", "targetName": "Name", "displayName": "Name", "companyName": "Company", "memberName": "Member", "planCode": "Plan", "seatLimit": "Seats", "effectiveAt": "Effective date", "expiresAt": "Expiry date", "channel": "Channel", "classification": "Classification", "result": "Result", "fields": "Fields"}, "reasonTransient": "Temporary provider issue", "reasonChanged": "Changed since preview", "reasonUnchanged": "No change needed", "reasonOther": "Review this outcome",
       "reviewCampaigns": "Review campaign drafts",
       "history": {
         "recentTitle": "My recent batch jobs",
@@ -4277,96 +3863,22 @@
       }
     },
     "members": {
-      "batch": {
-        "field": "Change field",
-        "tags": "Operational tags",
-        "tagsHelp": "Comma-separated, at most 10 tags of 30 characters. Replaces existing tags; leave empty to clear.",
-        "owner": "Responsible staff",
-        "unassigned": "Unassigned",
-        "preview": "Preview correction",
-        "reason": "Reason for correction",
-        "language": "Preferred language",
-        "english": "English",
-        "chinese": "Traditional Chinese",
-        "error": "Could not prepare the batch. Check the selection and try again.",
-        "exportPreview": "Preview CSV export",
-        "exportFields": "Export fields",
-        "exportError": "Could not prepare export."
-      },
+      "batch": {"field": "Change field", "tags": "Operational tags", "tagsHelp": "Comma-separated, at most 10 tags of 30 characters. Replaces existing tags; leave empty to clear.", "owner": "Responsible staff", "unassigned": "Unassigned", "preview": "Preview correction", "reason": "Reason for correction", "language": "Preferred language", "english": "English", "chinese": "Traditional Chinese", "error": "Could not prepare the batch. Check the selection and try again.", "exportPreview": "Preview CSV export", "exportFields": "Export fields", "exportError": "Could not prepare export."},
       "importLink": "Import members",
-      "selection": {
-        "page": "Select this page",
-        "all": "Select all {count} matching",
-        "clear": "Clear selection",
-        "selected": "{count} selected",
-        "row": "Select {name}",
-        "explicitScope": "Checked members only, across visited pages.",
-        "allMatchingScope": "All members matching these filters, except unchecked rows.",
+      "selection": {"page": "Select this page", "all": "Select all {count} matching", "clear": "Clear selection", "selected": "{count} selected", "row": "Select {name}", "explicitScope": "Checked members only, across visited pages.", "allMatchingScope": "All members matching these filters, except unchecked rows.",
         "unavailable": "Batch operations are not available in this environment. You can still view members and batch history.",
-        "exportUnavailable": "Member export is not available in this environment."
-      },
-      "savedViews": {
-        "title": "Saved views",
-        "name": "View name",
-        "save": "Save view",
-        "saved": "View saved",
-        "invalid": "Check the view name and filters.",
-        "error": "Could not save the view. Try again.",
-        "shared": "Shared with staff",
-        "empty": "No saved views yet."
-      },
-      "filters": {
-        "status": "Membership status",
-        "plan": "Plan",
-        "renewalFrom": "Renewal from (Hong Kong date)",
-        "renewalTo": "Renewal to (Hong Kong date)",
-        "companyId": "Company name",
-        "locale": "Preferred language",
-        "completeness": "Profile completeness",
-        "sort": "Sort by",
-        "apply": "Apply filters",
-        "clear": "Clear filters",
-        "any": "Any",
-        "complete": "Complete",
-        "incomplete": "Missing contact details",
-        "nameAsc": "Name A–Z",
-        "nameDesc": "Name Z–A",
-        "renewalAsc": "Renewal soonest",
-        "english": "English",
-        "chinese": "繁體中文",
-        "viewsLabel": "Default views",
-        "views": {
-          "active": "Active",
-          "due30": "Due within 30 days",
-          "due60": "Due within 60 days",
-          "due90": "Due within 90 days",
-          "pastDue": "Past due",
-          "expired": "Expired",
-          "missingData": "Missing details"
-        },
+        "exportUnavailable": "Member export is not available in this environment."},
+      "savedViews": {"title": "Saved views", "name": "View name", "save": "Save view", "saved": "View saved", "invalid": "Check the view name and filters.", "error": "Could not save the view. Try again.", "shared": "Shared with staff", "empty": "No saved views yet."},
+      "filters": {"status": "Membership status", "plan": "Plan", "renewalFrom": "Renewal from (Hong Kong date)", "renewalTo": "Renewal to (Hong Kong date)", "companyId": "Company name", "locale": "Preferred language", "completeness": "Profile completeness", "sort": "Sort by", "apply": "Apply filters", "clear": "Clear filters", "any": "Any", "complete": "Complete", "incomplete": "Missing contact details", "nameAsc": "Name A–Z", "nameDesc": "Name Z–A", "renewalAsc": "Renewal soonest", "english": "English", "chinese": "繁體中文", "viewsLabel": "Default views", "views": {"active": "Active", "due30": "Due within 30 days", "due60": "Due within 60 days", "due90": "Due within 90 days", "pastDue": "Past due", "expired": "Expired", "missingData": "Missing details"},
         "advanced": "Advanced filters",
         "moreTools": "Member tools and saved views",
         "companyEmpty": "No matching companies.",
         "companyError": "Company names could not be loaded. Please retry.",
         "companyChoose": "Choose a registered company result or clear the search.",
-        "companySearching": "Searching companies…"
-      },
+        "companySearching": "Searching companies…"},
       "view": "View",
-      "planCodes": {
-        "community": "Community",
-        "startup": "Startup",
-        "corporate": "Corporate",
-        "patron": "Patron"
-      },
-      "statusCodes": {
-        "active": "Active",
-        "past_due": "Past due",
-        "cancel_at_period_end": "Ends at period end",
-        "pending_review": "Pending review",
-        "pending_payment": "Awaiting payment",
-        "cancelled": "Cancelled",
-        "expired": "Expired"
-      },
+      "planCodes": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
+      "statusCodes": {"active": "Active", "past_due": "Past due", "cancel_at_period_end": "Ends at period end", "pending_review": "Pending review", "pending_payment": "Awaiting payment", "cancelled": "Cancelled", "expired": "Expired"},
       "title": "Members",
       "description": "Search member profiles, companies, memberships, and engagement scores.",
       "search": "Search members",
@@ -4501,28 +4013,14 @@
     },
     "eventsMgmt": {
       "format": "Format",
-      "formats": {
-        "in_person": "In person",
-        "online": "Online",
-        "hybrid": "Hybrid"
-      },
+      "formats": {"in_person": "In person", "online": "Online", "hybrid": "Hybrid"},
       "onlineUrl": "Online meeting URL",
       "externalRegistrationUrl": "External registration URL",
       "tags": "Tags (comma separated)",
       "visibility": "Visibility",
-      "visibilities": {
-        "public": "Public",
-        "members_only": "Members only",
-        "invite_only": "Invitation only"
-      },
+      "visibilities": {"public": "Public", "members_only": "Members only", "invite_only": "Invitation only"},
       "eyebrow": "Event operations",
-      "tabs": {
-        "label": "Event sections",
-        "content": "Content",
-        "attendees": "Attendees",
-        "orders": "Orders and refunds",
-        "notifications": "Notifications"
-      },
+      "tabs": {"label": "Event sections", "content": "Content", "attendees": "Attendees", "orders": "Orders and refunds", "notifications": "Notifications"},
       "searchOrders": "Order search",
       "searchSubmit": "Search",
       "nextPage": "Next page",
@@ -4669,8 +4167,7 @@
           "expired": "Expired",
           "failed": "Failed",
           "refunded": "Refunded",
-          "refund_failed": "Refund failed — staff follow-up needed",
-          "refund_pending": "Refund awaiting provider confirmation"
+          "refund_failed": "Refund failed — staff follow-up needed", "refund_pending": "Refund awaiting provider confirmation"
         },
         "refundOutcomes": {
           "refunded": "Refunded.",
@@ -4720,72 +4217,21 @@
       "error": "Something went wrong. Try again."
     },
     "partners": {
-      "eyebrow": "Partner operations",
-      "title": "General partners",
-      "description": "Manage bilingual partner records, relationship approval, logo rights and publication separately.",
-      "existing": "All partners",
-      "empty": "No partners yet.",
-      "nameEn": "Name (English)",
-      "nameZhHk": "Name (Traditional Chinese)",
-      "category": "Category",
-      "category_supporting": "Supporting",
-      "category_media": "Media",
-      "category_regional": "Regional",
-      "category_programme": "Programme",
-      "category_sponsor": "Sponsor",
-      "websiteUrl": "HTTPS website",
-      "logoMediaId": "Approved logo",
-      "noLogo": "No logo",
-      "displayOrder": "Display order",
-      "featured": "Featured",
-      "relationshipStartsOn": "Relationship starts",
-      "relationshipEndsOn": "Relationship ends",
-      "relationshipConfirmed": "Relationship confirmed",
-      "logoRightsConfirmed": "Logo rights confirmed",
-      "statusDraft": "Draft",
-      "statusPublished": "Published",
-      "statusArchived": "Archived",
-      "publish": "Publish",
-      "unpublish": "Unpublish",
-      "archive": "Archive",
-      "unarchive": "Restore",
-      "save": "Save partner",
-      "saving": "Saving…",
-      "createSuccess": "Partner created.",
-      "updateSuccess": "Partner updated.",
-      "validation": "Check the highlighted partner fields.",
-      "error": "We could not save this partner. Try again."
+      "eyebrow": "Partner operations", "title": "General partners", "description": "Manage bilingual partner records, relationship approval, logo rights and publication separately.",
+      "existing": "All partners", "empty": "No partners yet.", "nameEn": "Name (English)", "nameZhHk": "Name (Traditional Chinese)",
+      "category": "Category", "category_supporting": "Supporting", "category_media": "Media", "category_regional": "Regional", "category_programme": "Programme", "category_sponsor": "Sponsor",
+      "websiteUrl": "HTTPS website", "logoMediaId": "Approved logo", "noLogo": "No logo", "displayOrder": "Display order", "featured": "Featured",
+      "relationshipStartsOn": "Relationship starts", "relationshipEndsOn": "Relationship ends", "relationshipConfirmed": "Relationship confirmed", "logoRightsConfirmed": "Logo rights confirmed",
+      "statusDraft": "Draft", "statusPublished": "Published", "statusArchived": "Archived", "publish": "Publish", "unpublish": "Unpublish", "archive": "Archive", "unarchive": "Restore",
+      "save": "Save partner", "saving": "Saving…", "createSuccess": "Partner created.", "updateSuccess": "Partner updated.", "validation": "Check the highlighted partner fields.", "error": "We could not save this partner. Try again."
     },
     "landingPartners": {
-      "eyebrow": "Launch Pad operations",
-      "title": "Launch Pad partners",
-      "description": "Keep negotiation details private and publish only signed, approved records.",
-      "existing": "All Launch Pad partners",
-      "empty": "No Launch Pad partners yet.",
-      "organizationEn": "Organisation (English)",
-      "organizationZhHk": "Organisation (Traditional Chinese)",
-      "market": "Market",
-      "region": "Region",
-      "mouStatus": "MOU status",
-      "mou_prospect": "Prospect",
-      "mou_in_discussion": "In discussion",
-      "mou_signed": "Signed",
-      "mou_inactive": "Inactive",
-      "contactJson": "Private contact JSON",
-      "notes": "Private negotiation notes",
-      "statusDraft": "Draft",
-      "statusPublished": "Published",
-      "statusArchived": "Archived",
-      "publish": "Publish",
-      "unpublish": "Unpublish",
-      "archive": "Archive",
-      "unarchive": "Restore",
-      "save": "Save Launch Pad partner",
-      "saving": "Saving…",
-      "createSuccess": "Launch Pad partner created.",
-      "updateSuccess": "Launch Pad partner updated.",
-      "validation": "Check the highlighted Launch Pad partner fields.",
-      "error": "We could not save this Launch Pad partner. Try again."
+      "eyebrow": "Launch Pad operations", "title": "Launch Pad partners", "description": "Keep negotiation details private and publish only signed, approved records.",
+      "existing": "All Launch Pad partners", "empty": "No Launch Pad partners yet.", "organizationEn": "Organisation (English)", "organizationZhHk": "Organisation (Traditional Chinese)",
+      "market": "Market", "region": "Region", "mouStatus": "MOU status", "mou_prospect": "Prospect", "mou_in_discussion": "In discussion", "mou_signed": "Signed", "mou_inactive": "Inactive",
+      "contactJson": "Private contact JSON", "notes": "Private negotiation notes", "statusDraft": "Draft", "statusPublished": "Published", "statusArchived": "Archived",
+      "publish": "Publish", "unpublish": "Unpublish", "archive": "Archive", "unarchive": "Restore", "save": "Save Launch Pad partner", "saving": "Saving…",
+      "createSuccess": "Launch Pad partner created.", "updateSuccess": "Launch Pad partner updated.", "validation": "Check the highlighted Launch Pad partner fields.", "error": "We could not save this Launch Pad partner. Try again."
     },
     "media": {
       "statusArchived": "Archived",
@@ -4949,6 +4395,7 @@
       "renewalBatch": "Review renewal batch",
       "workflowHelp": "Review the outreach draft first. Approval records a human decision. Then prepare a renewal batch with current payment, membership and consent checks; campaign review and sending remain separate.",
       "stale": "Membership or consent has changed. Reload the current facts before deciding.",
+
       "eyebrow": "Approval queue",
       "title": "Pending approvals",
       "description": "Review trusted application requests and record one decision without executing the payload.",
@@ -5086,12 +4533,7 @@
         "description": "How leads move from first contact to paid membership, by source and owner, and how well invitations convert.",
         "back": "Back to reports",
         "windowLabel": "Reporting window",
-        "window": {
-          "30": "Last 30 days",
-          "90": "Last 90 days",
-          "180": "Last 180 days",
-          "all": "All time"
-        },
+        "window": {"30": "Last 30 days", "90": "Last 90 days", "180": "Last 180 days", "all": "All time"},
         "windowNote": "Leads are counted by the date they were created; invites by the date they were sent.",
         "unavailable": "The lead report is unavailable right now. Nothing below is shown because zeros would be misleading; try again shortly.",
         "funnelHeading": "Funnel by source",
@@ -5100,22 +4542,8 @@
         "totalColumn": "Leads",
         "memberRate": "Became members",
         "emptyFunnel": "No leads in this window.",
-        "stage": {
-          "new": "New",
-          "contacted": "Contacted",
-          "qualified": "Qualified",
-          "applied": "Applied",
-          "member": "Member",
-          "closed": "Closed"
-        },
-        "source": {
-          "whatsapp": "WhatsApp",
-          "event_guest": "Event guest",
-          "showcase_intro": "Showcase intro",
-          "join_abandoned": "Abandoned join",
-          "interest_form": "Interest form",
-          "import": "Import"
-        },
+        "stage": {"new": "New", "contacted": "Contacted", "qualified": "Qualified", "applied": "Applied", "member": "Member", "closed": "Closed"},
+        "source": {"whatsapp": "WhatsApp", "event_guest": "Event guest", "showcase_intro": "Showcase intro", "join_abandoned": "Abandoned join", "interest_form": "Interest form", "import": "Import"},
         "ownersHeading": "Results by owner",
         "ownersCaption": "Leads, invitations and conversions per owner",
         "ownerColumn": "Owner",
@@ -5140,12 +4568,7 @@
         "joinedColumn": "Joined",
         "countColumn": "Members",
         "emptyPlans": "No paid invitations in this window.",
-        "plan": {
-          "community": "Community",
-          "startup": "Startup",
-          "corporate": "Corporate",
-          "patron": "Patron"
-        },
+        "plan": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
         "estimateHeading": "Attributed first-year fees",
         "estimateLabel": "Estimate",
         "estimateNote": "Joined plans at their annual list price for the first year. Not reconciled with Stripe, so do not read it as booked revenue."
@@ -5199,20 +4622,8 @@
       "purchaseAmount": "Amount",
       "refundReason": "Refund reason",
       "refundedAt": "Refunded at",
-      "purchaseStatuses": {
-        "pending": "Pending",
-        "paid": "Paid",
-        "expired": "Expired",
-        "failed": "Failed",
-        "refunded": "Refunded",
-        "refund_failed": "Refund failed",
-        "refund_pending": "Refund awaiting provider confirmation"
-      },
-      "refundReasons": {
-        "oversold": "Oversold",
-        "staff": "Staff decision",
-        "cancelled": "Event cancelled"
-      },
+      "purchaseStatuses": {"pending": "Pending", "paid": "Paid", "expired": "Expired", "failed": "Failed", "refunded": "Refunded", "refund_failed": "Refund failed", "refund_pending": "Refund awaiting provider confirmation"},
+      "refundReasons": {"oversold": "Oversold", "staff": "Staff decision", "cancelled": "Event cancelled"},
       "backToMembers": "Back to member list",
       "historyNav": "Member history",
       "overview": "Overview",
