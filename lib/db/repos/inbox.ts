@@ -142,7 +142,7 @@ const queueStaffMessageSchema = z
     kind: z.enum(["session", "template"]),
     content: z.string().trim().min(1).max(4_096),
     templateKey: z.string().trim().min(1).max(120).nullable().default(null),
-    templateVariables: z.record(z.string().max(1_000)).default({}),
+    templateVariables: z.record(z.string(), z.string().max(1_000)).prefault({}),
     outboundKey: outboundKeySchema,
   })
   .strict()

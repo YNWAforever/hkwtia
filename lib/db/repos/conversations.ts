@@ -82,8 +82,8 @@ const appendMessageInputSchema = z.object({
   channel: z.enum(["web", "whatsapp"]),
   content: z.string().min(1).max(50_000),
   providerMessageId: z.string().min(1).max(255).nullish(),
-  metadata: z.record(z.unknown()).optional(),
-  citations: z.array(z.record(z.unknown())).max(50).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  citations: z.array(z.record(z.string(), z.unknown())).max(50).optional(),
 }).strict();
 const startAgentTurnInputSchema = z.object({
   startedAt: z.date()

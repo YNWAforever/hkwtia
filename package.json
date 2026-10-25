@@ -42,7 +42,7 @@
     "@ai-sdk/anthropic": "^4.0.21",
     "@ai-sdk/openai": "^4.0.20",
     "@aws-sdk/client-s3": "^3.1120.0",
-    "@hookform/resolvers": "^3.10.0",
+    "@hookform/resolvers": "^5.9.2",
     "@neondatabase/auth": "^0.5.0-beta",
     "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -103,7 +103,7 @@
     "sonner": "^1.7.4",
     "stripe": "^22.3.1",
     "tailwind-merge": "^2.6.0",
-    "zod": "^3.25.76"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
@@ -138,12 +138,25 @@
   "overrides": {
     "@neondatabase/auth-ui@0.3.0-beta": {
       "@better-auth/core": "1.6.23",
-      "@daveyplate/better-auth-ui": "3.3.15"
+      "@daveyplate/better-auth-ui": "3.3.15",
+      "zod": "^4.6.7"
     },
     "picomatch@2": "^2.3.2",
     "exceljs": {
       "uuid": "11.1.1"
     },
-    "fast-uri": "3.1.7"
+    "fast-uri": "3.1.7",
+    "vite": "^7.3.7",
+    "@lhci/cli": {
+      "proxy-addr": "^2.0.8",
+      "body-parser": "^1.20.9",
+      "compression": "^1.8.2"
+    },
+    "js-yaml@3": "^3.15.2",
+    "js-yaml@4": "^4.3.2",
+    "browserslist": "^4.28.7",
+    "@neondatabase/auth": {
+      "zod": "^4.6.7"
+    }
   }
 }

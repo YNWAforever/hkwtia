@@ -1,3 +1,4 @@
+import {partialUpdate} from "@/lib/validation/partial-update";
 import "server-only";
 import {and, asc, desc, eq, isNotNull, isNull} from "drizzle-orm";
 import {z} from "zod";
@@ -8,8 +9,8 @@ import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 const idSchema = z.string().uuid();
 const text = (max: number) => z.string().transform((value) => value.trim()).refine((value) => Array.from(value).length >= 1 && Array.from(value).length <= max, "LANDING_PARTNER_TEXT_INVALID");
-const inputObject = z.object({organizationEn: text(160), organizationZhHk: text(160), market: text(120), region: text(120), mouStatus: z.enum(["prospect", "in_discussion", "signed", "inactive"]), contact: z.record(z.unknown()).default({}), notes: z.union([z.string().trim().max(5000), z.null()]).optional().transform((value) => value || null)}).strict();
-const inputSchema = inputObject; const updateSchema = inputObject.partial().refine((value) => Object.keys(value).length > 0, "LANDING_PARTNER_UPDATE_EMPTY");
+const inputObject = z.object({organizationEn: text(160), organizationZhHk: text(160), market: text(120), region: text(120), mouStatus: z.enum(["prospect", "in_discussion", "signed", "inactive"]), contact: z.record(z.string(), z.unknown()).prefault({}), notes: z.union([z.string().trim().max(5000), z.null()]).optional().transform((value) => value || null)}).strict();
+const inputSchema = inputObject; const updateSchema = partialUpdate(inputObject).refine((value) => Object.keys(value).length > 0, "LANDING_PARTNER_UPDATE_EMPTY");
 type Input = z.output<typeof inputSchema>; type Patch = z.output<typeof updateSchema>;
 type Audit = Readonly<{actorUserId: string; actorType: AdminActor["kind"]; action: `landing_partner.${"created" | "updated" | "published" | "unpublished" | "archived" | "unarchived"}`; targetType: "landing_partner"; targetId: string; metadata: Record<string, unknown>}>;
 export type LandingPartnerMutationDependencies = Readonly<{transaction: <T>(work: (tx: Readonly<{insertPartner: (input: Input) => Promise<LandingPartner>; lockPartner: (id: string) => Promise<LandingPartner | null>; updatePartner: (id: string, input: Patch) => Promise<LandingPartner | null>; setPublishedAt: (id: string, value: Date | null) => Promise<LandingPartner | null>; setArchivedAt: (id: string, value: Date | null) => Promise<LandingPartner | null>; insertAudit: (input: Audit) => Promise<void>}>) => Promise<T>) => Promise<T>}>;

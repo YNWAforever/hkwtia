@@ -7,7 +7,7 @@ import {MEMBERSHIP_PLAN_CODES} from "@/lib/membership/constants";
 const stringList = z.array(z.string().min(1)).max(20).default([]);
 const profileIdList = z.array(z.string().trim().min(1).max(200)).max(20).default([]);
 
-function nullableNumber(schema: z.ZodNumber) {
+function nullableNumber(schema: z.ZodType<number>) {
   return z.preprocess((value) => typeof value === "string" && value.trim() === "" ? null : value, schema.nullable().default(null));
 }
 

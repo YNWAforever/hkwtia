@@ -218,7 +218,7 @@ export const createCampaignDraftSchema = z.object({
   channel: z.enum(["email", "whatsapp"]),
   template: z.string().trim().min(1).max(100).nullable().default(null),
   templateKey: z.string().trim().min(1).max(100).nullable().default(null),
-  variablesTemplate: z.record(z.string().trim().min(1).max(1_000)).default({}),
+  variablesTemplate: z.record(z.string(), z.string().trim().min(1).max(1_000)).prefault({}),
 }).strict().superRefine((value, context) => {
   // The same two rules `campaigns_email_template_check` and
   // `campaigns_whatsapp_template_check` state in the database, refused here so

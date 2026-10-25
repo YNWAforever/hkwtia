@@ -106,7 +106,7 @@ const claimCommon = {
   id: z.string().uuid(),
   campaign_id: z.string().uuid(),
   locale: z.enum(["en", "zh-HK"]),
-  variables: z.record(z.string()),
+  variables: z.record(z.string(), z.string()),
   status: z.literal("processing"),
   attempt_count: z.coerce.number().int().positive(),
   claimed_at: z.coerce.date(),

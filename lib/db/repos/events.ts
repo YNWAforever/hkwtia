@@ -1,3 +1,4 @@
+import {partialUpdate} from "@/lib/validation/partial-update";
 import "server-only";
 import {memberUpcomingPredicate} from "@/lib/db/repos/portal-paging";
 
@@ -96,7 +97,7 @@ function assertSupportedTicketVisibility(mode: string, visibility: EventVisibili
   }
 }
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
-const eventUpdateSchema = eventInputObjectSchema.partial().superRefine((input, context) => {
+const eventUpdateSchema = partialUpdate(eventInputObjectSchema).superRefine((input, context) => {
   if (Object.keys(input).length === 0) context.addIssue({code: z.ZodIssueCode.custom, message: "event update is empty"});
   addEventShapeIssues(input, context);
 });

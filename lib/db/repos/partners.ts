@@ -1,3 +1,4 @@
+import {partialUpdate} from "@/lib/validation/partial-update";
 import "server-only";
 
 import {and, asc, desc, eq, getTableColumns, gte, isNotNull, isNull, lte, or, sql} from "drizzle-orm";
@@ -18,7 +19,7 @@ const optionalId = z.union([z.literal(""), z.null(), z.undefined()]).transform((
 const optionalDate = z.union([z.literal(""), z.null(), z.undefined()]).transform(() => null).or(dateSchema);
 const partnerObject = z.object({nameEn: text(160), nameZhHk: text(160), category: z.enum(["supporting", "media", "regional", "programme", "sponsor"]), websiteUrl: optionalWebsite, logoMediaId: optionalId, displayOrder: z.number().int().min(0).max(10000), featured: z.boolean(), relationshipStartsOn: optionalDate, relationshipEndsOn: optionalDate, relationshipConfirmed: z.boolean().optional(), logoRightsConfirmed: z.boolean().optional()}).strict();
 const partnerInputSchema = partnerObject.superRefine((value, context) => { if (value.relationshipStartsOn && value.relationshipEndsOn && value.relationshipEndsOn < value.relationshipStartsOn) context.addIssue({code: z.ZodIssueCode.custom, path: ["relationshipEndsOn"], message: "PARTNER_RELATIONSHIP_WINDOW_INVALID"}); });
-const partnerUpdateSchema = partnerObject.partial().refine((value) => Object.keys(value).length > 0, "PARTNER_UPDATE_EMPTY");
+const partnerUpdateSchema = partialUpdate(partnerObject).refine((value) => Object.keys(value).length > 0, "PARTNER_UPDATE_EMPTY");
 
 type PartnerInput = z.output<typeof partnerInputSchema>;
 type PartnerWrite = Omit<PartnerInput, "relationshipConfirmed" | "logoRightsConfirmed"> & {relationshipConfirmedAt: Date | null; logoRightsConfirmedAt: Date | null};
