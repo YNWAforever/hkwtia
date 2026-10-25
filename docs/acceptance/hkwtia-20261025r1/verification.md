@@ -17,3 +17,7 @@ T22-03: observed red `expected false to be true` on submitted parser acceptance 
 T22-05: observed red 5 vs 4 plan articles before moving assistant out. Comparison uses four-column responsive grid, independent unnumbered help, catalog seats and a hero comparison anchor. Existing unavailable/partial catalog behavior remains. Structural comparison labels excluded from CMS; existing editable count retained. Focused membership tests rerun. Browser visual matrix remains BLOCKED pending usable browser and a source-verified preview with populated catalog; jsdom is not visual evidence.
 
 T22-01 initial audits: omit-dev 4 high/0 critical; full 20 high/1 critical (JSON captured separately). Join ownership/profile/recovery: 3 files/23 tests PASS. Next remains 16.4.3. No prior audit result reused.
+
+R2 T22-04A offline start: member projection boundary implemented test-first. Observed four intended failures (staff sentinel exposure, draft visibility, other-applicant authorization, explicit projection). Seven unit cases then pass. No service writes/schema/migration wired: verified target is still absent. Transaction/receipt/concurrency/real identity acceptance remain BLOCKED. This is partial implementation, not completed supplements.
+
+Fixture cleanup search: `rg -n r20261025a --glob '!package-lock.json' .` returned no matches before this note. No matching fixtures/manifests deleted.
