@@ -21,3 +21,11 @@ T22-01 initial audits: omit-dev 4 high/0 critical; full 20 high/1 critical (JSON
 R2 T22-04A offline start: member projection boundary implemented test-first. Observed four intended failures (staff sentinel exposure, draft visibility, other-applicant authorization, explicit projection). Seven unit cases then pass. No service writes/schema/migration wired: verified target is still absent. Transaction/receipt/concurrency/real identity acceptance remain BLOCKED. This is partial implementation, not completed supplements.
 
 Fixture cleanup search: `rg -n r20261025a --glob '!package-lock.json' .` returned no matches before this note. No matching fixtures/manifests deleted.
+
+Zod migration follows https://zod.dev/v4/changelog (read this run): explicit record key schemas, prefault for parsed object defaults, coercion input typing and partial patch omission preservation. Existing event write tests exposed the unwanted defaults; dedicated helper regression added. No boundary assertions weakened. Clean install completed with Node 22.23.4/npm 10.9.9; npm pruned canonical optional Ajv metadata, restored per existing CI contract. Initial interrupted full-suite runs are not claimed as passes; final results recorded below.
+
+Browser capability rechecked: Playwright Chromium downloaded and `chromium.launch()` succeeded. No verified populated catalog preview/session/DB target supplied; full visual matrix remains BLOCKED (not a browser installation failure). No provider/production connection used to populate it.
+
+T22-03 strengthened: SQL adapter unit test renders real Drizzle predicates for both dashboard and queue over six synthetic rows and compares exact review/payment UUIDs. Focused queue suite: 4 files/9 tests PASS. Still not live PostgreSQL evidence.
+
+Dependency follow-up: final omit-dev high gate PASS (11 moderate/0 high/0 critical); full-tree gate FAIL (2 low/18 moderate/13 high/0 critical), retained as accepted dev-only LHCI exception with owner/deadline/path/exposure in dependency-disposition.md. No CI severity change. Browser Chromium launch PASS is capability evidence only.
