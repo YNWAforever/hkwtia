@@ -189,14 +189,10 @@ export default async function MembershipPage({ params }: Props) {
         title={t("title")}
         actions={[{href: "#plans", label: t("compare.action")}]}
       />
-      <Section labelledBy="membership-self-service-title">
-        <h2 id="membership-self-service-title">{t("selfService.title")}</h2>
-        <p>{t("selfService.copy")}</p>
-        <div className="mt-6 flex flex-wrap gap-5">
-          <ActionLink href="/portal/billing" prefetch={false} variant="text-link">{t("selfService.billing")}</ActionLink>
-          <ActionLink href="/contact" variant="text-link">{t("selfService.support")}</ActionLink>
-        </div>
-      </Section>
+      <nav aria-label={t("selfService.title")} className="shell flex flex-wrap items-center gap-5 py-6">
+        <ActionLink href="/portal/billing" prefetch={false} variant="text-link">{t("selfService.billing")}</ActionLink>
+        <ActionLink href="/contact" variant="text-link">{t("selfService.support")}</ActionLink>
+      </nav>
       <Suspense
         fallback={
           <div className="min-h-screen">
