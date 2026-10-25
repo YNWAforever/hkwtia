@@ -63,3 +63,36 @@ describe("billing page", () => {
     expect(await render({})).toContain("<h2>t:billing.planHeading</h2>");
   });
 });
+
+describe("billing page server action closure", () => {
+  // Vitest runs the page as plain JS, so an inline "use server" action closes
+  // over anything here. Next's compiler instead hoists it and binds only the
+  // values it detects; it did not bind the `for...of` loop binding, so Manage
+  // billing / Continue payment threw ReferenceError at runtime. Compile the page
+  // the way next-swc-loader does and check the hoisted action body.
+  it("binds every per-membership value the hoisted action uses", async () => {
+    const {createRequire} = await import("node:module");
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const require = createRequire(import.meta.url);
+    const swc = require("next/dist/build/swc/index.js");
+    const {getLoaderSWCOptions} = require("next/dist/build/swc/options.js");
+    const root = path.resolve(__dirname, "../..");
+    const filename = path.join(root, "app/[locale]/(member)/portal/billing/page.tsx");
+    await swc.loadBindings();
+    const options = getLoaderSWCOptions({
+      filename, development: true, isServer: true, serverComponents: true, bundleLayer: "rsc", esm: true,
+      appDir: path.join(root, "app"), pagesDir: undefined, isPageFile: true, configDir: root, hasReactRefresh: false,
+      relativeFilePathFromRoot: path.relative(root, filename), serverReferenceHashSalt: "", jsConfig: {compilerOptions: {}},
+      compilerOptions: {}, cacheHandlers: {}, useCacheEnabled: false, isCacheComponents: false, taintEnabled: false,
+      trackDynamicImports: false, swcPlugins: [], optimizePackageImports: [], optimizeServerReact: false, pageExtensions: ["tsx", "ts"],
+    });
+    const {code} = await swc.transform(fs.readFileSync(filename, "utf8"), {...options, filename, sourceMaps: false, sourceFileName: filename});
+    const bodies = [...code.matchAll(/\$\$RSC_SERVER_ACTION_\d+ = async function[\s\S]*?\n};/g)].map((match) => match[0]);
+    expect(bodies.length).toBeGreaterThan(0);
+    for (const body of bodies) {
+      expect(body).toContain("decryptActionBoundArgs");
+      expect(body).not.toMatch(/\bmembership\b/);
+    }
+  }, 120_000);
+});

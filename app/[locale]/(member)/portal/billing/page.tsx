@@ -39,19 +39,24 @@ export default async function BillingPage({params, searchParams}: Props) {
 
   for (const membership of summary.memberships) {
     if (membership.recovery !== "new_checkout" && membership.recovery !== "resume" && !membership.canViewHistory) continue;
-    actions[membership.id] = async () => {
+    // The server-action compiler does not capture `for...of` loop bindings, so
+    // the action closes over plain per-iteration constants instead. Both
+    // services below re-authorize the membership against the current actor.
+    const membershipId = membership.id;
+    const recovery = membership.recovery;
+    actions[membershipId] = async () => {
       "use server";
       const currentActor = await requireActor();
-      if(membership.recovery==="new_checkout"&&policyAcceptanceEnabled()){
-        const current=await membershipsRepository.getBillingAccess(currentActor,membership.id);
+      if(recovery==="new_checkout"&&policyAcceptanceEnabled()){
+        const current=await membershipsRepository.getBillingAccess(currentActor,membershipId);
         if(current.status!=="pending_payment"||current.stripeSubscriptionId)redirect(errorPath);
         redirect(localizedPath(locale,"/join/checkout")+"?membership_id="+encodeURIComponent(current.id));
       }
       let session: {url: string};
       try {
-        session = membership.recovery === "new_checkout"
-          ? await createCheckoutSession(currentActor, membership.id, locale)
-          : await createBillingPortalSession(currentActor, membership.id, locale);
+        session = recovery === "new_checkout"
+          ? await createCheckoutSession(currentActor, membershipId, locale)
+          : await createBillingPortalSession(currentActor, membershipId, locale);
       } catch {
         redirect(errorPath);
       }
