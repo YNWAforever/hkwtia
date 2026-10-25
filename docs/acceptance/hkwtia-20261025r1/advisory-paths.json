@@ -1,0 +1,751 @@
+[
+  {
+    "package": "@lhci/cli",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "@lhci/utils",
+      "inquirer",
+      "lighthouse",
+      "proxy-agent",
+      "tmp",
+      "uuid"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/@lhci/cli",
+        "initialVersion": "0.15.1",
+        "finalVersion": "0.15.1",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "@lhci/utils",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "lighthouse"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/@lhci/utils",
+        "initialVersion": "0.15.1",
+        "finalVersion": "0.15.1",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "@neondatabase/auth",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "@neondatabase/auth-ui",
+      "better-auth",
+      "zod"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/@neondatabase/auth",
+        "initialVersion": "0.5.0-beta",
+        "finalVersion": "0.5.0-beta",
+        "exposure": "see dependency-disposition and omit-dev graph"
+      }
+    ],
+    "auditSuggestedFix": {
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "@neondatabase/auth-ui",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "@neondatabase/auth",
+      "better-auth"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/@neondatabase/auth-ui",
+        "initialVersion": "0.3.0-beta",
+        "finalVersion": "0.3.0-beta",
+        "exposure": "see dependency-disposition and omit-dev graph"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "@puppeteer/browsers",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "extract-zip",
+      "proxy-agent"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/@puppeteer/browsers",
+        "initialVersion": "2.13.2",
+        "finalVersion": "2.13.2",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "basic-ftp",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1240853,
+        "name": "basic-ftp",
+        "dependency": "basic-ftp",
+        "title": "basic-ftp: Quadratic-time CPU denial of service in Client.list() Unix directory-listing parser (RE_LINE backtracking)",
+        "url": "https://github.com/advisories/GHSA-c475-qrg2-pj4r",
+        "severity": "high",
+        "cwe": [
+          "CWE-1333"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": "<=6.2.0"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/basic-ftp",
+        "initialVersion": "5.3.1",
+        "finalVersion": "5.3.1",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "body-parser",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1243073,
+        "name": "body-parser",
+        "dependency": "body-parser",
+        "title": "body-parser vulnerable to Denial of Service via trailing bytes after a compressed request body",
+        "url": "https://github.com/advisories/GHSA-27r3-jxmh-p828",
+        "severity": "high",
+        "cwe": [
+          "CWE-248"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": "<1.20.9"
+      }
+    ],
+    "propagatedVia": [
+      "qs"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/body-parser",
+        "initialVersion": "1.20.6",
+        "finalVersion": "1.20.9",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "browserslist",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1153171,
+        "name": "browserslist",
+        "dependency": "browserslist",
+        "title": "Browserslist: Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM",
+        "url": "https://github.com/advisories/GHSA-c83g-rgw3-j3cx",
+        "severity": "high",
+        "cwe": [
+          "CWE-770"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": "<=4.28.6"
+      },
+      {
+        "source": 1153172,
+        "name": "browserslist",
+        "dependency": "browserslist",
+        "title": "Browserslist: Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats)",
+        "url": "https://github.com/advisories/GHSA-73wf-gq98-2v4g",
+        "severity": "high",
+        "cwe": [
+          "CWE-248",
+          "CWE-1321"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": "<=4.28.6"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/browserslist",
+        "initialVersion": "4.25.1",
+        "finalVersion": "4.29.4",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "chromium-bidi",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "zod"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/chromium-bidi",
+        "initialVersion": "14.0.0",
+        "finalVersion": "14.0.0",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "compression",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1241221,
+        "name": "compression",
+        "dependency": "compression",
+        "title": "compression vulnerable to Denial of Service via memory leak on premature response close",
+        "url": "https://github.com/advisories/GHSA-vc2v-76pw-4v95",
+        "severity": "high",
+        "cwe": [
+          "CWE-401",
+          "CWE-459"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": "<1.8.2"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/compression",
+        "initialVersion": "1.8.1",
+        "finalVersion": "1.8.2",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "extract-zip",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1139346,
+        "name": "extract-zip",
+        "dependency": "extract-zip",
+        "title": "extract-zip unvalidated symlink path traversal",
+        "url": "https://github.com/advisories/GHSA-jmr9-qjv8-65gv",
+        "severity": "high",
+        "cwe": [
+          "CWE-22"
+        ],
+        "cvss": {
+          "score": 8.1,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N"
+        },
+        "range": "<=2.0.1"
+      },
+      {
+        "source": 1193685,
+        "name": "extract-zip",
+        "dependency": "extract-zip",
+        "title": "extract-zip allows arbitrary file writes through symlink archive entries",
+        "url": "https://github.com/advisories/GHSA-7pqw-9j4j-h8q3",
+        "severity": "high",
+        "cwe": [
+          "CWE-22"
+        ],
+        "cvss": {
+          "score": 8.1,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:H"
+        },
+        "range": "<=2.0.1"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/extract-zip",
+        "initialVersion": "2.0.1",
+        "finalVersion": "2.0.1",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "get-uri",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "basic-ftp"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/get-uri",
+        "initialVersion": "6.0.5",
+        "finalVersion": "6.0.5",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "js-yaml",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1193726,
+        "name": "js-yaml",
+        "dependency": "js-yaml",
+        "title": "js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources",
+        "url": "https://github.com/advisories/GHSA-2883-xcg3-v3hh",
+        "severity": "high",
+        "cwe": [
+          "CWE-400",
+          "CWE-407"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": ">=3.0.0 <3.15.2"
+      },
+      {
+        "source": 1193727,
+        "name": "js-yaml",
+        "dependency": "js-yaml",
+        "title": "js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources",
+        "url": "https://github.com/advisories/GHSA-2883-xcg3-v3hh",
+        "severity": "high",
+        "cwe": [
+          "CWE-400",
+          "CWE-407"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": ">=4.0.0 <4.3.2"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/@lhci/utils/node_modules/js-yaml",
+        "initialVersion": "3.15.1",
+        "finalVersion": "3.15.2",
+        "exposure": "dev tooling"
+      },
+      {
+        "path": "node_modules/js-yaml",
+        "initialVersion": "4.3.1",
+        "finalVersion": "4.3.2",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "lighthouse",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "puppeteer-core"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/lighthouse",
+        "initialVersion": "12.6.1",
+        "finalVersion": "12.6.1",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "pac-proxy-agent",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "get-uri"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/pac-proxy-agent",
+        "initialVersion": "7.2.0",
+        "finalVersion": "7.2.0",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "proxy-addr",
+    "severity": "critical",
+    "advisories": [
+      {
+        "source": 1241210,
+        "name": "proxy-addr",
+        "dependency": "proxy-addr",
+        "title": "proxy-addr vulnerable to IP spoofing via IPv4-mapped IPv6 trust subnet",
+        "url": "https://github.com/advisories/GHSA-jqcg-44mw-7w3h",
+        "severity": "critical",
+        "cwe": [
+          "CWE-290",
+          "CWE-348",
+          "CWE-697"
+        ],
+        "cvss": {
+          "score": 9.1,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N"
+        },
+        "range": ">=1.1.0 <2.0.8"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/proxy-addr",
+        "initialVersion": "2.0.7",
+        "finalVersion": "2.0.8",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "proxy-agent",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "pac-proxy-agent"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/proxy-agent",
+        "initialVersion": "6.5.0",
+        "finalVersion": "6.5.0",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "puppeteer-core",
+    "severity": "high",
+    "advisories": [],
+    "propagatedVia": [
+      "@puppeteer/browsers",
+      "chromium-bidi"
+    ],
+    "paths": [
+      {
+        "path": "node_modules/puppeteer-core",
+        "initialVersion": "24.43.1",
+        "finalVersion": "24.43.1",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "tmp",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1109537,
+        "name": "tmp",
+        "dependency": "tmp",
+        "title": "tmp allows arbitrary temporary file / directory write via symbolic link `dir` parameter",
+        "url": "https://github.com/advisories/GHSA-52f5-9888-hmc6",
+        "severity": "low",
+        "cwe": [
+          "CWE-59"
+        ],
+        "cvss": {
+          "score": 2.5,
+          "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N"
+        },
+        "range": "<=0.2.3"
+      },
+      {
+        "source": 1120654,
+        "name": "tmp",
+        "dependency": "tmp",
+        "title": "tmp has Path Traversal via unsanitized prefix/postfix that enables directory escape",
+        "url": "https://github.com/advisories/GHSA-ph9p-34f9-6g65",
+        "severity": "high",
+        "cwe": [
+          "CWE-22"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": "<0.2.6"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/external-editor/node_modules/tmp",
+        "initialVersion": "0.0.33",
+        "finalVersion": "0.0.33",
+        "exposure": "dev tooling"
+      },
+      {
+        "path": "node_modules/tmp",
+        "initialVersion": "0.1.0",
+        "finalVersion": "0.1.0",
+        "exposure": "dev tooling"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "@lhci/cli",
+      "version": "0.6.1",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "vite",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1242623,
+        "name": "vite",
+        "dependency": "vite",
+        "title": "launch-editor: escapeCmdArgs() omits % escaping on Windows",
+        "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv",
+        "severity": "moderate",
+        "cwe": [
+          "CWE-78"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": ">=7.0.0 <=7.3.6"
+      },
+      {
+        "source": 1242652,
+        "name": "vite",
+        "dependency": "vite",
+        "title": "launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors",
+        "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw",
+        "severity": "moderate",
+        "cwe": [
+          "CWE-88"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": ">=7.0.0 <=7.3.6"
+      },
+      {
+        "source": 1242659,
+        "name": "vite",
+        "dependency": "vite",
+        "title": "launch-editor: `fs.existsSync()` existence check can be bypassed on Windows",
+        "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm",
+        "severity": "high",
+        "cwe": [
+          "CWE-77"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": ">=7.0.0 <=7.3.6"
+      },
+      {
+        "source": 1242725,
+        "name": "vite",
+        "dependency": "vite",
+        "title": "Vite: Cross origin script execution through Vite custom middleware",
+        "url": "https://github.com/advisories/GHSA-9jrq-w75r-8gcw",
+        "severity": "low",
+        "cwe": [
+          "CWE-80"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": ">=7.0.0 <=7.3.6"
+      },
+      {
+        "source": 1242731,
+        "name": "vite",
+        "dependency": "vite",
+        "title": "Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine",
+        "url": "https://github.com/advisories/GHSA-rq7h-c2jc-7f22",
+        "severity": "moderate",
+        "cwe": [
+          "CWE-22",
+          "CWE-284"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "range": ">=7.0.0 <=7.3.6"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/vite",
+        "initialVersion": "7.3.6",
+        "finalVersion": "7.3.7",
+        "exposure": "see dependency-disposition and omit-dev graph"
+      }
+    ],
+    "auditSuggestedFix": true,
+    "disposition": "see final audit and dependency-disposition.md"
+  },
+  {
+    "package": "zod",
+    "severity": "high",
+    "advisories": [
+      {
+        "source": 1243066,
+        "name": "zod",
+        "dependency": "zod",
+        "title": "Zod can exhaust memory while validating oversized constrained collections",
+        "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+        "severity": "high",
+        "cwe": [
+          "CWE-770"
+        ],
+        "cvss": {
+          "score": 7.5,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        },
+        "range": "<4.6.6"
+      }
+    ],
+    "propagatedVia": [],
+    "paths": [
+      {
+        "path": "node_modules/@neondatabase/auth-ui/node_modules/zod",
+        "initialVersion": "4.4.3",
+        "finalVersion": "4.6.7",
+        "exposure": "see dependency-disposition and omit-dev graph"
+      },
+      {
+        "path": "node_modules/@neondatabase/auth/node_modules/zod",
+        "initialVersion": "4.3.6",
+        "finalVersion": "4.6.7",
+        "exposure": "see dependency-disposition and omit-dev graph"
+      },
+      {
+        "path": "node_modules/zod",
+        "initialVersion": "3.25.76",
+        "finalVersion": "4.6.7",
+        "exposure": "see dependency-disposition and omit-dev graph"
+      }
+    ],
+    "auditSuggestedFix": {
+      "name": "zod",
+      "version": "4.6.7",
+      "isSemVerMajor": true
+    },
+    "disposition": "see final audit and dependency-disposition.md"
+  }
+]

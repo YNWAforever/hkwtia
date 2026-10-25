@@ -1,0 +1,128 @@
+{
+  "sourceHead": "d10fddc06bf3e3c694bd783b4c86f15aaf37dd17",
+  "testedTreeFingerprint": "git-tree:ba4a6d2a4390c11bdd4cb3a217d2b73327d40347",
+  "testedTreeNote": "Only acceptance documentation was dirty during final checks. Build generated next-env.d.ts paths were restored; no product behavior changed afterward.",
+  "environment": {
+    "node": "22.23.4",
+    "npm": "10.9.9",
+    "nodeOptions": "--max-old-space-size=4096",
+    "database": "No verified isolated target; no client/migration/seed invoked",
+    "browser": "Chromium launch works; Preview redirects to Vercel SSO"
+  },
+  "pr": "https://github.com/YNWAforever/hkwtia/pull/212",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "base": "wtia/five-role-acceptance-20261025",
+  "commands": [
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "actual": "7877 passed; 643 skipped; 893 files passed, 113 skipped; no unhandled errors"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "actual": "Next 16.4.3 production build passed"
+    },
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "actual": "strict TypeScript"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "actual": "0 errors; 77 warnings"
+    },
+    {
+      "command": "npm run audit:strings",
+      "exitCode": 0,
+      "actual": "visible string parity/audit"
+    },
+    {
+      "command": "npm --prefix workers run typecheck",
+      "exitCode": 0,
+      "actual": "worker typecheck"
+    },
+    {
+      "command": "npm --prefix workers test",
+      "exitCode": 0,
+      "actual": "57 passed"
+    },
+    {
+      "command": "npm audit --omit=dev --audit-level=high",
+      "exitCode": 0,
+      "actual": "11 moderate; 0 high; 0 critical"
+    },
+    {
+      "command": "npm audit --audit-level=high",
+      "exitCode": 1,
+      "actual": "2 low; 18 moderate; 13 high; 0 critical; accepted dev-only LHCI exception"
+    }
+  ],
+  "focused": {
+    "T22-03": "9 tests pass; mutation control 2 fail then 5 pass after restore",
+    "T22-05": "32 tests pass including actual next-intl EN/ZH links; CMS Membership=114 keys",
+    "T22-01": "23 join ownership/profile/recovery tests pass; 34 Zod/event/CI tests pass",
+    "R2-T22-04A": "7 supplement projection tests pass; 4 intended failures before fix",
+    "mobile-navigation": "7 pass after deferred focus cleanup fix",
+    "stacked-CI-patch": "14 pass with patch; patch unapplied due OAuth workflow-scope rejection"
+  },
+  "tasks": {
+    "P00": {
+      "code": "implemented",
+      "tests": "pass",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "not-tested"
+    },
+    "T22-03": {
+      "code": "implemented",
+      "tests": "pass",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "blocked"
+    },
+    "T22-05": {
+      "code": "implemented",
+      "tests": "pass",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "blocked"
+    },
+    "T22-01": {
+      "code": "implemented",
+      "tests": "pass",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "blocked"
+    },
+    "T-MP12A": {
+      "code": "documented; provider contract UNKNOWN",
+      "tests": "blocked",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "blocked"
+    },
+    "T22-02": {
+      "code": "not-started",
+      "tests": "blocked",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "blocked"
+    },
+    "R2-T22-04A": {
+      "code": "partial: member projection only",
+      "tests": "pass",
+      "deployment": "no promotion; automatic Preview exists for earlier pushed head, final-head runtime not verified",
+      "runtime": "blocked"
+    }
+  },
+  "blockers": [
+    "T22-02: current isolated Neon/Auth/Stripe/sink identities not verified; no production-restricted seed attempted",
+    "T22-03: staff UI and real PostgreSQL exact-ID readback blocked by T22-02",
+    "T22-05: source-verified preview requires Vercel SSO; four-width/zoom/keyboard/reduced-motion matrix blocked",
+    "T-MP12A/B: provider token semantics UNKNOWN; sandbox unavailable",
+    "Remote quality: stacked base excluded by workflow; GitHub rejects workflow changes without workflow scope; tested patch saved but unapplied"
+  ],
+  "fixtureCleanup": "No r20261025a data/fixture/manifest found; no deletions invented",
+  "remainingR2": [
+    "T22-04A persistence/schema/transaction/audit/receipts/concurrency after isolated target verified",
+    "T22-04B member/staff supplement UI and real identity round trip",
+    "T22-06 SQL pagination/detail ownership preserving existing listOwned callers",
+    "Approved resources/policy, staff navigation research, mobile/date/performance and existing-scope UAT"
+  ]
+}

@@ -1,0 +1,32 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index ca4ae6da..4314c154 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -2,7 +2,7 @@ name: CI
+ 
+ on:
+   pull_request:
+-    branches: [main, release, "codex/full-remediation-*"]
++    branches: [main, release, "codex/full-remediation-*", "wtia/five-role-acceptance-20261025"]
+   push:
+     branches: [main, release]
+ 
+diff --git a/tests/unit/ci-security-contract.test.ts b/tests/unit/ci-security-contract.test.ts
+index 193aca38..f70edd43 100644
+--- a/tests/unit/ci-security-contract.test.ts
++++ b/tests/unit/ci-security-contract.test.ts
+@@ -200,6 +200,14 @@ function runAuthTreeCheck(cwd: string, options: AuthTreeProcessOptions = {}) {
+ }
+ 
+ describe("CI and production dependency security contract", () => {
++  it("runs unchanged gates for the authorized stacked PR base", () => {
++    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
++    const branches = workflow.match(/pull_request:\s*branches: \[([^\]]+)\]/)?.[1];
++    expect(branches, "pull_request must declare its accepted bases").toBeDefined();
++    const accepted = branches!.split(",").map(value => value.trim().replaceAll('"', ""));
++    expect(accepted).toEqual(expect.arrayContaining(["main", "release", "wtia/five-role-acceptance-20261025"]));
++  });
++
+   it("declares scoped patched production dependency constraints", () => {
+     const packageJson = readJson("package.json");
+     const overrides = packageJson.overrides as Record<string, string | Record<string, string>>;
