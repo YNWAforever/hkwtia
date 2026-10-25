@@ -144,6 +144,7 @@ export default async function MembershipPage({ params }: Props) {
         {tiers.length > 0 ? (
           <>
             <PlanGrid
+              labels={{audience: t("compare.audience"), fee: t("compare.fee"), uses: t("compare.uses"), next: t("compare.next")}}
               sme={{
                 label: t("sme.label"),
                 title: t("sme.title"),
