@@ -69,6 +69,6 @@ export function isPublicRoute(value: unknown): value is PublicRoute {
 
 /** Runtime loading/failure messages are product state, outside the agreed CMS copy surface. */
 export function isPageCopyKeyEditable(namespace: string, keyPath: string): boolean {
-  if (namespace === "Membership" && keyPath.startsWith("selfService.")) return false;
+  if (namespace === "Membership" && (keyPath.startsWith("selfService.") || keyPath.startsWith("compare."))) return false;
   return namespace !== "Home" || (keyPath !== "openNow.loading" && !keyPath.startsWith("openNow.unavailable."));
 }

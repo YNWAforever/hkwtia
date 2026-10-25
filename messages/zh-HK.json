@@ -804,6 +804,7 @@
     }
   },
   "Membership": {
+    "compare": {"action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
     "metaTitle": "會員計劃｜WiseTech Hong Kong",
     "metaDescription": "比較 WTIA 會員級別及權益。",

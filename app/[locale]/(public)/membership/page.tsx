@@ -1,3 +1,4 @@
+import {PLAN_CATALOG} from "@/lib/membership/plans";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AwaitReadModel } from "@/components/server/await-read-model";
@@ -119,6 +120,7 @@ export default async function MembershipPage({ params }: Props) {
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
       priceLines: priceLines(tier.price, labels),
+      seatLabel: t("compare.seats", {count: PLAN_CATALOG[tier.code].seatAllowance}),
       // Programme D-5: the copy for each tier's real entitlements lives in the
       // bundle beside lib/membership/entitlements.ts; the old shared triple
       // said the same thing about every tier, which sells nothing.
@@ -184,6 +186,7 @@ export default async function MembershipPage({ params }: Props) {
         eyebrow={t("eyebrow")}
         lead={t("summary")}
         title={t("title")}
+        actions={[{href: "#plans", label: t("compare.action")}]}
       />
       <Section labelledBy="membership-self-service-title">
         <h2 id="membership-self-service-title">{t("selfService.title")}</h2>

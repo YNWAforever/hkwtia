@@ -6,6 +6,7 @@ export type PlanGridTier = Readonly<{
   name: string;
   description: string;
   priceLines: readonly string[];
+  seatLabel?: string;
   benefits: readonly string[];
   action: string;
   href: string;
@@ -13,25 +14,25 @@ export type PlanGridTier = Readonly<{
 
 export type PlanGridSme = Readonly<{label: string; title: string; copy: string; action: string; href: string}>;
 
-// `.plan-grid article:nth-child(5)` auto-styles the fifth card dark -- the SME card is simply
-// rendered fifth, in DOM order, so it needs no class of its own to be visually distinct (D-7).
 export function PlanGrid({tiers, sme}: Readonly<{tiers: readonly PlanGridTier[]; sme: PlanGridSme}>) {
-  return <div className="plan-grid">
+  return <><div className="plan-grid">
     {tiers.map((tier, index) => (
       <article id={tier.code} key={tier.code}>
         <CardIndex index={index + 1} />
         <h2>{tier.name}</h2>
         {tier.priceLines.map((line) => <p key={line}>{line}</p>)}
         <p>{tier.description}</p>
+        {tier.seatLabel ? <p>{tier.seatLabel}</p> : null}
         <ul>{tier.benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
         <ActionLink href={tier.href} variant="text-link">{tier.action}</ActionLink>
       </article>
     ))}
-    <article>
-      <CardIndex index={tiers.length + 1} />
+  </div>
+    <aside className="membership-plan-assistant">
+      <p>{sme.label}</p>
       <h2>{sme.title}</h2>
       <p>{sme.copy}</p>
       <ActionLink href={sme.href} variant="text-link">{sme.action}</ActionLink>
-    </article>
-  </div>;
+    </aside>
+  </>;
 }

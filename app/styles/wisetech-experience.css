@@ -1357,3 +1357,14 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .inner-card-grid:has(> :last-child:nth-child(6)),
   nav.programme-groupings:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* Four comparable memberships; decision help is a separate, unnumbered panel. */
+.plan-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.plan-grid article { min-width: 0; overflow-wrap: anywhere; }
+.plan-grid .card-index { margin-bottom: 28px; }
+.membership-plan-assistant { margin-top: 24px; padding: 28px; border: 1px solid var(--wt-line); }
+.membership-plan-assistant h2 { font-size: 28px; margin-block: 12px; }
+.membership-plan-assistant .text-link { margin-top: 20px; }
+@media (max-width: 1120px) { .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .plan-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .plan-grid article { transition: none; } .plan-grid article:hover { transform: none; } }
