@@ -11,3 +11,5 @@ P00 records the initial checkout in baseline.json. Historical local PASS is not 
 | T-MP12A | Requires source investigation | Not tested | Not deployed | BLOCKED: no sandbox contract |
 
 CI requires Node 22, lock graph, strings, lint, typecheck, build, omit-dev audit, unit shards and worker checks. The workflow currently targets PR bases main/release/full-remediation; a stacked PR base is outside that trigger. Current deployment identity is UNKNOWN; no deployment is authorized. No database client, migration or seed has been invoked.
+
+T22-03: observed red `expected false to be true` on submitted parser acceptance before implementation. Focused queue/dashboard/query suite now passes (4 files, 10 tests). Shared predicate and explicit dashboard link rebuilt; exact fixture IDs and real EN/ZH namespace covered. These are unit tests, not PostgreSQL or staff session evidence. Read installed Next `use-server` guide; authenticated action boundaries retained.

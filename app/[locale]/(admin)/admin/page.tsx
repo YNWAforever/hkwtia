@@ -36,7 +36,7 @@ export default async function AdminPage({params,searchParams}: Props) {
 
   const tiles: readonly DashboardTile[] = [
     {id:"unfinished-applications",href:"/admin/members/queue?status=draft",label:t("dashboard.unfinishedApplications"),count:counts.unfinishedApplications},
-    {id:"submitted-applications",href:"/admin/members/queue",label:t("dashboard.submittedApplications"),count:counts.submittedApplications},
+    {id:"submitted-applications",href:"/admin/members/queue?status=submitted",label:t("dashboard.submittedApplications"),count:counts.submittedApplications},
     {id: "profiles-review", href: "/admin/profiles-review", label: t("dashboard.profilesAwaitingReview"), count: counts.profiles},
     {id: "listings", href: "/admin/listings-review?status=pending_review", label: t("dashboard.listingsAwaitingReview"), count: counts.listings},
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},

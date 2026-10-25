@@ -1,3 +1,4 @@
+import {APPLICATION_QUEUE_FILTERS, resolveApplicationQueueStatuses} from "@/lib/admin/application-queue-filter";
 import { PrivateLink as Link } from "@/components/internal-shell/private-link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -7,7 +8,6 @@ import {
 import type { AppLocale } from "@/i18n/routing";
 import { requireAdminPageActor } from "@/lib/admin/page-auth";
 import {
-  APPLICATION_QUEUE_STATUSES,
   adminMembersRepository,
   applicationQueueQuerySchema,
 } from "@/lib/db/repos/admin-members";
@@ -44,7 +44,7 @@ export default async function AdminApplicationQueuePage({
   const selectedSort = query.success ? query.data.sort : "updated_desc";
   const selectedLimit = query.success ? query.data.limit : 20;
   const queueHref = (input: {
-    status?: (typeof APPLICATION_QUEUE_STATUSES)[number];
+    status?: (typeof APPLICATION_QUEUE_FILTERS)[number];
     search?: string;
     sort?: "updated_desc" | "updated_asc";
     limit?: number;
@@ -138,7 +138,7 @@ export default async function AdminApplicationQueuePage({
         aria-label={t("applicationQueue.views")}
         className="flex flex-wrap gap-3"
       >
-        {APPLICATION_QUEUE_STATUSES.map((state) => (
+        {APPLICATION_QUEUE_FILTERS.map((state) => (
           <Link
             aria-current={
               selectedStatus === state ? "page" : undefined
@@ -148,7 +148,7 @@ export default async function AdminApplicationQueuePage({
             key={state}
           >
             {t(`applicationQueue.viewsLabels.${state}`)}
-            {page ? ` (${page.counts[state]})` : null}
+            {page ? ` (${resolveApplicationQueueStatuses(state).reduce((total, status) => total + page!.counts[status], 0)})` : null}
           </Link>
         ))}
       </nav>
