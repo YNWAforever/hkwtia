@@ -2397,6 +2397,7 @@
     "navGroups": {"me": "我的帳戶", "company": "我的公司", "benefits": "會員權益"},
     "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},
     "applications": {
+      "paging": {"label": "申請分頁", "first": "返回最新申請", "next": "較早的申請"},
       "nav": "我的申請",
       "title": "我的申請",
       "description": "查看每份會籍申請的狀態、需要處理的資料及下一步。",

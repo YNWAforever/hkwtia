@@ -2397,6 +2397,7 @@
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "applications": {
+      "paging": {"label": "Application pages", "first": "Back to latest applications", "next": "Older applications"},
       "nav": "My applications",
       "title": "My applications",
       "description": "Track each membership application, what needs attention and what to do next.",
