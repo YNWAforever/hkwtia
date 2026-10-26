@@ -44,3 +44,5 @@ content/milestones.draft.json
 .tmp/
 
 .env.acceptance.local
+.env*
+!.env.example

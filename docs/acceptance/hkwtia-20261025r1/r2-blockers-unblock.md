@@ -35,7 +35,7 @@ PARTIAL rows still carry open layers (Preview SSO, magic-link A/staff, staff-D f
 | Stable Preview alias | `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` |
 | Unauthenticated GET `/` | **HTTP 302** → `https://vercel.com/sso-api?url=…` (SSO wall confirmed) |
 | Production custom domain `https://hkwtia.vercel.app` | Open (no SSO wall); still **older** `release@6833eb9a`, not PR #212 |
-| Box `vercel` CLI | **Logged out** (no `.vercel/`, no `auth.json`); `vc curl` / `vc env run` cannot mint `VERCEL_OIDC_TOKEN` yet |
+| Box `vercel` CLI | ~~Logged out~~ → **superseded 2026-10-27 ~01:50 HKT**: logged in as `ynwaforever`, linked to `ynwaforevers-projects/hkwtia`; OIDC proven (see [Preview OIDC proven](#preview-oidc-proven--2026-10-27)) |
 | Vercel MCP | Authenticated (can list project/deployments/envs); does **not** substitute for CLI OIDC or browser Trusted Sources |
 
 **Do not** disable Deployment Protection or mint a long-lived automation bypass as the first fix. Prefer the Trusted Sources / development OIDC path below. Production custom-domain protection must stay as-is.
@@ -105,9 +105,9 @@ Repo already ships `scripts/vercel-preview-session.mjs`:
 
 | Actionable without Willy | Needs Willy |
 | --- | --- |
-| Document SSO/OIDC/share/CI/Stripe status (this file) | `vercel login` on the box (or share URL / authorized bypass) so Preview OIDC/`vc curl` can be proven |
+| Document SSO/OIDC/share/CI/Stripe status (this file) | ~~`vercel login` on the box~~ **done 2026-10-27** (Preview OIDC/`vc curl` proven) |
 | Keep `stacked-ci-trigger.patch` prepared and unapplied | Fix GitHub Actions billing/spending limit on the org/account |
-| Local anonymous/LHCI already recorded; contrast fixed | Supply Stripe **test** price IDs into local acceptance **or** authorize Preview catalog check after SSO access |
+| Local anonymous/LHCI already recorded; contrast fixed | Supply Stripe **test** price IDs into local acceptance (Preview catalog now verified four-tier) |
 | Production Auth A/B/staff Google evidence already on PR | Magic-link A + staff confirmation; staff-D fixture role; zero-write DB readback; screen reader |
 | | T-MP08 materials, T-MP10 legal, T-MP12 contracts |
 | | Any production promote/deploy of PR #212 (not requested) |
@@ -115,3 +115,51 @@ Repo already ships `scripts/vercel-preview-session.mjs`:
 ## Recommended next concrete step
 
 **Sign the box Vercel CLI in as Willy (`vercel login` + `vercel link` to `hkwtia`), then run the preferred `vc curl` smoke against `https://hkwtia-l4eh06gmt-ynwaforevers-projects.vercel.app/`.** If that returns the app (not SSO), record the procedure result here and run a minimal anonymous Preview fetch (home + `/membership` headings) for UC22-01/03 exact-head evidence. In parallel, clear GitHub Actions billing so #211 CI can run before anyone applies `stacked-ci-trigger.patch`.
+
+## Preview OIDC proven — 2026-10-27
+
+Recorded ~01:55 Asia/Hong_Kong on PR #212 at HEAD `b10686e3`. Supersedes "CLI logged out" above. Deployment Protection **unchanged** (SSO still on, no bypass secret, no Trusted Sources edit). No production deploy, no `stacked-ci-trigger.patch` application, no writes.
+
+| Fact | Value |
+| --- | --- |
+| Box CLI | Vercel CLI 65.2.0, logged in as `ynwaforever`, `.vercel/project.json` linked to `ynwaforevers-projects/hkwtia` (gitignored) |
+| Dev OIDC token | `VERCEL_OIDC_TOKEN` present in gitignored `.env.local` (from `vc env pull`); loaded via `vercel env run --`; **never printed/committed** |
+| Target | PR #212 Preview `dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC` → `https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app`, commit `b10686e3` (exact branch head at probe time) |
+| Raw unauthenticated GET `/` | **302** → `vercel.com/sso-api` (wall still on) |
+| `vercel curl / --deployment <url>` | **200**, app HTML (WiseTech, "Find your route"), `dpl_9aTJ…` in HTML |
+
+### Anonymous `vercel curl` probes (same deployment)
+
+| Path | Status | Notes |
+| --- | --- | --- |
+| `/` | 200 | Home HTML |
+| `/en` | 307 → `/` | Default-locale prefix stripped (expected) |
+| `/membership` | 200 | `x-matched-path: /[locale]/membership`; `.plan-grid` has **4** `article` ids: `community`, `startup`, `corporate`, `patron` |
+| `/zh/membership` | 200 | Same four ids, ZH copy (社群/初創/企業/贊助人) |
+| `/en/membership` | 307 → `/membership` | Expected |
+| `/membership/join` | 404 | Not a route (join is per-tier CTA) — informational |
+| `/robots.txt` | 200 | |
+| `/sitemap.xml` | **500** | **Finding**: production `https://hkwtia.vercel.app/sitemap.xml` returns 200. Preview-only failure (likely Preview env/runtime data); not investigated here |
+| Health endpoint | n/a | App has no public `/api/health`; nearest are cron/job routes (not anonymous) |
+
+**Stripe paid tiers on Preview: YES.** Startup shows HK$2,400 / year, HK$250 / month, 5 seats; Corporate HK$12,000 / year, HK$1,200 / month, 25 seats; Patron "Contact us"; Community Free. The anonymous suite's four-tier assertion (`.plan-grid article` ids = community, startup, corporate, patron) would hold on Preview — the local red is purely the deliberately absent price IDs in `.env.acceptance.local`. Checkout itself (Stripe **test** secret/webhook) is still unverified.
+
+### Browser path (Playwright, origin-scoped header) — proven
+
+New read-only helper `scripts/preview-oidc-anon-check.mjs`: refuses non-`*.vercel.app` hosts and the production alias, attaches `x-vercel-trusted-oidc-idp-token` **only** to same-origin requests (third-party fonts/Stripe never see it), never logs the token.
+
+```bash
+cd /workspace/hkwtia
+vercel env run -- node scripts/preview-oidc-anon-check.mjs https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app
+```
+
+Result (exit 0): `/` 200 h1 "How can Hong Kong lead the AI+ era?"; `/membership` 200 h1 "Choose the membership that fits your needs", planCards `[community, startup, corporate, patron]`; `/zh/membership` 200 h1 "選擇適合你的會籍", same four. All landed on the Preview origin (no SSO bounce).
+
+### Still open
+
+- **computerUse / desktop Chrome on the box has no header injection**, so interactive Auth UAT on Preview (Google / magic-link) still hits SSO in that browser. Options: (a) drive Auth via Playwright with the same origin-scoped route header (Google OAuth leaves the origin; header only needed on the Preview host, Neon Auth callback returns to it); (b) a header-injection extension in the box Chrome; (c) Willy-authorized share URL (`scripts/vercel-preview-session.mjs`). Do not disable SSO.
+- Full `tests/e2e/hkwtia-anonymous-acceptance.spec.ts` on Preview: `playwright.config.ts` has no extra-header hook. Running it needs a tiny opt-in fixture that adds the same origin-scoped `context.route` when `VERCEL_OIDC_TOKEN` + `PLAYWRIGHT_BASE_URL` (Preview) are set — not added this slice.
+- Preview `/sitemap.xml` 500.
+- Stripe test checkout/webhook (UC22-15/20/37/38/40); Actions billing (UC22-59).
+
+Inventory: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (unchanged; UC22-01/03 gain `previewOidcEvidence`, UC22-01 blocker reworded).

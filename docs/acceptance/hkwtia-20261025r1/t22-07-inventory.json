@@ -31,9 +31,9 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Preview behind Vercel SSO (OIDC/vc curl or share-session; see r2-blockers-unblock.md)"
+    "Full anonymous suite not yet run on Preview (OIDC/vc curl access proven 2026-10-27; see r2-blockers-unblock.md)"
    ],
-   "nextWithoutAuth": "Obtain Preview/SSO evidence; local render and settled contrast checks complete.",
+   "nextWithoutAuth": "Run anonymous suite on Preview via origin-scoped OIDC header; local render and settled contrast checks complete.",
    "localBrowserEvidence": {
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
@@ -49,6 +49,15 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Live production host has no Deployment Protection wall; public entry rendered before sign-in. Production code, not PR head; Preview/SSO for PR head still open."
+   },
+   "previewOidcEvidence": {
+    "date": "2026-10-27",
+    "deployment": "dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC",
+    "url": "https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app",
+    "commit": "b10686e3",
+    "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
+    "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
+    "result": "/ and /zh/membership and /membership HTTP 200 on Preview, app HTML (not SSO); /sitemap.xml HTTP 500 on Preview (production 200) — finding"
    }
   },
   {
@@ -90,6 +99,15 @@
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
     "detail": "Community/Patron render; four-tier assertion remains red: Startup/Corporate unavailable without deliberately absent Stripe price IDs."
+   },
+   "previewOidcEvidence": {
+    "date": "2026-10-27",
+    "deployment": "dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC",
+    "url": "https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app",
+    "commit": "b10686e3",
+    "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
+    "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
+    "result": "EN+ZH /membership .plan-grid article ids = community,startup,corporate,patron; Startup HK$2,400/yr HK$250/mo; Corporate HK$12,000/yr HK$1,200/mo — Stripe price IDs configured on Preview env; local acceptance still omits them"
    }
   },
   {
@@ -1569,14 +1587,24 @@
    ]
   }
  ],
-  "r2BlockersUnblock": {
-    "date": "2026-10-27",
-    "doc": "r2-blockers-unblock.md",
-    "inventoryUnchanged": true,
-    "previewDeployment": "dpl_2PJRwnya2prEY68ZE43aMpgbQFgG",
-    "previewUrl": "https://hkwtia-l4eh06gmt-ynwaforevers-projects.vercel.app",
-    "preferredPath": "vercel login + vc curl / x-vercel-trusted-oidc-idp-token",
-    "cliLoggedOut": true,
-    "stackedCiPatchApplied": false
-  }
+ "r2BlockersUnblock": {
+  "date": "2026-10-27",
+  "doc": "r2-blockers-unblock.md",
+  "inventoryUnchanged": true,
+  "previewDeployment": "dpl_2PJRwnya2prEY68ZE43aMpgbQFgG",
+  "previewUrl": "https://hkwtia-l4eh06gmt-ynwaforevers-projects.vercel.app",
+  "preferredPath": "vercel login + vc curl / x-vercel-trusted-oidc-idp-token",
+  "cliLoggedOut": false,
+  "stackedCiPatchApplied": false,
+  "cliLinked": "ynwaforever -> ynwaforevers-projects/hkwtia",
+  "previewOidcProven": true,
+  "previewOidcDeployment": "dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC",
+  "previewOidcUrl": "https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app",
+  "previewOidcCommit": "b10686e3",
+  "previewFourTiers": true,
+  "previewSitemapStatus": 500,
+  "browserOidcScript": "scripts/preview-oidc-anon-check.mjs",
+  "computerUseBrowserNeedsHeaderInjection": true,
+  "deploymentProtectionChanged": false
+ }
 }

@@ -25,7 +25,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 | UC | Theme | Status | Offline / DB evidence | Blockers | Next without Auth |
 | --- | --- | --- | --- | --- | --- |
-| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Preview behind Vercel SSO (OIDC/`vc curl` or share-session; see r2-blockers-unblock.md) | Obtain Preview/SSO evidence; local render and settled contrast complete |
+| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Full anonymous suite not yet run on Preview (OIDC/`vc curl` access proven 2026-10-27; see r2-blockers-unblock.md) | Run anonymous suite on Preview via OIDC header; local render and settled contrast complete |
 | UC22-02 | Current concierge chat UI (not R3 actions) | **PARTIAL** | `concierge-widget.test.tsx`, `concierge-shell.test.tsx`, `concierge-unavailable-ui.test.tsx` | Real AI provider evaluation; Browser | Local Playwright disabled-provider path (manual fallback) without Auth |
 | UC22-03 | Four-tier membership comparison ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-catalog.test.ts`, `membership-tier-content.test.ts` | Browser visual matrix on populated catalog | Local Playwright visual at 375/768/1024/1440 |
 | UC22-04 | Comparison seats/help/anchor ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-links.test.tsx` | Browser visual matrix | Same local Playwright run |
@@ -118,7 +118,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Bound forms unmounted; write flag disabled | 2: 25, 60 |
 | T-MP12A sandbox contract / T-MP12B | 2: 32, 54 |
 | T-MP08 owner materials + private delivery | 2: 39, 40 |
-| Preview behind Vercel SSO (OIDC/`vc curl` or share-session; see r2-blockers-unblock.md) | 1: 01 |
+| Full anonymous suite not yet run on Preview (OIDC/`vc curl` access proven 2026-10-27; see r2-blockers-unblock.md) | 1: 01 |
 | Browser visual matrix on populated catalog | 1: 03 |
 | Browser visual matrix | 1: 04 |
 | Browser visual | 1: 09 |
@@ -195,3 +195,7 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## R2 blockers unblock — 2026-10-27
 
 [Live status and ordered Preview/Stripe/CI unblock paths](r2-blockers-unblock.md). Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. Preferred Preview access: box `vercel login` + `vc curl` / `x-vercel-trusted-oidc-idp-token` (never print token). `stacked-ci-trigger.patch` remains unapplied until Actions billing is fixed.
+
+## Preview OIDC proven — 2026-10-27
+
+[Evidence](r2-blockers-unblock.md#preview-oidc-proven--2026-10-27): box Vercel CLI linked (ynwaforever → `ynwaforevers-projects/hkwtia`); `vercel curl --deployment` and an origin-scoped `x-vercel-trusted-oidc-idp-token` Playwright check (`scripts/preview-oidc-anon-check.mjs`) reach PR #212 Preview `dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC` (commit `b10686e3`) without disabling SSO. Preview `/membership` EN+ZH render **all four tiers** (community/startup/corporate/patron, paid prices shown), so the paid-tier gap is local-env only. Finding: Preview `/sitemap.xml` HTTP 500 (production 200). UC22-01 blocker reworded; UC22-01/03 gain `previewOidcEvidence`. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
