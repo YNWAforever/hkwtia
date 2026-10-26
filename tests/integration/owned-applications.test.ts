@@ -1,4 +1,5 @@
 // @vitest-environment node
+import {insertOwnedApplications} from '@/scripts/acceptance/owned-applications-fixture';
 import type {Database} from '@/lib/db/repos/common';
 import {writeFileSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
@@ -33,8 +34,7 @@ describe.skipIf(!target)('owned paging on verified isolated Neon (synthetic acto
     neonConfig.webSocketConstructor=WebSocket;
     pool=new Pool({connectionString:target!.databaseUrl,connectionTimeoutMillis:15000});
     state.db=drizzle(pool,{logger:{logQuery(sql,params){queries.push({sql,params});}}});
-    await pool.query(`INSERT INTO membership_applications(id,applicant_user_id,plan_code,status,updated_at)
-      SELECT id,$2,'community','draft','2026-10-26T00:00:00.000123Z'::timestamptz FROM unnest($1::uuid[]) id`,[ids,a.profileId]);
+    await insertOwnedApplications(pool,a.profileId,ids);
     // A owns a company seat, but that must never grant applicant reads of B's row.
     await pool.query('UPDATE membership_applications SET company_id=$1 WHERE id=$2',[manifest.companyId,manifest.profiles[1].applicationId]);
   },120000);
