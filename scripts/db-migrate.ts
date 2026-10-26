@@ -54,7 +54,12 @@ export function runMigration(environment: NodeJS.ProcessEnv = process.env): Prom
 }
 
 if (process.argv[1]?.endsWith("db-migrate.ts")) {
-  if (process.argv.includes("--print-command")) {
+  if (process.argv.includes("--acceptance-websocket")) {
+    import("./acceptance/migrate.ts").then(({runAcceptanceMigration}) => runAcceptanceMigration()).catch(() => {
+      console.error("HKWTIA_ACCEPTANCE_MIGRATION_FAILED");
+      process.exitCode = 1;
+    });
+  } else if (process.argv.includes("--print-command")) {
     console.log(migrationCommandText());
   } else {
     runMigration().catch((error: unknown) => {
