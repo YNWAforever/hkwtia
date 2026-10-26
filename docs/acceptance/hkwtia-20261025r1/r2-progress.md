@@ -53,3 +53,7 @@ Continued from `3c66cb4e` on 2026-10-26. See [r2-ui-stretch.md](r2-ui-stretch.md
 ## T22-02 DB acceptance follow-up
 
 [T22-02 target/fixture evidence](t22-02.md) supersedes the prior blanket Neon blocker for the explicitly verified isolated child branch only. Guarded migration and synthetic fixture replay/cleanup/readback passed; A/B scoped SQL reads and NONSTAFF pure authorization passed with zero observed row changes. Auth/HTTP/server-action, Stripe test and notification sink remain BLOCKED. This does not complete supplement persistence, real identity UAT, paging performance, deployment or remote CI acceptance.
+
+## T22-04A SQL persistence follow-up — 2026-10-26
+
+[T22-04A persistence evidence](t22-04a.md) supersedes the earlier persistence/schema blocker for this slice. Incremental migration 0066 and an injectable scoped repository now persist requests, responses, actor-scoped receipts and existing audit events atomically. Five gated PostgreSQL cases pass on the T22-02 authorized child branch, including distinct-staff concurrency, direct unique-index violation, migration over existing rows, lost-response reconciliation and audit-failure rollback. Synthetic actors do not establish Auth/HTTP/browser acceptance. Mounted UI, actual sessions, Stripe and sink acceptance remain blocked; no manual deployment or merge.
