@@ -1,6 +1,7 @@
 import {existsSync, readFileSync} from 'node:fs';
 
 import {expect, test} from '../fixtures/preview-oidc';
+import {allowedMagicLink} from '../fixtures/preview-magic-link';
 
 // Opt-in member magic-link run against a Vercel-protected PR Preview through the OIDC fixture.
 //   PLAYWRIGHT_PREVIEW_OIDC=true PLAYWRIGHT_BASE_URL=https://<preview>.vercel.app \
@@ -26,19 +27,6 @@ function loginEmail(): string | null {
   if (!file || !existsSync(file)) return null;
   const value = readFileSync(file, 'utf8').trim();
   return value || null;
-}
-
-// Fixed-code refusal so a bad paste never lands on an arbitrary host or appears in output.
-export function allowedMagicLink(raw: string, previewOrigin: string): string {
-  let url: URL;
-  try {
-    url = new URL(raw.trim());
-  } catch {
-    throw new Error('MAGIC_LINK_UNPARSEABLE');
-  }
-  if (url.protocol !== 'https:') throw new Error('MAGIC_LINK_NOT_HTTPS');
-  if (url.origin !== previewOrigin && !NEON_AUTH_HOST.test(url.hostname)) throw new Error('MAGIC_LINK_HOST_REFUSED');
-  return url.toString();
 }
 
 test('member magic link on Preview: send, open in the same context, session sticks (/portal or create-profile)', async ({page, baseURL, previewOidc}) => {

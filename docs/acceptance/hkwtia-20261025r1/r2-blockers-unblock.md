@@ -374,3 +374,53 @@ Playwright auto-assert did **not** finish: the link was pasted into a second tab
 **Create member profile was NOT clicked** (no profile write approved); no profile or membership rows created. Neon Auth on Preview now holds a verified user for Member A (from A's own verify). No email, link, token or cookie recorded. Production, Neon config and Vercel env unchanged.
 
 Result: **PASS (needs-profile)** for Member A Preview magic-link send → verify → sticky verified state. Not a `/portal` session; spec auto-assert run still to repeat (paste into the spec's own tab or via `PREVIEW_MAGIC_LINK_FILE`).
+
+## Staff Preview Auth — profile grant + spec, ready for headed handoff (2026-10-27 HKT)
+
+Recorded ~04:00 Asia/Hong_Kong on PR #212 (continuing from `5cee1735`). Scope: Preview Neon `hkwtia-m2-preview` (`solitary-wave-52860119`) / `main` (`br-dark-forest-az0shpz9`) only. No Vercel env, SSO, Neon Auth config or Production change. No email address, link, token or cookie recorded.
+
+### Code path (read first)
+
+- `/admin-login` (`app/[locale]/admin-login/page.tsx`) → `resolveCurrentLogin({intent: "admin"})` → `lib/auth/login-resolution.ts`: signed-in subject → `profiles` row by `auth_user_id`; **no row → "needs-profile"** ("Staff account needs review", link to member sign-in); `role ∈ {staff, exco, superadmin}` → redirect to `/admin`; `member` → AccessDenied. `provisionMemberProfileAction` only ever creates `role=member`, and there is no in-app role-grant UI, so a staff profile on a fresh DB must be seeded (as on Production).
+- Magic link: `requestAdminLoginLink` → limiter → `auth.signIn.magicLink` with callback from `APP_URL` (PR alias) — same pipeline proven for members.
+- **Google is off on Preview**: `/admin-login` on the alias renders "Google sign-in will be available after provider setup is verified." (`AUTH_GOOGLE_ENABLED` not `true` for this branch). Neon Auth on Preview has a `google` (shared) provider, but enabling the button is a Vercel env change — not made. Staff Preview path = **magic link**.
+
+### Identifying the real staff Auth user without plaintext (read-only)
+
+Preview `neon_auth."user"` non-fixture rows (masked): `894b2e40-…` `l***@gmail.com`, verified, provider `google`, created 2026-09-25 (earlier Preview Google sign-in), no profile; `38259cd6-…` Member B (`w***@fimmick.com`, from B's magic link); `03f1f159-…` Member A (`l***@gmail.com`, from A's magic link 03:31 HKT). Matching was done by comparing `md5(lower(email))` of the Preview users with the single Production `profiles` row with role `superadmin` (**read-only `SELECT`** on Production `fragrant-mountain-25240574`; hashes only, nothing written): **exactly one match — `894b2e40-…`**. Member A is a different user (different hash), so granting staff to `894b2e40-…` cannot touch A.
+
+### Preview profile grant (write, Preview only)
+
+Pre-checks: no Preview `profiles` row with that id, `auth_user_id` or email (0 clashes); no triggers on `profiles`; Preview role counts before: member 27, staff 1, exco 1, superadmin 1 (fixtures).
+
+```sql
+-- Preview hkwtia-m2-preview / main only. Email copied inside the DB from neon_auth, never printed.
+insert into public.profiles (id, auth_user_id, email, role, display_name, locale)
+select u.id::text, u.id::text, lower(u.email), 'superadmin', 'Willy Lai', 'en'
+from neon_auth."user" u
+where u.id = '894b2e40-2283-4c88-aa64-828ab71ae090' and u."emailVerified"
+  and md5(lower(u.email)) = '<hash of the Production superadmin email>'
+on conflict do nothing;
+update public.profiles set onboarding_state = 'complete', locale = 'zh'
+where id = '894b2e40-2283-4c88-aa64-828ab71ae090' and role = 'superadmin';
+```
+
+Result: 1 row, `role=superadmin`, `onboarding_state=complete`, `locale=zh` (mirrors the Production superadmin row's role/onboarding/locale, read-only), created 03:53 HKT. No membership, company, audit or Auth row touched. Rollback: `delete from public.profiles where id = '894b2e40-2283-4c88-aa64-828ab71ae090'` (Preview only; not run).
+
+### Spec
+
+`tests/e2e/preview-oidc-staff-magic-link.spec.ts` (opt-in, OIDC fixture): `/admin-login` clean jar → send (`PREVIEW_LOGIN_EMAIL_FILE` or headed `PREVIEW_LOGIN_HANDOFF=true`) → `?sent=1` → wait for the link via `PREVIEW_MAGIC_LINK_FILE` **or any tab of the window** (fixes the member A second-tab stall) → assert landing `/admin` (fails with `NEEDS_PROFILE` on the recovery screen) → sticky `/admin` reload → `/portal` redirects to `/admin`. Read-only; no form/approval/queue action. `allowedMagicLink` moved to `tests/fixtures/preview-magic-link.ts` (shared with the member spec). Without opt-in: 2 skipped (member + staff). `tsc` + eslint clean.
+
+### Status: READY FOR HANDOFF (not yet run)
+
+Willy steps (headed, box display `:6`):
+
+1. Agent starts `/tmp/hkwtia-handoff/run-staff.sh` (box-only helper; equivalent to the command below). Send window 15 min, link window 15 min.
+   ```bash
+   DISPLAY=:6 PLAYWRIGHT_PREVIEW_OIDC=true PLAYWRIGHT_BASE_URL=https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app \
+   PREVIEW_LOGIN_HANDOFF=true PREVIEW_MAGIC_LINK_FILE=/tmp/hkwtia-preview-staff-magic-link PREVIEW_MAGIC_LINK_WAIT_MS=900000 \
+     vercel env run -- npx playwright test tests/e2e/preview-oidc-staff-magic-link.spec.ts --reporter=list --workers=1
+   ```
+2. In the Playwright Chromium on `/admin-login`, Willy types the **staff (Superadmin) Google address** (vault login 1083647) and clicks Send.
+3. Willy opens the "Sign In to hkwtia-m2-preview" email in the staff inbox and pastes the link into the **same Playwright window** (address bar or a new tab) within 5 minutes.
+4. Expect `[open] … (admin)`, `[sticky]`, `[separation]` and `EXIT=0`.

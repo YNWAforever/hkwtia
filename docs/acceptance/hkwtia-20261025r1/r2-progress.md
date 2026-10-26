@@ -211,3 +211,9 @@ Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No produc
 Continued from `0498d94e` on PR #212 (spec accepts the verified create-profile state). Preview PR alias → **`dpl_ABbWNxaAmyQJ5kV1ovnzDZbQuCbo`**. [Headed handoff](r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile): send `?sent=1` (no `limiter_unavailable`); Willy opened A's link → Preview `/member-login` "Your sign-in is verified. Create a member profile…"; fresh `/member-login` reload still verified (desktop check), no email field. **PASS (needs-profile)** — not `/portal`. Playwright `[open]`/`[sticky]` did not run (link pasted in a second tab); stuck handoff tree killed 03:34 HKT. Create member profile not clicked.
 
 Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (Preview, needs-profile; no `/portal` session). No production, Neon or Vercel env change; no profile/membership writes.
+
+## Staff Preview Auth — ready for handoff — 2026-10-27
+
+Continued from `5cee1735` on PR #212. [Details](r2-blockers-unblock.md#staff-preview-auth--profile-grant--spec-ready-for-headed-handoff-2026-10-27-hkt). Google is off on Preview, so the staff path is magic link on `/admin-login`. Identified the real staff Auth user on Preview (`894b2e40-…`, earlier Google sign-in) by email-hash match against the single Production superadmin profile (read-only, no plaintext); granted it a **Preview-only** `profiles` row (`superadmin`, onboarding complete) — Member A is a different user. New opt-in spec `tests/e2e/preview-oidc-staff-magic-link.spec.ts` asserts `/admin`, sticky reload and `/portal` → `/admin`, and picks the link up from any tab. Next: Willy's headed staff send + link paste.
+
+Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production write/deploy, no Vercel env/SSO/Neon Auth config change.
