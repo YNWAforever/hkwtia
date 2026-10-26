@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 import {Pool, neonConfig} from '@neondatabase/serverless';
 import {assertVerifiedTarget, type VerifiedTarget} from './target';
+import {connectTimingPool, type RetryStats} from './db-timing';
 import {seedM1Plans} from '../seed-m1';
 
 export const LABELS = ['A','B','C','SEAT','REVOKED','D','E','NONSTAFF','FREE'] as const;
@@ -21,11 +22,15 @@ export function fixtureManifest(runId: string) {
   }))};
 }
 export type FixtureManifest = ReturnType<typeof fixtureManifest>;
-export async function seedHkwtiaFixtures(target: VerifiedTarget, runId: string): Promise<FixtureManifest> {
+export async function seedHkwtiaFixtures(target: VerifiedTarget, runId: string, stats?:RetryStats): Promise<FixtureManifest> {
   assertVerifiedTarget(target);
   const manifest = fixtureManifest(runId);
   neonConfig.webSocketConstructor = WebSocket;
-  const pool = new Pool({connectionString: target.databaseUrl,connectionTimeoutMillis:15000});
+  const {pool} = await connectTimingPool(()=>{
+    const pool=new Pool({connectionString: target.databaseUrl,connectionTimeoutMillis:15000});
+    pool.on('error',()=>{/* Idle transport drops are handled by the next operation. */});
+    return pool;
+  },stats);
   const client = await pool.connect().catch(async (error: unknown) => {await pool.end(); throw error;});
   try {
     await client.query('BEGIN');
@@ -44,11 +49,15 @@ export async function seedHkwtiaFixtures(target: VerifiedTarget, runId: string):
   } catch (error) {await client.query('ROLLBACK'); throw error;}
   finally {client.release(); await pool.end();}
 }
-export async function cleanupHkwtiaFixtures(target: VerifiedTarget, manifest: FixtureManifest): Promise<void> {
+export async function cleanupHkwtiaFixtures(target: VerifiedTarget, manifest: FixtureManifest, stats?:RetryStats): Promise<void> {
   assertVerifiedTarget(target);
   if (JSON.stringify(manifest) !== JSON.stringify(fixtureManifest(manifest.runId))) throw Error('HKWTIA_ACCEPTANCE_MANIFEST_INVALID');
   neonConfig.webSocketConstructor = WebSocket;
-  const pool = new Pool({connectionString: target.databaseUrl,connectionTimeoutMillis:15000});
+  const {pool} = await connectTimingPool(()=>{
+    const pool=new Pool({connectionString: target.databaseUrl,connectionTimeoutMillis:15000});
+    pool.on('error',()=>{/* Idle transport drops are handled by the next operation. */});
+    return pool;
+  },stats);
   const client = await pool.connect().catch(async (error: unknown) => {await pool.end(); throw error;});
   try {
     await client.query('BEGIN');

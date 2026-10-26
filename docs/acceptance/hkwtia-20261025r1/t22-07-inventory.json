@@ -1009,7 +1009,8 @@
    ],
    "dbEvidence": [
     "T22-06 0067 10k paging/EXPLAIN (t22-06.md) (21 index rows, no sort)",
-    "UC22-56 1k/10k: 30 warm + 30 fresh-connection samples per production first/deep/detail reader, p50/p95/max/rows/bytes/EXPLAIN and exact-ID cleanup (uc22-56.md; uc22-56-manifest.json)"
+    "UC22-56 1k/10k: 30 warm + 30 fresh-connection samples per production first/deep/detail reader, p50/p95/max/rows/bytes/EXPLAIN and exact-ID cleanup (uc22-56.md; uc22-56-manifest.json)",
+    "Retry hardening: bounded connection-only retries, per-group handshake/exhaustion counts, successful-attempt percentiles, unique raw manifests and fresh-pool exact-ID cleanup (uc22-56.md Retry hardening; status remains PARTIAL); two full hardened replays PASS (DB-only), 0 handshake failures / retries / exhausted samples each, cleanup verified in both"
    ],
    "blockers": [
     "Real A/B/staff Auth sessions",

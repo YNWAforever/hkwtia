@@ -1794,5 +1794,914 @@
   "rawArtifacts": [
     ".tmp/uc22-56-run1.json",
     ".tmp/uc22-56.json"
-  ]
+  ],
+  "retryHardening": {
+    "heading": "Retry hardening",
+    "maxAttempts": 3,
+    "backoffMs": [
+      100,
+      200
+    ],
+    "scope": "Connection acquisition only; no SQL or assertion retries",
+    "maxExhaustedSamplesPerGroup": 2,
+    "samplesPerGroup": 30,
+    "latency": "Successful attempts only; failed attempts and backoff excluded; no imputation",
+    "output": ".tmp/uc22-56-<UUID>.json (ignored; exact recovery manifest/IDs, no secrets)",
+    "cleanup": "Fresh connection pools for exact-ID deletion, fixture cleanup and absence readback; failure is fatal",
+    "replays": [
+      {
+        "runId": "uc22-56-78cf7f22-a439-49a9-929a-af8396f5a638",
+        "rawOutput": ".tmp/uc22-56-78cf7f22-a439-49a9-929a-af8396f5a638.json",
+        "result": "PASS (DB-only harness)",
+        "recordedAt": "2026-10-26T11:33:12.939Z",
+        "cleanupVerified": true,
+        "infrastructure": {
+          "attempts": 5,
+          "failedHandshakes": 0,
+          "retriedSuccesses": 0,
+          "exhausted": 0
+        },
+        "idlePoolErrors": 0,
+        "results": [
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 253.34314599999925,
+              "p95Ms": 259.6763229999997,
+              "maxMs": 259.76821800000107
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 253.34314599999925,
+              "p95Ms": 259.6763229999997,
+              "maxMs": 259.76821800000107
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 249.07105500000034,
+              "p95Ms": 263.82250600000407,
+              "maxMs": 279.4910799999998
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 970.5581129999991,
+              "p95Ms": 1457.938059,
+              "maxMs": 1776.3268420000022
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1216.6645070000013,
+              "p95Ms": 1714.3934700000027,
+              "maxMs": 2039.212873000004
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 255.41798600000038,
+              "p95Ms": 261.0318760000082,
+              "maxMs": 267.4522799999977
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 255.41798600000038,
+              "p95Ms": 261.0318760000082,
+              "maxMs": 267.4522799999977
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 248.52527199999895,
+              "p95Ms": 262.8795519999985,
+              "maxMs": 279.9793659999996
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 773.2352600000013,
+              "p95Ms": 1277.416710999998,
+              "maxMs": 1474.8622639999958
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1029.754592000012,
+              "p95Ms": 1540.0269249999983,
+              "maxMs": 1730.319755000004
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 253.5456819999963,
+              "p95Ms": 256.83062999999675,
+              "maxMs": 257.8446600000025
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 253.5456819999963,
+              "p95Ms": 256.83062999999675,
+              "maxMs": 257.8446600000025
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 247.10192899999674,
+              "p95Ms": 265.4475959999836,
+              "maxMs": 274.9937009999994
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 775.7481849999895,
+              "p95Ms": 1486.7034200000053,
+              "maxMs": 1673.1347020000103
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1040.5127179999836,
+              "p95Ms": 1731.3040390000097,
+              "maxMs": 1929.2919300000067
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 242.05354700001772,
+              "p95Ms": 242.6266229999892,
+              "maxMs": 259.4369089999818
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 242.05354700001772,
+              "p95Ms": 242.6266229999892,
+              "maxMs": 259.4369089999818
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.68381499999668,
+              "p95Ms": 257.67839399998775,
+              "maxMs": 259.8066499999841
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 770.7587910000002,
+              "p95Ms": 1230.9364430000132,
+              "maxMs": 1239.920924999984
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1028.437184999988,
+              "p95Ms": 1475.0908960000088,
+              "maxMs": 1487.5391789999849
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 248.48692799999844,
+              "p95Ms": 251.03064400001313,
+              "maxMs": 253.7994769999932
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 248.48692799999844,
+              "p95Ms": 251.03064400001313,
+              "maxMs": 253.7994769999932
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.6226500000048,
+              "p95Ms": 256.37643299999763,
+              "maxMs": 257.1302259999793
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 934.838493999996,
+              "p95Ms": 1245.767796,
+              "maxMs": 1474.586427000002
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1176.4069730000047,
+              "p95Ms": 1493.219580999983,
+              "maxMs": 1717.8325550000009
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 248.53383999998914,
+              "p95Ms": 249.69882399999187,
+              "maxMs": 251.75817999997525
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 248.53383999998914,
+              "p95Ms": 249.69882399999187,
+              "maxMs": 251.75817999997525
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.01419700001134,
+              "p95Ms": 258.1557479999901,
+              "maxMs": 263.17770599998767
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 764.6170869999914,
+              "p95Ms": 1266.4689779999899,
+              "maxMs": 1446.9554079999798
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1019.797219,
+              "p95Ms": 1521.6354799999972,
+              "maxMs": 1697.6333710000035
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          }
+        ]
+      },
+      {
+        "runId": "uc22-56-f8d5a98f-3fc0-48c1-ac3c-dc0f243b341b",
+        "rawOutput": ".tmp/uc22-56-f8d5a98f-3fc0-48c1-ac3c-dc0f243b341b.json",
+        "result": "PASS (DB-only harness)",
+        "recordedAt": "2026-10-26T11:38:11.129Z",
+        "cleanupVerified": true,
+        "infrastructure": {
+          "attempts": 5,
+          "failedHandshakes": 0,
+          "retriedSuccesses": 0,
+          "exhausted": 0
+        },
+        "idlePoolErrors": 0,
+        "results": [
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 236.90811699999904,
+              "p95Ms": 239.1501419999986,
+              "maxMs": 251.71740599999976
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 236.90811699999904,
+              "p95Ms": 239.1501419999986,
+              "maxMs": 251.71740599999976
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 247.63335700000243,
+              "p95Ms": 258.0387980000014,
+              "maxMs": 268.7722480000011
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 753.2950999999957,
+              "p95Ms": 1021.9745689999982,
+              "maxMs": 1026.4295889999994
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1004.6112700000012,
+              "p95Ms": 1275.1751609999992,
+              "maxMs": 1295.2018370000005
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 237.4936549999984,
+              "p95Ms": 238.38507599999866,
+              "maxMs": 238.6642800000045
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 237.4936549999984,
+              "p95Ms": 238.38507599999866,
+              "maxMs": 238.6642800000045
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.4495670000033,
+              "p95Ms": 259.03666300000623,
+              "maxMs": 290.87686800000665
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 745.7898019999993,
+              "p95Ms": 1186.782831000004,
+              "maxMs": 1236.8749559999997
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 997.4884129999991,
+              "p95Ms": 1432.5963670000056,
+              "maxMs": 1481.052061999988
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 255.1520210000017,
+              "p95Ms": 255.87795199999528,
+              "maxMs": 256.27371700000367
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 255.1520210000017,
+              "p95Ms": 255.87795199999528,
+              "maxMs": 256.27371700000367
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.5838619999995,
+              "p95Ms": 258.16485899998224,
+              "maxMs": 259.20324699999765
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 934.3281480000005,
+              "p95Ms": 1396.1992129999999,
+              "maxMs": 1405.4081370000058
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1176.3179930000042,
+              "p95Ms": 1642.0748139999923,
+              "maxMs": 1656.8053710000095
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 236.33985600000597,
+              "p95Ms": 241.97510400001192,
+              "maxMs": 256.1098770000099
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 236.33985600000597,
+              "p95Ms": 241.97510400001192,
+              "maxMs": 256.1098770000099
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.87704299998586,
+              "p95Ms": 259.42507299999124,
+              "maxMs": 261.91844700000365
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 770.336897000001,
+              "p95Ms": 1220.3829039999982,
+              "maxMs": 1243.564916000003
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1030.1619739999878,
+              "p95Ms": 1461.495219000004,
+              "maxMs": 1494.8881640000036
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 239.94483200000832,
+              "p95Ms": 241.9241949999996,
+              "maxMs": 242.20878600000287
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 239.94483200000832,
+              "p95Ms": 241.9241949999996,
+              "maxMs": 242.20878600000287
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 249.03313900000649,
+              "p95Ms": 275.91761599999154,
+              "maxMs": 321.9905420000141
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 749.9371460000111,
+              "p95Ms": 1035.8372059999965,
+              "maxMs": 1736.581192999991
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1008.0710759999929,
+              "p95Ms": 1357.8277480000106,
+              "maxMs": 1995.170649000007
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 236.158110999997,
+              "p95Ms": 236.69863800000167,
+              "maxMs": 250.1923550000065
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 236.158110999997,
+              "p95Ms": 236.69863800000167,
+              "maxMs": 250.1923550000065
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.9869609999878,
+              "p95Ms": 257.3347369999974,
+              "maxMs": 263.3884750000143
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 755.9225650000153,
+              "p95Ms": 1189.0721509999712,
+              "maxMs": 1244.0368709999893
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1008.1043870000285,
+              "p95Ms": 1435.7558239999926,
+              "maxMs": 1491.0936470000015
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          }
+        ]
+      }
+    ],
+    "validation": {
+      "node": "22",
+      "focused": {
+        "files": 5,
+        "passed": 38
+      },
+      "gatedOwnedApplications": {
+        "passed": 5
+      },
+      "fullSuite": {
+        "passed": 7982,
+        "skipped": 659,
+        "failed": 0,
+        "passedFiles": 908,
+        "skippedFiles": 118
+      },
+      "typecheck": "PASS",
+      "lint": "PASS (0 errors; 77 existing warnings)",
+      "build": "PASS",
+      "tdd": "Observed classifier/backoff behavioral failures before implementation; removed failed-pool end call once and observed lifecycle test fail, then restored and passed"
+    }
+  }
 }
