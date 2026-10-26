@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-26",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "baseline": "3c66cb4ef1924801514af0942542ef07e07f3a7d",
+  "testedProductHead": "e55143a2635e143829be99a9fe53b5f8929e0eaf",
+  "testedProductTree": "0f89023dc6fb9e784e7a419febaf36df598c4cab",
+  "commits": [
+    "e55143a2635e143829be99a9fe53b5f8929e0eaf test: prepare R2 date boundaries and repeated performance sampling",
+    "dc1e7cd5075ed0d5c3dc498fe1937990b3b24fdc feat: add submitted application shortcut to daily staff navigation",
+    "276def384dfd0028d58795a18f842de51909300a feat: scaffold bilingual supplement publish and response forms"
+  ],
+  "commands": [
+    {
+      "command": "npx vitest run tests/unit/supplement-ui.test.tsx tests/unit/supplement-service.test.ts tests/unit/application-supplements.test.ts tests/unit/r2-daily-nav.test.tsx tests/unit/r2-device-date-perf.test.tsx tests/unit/admin-dashboard-recent.test.tsx tests/unit/admin-dashboard-tiles.test.tsx tests/unit/internal-navigation-config.test.ts tests/unit/portal-format-date.test.ts tests/unit/preview-session-harness.test.ts",
+      "exit": 0,
+      "filesPassed": 10,
+      "testsPassed": 68
+    },
+    {
+      "command": "npm test",
+      "exit": 0,
+      "filesPassed": 900,
+      "filesSkipped": 113,
+      "testsPassed": 7928,
+      "testsSkipped": 643,
+      "unhandledErrors": 0
+    },
+    {
+      "command": "npm run lint",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 77
+    },
+    {
+      "command": "npm run typecheck",
+      "exit": 0,
+      "generatedNextEnvEditsRestored": true
+    },
+    {
+      "command": "npm run build",
+      "exit": 0,
+      "nextVersion": "16.4.3",
+      "generatedNextEnvEditsRestored": true
+    },
+    {
+      "command": "npm run audit:strings",
+      "exit": 0,
+      "tsxFilesScanned": 359
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "failedFirstFullRun": {
+    "exit": 1,
+    "filesPassed": 899,
+    "filesFailed": 1,
+    "filesSkipped": 113,
+    "testsPassed": 7927,
+    "testsFailed": 1,
+    "testsSkipped": 643,
+    "failure": "admin-dashboard-recent ordered links omitted newly added shortcut; expectation corrected and full suite rerun"
+  },
+  "testFirst": {
+    "forms": "five behavioral failures against empty scaffolds before implementation",
+    "navigation": "two missing submitted-link failures before implementation",
+    "performance": "numberOfRuns 1 failed >=3 before config update",
+    "dates": "existing correct formatter; UTC sensitivity mutation caused two boundary failures, then restored and rerun green",
+    "collectionErrors": "test-title typo and config extension corrected before behavioral red; not counted as red evidence"
+  },
+  "layers": {
+    "code": "offline candidate; forms unmounted; daily navigation wired; three-run config prepared",
+    "tests": "unit/jsdom/config PASS; skipped tests are not acceptance",
+    "deployment": "NOT_DEPLOYED",
+    "runtime": "BLOCKED T22-02, real persistence/browser/device/Lighthouse/RUM acceptance"
+  },
+  "notRun": [
+    "Playwright/e2e",
+    "real identity/database acceptance",
+    "migrations/seeds",
+    "Lighthouse",
+    "RUM/field INP",
+    "staff research",
+    "private fixture performance",
+    "worker/dependency audits"
+  ],
+  "remoteCI": "BLOCKED: stacked base excluded by ci.yml; prior workflow-scope rejection unresolved; patch unapplied"
+}
