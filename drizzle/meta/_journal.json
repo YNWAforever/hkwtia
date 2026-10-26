@@ -463,6 +463,13 @@
       "when": 1792995522216,
       "tag": "0066_application_supplements",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1792996785920,
+      "tag": "0067_owned_application_paging",
+      "breakpoints": true
     }
   ]
 }

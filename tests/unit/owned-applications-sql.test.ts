@@ -15,10 +15,10 @@ describe("owned application SQL adapter (rendered SQL only)", () => {
     expect(run).toHaveBeenCalledTimes(1);
     const [sql, params] = run.mock.calls[0] as unknown as [string, unknown[]];
     expect(sql).toContain('"applicant_user_id" = $1');
-    expect(sql).toMatch(/order by .*"updated_at" desc, .*"id" desc limit/i);
-    expect(sql).toMatch(/"updated_at" < .*or.*"updated_at" = .*and.*"id" </i);
+    expect(sql).toMatch(/order by .*"updated_at" desc nulls last, .*"id" desc nulls last limit/i);
+    expect(sql).toMatch(/\("membership_applications"\."updated_at", "membership_applications"\."id"\) < \(.*::timestamptz, .*::uuid\)/i);
     expect(sql).toContain("US");
-    expect(params).toEqual([actor.profileId, time, time, id, 3]);
+    expect(params).toEqual([actor.profileId, time, id, 3]);
     expect(sql).not.toContain("company_members");
   });
   it("reads detail with ID and applicant in one SQL query", async () => {

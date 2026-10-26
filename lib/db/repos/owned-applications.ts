@@ -1,22 +1,22 @@
 import "server-only";
-import {and, desc, eq, getTableColumns, sql} from "drizzle-orm";
+import {and, eq, getTableColumns, sql} from "drizzle-orm";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {membershipApplications as applications} from "@/lib/db/server-schema";
 import {createOwnedApplicationReader} from "@/lib/membership/owned-application-reader";
 
-/** Uses the existing repository loader and scoped SQL. Unit proxy-driver tests
- * render this query; execution against PostgreSQL remains separately gated. */
+/** Applicant-only reads; PostgreSQL execution is covered by gated acceptance tests. */
 export function createOwnedApplicationsRepository(load: () => Promise<Database> = getDb) {
   return createOwnedApplicationReader({
     async select({ownerId, take, after}) {
       const db = await load();
+      // Match the composite index null ordering; both key columns are NOT NULL.
       return db.select({
         ...getTableColumns(applications),
         cursorTime: sql<string>`to_char(${applications.updatedAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       }).from(applications).where(and(
         eq(applications.applicantUserId, ownerId),
-        after ? sql`(${applications.updatedAt} < ${after.time}::timestamptz OR (${applications.updatedAt} = ${after.time}::timestamptz AND ${applications.id} < ${after.id}::uuid))` : sql`true`,
-      )).orderBy(desc(applications.updatedAt), desc(applications.id)).limit(take);
+        after ? sql`(${applications.updatedAt}, ${applications.id}) < (${after.time}::timestamptz, ${after.id}::uuid)` : sql`true`,
+      )).orderBy(sql`${applications.updatedAt} DESC NULLS LAST`, sql`${applications.id} DESC NULLS LAST`).limit(take);
     },
     async find({ownerId, id}) {
       const db = await load();

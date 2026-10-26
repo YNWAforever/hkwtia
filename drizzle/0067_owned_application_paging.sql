@@ -1,0 +1,1 @@
+CREATE INDEX "membership_applications_owned_page_idx" ON "membership_applications" USING btree ("applicant_user_id","updated_at" DESC NULLS LAST,"id" DESC NULLS LAST);

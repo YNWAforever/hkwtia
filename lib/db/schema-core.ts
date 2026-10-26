@@ -348,6 +348,7 @@ export const membershipApplications = pgTable(
   },
   (table) => [
     index("membership_applications_applicant_idx").on(table.applicantUserId),
+    index("membership_applications_owned_page_idx").on(table.applicantUserId, table.updatedAt.desc(), table.id.desc()),
     index("membership_applications_company_idx").on(table.companyId),
   ],
 );
