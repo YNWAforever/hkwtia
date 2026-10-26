@@ -14,8 +14,8 @@
  },
  "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan §7 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
  "counts": {
-  "PARTIAL": 48,
-  "BLOCKED": 12
+  "PARTIAL": 49,
+  "BLOCKED": 11
  },
  "total": 60,
  "cases": [
@@ -208,6 +208,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Signed-in member B at /admin redirected to /admin-login \"Staff access is unavailable for this account\" (live production)."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Signed-in member A at /admin redirected to /admin-login (live production)."
    }
   },
   {
@@ -254,7 +264,7 @@
    "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Real login member A (positive control)",
    "themeSource": "plan Task 2",
-   "status": "BLOCKED",
+   "status": "PARTIAL",
    "offlineEvidence": [
     "tests/unit/login-resolution.test.ts",
     "tests/unit/member-login-actions.test.ts",
@@ -264,13 +274,13 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Member A magic-link session not established on production (verifier loop at /member-login)",
+    "Member A magic-link path unconfirmed on production (session via Google only; send blocked in automation)",
     "Real staff D session",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)",
     "Fix on PR #212 not deployed"
    ],
    "nextWithoutAuth": null,
-   "liveAuthEvidence": {
+   "priorLiveAuthEvidence": {
     "document": "auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding",
     "manifest": "auth-browser-live-member-b-manifest.json",
     "actor": "member A",
@@ -278,6 +288,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "BLOCKED",
     "detail": "Two fresh A magic links: Neon verify succeeds, redirect to /member-login with session verifier that never clears; /portal redirects to login; no A session. Reused B token -> INVALID_TOKEN (expected). Google not tried. Code inspection confirms cookie-presence exchange suppression matching symptoms, without captured live cookie state. PR #212 fixes exchange and isolates old session/cache cookies; not deployed or live accepted."
+   },
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Real member A session on production via Google (clean cookie jar): /portal Corporate PAYMENT PENDING 25 seats; session sticky across portal routes and after /admin denial. Magic-link path still unconfirmed (automated send blocked; see operational note). Older production, PR #212 fix a34a631c undeployed; exact-head/Preview evidence open."
    }
   },
   {
@@ -293,7 +313,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Real member A session (B-vs-A comparison; A magic-link session not established on production)",
+    "B-vs-A cross-account access attempt (A and B sessions exist; only distinct dashboards observed)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
    "nextWithoutAuth": null,
@@ -305,6 +325,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Real member B magic-link session on live production: /portal Community ACTIVE 1 seat; own applications, profile (unsaved), billing observed. B-vs-A negative control not yet compared."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A dashboard (Corporate PAYMENT PENDING 25 seats, company Test HIDDEN) is distinct from B's (Community ACTIVE 1 seat). No cross-account access attempt."
    }
   },
   {
@@ -334,6 +364,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "NONSTAFF refusal observed: member B /admin -> /admin-login denial. Staff D positive control and zero-write readback not exercised."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Second NONSTAFF refusal: member A /admin -> /admin-login 'staff access unavailable'; session kept. Staff D and zero-write readback open."
    }
   },
   {
@@ -372,7 +412,17 @@
     "Stripe test mode",
     "Notification sink"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "BLOCKED",
+    "detail": "Member A /portal/billing: PAYMENT PENDING Corporate 25 seats with Continue payment present; NOT clicked, no Stripe action."
+   }
   },
   {
    "id": "UC22-16",
@@ -476,7 +526,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (8 memberships)"
    ],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -505,7 +555,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (all 7 statuses seeded)"
    ],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Real staff D Auth session (members A and B done on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -518,6 +568,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "ACTIVE status rendered for member B; other six statuses not observed live."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "PAYMENT PENDING status rendered for member A (Corporate); remaining statuses not observed live."
    }
   },
   {
@@ -535,7 +595,7 @@
     "T22-06 0067 10k paging/EXPLAIN (t22-06.md)"
    ],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -664,7 +724,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A owns company)"
    ],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Real staff D Auth session (members A and B done on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -677,6 +737,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Company/listing gated for Community tier (member B); edit path not exercised."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A /portal/company: Company Test, public page HIDDEN; viewed read-only, edit not exercised."
    }
   },
   {
@@ -694,7 +764,8 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (SEAT fixture)"
    ],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Real staff D Auth session (members A and B done on live production)",
+    "Seat page unavailable vs dashboard 25 seats for PAYMENT PENDING Corporate (finding, undiagnosed)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -707,6 +778,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Seats page empty for member B (1 seat); assignment not exercised."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A /portal/company/seats: 'Seat access is unavailable for this company' despite dashboard 25 seats (finding, likely PAYMENT PENDING gate; undiagnosed). Assignment not exercised."
    }
   },
   {
@@ -791,7 +872,7 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -819,7 +900,7 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Notification sink",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
@@ -880,7 +961,7 @@
    "dbEvidence": [],
    "blockers": [
     "T-MP08 owner materials + private delivery",
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
    "nextWithoutAuth": null,
@@ -1093,7 +1174,7 @@
     "T22-04A 0066 gated SQL cases (t22-04a.md)"
    ],
    "blockers": [
-    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Real staff D Auth session (members A and B done on live production)",
     "Authenticated browser/HTTP",
     "Zero-write DB readback for refused NONSTAFF",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
@@ -1107,6 +1188,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Member B (NONSTAFF) refused at /admin on live production; zero-write DB readback not performed."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A (NONSTAFF) refused at /admin on live production; zero-write DB readback not performed."
    }
   },
   {
@@ -1375,5 +1466,30 @@
    "member A",
    "staff D"
   ]
- }
+ },
+ "liveAuthRuns": [
+  {
+   "document": "auth-browser-live-member-b.md",
+   "date": "2026-10-26",
+   "actor": "member B",
+   "deployedSha": "6833eb9a",
+   "notExercised": [
+    "member A",
+    "staff D"
+   ]
+  },
+  {
+   "document": "auth-browser-live-member-a.md",
+   "manifest": "auth-browser-live-member-a-manifest.json",
+   "date": "2026-10-27",
+   "actor": "member A",
+   "signIn": "Google OAuth",
+   "deployedSha": "6833eb9a",
+   "notExercised": [
+    "member A magic link",
+    "staff D",
+    "PR #212 exact-head"
+   ]
+  }
+ ]
 }

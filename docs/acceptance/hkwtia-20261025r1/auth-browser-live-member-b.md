@@ -67,6 +67,8 @@ Interpretation (not root-caused): the provider-side verify works, but the app-si
 
 Inventory effect: UC22-11 stays **BLOCKED**, now with this live evidence and a narrowed blocker; UC22-12 stays PARTIAL (B-vs-A comparison impossible without an A session). Counts unchanged: **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**.
 
+Follow-up 2026-10-27: member A later signed in on production **via Google** in a clean cookie jar; magic-link path still unconfirmed. See [auth-browser-live-member-a.md](auth-browser-live-member-a.md). UC22-11 is now PARTIAL.
+
 ### Root cause and fix (branch, not deployed)
 
 Code inspection confirms a cookie-presence defect matching this failure; it does **not** prove which cookies were in the live browser. `main@3eb9992d:proxy.ts:73–75` (also present at branch baseline `488d220a`) returned before exchange whenever `__Secure-neon-auth.session_token` existed, without validating it. This explains a verifier that never clears and no refusal warning after B in the same browser. The portal proxy likewise skips its anonymous redirect on cookie presence; the portal layout then redirects an unresolved actor to login (`app/[locale]/(member)/portal/layout.tsx:62–76`). `lib/auth/server.ts:59–79` validates with cookie cache and refresh disabled and treats the forbidden Server Component cookie-mutation path as signed out.
