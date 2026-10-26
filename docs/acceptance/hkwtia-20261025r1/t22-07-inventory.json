@@ -758,12 +758,14 @@
     "tests/unit/application-queue-submitted-sql.test.ts",
     "tests/unit/admin-dashboard-queue-counts.test.ts"
    ],
-   "dbEvidence": [],
+   "dbEvidence": [
+    "UC22-42/43 gated PostgreSQL exact ID sets, count delta, bidirectional paging and cleanup (uc22-42-43.md; uc22-42-43-manifest.json)"
+   ],
    "blockers": [
     "Real A/B/staff Auth sessions",
     "Authenticated browser/HTTP"
    ],
-   "nextWithoutAuth": "Gated PostgreSQL same-ID-set test on isolated Neon (synthetic fixtures)"
+   "nextWithoutAuth": null
   },
   {
    "id": "UC22-43",
@@ -776,12 +778,14 @@
     "tests/unit/application-queue-table.test.tsx",
     "tests/unit/r2-daily-nav.test.tsx"
    ],
-   "dbEvidence": [],
+   "dbEvidence": [
+    "UC22-42/43 gated PostgreSQL exact ID sets, count delta, bidirectional paging and cleanup (uc22-42-43.md; uc22-42-43-manifest.json)"
+   ],
    "blockers": [
     "Real A/B/staff Auth sessions",
     "Authenticated browser/HTTP"
    ],
-   "nextWithoutAuth": "Same gated PG test"
+   "nextWithoutAuth": null
   },
   {
    "id": "UC22-44",
@@ -1088,10 +1092,11 @@
    "theme": "Submitted uses ID set, not count",
    "status": "PARTIAL",
    "evidence": [
-    "application-queue-submitted-sql.test.ts (rendered Drizzle predicate, exact UUIDs; mutation control)"
+    "application-queue-submitted-sql.test.ts (rendered Drizzle predicate, exact UUIDs; mutation control)",
+    "application-queue-submitted-postgres.test.ts: isolated PostgreSQL exact IDs + equal-count draft mutation observed red, restored green (uc22-42-43.md)"
    ],
    "blockers": [
-    "Live PG + staff session"
+    "Real staff Auth session and authenticated browser/HTTP"
    ]
   },
   {

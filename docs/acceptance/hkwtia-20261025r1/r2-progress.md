@@ -72,3 +72,14 @@ Continued from `3c66cb4e` on 2026-10-26. See [r2-ui-stretch.md](r2-ui-stretch.md
 ## T22-07 offline inventory — 2026-10-26
 
 [T22-07 inventory](t22-07-inventory.md) / [JSON](t22-07-inventory.json) maps UC22-01–60 to current offline/isolated-DB evidence: **0 PASS, 44 PARTIAL, 14 BLOCKED, 2 NOT RUN**. Focused offline rerun of all cited suites: 106 files, 1,235 passed / 0 failed / 3 skipped. Per-UC themes are inferred from plan §7 because the original Test_Cases.csv is not in the repo. This is not the T22-07 acceptance run; Auth/HTTP/browser, Stripe test, sink, T-MP08/10/12 and remote CI remain open.
+
+
+## UC22-42/43 — PostgreSQL same-ID-set acceptance (2026-10-26)
+
+Continued from `eecb0cfe` on the existing PR #212 branch, stacked on #211. [Evidence](uc22-42-43.md) and [redacted manifest](uc22-42-43-manifest.json) record two final gated WebSocket PostgreSQL runs (1/1 passed each) against only verified project `dark-cake-07139424` / branch `br-restless-pond-a11dpkvd`. Eight run-derived application UUIDs cover every real status, equal-count draft near misses and tied microsecond timestamps. Real dashboard counts and queue readers execute against the same repeatable-read fixture. The actual dashboard predicate's scoped diagnostic ID projection equals the expected three IDs and the queue's exact set; the dashboard count delta is three. Limit-one pages in both directions have no missing or duplicated IDs. Exact-ID cleanup and post-rollback absence readbacks pass.
+
+Temporarily replacing submitted statuses with draft preserved the count of three but failed the exact dashboard-ID assertion (observed red, exit 1). Restored production code passes; no bypass remains. Production code is unchanged. No write flags, supplement mounts, real Auth sessions, other target, Stripe, messaging or deployment operations were used. Synthetic actor objects are authorization inputs only, never sessions.
+
+Local Node 22 checks: focused queue/dashboard units **8 passed / 4 files**; full `npm test` **7,976 passed / 658 skipped / 0 failed**, 906 passed files and 117 skipped files; typecheck, lint and build **PASS**. Exact commands and two run manifests are linked above. Build-generated `next-env.d.ts` changes were restored and typecheck repeated successfully.
+
+Four layers: **Code PASS** (test/docs; existing production paths exercised), **Tests PASS**, **Deployment NOT RUN** (push can trigger existing Preview automation), **Runtime isolated DB PASS; real staff Auth and authenticated HTTP/browser BLOCKED**. UC22-42/43 and REG-submitted-id-set remain **PARTIAL**. No Auth/browser PASS or remote exact-head CI result is claimed. Remaining R2 owner, Stripe/provider and browser gates are unchanged.

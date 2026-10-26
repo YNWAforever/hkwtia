@@ -66,8 +66,8 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-39 | Approved member resources ¹ | **BLOCKED** | `member-resource-access.test.ts` | T-MP08 owner materials + private delivery; Real A/B/staff Auth sessions | — |
 | UC22-40 | Receipts ¹ | **BLOCKED** | `portal-billing-page.test.tsx` | Stripe test mode; T-MP08 owner materials + private delivery; Real A/B/staff Auth sessions | — |
 | UC22-41 | Cancellation/refund policy effect ¹ | **BLOCKED** | `membership-self-service-policy.test.ts`, `refund-policy-links.test.tsx` | T-MP10 policy/legal approval; Stripe test mode | — |
-| UC22-42 | Dashboard submitted count = queue ID set ¹ | **PARTIAL** | `application-queue-submitted.test.ts`, `application-queue-submitted-sql.test.ts`, `admin-dashboard-queue-counts.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | Gated PostgreSQL same-ID-set test on isolated Neon (synthetic fixtures) |
-| UC22-43 | Submitted queue filter/list ¹ | **PARTIAL** | `admin-application-queue-query.test.ts`, `application-queue-table.test.tsx`, `r2-daily-nav.test.tsx` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | Same gated PG test |
+| UC22-42 | Dashboard submitted count = queue ID set ¹ | **PARTIAL** | `application-queue-submitted.test.ts`, `application-queue-submitted-sql.test.ts`, `admin-dashboard-queue-counts.test.ts`; DB: [gated PostgreSQL exact ID sets/count/paging](uc22-42-43.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — (DB evidence completed; Auth/browser remains blocked) |
+| UC22-43 | Submitted queue filter/list ¹ | **PARTIAL** | `admin-application-queue-query.test.ts`, `application-queue-table.test.tsx`, `r2-daily-nav.test.tsx`; DB: [gated PostgreSQL exact ID sets/count/paging](uc22-42-43.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — (DB evidence completed; Auth/browser remains blocked) |
 | UC22-44 | Unknown save → receipt reconciliation ¹ | **PARTIAL** | `supplement-service.test.ts`, `supplement-ui.test.tsx`; DB: T22-04A 0066 gated SQL cases (t22-04a.md) (lost-response reconciliation) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
 | UC22-45 | Version conflict / concurrency ¹ | **PARTIAL** | `supplement-service.test.ts`, `supplement-repository.test.ts`; DB: T22-04A 0066 gated SQL cases (t22-04a.md) (distinct-staff concurrency, unique index) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
 | UC22-46 | Bulk actions | **PARTIAL** | `admin-batch-service.test.ts`, `admin-batch-runner.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Notification sink | — |
@@ -92,7 +92,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 | ID | Status | Evidence / blocker |
 | --- | --- | --- |
-| REG-submitted-id-set | PARTIAL | `application-queue-submitted-sql.test.ts` exact UUIDs + mutation control; live PG + staff session open |
+| REG-submitted-id-set | PARTIAL | `application-queue-submitted-sql.test.ts`; [PostgreSQL exact UUID sets, equal-count mutation red/restored green](uc22-42-43.md); real staff Auth/browser remains blocked |
 | REG-listOwned-untruncated | PARTIAL | `owned-application-reader.test.ts`; join-resume keeps full history; runtime caller check needs Auth |
 | REG-late-stream-company-switch | NOT RUN | R3 (T22-09) scope |
 | REG-personal-outcomes | NOT RUN | R3 (T22-12A) scope |
@@ -128,7 +128,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 ## Next steps that do not need Auth
 
-1. **UC22-42/43 live PG:** gated integration test on the isolated T22-02 child that seeds synthetic submitted/draft/review rows and asserts dashboard count query and queue query return the same ID set (not count).
+1. **UC22-42/43 isolated PG completed:** [evidence](uc22-42-43.md) proves exact fixture ID sets through production readers, count delta and bidirectional paging. Staff Auth/browser acceptance remains BLOCKED; rows remain PARTIAL.
 2. **UC22-56 DB p95:** timed 30 warm / 30 cold samples of the owned-page and detail SQL on the existing 10k fixture; record p50/p95, rows, bytes. Browser p95 stays open.
 3. **UC22-01/03/04/05/07/08/09/34/52/55 local anonymous browser:** `next build && next start` against the isolated catalog, Playwright anonymous smoke + four widths + keyboard, anonymous `/admin` and `/portal` negative probes, seeded company absent from public directory, provider-disabled concierge fallback. Preview remains SSO-protected; this would be local-runtime evidence only.
 4. **UC22-57:** local three-run LHCI on `next start` (lab LCP/CLS only; field INP stays NOT_TESTED).
