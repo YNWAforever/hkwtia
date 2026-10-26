@@ -8,6 +8,54 @@ test.beforeEach(async ({context, baseURL}) => {
   expect(baseURL).toBe('http://localhost:3212');
   await context.route('**/*', route => new URL(route.request().url()).origin === baseURL ? route.continue() : route.abort());
 });
+// Infinite decorative effects are excluded; a stuck finite effect fails within 10s.
+async function settleAnimations(page: import('@playwright/test').Page) {
+  await page.evaluate(async () => {
+    const finite = document.getAnimations().filter(animation => {
+      const timing = animation.effect?.getComputedTiming();
+      return timing && Number.isFinite(timing.endTime) && Number.isFinite(timing.iterations);
+    });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        Promise.all(finite.map(animation => animation.finished.catch(() => undefined))),
+        new Promise<never>((_, reject) => {timer = setTimeout(() => reject(Error('Finite animations did not settle within 10s')), 10_000);})
+      ]);
+    } finally {clearTimeout(timer);}
+  });
+}
+// Assert the effective settled colours, including every ancestor's opacity.
+async function homeContrast(page: import('@playwright/test').Page) {
+  const result = await page.locator('.hero .hero-actions .button[href="#pathways"]').evaluate(element => {
+    const rgb = (value: string) => {
+      const channels = value.match(/[\d.]+/g)?.map(Number);
+      if (!channels || channels.length < 3) throw Error(`Unsupported colour: ${value}`);
+      return channels;
+    };
+    const foreground = getComputedStyle(element).color;
+    let background = '';
+    for (let node: Element | null = element; node; node = node.parentElement) {
+      const style = getComputedStyle(node);
+      if (Number(style.opacity) !== 1) throw Error(`Unsettled opacity: ${style.opacity}`);
+      if (!background) {
+        const channels = rgb(style.backgroundColor);
+        if (channels.length === 3 || channels[3] === 1) background = style.backgroundColor;
+        else if (channels[3] !== 0) throw Error('Translucent background needs compositing');
+      }
+    }
+    if (!background) throw Error('No opaque background');
+    const luminance = (value: string) => rgb(value).slice(0, 3).map(c => {
+      const v = c / 255;
+      return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+    const fg = rgb(foreground);
+    if (fg.length === 4 && fg[3] !== 1) throw Error('Translucent foreground');
+    const a = luminance(foreground), b = luminance(background);
+    return {foreground, background, ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)};
+  });
+  expect(result.ratio).toBeGreaterThanOrEqual(4.5);
+  return result;
+}
 const paths = ['/', '/about', '/about/chairman', '/about/committees', '/membership', '/ai-ops', '/contact', '/members'];
 for (const prefix of ['', '/zh']) for (const width of [375, 768, 1024, 1440]) {
   test(`${prefix || 'en'} ${width} public render, keyboard and axe`, async ({page}, info) => {
@@ -24,8 +72,10 @@ for (const prefix of ['', '/zh']) for (const width of [375, 768, 1024, 1440]) {
       await expect(page.locator('a.skip-link')).toBeFocused();
       await page.keyboard.press('Enter');
       await expect(page).toHaveURL(/#main-content$/);
+      await settleAnimations(page);
+      const contrast = path === '/' ? await homeContrast(page) : undefined;
       const axe = await new AxeBuilder({page}).analyze();
-      records.push({path, status: response?.status(), heading: await page.locator('h1').innerText(), axe: axe.violations.map(v => ({id: v.id, impact: v.impact}))});
+      records.push({path, status: response?.status(), contrast, heading: await page.locator('h1').innerText(), axe: axe.violations.map(v => ({id: v.id, impact: v.impact}))});
       await page.screenshot({path: info.outputPath(path.replaceAll('/', '_') + '.png'), fullPage: true});
       expect.soft(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
     }
@@ -106,3 +156,13 @@ for (const prefix of ['', '/zh']) for (const area of ['admin', 'portal']) {
     await info.attach('initial-boundaries', {body: JSON.stringify(records), contentType: 'application/json'});
   });
 }
+
+for (const prefix of ['', '/zh']) test(`${prefix || 'en'} reduced-motion home axe`, async ({page}, info) => {
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.goto(prefix || '/');
+  await settleAnimations(page);
+  const contrast = await homeContrast(page);
+  const axe = await new AxeBuilder({page}).analyze();
+  await info.attach('reduced-motion', {body: JSON.stringify({contrast, violations: axe.violations}), contentType: 'application/json'});
+  expect(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
+});

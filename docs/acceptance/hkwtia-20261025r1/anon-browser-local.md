@@ -85,3 +85,35 @@ Counts now **0 PASS, 46 PARTIAL, 14 BLOCKED, 0 NOT RUN**. Local anonymous eviden
 | /partners | 2712.5 | 0 | 77 |
 
 Final checks under Node 22.23.4: full `npm test` **7,984 passed / 659 skipped / 0 failed**, 909 passed files / 118 skipped; typecheck PASS, lint 0 errors / 77 existing warnings; guarded production build PASS. Typecheck/lint repeated after restoring `next-env.d.ts`. Browser suite remains red as detailed above. Server stopped after collection, including the prior diagnostic localhost listener. No manual deployment or merge; push may trigger existing automation, whose result is not verified. Remaining gates: contrast findings, full four-tier/paid flows, real identities, Stripe test, provider/sink, screen reader, controlled/field performance, Preview/SSO and remote exact-head CI.
+
+
+## Settled CTA contrast replay — 2026-10-26
+
+Continued from `cd84a012` on the existing branch / PR #212. Chromium verified the timing diagnosis. At first DOM insertion, CTA computed foreground/background are `rgb(255, 255, 255)` / `rgb(26, 79, 130)`; CTA opacity is 1 but `.hero-actions` opacity is 0. Other ancestors are 1. After finite `document.getAnimations()` effects finish, all ancestor opacities are 1 and colours stay white / `#1a4f82`. Hover computes white / `#0f4c81`.
+
+Pausing the actual `xp-rise` animation at **533.43909ms** gives ancestor opacity **0.552**. Axe reproduces the exact prior serious finding: effective foreground **`#96b0c7`**, background **`#154e82`**, reported ratio **3.81**. WCAG sRGB calculations in code yield **3.818212:1** for those rounded sampled colours, **8.451873:1** settled, **8.856709:1** hover. No configured grey text exists: the effective grey is composited during the entrance fade. **No CSS or brand/CTA colours changed.** A product change to avoid fading the CTA could be considered separately; none was implemented.
+
+Test-first evidence: the first unforced assertion probe passed because load had settled. A temporary hostile probe paused the real CTA animation at 530ms; the new assertion then failed explicitly with `Unsettled opacity: 0.539506`. Read the failure, removed the probe, and ran the final suite. The measurement now waits for finite animation effects before every axe scan, excludes infinite iterations/effect ends, and fails after 10s if finite effects remain stuck. It never disables color-contrast. The home CTA assertion resolves an opaque background, rejects translucent colours/ancestors and calculates ratio ≥4.5 at **375/768/1024/1440 × EN/ZH**; both locales also run reduced-motion home axe scans.
+
+Before: **15 passed / 5 failed**, including three transient home contrast failures. After: **20 passed / 2 failed / 0 skipped**, no flaky successes; **64/64** public path/locale/width renders and axe scans complete with **zero axe violations**. All eight settled CTA ratios are **8.451873:1**; both reduced-motion home checks pass. **The settled contrast finding is cleared.** The two remaining failures are unchanged EN/ZH four-tier assertions (only Community/Patron; Startup/Corporate require deliberately absent Stripe price IDs). Paid-tier finding and UC22-01/55/57 remain **PARTIAL**. Screen reader, Preview/SSO/deployment, real Auth, Stripe test, provider/sink, controlled performance and field INP remain open. Inventory stays **0 PASS, 46 PARTIAL, 14 BLOCKED, 0 NOT RUN**.
+
+Guarded Node 22 build/start used the existing isolated-target launcher and localhost origin, no migration/seed or fixture write. Empty browser state, cross-origin aborts, no Auth or write flags remain intact. Directory preflight is the existing read-only fixture evidence. Full anonymous command: `HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=http://localhost:3212 npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --project=chromium --reporter=json`. Build/start: `npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts build` / `start`.
+
+### Repeated UC22-57 lab medians
+
+Same `lighthouserc.js`, ten URLs, **three runs each / 30 reports**, `LHCI_BASE_URL=http://localhost:3212`, Playwright Chromium executable via `CHROME_PATH`, Node 22 `lhci collect --config=lighthouserc.js`. No upload or category/assertion PASS. Initial collection overlaps browser replay; units finished before LHCI. Shared-host mobile simulated lab observations; **field INP NOT_TESTED**.
+
+| URL | Median LCP ms | Median CLS | Median TBT ms |
+| --- | ---: | ---: | ---: |
+| /events | 2882.5 | 0 | 43.5 |
+| /membership | 2333.8 | 0 | 82.0 |
+| / | 2872.7 | 0 | 138.0 |
+| /partners | 2508.4 | 0 | 94.0 |
+| /zh/programmes | 2712.9 | 0 | 93.0 |
+| /zh/events | 2868.6 | 0 | 50.0 |
+| /zh/membership | 2711.9 | 0 | 86.5 |
+| /zh/partners | 2713.9 | 0 | 80.0 |
+| /programmes | 2712.9 | 0 | 108.0 |
+| /zh | 2938.2 | 0 | 161.0 |
+
+Node 22 checks: focused home/width and reduced-motion cases green in full replay; full `npm test` **7,984 passed / 659 skipped / zero failures**, 909 passed files / 118 skipped; typecheck PASS (repeated after restoring generated `next-env.d.ts`), lint PASS (0 errors / 77 existing warnings), guarded build PASS. Local acceptance server stopped and no listener remains on port 3212. No new branch/PR, deployment, real Auth, write flags or CI trigger patch application. Raw reports remain ignored; compact observations, diagnosis and medians are in manifest `settledContrastRun`.

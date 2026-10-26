@@ -33,12 +33,13 @@
    "blockers": [
     "Preview behind Vercel SSO (no bypass)"
    ],
-   "nextWithoutAuth": "Resolve observed accessibility findings; Preview/SSO remains unverified.",
+   "nextWithoutAuth": "Obtain Preview/SSO evidence; local render and settled contrast checks complete.",
    "localBrowserEvidence": {
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "EN/ZH eight public paths render across four widths; local only, Preview/SSO unverified."
+    "detail": "64 EN/ZH public path/width combinations render; settled axe scans clear, eight home CTA ratios 8.452:1. Preview/SSO unverified.",
+    "run": "settledContrastRun (base cd84a012)"
    }
   },
   {
@@ -1049,12 +1050,13 @@
     "Browser/device matrix",
     "Screen reader"
    ],
-   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "nextWithoutAuth": "Screen reader and real-device checks remain open; settled and reduced-motion local axe complete.",
    "localBrowserEvidence": {
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "Four-width render/overflow/skip-link/axe checks executed; observed serious home CTA contrast finding. Screen reader NOT_TESTED."
+    "detail": "Settled axe clear on 64 combinations; home CTA 8.452:1 at four widths × both locales; two reduced-motion home axe checks clear. Prior 3.81 finding reproduced mid-animation at ancestor opacity 0.552. Screen reader NOT_TESTED.",
+    "run": "settledContrastRun (base cd84a012)"
    }
   },
   {
@@ -1096,7 +1098,8 @@
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "Three-run local LHCI per ten public EN/ZH URLs; median LCP/CLS/TBT recorded. Field INP NOT_TESTED; no Preview performance PASS."
+    "detail": "Repeated three-run local LHCI per same ten URLs; updated median LCP/CLS/TBT in settledContrastRun.lighthouse. Shared-host lab; field INP NOT_TESTED; Preview/SSO unverified.",
+    "run": "settledContrastRun (base cd84a012)"
    }
   },
   {
