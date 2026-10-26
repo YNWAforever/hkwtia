@@ -68,3 +68,7 @@ Continued from `3c66cb4e` on 2026-10-26. See [r2-ui-stretch.md](r2-ui-stretch.md
 ## T22-06 verified database follow-up — 2026-10-26
 
 [T22-06 evidence](t22-06.md) supersedes the earlier PostgreSQL/index/performance pending claims for owned paging. A 10k bulk fixture was affordable. Migration 0067 and index-compatible tuple SQL reduce first/deep paging to 21 index rows with no sort. Five gated cases pass and cleanup verifies absence. This does not establish Auth/browser or production acceptance.
+
+## T22-07 offline inventory — 2026-10-26
+
+[T22-07 inventory](t22-07-inventory.md) / [JSON](t22-07-inventory.json) maps UC22-01–60 to current offline/isolated-DB evidence: **0 PASS, 44 PARTIAL, 14 BLOCKED, 2 NOT RUN**. Focused offline rerun of all cited suites: 106 files, 1,235 passed / 0 failed / 3 skipped. Per-UC themes are inferred from plan §7 because the original Test_Cases.csv is not in the repo. This is not the T22-07 acceptance run; Auth/HTTP/browser, Stripe test, sink, T-MP08/10/12 and remote CI remain open.

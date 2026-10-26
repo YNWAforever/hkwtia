@@ -1,0 +1,1150 @@
+{
+ "task": "T22-07",
+ "scope": "UC22-01–60 existing membership/staff features (R2); R3/R4 capabilities not claimed",
+ "date": "2026-10-26",
+ "branch": "wtia/hkwtia-plan-r1-20261025",
+ "pr": 212,
+ "inventoryBaseHead": "6681eb970968d0a70f385e2771628bbfc2f1f86f",
+ "testedCodeHead": "a5891fccfd3761186e69c25b411b0b16b001eeac",
+ "statusRules": {
+  "PASS": "Fresh actual/result/evidence for the full UC including real identity/Stripe/DB where the UC requires it",
+  "PARTIAL": "Current-tree offline unit and/or isolated-DB evidence exists; acceptance-critical runtime layer still open",
+  "BLOCKED": "Core dependency of the UC is unavailable (Auth sessions, Stripe test, sink, legal approval, owner materials, tool contract, remote CI)",
+  "NOT RUN": "No external blocker for an offline/anonymous run, but not executed in this run"
+ },
+ "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan §7 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
+ "counts": {
+  "NOT RUN": 2,
+  "PARTIAL": 44,
+  "BLOCKED": 14
+ },
+ "total": 60,
+ "cases": [
+  {
+   "id": "UC22-01",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Public entry pages render (anonymous)",
+   "themeSource": "inferred",
+   "status": "NOT RUN",
+   "offlineEvidence": [
+    "tests/unit/membership-public-catalog.test.ts",
+    "tests/unit/navigation.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Preview behind Vercel SSO (no bypass)"
+   ],
+   "nextWithoutAuth": "Local `next build && next start` + Playwright anonymous smoke against isolated-catalog env"
+  },
+  {
+   "id": "UC22-02",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Current concierge chat UI (not R3 actions)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/concierge-widget.test.tsx",
+    "tests/unit/concierge-shell.test.tsx",
+    "tests/unit/concierge-unavailable-ui.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real AI provider evaluation",
+    "Browser"
+   ],
+   "nextWithoutAuth": "Local Playwright disabled-provider path (manual fallback) without Auth"
+  },
+  {
+   "id": "UC22-03",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Four-tier membership comparison",
+   "themeSource": "plan Task 5 (T22-05)",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-page-catalog.test.tsx",
+    "tests/unit/membership-catalog.test.ts",
+    "tests/unit/membership-tier-content.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser visual matrix on populated catalog"
+   ],
+   "nextWithoutAuth": "Local Playwright visual at 375/768/1024/1440"
+  },
+  {
+   "id": "UC22-04",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Comparison seats/help/anchor",
+   "themeSource": "plan Task 5 (T22-05)",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-page-catalog.test.tsx",
+    "tests/unit/membership-links.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser visual matrix"
+   ],
+   "nextWithoutAuth": "Same local Playwright run"
+  },
+  {
+   "id": "UC22-05",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Locale EN/ZH switching and hrefs",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/locale-switcher.test.tsx",
+    "tests/unit/locale-href-boundary.test.ts",
+    "tests/unit/membership-links-locale.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser"
+   ],
+   "nextWithoutAuth": "Local Playwright anonymous locale round-trip"
+  },
+  {
+   "id": "UC22-06",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "next= destination preserved through login",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/login-destination.test.ts",
+    "tests/unit/login-outcome-redirect.test.tsx",
+    "tests/unit/login-entry-routing.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-07",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Anonymous admin boundary",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-page-auth.test.ts",
+    "tests/unit/admin-page-auth-source.test.ts",
+    "tests/unit/admin-login-guard.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Anonymous HTTP probe of /admin/* on local server (no Auth needed for the negative control)"
+  },
+  {
+   "id": "UC22-08",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Anonymous portal boundary / admin redirect",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-admin-redirect.test.tsx",
+    "tests/unit/portal-navigation-access.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Anonymous HTTP probe of /portal/* on local server"
+  },
+  {
+   "id": "UC22-09",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Membership page help / CTA",
+   "themeSource": "plan Task 5 (T22-05)",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-page-catalog.test.tsx",
+    "tests/unit/join-plan-chooser.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser visual"
+   ],
+   "nextWithoutAuth": "Local Playwright"
+  },
+  {
+   "id": "UC22-10",
+   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Policy / self-service copy consistency",
+   "themeSource": "plan Task 5 + Task 12",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-self-service-policy.test.ts",
+    "tests/unit/refund-policy-links.test.tsx",
+    "tests/unit/policy-pages.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP10 policy/legal approval"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-11",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Real login member A (positive control)",
+   "themeSource": "plan Task 2",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/login-resolution.test.ts",
+    "tests/unit/member-login-actions.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-12",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Real login member B (negative control vs A)",
+   "themeSource": "plan Task 2",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/login-resolution-server.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-13",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Real login staff D / NONSTAFF refusal",
+   "themeSource": "plan Task 2",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/admin-login-actions.test.ts",
+    "tests/unit/admin-login-guard.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-14",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Free (community) join",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/hosted-free-onboarding.test.ts",
+    "tests/unit/join-service.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (FREE fixture)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-15",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Paid join checkout",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/checkout-service.test.ts",
+    "tests/unit/membership-checkout-status-route.test.ts",
+    "tests/unit/join-billing-pages.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Stripe test mode",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-16",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Owner checks on join/application",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-application-security.test.ts",
+    "tests/unit/join-actions-profile-identity.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A read OK, B read of A = null)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-17",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Retained input / resume",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-form-recovery.test.tsx",
+    "tests/unit/join-draft.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null,
+   "notes": "tests/integration/join-resume.test.ts exists but is gated and was skipped in the focused run"
+  },
+  {
+   "id": "UC22-18",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Identity/target gate and existing security fixes",
+   "themeSource": "plan Task 2 + Task 3",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/hkwtia-acceptance-target.test.ts",
+    "tests/unit/acceptance-guard.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Exact-head remote CI (stacked base; workflow scope)"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-19",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Dependency/security release gate",
+   "themeSource": "plan Task 3",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/ci-security-contract.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Exact-head remote CI (stacked base; workflow scope)",
+    "Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md)"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-20",
+   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "No second subscription",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/billing-checkout-locking.test.ts",
+    "tests/unit/membership-uniqueness-schema.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Stripe test mode"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-21",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Multiple memberships view/selection",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-membership-selection.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (8 memberships)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-22",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Seven membership statuses",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-lifecycle.test.ts",
+    "tests/unit/membership-entitlements.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (all 7 statuses seeded)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-23",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Own applications list (SQL paging)",
+   "themeSource": "plan Task 10",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/owned-applications-sql.test.ts",
+    "tests/unit/owned-application-reader.test.ts",
+    "tests/unit/portal-sql-paging.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-24",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Own application detail + supplement history",
+   "themeSource": "plan Task 8 + Task 10",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/owned-application-reader.test.ts",
+    "tests/unit/supplement-service.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md)",
+    "T22-04A 0066 gated SQL cases (t22-04a.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-25",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Member supplement response",
+   "themeSource": "plan Task 8 + Task 9",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/supplement-service.test.ts",
+    "tests/unit/supplement-ui.test.tsx",
+    "tests/unit/supplement-actions.test.ts",
+    "tests/unit/supplement-binding.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md)",
+    "Gated SQL binding cases (r2-resources-binding.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Bound forms unmounted; write flag disabled"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-26",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Application form submit",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-schema.test.ts",
+    "tests/unit/join-actions.test.ts",
+    "tests/unit/join-page.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-27",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Form validation and correction",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-schema.test.ts",
+    "tests/unit/join-form-recovery.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-28",
+   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Consent capture/withdrawal",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/profile-consent-audit.test.ts",
+    "tests/unit/whatsapp-consent.test.ts",
+    "tests/unit/contacts-consent-audit.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (opt-ins false)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-29",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Company profile edit",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/company-profile-core.test.ts",
+    "tests/unit/update-company-action.test.ts",
+    "tests/unit/portal-company-forms.test.tsx"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A owns company)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-30",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Seat assignment",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-seat-mutations.test.ts",
+    "tests/unit/portal-seat-bulk.test.ts",
+    "tests/integration/seat-capacity.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (SEAT fixture)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-31",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Seat/role revocation",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/company-portal-role-race.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (REVOKED fixture)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-32",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Existing external tool identity exchange contract",
+   "themeSource": "plan Task 7",
+   "status": "BLOCKED",
+   "offlineEvidence": [],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP12A sandbox contract / T-MP12B"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-33",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Public company profile review (staff)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/company-profiles-repository.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-34",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Public directory isolation (opt-in only)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/public-directory-availability.test.tsx",
+    "tests/unit/directory-paging.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (directory visibility false)"
+   ],
+   "blockers": [
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Anonymous local check that seeded company is absent from public directory on isolated Neon"
+  },
+  {
+   "id": "UC22-35",
+   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Portal directory isolation",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-directory.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-36",
+   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Event registration",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/event-registration-form.test.tsx",
+    "tests/unit/event-registration-public-action.test.ts",
+    "tests/unit/guest-rsvp-recovery.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-37",
+   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Ticket purchase",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/ticket-checkout-action-recovery.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Stripe test mode",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-38",
+   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Stripe webhook processing",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/webhook-service.test.ts",
+    "tests/unit/webhook-route.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Stripe test mode"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-39",
+   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Approved member resources",
+   "themeSource": "plan Task 11",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/member-resource-access.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP08 owner materials + private delivery",
+    "Real A/B/staff Auth sessions"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-40",
+   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Receipts",
+   "themeSource": "plan Task 11",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/portal-billing-page.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Stripe test mode",
+    "T-MP08 owner materials + private delivery",
+    "Real A/B/staff Auth sessions"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-41",
+   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Cancellation/refund policy effect",
+   "themeSource": "plan Task 12",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/membership-self-service-policy.test.ts",
+    "tests/unit/refund-policy-links.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP10 policy/legal approval",
+    "Stripe test mode"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-42",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Dashboard submitted count = queue ID set",
+   "themeSource": "plan Task 4",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/application-queue-submitted.test.ts",
+    "tests/unit/application-queue-submitted-sql.test.ts",
+    "tests/unit/admin-dashboard-queue-counts.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Gated PostgreSQL same-ID-set test on isolated Neon (synthetic fixtures)"
+  },
+  {
+   "id": "UC22-43",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Submitted queue filter/list",
+   "themeSource": "plan Task 4",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-application-queue-query.test.ts",
+    "tests/unit/application-queue-table.test.tsx",
+    "tests/unit/r2-daily-nav.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Same gated PG test"
+  },
+  {
+   "id": "UC22-44",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Unknown save → receipt reconciliation",
+   "themeSource": "plan Task 8",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/supplement-service.test.ts",
+    "tests/unit/supplement-ui.test.tsx"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md) (lost-response reconciliation)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-45",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Version conflict / concurrency",
+   "themeSource": "plan Task 8",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/supplement-service.test.ts",
+    "tests/unit/supplement-repository.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md) (distinct-staff concurrency, unique index)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-46",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Bulk actions",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-batch-service.test.ts",
+    "tests/unit/admin-batch-runner.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-47",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Import",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/member-import-service.test.ts",
+    "tests/unit/member-import-validation.test.ts",
+    "tests/unit/member-import-upload-route.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-48",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Staff case handling (current, non-R3)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/application-case-actions.test.ts",
+    "tests/unit/application-case-form.test.tsx",
+    "tests/unit/application-case-facts.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-49",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Staff draft review/adopt (current)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/application-draft-actions.test.ts",
+    "tests/unit/application-draft-adopt.test.tsx",
+    "tests/unit/ai-draft-validation.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-50",
+   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Staff guard (NONSTAFF refused, zero writes)",
+   "themeSource": "plan Task 2 + Task 8",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-server-action-boundaries.test.ts",
+    "tests/unit/supplement-actions.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (NONSTAFF zero row change)",
+    "T22-04A 0066 gated SQL cases (t22-04a.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-51",
+   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "Concierge cites sources (current)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/ai-concierge-grounding.test.ts",
+    "tests/unit/concierge-service.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real AI provider evaluation",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-52",
+   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "Concierge provider failure path",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/concierge-unavailable-ui.test.tsx",
+    "tests/unit/concierge-readiness.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real AI provider evaluation",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Local Playwright with provider disabled"
+  },
+  {
+   "id": "UC22-53",
+   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "Concierge data isolation",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/concierge-security.test.ts",
+    "tests/integration/concierge-route.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Real AI provider evaluation"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-54",
+   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "External tool authorization contract",
+   "themeSource": "plan Task 7",
+   "status": "BLOCKED",
+   "offlineEvidence": [],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP12A sandbox contract / T-MP12B"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-55",
+   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Mobile widths / zoom / keyboard / screen reader",
+   "themeSource": "plan Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/mobile-navigation.test.tsx",
+    "tests/unit/supplement-ui.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser/device matrix",
+    "Screen reader"
+   ],
+   "nextWithoutAuth": "Local Playwright 375/768/1024/1440 + keyboard on public pages"
+  },
+  {
+   "id": "UC22-56",
+   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Private list performance (20-row p95 ≤2s)",
+   "themeSource": "plan Task 10 + Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-sql-paging.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md) (21 index rows, no sort)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "30 warm/30 cold timed samples not run"
+   ],
+   "nextWithoutAuth": "Timed 30 warm/30 cold SQL samples on isolated 10k fixture (DB-only p95)"
+  },
+  {
+   "id": "UC22-57",
+   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Public performance LCP/CLS (INP field)",
+   "themeSource": "plan Task 14",
+   "status": "NOT RUN",
+   "offlineEvidence": [
+    "tests/unit/production-lhci-target.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "RUM for field INP",
+    "Preview behind SSO"
+   ],
+   "nextWithoutAuth": "Local LHCI 3-run against `next start`; field INP stays NOT_TESTED"
+  },
+  {
+   "id": "UC22-58",
+   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Hong Kong date boundaries (UTC 15:59/16:00)",
+   "themeSource": "plan Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/hong-kong-time.test.ts",
+    "tests/unit/event-hong-kong-datetime.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Rendered browser check"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-59",
+   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Exact-head CI gate",
+   "themeSource": "plan Task 3",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/ci-security-contract.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Exact-head remote CI (stacked base; workflow scope)",
+    "stacked-ci-trigger.patch unapplied"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-60",
+   "group": "UC22-60 member→staff→member same application (T22-04/07)",
+   "theme": "Member→staff→member same application, persisted readback",
+   "themeSource": "plan Task 9/15",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/supplement-binding.test.ts",
+    "tests/unit/supplement-ui.test.tsx"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md)",
+    "Gated SQL binding cases (r2-resources-binding.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Bound forms unmounted; write flag disabled"
+   ],
+   "nextWithoutAuth": null
+  }
+ ],
+ "additionalRegressions": [
+  {
+   "id": "REG-submitted-id-set",
+   "theme": "Submitted uses ID set, not count",
+   "status": "PARTIAL",
+   "evidence": [
+    "application-queue-submitted-sql.test.ts (rendered Drizzle predicate, exact UUIDs; mutation control)"
+   ],
+   "blockers": [
+    "Live PG + staff session"
+   ]
+  },
+  {
+   "id": "REG-listOwned-untruncated",
+   "theme": "listOwned for non-portal callers not truncated",
+   "status": "PARTIAL",
+   "evidence": [
+    "owned-application-reader.test.ts",
+    "join-resume retains complete owned history (r2-progress.md)"
+   ],
+   "blockers": [
+    "Runtime caller check with Auth"
+   ]
+  },
+  {
+   "id": "REG-late-stream-company-switch",
+   "theme": "Late stream after company switch",
+   "status": "NOT RUN",
+   "evidence": [],
+   "blockers": [
+    "R3 (T22-09) scope — not claimed in T22-07"
+   ]
+  },
+  {
+   "id": "REG-personal-outcomes",
+   "theme": "Personal outcomes",
+   "status": "NOT RUN",
+   "evidence": [],
+   "blockers": [
+    "R3 (T22-12A) scope"
+   ]
+  },
+  {
+   "id": "REG-provider-unknown-outcome",
+   "theme": "Provider without idempotency → unknown",
+   "status": "NOT RUN",
+   "evidence": [],
+   "blockers": [
+    "R4 (T22-11) scope"
+   ]
+  }
+ ],
+ "focusedRun": {
+  "command": "npx -p node@22 node node_modules/vitest/vitest.mjs run <all offlineEvidence files> + tests/integration/join-resume.test.ts (DATABASE_URL unset)",
+  "exitCode": 0,
+  "files": 106,
+  "testsPassed": 1235,
+  "testsFailed": 0,
+  "testsSkipped": 3,
+  "skippedFiles": [
+   "tests/integration/join-resume.test.ts (gated; not counted as evidence)"
+  ],
+  "headAtRun": "6681eb970968d0a70f385e2771628bbfc2f1f86f",
+  "scope": "offline unit/jsdom/rendered-SQL only; no Auth, browser, Stripe, sink or provider"
+ }
+}
