@@ -411,7 +411,7 @@ Result: 1 row, `role=superadmin`, `onboarding_state=complete`, `locale=zh` (mirr
 
 `tests/e2e/preview-oidc-staff-magic-link.spec.ts` (opt-in, OIDC fixture): `/admin-login` clean jar → send (`PREVIEW_LOGIN_EMAIL_FILE` or headed `PREVIEW_LOGIN_HANDOFF=true`) → `?sent=1` → wait for the link via `PREVIEW_MAGIC_LINK_FILE` **or any tab of the window** (fixes the member A second-tab stall) → assert landing `/admin` (fails with `NEEDS_PROFILE` on the recovery screen) → sticky `/admin` reload → `/portal` redirects to `/admin`. Read-only; no form/approval/queue action. `allowedMagicLink` moved to `tests/fixtures/preview-magic-link.ts` (shared with the member spec). Without opt-in: 2 skipped (member + staff). `tsc` + eslint clean.
 
-### Status: READY FOR HANDOFF (not yet run)
+### Status: READY FOR HANDOFF (superseded — PASS below)
 
 Willy steps (headed, box display `:6`):
 
@@ -424,3 +424,25 @@ Willy steps (headed, box display `:6`):
 2. In the Playwright Chromium on `/admin-login`, Willy types the **staff (Superadmin) Google address** (vault login 1083647) and clicks Send.
 3. Willy opens the "Sign In to hkwtia-m2-preview" email in the staff inbox and pastes the link into the **same Playwright window** (address bar or a new tab) within 5 minutes.
 4. Expect `[open] … (admin)`, `[sticky]`, `[separation]` and `EXIT=0`.
+
+## Staff Preview magic-link — PASS (2026-10-27 HKT)
+
+Headed handoff on box display `:6`, run ~04:02–04:07 Asia/Hong_Kong (spec runtime 4.7 min), against the PR #212 branch alias, which served Preview **`dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW`** (`hkwtia-p31qrc7d4-…`, commit **`2435152d`** = branch head at run time, READY 03:55 HKT). Spec `tests/e2e/preview-oidc-staff-magic-link.spec.ts` via the OIDC fixture (`x-vercel-trusted-oidc-idp-token` scoped to the Preview origin; Deployment Protection unchanged). Willy typed the staff address and pasted the link; the agent never saw or recorded the address, link, token or cookie.
+
+| Step | Result |
+| --- | --- |
+| `[send]` | `?sent=1` reached on `/admin-login` (Preview origin) — no `limiter_unavailable` |
+| `[open]` | Magic link landed on **`/admin`** (role resolved to staff/admin; not the "needs-profile" recovery screen) |
+| `[sticky]` | Reload of `/admin` stays on `/admin` |
+| `[separation]` | `/portal` redirects a staff session to `/admin` |
+| Result | **1 passed (4.7m), EXIT=0** |
+
+**Status: PASS — Staff Preview magic-link Auth end-to-end** (send → verify → `/admin` session → sticky → portal/admin separation) on exact-head Preview `2435152d`. Actor: the Preview-only `superadmin` profile for Auth user `894b2e40-…` granted above. Read-only: no approval, queue, member, form or settings action; no DB write beyond the earlier profile grant.
+
+Scope limits (not claimed):
+
+- **Google still off on Preview** (`AUTH_GOOGLE_ENABLED` unset for this branch) — magic-link path only. Enabling Google on Preview is a Vercel env change needing Willy's approval.
+- Superadmin, not the **staff D fixture role**; no staff write, zero-write NONSTAFF readback or `/admin` route walk on Preview.
+- Preview only — Production unchanged and still on `main@3eb9992d`.
+
+Inventory: status counts unchanged (**0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**); UC22-11/13 blockers reworded and `previewAuthEvidence` added (see `t22-07-inventory.json`).

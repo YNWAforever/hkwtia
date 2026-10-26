@@ -217,3 +217,9 @@ Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (Preview, 
 Continued from `5cee1735` on PR #212. [Details](r2-blockers-unblock.md#staff-preview-auth--profile-grant--spec-ready-for-headed-handoff-2026-10-27-hkt). Google is off on Preview, so the staff path is magic link on `/admin-login`. Identified the real staff Auth user on Preview (`894b2e40-…`, earlier Google sign-in) by email-hash match against the single Production superadmin profile (read-only, no plaintext); granted it a **Preview-only** `profiles` row (`superadmin`, onboarding complete) — Member A is a different user. New opt-in spec `tests/e2e/preview-oidc-staff-magic-link.spec.ts` asserts `/admin`, sticky reload and `/portal` → `/admin`, and picks the link up from any tab. Next: Willy's headed staff send + link paste.
 
 Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production write/deploy, no Vercel env/SSO/Neon Auth config change.
+
+## Staff Preview magic-link — PASS — 2026-10-27
+
+Continued from `2435152d` on PR #212. [Evidence](r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt): headed handoff (~04:02–04:07 HKT) on the PR alias → Preview **`dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW`** (commit `2435152d`, exact head at run time). `preview-oidc-staff-magic-link.spec.ts`: `[send]` `?sent=1` on `/admin-login`; `[open]` landed on `/admin`; `[sticky]` `/admin` reload stays; `[separation]` `/portal` → `/admin`. **1 passed (4.7m), EXIT=0** — **Staff Preview magic-link Auth PASS**. Google remains off on Preview (`AUTH_GOOGLE_ENABLED` unset) — magic-link path only. Superadmin, not staff D; read-only.
+
+Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. UC22-11/13 blocker wording updated for Preview A (needs-profile) and staff magic-link evidence. No production, Vercel env, SSO or Neon Auth change; no new DB write.

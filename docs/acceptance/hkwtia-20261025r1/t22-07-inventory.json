@@ -322,10 +322,10 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Member A magic-link path unconfirmed on production (session via Google only; send blocked in automation)",
-    "Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested)",
+    "Member A magic-link verified on PR #212 Preview (needs-profile; no Preview profile, so no /portal session); production magic link unconfirmed",
+    "Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)",
-    "Fix on PR #212 not deployed"
+    "Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production"
    ],
    "nextWithoutAuth": null,
    "priorLiveAuthEvidence": {
@@ -346,6 +346,27 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Real member A session on production via Google (clean cookie jar): /portal Corporate PAYMENT PENDING 25 seats; session sticky across portal routes and after /admin denial. Magic-link path still unconfirmed (automated send blocked; see operational note). Older production, PR #212 fix a34a631c undeployed; exact-head/Preview evidence open."
+   },
+   "previewAuthEvidence": {
+    "document": "r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile",
+    "actor": "member A",
+    "signIn": "Neon Auth magic link",
+    "host": "PR #212 Preview branch alias",
+    "deployment": "dpl_ABbWNxaAmyQJ5kV1ovnzDZbQuCbo",
+    "deployedSha": "0498d94e",
+    "result": "PASS (needs-profile)",
+    "detail": "send ?sent=1; verified create-member-profile screen, sticky after reload. No Preview profile, so no /portal session; Create member profile not clicked."
+   },
+   "previewAuthEvidenceStaff": {
+    "document": "r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt",
+    "actor": "staff (Superadmin, Preview-only profile)",
+    "signIn": "Neon Auth magic link",
+    "host": "PR #212 Preview branch alias",
+    "deployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
+    "deployedSha": "2435152d",
+    "spec": "tests/e2e/preview-oidc-staff-magic-link.spec.ts",
+    "result": "PASS (auth path)",
+    "detail": "send ?sent=1 on /admin-login; link landed /admin; /admin reload sticky; /portal -> /admin. 1 passed (4.7m). Google off on Preview. Not staff D; read-only."
    }
   },
   {
@@ -399,7 +420,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested)",
+    "Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised)",
     "Zero-write DB readback for refused NONSTAFF",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -432,6 +453,17 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Staff positive control: Willy Lai (Superadmin) signed in via Google on /admin-login in a clean cookie jar; session sticky across /admin, members, queue, events-mgmt, inbox. Not the staff D fixture role; staff magic link and zero-write readback open."
+   },
+   "previewAuthEvidenceStaff": {
+    "document": "r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt",
+    "actor": "staff (Superadmin, Preview-only profile)",
+    "signIn": "Neon Auth magic link",
+    "host": "PR #212 Preview branch alias",
+    "deployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
+    "deployedSha": "2435152d",
+    "spec": "tests/e2e/preview-oidc-staff-magic-link.spec.ts",
+    "result": "PASS (auth path)",
+    "detail": "send ?sent=1 on /admin-login; link landed /admin; /admin reload sticky; /portal -> /admin. 1 passed (4.7m). Google off on Preview. Not staff D; read-only."
    }
   },
   {
@@ -1605,6 +1637,19 @@
     "any staff write",
     "PR #212 exact-head"
    ]
+  },
+  {
+   "document": "r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt",
+   "date": "2026-10-27",
+   "actor": "staff (Superadmin)",
+   "signIn": "Neon Auth magic link (Preview)",
+   "deployedSha": "2435152d",
+   "notExercised": [
+    "staff D fixture role",
+    "any staff write",
+    "Google on Preview",
+    "production"
+   ]
   }
  ],
  "r2BlockersUnblock": {
@@ -1625,6 +1670,11 @@
   "previewSitemapStatus": 500,
   "browserOidcScript": "scripts/preview-oidc-anon-check.mjs",
   "computerUseBrowserNeedsHeaderInjection": true,
-  "deploymentProtectionChanged": false
+  "deploymentProtectionChanged": false,
+  "previewStaffMagicLink": "PASS",
+  "previewStaffMagicLinkDeployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
+  "previewStaffMagicLinkCommit": "2435152d",
+  "previewMemberAMagicLink": "PASS (needs-profile)",
+  "previewGoogleEnabled": false
  }
 }

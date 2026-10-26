@@ -35,9 +35,9 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-08 | Anonymous portal boundary / admin redirect | **PARTIAL** | `portal-admin-redirect.test.tsx`, `portal-navigation-access.test.ts`; [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md); [live staff](auth-browser-live-staff.md) | Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | Anonymous HTTP probe of /portal/* on local server |
 | UC22-09 | Membership page help / CTA ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `join-plan-chooser.test.ts` | Browser visual | Local Playwright |
 | UC22-10 | Policy / self-service copy consistency ¹ | **PARTIAL** | `membership-self-service-policy.test.ts`, `refund-policy-links.test.tsx`, `policy-pages.test.ts` | T-MP10 policy/legal approval | — |
-| UC22-11 | Real login member A (positive control) ¹ | **PARTIAL** | `login-resolution.test.ts`, `member-login-actions.test.ts`, `proxy.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member A attempt](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding); [live member A](auth-browser-live-member-a.md) | Member A magic-link path unconfirmed on production (session via Google only; send blocked in automation); Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested); Exact-head deployment (live production = main@3eb9992d, not PR #212); Fix on PR #212 not deployed | — |
+| UC22-11 | Real login member A (positive control) ¹ | **PARTIAL** | `login-resolution.test.ts`, `member-login-actions.test.ts`, `proxy.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member A attempt](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding); [live member A](auth-browser-live-member-a.md) | Member A magic-link verified on PR #212 Preview (needs-profile; no Preview profile, so no /portal session); production magic link unconfirmed; Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised); Exact-head deployment (live production = main@3eb9992d, not PR #212); Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production | — |
 | UC22-12 | Real login member B (negative control vs A) ¹ | **PARTIAL** | `login-resolution-server.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md) | B-vs-A cross-account access attempt (A and B sessions exist; only distinct dashboards observed); Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
-| UC22-13 | Real login staff D / NONSTAFF refusal ¹ | **PARTIAL** | `admin-login-actions.test.ts`, `admin-login-guard.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md); [live staff](auth-browser-live-staff.md) | Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested); Zero-write DB readback for refused NONSTAFF; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-13 | Real login staff D / NONSTAFF refusal ¹ | **PARTIAL** | `admin-login-actions.test.ts`, `admin-login-guard.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md); [live staff](auth-browser-live-staff.md) | Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised); Zero-write DB readback for refused NONSTAFF; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
 | UC22-14 | Free (community) join | **PARTIAL** | `hosted-free-onboarding.test.ts`, `join-service.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (FREE fixture) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
 | UC22-15 | Paid join checkout | **BLOCKED** | `checkout-service.test.ts`, `membership-checkout-status-route.test.ts`, `join-billing-pages.test.tsx`; [live member A](auth-browser-live-member-a.md) | Real A/B/staff Auth sessions; Stripe test mode; Notification sink | — |
 | UC22-16 | Owner checks on join/application | **PARTIAL** | `join-application-security.test.ts`, `join-actions-profile-identity.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A read OK, B read of A = null) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
@@ -113,7 +113,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Staff walk of this route (A, B and Superadmin staff sessions exist on live production) | 3: 22, 29, 30 |
 | Browser | 2: 02, 05 |
 | T-MP10 policy/legal approval | 2: 10, 41 |
-| Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested) | 2: 11, 13 |
+| Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised) | 2: 11, 13 |
 | Zero-write DB readback for refused NONSTAFF | 2: 13, 50 |
 | Bound forms unmounted; write flag disabled | 2: 25, 60 |
 | T-MP12A sandbox contract / T-MP12B | 2: 32, 54 |
@@ -122,8 +122,8 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Browser visual matrix on populated catalog | 1: 03 |
 | Browser visual matrix | 1: 04 |
 | Browser visual | 1: 09 |
-| Member A magic-link path unconfirmed on production (session via Google only; send blocked in automation) | 1: 11 |
-| Fix on PR #212 not deployed | 1: 11 |
+| Member A magic-link verified on PR #212 Preview (needs-profile; no Preview profile, so no /portal session); production magic link unconfirmed | 1: 11 |
+| Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production | 1: 11 |
 | B-vs-A cross-account access attempt (A and B sessions exist; only distinct dashboards observed) | 1: 12 |
 | Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md) | 1: 19 |
 | Seat page unavailable vs dashboard 25 seats for PAYMENT PENDING Corporate (finding, undiagnosed) | 1: 30 |
@@ -181,7 +181,7 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 
 ### Member A branch fix — 2026-10-26
 
-[Root cause and fix](auth-browser-live-member-b.md#root-cause-and-fix-branch-not-deployed): stale-cookie exchange suppression reproduced test-first; PR #212 exchanges the verifier with old session/cache cookies isolated. Fix on PR #212 not deployed. A session never established on older production. UC22-11 remains **BLOCKED**; counts **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**. Blocker index regenerated from JSON.
+[Root cause and fix](auth-browser-live-member-b.md#root-cause-and-fix-branch-not-deployed): stale-cookie exchange suppression reproduced test-first; PR #212 exchanges the verifier with old session/cache cookies isolated. Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production. A session never established on older production. UC22-11 remains **BLOCKED**; counts **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**. Blocker index regenerated from JSON.
 
 ## Live member A Auth/browser UAT — 2026-10-27
 
@@ -203,3 +203,7 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## Preview OIDC fixture smoke — 2026-10-27
 
 [Evidence](r2-blockers-unblock.md#preview-oidc-playwright-fixture--sitemap-diagnosis--2026-10-27): opt-in Playwright fixture `tests/fixtures/preview-oidc.ts`; minimal anonymous smoke on Preview `dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX` (commit `6cae5603`) 3/3 pass (home, EN/ZH membership four tiers). Preview `/sitemap.xml` 500 = unmigrated Preview DB (environment). UC22-01/03 `previewOidcEvidence` gain `fixtureSmoke`. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview magic-link Auth — 2026-10-27
+
+[Staff Preview magic-link PASS](r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt) (exact-head `2435152d`, `/admin` sticky, `/portal` → `/admin`) and [Member A Preview PASS (needs-profile)](r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile) reword UC22-11/13 blockers (per-row `previewAuthEvidence*` in JSON). No status change: staff D role, A/B Preview profiles/membership walks and production remain open; Google is off on Preview. Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
