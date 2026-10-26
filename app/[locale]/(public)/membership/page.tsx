@@ -1,3 +1,4 @@
+import {membershipSelfServicePolicy} from "@/lib/membership/policy-self-service";
 import {PLAN_CATALOG} from "@/lib/membership/plans";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -190,8 +191,8 @@ export default async function MembershipPage({ params }: Props) {
         actions={[{href: "#plans", label: t("compare.action")}]}
       />
       <nav aria-label={t("selfService.title")} className="shell flex flex-wrap items-center gap-5 py-6">
-        <ActionLink href="/portal/billing" prefetch={false} variant="text-link">{t("selfService.billing")}</ActionLink>
-        <ActionLink href="/contact" variant="text-link">{t("selfService.support")}</ActionLink>
+        <ActionLink href={membershipSelfServicePolicy.links.billing.href} prefetch={false} variant="text-link">{t(membershipSelfServicePolicy.links.billing.labelKey)}</ActionLink>
+        <ActionLink href={membershipSelfServicePolicy.links.support.href} variant="text-link">{t(membershipSelfServicePolicy.links.support.labelKey)}</ActionLink>
       </nav>
       <Suspense
         fallback={
