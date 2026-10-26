@@ -80,7 +80,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-53 | Concierge data isolation | **PARTIAL** | `concierge-security.test.ts`, `concierge-route.test.ts` | Real A/B/staff Auth sessions; Real AI provider evaluation | — |
 | UC22-54 | External tool authorization contract ¹ | **BLOCKED** | — | T-MP12A sandbox contract / T-MP12B | — |
 | UC22-55 | Mobile widths / zoom / keyboard / screen reader ¹ | **PARTIAL** | `mobile-navigation.test.tsx`, `supplement-ui.test.tsx` | Browser/device matrix; Screen reader | Local Playwright 375/768/1024/1440 + keyboard on public pages |
-| UC22-56 | Private list performance (20-row p95 ≤2s) ¹ | **PARTIAL** | `portal-sql-paging.test.ts`; DB: T22-06 0067 10k paging/EXPLAIN (t22-06.md) (21 index rows, no sort) | Real A/B/staff Auth sessions; 30 warm/30 cold timed samples not run | Timed 30 warm/30 cold SQL samples on isolated 10k fixture (DB-only p95) |
+| UC22-56 | Private list performance (20-row p95 ≤2s) ¹ | **PARTIAL** | `portal-sql-paging.test.ts`; DB: [1k/10k production reader timing, 30 warm/30 fresh connections, plans/rows/bytes + cleanup](uc22-56.md) | Real A/B/staff Auth sessions; authenticated HTTP/browser p95 unmeasured | DB timing completed; optional isolated replay. Full target requires Auth + HTTP/browser measurement |
 | UC22-57 | Public performance LCP/CLS (INP field) ¹ | **NOT RUN** | `production-lhci-target.test.ts` | RUM for field INP; Preview behind SSO | Local LHCI 3-run against `next start`; field INP stays NOT_TESTED |
 | UC22-58 | Hong Kong date boundaries (UTC 15:59/16:00) ¹ | **PARTIAL** | `hong-kong-time.test.ts`, `event-hong-kong-datetime.test.ts` | Rendered browser check | — |
 | UC22-59 | Exact-head CI gate ¹ | **BLOCKED** | `ci-security-contract.test.ts` | Exact-head remote CI (stacked base; workflow scope); stacked-ci-trigger.patch unapplied | — |
@@ -120,7 +120,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md) | 1: 19 |
 | Browser/device matrix | 1: 55 |
 | Screen reader | 1: 55 |
-| 30 warm/30 cold timed samples not run | 1: 56 |
+| Authenticated HTTP/browser 20-row list p95 remains unmeasured | 1: 56 |
 | RUM for field INP | 1: 57 |
 | Preview behind SSO | 1: 57 |
 | Rendered browser check | 1: 58 |
@@ -129,7 +129,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 ## Next steps that do not need Auth
 
 1. **UC22-42/43 isolated PG completed:** [evidence](uc22-42-43.md) proves exact fixture ID sets through production readers, count delta and bidirectional paging. Staff Auth/browser acceptance remains BLOCKED; rows remain PARTIAL.
-2. **UC22-56 DB p95:** timed 30 warm / 30 cold samples of the owned-page and detail SQL on the existing 10k fixture; record p50/p95, rows, bytes. Browser p95 stays open.
+2. **UC22-56 DB timing completed:** [evidence](uc22-56.md) records 1k/10k fixtures, 30 warm / 30 fresh-connection samples per production first/deep/detail reader, p50/p95/max, plans, rows, bytes and cleanup. Optional isolated replay needs no Auth; full private-list HTTP/browser p95 remains BLOCKED on real Auth.
 3. **UC22-01/03/04/05/07/08/09/34/52/55 local anonymous browser:** `next build && next start` against the isolated catalog, Playwright anonymous smoke + four widths + keyboard, anonymous `/admin` and `/portal` negative probes, seeded company absent from public directory, provider-disabled concierge fallback. Preview remains SSO-protected; this would be local-runtime evidence only.
 4. **UC22-57:** local three-run LHCI on `next start` (lab LCP/CLS only; field INP stays NOT_TESTED).
 5. **Acceptance harness skeleton:** `tests/e2e/hkwtia-membership-admin-acceptance.spec.ts` that loads this JSON, emits per-UC `case-results.json/csv` with role/fixture/SHA/actual/result/evidence/cleanup, and maps Playwright `skip` to BLOCKED/NOT RUN (never PASS). Auth cases stay skipped until sessions exist.

@@ -1008,13 +1008,14 @@
     "tests/unit/portal-sql-paging.test.ts"
    ],
    "dbEvidence": [
-    "T22-06 0067 10k paging/EXPLAIN (t22-06.md) (21 index rows, no sort)"
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md) (21 index rows, no sort)",
+    "UC22-56 1k/10k: 30 warm + 30 fresh-connection samples per production first/deep/detail reader, p50/p95/max/rows/bytes/EXPLAIN and exact-ID cleanup (uc22-56.md; uc22-56-manifest.json)"
    ],
    "blockers": [
     "Real A/B/staff Auth sessions",
-    "30 warm/30 cold timed samples not run"
+    "Authenticated HTTP/browser 20-row list p95 remains unmeasured"
    ],
-   "nextWithoutAuth": "Timed 30 warm/30 cold SQL samples on isolated 10k fixture (DB-only p95)"
+   "nextWithoutAuth": "DB-only timing completed; optional isolated DB replay via double gate. Full private-list p95 requires real Auth and HTTP/browser measurement."
   },
   {
    "id": "UC22-57",
