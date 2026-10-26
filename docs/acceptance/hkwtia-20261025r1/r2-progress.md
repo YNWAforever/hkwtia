@@ -205,3 +205,9 @@ Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No produc
 Continued from `f0a82ca1` on PR #212. With Willy's approval, [added a fresh branch-scoped Secret](r2-blockers-unblock.md#preview-rate_limit_key_secret-added--limiter-unblocked-2026-10-27-hkt) `RATE_LIMIT_KEY_SECRET` for Preview `wtia/hkwtia-plan-r1-20261025` only (not copied; Production unchanged). Redeployed → **`dpl_8Ro49iE2euShEhAkyxjFdq4oWfuj`** (READY, alias updated). Member B probe: send `?sent=1` (no `limiter_unavailable`), Neon Auth email delivered, verify succeeded → "Create member profile" (no Preview profile; not clicked). Preview now holds a Neon Auth user for B. Ready for headed Member A handoff.
 
 Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production deploy or production env/DB change, no SSO/Neon Auth config change.
+
+## Member A Preview magic-link — 2026-10-27
+
+Continued from `0498d94e` on PR #212 (spec accepts the verified create-profile state). Preview PR alias → **`dpl_ABbWNxaAmyQJ5kV1ovnzDZbQuCbo`**. [Headed handoff](r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile): send `?sent=1` (no `limiter_unavailable`); Willy opened A's link → Preview `/member-login` "Your sign-in is verified. Create a member profile…"; fresh `/member-login` reload still verified (desktop check), no email field. **PASS (needs-profile)** — not `/portal`. Playwright `[open]`/`[sticky]` did not run (link pasted in a second tab); stuck handoff tree killed 03:34 HKT. Create member profile not clicked.
+
+Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (Preview, needs-profile; no `/portal` session). No production, Neon or Vercel env change; no profile/membership writes.

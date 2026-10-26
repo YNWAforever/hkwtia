@@ -354,3 +354,23 @@ Redeploy (Preview, no Production touch): `vercel redeploy` of `dpl_C2u3j8Vsvr9WT
 Side effect: Neon Auth on Preview (sign-up allowed) now has a verified user for Member B, created by B's own magic-link verify. No membership/profile rows written. Link/token/cookies not recorded.
 
 Readiness: the Preview send path (limiter + email provider + callback to PR alias + verifier exchange) works. **Ready for the headed Member A handoff** (A types own address; A's Preview has no profile either unless one exists for the unconfirmed `l***@gmail.com` user, so expect the same "Create member profile" state rather than `/portal`). Spec note: step 4 should also accept the verified-no-profile state, or the run should create the profile first.
+
+## Member A headed Preview handoff (2026-10-27 HKT) — PASS (needs-profile)
+
+Spec `0498d94e`: step 4 now accepts either sticky `/portal` (no `neon_auth_session_verifier`, reload stays on `/portal`) or the verified "needs-profile" state (`profile-provision-form` visible on `/member-login`, still shown after a fresh `/member-login` load, signed-out email field absent). The provision form is never submitted by the spec. Step 3 also detects an address-bar paste that lands on the create-profile screen.
+
+Preview: PR alias → `dpl_ABbWNxaAmyQJ5kV1ovnzDZbQuCbo` (build of `0498d94e`, READY); `RATE_LIMIT_KEY_SECRET` present for Preview branch `wtia/hkwtia-plan-r1-20261025` only.
+
+Headed run started 03:22 HKT on box display `:6` (`PREVIEW_LOGIN_HANDOFF=true`, `PREVIEW_MAGIC_LINK_FILE=/tmp/hkwtia-preview-magic-link`, link wait 15 min, send wait 15 min). Willy typed Member A's address (vault-only) and clicked Send, then opened the Preview magic link from Gmail.
+
+| Step | Result |
+| --- | --- |
+| Send | `?sent=1` on the Preview origin (run log `[send]`); no `limiter_unavailable` |
+| Open | Preview `/member-login?next=/portal` shows "Your sign-in is verified. Create a member profile…" with **Create member profile** (needs-profile state; A has no Preview profile). Not `/portal` — `/portal` not claimed |
+| Sticky | Confirmed by a separate desktop check on the same Playwright Preview Chromium (~03:34 HKT): fresh load of `/member-login` on the PR alias still shows the verified create-profile UI, no email input |
+
+Playwright auto-assert did **not** finish: the link was pasted into a second tab, while the spec's `page` stayed on `?sent=1`, so `[open]`/`[sticky]` were never logged. At 03:34 HKT the stuck handoff tree (`/tmp/hkwtia-handoff/run.sh`, PID 1141875 → `vercel env run` → `playwright test` → Chromium) was killed with SIGTERM rather than left to its 15-minute link wait; no `EXIT=` line. Open/sticky evidence above is visual, not spec-asserted.
+
+**Create member profile was NOT clicked** (no profile write approved); no profile or membership rows created. Neon Auth on Preview now holds a verified user for Member A (from A's own verify). No email, link, token or cookie recorded. Production, Neon config and Vercel env unchanged.
+
+Result: **PASS (needs-profile)** for Member A Preview magic-link send → verify → sticky verified state. Not a `/portal` session; spec auto-assert run still to repeat (paste into the spec's own tab or via `PREVIEW_MAGIC_LINK_FILE`).
