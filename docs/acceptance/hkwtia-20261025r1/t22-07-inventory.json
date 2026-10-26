@@ -57,7 +57,17 @@
     "commit": "b10686e3",
     "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
     "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
-    "result": "/ and /zh/membership and /membership HTTP 200 on Preview, app HTML (not SSO); /sitemap.xml HTTP 500 on Preview (production 200) — finding"
+    "result": "/ and /zh/membership and /membership HTTP 200 on Preview, app HTML (not SSO); /sitemap.xml HTTP 500 on Preview (production 200) — finding",
+    "fixtureSmoke": {
+     "date": "2026-10-27",
+     "deployment": "dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX",
+     "url": "https://hkwtia-43pniorq6-ynwaforevers-projects.vercel.app",
+     "commit": "6cae5603",
+     "spec": "tests/e2e/preview-oidc-anonymous-smoke.spec.ts",
+     "fixture": "tests/fixtures/preview-oidc.ts",
+     "result": "3 passed (home 200; /membership and /zh/membership four tiers)",
+     "scope": "minimal smoke; full anonymous suite still not run on Preview"
+    }
    }
   },
   {
@@ -107,7 +117,17 @@
     "commit": "b10686e3",
     "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
     "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
-    "result": "EN+ZH /membership .plan-grid article ids = community,startup,corporate,patron; Startup HK$2,400/yr HK$250/mo; Corporate HK$12,000/yr HK$1,200/mo — Stripe price IDs configured on Preview env; local acceptance still omits them"
+    "result": "EN+ZH /membership .plan-grid article ids = community,startup,corporate,patron; Startup HK$2,400/yr HK$250/mo; Corporate HK$12,000/yr HK$1,200/mo — Stripe price IDs configured on Preview env; local acceptance still omits them",
+    "fixtureSmoke": {
+     "date": "2026-10-27",
+     "deployment": "dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX",
+     "url": "https://hkwtia-43pniorq6-ynwaforevers-projects.vercel.app",
+     "commit": "6cae5603",
+     "spec": "tests/e2e/preview-oidc-anonymous-smoke.spec.ts",
+     "fixture": "tests/fixtures/preview-oidc.ts",
+     "result": "3 passed (home 200; /membership and /zh/membership four tiers)",
+     "scope": "minimal smoke; full anonymous suite still not run on Preview"
+    }
    }
   },
   {

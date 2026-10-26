@@ -28,8 +28,9 @@ export default defineConfig({
     // writes; unset locally, so the managed dev server path is unchanged.
     storageState: process.env.PLAYWRIGHT_STORAGE_STATE || undefined,
     // A retry trace records request headers, so with either Preview credential present it would
-    // capture the `_vercel_jwt` cookie into test-results/. Off whenever one is set.
-    trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE ? 'off' : 'on-first-retry'
+    // capture the `_vercel_jwt` cookie (or the OIDC header from tests/fixtures/preview-oidc.ts) into
+    // test-results/. Off whenever one is set.
+    trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE || process.env.PLAYWRIGHT_PREVIEW_OIDC === 'true' ? 'off' : 'on-first-retry'
   },
   projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],
   ...(process.env.PLAYWRIGHT_BASE_URL

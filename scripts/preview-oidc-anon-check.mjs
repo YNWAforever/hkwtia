@@ -4,7 +4,8 @@
 //   vercel env run -- node scripts/preview-oidc-anon-check.mjs https://<preview>.vercel.app
 //
 // The `x-vercel-trusted-oidc-idp-token` header is attached ONLY to requests whose origin equals the
-// Preview origin (third-party requests such as fonts/Stripe never see it). Production alias refused.
+// Preview origin, per redirect hop (third-party requests such as fonts/Stripe/OAuth never see it).
+// Production alias refused. For Playwright specs use tests/fixtures/preview-oidc.ts instead.
 import {chromium} from "@playwright/test";
 
 const VERCEL_PREVIEW_HOST = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/;
@@ -21,12 +22,19 @@ const origin = target.origin;
 const browser = await chromium.launch();
 try {
   const context = await browser.newContext();
-  await context.route("**/*", (route) => {
-    const request = route.request();
-    if (new URL(request.url()).origin !== origin) return route.continue();
-    return route.continue({headers: {...request.headers(), "x-vercel-trusted-oidc-idp-token": token}});
-  });
   const page = await context.newPage();
+  // CDP Fetch, not `context.route`: Playwright's `route.continue({headers})` re-applies headers to
+  // every redirect hop (an off-origin 302 would carry the token), while CDP pauses each hop
+  // separately and only for the Preview-origin pattern. Same mechanism as tests/fixtures/preview-oidc.ts.
+  const session = await context.newCDPSession(page);
+  session.on("Fetch.requestPaused", (event) => {
+    const headers = Object.entries(event.request.headers)
+      .filter(([name]) => name.toLowerCase() !== "x-vercel-trusted-oidc-idp-token")
+      .map(([name, value]) => ({name, value}));
+    if (new URL(event.request.url).origin === origin) headers.push({name: "x-vercel-trusted-oidc-idp-token", value: token});
+    session.send("Fetch.continueRequest", {requestId: event.requestId, headers}).catch(() => undefined);
+  });
+  await session.send("Fetch.enable", {patterns: [{urlPattern: `${origin}/*`, requestStage: "Request"}]});
   const results = [];
   for (const path of PATHS) {
     const response = await page.goto(origin + path, {waitUntil: "domcontentloaded"});

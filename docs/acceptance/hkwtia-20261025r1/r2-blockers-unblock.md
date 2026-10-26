@@ -163,3 +163,46 @@ Result (exit 0): `/` 200 h1 "How can Hong Kong lead the AI+ era?"; `/membership`
 - Stripe test checkout/webhook (UC22-15/20/37/38/40); Actions billing (UC22-59).
 
 Inventory: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (unchanged; UC22-01/03 gain `previewOidcEvidence`, UC22-01 blocker reworded).
+
+## Preview OIDC Playwright fixture + sitemap diagnosis — 2026-10-27
+
+Recorded ~02:05 Asia/Hong_Kong on PR #212, continuing from `6cae5603`. Deployment Protection **unchanged**; no bypass, no production deploy, no `stacked-ci-trigger.patch`, no DB writes. Token never printed or committed (grep of `test-results/` and git tree for the token value: clean).
+
+### Fixture (opt-in)
+
+- `tests/fixtures/preview-oidc.ts` — drop-in `test`/`expect`. No-op unless `PLAYWRIGHT_PREVIEW_OIDC=true`; then requires `PLAYWRIGHT_BASE_URL` = HTTPS one-label `*.vercel.app` (refuses `hkwtia.vercel.app` → `PREVIEW_OIDC_PRODUCTION_TARGET_FORBIDDEN`) and `VERCEL_OIDC_TOKEN` (via `vercel env run --`). Errors are fixed codes; the token never appears in them.
+- **Mechanism: Chromium CDP `Fetch` scoped to `<preview-origin>/*`, not `context.route`.** Verified on the box: Playwright routes only the first hop of a redirect chain, so `route.continue({headers})` re-applies the header to every later hop (a Preview 302 to Google OAuth / Stripe would carry the token), while `route.fetch`+`fulfill` drops it on same-origin hops (`/en` → `/` would bounce to SSO). CDP pauses each hop separately and its header override does not extend to redirects, so exactly the Preview-origin hops get the header.
+- `tests/e2e/preview-oidc-header-scope.spec.ts` — hermetic (two loopback servers): header present on Preview same-origin redirect hop + subresource, absent on third-party subresource, off-origin redirect, and off-origin hop of a round-trip; present again on the return hop. **1 passed.**
+- `tests/unit/preview-oidc-fixture.test.ts` — host/opt-in/token rules (11 passed). `playwright.config.ts` turns traces off when `PLAYWRIGHT_PREVIEW_OIDC=true` (pinned in the two existing config contract tests).
+- `scripts/preview-oidc-anon-check.mjs` switched to the same CDP mechanism (it previously used `route.continue({headers})`; its three paths never redirected off-origin, so no exposure occurred).
+
+### Minimal anonymous smoke on Preview — PASS
+
+Target: PR #212 Preview `dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX` → `https://hkwtia-43pniorq6-ynwaforevers-projects.vercel.app`, commit `6cae5603` (exact branch head at run time; Vercel `githubCommitSha` confirmed).
+
+```bash
+PLAYWRIGHT_PREVIEW_OIDC=true PLAYWRIGHT_BASE_URL=https://hkwtia-43pniorq6-ynwaforevers-projects.vercel.app \
+  vercel env run -- npx playwright test tests/e2e/preview-oidc-anonymous-smoke.spec.ts
+```
+
+| Test | Result |
+| --- | --- |
+| `/` 200, stays on Preview origin, `lang=en`, one `h1` | pass |
+| `/membership` 200, one `h1`, `.plan-grid article` ids = community, startup, corporate, patron | pass |
+| `/zh/membership` 200, same four ids | pass |
+
+3 passed (6.4s). Negative: same command with `hkwtia.vercel.app` → `PREVIEW_OIDC_PRODUCTION_TARGET_FORBIDDEN`; without the opt-in flag → 3 skipped. Re-ran `scripts/preview-oidc-anon-check.mjs` on the same deployment: exit 0, same h1s and four tiers.
+
+### Preview `/sitemap.xml` 500 — diagnosed, not fixed (environment, not code)
+
+`vercel curl /sitemap.xml` on both `dpl_9aTJ…` (b10686e3) and `dpl_HPvt…` (6cae5603): **500**, empty body. `vercel logs --deployment` shows `app/sitemap.ts` DB reads failing on the **Preview database schema**:
+
+- `relation "posts" does not exist` (42P01) from `listPublishedNews("en"|"zh-HK")` — `posts` arrives in `drizzle/0012_m4b_scheduled_agents.sql`.
+- `column events.status does not exist` (42703) from `eventsRepository.listPublicSlugs()` — added by `drizzle/0026_phase_b_events_two_sided.sql`.
+
+So the Preview `DATABASE_URL` points at a database whose migrations lag far behind the branch (`npm run build` does not migrate; `db:migrate` is manual). `sitemap.ts` deliberately fails rather than publish a partial sitemap, so the 500 is correct behaviour for that DB; production (migrated DB) returns 200. **Not fixed here**: the fix is running `npm run db:migrate` against the Preview database (or pointing Preview at a migrated Neon branch) — a write to shared infrastructure that needs Willy's go-ahead. Implication: any Preview page reading `posts`/new `events` columns (news, events, sitemap) will also 500 on Preview, and Auth/portal on Preview may hit the same schema gap — migrate before Auth-on-Preview.
+
+### Next Auth-on-Preview step
+
+1. Willy authorizes migrating the Preview database (or re-pointing Preview `DATABASE_URL` to a migrated, non-production Neon branch); re-check `/sitemap.xml` → 200.
+2. Write an opt-in `preview-oidc` Auth spec (import `test` from `tests/fixtures/preview-oidc.ts`): member magic-link request on `/member-login` → Willy pastes the link (or Gmail read) → assert `/portal` session sticks; Google OAuth hops leave the origin header-free by construction. Confirm Neon Auth trusted origins include the Preview host first (callback must return to the Preview origin).

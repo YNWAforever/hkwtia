@@ -199,3 +199,7 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## Preview OIDC proven — 2026-10-27
 
 [Evidence](r2-blockers-unblock.md#preview-oidc-proven--2026-10-27): box Vercel CLI linked (ynwaforever → `ynwaforevers-projects/hkwtia`); `vercel curl --deployment` and an origin-scoped `x-vercel-trusted-oidc-idp-token` Playwright check (`scripts/preview-oidc-anon-check.mjs`) reach PR #212 Preview `dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC` (commit `b10686e3`) without disabling SSO. Preview `/membership` EN+ZH render **all four tiers** (community/startup/corporate/patron, paid prices shown), so the paid-tier gap is local-env only. Finding: Preview `/sitemap.xml` HTTP 500 (production 200). UC22-01 blocker reworded; UC22-01/03 gain `previewOidcEvidence`. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview OIDC fixture smoke — 2026-10-27
+
+[Evidence](r2-blockers-unblock.md#preview-oidc-playwright-fixture--sitemap-diagnosis--2026-10-27): opt-in Playwright fixture `tests/fixtures/preview-oidc.ts`; minimal anonymous smoke on Preview `dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX` (commit `6cae5603`) 3/3 pass (home, EN/ZH membership four tiers). Preview `/sitemap.xml` 500 = unmigrated Preview DB (environment). UC22-01/03 `previewOidcEvidence` gain `fixtureSmoke`. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
