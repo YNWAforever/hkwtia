@@ -333,3 +333,24 @@ Run 02:55 HKT (Member B address as the pipeline probe — the only inbox readabl
 Cause: `checkAuthSend` → `rateLimitKeyHash` throws `RATE_LIMIT_KEY_SECRET_REQUIRED` (fail-closed) because **`RATE_LIMIT_KEY_SECRET` is not set for Preview branch `wtia/hkwtia-plan-r1-20261025`** (`vercel env ls`: set for Production and several `codex/*` Preview branches only). Preview `rate_limit_buckets` already allows the `auth-send-*` scopes, so the DB is not the blocker.
 
 Unblock (needs Willy's OK — Vercel env change): add a fresh random ≥32-byte `RATE_LIMIT_KEY_SECRET` for Preview branch `wtia/hkwtia-plan-r1-20261025` only (not copied from Production), redeploy that Preview, re-run the spec. Then Member A: Willy (or a vault-fill step) types A's email in the headed handoff window, A's Preview link is pasted into `PREVIEW_MAGIC_LINK_FILE` or that window's address bar; the spec asserts `/portal` with no `neon_auth_session_verifier` left and a sticky reload.
+
+## Preview RATE_LIMIT_KEY_SECRET added — limiter unblocked (2026-10-27 HKT)
+
+With Willy's approval: a **fresh** random secret (32 random bytes, hex-encoded, generated on the box; not copied from Production or any other branch; never printed or committed; temp file shredded) was added as `RATE_LIMIT_KEY_SECRET`, type **Secret**, scoped to **Preview, git branch `wtia/hkwtia-plan-r1-20261025` only** (`vercel env add … preview --git-branch=… --type secret`, value via stdin). Read-back `vercel env ls preview wtia/hkwtia-plan-r1-20261025`: `RATE_LIMIT_KEY_SECRET  Hidden  Secret  Preview (wtia/hkwtia-plan-r1-20261025)`. Production `RATE_LIMIT_KEY_SECRET` unchanged (created 28d ago). No Preview-wide value, no Neon Auth / SSO change.
+
+Redeploy (Preview, no Production touch): `vercel redeploy` of `dpl_C2u3j8Vsvr9WTySMTPgDGD8REDd2` (branch build of `f0a82ca1`) → **`dpl_8Ro49iE2euShEhAkyxjFdq4oWfuj`** `https://hkwtia-5k0tlcz6j-ynwaforevers-projects.vercel.app`, target `preview`, **READY** 03:06 HKT; PR alias `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` now points at it.
+
+### Limiter / magic-link probe (Member B address, 03:10 HKT)
+
+`tests/e2e/preview-oidc-member-magic-link.spec.ts` via the OIDC fixture on the PR alias, Member B's address (Willy's connected inbox; A's address stays vault-only and was not used):
+
+| Step | Result |
+| --- | --- |
+| Send | **`?sent=1`** on the Preview origin — no `error=limiter_unavailable` / `RATE_LIMIT_KEY_SECRET_REQUIRED` |
+| Delivery | Neon Auth email "Sign In to hkwtia-m2-preview" arrived in B's inbox (SendGrid click-wrapped link → `*.neonauth.*.neon.tech`, 5-minute expiry) |
+| Open (same OIDC context) | Neon Auth verify succeeded; app returned to Preview `/member-login` showing "Your sign-in is verified. Create a member profile to continue…" |
+| `/portal` assertion | Not reached (spec timeout at step 4) — **expected**: Preview has no `profiles` row for B; "Create member profile" was **not** clicked (no profile write) |
+
+Side effect: Neon Auth on Preview (sign-up allowed) now has a verified user for Member B, created by B's own magic-link verify. No membership/profile rows written. Link/token/cookies not recorded.
+
+Readiness: the Preview send path (limiter + email provider + callback to PR alias + verifier exchange) works. **Ready for the headed Member A handoff** (A types own address; A's Preview has no profile either unless one exists for the unconfirmed `l***@gmail.com` user, so expect the same "Create member profile" state rather than `/portal`). Spec note: step 4 should also accept the verified-no-profile state, or the run should create the profile first.
