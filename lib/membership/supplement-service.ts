@@ -37,12 +37,11 @@ export type SupplementState = {
   receipts: {actor: string; kind: Kind; payloadHash: string; result: Saved}[];
   audits: {actor: string; kind: Kind; requestId: string; operationRequestId: string; at: string}[];
 };
-/** Offline transactional port, not a database adapter. Implementations MUST serialize
- * transactions, roll back on failure and atomically commit records, audit and receipts.
- * A future SQL adapter additionally needs the partial unique open-request constraint.
- * No default repository or runtime entrypoint is installed by this module. */
+/** Scope is server-derived; SQL adapters must reject absent scope. The fake port
+ * may ignore it. Records, receipts and audits commit atomically. */
+export type SupplementScope = {actor: string; applicationId?: string; requestId?: string; operationRequestId?: string};
 export interface SupplementRepository {
-  transaction<T>(work: (state: SupplementState) => Promise<T>): Promise<T>;
+  transaction<T>(work: (state: SupplementState) => Promise<T>, scope?: SupplementScope): Promise<T>;
 }
 function actorKey(actor: Actor): string | null {
   return "profileId" in actor ? `${actor.kind}:${actor.profileId}` : null;
@@ -111,7 +110,7 @@ export function createSupplementService(repository: SupplementRepository, deps =
         state.audits.push({actor: identity, kind, requestId: target.id, operationRequestId: input.operationRequestId, at: now});
         state.receipts.push({actor: identity, kind, payloadHash, result: structuredClone(result)});
         return result;
-      });
+      }, {actor: identity, ...("applicationId" in input ? {applicationId: input.applicationId} : {requestId: input.requestId}), operationRequestId: input.operationRequestId});
     } catch { return {status: "unknown", operationRequestId: input.operationRequestId, ...retry}; }
   }
   return {
@@ -130,7 +129,7 @@ export function createSupplementService(repository: SupplementRepository, deps =
           items: request.items.map(({itemId, label, description, required}) => ({itemId, label, ...(description ? {description} : {}), required})),
           responses: state.responses.filter(r => r.requestId === request.id && r.applicantUserId === actor.profileId).map(({id, requestVersion, answers, submittedAt, operationId}) => ({id, requestVersion, answers: structuredClone(answers), submittedAt, operationId})),
         }));
-      });
+      }, {actor: actorKey(actor)!, applicationId});
     },
     async getOperationReceipt(actor: Actor, raw: unknown): Promise<Saved | null> {
       const identity = actorKey(actor);
@@ -141,7 +140,7 @@ export function createSupplementService(repository: SupplementRepository, deps =
         if (!receipt) return null;
         if (actor.kind === "member" && !state.applications.some(app => app.id === receipt.result.reference.applicationId && app.applicantUserId === actor.profileId)) forbidden();
         return structuredClone(receipt.result);
-      });
+      }, {actor: identity!, operationRequestId});
     },
   };
 }
