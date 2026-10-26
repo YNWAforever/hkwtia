@@ -519,8 +519,11 @@
   color: var(--xp-on-ink-muted);
   font-size: 14px;
 }
+/* #8fc4e0 (--xp-signal) measures 4.48:1 on the --wt-ink-soft (#1a4f82) host — found by the
+ * Preview anonymous axe run once a past record rendered. #a8d4ec is the cyan tint
+ * wisetech-shell.css already uses on this host for `.honest-empty .status-label` (5.35:1). */
 .open-now-record > span {
-  color: var(--xp-signal);
+  color: #a8d4ec;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.18em;
