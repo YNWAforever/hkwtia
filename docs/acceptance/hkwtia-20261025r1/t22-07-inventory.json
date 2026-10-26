@@ -31,9 +31,9 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Full anonymous suite not yet run on Preview (OIDC/vc curl access proven 2026-10-27; see r2-blockers-unblock.md)"
+    "Preview anonymous suite PASS 15/15 on 06ccd701 (r2-blockers-unblock.md); PASS promotion awaits review against the original UC checklist (Test_Cases.csv absent)"
    ],
-   "nextWithoutAuth": "Run anonymous suite on Preview via origin-scoped OIDC header; local render and settled contrast checks complete.",
+   "nextWithoutAuth": "Review Preview 15/15 evidence against the original UC22-01 checklist; promote to PASS if it matches.",
    "localBrowserEvidence": {
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
@@ -68,6 +68,14 @@
      "result": "3 passed (home 200; /membership and /zh/membership four tiers)",
      "scope": "minimal smoke; full anonymous suite still not run on Preview"
     }
+   },
+   "previewAnonymousEvidence": {
+    "document": "r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt",
+    "spec": "tests/e2e/preview-oidc-anonymous-acceptance.spec.ts",
+    "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+    "deployedSha": "06ccd701",
+    "result": "PASS 15/15",
+    "detail": "8 public paths x EN/ZH x 375/768/1024/1440: 200, single h1, no horizontal overflow, skip link, settled home CTA contrast, axe 0 serious/critical; membership four tiers + anchor/help; anonymous /admin,/portal -> login with next; reduced-motion home axe; locale round-trip. First run on 57c4540c-era code: 10 failed on .open-now-record > span 4.48:1, fixed in 06ccd701."
    }
   },
   {
@@ -1425,6 +1433,14 @@
     "result": "PARTIAL",
     "detail": "Movement-only CTA entrance: 32 samples at 0/450/600/800ms across four widths × EN/ZH, all ancestor opacities 1, white/#1a4f82 ratio 8.451873:1; eight 600ms hero axe scans clear. Settled/reduced-motion checks retained. Screen reader and real devices open.",
     "run": "movementOnlyEntranceRun (code cafee809)"
+   },
+   "previewAnonymousEvidence": {
+    "document": "r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt",
+    "spec": "tests/e2e/preview-oidc-anonymous-acceptance.spec.ts",
+    "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+    "deployedSha": "06ccd701",
+    "result": "PASS 15/15",
+    "detail": "8 public paths x EN/ZH x 375/768/1024/1440: 200, single h1, no horizontal overflow, skip link, settled home CTA contrast, axe 0 serious/critical; membership four tiers + anchor/help; anonymous /admin,/portal -> login with next; reduced-motion home axe; locale round-trip. First run on 57c4540c-era code: 10 failed on .open-now-record > span 4.48:1, fixed in 06ccd701."
    }
   },
   {
@@ -1459,7 +1475,7 @@
    "dbEvidence": [],
    "blockers": [
     "RUM for field INP",
-    "Preview behind SSO (see r2-blockers-unblock.md)"
+    "Preview lab/RUM not run (Preview reachable via OIDC since 2026-10-27; see r2-blockers-unblock.md)"
    ],
    "nextWithoutAuth": "Review local medians and repeat in controlled lab; obtain field RUM for INP and Preview evidence.",
    "localBrowserEvidence": {
@@ -1675,6 +1691,9 @@
   "previewStaffMagicLinkDeployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
   "previewStaffMagicLinkCommit": "2435152d",
   "previewMemberAMagicLink": "PASS (needs-profile)",
-  "previewGoogleEnabled": false
+  "previewGoogleEnabled": false,
+  "previewAnonymousAcceptance": "PASS 15/15",
+  "previewAnonymousAcceptanceCommit": "06ccd701",
+  "openNowRecordContrastFix": "06ccd701"
  }
 }

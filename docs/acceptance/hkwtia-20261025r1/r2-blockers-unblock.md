@@ -446,3 +446,32 @@ Scope limits (not claimed):
 - Preview only — Production unchanged and still on `main@3eb9992d`.
 
 Inventory: status counts unchanged (**0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**); UC22-11/13 blockers reworded and `previewAuthEvidence` added (see `t22-07-inventory.json`).
+
+## Preview anonymous acceptance — PASS 15/15 (2026-10-27 HKT)
+
+New opt-in spec `tests/e2e/preview-oidc-anonymous-acceptance.spec.ts` (OIDC fixture, origin-scoped header, traces/video off) mirrors the local `hkwtia-anonymous-acceptance.spec.ts` on Preview; helpers moved verbatim to `tests/fixtures/anon-acceptance-helpers.ts`. Omitted on Preview by design: concierge POST (provider call), local-DB directory preflight, and `APIRequestContext` HTTP-boundary probes (would not carry the header) — boundaries are checked in the browser instead, including `next=`.
+
+| Run (HKT) | Preview | Result |
+| --- | --- | --- |
+| ~04:10 | PR alias, code = `2435152d`/`57c4540c` | **5 passed / 10 failed** — all 10 are one axe `color-contrast` (serious): `.open-now-record > span` "Most recent on the record" / "最近一次活動紀錄", `#8fc4e0` on `#1a4f82`, **4.48:1** (11px bold, needs 4.5). Every page other than home was clean. |
+| ~04:20 | `dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq` (commit **`06ccd701`**) | **15 passed (2.7m), EXIT=0** |
+
+Why local missed it: the Open Now record only renders when a published past item exists; the Preview DB (migrated, with content) has one, the local anonymous catalog did not.
+
+Fix (`06ccd701`, test-first): `.open-now-record > span` → `#a8d4ec` (5.35:1), the cyan tint `wisetech-shell.css` already uses on this host for `.honest-empty .status-label`; `--xp-signal` untouched. `tests/unit/open-now-record-contrast.test.ts` failed before, passes after; related CSS/home units 150/150; `tsc` and eslint clean.
+
+Coverage at 15/15: 8 public paths × EN/ZH × 375/768/1024/1440 (200, one visible h1, `main#main-content`, no horizontal overflow, skip link → `#main-content`, settled home CTA contrast, axe 0 serious/critical, Vercel toolbar excluded); `/membership` + `/zh/membership` four tiers, `#plans` anchor, FAQ, contact link; anonymous `/admin`, `/admin/members`, `/portal`, `/portal/company` (EN/ZH) → login with `next`; reduced-motion home axe EN/ZH; locale round-trip keeps query/hash.
+
+Not claimed: screen reader, real devices, Lighthouse/RUM on Preview, production. UC22-01 stays PARTIAL pending review against the original checklist.
+
+## Remaining R2 gates — who unblocks (2026-10-27 HKT)
+
+| Gate | Needs | Notes |
+| --- | --- | --- |
+| Member A/B Preview membership walks (portal routes, UC22-21/22/23/29/30/35/36/39 on Preview) | **Willy**: approve creating Preview member profiles for A/B (click "Create member profile", or an agent-seeded Preview-only profile) | Both verify to "Create member profile" today; no Preview profile/membership rows |
+| Google sign-in on Preview | **Willy**: approve setting `AUTH_GOOGLE_ENABLED=true` for the Preview branch | Not set; magic link is the only Preview path |
+| Staff D fixture role / staff writes / zero-write NONSTAFF readback | **Willy**: approve a Preview `staff` (non-superadmin) profile and which writes to exercise | Superadmin magic-link PASS only |
+| Local paid-tier catalog (local four-tier red) | **Willy**: Stripe *test* price IDs for local acceptance env | Preview/Production already show four tiers; do not invent IDs |
+| Exact-head remote CI | **Willy**: fix GitHub Actions billing, then apply `stacked-ci-trigger.patch` | #211 zero-step failures; #212 no runs |
+| UC22-01 PASS promotion | Reviewer / Willy: original Test_Cases.csv checklist | Preview 15/15 evidence above |
+| Preview Lighthouse (UC22-57) | None — agent can run (read-only) | Next offline candidate |

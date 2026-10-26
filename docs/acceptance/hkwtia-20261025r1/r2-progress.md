@@ -223,3 +223,9 @@ Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No produc
 Continued from `2435152d` on PR #212. [Evidence](r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt): headed handoff (~04:02–04:07 HKT) on the PR alias → Preview **`dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW`** (commit `2435152d`, exact head at run time). `preview-oidc-staff-magic-link.spec.ts`: `[send]` `?sent=1` on `/admin-login`; `[open]` landed on `/admin`; `[sticky]` `/admin` reload stays; `[separation]` `/portal` → `/admin`. **1 passed (4.7m), EXIT=0** — **Staff Preview magic-link Auth PASS**. Google remains off on Preview (`AUTH_GOOGLE_ENABLED` unset) — magic-link path only. Superadmin, not staff D; read-only.
 
 Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. UC22-11/13 blocker wording updated for Preview A (needs-profile) and staff magic-link evidence. No production, Vercel env, SSO or Neon Auth change; no new DB write.
+
+## Preview anonymous acceptance PASS + Open Now contrast fix — 2026-10-27
+
+Continued from `57c4540c`. [Evidence](r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt): new opt-in `preview-oidc-anonymous-acceptance.spec.ts` first run **5/15** — one real axe finding on Preview only (Open Now record label 4.48:1 on `#1a4f82`). Fixed test-first in **`06ccd701`** (`#a8d4ec`, 5.35:1); rerun on Preview `dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq` **15/15 PASS**. UC22-01 Preview blocker cleared (still PARTIAL pending checklist review); UC22-55/57 updated. [Remaining gates table](r2-blockers-unblock.md#remaining-r2-gates--who-unblocks-2026-10-27-hkt) lists what waits on Willy.
+
+Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production, Vercel env, SSO, Neon or Auth change.

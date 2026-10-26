@@ -25,7 +25,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 | UC | Theme | Status | Offline / DB evidence | Blockers | Next without Auth |
 | --- | --- | --- | --- | --- | --- |
-| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Full anonymous suite not yet run on Preview (OIDC/`vc curl` access proven 2026-10-27; see r2-blockers-unblock.md) | Run anonymous suite on Preview via OIDC header; local render and settled contrast complete |
+| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Preview anonymous suite PASS 15/15 on 06ccd701 (r2-blockers-unblock.md); PASS promotion awaits review against the original UC checklist (Test_Cases.csv absent) | Review Preview 15/15 against the original UC22-01 checklist; promote if it matches |
 | UC22-02 | Current concierge chat UI (not R3 actions) | **PARTIAL** | `concierge-widget.test.tsx`, `concierge-shell.test.tsx`, `concierge-unavailable-ui.test.tsx` | Real AI provider evaluation; Browser | Local Playwright disabled-provider path (manual fallback) without Auth |
 | UC22-03 | Four-tier membership comparison ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-catalog.test.ts`, `membership-tier-content.test.ts` | Browser visual matrix on populated catalog | Local Playwright visual at 375/768/1024/1440 |
 | UC22-04 | Comparison seats/help/anchor ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-links.test.tsx` | Browser visual matrix | Same local Playwright run |
@@ -81,7 +81,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-54 | External tool authorization contract ¹ | **BLOCKED** | — | T-MP12A sandbox contract / T-MP12B | — |
 | UC22-55 | Mobile widths / zoom / keyboard / screen reader ¹ | **PARTIAL** | `mobile-navigation.test.tsx`, `supplement-ui.test.tsx`; [eight CTA ratios 8.452:1, 64 settled + two reduced-motion axe scans clear](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26) | Real-device matrix; Screen reader | Screen reader and real-device checks remain open |
 | UC22-56 | Private list performance (20-row p95 ≤2s) ¹ | **PARTIAL** | `portal-sql-paging.test.ts`; DB: [1k/10k production reader timing, 30 warm/30 fresh connections, plans/rows/bytes + cleanup; retry hardening: 2 full DB replays, 0 handshake failures/exhausted, cleanup verified](uc22-56.md#retry-hardening) | Real A/B/staff Auth sessions; authenticated HTTP/browser p95 unmeasured | DB timing completed; optional isolated replay. Full target requires Auth + HTTP/browser measurement |
-| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **PARTIAL** | `production-lhci-target.test.ts`; [repeated three-run medians for ten URLs](anon-browser-local.md#repeated-uc22-57-lab-medians) | RUM for field INP; Preview behind SSO (see r2-blockers-unblock.md) | Controlled lab and field/Preview evidence remain open |
+| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **PARTIAL** | `production-lhci-target.test.ts`; [repeated three-run medians for ten URLs](anon-browser-local.md#repeated-uc22-57-lab-medians) | RUM for field INP; Preview lab/RUM not run (Preview reachable via OIDC since 2026-10-27; see r2-blockers-unblock.md) | Controlled lab and field/Preview evidence remain open |
 | UC22-58 | Hong Kong date boundaries (UTC 15:59/16:00) ¹ | **PARTIAL** | `hong-kong-time.test.ts`, `event-hong-kong-datetime.test.ts` | Rendered browser check | — |
 | UC22-59 | Exact-head CI gate ¹ | **BLOCKED** | `ci-security-contract.test.ts` | Exact-head remote CI (stacked base; workflow scope); stacked-ci-trigger.patch unapplied | — |
 | UC22-60 | Member→staff→member same application, persisted readback ¹ | **BLOCKED** | `supplement-binding.test.ts`, `supplement-ui.test.tsx`; DB: T22-04A 0066 gated SQL cases (t22-04a.md); Gated SQL binding cases (r2-resources-binding.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Bound forms unmounted; write flag disabled | — |
@@ -118,7 +118,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Bound forms unmounted; write flag disabled | 2: 25, 60 |
 | T-MP12A sandbox contract / T-MP12B | 2: 32, 54 |
 | T-MP08 owner materials + private delivery | 2: 39, 40 |
-| Full anonymous suite not yet run on Preview (OIDC/`vc curl` access proven 2026-10-27; see r2-blockers-unblock.md) | 1: 01 |
+| Preview anonymous suite PASS 15/15 on 06ccd701 (r2-blockers-unblock.md); PASS promotion awaits review against the original UC checklist (Test_Cases.csv absent) | 1: 01 |
 | Browser visual matrix on populated catalog | 1: 03 |
 | Browser visual matrix | 1: 04 |
 | Browser visual | 1: 09 |
@@ -135,7 +135,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Screen reader | 1: 55 |
 | Authenticated HTTP/browser 20-row list p95 remains unmeasured | 1: 56 |
 | RUM for field INP | 1: 57 |
-| Preview behind SSO (see r2-blockers-unblock.md) | 1: 57 |
+| Preview lab/RUM not run (Preview reachable via OIDC since 2026-10-27; see r2-blockers-unblock.md) | 1: 57 |
 | Rendered browser check | 1: 58 |
 | stacked-ci-trigger.patch unapplied | 1: 59 |
 
@@ -207,3 +207,7 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## Preview magic-link Auth — 2026-10-27
 
 [Staff Preview magic-link PASS](r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt) (exact-head `2435152d`, `/admin` sticky, `/portal` → `/admin`) and [Member A Preview PASS (needs-profile)](r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile) reword UC22-11/13 blockers (per-row `previewAuthEvidence*` in JSON). No status change: staff D role, A/B Preview profiles/membership walks and production remain open; Google is off on Preview. Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview anonymous acceptance — 2026-10-27
+
+[Preview anonymous acceptance PASS 15/15](r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt) on `06ccd701` after fixing the Open Now record label contrast (4.48 → 5.35:1). UC22-01's Preview blocker is cleared; it stays **PARTIAL** pending review against the original UC checklist. UC22-55 gains Preview axe evidence; UC22-57 blocker reworded (Preview reachable; lab/RUM not run). Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
