@@ -5211,5 +5211,20 @@
     "invalid": "請求無效。",
     "dirty": "目前有未儲存修改。複製已批准草稿前，請先儲存或保留修改。",
     "noHistory": "這個語言未有已儲存草稿。"
+  },
+  "Supplement": {
+    "preview": "發布預覽",
+    "visible": "申請人可見",
+    "publish": "發布補件要求",
+    "respond": "提交回覆",
+    "text": "回覆",
+    "url": "HTTPS 網址",
+    "due": "期限",
+    "saved": "已儲存",
+    "validation": "請檢查回覆，輸入已保留。",
+    "forbidden": "你無權處理此要求。",
+    "conflict": "要求已變更，請重新載入。",
+    "unknown": "結果未明，重試前請查核操作收據。",
+    "receipt": "操作收據"
   }
 }

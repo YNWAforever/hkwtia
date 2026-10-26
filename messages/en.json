@@ -5182,5 +5182,20 @@
     "invalid": "The request is invalid.",
     "dirty": "Unsaved edits are present. Save or retain them before copying an approved draft.",
     "noHistory": "No saved draft for this language."
+  },
+  "Supplement": {
+    "preview": "Publication preview",
+    "visible": "Visible to the applicant",
+    "publish": "Publish request",
+    "respond": "Submit response",
+    "text": "Answer",
+    "url": "HTTPS URL",
+    "due": "Due",
+    "saved": "Saved",
+    "validation": "Check your answers. Your input is retained.",
+    "forbidden": "You cannot act on this request.",
+    "conflict": "This request changed. Reload before trying again.",
+    "unknown": "Outcome unknown. Check the operation receipt before retrying.",
+    "receipt": "Operation receipt"
   }
 }
