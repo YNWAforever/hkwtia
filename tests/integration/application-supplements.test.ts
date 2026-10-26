@@ -7,6 +7,7 @@ import {afterAll, beforeAll, describe, expect, it} from 'vitest';
 import {localAcceptanceTarget} from '@/scripts/acceptance/local-config';
 import {seedHkwtiaFixtures, cleanupHkwtiaFixtures, fixtureManifest} from '@/scripts/acceptance/hkwtia-fixtures';
 import {createSupplementService, type SupplementResult, type SupplementRepository} from '@/lib/membership/supplement-service';
+import {createSupplementBinding} from '@/lib/membership/supplement-binding';
 import {createSupplementRepository} from '@/lib/db/repos/application-supplements';
 
 const target = process.env.HKWTIA_DB_ACCEPTANCE === '1' ? localAcceptanceTarget() : null;
@@ -93,6 +94,26 @@ describe.skipIf(!target)('supplement SQL persistence (synthetic actors; no Auth/
     expect((await pool.query("SELECT id FROM audit_events WHERE request_id=$1 AND target_type='application_supplement'",[submit.operationRequestId])).rowCount).toBe(1);
     const other = await draft();
     expect(await service.publishSupplementRequest(staff,{requestId:other.requestId,expectedVersion:1,operationRequestId:randomUUID()})).toMatchObject({status:'conflict',reason:'open_request_exists'});
+    saved(await service.closeSupplementRequest(staff,{requestId:r.requestId,expectedVersion:3,operationRequestId:randomUUID()}));
+  });
+  it('binds form-shaped payloads to SQL with fresh synthetic actors and an explicit write gate',async()=>{
+    const r=await draft();
+    let current: typeof staff | typeof a | typeof b = staff;
+    let enabled=false;
+    const binding=createSupplementBinding({enabled:()=>enabled,actor:async()=>current,repository:repo});
+    const input={requestId:r.requestId,expectedVersion:1,operationRequestId:randomUUID()};
+    expect(await binding.publish(input)).toEqual({status:'forbidden'});
+    enabled=true;
+    saved(await binding.publish(input));
+    current=b;
+    const response={...input,expectedVersion:2,operationRequestId:randomUUID(),answers};
+    expect(await binding.respond(response)).toEqual({status:'forbidden'});
+    current=a;
+    const result=await binding.respond(response);
+    saved(result);
+    enabled=false;
+    expect(await binding.receipt(response.operationRequestId)).toEqual(result);
+    expect((await pool.query('SELECT id FROM application_supplement_responses WHERE request_id=$1',[r.requestId])).rowCount).toBe(1);
     saved(await service.closeSupplementRequest(staff,{requestId:r.requestId,expectedVersion:3,operationRequestId:randomUUID()}));
   });
   it('serializes independent repository instances and independently enforces the DB open constraint',async()=>{

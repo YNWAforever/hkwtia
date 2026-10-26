@@ -5,20 +5,22 @@ import en from '@/messages/en.json';
 import zh from '@/messages/zh-HK.json';
 import {SupplementResponseForm} from '@/components/member/supplement-response-form';
 import {SupplementPublishPreview} from '@/components/admin/supplement-publish-preview';
+import {createSupplementBinding} from '@/lib/membership/supplement-binding';
 import {createSupplementService, type SupplementState} from '@/lib/membership/supplement-service';
 afterEach(cleanup);
 async function fixture() {
  const state: SupplementState = {applications:[{id:randomUUID(),applicantUserId:'a',status:'pending_review'}], requests:[],responses:[],receipts:[],audits:[]};
- const service=createSupplementService({transaction:async work=>work(state)});
+ const repository={transaction:async<T,>(work:(state:SupplementState)=>Promise<T>)=>work(state)};
+ const service=createSupplementService(repository);
  const staff={kind:'staff',userId:'staff',profileId:'staff'} as const;
  const created=await service.createSupplementDraft(staff,{applicationId:state.applications[0].id,operationRequestId:randomUUID(),items:[{itemId:'website',label:'Company website',required:true}],dueAt:'2026-11-01T16:00:00Z',staffContext:'PRIVATE-SENTINEL'});
  if(created.status!=='saved') throw Error('fixture draft');
- return {state,service,staff,request:state.requests[0]};
+ return {state,service,staff,request:state.requests[0],binding:(actor:typeof staff | {kind:"member";userId:string;profileId:string})=>createSupplementBinding({enabled:()=>true,actor:async()=>actor,repository})};
 }
 describe('offline supplement UI through real service / fake transaction',()=>{
  for(const messages of [en,zh]) it(`previews and publishes member-visible fields`,async()=>{
   const f=await fixture(); const labels=messages.Supplement;
-  render(<SupplementPublishPreview request={f.request} labels={labels} action={input=>f.service.publishSupplementRequest(f.staff,input)}/>);
+  render(<SupplementPublishPreview request={f.request} labels={labels} action={f.binding(f.staff).publish}/>);
   expect(screen.getByText(labels.visible)).toBeInTheDocument();
   expect(document.body.textContent).not.toContain('PRIVATE-SENTINEL');
   fireEvent.click(screen.getByRole('button',{name:labels.publish}));
@@ -30,7 +32,7 @@ describe('offline supplement UI through real service / fake transaction',()=>{
   const f=await fixture(); const labels=messages.Supplement;
   await f.service.publishSupplementRequest(f.staff,{requestId:f.request.id,expectedVersion:1,operationRequestId:randomUUID()});
   const [request]=await f.service.listMySupplementRequests({kind:'member',userId:'a',profileId:'a'},{applicationId:f.request.applicationId});
-  render(<SupplementResponseForm request={request} labels={labels} action={input=>f.service.respondToSupplementRequest({kind:'member',userId:'a',profileId:'a'},input)}/>);
+  render(<SupplementResponseForm request={request} labels={labels} action={f.binding({kind:'member',userId:'a',profileId:'a'}).respond}/>);
   const text=screen.getByLabelText(`${labels.text}: Company website`); const url=screen.getByLabelText(`${labels.url}: Company website`);
   fireEvent.change(text,{target:{value:'Keep my answer'}}); fireEvent.change(url,{target:{value:'http://unsafe.test'}});
   fireEvent.click(screen.getByRole('button',{name:labels.respond}));
@@ -55,7 +57,7 @@ describe('offline supplement UI through real service / fake transaction',()=>{
 it('retains required and overlong answers on service validation',async()=>{
  const f=await fixture();const labels=en.Supplement;
  await f.service.publishSupplementRequest(f.staff,{requestId:f.request.id,expectedVersion:1,operationRequestId:randomUUID()});
- render(<SupplementResponseForm request={f.state.requests[0]} labels={labels} action={input=>f.service.respondToSupplementRequest({kind:'member',userId:'a',profileId:'a'},input)}/>);
+ render(<SupplementResponseForm request={f.state.requests[0]} labels={labels} action={f.binding({kind:'member',userId:'a',profileId:'a'}).respond}/>);
  fireEvent.click(screen.getByRole('button',{name:labels.respond}));
  expect(await screen.findByRole('alert')).toHaveTextContent(labels.validation);
  const text=screen.getByLabelText(`${labels.text}: Company website`);
@@ -80,7 +82,7 @@ it('retains cancelled-version input and prevents blind retry',async()=>{
  await f.service.publishSupplementRequest(f.staff,{requestId:f.request.id,expectedVersion:1,operationRequestId:randomUUID()});
  const request={...f.state.requests[0]};
  await f.service.cancelSupplementRequest(f.staff,{requestId:request.id,expectedVersion:request.version,operationRequestId:randomUUID(),reason:'Internal reason'});
- render(<SupplementResponseForm request={request} labels={labels} action={input=>f.service.respondToSupplementRequest({kind:'member',userId:'a',profileId:'a'},input)}/>);
+ render(<SupplementResponseForm request={request} labels={labels} action={f.binding({kind:'member',userId:'a',profileId:'a'}).respond}/>);
  const text=screen.getByLabelText(`${labels.text}: Company website`);
  fireEvent.change(text,{target:{value:'Preserve across cancellation'}});
  fireEvent.click(screen.getByRole('button',{name:labels.respond}));
