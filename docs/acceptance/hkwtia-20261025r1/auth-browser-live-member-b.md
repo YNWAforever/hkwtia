@@ -50,3 +50,19 @@ Recorded 2026-10-26 (Asia/Hong_Kong) on PR #212 branch `wtia/hkwtia-plan-r1-2026
 | UC22-39 | BLOCKED (unchanged) | Documents empty for B; T-MP08 materials and A/staff still open |
 
 Counts: **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**.
+
+## Member A magic-link attempt — 2026-10-26 (finding)
+
+Same host and deployment (`https://hkwtia.vercel.app`, production `release@6833eb9a`; **not** a PR #212 deploy). No token, verifier value, cookie or email is recorded.
+
+| Step | Observation |
+| --- | --- |
+| First paste | A previously used **member B** token was pasted by mistake → Neon Auth `INVALID_TOKEN` (expected: single-use token reuse rejected) |
+| Fresh A link #1 and #2 | Two fresh member A magic links, tokens distinct from B. Neon Auth verify **succeeds** (no `INVALID_TOKEN`) and redirects to `/member-login?next=/portal&neon_auth_session_verifier=ml-…` |
+| After redirect | The `neon_auth_session_verifier` parameter **never clears**; `/member-login` does not complete the session (second attempt waited ~45 s) |
+| `/portal` | Redirects back to `/member-login`; **no member A session was established** |
+| Google OAuth | Not tried |
+
+Interpretation (not root-caused): the provider-side verify works, but the app-side exchange of the session verifier on `/member-login` does not complete for member A on the production build, whereas member B's identical flow landed on `/portal`. Candidate areas for diagnosis: the verifier exchange/cookie set on the production origin, account/identity resolution for A (e.g. member record linkage), or timing. No retry with Google, no code change and no production data inspection were done.
+
+Inventory effect: UC22-11 stays **BLOCKED**, now with this live evidence and a narrowed blocker; UC22-12 stays PARTIAL (B-vs-A comparison impossible without an A session). Counts unchanged: **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**.

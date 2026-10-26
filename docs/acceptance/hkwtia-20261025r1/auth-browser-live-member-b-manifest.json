@@ -96,5 +96,39 @@
   "statusChanges": {
     "UC22-12": "BLOCKED->PARTIAL",
     "UC22-13": "BLOCKED->PARTIAL"
+  },
+  "memberAAttempt": {
+    "date": "2026-10-26",
+    "timezone": "Asia/Hong_Kong",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a",
+    "secretsRecorded": false,
+    "steps": [
+      {
+        "step": "reused member B token pasted",
+        "result": "INVALID_TOKEN",
+        "expected": true
+      },
+      {
+        "step": "fresh member A magic link x2 (tokens distinct from B)",
+        "neonVerify": "success",
+        "redirect": "/member-login?next=/portal&neon_auth_session_verifier=ml-<redacted>"
+      },
+      {
+        "step": "wait on /member-login",
+        "result": "verifier never clears (~45s on second attempt)"
+      },
+      {
+        "step": "/portal",
+        "result": "redirects to /member-login"
+      }
+    ],
+    "googleOAuthTried": false,
+    "sessionEstablished": false,
+    "rootCause": "not determined",
+    "inventoryEffect": {
+      "UC22-11": "BLOCKED (unchanged, blocker narrowed)",
+      "UC22-12": "PARTIAL (unchanged)"
+    }
   }
 }

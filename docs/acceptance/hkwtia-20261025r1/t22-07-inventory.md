@@ -35,8 +35,8 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-08 | Anonymous portal boundary / admin redirect | **PARTIAL** | `portal-admin-redirect.test.tsx`, `portal-navigation-access.test.ts`; [live member B](auth-browser-live-member-b.md) | Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | Anonymous HTTP probe of /portal/* on local server |
 | UC22-09 | Membership page help / CTA ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `join-plan-chooser.test.ts` | Browser visual | Local Playwright |
 | UC22-10 | Policy / self-service copy consistency ¹ | **PARTIAL** | `membership-self-service-policy.test.ts`, `refund-policy-links.test.tsx`, `policy-pages.test.ts` | T-MP10 policy/legal approval | — |
-| UC22-11 | Real login member A (positive control) ¹ | **BLOCKED** | `login-resolution.test.ts`, `member-login-actions.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) | Real A/B/staff Auth sessions | — |
-| UC22-12 | Real login member B (negative control vs A) ¹ | **PARTIAL** | `login-resolution-server.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md) | Real member A session (B-vs-A comparison); Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-11 | Real login member A (positive control) ¹ | **BLOCKED** | `login-resolution.test.ts`, `member-login-actions.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member A attempt](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding) | Member A magic-link session not established on production (verifier loop at /member-login); Real staff D session; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-12 | Real login member B (negative control vs A) ¹ | **PARTIAL** | `login-resolution-server.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md) | Real member A session (B-vs-A comparison; A magic-link session not established on production); Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
 | UC22-13 | Real login staff D / NONSTAFF refusal ¹ | **PARTIAL** | `admin-login-actions.test.ts`, `admin-login-guard.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md) | Real staff D session; Zero-write DB readback for refused NONSTAFF; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
 | UC22-14 | Free (community) join | **PARTIAL** | `hosted-free-onboarding.test.ts`, `join-service.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (FREE fixture) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
 | UC22-15 | Paid join checkout | **BLOCKED** | `checkout-service.test.ts`, `membership-checkout-status-route.test.ts`, `join-billing-pages.test.tsx` | Real A/B/staff Auth sessions; Stripe test mode; Notification sink | — |
@@ -103,8 +103,8 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Blocker | UCs (status BLOCKED or remaining layer) |
 | --- | --- |
 | Authenticated browser/HTTP | 33: 06, 07, 08, 14, 16, 17, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 60 |
-| Real A/B/staff Auth sessions | 28: 06, 11, 14, 15, 16, 17, 18, 20, 24, 25, 26, 27, 28, 31, 33, 37, 40, 42, 43, 44, 45, 46, 47, 48, 49, 53, 56, 60 |
-| Exact-head deployment (live production = main@3eb9992d, not PR #212) | 12: 08, 12, 13, 21, 22, 23, 29, 30, 35, 36, 39, 50 |
+| Real A/B/staff Auth sessions | 27: 06, 14, 15, 16, 17, 18, 20, 24, 25, 26, 27, 28, 31, 33, 37, 40, 42, 43, 44, 45, 46, 47, 48, 49, 53, 56, 60 |
+| Exact-head deployment (live production = main@3eb9992d, not PR #212) | 13: 08, 11, 12, 13, 21, 22, 23, 29, 30, 35, 36, 39, 50 |
 | Real member A / staff D Auth sessions (member B done on live production) | 9: 21, 22, 23, 29, 30, 35, 36, 39, 50 |
 | Stripe test mode | 6: 15, 20, 37, 38, 40, 41 |
 | Notification sink | 5: 15, 28, 36, 37, 46 |
@@ -112,6 +112,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Exact-head remote CI (stacked base; workflow scope) | 3: 18, 19, 59 |
 | Browser | 2: 02, 05 |
 | T-MP10 policy/legal approval | 2: 10, 41 |
+| Real staff D session | 2: 11, 13 |
 | Zero-write DB readback for refused NONSTAFF | 2: 13, 50 |
 | Bound forms unmounted; write flag disabled | 2: 25, 60 |
 | T-MP12A sandbox contract / T-MP12B | 2: 32, 54 |
@@ -120,8 +121,8 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Browser visual matrix on populated catalog | 1: 03 |
 | Browser visual matrix | 1: 04 |
 | Browser visual | 1: 09 |
-| Real member A session (B-vs-A comparison) | 1: 12 |
-| Real staff D session | 1: 13 |
+| Member A magic-link session not established on production (verifier loop at /member-login) | 1: 11 |
+| Real member A session (B-vs-A comparison; A magic-link session not established on production) | 1: 12 |
 | Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md) | 1: 19 |
 | Browser/device matrix | 1: 55 |
 | Screen reader | 1: 55 |
@@ -166,3 +167,7 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## Live member B Auth/browser UAT — 2026-10-26
 
 [Evidence](auth-browser-live-member-b.md) / [manifest](auth-browser-live-member-b-manifest.json): real member B magic-link (Neon Auth) session on live production `https://hkwtia.vercel.app` (no Deployment Protection wall; deployed `release@6833eb9a` = main@3eb9992d, **not** PR #212 head). Read-only portal walk observed; member B at `/admin` was refused. UC22-12 and UC22-13 BLOCKED → PARTIAL; UC22-01/08/21/22/23/29/30/35/36/39/50 gain live evidence with unchanged status. Counts **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**. Member A and staff D magic links (gmail.com) not exercised; no PASS claimed.
+
+## Live member A attempt — 2026-10-26
+
+[Finding](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding): on production `release@6833eb9a` (not PR #212), two fresh member A magic links verify at Neon Auth but stall at `/member-login` with an uncleared session verifier; `/portal` returns to login, so no A session exists. UC22-11 stays **BLOCKED** (blocker narrowed); UC22-12 stays PARTIAL. Counts unchanged **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**.

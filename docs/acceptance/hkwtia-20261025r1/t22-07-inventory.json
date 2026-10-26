@@ -263,9 +263,20 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions"
+    "Member A magic-link session not established on production (verifier loop at /member-login)",
+    "Real staff D session",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member A",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "BLOCKED",
+    "detail": "Two fresh A magic links: Neon verify succeeds, redirect to /member-login with session verifier that never clears; /portal redirects to login; no A session. Reused B token -> INVALID_TOKEN (expected). Google not tried."
+   }
   },
   {
    "id": "UC22-12",
@@ -280,7 +291,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Real member A session (B-vs-A comparison)",
+    "Real member A session (B-vs-A comparison; A magic-link session not established on production)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
    "nextWithoutAuth": null,

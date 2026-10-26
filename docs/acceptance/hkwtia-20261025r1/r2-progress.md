@@ -134,3 +134,8 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## Live member B Auth/browser UAT — 2026-10-26
 
 [Evidence](auth-browser-live-member-b.md): member B signed in by Neon Auth magic link on live production `https://hkwtia.vercel.app` (no Deployment Protection wall; Google also offered; no passwords used). Deployed code is `release@6833eb9a` (main@3eb9992d) — existing-feature evidence, not PR #212 exact-head. Read-only: /portal Community ACTIVE 1 seat, own applications (Community Complete / Startup Draft), profile unsaved, tier gates on company/tools, empty seats/events/directory/documents, billing ACTIVE; `/admin` refused for member B. UC22-12/13 BLOCKED → PARTIAL; inventory **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**. Open: member A and staff D magic links (gmail.com inbox not connected), B-vs-A comparison, staff positive control, zero-write readback, `next=` via magic link, exact-head deployment, screen reader, Stripe. No writes, deployment, write flags or CI patch application.
+
+
+## Live member A magic-link finding — 2026-10-26
+
+[Finding](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding): production (`release@6833eb9a`, not PR #212). Reused B token → `INVALID_TOKEN` (expected). Two fresh A links: Neon verify succeeds → `/member-login?next=/portal&neon_auth_session_verifier=…` never clears (~45 s); `/portal` redirects to login; no A session. Google OAuth not tried; root cause not determined. UC22-11 BLOCKED, UC22-12 PARTIAL; inventory unchanged **0 PASS / 48 PARTIAL / 12 BLOCKED**. Docs only.
