@@ -235,7 +235,29 @@ Production (`hkwtia.vercel.app`, its Neon project/env) untouched. No deploy, no 
 
 ### Remaining Auth-on-Preview blockers
 
-- **Neon Auth trusted origins (read-only check).** Preview's `NEON_AUTH_BASE_URL` is the Neon Auth of the same Preview branch (`ep-summer-dream-azxaax7t.neonauth…/neondb/auth`). Its trusted domains are only `https://hkwtia-fyyvbi4e3-ynwaforevers-projects.vercel.app` (an old immutable deployment) and `https://hkwtia-ynwaforever-ynwaforevers-projects.vercel.app`. Neither the PR #212 branch alias nor the current deployment URL is trusted, so Google/magic-link callbacks on the PR Preview are expected to fail origin checks. Fix (needs Willy's go-ahead; not done): add `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` (stable across pushes) to that branch's trusted domains.
+- **Neon Auth trusted origins (read-only check).** Preview's `NEON_AUTH_BASE_URL` is the Neon Auth of the same Preview branch (`ep-summer-dream-azxaax7t.neonauth…/neondb/auth`). Its trusted domains are only `https://hkwtia-fyyvbi4e3-ynwaforevers-projects.vercel.app` (an old immutable deployment) and `https://hkwtia-ynwaforever-ynwaforevers-projects.vercel.app`. Neither the PR #212 branch alias nor the current deployment URL is trusted, so Google/magic-link callbacks on the PR Preview are expected to fail origin checks. Fixed with Willy's approval — see [Preview Neon Auth trusted origin added](#preview-neon-auth-trusted-origin-added--2026-10-27).
 - **`NEXT_PUBLIC_SITE_URL` on Preview is `https://hkwtia.vercel.app/`** — any absolute callback/redirect built from it would send a Preview sign-in back to production; check the login callback path before relying on Preview Auth.
 - **Accounts:** the Preview Auth user directory is separate from production; Member A/B/staff must exist (or be created) there for a Preview Auth walk.
 - Box desktop Chrome still lacks OIDC header injection — drive Preview Auth via the `tests/fixtures/preview-oidc.ts` Playwright fixture.
+
+## Preview Neon Auth trusted origin added — 2026-10-27
+
+Approved by Willy (Preview DB `hkwtia-m2-preview` / `main` confirmed not production). Change made via Neon MCP `add_auth_trusted_domain` (`auth_provider: better_auth`); no domain removed, no other Auth config touched.
+
+| Item | Value |
+| --- | --- |
+| Neon project | `hkwtia-m2-preview` (`solitary-wave-52860119`, org Vercel `ynwaforever's projects`) |
+| Branch | `main` (`br-dark-forest-az0shpz9`; Vercel-integration "production" branch of the **Preview** project) |
+| Before | `https://hkwtia-fyyvbi4e3-ynwaforevers-projects.vercel.app`, `https://hkwtia-ynwaforever-ynwaforevers-projects.vercel.app` |
+| Added | `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` (stable PR #212 branch alias) |
+| After (re-listed) | the two above **+** the PR #212 branch alias — 3 domains, all `better_auth` |
+
+Per-deployment hosts (`hkwtia-<hash>-…`) were **not** added: they change on every push, and the stable alias is the one to test on.
+
+### Remaining Auth-on-Preview gaps
+
+- **`APP_URL` on Preview (branch `wtia/hkwtia-plan-r1-20261025`) is `https://hkwtia-ynwaforever-ynwaforevers-projects.vercel.app`**, not the PR #212 alias. Magic-link `callbackURL` is built from `appEnv().appUrl` (`app/[locale]/member-login/actions.ts`, join, seat invites), so a magic link requested on the PR alias will land on the `hkwtia-ynwaforever-…` host (a different deployment, and its own cookie origin). Needs a branch-scoped Preview `APP_URL` override = the PR #212 alias (env change; needs approval) before a Preview magic-link walk is meaningful.
+- **`NEXT_PUBLIC_SITE_URL` on Preview is `https://hkwtia.vercel.app`** — used by `lib/urls.ts` and `metadataBase`; any absolute link built from it points at production. Same branch-scoped override would fix it.
+- **Accounts:** the Preview Auth user directory is separate from production; Member A/B/staff must exist (or be created) there.
+- **Browser:** box desktop Chrome lacks OIDC header injection; drive Preview login through `tests/fixtures/preview-oidc.ts` (Google OAuth hops leave the origin header-free by construction, but the return hop to the Preview origin needs the header — the CDP fixture handles that).
+

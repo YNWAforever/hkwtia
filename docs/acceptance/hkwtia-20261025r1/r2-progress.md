@@ -186,3 +186,10 @@ Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (minimal s
 Continued from `a634bab1` on PR #212. With Willy's confirmation that `hkwtia-m2-preview` / `main` is not production, [migrated the Preview DB](r2-blockers-unblock.md#preview-database-migrated--2026-10-27) via `DATABASE_URL_UNPOOLED` (Preview env only; host `ep-summer-dream-azxaax7t`, verified against Neon; secrets never printed): ledger **6 → 67** (`0007`…`0067`), `posts` and `events.status` now present. Box `:5432` is blocked, so the same Drizzle journal ran over Neon's WebSocket transport (as `scripts/acceptance/migrate.ts` does). Latest PR Preview `dpl_3AMTCMw4e2NSegZA5VwwPjLCgpex` (commit `a634bab1`): `/sitemap.xml` **200** (152 URLs, was 500); `/membership` 200 with all four tiers; `/zh/membership`, `/news`, `/events` 200. Remaining Auth-on-Preview blocker: Preview Neon Auth trusted domains omit the PR #212 branch alias and deployment URL (read-only check; not changed), and Preview `NEXT_PUBLIC_SITE_URL` points at production.
 
 Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production deploy or production DB/env change, no SSO change, no `stacked-ci-trigger.patch`.
+
+## Preview Neon Auth trusted origin — 2026-10-27
+
+Continued from `0a8b2440` on PR #212. With Willy's approval, [added](r2-blockers-unblock.md#preview-neon-auth-trusted-origin-added--2026-10-27) `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` to Neon Auth trusted domains on `hkwtia-m2-preview` / `main` (`br-dark-forest-az0shpz9`, `better_auth`). Before: 2 domains; after: 3 (existing kept). Remaining Auth-on-Preview gaps: Preview `APP_URL` is `hkwtia-ynwaforever-…` (magic-link callbacks would leave the PR alias), `NEXT_PUBLIC_SITE_URL` is production, Preview Auth users may be missing, login must run through the Playwright OIDC fixture.
+
+Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production change, no Vercel env change, no deploy, no SSO change.
+
