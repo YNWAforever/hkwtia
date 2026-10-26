@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-26",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "baseline": "fcc1a278d5f1f2fb869b5c804328e9189ccb8456",
+  "testedProductHead": "61b74c6c61647f13e7a5d27f05a9062a45b337e4",
+  "testedProductTree": "eb12b7572e3fc21982685fa01c04c085d746418e",
+  "commits": [
+    {
+      "sha": "61b74c6c61647f13e7a5d27f05a9062a45b337e4",
+      "subject": "feat: version existing membership self-service copy contract"
+    },
+    {
+      "sha": "e40faf39d0b4995cd3259c3dee41a354ef75d162",
+      "subject": "feat: page applicant-owned applications with scoped detail reads"
+    },
+    {
+      "sha": "390ab2586a06a2cf094351931cdaf3191b77b83f",
+      "subject": "feat: add offline application supplement transaction service"
+    }
+  ],
+  "commands": [
+    {
+      "command": "npx vitest run tests/unit/application-supplements.test.ts tests/unit/supplement-service.test.ts tests/unit/owned-application-reader.test.ts tests/unit/owned-applications-sql.test.ts tests/unit/portal-applications.test.ts tests/unit/portal-applications-page.test.tsx tests/unit/application-security-ui.test.tsx tests/unit/membership-self-service-policy.test.ts tests/unit/audit-full-policy-acceptance.test.ts",
+      "exit": 0,
+      "filesPassed": 9,
+      "testsPassed": 91
+    },
+    {
+      "command": "npm test",
+      "exit": 0,
+      "filesPassed": 897,
+      "filesSkipped": 113,
+      "testsPassed": 7910,
+      "testsSkipped": 643,
+      "unhandledErrors": 0
+    },
+    {
+      "command": "npm run build",
+      "exit": 0,
+      "nextVersion": "16.4.3",
+      "generatedNextEnvEditsRestored": true
+    },
+    {
+      "command": "npm run typecheck",
+      "exit": 0
+    },
+    {
+      "command": "npm run lint",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 77
+    },
+    {
+      "command": "npm run audit:strings",
+      "exit": 0,
+      "tsxFilesScanned": 357
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "tasks": {
+    "T22-04A": {
+      "code": "OFFLINE_PARTIAL: seven operations, transaction port, no SQL persistence/entrypoint/migration",
+      "tests": "PASS_UNIT_FAKE_ONLY: 18 service + 7 projection",
+      "deployment": "NOT_DEPLOYED",
+      "runtime": "BLOCKED_T22_02"
+    },
+    "T22-06": {
+      "code": "OFFLINE_CANDIDATE: scoped page/detail SQL, portal paging; index and performance pending",
+      "tests": "PASS_UNIT: fake port, rendered SQL and EN/ZH jsdom; no PostgreSQL execution",
+      "deployment": "NOT_DEPLOYED",
+      "runtime": "BLOCKED_T22_02"
+    },
+    "T-MP10": {
+      "code": "OFFLINE_PARTIAL: versioned shipped links/copy, unknown refund/SLA; legal policy registry unchanged",
+      "tests": "PASS_UNIT_EN_ZH: 4 consistency + 10 policy-selection",
+      "deployment": "NOT_DEPLOYED",
+      "runtime": "BLOCKED_POLICY_APPROVAL_AND_T22_02"
+    }
+  },
+  "firstBroadRun": {
+    "exit": 1,
+    "testsPassed": 7898,
+    "testsFailed": 8,
+    "testsSkipped": 643,
+    "cause": "Application security UI mock lacked new detail reader; fixed mock contract and preserved hostile foreign-row checks"
+  },
+  "review": {
+    "kind": "independent read-only subagent",
+    "importantFinding": "cancelled unpublished draft visibility",
+    "fix": "Regression observed failing before requiring publishedAt; published historical reads retained",
+    "deferredMinors": []
+  },
+  "blockers": [
+    "T22-02 verified isolated Neon/Auth target and real identities absent",
+    "Supplement schema/SQL adapter/unique-open constraint/transaction durability/integration/UI acceptance pending",
+    "Paging composite index, 10k fixture, EXPLAIN/rows/bytes/p95 and browser acceptance pending",
+    "Legal policy approvals and cross-channel effective policy version/test-mode Stripe acceptance pending",
+    "Stacked PR CI trigger excludes #211 base; prior workflow-scope rejection and unapplied patch remain"
+  ],
+  "prohibitedActionsPerformed": []
+}
