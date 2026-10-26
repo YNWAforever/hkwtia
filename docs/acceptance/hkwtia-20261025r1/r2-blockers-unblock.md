@@ -206,3 +206,36 @@ So the Preview `DATABASE_URL` points at a database whose migrations lag far behi
 
 1. Willy authorizes migrating the Preview database (or re-pointing Preview `DATABASE_URL` to a migrated, non-production Neon branch); re-check `/sitemap.xml` → 200.
 2. Write an opt-in `preview-oidc` Auth spec (import `test` from `tests/fixtures/preview-oidc.ts`): member magic-link request on `/member-login` → Willy pastes the link (or Gmail read) → assert `/portal` session sticks; Google OAuth hops leave the origin header-free by construction. Confirm Neon Auth trusted origins include the Preview host first (callback must return to the Preview origin).
+
+## Preview database migrated — 2026-10-27
+
+Willy confirmed (2026-10-27) that Neon project `hkwtia-m2-preview` branch `main` is **not production** (the Neon "vercel production branch" flag on it is the Vercel integration's label only) and authorized migrating it with the direct (non-pooler) URL.
+
+| Item | Value |
+| --- | --- |
+| Env source | `vercel env pull --environment=preview --git-branch=wtia/hkwtia-plan-r1-20261025` to a 0600 temp file outside the repo (deleted after use). Production env not pulled. |
+| Target | `DATABASE_URL_UNPOOLED` (= `POSTGRES_URL_NON_POOLING`) → host `ep-summer-dream-azxaax7t.c-3.ap-southeast-1.aws.neon.tech`, db `neondb`. Neon readback: project `hkwtia-m2-preview` (`solitary-wave-52860119`), branch `main` (`br-dark-forest-az0shpz9`), read-write endpoint `ep-summer-dream-azxaax7t`. Credentials never printed or committed. |
+| Transport | Box egress to `:5432` is blocked, so the same Drizzle journal/SQL as `npm run db:migrate` (`drizzle-kit migrate`) was applied with `drizzle-orm/neon-serverless/migrator` over Neon's TLS WebSocket (`:443`) — the mechanism of `scripts/acceptance/migrate.ts`, pointed at the Preview URL with a hard host guard. Throwaway runner, not committed. |
+| Before | `drizzle.__drizzle_migrations` 6 rows (last `0006_m2_integrity_indexes`, `when` 1784735440899 = journal idx 6); `public.posts` absent; `events.status` absent; 20 public tables |
+| Applied | `0007_m3_automations` … `0067_owned_application_paging` (61 migrations), ~02:25–02:28 HKT, single run, no errors |
+| After | 67 rows (last `when` 1792996785920 = journal `0067`); `posts` present; `events.status` present; 75 public tables |
+
+### Verification (`vercel curl --deployment`, Deployment Protection unchanged)
+
+Latest PR #212 Preview `dpl_3AMTCMw4e2NSegZA5VwwPjLCgpex` → `https://hkwtia-8cjq4mq09-ynwaforevers-projects.vercel.app` (alias `hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app`), Vercel `githubCommitSha` `a634bab1` (exact branch head at run time):
+
+| Path | Result |
+| --- | --- |
+| `/sitemap.xml` | **200** (was 500), 152 `<url>` entries |
+| `/membership` | 200, plan ids `community`, `startup`, `corporate`, `patron` |
+| `/zh/membership` | 200 |
+| `/news`, `/events` | 200 (previously at risk from the same schema gap) |
+
+Production (`hkwtia.vercel.app`, its Neon project/env) untouched. No deploy, no SSO change, no `stacked-ci-trigger.patch`. The Preview DB now has the full schema but only whatever data it held before (no seed run).
+
+### Remaining Auth-on-Preview blockers
+
+- **Neon Auth trusted origins (read-only check).** Preview's `NEON_AUTH_BASE_URL` is the Neon Auth of the same Preview branch (`ep-summer-dream-azxaax7t.neonauth…/neondb/auth`). Its trusted domains are only `https://hkwtia-fyyvbi4e3-ynwaforevers-projects.vercel.app` (an old immutable deployment) and `https://hkwtia-ynwaforever-ynwaforevers-projects.vercel.app`. Neither the PR #212 branch alias nor the current deployment URL is trusted, so Google/magic-link callbacks on the PR Preview are expected to fail origin checks. Fix (needs Willy's go-ahead; not done): add `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` (stable across pushes) to that branch's trusted domains.
+- **`NEXT_PUBLIC_SITE_URL` on Preview is `https://hkwtia.vercel.app/`** — any absolute callback/redirect built from it would send a Preview sign-in back to production; check the login callback path before relying on Preview Auth.
+- **Accounts:** the Preview Auth user directory is separate from production; Member A/B/staff must exist (or be created) there for a Preview Auth walk.
+- Box desktop Chrome still lacks OIDC header injection — drive Preview Auth via the `tests/fixtures/preview-oidc.ts` Playwright fixture.
