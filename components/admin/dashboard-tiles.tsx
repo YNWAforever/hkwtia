@@ -17,6 +17,7 @@ export type DashboardTileLabels = Readonly<{
   view: string;
   unavailable: string;
   applicationQueue: string;
+  submittedApplications?: string;
 }>;
 
 /**
@@ -41,6 +42,11 @@ export function DashboardTiles({
         </h2>
         <p className="text-muted-foreground">{labels.description}</p>
       </header>
+      {labels.submittedApplications ? <nav aria-label={labels.heading}>
+        <Link prefetch={false} className="inline-flex min-h-11 items-center rounded-md border px-4 font-medium text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" href={localizedPath(locale, "/admin/members/queue?status=submitted")}>
+          {labels.submittedApplications}
+        </Link>
+      </nav> : null}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
           <li key={tile.id}>

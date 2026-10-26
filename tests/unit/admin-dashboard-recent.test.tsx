@@ -29,6 +29,7 @@ describe("admin dashboard recent batch recovery", () => {
 
     const queues = screen.getByRole("region", {name: "dashboard.heading"});
     expect(within(queues).getAllByRole("link").map(link => link.getAttribute("href"))).toEqual([
+      "/admin/members/queue?status=submitted",
       "/admin/members/queue?status=draft",
       "/admin/members/queue?status=submitted",
       "/admin/profiles-review",

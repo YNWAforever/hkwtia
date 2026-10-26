@@ -69,6 +69,7 @@ export default async function AdminPage({params,searchParams}: Props) {
           view: t("dashboard.view"),
           unavailable: t("dashboard.unavailable"),
           applicationQueue: t("dashboard.applicationQueue"),
+          submittedApplications: t("dashboard.submittedApplications"),
         }}
       />
       <section aria-labelledby="admin-recent-batches" className="space-y-4">
