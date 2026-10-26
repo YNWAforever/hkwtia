@@ -14,9 +14,9 @@
  },
  "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan §7 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
  "counts": {
-  "NOT RUN": 2,
+  "BLOCKED": 15,
   "PARTIAL": 44,
-  "BLOCKED": 14
+  "NOT RUN": 1
  },
  "total": 60,
  "cases": [
@@ -25,16 +25,23 @@
    "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Public entry pages render (anonymous)",
    "themeSource": "inferred",
-   "status": "NOT RUN",
+   "status": "BLOCKED",
    "offlineEvidence": [
     "tests/unit/membership-public-catalog.test.ts",
     "tests/unit/navigation.test.ts"
    ],
    "dbEvidence": [],
    "blockers": [
-    "Preview behind Vercel SSO (no bypass)"
+    "Preview behind Vercel SSO (no bypass)",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Local `next build && next start` + Playwright anonymous smoke against isolated-catalog env"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+   }
   },
   {
    "id": "UC22-02",
@@ -67,9 +74,16 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Browser visual matrix on populated catalog"
+    "Browser visual matrix on populated catalog",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Local Playwright visual at 375/768/1024/1440"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Stripe price IDs absent deliberately; populated four-tier comparison remains unverified independently of redirect blocker."
+   }
   },
   {
    "id": "UC22-04",
@@ -83,9 +97,16 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Browser visual matrix"
+    "Browser visual matrix",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Same local Playwright run"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+   }
   },
   {
    "id": "UC22-05",
@@ -100,9 +121,16 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Browser"
+    "Browser",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Local Playwright anonymous locale round-trip"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+   }
   },
   {
    "id": "UC22-06",
@@ -135,9 +163,16 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Authenticated browser/HTTP"
+    "Authenticated browser/HTTP",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Anonymous HTTP probe of /admin/* on local server (no Auth needed for the negative control)"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+   }
   },
   {
    "id": "UC22-08",
@@ -151,9 +186,16 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Authenticated browser/HTTP"
+    "Authenticated browser/HTTP",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Anonymous HTTP probe of /portal/* on local server"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+   }
   },
   {
    "id": "UC22-09",
@@ -167,9 +209,16 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Browser visual"
+    "Browser visual",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Local Playwright"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+   }
   },
   {
    "id": "UC22-10",
@@ -625,9 +674,16 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (directory visibility false)"
    ],
    "blockers": [
-    "Authenticated browser/HTTP"
+    "Authenticated browser/HTTP",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Anonymous local check that seeded company is absent from public directory on isolated Neon"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Guarded read-only preflight found exactly one existing hidden, unpublished synthetic company; public absence NOT proven."
+   }
   },
   {
    "id": "UC22-35",
@@ -947,9 +1003,16 @@
    "dbEvidence": [],
    "blockers": [
     "Real AI provider evaluation",
-    "Authenticated browser/HTTP"
+    "Authenticated browser/HTTP",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Local Playwright with provider disabled"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+   }
   },
   {
    "id": "UC22-53",
@@ -994,9 +1057,16 @@
    "dbEvidence": [],
    "blockers": [
     "Browser/device matrix",
-    "Screen reader"
+    "Screen reader",
+    "Local production-start locale redirect loop (2026-10-26); Preview/deployment unverified"
    ],
-   "nextWithoutAuth": "Local Playwright 375/768/1024/1440 + keyboard on public pages"
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "BLOCKED",
+    "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+   }
   },
   {
    "id": "UC22-56",
@@ -1032,7 +1102,13 @@
     "RUM for field INP",
     "Preview behind SSO"
    ],
-   "nextWithoutAuth": "Local LHCI 3-run against `next start`; field INP stays NOT_TESTED"
+   "nextWithoutAuth": "Local LHCI 3-run against `next start`; field INP stays NOT_TESTED",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "NOT_RUN",
+    "detail": "Optional LHCI omitted: public navigation loops; field INP NOT_TESTED."
+   }
   },
   {
    "id": "UC22-58",

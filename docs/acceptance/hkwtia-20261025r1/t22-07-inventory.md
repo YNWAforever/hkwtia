@@ -8,8 +8,8 @@ Inventory base HEAD `6681eb970968d0a70f385e2771628bbfc2f1f86f` (docs-only after 
 | --- | ---: | --- |
 | PASS | 0 | Fresh actual/result/evidence for the whole UC, incl. real identity/Stripe/DB where required |
 | PARTIAL | 44 | Current-tree offline unit/jsdom and/or isolated-Neon evidence; acceptance-critical runtime layer still open |
-| BLOCKED | 14 | Core dependency unavailable (Auth sessions, Stripe test, sink, T-MP10 approval, T-MP08 materials, T-MP12 contract, remote CI) |
-| NOT RUN | 2 | No external blocker for an anonymous/local run, but not executed yet |
+| BLOCKED | 15 | Core dependency unavailable (Auth sessions, Stripe test, sink, T-MP10 approval, T-MP08 materials, T-MP12 contract, remote CI) |
+| NOT RUN | 1 | No external blocker for an anonymous/local run, but not executed yet |
 
 **No UC is PASS.** Every UC22-01–60 acceptance requires real Auth/HTTP/browser, Stripe or owner/legal input for at least one layer; offline evidence never substitutes (plan Task 15 exact completion condition).
 
@@ -25,7 +25,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 | UC | Theme | Status | Offline / DB evidence | Blockers | Next without Auth |
 | --- | --- | --- | --- | --- | --- |
-| UC22-01 | Public entry pages render (anonymous) | **NOT RUN** | `membership-public-catalog.test.ts`, `navigation.test.ts` | Preview behind Vercel SSO (no bypass) | Local `next build && next start` + Playwright anonymous smoke against isolated-catalog env |
+| UC22-01 | Public entry pages render (anonymous) | **BLOCKED** | `membership-public-catalog.test.ts`, `navigation.test.ts` | Preview behind Vercel SSO (no bypass) | Local `next build && next start` + Playwright anonymous smoke against isolated-catalog env |
 | UC22-02 | Current concierge chat UI (not R3 actions) | **PARTIAL** | `concierge-widget.test.tsx`, `concierge-shell.test.tsx`, `concierge-unavailable-ui.test.tsx` | Real AI provider evaluation; Browser | Local Playwright disabled-provider path (manual fallback) without Auth |
 | UC22-03 | Four-tier membership comparison ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-catalog.test.ts`, `membership-tier-content.test.ts` | Browser visual matrix on populated catalog | Local Playwright visual at 375/768/1024/1440 |
 | UC22-04 | Comparison seats/help/anchor ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-links.test.tsx` | Browser visual matrix | Same local Playwright run |
@@ -136,3 +136,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 6. **Obtain original Test_Cases.csv** and reconcile themes.
 
 No write flag was enabled, no production Neon was touched and nothing was deployed.
+
+## Local anonymous production-start attempt — 2026-10-26
+
+[Browser evidence](anon-browser-local.md) / [manifest](anon-browser-local-manifest.json): build/start passed, but both anonymous browser runs encountered locale redirect loops before public render. Four initial-hop HTTP boundary checks passed on retry; login destinations still loop. UC22-01 moves NOT RUN → BLOCKED; other statuses remain unchanged. Current counts: **0 PASS, 44 PARTIAL, 15 BLOCKED, 1 NOT RUN**. Per-row `localBrowserEvidence` in JSON distinguishes these results from prior offline evidence. Historical browser next steps in the table now depend on resolving the local redirect loop. No screenshots, axe, keyboard, screen reader, Lighthouse, field INP, Preview or deployment PASS.

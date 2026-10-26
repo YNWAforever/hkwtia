@@ -1,0 +1,247 @@
+{
+  "date": "2026-10-26",
+  "baseHead": "45dbecbe21b153ddd0da300a783e5625f2e6a1f4",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "pr": 212,
+  "stackedOn": 211,
+  "serverMode": "Next production build --webpack / next start; 127.0.0.1:3212; no dev server used for evidence",
+  "versions": {
+    "node": "22.23.4",
+    "next": "16.4.3",
+    "chromium": "149.0.7827.55"
+  },
+  "target": {
+    "projectId": "dark-cake-07139424",
+    "branchId": "br-restless-pond-a11dpkvd",
+    "verification": "localAcceptanceTarget -> verifyAcceptanceTarget before production child; existing fixture read-only; no migration/seed/write"
+  },
+  "environment": {
+    "inheritedNames": [
+      "PATH",
+      "HOME",
+      "TMPDIR",
+      "LANG"
+    ],
+    "explicitNames": [
+      "NODE_ENV",
+      "DATABASE_URL",
+      "APP_URL",
+      "NEXT_PUBLIC_SITE_URL",
+      "NEON_AUTH_BASE_URL",
+      "NEON_AUTH_COOKIE_SECRET",
+      "CONCIERGE_COOKIE_SECRET",
+      "AGENTS_ENABLED",
+      "NEXT_TELEMETRY_DISABLED"
+    ],
+    "dummyNames": [
+      "NEON_AUTH_BASE_URL",
+      "NEON_AUTH_COOKIE_SECRET",
+      "CONCIERGE_COOKIE_SECRET"
+    ],
+    "dummyAuth": "loopback closed port, no real Auth credentials or sessions",
+    "absent": "All Stripe, AI provider, messaging, email, Vercel/Preview credentials and mutation flags; Turnstile absent; no production keys",
+    "browserNames": [
+      "HKWTIA_ANONYMOUS_ACCEPTANCE",
+      "PLAYWRIGHT_BASE_URL"
+    ],
+    "authState": "Explicit empty cookies/origins, no storageState file; cross-origin browser requests aborted"
+  },
+  "commands": [
+    "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts build",
+    "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts start",
+    "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-directory-readback.ts",
+    "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=<loopback> npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --reporter=json",
+    "npx -y -p node@22 -c \"npm test\"",
+    "npx -y -p node@22 -c \"npm run typecheck && npm run lint\""
+  ],
+  "runs": [
+    {
+      "name": "initial",
+      "passed": 0,
+      "failed": 16,
+      "reason": "All navigation hits redirect loop",
+      "durationMs": 34638
+    },
+    {
+      "name": "one retry plus initial-hop diagnostics",
+      "passed": 4,
+      "failed": 16,
+      "flaky": 0,
+      "durationMs": 29400
+    }
+  ],
+  "excludedAttempts": [
+    "Pre-server exploratory locale test failed connection refusal; not behavioral evidence.",
+    "First build failed new launcher ProcessEnv type; corrected before successful build/start.",
+    "Gate check without PLAYWRIGHT_BASE_URL invoked managed-server configuration and failed before tests; excluded. Repeated gate with explicit loopback base."
+  ],
+  "initialBoundaryResponses": [
+    {
+      "path": "/admin",
+      "status": 307,
+      "location": "/admin-login?next=%2Fadmin"
+    },
+    {
+      "path": "/admin/members",
+      "status": 307,
+      "location": "/admin-login?next=%2Fadmin%2Fmembers"
+    },
+    {
+      "path": "/portal",
+      "status": 307,
+      "location": "/member-login?next=%2Fportal"
+    },
+    {
+      "path": "/portal/company",
+      "status": 307,
+      "location": "/member-login?next=%2Fportal%2Fcompany"
+    },
+    {
+      "path": "/zh/admin",
+      "status": 307,
+      "location": "/zh/admin-login?next=%2Fadmin"
+    },
+    {
+      "path": "/zh/admin/members",
+      "status": 307,
+      "location": "/zh/admin-login?next=%2Fadmin%2Fmembers"
+    },
+    {
+      "path": "/zh/portal",
+      "status": 307,
+      "location": "/zh/member-login?next=%2Fportal"
+    },
+    {
+      "path": "/zh/portal/company",
+      "status": 307,
+      "location": "/zh/member-login?next=%2Fportal%2Fcompany"
+    }
+  ],
+  "publicHttpDiagnostics": [
+    {
+      "path": "/",
+      "status": 307,
+      "location": "/"
+    },
+    {
+      "path": "/about",
+      "status": 307,
+      "location": "/about"
+    },
+    {
+      "path": "/zh",
+      "status": 307,
+      "location": "/zh-HK"
+    }
+  ],
+  "directoryPreflight": {
+    "rows": 1,
+    "directoryVisible": false,
+    "published": false,
+    "publicAbsence": "NOT_PROVEN"
+  },
+  "checks": {
+    "build": "PASS",
+    "unit": {
+      "passed": 7984,
+      "skipped": 659,
+      "failed": 0,
+      "filesPassed": 909,
+      "filesSkipped": 118
+    },
+    "typecheck": "PASS",
+    "lint": {
+      "errors": 0,
+      "warnings": 77
+    },
+    "browser": "FAIL (4 initial-hop checks passed, 16 navigation failures)",
+    "screenshots": "None: navigation failed before capture",
+    "axe": "NOT_TESTED",
+    "keyboard": "NOT_TESTED",
+    "screenReader": "NOT_TESTED",
+    "lhci": "NOT_RUN",
+    "fieldINP": "NOT_TESTED"
+  },
+  "results": [
+    {
+      "id": "UC22-01",
+      "oldStatus": "NOT RUN",
+      "newStatus": "BLOCKED",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+    },
+    {
+      "id": "UC22-03",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Stripe price IDs absent deliberately; populated four-tier comparison remains unverified independently of redirect blocker."
+    },
+    {
+      "id": "UC22-04",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+    },
+    {
+      "id": "UC22-05",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+    },
+    {
+      "id": "UC22-07",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+    },
+    {
+      "id": "UC22-08",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+    },
+    {
+      "id": "UC22-09",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+    },
+    {
+      "id": "UC22-34",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Guarded read-only preflight found exactly one existing hidden, unpublished synthetic company; public absence NOT proven."
+    },
+    {
+      "id": "UC22-52",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+    },
+    {
+      "id": "UC22-55",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "BLOCKED",
+      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+    },
+    {
+      "id": "UC22-57",
+      "oldStatus": "NOT RUN",
+      "newStatus": "NOT RUN",
+      "localResult": "NOT_RUN",
+      "detail": "Optional LHCI omitted: public navigation loops; field INP NOT_TESTED."
+    }
+  ],
+  "serverStopped": true,
+  "deployment": "NOT_RUN",
+  "remoteCI": "BLOCKED: billing; stacked-ci-trigger.patch untouched"
+}
