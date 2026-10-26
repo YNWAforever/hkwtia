@@ -68,10 +68,12 @@
       "runtime": "BLOCKED_T22_02"
     },
     "T22-06": {
-      "code": "OFFLINE_CANDIDATE: scoped page/detail SQL, portal paging; index and performance pending",
-      "tests": "PASS_UNIT: fake port, rendered SQL and EN/ZH jsdom; no PostgreSQL execution",
-      "deployment": "NOT_DEPLOYED",
-      "runtime": "BLOCKED_T22_02"
+      "code": "IMPLEMENTED: owned tuple paging/detail; composite index 0067; legacy listOwned remains unbounded",
+      "tests": "PASS: 21 focused unit cases and 5 gated Neon cases with 10,001 owned rows; see t22-06.md",
+      "deployment": "NOT_DEPLOYED: no merge or manual deployment; Preview/remote CI unverified",
+      "runtime": "ISOLATED_DB_PASS; AUTH_BROWSER_STRIPE_SINK_BLOCKED",
+      "evidence": "t22-06.md",
+      "explain": "t22-06-explain.json"
     },
     "T-MP10": {
       "code": "OFFLINE_PARTIAL: versioned shipped links/copy, unknown refund/SLA; legal policy registry unchanged",
