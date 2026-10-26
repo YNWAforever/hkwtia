@@ -257,7 +257,8 @@
    "status": "BLOCKED",
    "offlineEvidence": [
     "tests/unit/login-resolution.test.ts",
-    "tests/unit/member-login-actions.test.ts"
+    "tests/unit/member-login-actions.test.ts",
+    "tests/unit/proxy.test.ts"
    ],
    "dbEvidence": [
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
@@ -265,7 +266,8 @@
    "blockers": [
     "Member A magic-link session not established on production (verifier loop at /member-login)",
     "Real staff D session",
-    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)",
+    "Fix on PR #212 not deployed"
    ],
    "nextWithoutAuth": null,
    "liveAuthEvidence": {
@@ -275,7 +277,7 @@
     "host": "https://hkwtia.vercel.app",
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "BLOCKED",
-    "detail": "Two fresh A magic links: Neon verify succeeds, redirect to /member-login with session verifier that never clears; /portal redirects to login; no A session. Reused B token -> INVALID_TOKEN (expected). Google not tried."
+    "detail": "Two fresh A magic links: Neon verify succeeds, redirect to /member-login with session verifier that never clears; /portal redirects to login; no A session. Reused B token -> INVALID_TOKEN (expected). Google not tried. Code inspection confirms cookie-presence exchange suppression matching symptoms, without captured live cookie state. PR #212 fixes exchange and isolates old session/cache cookies; not deployed or live accepted."
    }
   },
   {

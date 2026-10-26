@@ -125,10 +125,20 @@
     ],
     "googleOAuthTried": false,
     "sessionEstablished": false,
-    "rootCause": "not determined",
+    "rootCause": "Confirmed code defect matching symptoms: cookie-presence guard suppresses verifier exchange; actual live cookie state not captured.",
     "inventoryEffect": {
       "UC22-11": "BLOCKED (unchanged, blocker narrowed)",
       "UC22-12": "PARTIAL (unchanged)"
+    },
+    "branchFix": {
+      "deployed": false,
+      "pr": 212,
+      "baselineHead": "488d220a",
+      "document": "auth-browser-live-member-b.md#root-cause-and-fix-branch-not-deployed",
+      "change": "Exchange supplied verifier despite existing session; isolate session and session-data cookies from cloned exchange request; relay minted cookies and strip verifier only on success.",
+      "providerVerifierReplay": "Backend behavior not proven locally; refusal/no-cookie fallthrough tested.",
+      "acceptance": "BLOCKED: Fix on PR #212 not deployed; member A session never established.",
+      "productionTouched": false
     }
   }
 }
