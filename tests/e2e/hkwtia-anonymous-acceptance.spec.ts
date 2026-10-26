@@ -24,7 +24,7 @@ async function settleAnimations(page: import('@playwright/test').Page) {
     } finally {clearTimeout(timer);}
   });
 }
-// Assert the effective settled colours, including every ancestor's opacity.
+// Assert the effective colours, including every ancestor's opacity.
 async function homeContrast(page: import('@playwright/test').Page) {
   const result = await page.locator('.hero .hero-actions .button[href="#pathways"]').evaluate(element => {
     const rgb = (value: string) => {
@@ -34,8 +34,10 @@ async function homeContrast(page: import('@playwright/test').Page) {
     };
     const foreground = getComputedStyle(element).color;
     let background = '';
+    const opacities: number[] = [];
     for (let node: Element | null = element; node; node = node.parentElement) {
       const style = getComputedStyle(node);
+      opacities.push(Number(style.opacity));
       if (Number(style.opacity) !== 1) throw Error(`Unsettled opacity: ${style.opacity}`);
       if (!background) {
         const channels = rgb(style.backgroundColor);
@@ -51,7 +53,7 @@ async function homeContrast(page: import('@playwright/test').Page) {
     const fg = rgb(foreground);
     if (fg.length === 4 && fg[3] !== 1) throw Error('Translucent foreground');
     const a = luminance(foreground), b = luminance(background);
-    return {foreground, background, ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)};
+    return {foreground, background, opacities, ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)};
   });
   expect(result.ratio).toBeGreaterThanOrEqual(4.5);
   return result;
@@ -166,3 +168,30 @@ for (const prefix of ['', '/zh']) test(`${prefix || 'en'} reduced-motion home ax
   await info.attach('reduced-motion', {body: JSON.stringify({contrast, violations: axe.violations}), contentType: 'application/json'});
   expect(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
 });
+
+// Freeze real time-based document effects; scroll-driven effects retain their scroll progress.
+for (const prefix of ['', '/zh']) for (const width of [375, 768, 1024, 1440]) {
+  test(`${prefix || 'en'} ${width} home mid-entrance contrast`, async ({page}, info) => {
+    await page.emulateMedia({reducedMotion: 'no-preference'});
+    await page.setViewportSize({width, height: 900});
+    await page.goto(prefix || '/', {waitUntil: 'domcontentloaded'});
+    const samples = [];
+    for (const time of [0, 450, 600, 800]) {
+      const animations = await page.evaluate(time => {
+        const animations = document.getAnimations().filter(animation => animation.timeline === document.timeline);
+        for (const animation of animations) {
+          animation.pause();
+          animation.currentTime = time;
+        }
+        return animations.filter(animation => (animation.effect as KeyframeEffect | null)?.target === document.querySelector('.hero-actions')).length;
+      }, time);
+      expect(animations).toBe(1);
+      samples.push({time, ...await homeContrast(page)});
+      if (time === 600) {
+        const axe = await new AxeBuilder({page}).include('.hero').analyze();
+        expect(axe.violations.filter(v => v.id === 'color-contrast')).toEqual([]);
+      }
+    }
+    await info.attach('mid-entrance', {body: JSON.stringify(samples), contentType: 'application/json'});
+  });
+}

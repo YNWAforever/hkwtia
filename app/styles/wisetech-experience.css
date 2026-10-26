@@ -769,9 +769,11 @@
   .hero-content > .eyebrow { animation-delay: 80ms; }
   .hero-content > h1 { animation-delay: 160ms; }
   .hero-content > p:not(.eyebrow) { animation-delay: 300ms; }
-  .hero-content > .hero-actions { animation-delay: 420ms; }
+  /* Keep action contrast opaque throughout entrance (WCAG 1.4.3). */
+  .hero-content > .hero-actions { animation-name: xp-rise-move; animation-delay: 420ms; }
   .hero-scroll { animation: xp-fade 900ms ease 700ms both; }
 }
+@keyframes xp-rise-move { from { transform: translateY(18px); } }
 @keyframes xp-rise { from { opacity: 0; transform: translateY(18px); } }
 @keyframes xp-fade { from { opacity: 0; } }
 
