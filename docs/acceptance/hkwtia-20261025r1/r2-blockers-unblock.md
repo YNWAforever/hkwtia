@@ -474,4 +474,44 @@ Not claimed: screen reader, real devices, Lighthouse/RUM on Preview, production.
 | Local paid-tier catalog (local four-tier red) | **Willy**: Stripe *test* price IDs for local acceptance env | Preview/Production already show four tiers; do not invent IDs |
 | Exact-head remote CI | **Willy**: fix GitHub Actions billing, then apply `stacked-ci-trigger.patch` | #211 zero-step failures; #212 no runs |
 | UC22-01 PASS promotion | Reviewer / Willy: original Test_Cases.csv checklist | Preview 15/15 evidence above |
-| Preview Lighthouse (UC22-57) | None — agent can run (read-only) | Next offline candidate |
+| Preview Lighthouse (UC22-57) | ~~None — agent can run~~ **Done 2026-10-27** ([lab pass](#preview-lighthouse-lab-uc22-57--2026-10-27-hkt)); field INP needs RUM (Willy: enable Vercel Speed Insights / RUM on Production or a real-traffic Preview) | Perf ≥0.94 / A11y 1.00 on 10/10; SEO 0.54 Preview-environment; mailto form mixed-content observation |
+
+## Preview Lighthouse lab (UC22-57) — 2026-10-27 HKT
+
+Read-only lab pass, run 04:22–04:27 Asia/Hong_Kong on PR #212 Preview **`dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq`** (`hkwtia-b4ufoywcd-…`, commit `06ccd701`; branch head `cbaca9b4` differs by docs only), the deployment the PR alias served. Manifest: [uc22-57-preview-lighthouse.json](uc22-57-preview-lighthouse.json).
+
+**Harness.** `lhci collect --config=lighthouserc.js` was not used on Preview: its only protected-Preview path is `LHCI_COOKIE_FILE` (needs a share-link `_vercel_jwt`, i.e. a Willy-authorized share URL), and putting the OIDC token in Lighthouse `extraHeaders` would send it to third-party origins (Preview injects `vercel.live`) and copy it into every `lhr.configSettings`. New `scripts/preview-oidc-lighthouse.mjs` runs Lighthouse 12.6.1 (same version as LHCI) through its Node API on a puppeteer-core page, injecting `x-vercel-trusted-oidc-idp-token` per request via CDP Fetch scoped to the Preview origin (same mechanism as `tests/fixtures/preview-oidc.ts`). Same ten URLs and order as `lighthouserc.js`, **3 runs each / 30 reports**, default mobile simulated throttling (4× CPU, 150 ms RTT), medians. `extraHeaders` null in every LHR; token-string scan of all saved reports: **0 hits**. Raw LHRs stay under ignored `.playwright/lighthouse-preview*/`; nothing uploaded.
+
+```bash
+cd /workspace/hkwtia
+vercel env run -- node scripts/preview-oidc-lighthouse.mjs https://hkwtia-b4ufoywcd-ynwaforevers-projects.vercel.app 3
+```
+
+| URL | Perf | A11y | Best pr. | SEO | LCP ms | CLS | TBT ms | FCP ms |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| / | 0.94 | 1.00 | 0.61 | 0.54 | 2344 | 0 | 74 | 1240 |
+| /membership | 0.99 | 1.00 | 0.61 | 0.54 | 2109 | 0 | 39 | 1237 |
+| /events | 0.96 | 1.00 | 0.61 | 0.54 | 2418 | 0 | 74 | 1235 |
+| /programmes | 0.98 | 1.00 | 0.61 | 0.54 | 2277 | 0 | 93 | 1227 |
+| /partners | 0.99 | 1.00 | 0.61 | 0.54 | 1957 | 0 | 66 | 1089 |
+| /zh | 0.98 | 1.00 | 0.61 | 0.54 | 2247 | 0 | 111 | 1227 |
+| /zh/membership | 0.99 | 1.00 | 0.61 | 0.54 | 2095 | 0 | 41 | 1228 |
+| /zh/events | 0.98 | 1.00 | 0.61 | 0.54 | 2410 | 0 | 90 | 1231 |
+| /zh/programmes | 0.98 | 1.00 | 0.61 | 0.54 | 2269 | 0 | 96 | 1223 |
+| /zh/partners | 0.99 | 1.00 | 0.61 | 0.54 | 1891 | 0 | 76 | 1086 |
+
+All 30 runs landed on the Preview origin (no SSO bounce), no runtime errors. Single-run range: performance 0.83–0.99 (one `/zh` cold first run 0.83; medians all ≥0.94).
+
+Against the `lighthouserc.js` assertions (median): **performance ≥0.90 — met on 10/10; accessibility ≥0.95 — 1.00 on 10/10; SEO ≥0.95 — not met (0.54)**. Best-practices is not asserted by the config (0.61). Causes:
+
+| Audit | Kind | Detail |
+| --- | --- | --- |
+| SEO `is-crawlable` | Environment | Preview sends `x-robots-tag: noindex` (Vercel Preview default) |
+| SEO `robots-txt` | Harness artifact | Lighthouse fetches `/robots.txt` outside the page's request path, so the scoped header is absent and it gets SSO HTML; header-scoped curl of `/robots.txt` → 200 |
+| SEO `canonical` | Host artifact | Canonical/hreflang use the branch alias; fails only on the immutable deployment URL. Alias spot-check (1 run, `/`, `/zh`, `/membership`): canonical passes, SEO 0.61 (only the two rows above remain) |
+| BP `third-party-cookies` + cookie inspector issue | Environment | `vercel.live` feedback toolbar (Preview-only) sets `_vcrr_*` |
+| BP `is-on-https` + mixed-content inspector issue | **Product observation** | Footer newsletter form's intentionally inert `action="mailto:contact@hkwtia.org"` (`components/layout/footer-newsletter.tsx`, blocked by CSP `form-action 'self'`) is reported by Chrome as mixed content "Allowed with warning" on HTTPS. Not visible on http localhost runs. **Not changed** — product/design decision (the comment explains why removing the action would leak the address) |
+
+Compared with the local `next start` medians (LCP ~2.2–2.9 s), Preview lab LCP is **1.9–2.4 s**, CLS 0 everywhere, TBT 39–111 ms. Lab only, shared box host, one Vercel region (iad1) from Hong Kong. **Field INP (RUM) NOT_TESTED**; UC22-57 stays **PARTIAL**. Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+No Production, Vercel env, Deployment Protection/SSO, Neon or Auth change; GETs to the Preview only.

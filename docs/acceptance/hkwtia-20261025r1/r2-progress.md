@@ -229,3 +229,9 @@ Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. UC
 Continued from `57c4540c`. [Evidence](r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt): new opt-in `preview-oidc-anonymous-acceptance.spec.ts` first run **5/15** — one real axe finding on Preview only (Open Now record label 4.48:1 on `#1a4f82`). Fixed test-first in **`06ccd701`** (`#a8d4ec`, 5.35:1); rerun on Preview `dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq` **15/15 PASS**. UC22-01 Preview blocker cleared (still PARTIAL pending checklist review); UC22-55/57 updated. [Remaining gates table](r2-blockers-unblock.md#remaining-r2-gates--who-unblocks-2026-10-27-hkt) lists what waits on Willy.
 
 Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production, Vercel env, SSO, Neon or Auth change.
+
+## Preview Lighthouse lab (UC22-57) — 2026-10-27
+
+Continued from `cbaca9b4`. [Evidence](r2-blockers-unblock.md#preview-lighthouse-lab-uc22-57--2026-10-27-hkt) / [manifest](uc22-57-preview-lighthouse.json): new read-only `scripts/preview-oidc-lighthouse.mjs` (Lighthouse 12.6.1, origin-scoped OIDC header via CDP, token never in reports) ran the `lighthouserc.js` ten URLs × 3 on Preview `dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq` (`06ccd701`), 04:22–04:27 HKT. Medians: **performance 0.94–0.99, accessibility 1.00 on 10/10**, CLS 0, LCP 1.9–2.4 s, TBT 39–111 ms. SEO 0.54 / best-practices 0.61 explained by Preview `noindex`, `vercel.live` toolbar, robots.txt fetch outside the header path and deployment-URL canonical (passes on alias), plus one product observation: footer newsletter's inert `mailto:` form action flagged as mixed content on HTTPS (unchanged). Field INP NOT_TESTED → UC22-57 stays **PARTIAL**.
+
+Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production, Vercel env, SSO, Neon or Auth change.

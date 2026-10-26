@@ -1474,16 +1474,23 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "RUM for field INP",
-    "Preview lab/RUM not run (Preview reachable via OIDC since 2026-10-27; see r2-blockers-unblock.md)"
+    "RUM for field INP"
    ],
-   "nextWithoutAuth": "Review local medians and repeat in controlled lab; obtain field RUM for INP and Preview evidence.",
+   "nextWithoutAuth": "Obtain field RUM for INP (Vercel Speed Insights or equivalent); optionally repeat lab on a controlled device.",
    "localBrowserEvidence": {
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
     "detail": "Same-config LHCI repeated after CSS fix: three runs per ten URLs, medians in movementOnlyEntranceRun.lighthouse. Shared-host local lab; controlled performance, field INP and Preview/SSO open.",
     "run": "movementOnlyEntranceRun (code cafee809)"
+   },
+   "previewLighthouseEvidence": {
+    "document": "r2-blockers-unblock.md#preview-lighthouse-lab-uc22-57--2026-10-27-hkt",
+    "manifest": "uc22-57-preview-lighthouse.json",
+    "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+    "commit": "06ccd701",
+    "result": "PARTIAL",
+    "detail": "Ten lighthouserc URLs x3, mobile simulated: perf medians 0.94-0.99, a11y 1.00, CLS 0, LCP 1.9-2.4s, TBT 39-111ms. SEO 0.54/BP 0.61 from Preview noindex, vercel.live toolbar, robots.txt fetch outside OIDC path, deployment-URL canonical; plus footer mailto form mixed-content observation. Field INP NOT_TESTED."
    }
   },
   {

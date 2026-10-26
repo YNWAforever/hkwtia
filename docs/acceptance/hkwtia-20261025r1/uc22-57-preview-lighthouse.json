@@ -1,0 +1,396 @@
+{
+  "uc": "UC22-57",
+  "kind": "preview-lab-lighthouse",
+  "date": "2026-10-27",
+  "runWindowHkt": "04:22:51–04:27:09 Asia/Hong_Kong",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "pr": 212,
+  "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+  "deploymentUrl": "https://hkwtia-b4ufoywcd-ynwaforevers-projects.vercel.app",
+  "deployedCommit": "06ccd701",
+  "branchHeadAtRun": "cbaca9b4 (docs-only diff vs 06ccd701)",
+  "alias": "https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app",
+  "harness": "scripts/preview-oidc-lighthouse.mjs via `vercel env run --` (Lighthouse 12.6.1 Node API, puppeteer-core page, Playwright chromium-1228 headless; x-vercel-trusted-oidc-idp-token injected per request via CDP Fetch scoped to the Preview origin; no extraHeaders, token absent from all 31 saved reports)",
+  "settings": {
+    "formFactor": "mobile",
+    "throttlingMethod": "simulate",
+    "cpuSlowdownMultiplier": 4,
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "runsPerUrl": 3,
+    "aggregation": "median",
+    "urls": "same ten URLs/order as lighthouserc.js"
+  },
+  "lhciThresholdsForReference": {
+    "performance": 0.9,
+    "accessibility": 0.95,
+    "seo": 0.95
+  },
+  "rows": [
+    {
+      "path": "/",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.94,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2344,
+      "cls": 0,
+      "tbtMs": 74,
+      "fcpMs": 1240.2,
+      "siMs": 1464.7,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/membership",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.99,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2108.5,
+      "cls": 0,
+      "tbtMs": 38.5,
+      "fcpMs": 1237.1,
+      "siMs": 1237.1,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/events",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.96,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2417.7,
+      "cls": 0,
+      "tbtMs": 74,
+      "fcpMs": 1235.2,
+      "siMs": 1235.2,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "null",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/programmes",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.98,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2277,
+      "cls": 0,
+      "tbtMs": 93,
+      "fcpMs": 1227,
+      "siMs": 1227,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/partners",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.99,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 1957.3,
+      "cls": 0,
+      "tbtMs": 66,
+      "fcpMs": 1089.1,
+      "siMs": 1226.2,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/zh",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.98,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2247,
+      "cls": 0,
+      "tbtMs": 110.5,
+      "fcpMs": 1227,
+      "siMs": 1374.7,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/zh/membership",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.99,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2095.2,
+      "cls": 0,
+      "tbtMs": 40.5,
+      "fcpMs": 1228.2,
+      "siMs": 1228.2,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/zh/events",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.98,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2410.2,
+      "cls": 0,
+      "tbtMs": 90,
+      "fcpMs": 1230.7,
+      "siMs": 1230.7,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "null",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/zh/programmes",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.98,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 2269.2,
+      "cls": 0,
+      "tbtMs": 96,
+      "fcpMs": 1223.3,
+      "siMs": 1223.3,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    },
+    {
+      "path": "/zh/partners",
+      "runs": 3,
+      "offOrigin": false,
+      "perf": 0.99,
+      "a11y": 1,
+      "bestPractices": 0.61,
+      "seo": 0.54,
+      "lcpMs": 1891,
+      "cls": 0,
+      "tbtMs": 75.5,
+      "fcpMs": 1085.6,
+      "siMs": 1232.5,
+      "failedBestPractices": [
+        "is-on-https",
+        "third-party-cookies",
+        "inspector-issues"
+      ],
+      "failedSeo": [
+        "is-crawlable",
+        "robots-txt",
+        "canonical"
+      ],
+      "requestOrigins": [
+        "<preview>",
+        "https://vercel.live"
+      ]
+    }
+  ],
+  "aliasSpotCheck": {
+    "origin": "https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app",
+    "runsPerUrl": 1,
+    "rows": [
+      {
+        "path": "/",
+        "perf": 0.86,
+        "a11y": 1,
+        "bestPractices": 0.61,
+        "seo": 0.61,
+        "failedSeo": [
+          "is-crawlable",
+          "robots-txt"
+        ],
+        "failedBestPractices": [
+          "is-on-https",
+          "third-party-cookies",
+          "inspector-issues"
+        ]
+      },
+      {
+        "path": "/zh",
+        "perf": 0.86,
+        "a11y": 1,
+        "bestPractices": 0.61,
+        "seo": 0.61,
+        "failedSeo": [
+          "is-crawlable",
+          "robots-txt"
+        ],
+        "failedBestPractices": [
+          "is-on-https",
+          "third-party-cookies",
+          "inspector-issues"
+        ]
+      },
+      {
+        "path": "/membership",
+        "perf": 0.99,
+        "a11y": 1,
+        "bestPractices": 0.61,
+        "seo": 0.61,
+        "failedSeo": [
+          "is-crawlable",
+          "robots-txt"
+        ],
+        "failedBestPractices": [
+          "is-on-https",
+          "third-party-cookies",
+          "inspector-issues"
+        ]
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "seo-is-crawlable",
+      "kind": "environment",
+      "detail": "Preview responds x-robots-tag: noindex (Vercel Preview default); not expected on Production"
+    },
+    {
+      "id": "seo-robots-txt",
+      "kind": "harness-artifact",
+      "detail": "Lighthouse fetches /robots.txt outside the page request path, so the OIDC header is not attached and it receives the Vercel SSO HTML; direct header-scoped curl of /robots.txt returns 200"
+    },
+    {
+      "id": "seo-canonical",
+      "kind": "host-artifact",
+      "detail": "Fails only on the immutable deployment URL: canonical/hreflang use the branch alias (site URL). Passes on the alias spot-check"
+    },
+    {
+      "id": "bp-third-party-cookies+inspector-issues(cookie)",
+      "kind": "environment",
+      "detail": "vercel.live feedback toolbar script (Preview-only injection) sets _vcrr_* third-party cookie"
+    },
+    {
+      "id": "bp-is-on-https+inspector-issues(mixed-content)",
+      "kind": "product-observation",
+      "detail": "Footer newsletter form keeps an intentionally inert action=mailto:contact@hkwtia.org (components/layout/footer-newsletter.tsx, blocked by CSP form-action self); Chrome reports it as mixed content \"Allowed with warning\" on HTTPS. Not seen on http://localhost runs. No change made; product decision"
+    }
+  ],
+  "conclusion": "Lab only. Performance median ≥0.94 and accessibility 1.00 on all ten URLs (meets lighthouserc perf/a11y thresholds); CLS 0; median LCP 1.9–2.4s. SEO/best-practices below thresholds on Preview for environment/harness reasons plus one product observation. Field INP (RUM) NOT_TESTED; UC22-57 stays PARTIAL.",
+  "safety": "Read-only GETs to Preview only. No Production, Vercel env, Deployment Protection/SSO, Neon or Auth change. Raw LHRs kept under ignored .playwright/lighthouse-preview*/ (not uploaded)."
+}
