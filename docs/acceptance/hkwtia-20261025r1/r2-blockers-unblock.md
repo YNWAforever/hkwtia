@@ -261,3 +261,43 @@ Per-deployment hosts (`hkwtia-<hash>-…`) were **not** added: they change on ev
 - **Accounts:** the Preview Auth user directory is separate from production; Member A/B/staff must exist (or be created) there.
 - **Browser:** box desktop Chrome lacks OIDC header injection; drive Preview login through `tests/fixtures/preview-oidc.ts` (Google OAuth hops leave the origin header-free by construction, but the return hop to the Preview origin needs the header — the CDP fixture handles that).
 
+
+## Preview APP_URL / NEXT_PUBLIC_SITE_URL pinned to PR #212 alias — 2026-10-27
+
+Approved by Willy. Change made with Vercel CLI 65.2.0 (`ynwaforever`, linked `ynwaforevers-projects/hkwtia`) as **branch-scoped Preview** variables — `vercel env add <NAME> -e preview --git-branch=wtia/hkwtia-plan-r1-20261025 --type config --value <alias> --yes`. No existing variable was edited or removed; global Preview, other branch overrides, Production and all `DATABASE_*` untouched.
+
+| Variable | Scope | Before (effective for branch, inherited from global Preview) | After |
+| --- | --- | --- | --- |
+| `APP_URL` | Preview (`wtia/hkwtia-plan-r1-20261025`), Config | `https://hkwtia-ynwaforever-ynwaforevers-projects.vercel.app` | `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` |
+| `NEXT_PUBLIC_SITE_URL` | Preview (`wtia/hkwtia-plan-r1-20261025`), Config | `https://hkwtia.vercel.app` | `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` |
+
+Read-back via `vercel env pull` (values are public URLs; nothing else printed):
+
+- Branch `wtia/hkwtia-plan-r1-20261025` Preview: both = PR #212 alias.
+- Global Preview (other branches): unchanged — `APP_URL` `https://hkwtia-ynwaforever-…`, `NEXT_PUBLIC_SITE_URL` `https://hkwtia.vercel.app`.
+- Production: unchanged — both `https://hkwtia.vercel.app`; `DATABASE_*` hash identical before/after.
+
+### Redeploy
+
+`vercel redeploy` of the latest branch Preview `hkwtia-hhpad6ybq-…` (`dpl_6U8WRYXfLnsqSt69nXMq4nem2DDZ`, commit `04273b69`) → **`dpl_AwY4mismW3emRjKGS7EE8d4mSxhy`** (`https://hkwtia-n5xyn93r1-ynwaforevers-projects.vercel.app`), target `preview`, Ready (~3 min). Stable alias `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` serves it (132 × `dpl_AwY4…` in home HTML). No production deploy.
+
+### Verification (`vercel curl --deployment <alias>`, Deployment Protection unchanged)
+
+| Path | HTTP | Absolute links |
+| --- | --- | --- |
+| `/` | 200 | canonical, `og:url`, `og:image`, `hreflang` en/zh-HK/x-default all on the PR alias; **0** `https://hkwtia.vercel.app` references, 20 alias references |
+| `/sitemap.xml` | 200 | 608 alias references, 0 production |
+| `/robots.txt` | 200 | sitemap line on alias, 0 production |
+| `/member-login`, `/admin-login` | 200 | no absolute site URLs in HTML (callback URL is built server-side from `APP_URL` at submit time) |
+
+How to re-check: `vercel curl / --deployment https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app -- -s | grep -oE '<link rel="canonical"[^>]*>|https://hkwtia\.vercel\.app'`.
+
+Neon Auth trusted domains on `hkwtia-m2-preview` / `main` (`br-dark-forest-az0shpz9`, read-only re-list via Neon MCP): still 3 — `hkwtia-fyyvbi4e3-…`, `hkwtia-ynwaforever-…`, and the PR #212 alias — all `better_auth`.
+
+Note: any later push to `wtia/hkwtia-plan-r1-20261025` (including this docs commit) builds with the branch-scoped values automatically.
+
+### Remaining Auth-on-Preview gaps
+
+- **Accounts:** Preview Neon Auth has its own user directory, separate from production; Member A/B/staff (and staff D) must exist or be created on Preview before a Preview Auth walk. Not checked/changed in this slice.
+- **Magic-link delivery on Preview** (email provider env on Preview) not yet exercised; first real `APP_URL`-based callback still to be observed end-to-end.
+- **Browser:** box desktop Chrome lacks OIDC header injection; drive Preview login through `tests/fixtures/preview-oidc.ts`. Google OAuth return to the alias must be confirmed against the Google client's allowed redirect URIs (Neon Auth-managed vs custom client — unverified).

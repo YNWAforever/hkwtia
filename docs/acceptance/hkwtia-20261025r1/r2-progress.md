@@ -193,3 +193,9 @@ Continued from `0a8b2440` on PR #212. With Willy's approval, [added](r2-blockers
 
 Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production change, no Vercel env change, no deploy, no SSO change.
 
+
+## Preview APP_URL / NEXT_PUBLIC_SITE_URL on PR alias — 2026-10-27
+
+Continued from `04273b69` on PR #212. With Willy's approval, [added branch-scoped Preview env](r2-blockers-unblock.md#preview-app_url--next_public_site_url-pinned-to-pr-212-alias--2026-10-27) for `wtia/hkwtia-plan-r1-20261025` (Config): `APP_URL` `hkwtia-ynwaforever-…` → PR alias, `NEXT_PUBLIC_SITE_URL` `hkwtia.vercel.app` → PR alias (`https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app`). Global Preview, other branches, Production and `DATABASE_*` unchanged (read back). Redeployed `dpl_6U8W…` → **`dpl_AwY4mismW3emRjKGS7EE8d4mSxhy`** (commit `04273b69`, Preview). `vercel curl` on the alias: `/`, `/sitemap.xml`, `/robots.txt`, `/member-login`, `/admin-login` 200; canonical/og/hreflang/sitemap all on the alias, 0 production-host references. Neon Auth trusted domains still include the alias. Remaining: Preview Auth users, Preview magic-link delivery, OIDC-fixture login walk.
+
+Inventory unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No production deploy or production env/DB change, no SSO change, no `stacked-ci-trigger.patch`.
