@@ -49,3 +49,7 @@ PR #212 remains stacked on #211. Its base is excluded by the existing CI trigger
 ## R2 UI stretch follow-up
 
 Continued from `3c66cb4e` on 2026-10-26. See [r2-ui-stretch.md](r2-ui-stretch.md) for the current four-layer scope, test-first evidence, device/measurement protocol and recovery limitations, and `r2-ui-verification.json` for exact commands/results. The prior “Final checks” above remain historical evidence for the earlier slice. New components remain unmounted offline scaffolding; implementing feature-gated authenticated binding and receipt reconciliation still follows the verified T22-02 environment and supplement persistence adapter. No real browser, database, deployment, Lighthouse or RUM PASS is added by this follow-up.
+
+## T22-02 DB acceptance follow-up
+
+[T22-02 target/fixture evidence](t22-02.md) supersedes the prior blanket Neon blocker for the explicitly verified isolated child branch only. Guarded migration and synthetic fixture replay/cleanup/readback passed; A/B scoped SQL reads and NONSTAFF pure authorization passed with zero observed row changes. Auth/HTTP/server-action, Stripe test and notification sink remain BLOCKED. This does not complete supplement persistence, real identity UAT, paging performance, deployment or remote CI acceptance.

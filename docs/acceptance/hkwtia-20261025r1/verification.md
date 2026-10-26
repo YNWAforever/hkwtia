@@ -49,3 +49,7 @@ Final commands and four-layer task ledger are in verification.json. Full-tree np
 ## R2 continuation, 2026-10-26
 
 The projection-only R2 status above is historical. Current offline service, paging and self-service contract work and four-layer limitations are recorded in [r2-progress.md](r2-progress.md) and [r2-verification.json](r2-verification.json). Final local suite: 7,910 passed / 643 skipped; 91 focused tests passed; build, typecheck, lint and strings passed. No database/identity/deployment PASS is claimed.
+
+## T22-02 continuation, 2026-10-26
+
+The earlier unverified-Neon statements describe prior slices. [T22-02](t22-02.md) and its [redacted manifest](t22-02-manifest.json) now record a verified isolated child target, guarded migration, synthetic fixture replay, scoped PostgreSQL ownership reads and exact-ID cleanup/readback. Code: DB scope implemented. Tests: offline/live DB PASS; real Auth/HTTP BLOCKED. Deployment: not deployed. Runtime: DB PASS, Auth/Stripe/sink BLOCKED. No real login, payment or notification evidence is claimed.
