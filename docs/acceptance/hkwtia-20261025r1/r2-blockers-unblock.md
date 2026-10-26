@@ -301,3 +301,35 @@ Note: any later push to `wtia/hkwtia-plan-r1-20261025` (including this docs comm
 - **Accounts:** Preview Neon Auth has its own user directory, separate from production; Member A/B/staff (and staff D) must exist or be created on Preview before a Preview Auth walk. Not checked/changed in this slice.
 - **Magic-link delivery on Preview** (email provider env on Preview) not yet exercised; first real `APP_URL`-based callback still to be observed end-to-end.
 - **Browser:** box desktop Chrome lacks OIDC header injection; drive Preview login through `tests/fixtures/preview-oidc.ts`. Google OAuth return to the alias must be confirmed against the Google client's allowed redirect URIs (Neon Auth-managed vs custom client — unverified).
+
+## Auth on Preview — accounts + Member magic-link send (2026-10-27 HKT)
+
+Target: PR #212 alias `https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app` → `dpl_3h5g6U1BQW6RALJcqAo1FDsAJdXf` (target `preview`, created 02:47 HKT, branch build after `6876d1b1`). Database/Auth: Neon `hkwtia-m2-preview` / `main` (`br-dark-forest-az0shpz9`). Read-only SQL; no Neon, Vercel env or Production change in this slice. Emails are not recorded (masked form only).
+
+### Preview accounts (read-only `neon_auth."user"` + `public.profiles`)
+
+| Account | Preview `neon_auth` user | Preview `profiles` row | Note |
+| --- | --- | --- | --- |
+| Member A (gmail.com) | **unconfirmed** — one non-fixture user exists, `l***@gmail.com`, verified, created 2026-09-25; same masked shape as A's production recipient (`l***@g***.com`) but identity vs A/staff not proven | none for that user | |
+| Member B (Fimmick) | **absent** | none | |
+| Staff (gmail.com) | **unconfirmed** (see A row; staff is also gmail.com) | none | Preview staff profiles are fixtures only (`m2-staff-01`, `m2-superadmin-01`, `m2-exco-01`) |
+| Other | 27 M2 fixture users `m***@example.com` (unverified) | 28 fixture profiles `*@m2.example.test` | |
+
+No users were created. Not needed for magic link: Preview Neon Auth config has sign-up allowed, so `auth.signIn.magicLink` creates the user on first verify, and `provisionMemberProfileAction` creates the member profile from the verified session. `create_auth_user` would need the plaintext address in the call, which vault fill references cannot supply. **Beyond Auth:** Preview has no membership/company rows for A/B (production A = Corporate PAYMENT PENDING), so a Preview `/portal` for A shows a member with no membership — enough for the session/verifier check, not for membership walks. Staff `/admin` on Preview needs a staff/superadmin `profiles.role` for the real staff `auth_user_id` (seed or manual grant after first login).
+
+### Magic-link send — BLOCKED: `limiter_unavailable`
+
+New opt-in spec `tests/e2e/preview-oidc-member-magic-link.spec.ts` (same OIDC fixture; one page does send → wait for link → open → `/portal` sticky, so the verifier exchange runs in the context that requested the link). Clears `hkwtia-login-*` sessionStorage first, types with real keystrokes, asserts `?sent=1`.
+
+```bash
+PLAYWRIGHT_PREVIEW_OIDC=true PLAYWRIGHT_BASE_URL=https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app \
+PREVIEW_LOGIN_EMAIL_FILE=/tmp/<0600 file>   # or PREVIEW_LOGIN_HANDOFF=true (headed; a person types the email and clicks Send)
+PREVIEW_MAGIC_LINK_FILE=/tmp/<file the pasted link is written to> \
+  vercel env run -- npx playwright test tests/e2e/preview-oidc-member-magic-link.spec.ts
+```
+
+Run 02:55 HKT (Member B address as the pipeline probe — the only inbox readable here; A's address is vault-only): page 200 past Deployment Protection, field filled, submit → `/member-login?next=%2Fportal&error=limiter_unavailable`. **No email was sent.** Without opt-in the spec skips (1 skipped).
+
+Cause: `checkAuthSend` → `rateLimitKeyHash` throws `RATE_LIMIT_KEY_SECRET_REQUIRED` (fail-closed) because **`RATE_LIMIT_KEY_SECRET` is not set for Preview branch `wtia/hkwtia-plan-r1-20261025`** (`vercel env ls`: set for Production and several `codex/*` Preview branches only). Preview `rate_limit_buckets` already allows the `auth-send-*` scopes, so the DB is not the blocker.
+
+Unblock (needs Willy's OK — Vercel env change): add a fresh random ≥32-byte `RATE_LIMIT_KEY_SECRET` for Preview branch `wtia/hkwtia-plan-r1-20261025` only (not copied from Production), redeploy that Preview, re-run the spec. Then Member A: Willy (or a vault-fill step) types A's email in the headed handoff window, A's Preview link is pasted into `PREVIEW_MAGIC_LINK_FILE` or that window's address bar; the spec asserts `/portal` with no `neon_auth_session_verifier` left and a sticky reload.
