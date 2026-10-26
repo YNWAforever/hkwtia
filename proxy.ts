@@ -1,9 +1,10 @@
-import type {NextRequest} from "next/server";
+import {NextRequest} from "next/server";
 import {NextResponse} from "next/server";
 import createMiddleware from "next-intl/middleware";
 import {
   handleAuthProxyRequest,
   NEON_AUTH_SESSION_COOKIE_NAME,
+  NEON_AUTH_SESSION_DATA_COOKIE_NAME,
 } from "@neondatabase/auth/server";
 
 import {authEnv} from "@/lib/config/env";
@@ -68,9 +69,10 @@ export function createNeonAuthExchange(
 ) {
   return async function neonAuthExchange(request: NextRequest): Promise<NextResponse | null> {
     if (!request.nextUrl.searchParams.has(NEON_AUTH_SESSION_VERIFIER_PARAM)) return null;
-    // Already signed in: the verifier is a leftover on a shared or re-opened
-    // link, and re-spending it would replace a good session with a worse one.
-    if (request.cookies.has(NEON_AUTH_SESSION_COOKIE_NAME)) return null;
+    // A verifier is explicit new sign-in intent, even when an old session
+    // cookie remains. Cookie presence alone says nothing about its validity.
+    // Let Neon decide whether the verifier is usable; refusal leaves the
+    // browser's existing cookies and URL untouched.
 
     let environment: {neonAuthBaseUrl: string; neonAuthCookieSecret: string};
     try {
@@ -83,8 +85,18 @@ export function createNeonAuthExchange(
 
     let cookies: readonly string[];
     try {
+      // Do not let the SDK satisfy get-session from the previous account's
+      // cache, or forward its stale credential to Neon instead of the verifier.
+      // Clone headers so a refused exchange leaves ordinary routing unchanged.
+      const headers = new Headers(request.headers);
+      const cookiesToForward = (headers.get("cookie") ?? "").split(";").filter((cookie) => {
+        const name = cookie.trim().split("=", 1)[0];
+        return name !== NEON_AUTH_SESSION_COOKIE_NAME && name !== NEON_AUTH_SESSION_DATA_COOKIE_NAME;
+      }).map((cookie) => cookie.trim()).filter(Boolean).join("; ");
+      if (cookiesToForward) headers.set("cookie", cookiesToForward);
+      else headers.delete("cookie");
       const response = await runExchange({
-        request,
+        request: new NextRequest(request, {headers}),
         path: "get-session",
         baseUrl: environment.neonAuthBaseUrl,
         cookieSecret: environment.neonAuthCookieSecret,

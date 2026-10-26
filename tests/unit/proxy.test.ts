@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 import {NextRequest} from "next/server";
 
-import {createNeonAuthExchange} from "@/proxy";
+import {createNeonAuthExchange, type NeonAuthExchangeRunner} from "@/proxy";
 
 const env = () => ({neonAuthBaseUrl: "https://auth.example.test", neonAuthCookieSecret: "s".repeat(32)});
 
@@ -12,6 +12,7 @@ const CALLBACK = "https://hkwtia.vercel.app/zh/member-login?next=%2Fportal&neon_
 function minted(): Response {
   const response = new Response(null, {status: 200});
   response.headers.append("Set-Cookie", `${SESSION_COOKIE}=abc; Path=/; HttpOnly; Secure`);
+  response.headers.append("Set-Cookie", "__Secure-neon-auth.local.session_data=new-cache; Path=/; HttpOnly; Secure");
   return response;
 }
 
@@ -50,14 +51,36 @@ describe("createNeonAuthExchange", () => {
     expect(called).toBe(false);
   });
 
-  it("does not re-spend a leftover verifier for a visitor who is already signed in", async () => {
-    let called = false;
-    const exchange = createNeonAuthExchange(async () => { called = true; return minted(); }, env);
+  it("exchanges a fresh verifier despite stale session cookies and isolates the forwarded request", async () => {
+    const run = vi.fn<NeonAuthExchangeRunner>(async () => minted());
+    const exchange = createNeonAuthExchange(run, env);
+    const request = new NextRequest(CALLBACK, {headers: {cookie:
+      `${SESSION_COOKIE}=stale; __Secure-neon-auth.local.session_data=old-cache; preference=zh`,
+    }});
+
+    const response = await exchange(request);
+
+    expect(run).toHaveBeenCalledTimes(1);
+    const forwarded = run.mock.calls[0];
+    expect(forwarded[0].request.headers.get("cookie")).toBe("preference=zh");
+    expect(forwarded[0].request.cookies.has(SESSION_COOKIE)).toBe(false);
+    expect(request.cookies.has(SESSION_COOKIE)).toBe(true);
+    expect(response?.headers.getSetCookie()).toEqual(minted().headers.getSetCookie());
+    const location = new URL(response!.headers.get("location")!);
+    expect(location.searchParams.has("neon_auth_session_verifier")).toBe(false);
+    expect(location.searchParams.get("next")).toBe("/portal");
+  });
+
+  it("falls through without redirect or cookie mutation when a verifier is refused with an existing session", async () => {
+    const run = vi.fn(async () => new Response(null, {status: 401}));
+    const exchange = createNeonAuthExchange(run, env);
     const request = new NextRequest(CALLBACK);
-    request.cookies.set(SESSION_COOKIE, "already-signed-in");
+    request.cookies.set(SESSION_COOKIE, "existing-session");
 
     expect(await exchange(request)).toBeNull();
-    expect(called).toBe(false);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(request.cookies.has(SESSION_COOKIE)).toBe(true);
+    expect(request.nextUrl.searchParams.has("neon_auth_session_verifier")).toBe(true);
   });
 
   it("falls through unchanged when Neon declines to mint a session, rather than stripping the verifier", async () => {
