@@ -4,7 +4,7 @@
   "branch": "wtia/hkwtia-plan-r1-20261025",
   "pr": 212,
   "stackedOn": 211,
-  "serverMode": "Next production build --webpack / next start; 127.0.0.1:3212; no dev server used for evidence",
+  "serverMode": "Guarded production rebuild --webpack and next start on localhost:3212; APP_URL/NEXT_PUBLIC_SITE_URL/PLAYWRIGHT_BASE_URL same origin",
   "versions": {
     "node": "22.23.4",
     "next": "16.4.3",
@@ -31,7 +31,8 @@
       "NEON_AUTH_COOKIE_SECRET",
       "CONCIERGE_COOKIE_SECRET",
       "AGENTS_ENABLED",
-      "NEXT_TELEMETRY_DISABLED"
+      "NEXT_TELEMETRY_DISABLED",
+      "PLAYWRIGHT_BASE_URL"
     ],
     "dummyNames": [
       "NEON_AUTH_BASE_URL",
@@ -52,7 +53,9 @@
     "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-directory-readback.ts",
     "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=<loopback> npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --reporter=json",
     "npx -y -p node@22 -c \"npm test\"",
-    "npx -y -p node@22 -c \"npm run typecheck && npm run lint\""
+    "npx -y -p node@22 -c \"npm run typecheck && npm run lint\"",
+    "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=http://localhost:3212 npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --project=chromium --reporter=json",
+    "LHCI_BASE_URL=http://localhost:3212 CHROME_PATH=<Playwright Chromium executable> npx -y -p node@22 node node_modules/@lhci/cli/src/cli.js collect --config=lighthouserc.js"
   ],
   "runs": [
     {
@@ -138,7 +141,7 @@
     "rows": 1,
     "directoryVisible": false,
     "published": false,
-    "publicAbsence": "NOT_PROVEN"
+    "publicAbsence": "PROVEN_LOCAL_EN_ZH"
   },
   "checks": {
     "build": "PASS",
@@ -154,94 +157,784 @@
       "errors": 0,
       "warnings": 77
     },
-    "browser": "FAIL (4 initial-hop checks passed, 16 navigation failures)",
-    "screenshots": "None: navigation failed before capture",
-    "axe": "NOT_TESTED",
-    "keyboard": "NOT_TESTED",
+    "browser": "See localhostRuns/browserFailures; unmet checks remain failures",
+    "screenshots": "Captured under ignored test-results/",
+    "axe": "Executed; serious contrast finding observed",
+    "keyboard": "Skip-link focus/Enter exercised",
     "screenReader": "NOT_TESTED",
-    "lhci": "NOT_RUN",
-    "fieldINP": "NOT_TESTED"
+    "lhci": "30 local lab reports collected; no upload",
+    "fieldINP": "NOT_TESTED",
+    "focusedInventory": "2 passed",
+    "typecheckAfterNextEnvRestore": "PASS",
+    "lintAfterFinalSpecEdits": {
+      "errors": 0,
+      "warnings": 77
+    }
   },
   "results": [
     {
       "id": "UC22-01",
-      "oldStatus": "NOT RUN",
-      "newStatus": "BLOCKED",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      "oldStatus": "BLOCKED",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "EN/ZH eight public paths render across four widths; local only, Preview/SSO unverified."
     },
     {
       "id": "UC22-03",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Stripe price IDs absent deliberately; populated four-tier comparison remains unverified independently of redirect blocker."
+      "localResult": "PARTIAL",
+      "detail": "Community/Patron render; four-tier assertion remains red: Startup/Corporate unavailable without deliberately absent Stripe price IDs."
     },
     {
       "id": "UC22-04",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      "localResult": "PARTIAL",
+      "detail": "Rendered tier headings, plans anchor, FAQ and contact help checked in both locales; paid seats/checkout remain unverified."
     },
     {
       "id": "UC22-05",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      "localResult": "PARTIAL",
+      "detail": "Locale round-trip retains query/hash and localized contact hrefs."
     },
     {
       "id": "UC22-07",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
       "localResult": "PARTIAL",
-      "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+      "detail": "Anonymous admin routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
     },
     {
       "id": "UC22-08",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
       "localResult": "PARTIAL",
-      "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+      "detail": "Anonymous portal routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
     },
     {
       "id": "UC22-09",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      "localResult": "PARTIAL",
+      "detail": "Membership plans anchor, FAQ and manual contact link exercised in both locales."
     },
     {
       "id": "UC22-34",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Guarded read-only preflight found exactly one existing hidden, unpublished synthetic company; public absence NOT proven."
+      "localResult": "PARTIAL",
+      "detail": "Existing hidden/unpublished synthetic company absent from healthy EN/ZH directory; preflight read-only, no fixture writes."
     },
     {
       "id": "UC22-52",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      "localResult": "PARTIAL",
+      "detail": "Disabled concierge POST returns 503 and localized alert/manual support link in EN/ZH; no provider calls."
     },
     {
       "id": "UC22-55",
       "oldStatus": "PARTIAL",
       "newStatus": "PARTIAL",
-      "localResult": "BLOCKED",
-      "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      "localResult": "PARTIAL",
+      "detail": "Four-width render/overflow/skip-link/axe checks executed; observed serious home CTA contrast finding. Screen reader NOT_TESTED."
     },
     {
       "id": "UC22-57",
       "oldStatus": "NOT RUN",
-      "newStatus": "NOT RUN",
-      "localResult": "NOT_RUN",
-      "detail": "Optional LHCI omitted: public navigation loops; field INP NOT_TESTED."
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Three-run local LHCI per ten public EN/ZH URLs; median LCP/CLS/TBT recorded. Field INP NOT_TESTED; no Preview performance PASS."
     }
   ],
   "serverStopped": true,
   "deployment": "NOT_RUN",
-  "remoteCI": "BLOCKED: billing; stacked-ci-trigger.patch untouched"
+  "remoteCI": "BLOCKED: billing; stacked-ci-trigger.patch untouched",
+  "launcherFixBaseHead": "37887794ed21e4c71a74bcc906d6c9321a61090d",
+  "historicalFailedAttempt": {
+    "serverMode": "Next production build --webpack / next start; 127.0.0.1:3212; no dev server used for evidence",
+    "runs": [
+      {
+        "name": "initial",
+        "passed": 0,
+        "failed": 16,
+        "reason": "All navigation hits redirect loop",
+        "durationMs": 34638
+      },
+      {
+        "name": "one retry plus initial-hop diagnostics",
+        "passed": 4,
+        "failed": 16,
+        "flaky": 0,
+        "durationMs": 29400
+      }
+    ],
+    "publicHttpDiagnostics": [
+      {
+        "path": "/",
+        "status": 307,
+        "location": "/"
+      },
+      {
+        "path": "/about",
+        "status": 307,
+        "location": "/about"
+      },
+      {
+        "path": "/zh",
+        "status": 307,
+        "location": "/zh-HK"
+      }
+    ],
+    "checks": {
+      "build": "PASS",
+      "unit": {
+        "passed": 7984,
+        "skipped": 659,
+        "failed": 0,
+        "filesPassed": 909,
+        "filesSkipped": 118
+      },
+      "typecheck": "PASS",
+      "lint": {
+        "errors": 0,
+        "warnings": 77
+      },
+      "browser": "See localhostRuns/browserFailures; unmet checks remain failures",
+      "screenshots": "Captured under ignored test-results/",
+      "axe": "Executed; serious contrast finding observed",
+      "keyboard": "Skip-link focus/Enter exercised",
+      "screenReader": "NOT_TESTED",
+      "lhci": "30 local lab reports collected; no upload",
+      "fieldINP": "NOT_TESTED"
+    },
+    "results": [
+      {
+        "id": "UC22-01",
+        "oldStatus": "NOT RUN",
+        "newStatus": "BLOCKED",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-03",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Stripe price IDs absent deliberately; populated four-tier comparison remains unverified independently of redirect blocker."
+      },
+      {
+        "id": "UC22-04",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-05",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-07",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "PARTIAL",
+        "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+      },
+      {
+        "id": "UC22-08",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "PARTIAL",
+        "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+      },
+      {
+        "id": "UC22-09",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-34",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Guarded read-only preflight found exactly one existing hidden, unpublished synthetic company; public absence NOT proven."
+      },
+      {
+        "id": "UC22-52",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-55",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-57",
+        "oldStatus": "NOT RUN",
+        "newStatus": "NOT RUN",
+        "localResult": "NOT_RUN",
+        "detail": "Optional LHCI omitted: public navigation loops; field INP NOT_TESTED."
+      }
+    ]
+  },
+  "rootCause": "Launcher origin mismatch: 127.0.0.1 request rewritten to absolute localhost/en, external rewrite re-enters as-needed locale redirect. Verified before fix: 307 Location /, x-middleware-rewrite http://localhost:3212/en; after: 200, relative /en. No production routing change.",
+  "localhostRuns": [
+    {
+      "name": "first",
+      "startTime": "2026-10-26T12:31:23.868Z",
+      "duration": 179425.91999999998,
+      "expected": 17,
+      "skipped": 0,
+      "unexpected": 3,
+      "flaky": 0
+    },
+    {
+      "name": "final",
+      "startTime": "2026-10-26T12:34:57.589Z",
+      "duration": 94153.961,
+      "expected": 15,
+      "skipped": 0,
+      "unexpected": 5,
+      "flaky": 0
+    }
+  ],
+  "renderObservations": [
+    {
+      "case": "en 375 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "en 768 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": [
+            {
+              "id": "color-contrast",
+              "impact": "serious"
+            }
+          ]
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "en 1024 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "en 1440 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 375 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": [
+            {
+              "id": "color-contrast",
+              "impact": "serious"
+            }
+          ]
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 768 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 1024 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": [
+            {
+              "id": "color-contrast",
+              "impact": "serious"
+            }
+          ]
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 1440 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    }
+  ],
+  "browserFailures": [
+    "en 768 public render, keyboard and axe",
+    "/zh 375 public render, keyboard and axe",
+    "/zh 1024 public render, keyboard and axe",
+    "en membership four tiers, help and anchor",
+    "/zh membership four tiers, help and anchor"
+  ],
+  "lighthouse": {
+    "scope": "Local mobile simulated lab; concurrent browser/unit/check load during part of collection; no upload or assertion PASS claimed",
+    "numberOfRuns": 3,
+    "fieldINP": "NOT_TESTED",
+    "urls": [
+      {
+        "url": "http://localhost:3212/programmes",
+        "runs": 3,
+        "lcpMs": 2487.658,
+        "cls": 0,
+        "tbtMs": 98.0
+      },
+      {
+        "url": "http://localhost:3212/zh/events",
+        "runs": 3,
+        "lcpMs": 2866.041,
+        "cls": 0,
+        "tbtMs": 41.5
+      },
+      {
+        "url": "http://localhost:3212/events",
+        "runs": 3,
+        "lcpMs": 2925.611,
+        "cls": 0,
+        "tbtMs": 150
+      },
+      {
+        "url": "http://localhost:3212/zh/programmes",
+        "runs": 3,
+        "lcpMs": 2710.787,
+        "cls": 0,
+        "tbtMs": 82
+      },
+      {
+        "url": "http://localhost:3212/",
+        "runs": 3,
+        "lcpMs": 2937.512,
+        "cls": 0,
+        "tbtMs": 527.5
+      },
+      {
+        "url": "http://localhost:3212/zh/membership",
+        "runs": 3,
+        "lcpMs": 2334.861,
+        "cls": 0,
+        "tbtMs": 68
+      },
+      {
+        "url": "http://localhost:3212/zh/partners",
+        "runs": 3,
+        "lcpMs": 2417.124,
+        "cls": 0,
+        "tbtMs": 84
+      },
+      {
+        "url": "http://localhost:3212/membership",
+        "runs": 3,
+        "lcpMs": 2567.909,
+        "cls": 0,
+        "tbtMs": 178
+      },
+      {
+        "url": "http://localhost:3212/zh",
+        "runs": 3,
+        "lcpMs": 2940.522,
+        "cls": 0,
+        "tbtMs": 152
+      },
+      {
+        "url": "http://localhost:3212/partners",
+        "runs": 3,
+        "lcpMs": 2712.452,
+        "cls": 0,
+        "tbtMs": 77
+      }
+    ]
+  }
 }

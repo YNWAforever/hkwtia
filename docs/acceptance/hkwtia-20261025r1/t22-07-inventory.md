@@ -7,9 +7,9 @@ Inventory base HEAD `6681eb970968d0a70f385e2771628bbfc2f1f86f` (docs-only after 
 | Status | Count | Meaning |
 | --- | ---: | --- |
 | PASS | 0 | Fresh actual/result/evidence for the whole UC, incl. real identity/Stripe/DB where required |
-| PARTIAL | 44 | Current-tree offline unit/jsdom and/or isolated-Neon evidence; acceptance-critical runtime layer still open |
-| BLOCKED | 15 | Core dependency unavailable (Auth sessions, Stripe test, sink, T-MP10 approval, T-MP08 materials, T-MP12 contract, remote CI) |
-| NOT RUN | 1 | No external blocker for an anonymous/local run, but not executed yet |
+| PARTIAL | 46 | Current-tree offline unit/jsdom and/or isolated-Neon evidence; acceptance-critical runtime layer still open |
+| BLOCKED | 14 | Core dependency unavailable (Auth sessions, Stripe test, sink, T-MP10 approval, T-MP08 materials, T-MP12 contract, remote CI) |
+| NOT RUN | 0 | No external blocker for an anonymous/local run, but not executed yet |
 
 **No UC is PASS.** Every UC22-01–60 acceptance requires real Auth/HTTP/browser, Stripe or owner/legal input for at least one layer; offline evidence never substitutes (plan Task 15 exact completion condition).
 
@@ -25,7 +25,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 | UC | Theme | Status | Offline / DB evidence | Blockers | Next without Auth |
 | --- | --- | --- | --- | --- | --- |
-| UC22-01 | Public entry pages render (anonymous) | **BLOCKED** | `membership-public-catalog.test.ts`, `navigation.test.ts` | Preview behind Vercel SSO (no bypass) | Local `next build && next start` + Playwright anonymous smoke against isolated-catalog env |
+| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts` | Preview behind Vercel SSO (no bypass) | Local `next build && next start` + Playwright anonymous smoke against isolated-catalog env |
 | UC22-02 | Current concierge chat UI (not R3 actions) | **PARTIAL** | `concierge-widget.test.tsx`, `concierge-shell.test.tsx`, `concierge-unavailable-ui.test.tsx` | Real AI provider evaluation; Browser | Local Playwright disabled-provider path (manual fallback) without Auth |
 | UC22-03 | Four-tier membership comparison ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-catalog.test.ts`, `membership-tier-content.test.ts` | Browser visual matrix on populated catalog | Local Playwright visual at 375/768/1024/1440 |
 | UC22-04 | Comparison seats/help/anchor ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-links.test.tsx` | Browser visual matrix | Same local Playwright run |
@@ -81,7 +81,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-54 | External tool authorization contract ¹ | **BLOCKED** | — | T-MP12A sandbox contract / T-MP12B | — |
 | UC22-55 | Mobile widths / zoom / keyboard / screen reader ¹ | **PARTIAL** | `mobile-navigation.test.tsx`, `supplement-ui.test.tsx` | Browser/device matrix; Screen reader | Local Playwright 375/768/1024/1440 + keyboard on public pages |
 | UC22-56 | Private list performance (20-row p95 ≤2s) ¹ | **PARTIAL** | `portal-sql-paging.test.ts`; DB: [1k/10k production reader timing, 30 warm/30 fresh connections, plans/rows/bytes + cleanup; retry hardening: 2 full DB replays, 0 handshake failures/exhausted, cleanup verified](uc22-56.md#retry-hardening) | Real A/B/staff Auth sessions; authenticated HTTP/browser p95 unmeasured | DB timing completed; optional isolated replay. Full target requires Auth + HTTP/browser measurement |
-| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **NOT RUN** | `production-lhci-target.test.ts` | RUM for field INP; Preview behind SSO | Local LHCI 3-run against `next start`; field INP stays NOT_TESTED |
+| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **PARTIAL** | `production-lhci-target.test.ts` | RUM for field INP; Preview behind SSO | Local LHCI 3-run against `next start`; field INP stays NOT_TESTED |
 | UC22-58 | Hong Kong date boundaries (UTC 15:59/16:00) ¹ | **PARTIAL** | `hong-kong-time.test.ts`, `event-hong-kong-datetime.test.ts` | Rendered browser check | — |
 | UC22-59 | Exact-head CI gate ¹ | **BLOCKED** | `ci-security-contract.test.ts` | Exact-head remote CI (stacked base; workflow scope); stacked-ci-trigger.patch unapplied | — |
 | UC22-60 | Member→staff→member same application, persisted readback ¹ | **BLOCKED** | `supplement-binding.test.ts`, `supplement-ui.test.tsx`; DB: T22-04A 0066 gated SQL cases (t22-04a.md); Gated SQL binding cases (r2-resources-binding.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Bound forms unmounted; write flag disabled | — |
@@ -140,3 +140,8 @@ No write flag was enabled, no production Neon was touched and nothing was deploy
 ## Local anonymous production-start attempt — 2026-10-26
 
 [Browser evidence](anon-browser-local.md) / [manifest](anon-browser-local-manifest.json): build/start passed, but both anonymous browser runs encountered locale redirect loops before public render. Four initial-hop HTTP boundary checks passed on retry; login destinations still loop. UC22-01 moves NOT RUN → BLOCKED; other statuses remain unchanged. Current counts: **0 PASS, 44 PARTIAL, 15 BLOCKED, 1 NOT RUN**. Per-row `localBrowserEvidence` in JSON distinguishes these results from prior offline evidence. Historical browser next steps in the table now depend on resolving the local redirect loop. No screenshots, axe, keyboard, screen reader, Lighthouse, field INP, Preview or deployment PASS.
+
+
+## Localhost follow-up reconciliation — 2026-10-26
+
+[Updated evidence](anon-browser-local.md#localhost-follow-up--2026-10-26) / [manifest](anon-browser-local-manifest.json) supersedes the local launcher blocker above. UC22-01 BLOCKED → PARTIAL; UC22-57 NOT RUN → PARTIAL; remaining targeted cases stay PARTIAL. All 64 public render combinations completed. Final anonymous Chromium run: 15 passed / 5 failed (three serious home CTA contrast cases and two deliberately unconfigured four-tier catalog cases). Login redirects, locale/query/hash, manual help, disabled concierge 503/fallback and hidden-company exclusion verified locally. Three Lighthouse runs per ten public URLs record median LCP/CLS/TBT; field INP and screen reader NOT_TESTED. No Preview/SSO PASS. Current counts: **0 PASS, 46 PARTIAL, 14 BLOCKED, 0 NOT RUN**. Historical next-step rows above are superseded by per-UC JSON evidence and the findings in the updated document.

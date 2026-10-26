@@ -5,7 +5,7 @@ import AxeBuilder from '@axe-core/playwright';
 test.use({storageState: {cookies: [], origins: []}, trace: 'off'});
 test.beforeEach(async ({context, baseURL}) => {
   test.skip(process.env.HKWTIA_ANONYMOUS_ACCEPTANCE !== 'true', 'Explicit local anonymous acceptance only');
-  expect(baseURL).toBe('http://127.0.0.1:3212');
+  expect(baseURL).toBe('http://localhost:3212');
   await context.route('**/*', route => new URL(route.request().url()).origin === baseURL ? route.continue() : route.abort());
 });
 const paths = ['/', '/about', '/about/chairman', '/about/committees', '/membership', '/ai-ops', '/contact', '/members'];
@@ -27,7 +27,7 @@ for (const prefix of ['', '/zh']) for (const width of [375, 768, 1024, 1440]) {
       const axe = await new AxeBuilder({page}).analyze();
       records.push({path, status: response?.status(), heading: await page.locator('h1').innerText(), axe: axe.violations.map(v => ({id: v.id, impact: v.impact}))});
       await page.screenshot({path: info.outputPath(path.replaceAll('/', '_') + '.png'), fullPage: true});
-      expect(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
+      expect.soft(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
     }
     await info.attach('observations', {body: JSON.stringify(records), contentType: 'application/json'});
   });
@@ -35,8 +35,11 @@ for (const prefix of ['', '/zh']) for (const width of [375, 768, 1024, 1440]) {
 for (const prefix of ['', '/zh']) {
   test(`${prefix || 'en'} membership four tiers, help and anchor`, async ({page}) => {
     await page.goto(prefix + '/membership');
-    await expect(page.locator('.plan-grid article')).toHaveCount(4);
-    for (const code of ['community', 'startup', 'corporate', 'patron']) await expect(page.locator(`#${code} h2`)).toBeVisible();
+    // Paid tiers require configured Stripe prices, deliberately absent in this runtime.
+    // Keep the unmet four-tier requirement red while still exercising help/anchor behavior.
+    const codes = await page.locator('.plan-grid article').evaluateAll(cards => cards.map(card => card.id));
+    expect.soft(codes).toEqual(['community', 'startup', 'corporate', 'patron']);
+    for (const code of codes) await expect(page.locator(`#${code} h2`)).toBeVisible();
     await page.locator('a[href="#plans"]').click();
     await expect(page).toHaveURL(/#plans$/);
     await expect(page.locator('#membership-faq-title')).toBeVisible();
@@ -94,8 +97,8 @@ for (const prefix of ['', '/zh']) for (const area of ['admin', 'portal']) {
       const path = prefix + '/' + area + suffix;
       const response = await request.get(path, {maxRedirects: 0});
       expect(response.status()).toBe(307);
-      const location = new URL(response.headers().location, 'http://127.0.0.1:3212');
-      expect(location.origin).toBe('http://127.0.0.1:3212');
+      const location = new URL(response.headers().location, 'http://localhost:3212');
+      expect(location.origin).toBe('http://localhost:3212');
       expect(location.pathname).toBe(prefix + (area === 'admin' ? '/admin-login' : '/member-login'));
       expect(location.searchParams.get('next')).toBe('/' + area + suffix);
       records.push({path, status: response.status(), location: location.pathname + location.search});
