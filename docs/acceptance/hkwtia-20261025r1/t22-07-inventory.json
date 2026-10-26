@@ -218,6 +218,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Signed-in member A at /admin redirected to /admin-login (live production)."
+   },
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Signed-in staff at /portal redirected to /admin (staff do not see member portal) on live production."
    }
   },
   {
@@ -275,7 +285,7 @@
    ],
    "blockers": [
     "Member A magic-link path unconfirmed on production (session via Google only; send blocked in automation)",
-    "Real staff D session",
+    "Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)",
     "Fix on PR #212 not deployed"
    ],
@@ -351,7 +361,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Real staff D session",
+    "Staff D fixture role session (live staff session is Superadmin via Google only; staff magic link untested)",
     "Zero-write DB readback for refused NONSTAFF",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -374,6 +384,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Second NONSTAFF refusal: member A /admin -> /admin-login 'staff access unavailable'; session kept. Staff D and zero-write readback open."
+   },
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Staff positive control: Willy Lai (Superadmin) signed in via Google on /admin-login in a clean cookie jar; session sticky across /admin, members, queue, events-mgmt, inbox. Not the staff D fixture role; staff magic link and zero-write readback open."
    }
   },
   {
@@ -526,7 +546,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (8 memberships)"
    ],
    "blockers": [
-    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -555,7 +575,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (all 7 statuses seeded)"
    ],
    "blockers": [
-    "Real staff D Auth session (members A and B done on live production)",
+    "Staff walk of this route (A, B and Superadmin staff sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -595,7 +615,7 @@
     "T22-06 0067 10k paging/EXPLAIN (t22-06.md)"
    ],
    "blockers": [
-    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -724,7 +744,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A owns company)"
    ],
    "blockers": [
-    "Real staff D Auth session (members A and B done on live production)",
+    "Staff walk of this route (A, B and Superadmin staff sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -764,7 +784,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (SEAT fixture)"
    ],
    "blockers": [
-    "Real staff D Auth session (members A and B done on live production)",
+    "Staff walk of this route (A, B and Superadmin staff sessions exist on live production)",
     "Seat page unavailable vs dashboard 25 seats for PAYMENT PENDING Corporate (finding, undiagnosed)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
@@ -832,10 +852,21 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Staff review of a public company profile (staff session exists; dashboard review counts observed only)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Dashboard shows 0 member pages and 0 listings awaiting review (snapshot ~00:52 HKT); no review performed."
+   }
   },
   {
    "id": "UC22-34",
@@ -872,7 +903,7 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
@@ -900,7 +931,7 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
     "Authenticated browser/HTTP",
     "Notification sink",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
@@ -961,7 +992,7 @@
    "dbEvidence": [],
    "blockers": [
     "T-MP08 owner materials + private delivery",
-    "Member A walk of this route + real staff D Auth session (A and B sessions exist on live production)",
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
    "nextWithoutAuth": null,
@@ -1024,10 +1055,21 @@
     "UC22-42/43 gated PostgreSQL exact ID sets, count delta, bidirectional paging and cleanup (uc22-42-43.md; uc22-42-43-manifest.json)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Live dashboard-vs-queue submitted ID-set comparison (staff session exists; dashboard 1 submitted observed)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Dashboard shows 1 submitted (snapshot ~00:52 HKT); /admin/members/queue rendered; submitted ID set not compared live."
+   }
   },
   {
    "id": "UC22-43",
@@ -1044,10 +1086,21 @@
     "UC22-42/43 gated PostgreSQL exact ID sets, count delta, bidirectional paging and cleanup (uc22-42-43.md; uc22-42-43-manifest.json)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Live submitted filter/list exercise (staff session exists; queue page rendered only)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "/admin/members/queue (Applications and payments) rendered in staff session; filter/list/paging not exercised."
+   }
   },
   {
    "id": "UC22-44",
@@ -1174,7 +1227,7 @@
     "T22-04A 0066 gated SQL cases (t22-04a.md)"
    ],
    "blockers": [
-    "Real staff D Auth session (members A and B done on live production)",
+    "Staff D fixture role session (Superadmin positive access and members A/B refusals observed on live production)",
     "Authenticated browser/HTTP",
     "Zero-write DB readback for refused NONSTAFF",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
@@ -1198,6 +1251,16 @@
     "deployedSha": "6833eb9a (main@3eb9992d)",
     "result": "PARTIAL",
     "detail": "Member A (NONSTAFF) refused at /admin on live production; zero-write DB readback not performed."
+   },
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Staff (Superadmin) reached /admin and sub-routes, complementing member A/B NONSTAFF refusals; read-only, zero-write DB readback not performed."
    }
   },
   {
@@ -1488,6 +1551,20 @@
    "notExercised": [
     "member A magic link",
     "staff D",
+    "PR #212 exact-head"
+   ]
+  },
+  {
+   "document": "auth-browser-live-staff.md",
+   "manifest": "auth-browser-live-staff-manifest.json",
+   "date": "2026-10-27",
+   "actor": "staff (Superadmin)",
+   "signIn": "Google OAuth",
+   "deployedSha": "6833eb9a",
+   "notExercised": [
+    "staff magic link",
+    "staff D fixture role",
+    "any staff write",
     "PR #212 exact-head"
    ]
   }
