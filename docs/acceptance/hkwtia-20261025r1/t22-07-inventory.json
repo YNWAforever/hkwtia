@@ -31,7 +31,7 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Preview behind Vercel SSO (no bypass)"
+    "Preview behind Vercel SSO (OIDC/vc curl or share-session; see r2-blockers-unblock.md)"
    ],
    "nextWithoutAuth": "Obtain Preview/SSO evidence; local render and settled contrast checks complete.",
    "localBrowserEvidence": {
@@ -1389,7 +1389,7 @@
    "dbEvidence": [],
    "blockers": [
     "RUM for field INP",
-    "Preview behind SSO"
+    "Preview behind SSO (see r2-blockers-unblock.md)"
    ],
    "nextWithoutAuth": "Review local medians and repeat in controlled lab; obtain field RUM for INP and Preview evidence.",
    "localBrowserEvidence": {
@@ -1568,5 +1568,15 @@
     "PR #212 exact-head"
    ]
   }
- ]
+ ],
+  "r2BlockersUnblock": {
+    "date": "2026-10-27",
+    "doc": "r2-blockers-unblock.md",
+    "inventoryUnchanged": true,
+    "previewDeployment": "dpl_2PJRwnya2prEY68ZE43aMpgbQFgG",
+    "previewUrl": "https://hkwtia-l4eh06gmt-ynwaforevers-projects.vercel.app",
+    "preferredPath": "vercel login + vc curl / x-vercel-trusted-oidc-idp-token",
+    "cliLoggedOut": true,
+    "stackedCiPatchApplied": false
+  }
 }

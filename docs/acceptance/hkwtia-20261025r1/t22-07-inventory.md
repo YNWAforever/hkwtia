@@ -25,7 +25,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 
 | UC | Theme | Status | Offline / DB evidence | Blockers | Next without Auth |
 | --- | --- | --- | --- | --- | --- |
-| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Preview behind Vercel SSO (no bypass) | Obtain Preview/SSO evidence; local render and settled contrast complete |
+| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Preview behind Vercel SSO (OIDC/`vc curl` or share-session; see r2-blockers-unblock.md) | Obtain Preview/SSO evidence; local render and settled contrast complete |
 | UC22-02 | Current concierge chat UI (not R3 actions) | **PARTIAL** | `concierge-widget.test.tsx`, `concierge-shell.test.tsx`, `concierge-unavailable-ui.test.tsx` | Real AI provider evaluation; Browser | Local Playwright disabled-provider path (manual fallback) without Auth |
 | UC22-03 | Four-tier membership comparison ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-catalog.test.ts`, `membership-tier-content.test.ts` | Browser visual matrix on populated catalog | Local Playwright visual at 375/768/1024/1440 |
 | UC22-04 | Comparison seats/help/anchor ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-links.test.tsx` | Browser visual matrix | Same local Playwright run |
@@ -81,7 +81,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | UC22-54 | External tool authorization contract ¹ | **BLOCKED** | — | T-MP12A sandbox contract / T-MP12B | — |
 | UC22-55 | Mobile widths / zoom / keyboard / screen reader ¹ | **PARTIAL** | `mobile-navigation.test.tsx`, `supplement-ui.test.tsx`; [eight CTA ratios 8.452:1, 64 settled + two reduced-motion axe scans clear](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26) | Real-device matrix; Screen reader | Screen reader and real-device checks remain open |
 | UC22-56 | Private list performance (20-row p95 ≤2s) ¹ | **PARTIAL** | `portal-sql-paging.test.ts`; DB: [1k/10k production reader timing, 30 warm/30 fresh connections, plans/rows/bytes + cleanup; retry hardening: 2 full DB replays, 0 handshake failures/exhausted, cleanup verified](uc22-56.md#retry-hardening) | Real A/B/staff Auth sessions; authenticated HTTP/browser p95 unmeasured | DB timing completed; optional isolated replay. Full target requires Auth + HTTP/browser measurement |
-| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **PARTIAL** | `production-lhci-target.test.ts`; [repeated three-run medians for ten URLs](anon-browser-local.md#repeated-uc22-57-lab-medians) | RUM for field INP; Preview behind SSO | Controlled lab and field/Preview evidence remain open |
+| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **PARTIAL** | `production-lhci-target.test.ts`; [repeated three-run medians for ten URLs](anon-browser-local.md#repeated-uc22-57-lab-medians) | RUM for field INP; Preview behind SSO (see r2-blockers-unblock.md) | Controlled lab and field/Preview evidence remain open |
 | UC22-58 | Hong Kong date boundaries (UTC 15:59/16:00) ¹ | **PARTIAL** | `hong-kong-time.test.ts`, `event-hong-kong-datetime.test.ts` | Rendered browser check | — |
 | UC22-59 | Exact-head CI gate ¹ | **BLOCKED** | `ci-security-contract.test.ts` | Exact-head remote CI (stacked base; workflow scope); stacked-ci-trigger.patch unapplied | — |
 | UC22-60 | Member→staff→member same application, persisted readback ¹ | **BLOCKED** | `supplement-binding.test.ts`, `supplement-ui.test.tsx`; DB: T22-04A 0066 gated SQL cases (t22-04a.md); Gated SQL binding cases (r2-resources-binding.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Bound forms unmounted; write flag disabled | — |
@@ -118,7 +118,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Bound forms unmounted; write flag disabled | 2: 25, 60 |
 | T-MP12A sandbox contract / T-MP12B | 2: 32, 54 |
 | T-MP08 owner materials + private delivery | 2: 39, 40 |
-| Preview behind Vercel SSO (no bypass) | 1: 01 |
+| Preview behind Vercel SSO (OIDC/`vc curl` or share-session; see r2-blockers-unblock.md) | 1: 01 |
 | Browser visual matrix on populated catalog | 1: 03 |
 | Browser visual matrix | 1: 04 |
 | Browser visual | 1: 09 |
@@ -135,7 +135,7 @@ The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in 
 | Screen reader | 1: 55 |
 | Authenticated HTTP/browser 20-row list p95 remains unmeasured | 1: 56 |
 | RUM for field INP | 1: 57 |
-| Preview behind SSO | 1: 57 |
+| Preview behind SSO (see r2-blockers-unblock.md) | 1: 57 |
 | Rendered browser check | 1: 58 |
 | stacked-ci-trigger.patch unapplied | 1: 59 |
 
@@ -190,3 +190,8 @@ UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 
 ## Live staff Auth/browser UAT — 2026-10-27
 
 [Evidence](auth-browser-live-staff.md) / [manifest](auth-browser-live-staff-manifest.json): real staff session on live production `https://hkwtia.vercel.app` (`release@6833eb9a` = main@3eb9992d, older than PR #212), signed in by Willy **via Google** on `/admin-login` after clearing site data (empty cookie jar). Identity Willy Lai, **Superadmin** (not the staff D fixture role); staff magic link not tested. Read-only walk: session sticky across `/admin`, `/admin/members`, `/admin/members/queue`, `/admin/events-mgmt`, `/admin/inbox` and back; `/portal` redirects staff to `/admin`. Dashboard snapshot (~00:52 HKT): 1 submitted, 5 unfinished, 0 review/approvals, 3 open staff tasks. No writes, approvals or messages. UC22-08/13/33/42/43/50 gain staff evidence; staff blockers reworded on UC22-11/21/22/23/29/30/35/36/39. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. Blocker index regenerated from JSON.
+
+
+## R2 blockers unblock — 2026-10-27
+
+[Live status and ordered Preview/Stripe/CI unblock paths](r2-blockers-unblock.md). Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. Preferred Preview access: box `vercel login` + `vc curl` / `x-vercel-trusted-oidc-idp-token` (never print token). `stacked-ci-trigger.patch` remains unapplied until Actions billing is fixed.

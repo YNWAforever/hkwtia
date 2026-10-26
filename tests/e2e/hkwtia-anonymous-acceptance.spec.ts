@@ -87,10 +87,15 @@ for (const prefix of ['', '/zh']) for (const width of [375, 768, 1024, 1440]) {
 for (const prefix of ['', '/zh']) {
   test(`${prefix || 'en'} membership four tiers, help and anchor`, async ({page}) => {
     await page.goto(prefix + '/membership');
-    // Paid tiers require configured Stripe prices, deliberately absent in this runtime.
-    // Keep the unmet four-tier requirement red while still exercising help/anchor behavior.
+    // Paid tiers need STRIPE_STARTUP_PRICE_ID + STRIPE_CORPORATE_PRICE_ID (or mapped STRIPE_TEST_*).
+    // Local .env.acceptance.local deliberately omits them; keep the four-tier requirement red.
+    // Help/anchor still run. Preview/Production Vercel envs may already have price IDs — see
+    // docs/acceptance/hkwtia-20261025r1/r2-blockers-unblock.md (do not invent secrets here).
     const codes = await page.locator('.plan-grid article').evaluateAll(cards => cards.map(card => card.id));
-    expect.soft(codes).toEqual(['community', 'startup', 'corporate', 'patron']);
+    expect.soft(
+      codes,
+      'four-tier catalog needs configured Stripe startup+corporate price IDs in runtime env; local acceptance omits them on purpose',
+    ).toEqual(['community', 'startup', 'corporate', 'patron']);
     for (const code of codes) await expect(page.locator(`#${code} h2`)).toBeVisible();
     await page.locator('a[href="#plans"]').click();
     await expect(page).toHaveURL(/#plans$/);
