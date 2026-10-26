@@ -150,3 +150,10 @@ No write flag was enabled, no production Neon was touched and nothing was deploy
 ## Settled contrast reconciliation — 2026-10-26
 
 [New replay evidence](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26) / manifest `settledContrastRun` supersedes the home contrast blocker: exact 3.81 axe finding reproduced at ancestor opacity 0.552; settled white on #1a4f82 is 8.452:1. No CSS change. All 64 settled public axe scans and two reduced-motion home scans clear; eight width/locale CTA assertions pass. Anonymous suite **20 passed / 2 failed**; remaining failures are deliberately unconfigured paid tiers, still PARTIAL. UC22-01/55/57 remain **PARTIAL**, with updated per-row JSON evidence; Preview/SSO/deployment, screen reader and field INP remain open. Repeated LHCI medians for three runs per same ten URLs are linked above. Totals unchanged: **0 PASS, 46 PARTIAL, 14 BLOCKED, 0 NOT RUN**.
+
+
+## Movement-only home CTA entrance — 2026-10-26
+
+Approved CSS fix `cafee809`: hero-actions retains movement/timing and full opacity (WCAG 1.4.3). [Evidence](anon-browser-local.md#movement-only-cta-entrance--2026-10-26) / manifest `movementOnlyEntranceRun`: old CSS failed new assertion with opacity 0; focused replay 8/8 green; full anonymous suite **28 passed / 2 failed** (unchanged paid-tier configuration failures). All 32 paused samples across four widths × EN/ZH at 0/450/600/800ms: every CTA ancestor opacity 1, white/#1a4f82 **8.451873:1**; eight paused hero axe scans clear. Existing 64 settled public scans and reduced-motion checks remain clear. Same-config three-run LHCI per ten URLs repeated; medians in linked evidence. Node 22 units **7,986 passed / 659 skipped**, typecheck/lint/build green (77 existing lint warnings); next-env.d.ts restored, server stopped, no listener on 3212.
+
+UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 PARTIAL / 14 BLOCKED / 0 NOT RUN**. Preview/SSO, screen reader, real devices, controlled performance/field INP, Auth, Stripe/provider acceptance and exact-head remote CI remain open. Same branch/PR, no deployment, Auth, write flags, fixture changes or CI patch application.

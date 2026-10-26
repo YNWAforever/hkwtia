@@ -38,8 +38,8 @@
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "64 EN/ZH public path/width combinations render; settled axe scans clear, eight home CTA ratios 8.452:1. Preview/SSO unverified.",
-    "run": "settledContrastRun (base cd84a012)"
+    "detail": "64 EN/ZH public renders and settled axe scans clear; 32 paused CTA samples opaque at 8.451873:1. Local only; Preview/SSO open.",
+    "run": "movementOnlyEntranceRun (code cafee809)"
    }
   },
   {
@@ -1055,8 +1055,8 @@
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "Settled axe clear on 64 combinations; home CTA 8.452:1 at four widths × both locales; two reduced-motion home axe checks clear. Prior 3.81 finding reproduced mid-animation at ancestor opacity 0.552. Screen reader NOT_TESTED.",
-    "run": "settledContrastRun (base cd84a012)"
+    "detail": "Movement-only CTA entrance: 32 samples at 0/450/600/800ms across four widths × EN/ZH, all ancestor opacities 1, white/#1a4f82 ratio 8.451873:1; eight 600ms hero axe scans clear. Settled/reduced-motion checks retained. Screen reader and real devices open.",
+    "run": "movementOnlyEntranceRun (code cafee809)"
    }
   },
   {
@@ -1098,8 +1098,8 @@
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "Repeated three-run local LHCI per same ten URLs; updated median LCP/CLS/TBT in settledContrastRun.lighthouse. Shared-host lab; field INP NOT_TESTED; Preview/SSO unverified.",
-    "run": "settledContrastRun (base cd84a012)"
+    "detail": "Same-config LHCI repeated after CSS fix: three runs per ten URLs, medians in movementOnlyEntranceRun.lighthouse. Shared-host local lab; controlled performance, field INP and Preview/SSO open.",
+    "run": "movementOnlyEntranceRun (code cafee809)"
    }
   },
   {

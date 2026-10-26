@@ -91,7 +91,7 @@ Final checks under Node 22.23.4: full `npm test` **7,984 passed / 659 skipped / 
 
 Continued from `cd84a012` on the existing branch / PR #212. Chromium verified the timing diagnosis. At first DOM insertion, CTA computed foreground/background are `rgb(255, 255, 255)` / `rgb(26, 79, 130)`; CTA opacity is 1 but `.hero-actions` opacity is 0. Other ancestors are 1. After finite `document.getAnimations()` effects finish, all ancestor opacities are 1 and colours stay white / `#1a4f82`. Hover computes white / `#0f4c81`.
 
-Pausing the actual `xp-rise` animation at **533.43909ms** gives ancestor opacity **0.552**. Axe reproduces the exact prior serious finding: effective foreground **`#96b0c7`**, background **`#154e82`**, reported ratio **3.81**. WCAG sRGB calculations in code yield **3.818212:1** for those rounded sampled colours, **8.451873:1** settled, **8.856709:1** hover. No configured grey text exists: the effective grey is composited during the entrance fade. **No CSS or brand/CTA colours changed.** A product change to avoid fading the CTA could be considered separately; none was implemented.
+Pausing the actual `xp-rise` animation at **533.43909ms** gives ancestor opacity **0.552**. Axe reproduces the exact prior serious finding: effective foreground **`#96b0c7`**, background **`#154e82`**, reported ratio **3.81**. WCAG sRGB calculations in code yield **3.818212:1** for those rounded sampled colours, **8.451873:1** settled, **8.856709:1** hover. No configured grey text exists: the effective grey is composited during the entrance fade. **No CSS or brand/CTA colours changed.** At that replay no product fix was implemented; the approved movement-only fix is now recorded in [Movement-only CTA entrance](#movement-only-cta-entrance--2026-10-26).
 
 Test-first evidence: the first unforced assertion probe passed because load had settled. A temporary hostile probe paused the real CTA animation at 530ms; the new assertion then failed explicitly with `Unsettled opacity: 0.539506`. Read the failure, removed the probe, and ran the final suite. The measurement now waits for finite animation effects before every axe scan, excludes infinite iterations/effect ends, and fails after 10s if finite effects remain stuck. It never disables color-contrast. The home CTA assertion resolves an opaque background, rejects translucent colours/ancestors and calculates ratio ≥4.5 at **375/768/1024/1440 × EN/ZH**; both locales also run reduced-motion home axe scans.
 
@@ -117,3 +117,33 @@ Same `lighthouserc.js`, ten URLs, **three runs each / 30 reports**, `LHCI_BASE_U
 | /zh | 2938.2 | 0 | 161.0 |
 
 Node 22 checks: focused home/width and reduced-motion cases green in full replay; full `npm test` **7,984 passed / 659 skipped / zero failures**, 909 passed files / 118 skipped; typecheck PASS (repeated after restoring generated `next-env.d.ts`), lint PASS (0 errors / 77 existing warnings), guarded build PASS. Local acceptance server stopped and no listener remains on port 3212. No new branch/PR, deployment, real Auth, write flags or CI trigger patch application. Raw reports remain ignored; compact observations, diagnosis and medians are in manifest `settledContrastRun`.
+
+
+## Movement-only CTA entrance — 2026-10-26
+
+Willy-approved fix from base `39dfa831`, code commit `cafee809`, same branch / PR #212. Only `.hero-content > .hero-actions` changes animation name to new transform-only `xp-rise-move`; inherited **760ms**, easing, **420ms** delay and `both` fill are retained. The comment records entrance contrast / WCAG 1.4.3. CTA and two light text links move together at full opacity. Eyebrow/h1/lead, hero-scroll, colours and reduced-motion behavior are unchanged. CSS, hero and public layout review found no other fading CTA ancestor or view-transition path; runtime ancestor measurements agree. No wider fix was necessary.
+
+Test-first: before changing CSS, the new gated **en 375 home mid-entrance contrast** test failed with **`Unsettled opacity: 0`** at 0ms (`.tmp/anon/move-red.log`). This names the actual fading ancestor, not a missing target. First post-fix harness attempt failed 8/8 because unrelated scroll-driven animations reject millisecond currentTime; corrected to freeze document-timeline animations only. The corrected focused run passed **8/8**. A new PostCSS unit check follows the selected keyframes by name, asserts nonempty discoveries and tests hostile/safe samples. Temporarily selecting old `xp-rise` failed with `opacity` plus `transform` instead of transform only; restoring the fix passes both tests. Logs: `.tmp/anon/move-unit-red.log` / `move-unit-green.log`. The browser test asserts exactly one real hero-actions effect, preventing a missing animation from silently passing. No opacity or color overrides are used.
+
+Full replay: **28 passed / 2 failed / 0 skipped / 0 flaky**, 189.1s. Only unchanged EN/ZH four-tier catalog assertions fail (Startup/Corporate deliberately lack Stripe prices); paid-tier finding stays **PARTIAL**. All **64** public path/width/locale combinations retain settled waits, keyboard/overflow and axe checks, with **zero axe violations**; both reduced-motion home checks pass. Eight new cases pause actual effects at **0, 450, 600, 800ms**, yielding **32/32** samples with CTA and **every ancestor opacity exactly 1**, foreground **rgb(255,255,255) / #ffffff**, opaque background **rgb(26,79,130) / #1a4f82**, ratio **8.451873:1** (minimum 4.5). Hero-scoped axe at **600ms**, while effects stay paused, reports **zero color-contrast violations in 8/8 scans**. Four widths: 375/768/1024/1440, EN and ZH. Historical fade finding is fixed locally throughout entrance; settled checks remain intact.
+
+Guarded Node 22 build/start used `scripts/acceptance/anonymous-runtime.ts` and `http://localhost:3212`, same isolated Neon target, no migration/seed/fixture write. Full browser command and launcher commands are unchanged from the settled replay above. No real Auth, write flags, provider credentials, new branch/PR, deployment or CI patch application. Existing read-only directory preflight retained. Manifest `movementOnlyEntranceRun` contains samples and observations; raw reports are ignored.
+
+### UC22-57 after entrance fix
+
+Same `lighthouserc.js`, **three runs per ten URLs / 30 reports**, same Node 22 `lhci collect` / Playwright `CHROME_PATH` harness and explicit localhost `LHCI_BASE_URL`; no upload or assertion/category PASS. Collection followed browser and initial checks; final full checks with the new CSS unit test overlap collection, on this shared host with mobile simulated settings. **Field INP NOT_TESTED**; controlled-device and Preview performance remain open.
+
+| URL | Median LCP ms | Median CLS | Median TBT ms |
+| --- | ---: | ---: | ---: |
+| / | 2863.7 | 0 | 181.0 |
+| /events | 2938.3 | 0 | 53.5 |
+| /membership | 2713.8 | 0 | 74.0 |
+| /partners | 2524.7 | 0 | 84.0 |
+| /programmes | 2712.6 | 0 | 76.0 |
+| /zh | 2928.9 | 0 | 115.5 |
+| /zh/events | 2596.9 | 0 | 81.0 |
+| /zh/membership | 2236.9 | 0 | 166.0 |
+| /zh/partners | 2714.8 | 0 | 87.0 |
+| /zh/programmes | 2566.1 | 0 | 190.5 |
+
+Node 22: full units **7,986 passed / 659 skipped / 0 failed** (910 passed files / 118 skipped), typecheck PASS, lint **0 errors / 77 existing warnings**, guarded build PASS. Generated `next-env.d.ts` restored. Local server stopped; no listener on 3212. UC22-01/55/57 remain **PARTIAL**; totals **0 PASS / 46 PARTIAL / 14 BLOCKED / 0 NOT RUN**. Preview/SSO, screen reader, real devices, real Auth, Stripe test, provider/sink, controlled performance, field INP and exact-head remote CI remain open.
