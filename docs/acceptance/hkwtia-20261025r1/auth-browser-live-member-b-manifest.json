@@ -1,0 +1,100 @@
+{
+  "run": "memberBLiveProduction",
+  "date": "2026-10-26",
+  "timezone": "Asia/Hong_Kong",
+  "host": "https://hkwtia.vercel.app",
+  "deploymentProtectionWall": false,
+  "deployment": {
+    "id": "dpl_5TMerrJ1oURQsBYhau8cNrUHCLmi",
+    "target": "production",
+    "state": "READY",
+    "createdAtHkt": "2026-10-20T03:44:59+08:00",
+    "gitRef": "release",
+    "gitSha": "6833eb9a162733a6bd53b7226449f3a2f1aa6a93",
+    "promotes": "main@3eb9992d",
+    "ancestorOfPr212Head": "main@3eb9992d yes; 45 PR branch commits not deployed"
+  },
+  "authUi": [
+    "Neon Auth passwordless magic link",
+    "Google"
+  ],
+  "passwordsUsed": false,
+  "secretsRecorded": false,
+  "mode": "read-only",
+  "actor": {
+    "role": "member B",
+    "signIn": "magic link",
+    "landing": "/portal",
+    "membership": {
+      "tier": "Community",
+      "status": "ACTIVE",
+      "seats": 1
+    },
+    "greeting": "Welcome back, WTIA member."
+  },
+  "observations": [
+    {
+      "route": "/portal",
+      "result": "PASS_OBSERVED"
+    },
+    {
+      "route": "/portal/applications",
+      "result": "PASS_OBSERVED",
+      "detail": "Community Complete 17 Oct 2026; Startup Draft 29 Sept 2026"
+    },
+    {
+      "route": "/portal/profile",
+      "result": "PASS_OBSERVED",
+      "detail": "editable, not saved"
+    },
+    {
+      "route": "/portal/events/my",
+      "result": "EMPTY"
+    },
+    {
+      "route": "company/listing",
+      "result": "GATED_COMMUNITY"
+    },
+    {
+      "route": "seats",
+      "result": "EMPTY"
+    },
+    {
+      "route": "events/directory",
+      "result": "EMPTY"
+    },
+    {
+      "route": "tools",
+      "result": "GATED",
+      "detail": "Startup/Corporate/Patron only"
+    },
+    {
+      "route": "documents",
+      "result": "EMPTY"
+    },
+    {
+      "route": "billing",
+      "result": "OBSERVED",
+      "detail": "ACTIVE Community"
+    },
+    {
+      "route": "/admin",
+      "result": "PASS_DENIED",
+      "detail": "redirect /admin-login: Staff access is unavailable for this account"
+    }
+  ],
+  "notExercised": [
+    "member A magic link (gmail.com; connected inbox was Fimmick)",
+    "staff D magic link (gmail.com)",
+    "next= through magic link",
+    "application detail/supplement",
+    "any write",
+    "zero-write DB readback after /admin refusal",
+    "screen reader",
+    "Stripe"
+  ],
+  "statusChanges": {
+    "UC22-12": "BLOCKED->PARTIAL",
+    "UC22-13": "BLOCKED->PARTIAL"
+  }
+}

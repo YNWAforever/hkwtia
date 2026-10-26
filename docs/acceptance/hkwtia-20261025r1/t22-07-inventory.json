@@ -14,8 +14,8 @@
  },
  "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan §7 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
  "counts": {
-  "PARTIAL": 46,
-  "BLOCKED": 14
+  "PARTIAL": 48,
+  "BLOCKED": 12
  },
  "total": 60,
  "cases": [
@@ -40,6 +40,15 @@
     "result": "PARTIAL",
     "detail": "64 EN/ZH public renders and settled axe scans clear; 32 paused CTA samples opaque at 8.451873:1. Local only; Preview/SSO open.",
     "run": "movementOnlyEntranceRun (code cafee809)"
+   },
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Live production host has no Deployment Protection wall; public entry rendered before sign-in. Production code, not PR head; Preview/SSO for PR head still open."
    }
   },
   {
@@ -181,7 +190,8 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Authenticated browser/HTTP"
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
    "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
    "localBrowserEvidence": {
@@ -189,6 +199,15 @@
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
     "detail": "Anonymous portal routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
+   },
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Signed-in member B at /admin redirected to /admin-login \"Staff access is unavailable for this account\" (live production)."
    }
   },
   {
@@ -253,7 +272,7 @@
    "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Real login member B (negative control vs A)",
    "themeSource": "plan Task 2",
-   "status": "BLOCKED",
+   "status": "PARTIAL",
    "offlineEvidence": [
     "tests/unit/login-resolution-server.test.ts"
    ],
@@ -261,16 +280,26 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions"
+    "Real member A session (B-vs-A comparison)",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Real member B magic-link session on live production: /portal Community ACTIVE 1 seat; own applications, profile (unsaved), billing observed. B-vs-A negative control not yet compared."
+   }
   },
   {
    "id": "UC22-13",
    "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Real login staff D / NONSTAFF refusal",
    "themeSource": "plan Task 2",
-   "status": "BLOCKED",
+   "status": "PARTIAL",
    "offlineEvidence": [
     "tests/unit/admin-login-actions.test.ts",
     "tests/unit/admin-login-guard.test.ts"
@@ -279,9 +308,20 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions"
+    "Real staff D session",
+    "Zero-write DB readback for refused NONSTAFF",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "NONSTAFF refusal observed: member B /admin -> /admin-login denial. Staff D positive control and zero-write readback not exercised."
+   }
   },
   {
    "id": "UC22-14",
@@ -423,10 +463,20 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (8 memberships)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B shows a single Community ACTIVE membership; multi-membership selection not exercised."
+   }
   },
   {
    "id": "UC22-22",
@@ -442,10 +492,20 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (all 7 statuses seeded)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "ACTIVE status rendered for member B; other six statuses not observed live."
+   }
   },
   {
    "id": "UC22-23",
@@ -462,10 +522,20 @@
     "T22-06 0067 10k paging/EXPLAIN (t22-06.md)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B own list: Community Complete (17 Oct 2026), Startup Draft (29 Sept 2026). Isolation vs A not compared."
+   }
   },
   {
    "id": "UC22-24",
@@ -581,10 +651,20 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A owns company)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Company/listing gated for Community tier (member B); edit path not exercised."
+   }
   },
   {
    "id": "UC22-30",
@@ -601,10 +681,20 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (SEAT fixture)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Seats page empty for member B (1 seat); assignment not exercised."
+   }
   },
   {
    "id": "UC22-31",
@@ -688,10 +778,20 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Portal directory empty for member B; isolation vs A not compared."
+   }
   },
   {
    "id": "UC22-36",
@@ -706,11 +806,21 @@
    ],
    "dbEvidence": [],
    "blockers": [
-    "Real A/B/staff Auth sessions",
+    "Real member A / staff D Auth sessions (member B done on live production)",
     "Authenticated browser/HTTP",
-    "Notification sink"
+    "Notification sink",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B /portal/events/my and events empty; registration not exercised."
+   }
   },
   {
    "id": "UC22-37",
@@ -757,9 +867,19 @@
    "dbEvidence": [],
    "blockers": [
     "T-MP08 owner materials + private delivery",
-    "Real A/B/staff Auth sessions"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Documents empty for member B; approved resources not exercised."
+   }
   },
   {
    "id": "UC22-40",
@@ -960,10 +1080,21 @@
     "T22-04A 0066 gated SQL cases (t22-04a.md)"
    ],
    "blockers": [
-    "Real A/B/staff Auth sessions",
-    "Authenticated browser/HTTP"
+    "Real member A / staff D Auth sessions (member B done on live production)",
+    "Authenticated browser/HTTP",
+    "Zero-write DB readback for refused NONSTAFF",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
    ],
-   "nextWithoutAuth": null
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B (NONSTAFF) refused at /admin on live production; zero-write DB readback not performed."
+   }
   },
   {
    "id": "UC22-51",
@@ -1221,5 +1352,15 @@
   ],
   "headAtRun": "6681eb970968d0a70f385e2771628bbfc2f1f86f",
   "scope": "offline unit/jsdom/rendered-SQL only; no Auth, browser, Stripe, sink or provider"
+ },
+ "liveAuthRun": {
+  "document": "auth-browser-live-member-b.md",
+  "date": "2026-10-26",
+  "actor": "member B",
+  "deployedSha": "6833eb9a",
+  "notExercised": [
+   "member A",
+   "staff D"
+  ]
  }
 }
