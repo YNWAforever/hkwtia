@@ -468,7 +468,7 @@ Not claimed: screen reader, real devices, Lighthouse/RUM on Preview, production.
 
 | Gate | Needs | Notes |
 | --- | --- | --- |
-| Member A/B Preview membership walks (portal routes, UC22-21/22/23/29/30/35/36/39 on Preview) | ~~approve Preview member profiles~~ **Done 2026-10-27** ([seeded](#preview-member-profiles-for-ab--seeded-2026-10-27-hkt)). Now: **Willy** headed A/B magic-link handoff to browser-prove `/portal`; **Willy** decide Preview membership/company fixtures for the walks | Profiles only: `/portal` renders "no current membership"; no Preview membership/company/application rows |
+| Member A/B Preview membership walks (portal routes, UC22-21/22/23/29/30/35/36/39 on Preview) | ~~profiles~~ **Done**; ~~A/B `/portal` headed prove~~ **Done** ([r2-43](#members-ab-preview-portal-headed-prove--pass-2026-10-27-hkt)); ~~mirror-Production fixtures~~ **Done** ([seeded](#preview-ab-membership-company-fixtures--seeded-2026-10-27-hkt)). Now: **Willy** fresh A/B magic-link handoff to walk membership/company/apps data on exact-head | Fixtures seeded (A Corporate pending_payment + company Test HIDDEN; B Community active + 2 apps). Headed walks still need Willy (vault emails) |
 | Google sign-in on Preview | **Willy**: approve setting `AUTH_GOOGLE_ENABLED=true` for the Preview branch | Not set; magic link is the only Preview path |
 | Staff D fixture role / staff writes / zero-write NONSTAFF readback | **Willy**: approve a Preview `staff` (non-superadmin) profile and which writes to exercise | Superadmin magic-link PASS only |
 | Local paid-tier catalog (local four-tier red) | **Willy**: Stripe *test* price IDs for local acceptance env | Preview/Production already show four tiers; do not invent IDs |
@@ -567,9 +567,9 @@ Rollback (Preview only; not run): `delete from public.profiles where id in ('03f
 | Memberships / company links / applications for A and B on Preview | 0 / 0 / 0 |
 | Live (unexpired) Neon Auth sessions | 1 each (from the 03:12/03:31 HKT verifies); their cookies lived only in the killed handoff browsers — not reused |
 
-**Not yet browser-proven.** A real `/portal` session for A/B needs a fresh magic link to each inbox, which only Willy can open (addresses are vault-only and typed by Willy). DB-level: needs-profile is gone for both.
+**Browser-proven later the same day** — see [Members A/B Preview `/portal` headed prove](#members-ab-preview-portal-headed-prove--pass-2026-10-27-hkt). At profile-seed time, DB-level needs-profile was gone for both; `/portal` then showed membership-unavailable until fixtures were seeded.
 
-What `/portal` will show: `getDashboard` throws `MEMBERSHIP_INACTIVE` with no membership, so `/portal` renders 200 with "This account has no current membership" / 「此帳戶目前沒有可使用的會籍」 plus links to applications, profile, billing and sign-out — a member session, not a membership dashboard.
+What `/portal` showed before fixtures: `getDashboard` throws `MEMBERSHIP_INACTIVE` with no membership, so `/portal` renders 200 with "This account has no current membership" / 「此帳戶目前沒有可使用的會籍」 plus links to applications, profile, billing and sign-out — a member session, not a membership dashboard.
 
 ### Spec update — strict `/portal` + read-only route smoke
 
@@ -588,12 +588,103 @@ PREVIEW_LOGIN_HANDOFF=true PREVIEW_EXPECT_PORTAL=true PREVIEW_MAGIC_LINK_WAIT_MS
 
 Willy types A's (vault 1082203) or B's (vault 1083056) address in the headed window, clicks Send, pastes the "Sign In to hkwtia-m2-preview" link into that window within 5 minutes. Expect `[open] … (portal)`, `[sticky]`, `[dashboard] membership-unavailable`, 11 `[route]` lines, `EXIT=0`.
 
-### Membership walks — still need Willy (fixtures)
+### Membership walks — fixtures (option 1 chosen)
 
-Profiles alone give a member session but **no** data for UC22-21/22/23/29/30/35/36/39: Preview has no membership, company, company_members or application rows for A/B. Seeding them is a fixture-design choice (which tiers/statuses, A as company owner, B's seats, whether to fake `ACTIVE` paid memberships without Stripe), not "clearly required", so nothing beyond profiles was written. Options for Willy:
+Profiles alone give a member session but **no** data for UC22-21/22/23/29/30/35/36/39. Willy chose option 1 (widget answer t34s383, 2026-10-27): **Mirror Production read-only shapes**. Seeded the same day — see [Preview A/B membership/company fixtures](#preview-ab-membership-company-fixtures--seeded-2026-10-27-hkt). Options 2/3 not taken. UC22-39 also stays BLOCKED on T-MP08 owner materials regardless.
 
-1. **Mirror Production read-only shapes** (A: Corporate `PAYMENT_PENDING` + owned company "Company Test", hidden public page; B: Community `ACTIVE` + one Complete + one Draft application) as Preview-only rows → reproduces the production walks (incl. the UC22-30 seats-unavailable finding) on exact-head.
-2. **T22-02 fixture set** (8 memberships, all 7 statuses, SEAT fixture) attached to A/B on Preview → covers UC22-21 multi-membership and UC22-22 statuses.
-3. **Members self-serve** via `/join` on Preview (creates applications; paid tiers stop at Stripe, which is not configured for tests) — covers UC22-23 only.
+## Members A/B Preview `/portal` headed prove — PASS (2026-10-27 HKT)
 
-UC22-39 also stays BLOCKED on T-MP08 owner materials regardless.
+r2-43. After Preview member profiles were seeded, Willy ran headed magic-link handoffs for Member A and Member B on the PR #212 Preview alias (`PLAYWRIGHT_PREVIEW_OIDC=true`, `PREVIEW_LOGIN_HANDOFF=true`, `PREVIEW_EXPECT_PORTAL=true`, box display `:6`). No email, magic link, token or cookie recorded. No Production / Vercel env / SSO / Neon Auth / Stripe change. At run time Preview still had **no** membership/company/application rows (fixtures came later the same day).
+
+| Actor | Spec | Result | Dashboard log | Routes |
+| --- | --- | --- | --- | --- |
+| Member A (`03f1f159-…`) | `preview-oidc-member-magic-link.spec.ts` | **1 passed (2.6m), EXIT=0** | `[dashboard] membership-unavailable (no Preview membership rows)` | 11 portal GETs → 200, stay under `/portal`, no bounce to `/member-login` |
+| Member B (`38259cd6-…`) | same | **1 passed (1.7m), EXIT=0** | same membership-unavailable | same 11 routes 200 |
+
+Observed sequence (both): `[send] ?sent=1` → `[open] landed on /portal (portal)` → `[sticky] /portal reload stays on /portal` → `[dashboard] membership-unavailable` → `[route]` for `/portal`, `/portal/applications`, `/portal/profile`, `/portal/company`, `/portal/company/seats`, `/portal/directory`, `/portal/events`, `/portal/events/my`, `/portal/documents`, `/portal/billing`, `/zh/portal`.
+
+**PASS** for Preview `/portal` session stickiness + read-only route smoke with profiles present. Not a membership-data walk (that needed fixtures — next section).
+
+## Preview A/B membership/company fixtures — seeded (2026-10-27 HKT)
+
+Approved by Willy (2026-10-27, widget answer **t34s383**: "Mirror Production read-only shapes for A/B on Preview" = option 1 from the profiles-seed section). Recorded ~22:47 Asia/Hong_Kong on PR #212. Scope: Preview Neon `hkwtia-m2-preview` (`solitary-wave-52860119`) / `main` (`br-dark-forest-az0shpz9`) only, via Neon MCP `run_sql_transaction`. No Production, Vercel env, SSO/Deployment Protection, Neon Auth config, Stripe or CI change. No email, link, token or cookie printed or recorded.
+
+### Target shapes (from production UAT + option 1)
+
+| Actor | Profile id | Shape |
+| --- | --- | --- |
+| Member A | `03f1f159-44d0-4e77-b92e-a8b603054ef8` | Corporate membership `pending_payment`, 25 seats, company-scoped (`company_id` set, `owner_user_id` NULL); owns company legal/display **"Test"** (`directory_visible=false`, `public_profile_status=hidden`); `company_members.role=owner` |
+| Member B | `38259cd6-7080-407f-9c19-895770e23584` | Community membership `active`, 1 seat, personal (`owner_user_id=B`, `company_id` NULL, `billing_interval=none`); applications: Community `completed` / `current_step=complete` + Startup `draft` / `current_step=profile` |
+
+### Pre-checks (read-only)
+
+| Check | Result |
+| --- | --- |
+| A/B `profiles.role` | member / member (untouched) |
+| Existing memberships / company_members / applications for A/B | 0 / 0 / 0 |
+| `membership_plans` | community (seat_allowance 1), startup (5), corporate (25), patron (1) — all `active` |
+| Totals before | memberships 18, companies 12, company_members 18, applications 18 |
+
+### Write (Preview only; predetermined UUIDs)
+
+```sql
+-- Preview hkwtia-m2-preview / main only. Mirrors production UAT read-only shapes.
+-- Companies have no owner_user_id; ownership is company_members.role='owner'.
+insert into public.companies (id, legal_name, display_name, directory_visible, public_profile_status)
+values ('a7c10001-1027-4a01-8f01-000000000001', 'Test', 'Test', false, 'hidden');
+
+insert into public.company_members (id, company_id, user_id, role)
+values ('a7c10001-1027-4a01-8f01-000000000002', 'a7c10001-1027-4a01-8f01-000000000001',
+        '03f1f159-44d0-4e77-b92e-a8b603054ef8', 'owner');
+
+insert into public.memberships (id, owner_user_id, company_id, plan_code, status, seat_limit, billing_interval)
+values ('a7c10001-1027-4a01-8f01-000000000003', null, 'a7c10001-1027-4a01-8f01-000000000001',
+        'corporate', 'pending_payment', 25, 'annual');
+
+insert into public.memberships (id, owner_user_id, company_id, plan_code, status, seat_limit, billing_interval)
+values ('b7c10001-1027-4b01-8f01-000000000001', '38259cd6-7080-407f-9c19-895770e23584', null,
+        'community', 'active', 1, 'none');
+
+insert into public.membership_applications (id, applicant_user_id, plan_code, current_step, status)
+values ('b7c10001-1027-4b01-8f01-000000000002', '38259cd6-7080-407f-9c19-895770e23584',
+        'community', 'complete', 'completed'),
+       ('b7c10001-1027-4b01-8f01-000000000003', '38259cd6-7080-407f-9c19-895770e23584',
+        'startup', 'profile', 'draft');
+```
+
+(Actual transaction used `INSERT … SELECT … WHERE NOT EXISTS` guards; all six statements returned one row each.)
+
+| Row | Id | Key fields |
+| --- | --- | --- |
+| company | `a7c10001-1027-4a01-8f01-000000000001` | legal/display **Test**, directory_visible false, public_profile_status hidden |
+| company_members | `a7c10001-1027-4a01-8f01-000000000002` | user A, role owner, revoked_at null |
+| membership A | `a7c10001-1027-4a01-8f01-000000000003` | corporate / pending_payment / 25 / annual / company-scoped |
+| membership B | `b7c10001-1027-4b01-8f01-000000000001` | community / active / 1 / none / personal |
+| app B community | `b7c10001-1027-4b01-8f01-000000000002` | completed / complete |
+| app B startup | `b7c10001-1027-4b01-8f01-000000000003` | draft / profile |
+
+Rollback (Preview only; not run):
+
+```sql
+delete from public.membership_applications where id in
+  ('b7c10001-1027-4b01-8f01-000000000002','b7c10001-1027-4b01-8f01-000000000003');
+delete from public.memberships where id in
+  ('a7c10001-1027-4a01-8f01-000000000003','b7c10001-1027-4b01-8f01-000000000001');
+delete from public.company_members where id = 'a7c10001-1027-4a01-8f01-000000000002';
+delete from public.companies where id = 'a7c10001-1027-4a01-8f01-000000000001';
+```
+
+### Verification
+
+| Check | Result |
+| --- | --- |
+| A membership | corporate, pending_payment, seat_limit 25, owner_user_id null, company_id = Test company |
+| B membership | community, active, seat_limit 1, owner_user_id = B, company_id null, billing_interval none |
+| Company | legal_name=Test, display_name=Test, directory_visible=false, public_profile_status=hidden |
+| company_members | A owner, revoked_at null |
+| B applications | community completed/complete + startup draft/profile (2 rows) |
+| A applications | 0 |
+| Totals after | memberships 20 (+2), companies 13 (+1), company_members 19 (+1), applications 20 (+2) |
+| `memberships_target_check` | satisfied (A company-scoped XOR; B personal XOR) |
+
+What headed portal walks can now expect (after a fresh A/B magic-link handoff): A dashboard Corporate / PAYMENT PENDING / 25 seats + company "Test" HIDDEN (UC22-30 seats-unavailable finding likely still applies while pending_payment); B dashboard Community / ACTIVE / 1 seat + applications Community Complete + Startup Draft. **No Stripe charges** were created (`stripe_*` null). Membership-data walks still need Willy (vault-only emails) for a fresh headed session — the earlier `/portal` prove sessions saw membership-unavailable because fixtures were not yet present.

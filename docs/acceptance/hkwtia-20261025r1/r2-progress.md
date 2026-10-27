@@ -241,3 +241,16 @@ Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. No
 Continued from `3f723cc3`. With Willy's approval (t26s330), [seeded Preview-only `profiles`](r2-blockers-unblock.md#preview-member-profiles-for-ab--seeded-2026-10-27-hkt) for Member A `03f1f159-…` and Member B `38259cd6-…` (role `member`, defaults otherwise), mirroring `provisionMember` column-for-column; email copied inside the DB, never printed. Pre-check 0 clashes; readback: replayed resolve query returns `member` for both (needs-profile gone at the DB layer); +2 member rows only. No membership/company/application rows. Member magic-link spec now watches every tab and, with `PREVIEW_EXPECT_PORTAL=true`, requires `/portal` and GET-smokes 11 portal routes. Browser `/portal` proof awaits Willy's A/B headed handoff; membership walks await a Willy fixture decision.
 
 Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (UC22-11 blocker reworded). No Production, Vercel env, SSO, Neon Auth config, Stripe or CI change.
+
+## Members A/B Preview `/portal` headed prove — PASS — 2026-10-27
+
+Continued from `384d1c15`. After profiles seed, Willy headed magic-link handoffs proved Member A and Member B Preview `/portal` sessions (r2-43): A **EXIT=0 (2.6m)**, B **EXIT=0 (1.7m)**; sticky `/portal`; `[dashboard] membership-unavailable`; 11 portal routes 200 including `/zh/portal`. Evidence: [r2-blockers-unblock.md](r2-blockers-unblock.md#members-ab-preview-portal-headed-prove--pass-2026-10-27-hkt). No Production / Vercel env / SSO / Neon / Stripe change.
+
+Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview A/B membership/company fixtures — seeded — 2026-10-27
+
+Continued from the `/portal` prove above. Willy approved option 1 (widget **t34s383**): mirror Production read-only shapes on Preview. [Seeded](r2-blockers-unblock.md#preview-ab-membership-company-fixtures--seeded-2026-10-27-hkt) Preview-only via Neon MCP `run_sql_transaction` on `hkwtia-m2-preview` / `main`: A Corporate `pending_payment` 25 seats + company **Test** (hidden) + `company_members` owner; B Community `active` 1 seat + Community completed + Startup draft applications. Pre-check 0 clashes; readback matches target XOR ownership and plan/status/seats. Totals +2 memberships / +1 company / +1 company_member / +2 applications. No Stripe ids. Headed membership walks still need Willy (fresh magic links).
+
+Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (UC22-21/22/23/29/30/35/36 walk blockers reduced to "needs headed re-walk with fixtures"; UC22-39 still T-MP08). No Production, Vercel env, SSO, Neon Auth config, Stripe or CI change.
+

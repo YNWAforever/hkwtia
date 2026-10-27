@@ -1,6 +1,6 @@
 {
  "task": "T22-07",
- "scope": "UC22-01–60 existing membership/staff features (R2); R3/R4 capabilities not claimed",
+ "scope": "UC22-01\u201360 existing membership/staff features (R2); R3/R4 capabilities not claimed",
  "date": "2026-10-26",
  "branch": "wtia/hkwtia-plan-r1-20261025",
  "pr": 212,
@@ -12,7 +12,7 @@
   "BLOCKED": "Core dependency of the UC is unavailable (Auth sessions, Stripe test, sink, legal approval, owner materials, tool contract, remote CI)",
   "NOT RUN": "No external blocker for an offline/anonymous run, but not executed in this run"
  },
- "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan §7 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
+ "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan \u00a77 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
  "counts": {
   "PARTIAL": 49,
   "BLOCKED": 11
@@ -21,7 +21,7 @@
  "cases": [
   {
    "id": "UC22-01",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Public entry pages render (anonymous)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -57,7 +57,7 @@
     "commit": "b10686e3",
     "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
     "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
-    "result": "/ and /zh/membership and /membership HTTP 200 on Preview, app HTML (not SSO); /sitemap.xml HTTP 500 on Preview (production 200) — finding",
+    "result": "/ and /zh/membership and /membership HTTP 200 on Preview, app HTML (not SSO); /sitemap.xml HTTP 500 on Preview (production 200) \u2014 finding",
     "fixtureSmoke": {
      "date": "2026-10-27",
      "deployment": "dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX",
@@ -80,7 +80,7 @@
   },
   {
    "id": "UC22-02",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Current concierge chat UI (not R3 actions)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -98,7 +98,7 @@
   },
   {
    "id": "UC22-03",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Four-tier membership comparison",
    "themeSource": "plan Task 5 (T22-05)",
    "status": "PARTIAL",
@@ -125,7 +125,7 @@
     "commit": "b10686e3",
     "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
     "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
-    "result": "EN+ZH /membership .plan-grid article ids = community,startup,corporate,patron; Startup HK$2,400/yr HK$250/mo; Corporate HK$12,000/yr HK$1,200/mo — Stripe price IDs configured on Preview env; local acceptance still omits them",
+    "result": "EN+ZH /membership .plan-grid article ids = community,startup,corporate,patron; Startup HK$2,400/yr HK$250/mo; Corporate HK$12,000/yr HK$1,200/mo \u2014 Stripe price IDs configured on Preview env; local acceptance still omits them",
     "fixtureSmoke": {
      "date": "2026-10-27",
      "deployment": "dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX",
@@ -140,7 +140,7 @@
   },
   {
    "id": "UC22-04",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Comparison seats/help/anchor",
    "themeSource": "plan Task 5 (T22-05)",
    "status": "PARTIAL",
@@ -162,7 +162,7 @@
   },
   {
    "id": "UC22-05",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Locale EN/ZH switching and hrefs",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -185,7 +185,7 @@
   },
   {
    "id": "UC22-06",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "next= destination preserved through login",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -203,7 +203,7 @@
   },
   {
    "id": "UC22-07",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Anonymous admin boundary",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -226,7 +226,7 @@
   },
   {
    "id": "UC22-08",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Anonymous portal boundary / admin redirect",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -278,7 +278,7 @@
   },
   {
    "id": "UC22-09",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Membership page help / CTA",
    "themeSource": "plan Task 5 (T22-05)",
    "status": "PARTIAL",
@@ -300,7 +300,7 @@
   },
   {
    "id": "UC22-10",
-   "group": "UC22-01–10 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
    "theme": "Policy / self-service copy consistency",
    "themeSource": "plan Task 5 + Task 12",
    "status": "PARTIAL",
@@ -317,7 +317,7 @@
   },
   {
    "id": "UC22-11",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Real login member A (positive control)",
    "themeSource": "plan Task 2",
    "status": "PARTIAL",
@@ -379,7 +379,7 @@
   },
   {
    "id": "UC22-12",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Real login member B (negative control vs A)",
    "themeSource": "plan Task 2",
    "status": "PARTIAL",
@@ -416,7 +416,7 @@
   },
   {
    "id": "UC22-13",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Real login staff D / NONSTAFF refusal",
    "themeSource": "plan Task 2",
    "status": "PARTIAL",
@@ -476,7 +476,7 @@
   },
   {
    "id": "UC22-14",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Free (community) join",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -495,7 +495,7 @@
   },
   {
    "id": "UC22-15",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Paid join checkout",
    "themeSource": "inferred",
    "status": "BLOCKED",
@@ -524,7 +524,7 @@
   },
   {
    "id": "UC22-16",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Owner checks on join/application",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -543,7 +543,7 @@
   },
   {
    "id": "UC22-17",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Retained input / resume",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -561,7 +561,7 @@
   },
   {
    "id": "UC22-18",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Identity/target gate and existing security fixes",
    "themeSource": "plan Task 2 + Task 3",
    "status": "PARTIAL",
@@ -580,7 +580,7 @@
   },
   {
    "id": "UC22-19",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "Dependency/security release gate",
    "themeSource": "plan Task 3",
    "status": "PARTIAL",
@@ -596,7 +596,7 @@
   },
   {
    "id": "UC22-20",
-   "group": "UC22-11–20 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
    "theme": "No second subscription",
    "themeSource": "inferred",
    "status": "BLOCKED",
@@ -613,7 +613,7 @@
   },
   {
    "id": "UC22-21",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Multiple memberships view/selection",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -641,7 +641,7 @@
   },
   {
    "id": "UC22-22",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Seven membership statuses",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -680,7 +680,7 @@
   },
   {
    "id": "UC22-23",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Own applications list (SQL paging)",
    "themeSource": "plan Task 10",
    "status": "PARTIAL",
@@ -710,7 +710,7 @@
   },
   {
    "id": "UC22-24",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Own application detail + supplement history",
    "themeSource": "plan Task 8 + Task 10",
    "status": "PARTIAL",
@@ -730,7 +730,7 @@
   },
   {
    "id": "UC22-25",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Member supplement response",
    "themeSource": "plan Task 8 + Task 9",
    "status": "PARTIAL",
@@ -753,7 +753,7 @@
   },
   {
    "id": "UC22-26",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Application form submit",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -771,7 +771,7 @@
   },
   {
    "id": "UC22-27",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Form validation and correction",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -788,7 +788,7 @@
   },
   {
    "id": "UC22-28",
-   "group": "UC22-21–28 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
    "theme": "Consent capture/withdrawal",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -809,7 +809,7 @@
   },
   {
    "id": "UC22-29",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Company profile edit",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -849,7 +849,7 @@
   },
   {
    "id": "UC22-30",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Seat assignment",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -890,7 +890,7 @@
   },
   {
    "id": "UC22-31",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Seat/role revocation",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -908,7 +908,7 @@
   },
   {
    "id": "UC22-32",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Existing external tool identity exchange contract",
    "themeSource": "plan Task 7",
    "status": "BLOCKED",
@@ -921,7 +921,7 @@
   },
   {
    "id": "UC22-33",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Public company profile review (staff)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -948,7 +948,7 @@
   },
   {
    "id": "UC22-34",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Public directory isolation (opt-in only)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -972,7 +972,7 @@
   },
   {
    "id": "UC22-35",
-   "group": "UC22-29–35 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
    "theme": "Portal directory isolation",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -998,7 +998,7 @@
   },
   {
    "id": "UC22-36",
-   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
    "theme": "Event registration",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1027,7 +1027,7 @@
   },
   {
    "id": "UC22-37",
-   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
    "theme": "Ticket purchase",
    "themeSource": "inferred",
    "status": "BLOCKED",
@@ -1044,7 +1044,7 @@
   },
   {
    "id": "UC22-38",
-   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
    "theme": "Stripe webhook processing",
    "themeSource": "inferred",
    "status": "BLOCKED",
@@ -1060,7 +1060,7 @@
   },
   {
    "id": "UC22-39",
-   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
    "theme": "Approved member resources",
    "themeSource": "plan Task 11",
    "status": "BLOCKED",
@@ -1086,7 +1086,7 @@
   },
   {
    "id": "UC22-40",
-   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
    "theme": "Receipts",
    "themeSource": "plan Task 11",
    "status": "BLOCKED",
@@ -1103,7 +1103,7 @@
   },
   {
    "id": "UC22-41",
-   "group": "UC22-36–41 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
    "theme": "Cancellation/refund policy effect",
    "themeSource": "plan Task 12",
    "status": "BLOCKED",
@@ -1120,7 +1120,7 @@
   },
   {
    "id": "UC22-42",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Dashboard submitted count = queue ID set",
    "themeSource": "plan Task 4",
    "status": "PARTIAL",
@@ -1151,7 +1151,7 @@
   },
   {
    "id": "UC22-43",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Submitted queue filter/list",
    "themeSource": "plan Task 4",
    "status": "PARTIAL",
@@ -1182,8 +1182,8 @@
   },
   {
    "id": "UC22-44",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
-   "theme": "Unknown save → receipt reconciliation",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Unknown save \u2192 receipt reconciliation",
    "themeSource": "plan Task 8",
    "status": "PARTIAL",
    "offlineEvidence": [
@@ -1201,7 +1201,7 @@
   },
   {
    "id": "UC22-45",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Version conflict / concurrency",
    "themeSource": "plan Task 8",
    "status": "PARTIAL",
@@ -1220,7 +1220,7 @@
   },
   {
    "id": "UC22-46",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Bulk actions",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1238,7 +1238,7 @@
   },
   {
    "id": "UC22-47",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Import",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1256,7 +1256,7 @@
   },
   {
    "id": "UC22-48",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Staff case handling (current, non-R3)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1274,7 +1274,7 @@
   },
   {
    "id": "UC22-49",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Staff draft review/adopt (current)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1292,7 +1292,7 @@
   },
   {
    "id": "UC22-50",
-   "group": "UC22-42–50 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
    "theme": "Staff guard (NONSTAFF refused, zero writes)",
    "themeSource": "plan Task 2 + Task 8",
    "status": "PARTIAL",
@@ -1343,7 +1343,7 @@
   },
   {
    "id": "UC22-51",
-   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
    "theme": "Concierge cites sources (current)",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1360,7 +1360,7 @@
   },
   {
    "id": "UC22-52",
-   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
    "theme": "Concierge provider failure path",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1383,7 +1383,7 @@
   },
   {
    "id": "UC22-53",
-   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
    "theme": "Concierge data isolation",
    "themeSource": "inferred",
    "status": "PARTIAL",
@@ -1400,7 +1400,7 @@
   },
   {
    "id": "UC22-54",
-   "group": "UC22-51–54 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
    "theme": "External tool authorization contract",
    "themeSource": "plan Task 7",
    "status": "BLOCKED",
@@ -1413,7 +1413,7 @@
   },
   {
    "id": "UC22-55",
-   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
    "theme": "Mobile widths / zoom / keyboard / screen reader",
    "themeSource": "plan Task 14",
    "status": "PARTIAL",
@@ -1431,7 +1431,7 @@
     "document": "anon-browser-local.md",
     "manifest": "anon-browser-local-manifest.json",
     "result": "PARTIAL",
-    "detail": "Movement-only CTA entrance: 32 samples at 0/450/600/800ms across four widths × EN/ZH, all ancestor opacities 1, white/#1a4f82 ratio 8.451873:1; eight 600ms hero axe scans clear. Settled/reduced-motion checks retained. Screen reader and real devices open.",
+    "detail": "Movement-only CTA entrance: 32 samples at 0/450/600/800ms across four widths \u00d7 EN/ZH, all ancestor opacities 1, white/#1a4f82 ratio 8.451873:1; eight 600ms hero axe scans clear. Settled/reduced-motion checks retained. Screen reader and real devices open.",
     "run": "movementOnlyEntranceRun (code cafee809)"
    },
    "previewAnonymousEvidence": {
@@ -1445,8 +1445,8 @@
   },
   {
    "id": "UC22-56",
-   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
-   "theme": "Private list performance (20-row p95 ≤2s)",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Private list performance (20-row p95 \u22642s)",
    "themeSource": "plan Task 10 + Task 14",
    "status": "PARTIAL",
    "offlineEvidence": [
@@ -1465,7 +1465,7 @@
   },
   {
    "id": "UC22-57",
-   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
    "theme": "Public performance LCP/CLS (INP field)",
    "themeSource": "plan Task 14",
    "status": "PARTIAL",
@@ -1495,7 +1495,7 @@
   },
   {
    "id": "UC22-58",
-   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
    "theme": "Hong Kong date boundaries (UTC 15:59/16:00)",
    "themeSource": "plan Task 14",
    "status": "PARTIAL",
@@ -1511,7 +1511,7 @@
   },
   {
    "id": "UC22-59",
-   "group": "UC22-55–59 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
    "theme": "Exact-head CI gate",
    "themeSource": "plan Task 3",
    "status": "BLOCKED",
@@ -1527,8 +1527,8 @@
   },
   {
    "id": "UC22-60",
-   "group": "UC22-60 member→staff→member same application (T22-04/07)",
-   "theme": "Member→staff→member same application, persisted readback",
+   "group": "UC22-60 member\u2192staff\u2192member same application (T22-04/07)",
+   "theme": "Member\u2192staff\u2192member same application, persisted readback",
    "themeSource": "plan Task 9/15",
    "status": "BLOCKED",
    "offlineEvidence": [
@@ -1578,7 +1578,7 @@
    "status": "NOT RUN",
    "evidence": [],
    "blockers": [
-    "R3 (T22-09) scope — not claimed in T22-07"
+    "R3 (T22-09) scope \u2014 not claimed in T22-07"
    ]
   },
   {
@@ -1592,7 +1592,7 @@
   },
   {
    "id": "REG-provider-unknown-outcome",
-   "theme": "Provider without idempotency → unknown",
+   "theme": "Provider without idempotency \u2192 unknown",
    "status": "NOT RUN",
    "evidence": [],
    "blockers": [
@@ -1722,11 +1722,75 @@
     }
    ],
    "mirrors": "profileIdentityRepository.provisionMember insert",
-   "memberships": 0,
+   "memberships": 1,
    "companyLinks": 0,
    "applications": 0,
-   "portalSessionBrowserProven": false,
+   "portalSessionBrowserProven": true,
    "doc": "r2-blockers-unblock.md#preview-member-profiles-for-ab--seeded-2026-10-27-hkt"
+  },
+  "previewAbPortalHeadedProve": {
+   "date": "2026-10-27",
+   "r2": "r2-43",
+   "memberA": {
+    "exit": 0,
+    "duration": "2.6m",
+    "dashboard": "membership-unavailable",
+    "routes200": 11
+   },
+   "memberB": {
+    "exit": 0,
+    "duration": "1.7m",
+    "dashboard": "membership-unavailable",
+    "routes200": 11
+   },
+   "doc": "r2-blockers-unblock.md#members-ab-preview-portal-headed-prove--pass-2026-10-27-hkt"
+  },
+  "previewAbMembershipFixturesSeeded": {
+   "date": "2026-10-27",
+   "authorizedBy": "Willy (t34s383 option 1 mirror Production)",
+   "neonProject": "solitary-wave-52860119",
+   "branch": "br-dark-forest-az0shpz9",
+   "memberA": {
+    "profileId": "03f1f159-44d0-4e77-b92e-a8b603054ef8",
+    "membershipId": "a7c10001-1027-4a01-8f01-000000000003",
+    "plan": "corporate",
+    "status": "pending_payment",
+    "seatLimit": 25,
+    "companyId": "a7c10001-1027-4a01-8f01-000000000001",
+    "companyName": "Test",
+    "directoryVisible": false,
+    "publicProfileStatus": "hidden",
+    "companyMemberId": "a7c10001-1027-4a01-8f01-000000000002",
+    "companyMemberRole": "owner"
+   },
+   "memberB": {
+    "profileId": "38259cd6-7080-407f-9c19-895770e23584",
+    "membershipId": "b7c10001-1027-4b01-8f01-000000000001",
+    "plan": "community",
+    "status": "active",
+    "seatLimit": 1,
+    "applications": [
+     {
+      "id": "b7c10001-1027-4b01-8f01-000000000002",
+      "plan": "community",
+      "status": "completed",
+      "currentStep": "complete"
+     },
+     {
+      "id": "b7c10001-1027-4b01-8f01-000000000003",
+      "plan": "startup",
+      "status": "draft",
+      "currentStep": "profile"
+     }
+    ]
+   },
+   "totalsDelta": {
+    "memberships": 2,
+    "companies": 1,
+    "companyMembers": 1,
+    "applications": 2
+   },
+   "doc": "r2-blockers-unblock.md#preview-ab-membership-company-fixtures--seeded-2026-10-27-hkt"
   }
  }
 }
