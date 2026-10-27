@@ -468,7 +468,7 @@ Not claimed: screen reader, real devices, Lighthouse/RUM on Preview, production.
 
 | Gate | Needs | Notes |
 | --- | --- | --- |
-| Member A/B Preview membership walks (portal routes, UC22-21/22/23/29/30/35/36/39 on Preview) | **Willy**: approve creating Preview member profiles for A/B (click "Create member profile", or an agent-seeded Preview-only profile) | Both verify to "Create member profile" today; no Preview profile/membership rows |
+| Member A/B Preview membership walks (portal routes, UC22-21/22/23/29/30/35/36/39 on Preview) | ~~approve Preview member profiles~~ **Done 2026-10-27** ([seeded](#preview-member-profiles-for-ab--seeded-2026-10-27-hkt)). Now: **Willy** headed A/B magic-link handoff to browser-prove `/portal`; **Willy** decide Preview membership/company fixtures for the walks | Profiles only: `/portal` renders "no current membership"; no Preview membership/company/application rows |
 | Google sign-in on Preview | **Willy**: approve setting `AUTH_GOOGLE_ENABLED=true` for the Preview branch | Not set; magic link is the only Preview path |
 | Staff D fixture role / staff writes / zero-write NONSTAFF readback | **Willy**: approve a Preview `staff` (non-superadmin) profile and which writes to exercise | Superadmin magic-link PASS only |
 | Local paid-tier catalog (local four-tier red) | **Willy**: Stripe *test* price IDs for local acceptance env | Preview/Production already show four tiers; do not invent IDs |
@@ -515,3 +515,85 @@ Against the `lighthouserc.js` assertions (median): **performance ≥0.90 — met
 Compared with the local `next start` medians (LCP ~2.2–2.9 s), Preview lab LCP is **1.9–2.4 s**, CLS 0 everywhere, TBT 39–111 ms. Lab only, shared box host, one Vercel region (iad1) from Hong Kong. **Field INP (RUM) NOT_TESTED**; UC22-57 stays **PARTIAL**. Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
 
 No Production, Vercel env, Deployment Protection/SSO, Neon or Auth change; GETs to the Preview only.
+
+## Preview member profiles for A/B — seeded (2026-10-27 HKT)
+
+Approved by Willy (2026-10-27, "Create Preview member profiles for A/B so portal walks can run"). Recorded ~10:45 Asia/Hong_Kong on PR #212. Scope: Preview Neon `hkwtia-m2-preview` (`solitary-wave-52860119`) / `main` (`br-dark-forest-az0shpz9`) only, via Neon MCP `run_sql_transaction`. No Production, Vercel env, SSO/Deployment Protection, Neon Auth config, Stripe or CI change. No email address, link, token or cookie printed or recorded.
+
+### Code path (read first)
+
+`provisionMemberProfileAction` (`app/[locale]/member-login/provision-action.ts`) → `provisionVerifiedMember` (needs `emailVerified`) → `profileIdentityRepository.provisionMember` (`lib/db/repos/profile-identities.ts`): in one transaction, advisory lock on the email, return the existing row by `auth_user_id`, refuse on a same-email row (`conflict`), else insert **`{id: authUserId, auth_user_id: authUserId, email: lower(trim(email)), role: 'member', display_name: name.trim().slice(0,120) || 'WTIA member'}`** with every other column on its default. No membership, company, audit, notification or Auth side effect. So a SQL insert of the same columns is equivalent to clicking "Create member profile"; no headed click was needed. `sessionToActor` / `resolveLogin` then resolve role `member` from `profiles.auth_user_id` → `/portal` allowed.
+
+### Pre-checks (read-only)
+
+| Check | Result |
+| --- | --- |
+| Preview `neon_auth."user"` non-fixture rows | `894b2e40-…` (staff superadmin, already has its profile — untouched), `38259cd6-7080-407f-9c19-895770e23584` (Member B, `w***@fimmick.com`, verified, created 2026-10-27 03:12 HKT), `03f1f159-44d0-4e77-b92e-a8b603054ef8` (Member A, `l***@gmail.com`, verified, created 2026-10-27 03:31 HKT). Auth `name` blank for both A and B |
+| Clashes for A/B (`profiles` by id, `auth_user_id` or lower(email)) | 0 / 0 |
+| Triggers on `profiles` | 0 |
+| Role counts before | member 27, staff 1, exco 1, superadmin 2 |
+
+### Write (Preview only)
+
+```sql
+-- Preview hkwtia-m2-preview / main only. Mirrors provisionMember; email copied inside the DB, never printed.
+insert into public.profiles (id, auth_user_id, email, role, display_name)
+select u.id::text, u.id::text, lower(trim(u.email)), 'member',
+       coalesce(nullif(left(trim(u.name),120),''),'WTIA member')
+from neon_auth."user" u
+where u.id in ('03f1f159-44d0-4e77-b92e-a8b603054ef8','38259cd6-7080-407f-9c19-895770e23584')
+  and u."emailVerified"
+  and not exists (select 1 from public.profiles p
+                  where p.auth_user_id = u.id::text or p.id = u.id::text or lower(p.email) = lower(trim(u.email)))
+on conflict do nothing;
+```
+
+Result: 2 rows, created 2026-10-27 10:43:46 HKT.
+
+| Profile id (= Auth user id) | Actor | role | onboarding_state | locale | display_name |
+| --- | --- | --- | --- | --- | --- |
+| `03f1f159-44d0-4e77-b92e-a8b603054ef8` | Member A | member | profile (default) | en (default) | WTIA member |
+| `38259cd6-7080-407f-9c19-895770e23584` | Member B | member | profile (default) | en (default) | WTIA member |
+
+Rollback (Preview only; not run): `delete from public.profiles where id in ('03f1f159-44d0-4e77-b92e-a8b603054ef8','38259cd6-7080-407f-9c19-895770e23584') and role = 'member';`
+
+### Verification
+
+| Check | Result |
+| --- | --- |
+| Email on each row equals its `neon_auth` user's (compared in SQL, boolean only) | true / true; exactly 1 profile per address |
+| App resolve query replayed read-only (`select id, role from profiles where auth_user_id = $1 limit 1`) | A → `{profileId: 03f1f159-…, role: member}`; B → `{profileId: 38259cd6-…, role: member}` ⇒ `resolveLogin` = allowed for `/portal`, no longer needs-profile |
+| Role counts after | member 29, staff 1, exco 1, superadmin 2 (+2 member only) |
+| Memberships / company links / applications for A and B on Preview | 0 / 0 / 0 |
+| Live (unexpired) Neon Auth sessions | 1 each (from the 03:12/03:31 HKT verifies); their cookies lived only in the killed handoff browsers — not reused |
+
+**Not yet browser-proven.** A real `/portal` session for A/B needs a fresh magic link to each inbox, which only Willy can open (addresses are vault-only and typed by Willy). DB-level: needs-profile is gone for both.
+
+What `/portal` will show: `getDashboard` throws `MEMBERSHIP_INACTIVE` with no membership, so `/portal` renders 200 with "This account has no current membership" / 「此帳戶目前沒有可使用的會籍」 plus links to applications, profile, billing and sign-out — a member session, not a membership dashboard.
+
+### Spec update — strict `/portal` + read-only route smoke
+
+`tests/e2e/preview-oidc-member-magic-link.spec.ts`:
+- Watches **every tab** of the handoff window for the link (fixes the Member A second-tab stall, same as the staff spec).
+- `PREVIEW_EXPECT_PORTAL=true` → the verified create-profile screen fails with `NEEDS_PROFILE`; after `[sticky]` it logs `[dashboard]` (membership-unavailable vs membership dashboard) and GETs `/portal`, `/portal/applications`, `/portal/profile`, `/portal/company`, `/portal/company/seats`, `/portal/directory`, `/portal/events`, `/portal/events/my`, `/portal/documents`, `/portal/billing`, `/zh/portal` — asserting < 500, no bounce to `/member-login`, still under `/portal`. GET only; no form or button.
+- Without opt-in: skipped. eslint clean; `tsc` clean.
+
+Handoff (box display `:6`, one member per run; box helper `/tmp/hkwtia-handoff/run-member-portal.sh A|B`):
+
+```bash
+DISPLAY=:6 PLAYWRIGHT_PREVIEW_OIDC=true PLAYWRIGHT_BASE_URL=https://hkwtia-git-wtia-hkwtia-plan-r1-20261025-ynwaforevers-projects.vercel.app \
+PREVIEW_LOGIN_HANDOFF=true PREVIEW_EXPECT_PORTAL=true PREVIEW_MAGIC_LINK_WAIT_MS=900000 \
+  vercel env run -- npx playwright test tests/e2e/preview-oidc-member-magic-link.spec.ts --reporter=list --workers=1
+```
+
+Willy types A's (vault 1082203) or B's (vault 1083056) address in the headed window, clicks Send, pastes the "Sign In to hkwtia-m2-preview" link into that window within 5 minutes. Expect `[open] … (portal)`, `[sticky]`, `[dashboard] membership-unavailable`, 11 `[route]` lines, `EXIT=0`.
+
+### Membership walks — still need Willy (fixtures)
+
+Profiles alone give a member session but **no** data for UC22-21/22/23/29/30/35/36/39: Preview has no membership, company, company_members or application rows for A/B. Seeding them is a fixture-design choice (which tiers/statuses, A as company owner, B's seats, whether to fake `ACTIVE` paid memberships without Stripe), not "clearly required", so nothing beyond profiles was written. Options for Willy:
+
+1. **Mirror Production read-only shapes** (A: Corporate `PAYMENT_PENDING` + owned company "Company Test", hidden public page; B: Community `ACTIVE` + one Complete + one Draft application) as Preview-only rows → reproduces the production walks (incl. the UC22-30 seats-unavailable finding) on exact-head.
+2. **T22-02 fixture set** (8 memberships, all 7 statuses, SEAT fixture) attached to A/B on Preview → covers UC22-21 multi-membership and UC22-22 statuses.
+3. **Members self-serve** via `/join` on Preview (creates applications; paid tiers stop at Stripe, which is not configured for tests) — covers UC22-23 only.
+
+UC22-39 also stays BLOCKED on T-MP08 owner materials regardless.

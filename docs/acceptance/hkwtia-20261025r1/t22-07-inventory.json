@@ -330,7 +330,7 @@
     "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
    ],
    "blockers": [
-    "Member A magic-link verified on PR #212 Preview (needs-profile; no Preview profile, so no /portal session); production magic link unconfirmed",
+    "Member A magic-link verified on PR #212 Preview; Preview member profiles for A/B seeded 2026-10-27 (role=member, DB resolve = member) but /portal session not yet browser-proven (headed handoff pending); production magic link unconfirmed",
     "Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised)",
     "Exact-head deployment (live production = main@3eb9992d, not PR #212)",
     "Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production"
@@ -1701,6 +1701,32 @@
   "previewGoogleEnabled": false,
   "previewAnonymousAcceptance": "PASS 15/15",
   "previewAnonymousAcceptanceCommit": "06ccd701",
-  "openNowRecordContrastFix": "06ccd701"
+  "openNowRecordContrastFix": "06ccd701",
+  "previewMemberProfilesSeeded": {
+   "date": "2026-10-27",
+   "authorizedBy": "Willy (t26s330)",
+   "neonProject": "solitary-wave-52860119",
+   "branch": "br-dark-forest-az0shpz9",
+   "rows": [
+    {
+     "id": "03f1f159-44d0-4e77-b92e-a8b603054ef8",
+     "actor": "member A",
+     "role": "member",
+     "onboardingState": "profile"
+    },
+    {
+     "id": "38259cd6-7080-407f-9c19-895770e23584",
+     "actor": "member B",
+     "role": "member",
+     "onboardingState": "profile"
+    }
+   ],
+   "mirrors": "profileIdentityRepository.provisionMember insert",
+   "memberships": 0,
+   "companyLinks": 0,
+   "applications": 0,
+   "portalSessionBrowserProven": false,
+   "doc": "r2-blockers-unblock.md#preview-member-profiles-for-ab--seeded-2026-10-27-hkt"
+  }
  }
 }

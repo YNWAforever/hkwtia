@@ -1,5 +1,7 @@
 import {existsSync, readFileSync} from 'node:fs';
 
+import type {Page} from '@playwright/test';
+
 import {expect, test} from '../fixtures/preview-oidc';
 import {allowedMagicLink} from '../fixtures/preview-magic-link';
 
@@ -12,12 +14,50 @@ import {allowedMagicLink} from '../fixtures/preview-magic-link';
 // same OIDC context that requested the link. Without an email source the send happens by hand in a
 // headed window (PREVIEW_LOGIN_HANDOFF=true): a person types the address and clicks Send; the spec
 // only waits for `?sent=1`. A pasted link may be written to PREVIEW_MAGIC_LINK_FILE or typed into
-// that window's address bar. Nothing here logs the address, the link, cookies or the OIDC header.
+// that window's address bar (any tab of the window is watched). Nothing here logs the address, the
+// link, cookies or the OIDC header.
+// PREVIEW_EXPECT_PORTAL=true (members with a Preview `profiles` row, e.g. A/B since 2026-10-27) makes
+// the verified create-profile screen a failure (NEEDS_PROFILE) and, after the sticky check, GETs the
+// member portal routes read-only (no form, button or write) to prove each resolves on the session.
 const HANDOFF = process.env.PREVIEW_LOGIN_HANDOFF === 'true';
 const LINK_FILE = process.env.PREVIEW_MAGIC_LINK_FILE;
 const LINK_WAIT_MS = Number(process.env.PREVIEW_MAGIC_LINK_WAIT_MS ?? 30 * 60_000);
 const SEND_WAIT_MS = HANDOFF ? 15 * 60_000 : 30_000;
 const NEON_AUTH_HOST = /^[a-z0-9-]+\.neonauth\.[a-z0-9.-]+\.neon\.tech$/;
+const EXPECT_PORTAL = process.env.PREVIEW_EXPECT_PORTAL === 'true';
+const PORTAL_PATH = /^\/(?:(?:en|zh)\/)?portal(?:\/|$)/;
+const LOGIN_PATH = /^\/(?:(?:en|zh)\/)?member-login(?:\/|$)/;
+// Read-only member routes behind UC22-21/22/23/29/30/35/36/39. GET only.
+const PORTAL_ROUTES = [
+  '/portal',
+  '/portal/applications',
+  '/portal/profile',
+  '/portal/company',
+  '/portal/company/seats',
+  '/portal/directory',
+  '/portal/events',
+  '/portal/events/my',
+  '/portal/documents',
+  '/portal/billing',
+  '/zh/portal',
+] as const;
+
+type Landing = 'pending' | 'portal' | 'needs-profile';
+
+async function landing(candidate: Page, origin: string): Promise<Landing> {
+  let url: URL;
+  try {
+    url = new URL(candidate.url());
+  } catch {
+    return 'pending';
+  }
+  if (url.origin !== origin || url.searchParams.has('neon_auth_session_verifier')) return 'pending';
+  if (PORTAL_PATH.test(url.pathname)) return 'portal';
+  if (LOGIN_PATH.test(url.pathname) && (await candidate.getByTestId('profile-provision-form').isVisible().catch(() => false))) {
+    return 'needs-profile';
+  }
+  return 'pending';
+}
 
 test.use({storageState: {cookies: [], origins: []}, trace: 'off', video: 'off', screenshot: 'off', headless: !HANDOFF});
 test.setTimeout(LINK_WAIT_MS + SEND_WAIT_MS + 120_000);
@@ -29,7 +69,7 @@ function loginEmail(): string | null {
   return value || null;
 }
 
-test('member magic link on Preview: send, open in the same context, session sticks (/portal or create-profile)', async ({page, baseURL, previewOidc}) => {
+test('member magic link on Preview: send, open in the same context, session sticks (/portal or create-profile)', async ({page, context, baseURL, previewOidc}) => {
   test.skip(!previewOidc, 'Set PLAYWRIGHT_PREVIEW_OIDC=true with a Preview PLAYWRIGHT_BASE_URL');
   const email = loginEmail();
   test.skip(!email && !HANDOFF, 'Set PREVIEW_LOGIN_EMAIL_FILE or PREVIEW_LOGIN_HANDOFF=true');
@@ -58,69 +98,78 @@ test('member magic link on Preview: send, open in the same context, session stic
   await expect(page.getByRole('status')).toBeVisible();
   console.log('[send] ?sent=1 reached on the Preview origin');
 
-  // 3. Wait for the link: a file write, or a navigation typed into this window.
+  // 3. Wait for the link: a file write, or a paste into ANY tab of this window.
   const deadline = Date.now() + LINK_WAIT_MS;
-  let opened = false;
-  while (Date.now() < deadline) {
-    // An address-bar paste shows up as a navigation away from the ?sent=1 screen: the Neon Auth host,
-    // a verifier callback, /portal, or the verified create-profile form.
-    const current = new URL(page.url());
-    if (
-      NEON_AUTH_HOST.test(current.hostname) ||
-      current.searchParams.has('neon_auth_session_verifier') ||
-      current.pathname.replace(/^\/(en|zh)(?=\/)/, '').startsWith('/portal') ||
-      (await page.getByTestId('profile-provision-form').isVisible().catch(() => false))
-    ) {
-      opened = true;
-      break;
+  let active: Page | null = null;
+  let fileUsed = false;
+  while (Date.now() < deadline && !active) {
+    for (const candidate of context.pages()) {
+      let current: URL | null = null;
+      try {
+        current = new URL(candidate.url());
+      } catch {
+        current = null;
+      }
+      if (
+        (current && (NEON_AUTH_HOST.test(current.hostname) || current.searchParams.has('neon_auth_session_verifier'))) ||
+        (await landing(candidate, origin)) !== 'pending'
+      ) {
+        active = candidate;
+        break;
+      }
     }
-    if (LINK_FILE && existsSync(LINK_FILE) && readFileSync(LINK_FILE, 'utf8').trim()) {
-      const link = allowedMagicLink(readFileSync(LINK_FILE, 'utf8'), origin);
-      await page.goto(link);
-      opened = true;
+    if (active) break;
+    if (!fileUsed && LINK_FILE && existsSync(LINK_FILE) && readFileSync(LINK_FILE, 'utf8').trim()) {
+      fileUsed = true;
+      await page.goto(allowedMagicLink(readFileSync(LINK_FILE, 'utf8'), origin));
+      active = page;
       break;
     }
     await page.waitForTimeout(2_000);
   }
-  expect(opened, 'no magic link was provided before the wait expired').toBe(true);
+  expect(active, 'no magic link was provided before the wait expired').not.toBeNull();
+  const memberPage = active!;
 
-  // 4. The verifier exchange must leave a session, not a signed-out /member-login. Two outcomes count:
+  // 4. The verifier exchange must leave a session, not a signed-out /member-login. Two outcomes count
+  //    unless PREVIEW_EXPECT_PORTAL=true:
   //    (a) "portal": the member has a profile -> sticky /portal;
   //    (b) "needs-profile": verified identity without a Preview profile -> /member-login renders the
   //        provision form ("Create member profile"). The form is never submitted here (no profile write).
-  const portalPath = /^\/(?:(?:en|zh)\/)?portal(?:\/|$)/;
-  const loginPath = /^\/(?:(?:en|zh)\/)?member-login(?:\/|$)/;
-  const provisionForm = page.getByTestId('profile-provision-form');
-  await expect
-    .poll(
-      async () => {
-        const url = new URL(page.url());
-        if (url.origin !== origin || url.searchParams.has('neon_auth_session_verifier')) return 'pending';
-        if (portalPath.test(url.pathname)) return 'portal';
-        if (loginPath.test(url.pathname) && (await provisionForm.isVisible().catch(() => false))) return 'needs-profile';
-        return 'pending';
-      },
-      {timeout: 60_000, intervals: [1_000]},
-    )
-    .not.toBe('pending');
-  const landed = new URL(page.url());
+  await expect.poll(() => landing(memberPage, origin), {timeout: 60_000, intervals: [1_000]}).not.toBe('pending');
+  const landed = new URL(memberPage.url());
   expect(landed.searchParams.has('neon_auth_session_verifier')).toBe(false);
-  const outcome = portalPath.test(landed.pathname) ? 'portal' : 'needs-profile';
+  const outcome = await landing(memberPage, origin);
   console.log(`[open] landed on ${landed.pathname} (${outcome})`);
+  if (EXPECT_PORTAL) expect(outcome, 'NEEDS_PROFILE: this member has no Preview profiles row').toBe('portal');
 
   if (outcome === 'portal') {
-    const again = await page.goto('/portal');
+    const again = await memberPage.goto('/portal');
     expect(again?.status()).toBe(200);
-    expect(new URL(page.url()).pathname).toMatch(portalPath);
-    console.log(`[sticky] /portal reload stays on ${new URL(page.url()).pathname}`);
+    expect(new URL(memberPage.url()).pathname).toMatch(PORTAL_PATH);
+    console.log(`[sticky] /portal reload stays on ${new URL(memberPage.url()).pathname}`);
+    if (!EXPECT_PORTAL) return;
+
+    // 5. Read-only route smoke: each member route resolves on this session (no bounce to login,
+    //    no 5xx). Records the dashboard state without reading or logging any member data.
+    const noMembership = await memberPage.getByText(/no current membership|沒有可使用的會籍/).count();
+    console.log(`[dashboard] ${noMembership > 0 ? 'membership-unavailable (no Preview membership rows)' : 'membership dashboard'}`);
+    for (const route of PORTAL_ROUTES) {
+      const res = await memberPage.goto(route);
+      const path = new URL(memberPage.url()).pathname;
+      const status = res?.status() ?? 0;
+      console.log(`[route] ${route} -> ${status} ${path}`);
+      expect(status, `${route} returned ${status}`).toBeLessThan(500);
+      expect(path, `${route} bounced to login`).not.toMatch(LOGIN_PATH);
+      expect(path).toMatch(PORTAL_PATH);
+    }
     return;
   }
 
   // Session sticks for a verified-no-profile identity: a fresh /member-login load still resolves
   // "needs-profile" (provision form shown, signed-out email field absent).
-  const again = await page.goto('/member-login');
+  const again = await memberPage.goto('/member-login');
   expect(again?.status()).toBe(200);
-  await expect(provisionForm).toBeVisible();
-  await expect(page.locator('#member-login-email')).toHaveCount(0);
+  await expect(memberPage.getByTestId('profile-provision-form')).toBeVisible();
+  await expect(memberPage.locator('#member-login-email')).toHaveCount(0);
   console.log('[sticky] /member-login reload still shows the verified create-member-profile state');
 });
