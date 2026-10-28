@@ -9,7 +9,7 @@ import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, contacts, memberImportRows, memberImportRuns, memberOperationsMetadata, profiles} from "@/lib/db/server-schema";
 
 function rows(result: unknown): unknown[] {if (Array.isArray(result)) return result; if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows; return [];}
-const importRowSchema = z.object({id: z.string().uuid(), rowNumber: z.coerce.number().int(), status: z.enum(["create", "update"]), values: z.record(z.unknown()), targetId: z.string().nullable(), expectedVersion: z.string().nullable()});
+const importRowSchema = z.object({id: z.string().uuid(), rowNumber: z.coerce.number().int(), status: z.enum(["create", "update"]), values: z.record(z.string(), z.unknown()), targetId: z.string().nullable(), expectedVersion: z.string().nullable()});
 /** Pins the row decision, mapping-derived payload and original profile CAS version. */
 function importRowPreviewVersion(row: z.infer<typeof importRowSchema>): string {
   return batchPreviewDigest({rowNumber: row.rowNumber, status: row.status, values: row.values, targetId: row.targetId, profileVersion: row.expectedVersion});
