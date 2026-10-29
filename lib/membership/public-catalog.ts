@@ -113,6 +113,9 @@ export function buildPublicMembershipCatalog(input: Readonly<{
       continue;
     }
 
+    // Individual and Platinum are priced from the ops list, not this legacy catalog.
+    if (code === "individual" || code === "platinum") continue;
+
     const tier = paidTier(code, row, input.priceIds[code], money);
     if (tier) tiers.push(tier);
   }

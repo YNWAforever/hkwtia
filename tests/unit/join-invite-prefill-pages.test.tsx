@@ -75,19 +75,13 @@ describe("join pages with an invite prefill", () => {
     expect(valueOf(html, "whatsappNumber")).toBe("+85291234567");
   });
 
-  it("collects contacts and a business registration on the corporate track", async () => {
+  it("does not ask for a business registration before corporate checkout", async () => {
     const html = renderToStaticMarkup(await CompanyPage({
       params: Promise.resolve({locale: "en"}),
       searchParams: Promise.resolve({plan: "corporate", application: APPLICATION_ID}),
     }));
-    expect(html).toContain('name="businessRegistration"');
-    expect(html).toContain('name="primaryEmail"');
-    expect(html).toContain('name="secondaryName"');
-    expect(html).toContain('name="tier"');
-    expect(html).toContain('value="corporate"');
-    expect(html).toContain("localized:organisation.intro");
-    const startup = await companyHtml();
-    expect(startup).not.toContain('name="businessRegistration"');
+    expect(html).not.toContain('name="businessRegistration"');
+    expect(html).toContain('name="legalName"');
   });
 
   it("fills legal name and company display name from the organisation", async () => {

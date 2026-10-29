@@ -26,6 +26,10 @@ export const ENTITLEMENTS: Readonly<Record<MembershipPlanCode, Entitlements>> = 
   startup: Object.freeze({directoryListing: "profile", publishEventsPerQuarter: 2, showcaseListings: 1, whatsappSupport: "standard", memberTools: "included", coBrandedEvents: false, aiWriterRunsPerMonth: 20}),
   corporate: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "priority", memberTools: "included", coBrandedEvents: false, aiWriterRunsPerMonth: 100}),
   patron: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "dedicated", memberTools: "included", coBrandedEvents: true, aiWriterRunsPerMonth: Number.POSITIVE_INFINITY}),
+  // Paid personal tier. Benefits match the old Startup seat until Willy sets a separate list.
+  individual: Object.freeze({directoryListing: "profile", publishEventsPerQuarter: 2, showcaseListings: 1, whatsappSupport: "standard", memberTools: "included", coBrandedEvents: false, aiWriterRunsPerMonth: 20}),
+  // Top company tier. Benefits match the old Patron seat, with Corporate's seat count.
+  platinum: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "dedicated", memberTools: "included", coBrandedEvents: true, aiWriterRunsPerMonth: Number.POSITIVE_INFINITY}),
 });
 
 /** Current policy includes past_due and cancel_at_period_end; changing it needs association approval. */

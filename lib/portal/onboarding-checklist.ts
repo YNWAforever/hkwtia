@@ -1,6 +1,7 @@
-import {MEMBERSHIP_KIT_LINKS} from "@/config/membership-journey";
+import {MEMBERSHIP_KIT_LINKS, planCollectsCompany} from "@/config/membership-journey";
+import type {MembershipPlanCode} from "@/lib/membership/constants";
 
-export type OnboardingChecklistId = "profile" | "welcomeKit" | "associationKit" | "whatsapp" | "firstEvent";
+export type OnboardingChecklistId = "profile" | "welcomeKit" | "associationKit" | "whatsapp" | "firstEvent" | "registration";
 
 export type OnboardingChecklistItem = Readonly<{
   id: OnboardingChecklistId;
@@ -17,12 +18,18 @@ export type OnboardingChecklistItem = Readonly<{
 export function deriveOnboardingChecklist(input: Readonly<{
   profileComplete: boolean;
   whatsappOptIn: boolean;
+  planCode?: MembershipPlanCode;
 }>): readonly OnboardingChecklistItem[] {
-  return [
+  const items: OnboardingChecklistItem[] = [
     {id: "profile", done: input.profileComplete, href: "/portal/profile", external: false},
     {id: "welcomeKit", done: false, href: MEMBERSHIP_KIT_LINKS.welcomeKit, external: true},
     {id: "associationKit", done: false, href: MEMBERSHIP_KIT_LINKS.associationKit, external: true},
     {id: "whatsapp", done: input.whatsappOptIn, href: "/portal/profile", external: false},
     {id: "firstEvent", done: false, href: "/events", external: false},
   ];
+  // Optional after payment. It does not block checkout.
+  if (input.planCode && planCollectsCompany(input.planCode) && input.planCode !== "startup") {
+    items.push({id: "registration", done: false, href: "/portal/company", external: false});
+  }
+  return items;
 }

@@ -254,22 +254,22 @@ describe("membership join orchestration", () => {
     expect(deps.inspect().memberships).toMatchObject([{planCode: "startup", status: "pending_payment", billingInterval: "annual"}]);
   });
 
-  it("holds a new corporate application for review without opening checkout", async () => {
+  it("sends a new corporate application to checkout", async () => {
     const deps = harness();
     const result = await completeApplication(
       actor,
       {
         plan: "corporate",
-        billingInterval: "none",
+        billingInterval: "annual",
         profile: {displayName: "Corporate Member"},
         company: {id: "company-a", legalName: "Corporate Ltd", displayName: "Corporate"},
       },
       deps,
     );
 
-    expect(result.next).toBe("review");
-    expect(result.checkout).toBeUndefined();
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "corporate", status: "pending_review", billingInterval: "none"}]);
+    expect(result.next).toBe("checkout");
+    expect(result.checkout).toMatchObject({kind: "membership_checkout", planCode: "corporate"});
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "corporate", status: "pending_payment", billingInterval: "annual"}]);
   });
 
   it("sends patron applications to review without creating a charge", async () => {

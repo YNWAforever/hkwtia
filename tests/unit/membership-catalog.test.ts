@@ -21,9 +21,14 @@ describe("resolveMembershipOption", () => {
     expect(option.available).toBe(false);
   });
 
-  it("resolves a new Corporate application to interval none without a Stripe price", () => {
-    const option = resolveMembershipOption("corporate", "none", {stripeStartupPriceId: "", stripeCorporatePriceId: ""});
-    expect(option).toEqual({planCode: "corporate", billingInterval: "none", priceReference: null, available: true});
+  it("fails closed for Corporate interval none because Corporate pays annually", () => {
+    const option = resolveMembershipOption("corporate", "none", {stripeStartupPriceId: "", stripeCorporatePriceId: "price_corporate_annual"});
+    expect(option.available).toBe(false);
+  });
+
+  it("fails closed for Individual and Platinum until their price ids are set", () => {
+    expect(resolveMembershipOption("individual", "annual", {stripeStartupPriceId: "price_startup_annual", stripeCorporatePriceId: "price_corporate_annual"}).available).toBe(false);
+    expect(resolveMembershipOption("platinum", "annual", {stripeStartupPriceId: "price_startup_annual", stripeCorporatePriceId: "price_corporate_annual", stripePlatinumPriceId: "price_platinum"}).available).toBe(true);
   });
 
   it("still resolves Corporate annual when the existing Stripe price is configured", () => {

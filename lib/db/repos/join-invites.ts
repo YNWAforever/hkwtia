@@ -43,10 +43,12 @@ export type InvitePrefill = Readonly<{
 }>;
 
 const uuidSchema = z.string().uuid();
-// `patron` is invitation-by-review elsewhere; a lead invite never offers it.
+// New lead invites are Individual, Corporate, or Platinum (pay first). Patron is a
+// Willy-only exception and is not minted here. Legacy community and startup
+// links still open; they are not created by this schema.
 const createInputSchema = z.object({
   contactId: z.string().uuid(),
-  planCode: z.enum(["community", "startup", "corporate"]),
+  planCode: z.enum(["individual", "corporate", "platinum"]),
 }).strict();
 const consumeInputSchema = z.object({
   inviteId: z.string().uuid(),

@@ -71,11 +71,11 @@ describe("JoinPage portal continuation auth", () => {
     const previous = process.env.AUTH_GOOGLE_ENABLED;
     process.env.AUTH_GOOGLE_ENABLED = "true";
     try {
-      render(await JoinPage(props("zh-HK", {plan: "startup", application})));
+      render(await JoinPage(props("zh-HK", {plan: "individual", application})));
       fireEvent.click(screen.getByRole("button", {name: "localized:google"}));
       await waitFor(() => expect(social).toHaveBeenCalledWith({
         provider: "google",
-        callbackURL: `/zh/member-login?next=${encodeURIComponent(`/join?plan=startup&application=${application}`)}`,
+        callbackURL: `/zh/member-login?next=${encodeURIComponent(`/join?plan=individual&application=${application}`)}`,
       }));
     } finally {
       if (previous === undefined) delete process.env.AUTH_GOOGLE_ENABLED;
@@ -84,15 +84,15 @@ describe("JoinPage portal continuation auth", () => {
   });
   it("sends a verified provider subject without a profile to onboarding with the selected plan", async () => {
     state.loginResolution = {kind: "needs-profile"};
-    await expect(JoinPage(props("zh-HK", {plan: "startup"}))).rejects.toThrow("NEXT_REDIRECT");
-    expect(state.redirectUrl).toBe("/zh/member-login?next=%2Fjoin%3Fplan%3Dstartup");
+    await expect(JoinPage(props("zh-HK", {plan: "individual"}))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe("/zh/member-login?next=%2Fjoin%3Fplan%3Dindividual");
   });
   it("renders the plan chooser on a bare /join and the unavailable state for a malformed plan", async () => {
     const chooser = renderToStaticMarkup(await JoinPage(props("zh-HK", {})));
     expect(chooser).toContain("localized:choosePlanTitle");
-    expect(chooser).toContain('href="/zh/join?plan=startup"');
-    expect(chooser).toContain('href="/zh/join?plan=patron"');
-    expect(chooser).toContain("localized:tracks.organisation.title");
+    expect(chooser).toContain('href="/zh/join?plan=individual"');
+    expect(chooser).toContain('href="/zh/join?plan=corporate"');
+    expect(chooser).toContain('href="/zh/join?plan=platinum"');
     expect(chooser).toContain('data-active="plan"');
 
     const malformed = renderToStaticMarkup(await JoinPage(props("en", {plan: "gold"})));
@@ -102,7 +102,7 @@ describe("JoinPage portal continuation auth", () => {
 
   it("renders a signed-in plan entry without creating an application during GET", async () => {
     state.actor = {kind: "member", userId: "user-a"};
-    const markup = renderToStaticMarkup(await JoinPage(props("en", {plan: "startup"})));
+    const markup = renderToStaticMarkup(await JoinPage(props("en", {plan: "individual"})));
     expect(state.startJoinCalls).toHaveLength(0);
     expect(state.redirectUrl).toBeNull();
     expect(markup).toContain("localized:resume.start");
@@ -111,13 +111,13 @@ describe("JoinPage portal continuation auth", () => {
   it("shows owned resumable state and keeps the explicit new path separate", async () => {
     state.actor = {kind: "member", userId: "user-a"};
     state.ownedApplications = [{id: "application-a", planCode: "startup", status: "pending_payment", currentStep: "profile", updatedAt: new Date("2026-09-27T00:00:00Z")}];
-    const markup = renderToStaticMarkup(await JoinPage(props("en", {plan: "startup", application: "application-a"})));
+    const markup = renderToStaticMarkup(await JoinPage(props("en", {plan: "individual", application: "application-a"})));
     expect(markup).toContain("localized:resume.steps.checkout");
     expect(markup).toContain("localized:resume.lastSaved");
     expect(markup).toContain('name="applicationId"');
     expect(markup).toContain('name="intent"');
     expect(state.startJoinCalls).toHaveLength(0);
-    await expect(JoinPage(props("en", {plan: "startup", application: "foreign"}))).rejects.toThrow("NEXT_NOT_FOUND");
+    await expect(JoinPage(props("en", {plan: "individual", application: "foreign"}))).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
   it("redirects an authenticated no-plan continuation directly to the portal", async () => {

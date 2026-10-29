@@ -129,7 +129,7 @@ describe("join review fixes", () => {
     const deps = durableHarness();
 
     await expect(
-      completeApplication(actor, {plan: "corporate", billingInterval: "none", profile: {displayName: "A"}, company: null}, deps),
+      completeApplication(actor, {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: null}, deps),
     ).rejects.toThrow("COMPANY_REQUIRED");
   });
 
@@ -139,14 +139,14 @@ describe("join review fixes", () => {
     await expect(
       completeApplication(
         actor,
-        {plan: "corporate", billingInterval: "none", profile: {displayName: "A"}, company: {id: "company-b", legalName: "B", displayName: "B"}},
+        {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-b", legalName: "B", displayName: "B"}},
         deps,
       ),
     ).rejects.toThrow("FORBIDDEN");
 
     const accepted = await completeApplication(
       actor,
-      {plan: "corporate", billingInterval: "none", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
+      {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
       deps,
     );
     const application = deps.inspect().applications.get(accepted.applicationId);

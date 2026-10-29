@@ -28,8 +28,10 @@ function lookup(key: string): string {
   const messages: Record<string, Record<string, string>> = {
     en: {
       unavailable: "Membership is currently unavailable",
-      "tiers.community.name": "Community",
-      "tiers.community.description": "Community description",
+      "tiers.individual.name": "Individual",
+      "tiers.corporate.name": "Corporate",
+      "tiers.platinum.name": "Platinum",
+      "tiers.individual.description": "Individual description",
       "priceLabels.free": "Free",
       "priceLabels.review": "Contact us",
       "cadenceLabels.annual": "per year",
@@ -39,8 +41,10 @@ function lookup(key: string): string {
     },
     "zh-HK": {
       unavailable: "會員計劃暫時未能提供",
-      "tiers.community.name": "社群",
-      "tiers.community.description": "社群簡介",
+      "tiers.individual.name": "個人",
+      "tiers.corporate.name": "企業",
+      "tiers.platinum.name": "白金",
+      "tiers.individual.description": "個人簡介",
       "priceLabels.free": "免費",
       "priceLabels.review": "聯絡我們",
       "cadenceLabels.annual": "每年",
@@ -104,18 +108,19 @@ describe("repository-backed Membership page", () => {
   });
 
   it.each([
-    ["en", "Membership is currently unavailable"],
-    ["zh-HK", "會員計劃暫時未能提供"],
+    ["en", "Individual"],
+    ["zh-HK", "個人"],
   ] as const)(
-    "shows one localized unavailable state for no valid %s tier",
-    async (locale, message) => {
+    "shows the ops tiers even when the %s catalog read is empty",
+    async (locale, name) => {
       const html = await renderMembership([], locale);
-
-      expect(html.match(new RegExp(message, "g"))).toHaveLength(1);
+      expect(html).toContain(name);
+      expect(html).toContain('href="/join?plan=individual"');
+      expect(html).not.toContain(locale === "en" ? "Membership is currently unavailable" : "會員計劃暫時未能提供");
     },
   );
 
-  it("uses the same unavailable state when the repository read fails", async () => {
+  it("still shows the ops tiers when the repository read fails", async () => {
     membershipPlans.list.mockRejectedValue(
       new Error("database private payload"),
     );
@@ -126,7 +131,9 @@ describe("repository-backed Membership page", () => {
       ),
     );
 
-    expect(html.match(/Membership is currently unavailable/g)).toHaveLength(1);
+    expect(html).toContain("Individual");
+    expect(html).toContain('href="/join?plan=corporate"');
+    expect(html).not.toContain("database private payload");
   });
 
   it("renders answer-bearing FAQ entries and support links for unresolved terms", async () => {
@@ -143,9 +150,9 @@ describe("repository-backed Membership page", () => {
     const html = await renderMembership([community]);
 
     expect(membershipPlans.list).toHaveBeenCalledOnce();
-    expect(html).toContain("Community");
-    expect(html).toContain("Free");
-    expect(html).toContain('href="/join?plan=community"');
+    expect(html).toContain("Individual");
+    expect(html).toContain("HK$500");
+    expect(html).toContain('href="/join?plan=individual"');
     expect(html).not.toContain("Membership is currently unavailable");
   });
 });

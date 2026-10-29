@@ -4,7 +4,7 @@ import type {AppLocale} from "@/i18n/routing";
 import type {AtRiskMember} from "@/lib/admin/at-risk";
 import {localizedPath} from "@/lib/urls";
 
-type PlanCode = "community" | "startup" | "corporate" | "patron";
+type PlanCode = "community" | "startup" | "corporate" | "patron" | "individual" | "platinum";
 export type AtRiskTableLabels = Readonly<{
   caption: string; empty: string; name: string; company: string; tier: string; status: string;
   score: string; trend: string; renewal: string; evidence: string; actions: string; unavailable: string;

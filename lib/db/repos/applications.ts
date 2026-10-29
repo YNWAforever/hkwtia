@@ -20,6 +20,7 @@ import type { Actor } from "@/lib/membership/lifecycle";
 import {
   companyMembers,
   membershipApplications as membershipApplicationsTable,
+  membershipPlans,
   type MembershipApplication,
 } from "@/lib/db/server-schema";
 import { forbidden, getDb, requireMember } from "@/lib/db/repos/common";
@@ -214,6 +215,18 @@ export const applicationsRepository = {
   ): Promise<MembershipApplication> {
     requireMember(actor);
     const db = await getDb();
+    // The enum values land in 0069, which must be committed before this insert can succeed.
+    // The plan row cannot be inserted in that same migration transaction.
+    if (input.planCode === "individual" || input.planCode === "platinum") {
+      await db.insert(membershipPlans).values({
+        code: input.planCode,
+        audience: input.planCode === "individual" ? "individual" : "platinum",
+        billingBehavior: "checkout",
+        seatAllowance: input.planCode === "individual" ? 1 : 25,
+        annualPriceHkd: input.planCode === "individual" ? 500 : 4800,
+        active: true,
+      }).onConflictDoNothing();
+    }
     const rows = await db
       .insert(membershipApplicationsTable)
       .values({ ...input, applicantUserId: actor.profileId })

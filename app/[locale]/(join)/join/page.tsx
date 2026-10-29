@@ -19,7 +19,7 @@ import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {buildBreadcrumbData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
-import {MEMBERSHIP_TRACKS, planCollectsCompany} from "@/config/membership-journey";
+import {LEGACY_JOIN_REDIRECT, planCollectsCompany} from "@/config/membership-journey";
 import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
 import {requestMagicLink, resumeJoinAction} from "./actions";
@@ -52,7 +52,18 @@ export default async function JoinPage({params, searchParams}: Props) {
   // Five states render below -- chooser, invalid plan, two magic-link forms and the signed-in
   // status -- but every one is /join at the same canonical URL, so each carries the same trail.
   const trail = <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/join", tRoot))} />;
-  const plan = selectedPlan(queryValue(query.plan));
+  const rawPlan = queryValue(query.plan);
+  if (!queryValue(query.application) && (rawPlan === "community" || rawPlan === "startup" || rawPlan === "patron")) {
+    const nextPlan = LEGACY_JOIN_REDIRECT[rawPlan];
+    const params = new URLSearchParams();
+    if (nextPlan) params.set("plan", nextPlan);
+    for (const key of ["application", "next", "sent"] as const) {
+      const value = queryValue(query[key]);
+      if (value) params.set(key, value);
+    }
+    redirect(`${localizedPath(locale, "/join")}?${params.toString()}`);
+  }
+  const plan = selectedPlan(rawPlan);
   const continuation = parseJoinContinuation(queryValue(query.next), locale);
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const joinQuery = new URLSearchParams();
@@ -91,25 +102,18 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active="plan" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>
-        <div className="mt-8 space-y-10">
-          {(["individual", "organisation"] as const).map((track) => (
-            <div key={track}>
-              <h2 className="font-serif text-2xl font-semibold">{t(`tracks.${track}.title`)}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{t(`tracks.${track}.copy`)}</p>
-              <ul className="mt-4 grid gap-4 sm:grid-cols-2">
-                {planChooserItems(locale).filter((item) => (MEMBERSHIP_TRACKS[track] as readonly string[]).includes(item.code)).map((item) => (
-                  <li className="rounded-lg border border-border p-5" key={item.code}>
-                    <h3 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
-                    <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
-                      {t("choosePlanAction", {plan: t(`plans.${item.code}`)})}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+          {planChooserItems(locale).map((item) => (
+            <li className="rounded-lg border border-border p-5" key={item.code}>
+              <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>
+              <p className="mt-2 text-sm font-medium">{t("choosePlanPrice", {amount: new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0}).format(item.annualPriceHkd)})}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
+              <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
+                {t("choosePlanAction", {plan: t(`plans.${item.code}`)})}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
         <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("choosePlanCompare")}</Link>
         {trail}
       </section>

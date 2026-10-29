@@ -114,19 +114,6 @@ describe("production-mode onboarding without unrelated billing secrets", () => {
     }]);
   });
 
-  it("holds a new corporate application for review without Stripe configuration", async () => {
-    const state = harness();
-    const result = await completeApplication(actor, {
-      plan: "corporate",
-      billingInterval: "none",
-      profile: {displayName: "Synthetic Member"},
-      company: {id: "synthetic-company", legalName: "Synthetic Company", displayName: "Synthetic Company"},
-    }, state.dependencies);
-    expect(result.next).toBe("review");
-    expect(result.checkout).toBeUndefined();
-    expect(state.memberships[0]).toMatchObject({status: "pending_review", billingInterval: "none", planCode: "corporate"});
-  });
-
   it.each(["community", "patron"])("rejects a paid interval for %s before any write", async (plan) => {
     const state = harness();
     await expect(completeApplication(actor, {
@@ -137,18 +124,7 @@ describe("production-mode onboarding without unrelated billing secrets", () => {
     expect(state.memberships).toHaveLength(0);
   });
 
-  it("rejects an annual interval for corporate before any write", async () => {
-    const state = harness();
-    await expect(completeApplication(actor, {
-      plan: "corporate", billingInterval: "annual", profile: {displayName: "Synthetic Member"},
-      company: {id: "synthetic-company", legalName: "Synthetic Company", displayName: "Synthetic Company"},
-    }, state.dependencies)).rejects.toThrow("UNSUPPORTED_BILLING_INTERVAL");
-    expect(state.profiles.size).toBe(0);
-    expect(state.applications.size).toBe(0);
-    expect(state.memberships).toHaveLength(0);
-  });
-
-  it.each(["startup"])("requires billing configuration for %s before writes", async (plan) => {
+  it.each(["startup", "corporate", "individual", "platinum"] as const)("requires billing configuration for %s before writes", async (plan) => {
     const state = harness();
     await expect(completeApplication(actor, {
       plan, billingInterval: "annual", profile: {displayName: "Synthetic Member"},

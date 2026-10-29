@@ -149,7 +149,7 @@ export default async function PortalPage({params}: Props) {
       }}/> : null}
       {renewalPathForStatus(primaryStatus) ? <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/billing")}>{t("renew.action")}</PrivateLink> : null}
       <OnboardingChecklist
-        items={deriveOnboardingChecklist({profileComplete: onboarding.profileComplete, whatsappOptIn: profile.whatsappOptIn})}
+        items={deriveOnboardingChecklist({profileComplete: onboarding.profileComplete, whatsappOptIn: profile.whatsappOptIn, planCode: membership.planCode})}
         labels={{
           title: t("checklist.title"),
           lead: t("checklist.lead"),
@@ -163,6 +163,7 @@ export default async function PortalPage({params}: Props) {
             associationKit: t("checklist.associationKit"),
             whatsapp: t("checklist.whatsapp"),
             firstEvent: t("checklist.firstEvent"),
+            registration: t("checklist.registration"),
           },
           welcomeKit: t("checklist.welcomeKit"),
           associationKit: t("checklist.associationKit"),

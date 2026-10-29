@@ -250,16 +250,17 @@ export async function completeApplication(
   const input = completeApplicationSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
   const plan = getPlan(input.plan);
-  // New organisation applications are review / interval none even though the
-  // Corporate catalog row stays billingBehavior "checkout" for the Stripe price.
-  // Reject a mismatched interval before billing env or any write.
+  // Pay-first tiers must name the interval the catalog accepts. A mismatch fails
+  // before billing env or any write. Individual and Platinum price ids are optional
+  // and are not part of the production billing contract.
   const outcome = applicationOutcome(plan.code);
   if (input.billingInterval !== outcome.billingInterval) throw new Error("UNSUPPORTED_BILLING_INTERVAL");
-  // Validate (planCode, billingInterval) against the membership catalog before touching
-  // profile, company, application, or membership state -- a missing, duplicated, or
-  // unsupported interval must fail closed before any write.
   const catalogEnvironment = outcome.kind === "checkout"
-    ? billingEnv()
+    ? {
+        ...billingEnv(),
+        stripeIndividualPriceId: process.env.STRIPE_INDIVIDUAL_PRICE_ID ?? "",
+        stripePlatinumPriceId: process.env.STRIPE_PLATINUM_PRICE_ID ?? "",
+      }
     : {stripeStartupPriceId: "", stripeCorporatePriceId: ""};
   const membershipOption = resolveMembershipOption(plan.code, input.billingInterval, catalogEnvironment);
   if (!membershipOption.available) throw new Error("UNSUPPORTED_BILLING_INTERVAL");

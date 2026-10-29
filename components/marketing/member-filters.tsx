@@ -45,7 +45,7 @@ export function MemberFilters({locale, filters, labels}: Readonly<{locale: AppLo
           <label htmlFor="member-plan">{labels.plan}</label>
           <select defaultValue={filters.plan ?? ""} id="member-plan" name="plan">
             <option value="">{labels.anyPlan}</option>
-            {MEMBERSHIP_PLAN_CODES.map((plan) => (
+            {MEMBERSHIP_PLAN_CODES.filter((plan, index, codes) => codes.findIndex((candidate) => labels.plans[candidate] === labels.plans[plan]) === index).map((plan) => (
               <option key={plan} value={plan}>{labels.plans[plan]}</option>
             ))}
           </select>

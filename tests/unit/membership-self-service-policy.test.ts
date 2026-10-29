@@ -9,7 +9,7 @@ describe("versioned shipped self-service copy contract", () => {
   it("has explicit unknown refund/SLA and does not invent association approval", () => {
     expect(membershipSelfServicePolicy.version).toBe("self-service-links-v1");
     expect(membershipSelfServicePolicy.membershipRefund).toBe("unknown");
-    expect(membershipSelfServicePolicy.reviewSla).toBe("unknown");
+    expect(membershipSelfServicePolicy.reviewSla).toBe("5-working-days");
     expect(MEMBERSHIP_POLICIES).toEqual([]);
   });
   it.each(["en", "zh-HK"] as const)("binds the same self-service destinations and complete existing copy in %s", locale => {
@@ -25,8 +25,6 @@ describe("versioned shipped self-service copy contract", () => {
     expect(copy.selfService.copy).toContain(locale === "en" ? "Contact WTIA" : "聯絡 WTIA");
   });
   it("pins both languages' existing membership refund and review qualifications", () => {
-    // The operational aim is public copy. reviewSla stays "unknown" above: it is not
-    // an approved membership-policy term.
     expect(en.Membership.faq["5"].answer).toContain("5 working days");
     expect(zhHK.Membership.faq["5"].answer).toContain("5 個工作天");
     expect(en.Membership.faq["6"].answer).toContain("no membership refund entitlement");

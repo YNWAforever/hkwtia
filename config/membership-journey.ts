@@ -1,30 +1,43 @@
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 
 /**
- * Public onboarding journey. Tier *names* stay Community / Startup / Corporate / Patron.
+ * Public memberships Willy confirmed on 2026-10-29:
+ * Individual HK$500, Corporate HK$1,800, Platinum HK$4,800. All three pay first.
  *
- * Provisional mapping, for Willy to confirm (see the PR mismatch table):
- * - Individual track: Community (free, immediate) and Startup (existing Stripe checkout).
- * - Organisation track: Corporate and Patron. A new application is reviewed before payment.
- *   Ops language "Corporate / Platinum" is not used as a public name here. Patron is the
- *   closest existing review tier; this file does not rename it to Platinum.
+ * Stored plan codes still include the legacy community / startup / patron rows so
+ * existing memberships load. New joins use individual, corporate, and platinum.
+ * Community and Startup are not offered. Patron remains only as a legacy review
+ * exception, and that exception is for Willy alone — not a committee.
  *
- * `lib/membership/plans.ts` still records Corporate `billingBehavior: "checkout"` so the
- * published fee and STRIPE_CORPORATE_PRICE_ID stay valid for renewal and for memberships
- * already waiting on payment. Only *new* organisation applications skip Checkout.
+ * Stripe: Corporate reuses STRIPE_CORPORATE_PRICE_ID. Individual and Platinum need
+ * price ids that do not exist in this repo. Do not create live Stripe products here.
+ * Set STRIPE_INDIVIDUAL_PRICE_ID and STRIPE_PLATINUM_PRICE_ID when those prices exist.
+ * Checkout fails closed until they are set.
  */
-export type MembershipTrack = "individual" | "organisation";
+export const OPS_MEMBERSHIP_TIERS = [
+  {code: "individual", annualPriceHkd: 500, collectsCompany: false, stripeEnv: "STRIPE_INDIVIDUAL_PRICE_ID"},
+  {code: "corporate", annualPriceHkd: 1800, collectsCompany: true, stripeEnv: "STRIPE_CORPORATE_PRICE_ID"},
+  {code: "platinum", annualPriceHkd: 4800, collectsCompany: true, stripeEnv: "STRIPE_PLATINUM_PRICE_ID"},
+] as const;
 
-export const MEMBERSHIP_TRACKS = {
-  individual: ["community", "startup"],
-  organisation: ["corporate", "patron"],
-} as const satisfies Record<MembershipTrack, readonly MembershipPlanCode[]>;
+export type OpsMembershipCode = (typeof OPS_MEMBERSHIP_TIERS)[number]["code"];
 
-export function membershipTrack(plan: MembershipPlanCode): MembershipTrack {
-  return (MEMBERSHIP_TRACKS.organisation as readonly MembershipPlanCode[]).includes(plan)
-    ? "organisation"
-    : "individual";
+export function isOpsMembershipCode(code: string): code is OpsMembershipCode {
+  return OPS_MEMBERSHIP_TIERS.some((tier) => tier.code === code);
 }
+
+export function opsTier(code: OpsMembershipCode) {
+  const tier = OPS_MEMBERSHIP_TIERS.find((item) => item.code === code);
+  if (!tier) throw new Error("INVALID_PLAN_CODE");
+  return tier;
+}
+
+/** Legacy join links keep working, but the public name is the ops tier. */
+export const LEGACY_JOIN_REDIRECT: Readonly<Partial<Record<MembershipPlanCode, OpsMembershipCode>>> = {
+  community: "individual",
+  startup: "individual",
+  patron: "platinum",
+};
 
 export type ApplicationOutcome = Readonly<{
   kind: "free" | "checkout" | "review";
@@ -32,23 +45,32 @@ export type ApplicationOutcome = Readonly<{
   status: "active" | "pending_payment" | "pending_review";
 }>;
 
-/** Outcome for a membership row created by a new application. Existing rows are left alone. */
+/**
+ * New Individual, Corporate, and Platinum memberships pay before they are active.
+ * Community stays free for rows already in flight. Patron stays a review exception
+ * for Willy; the public Platinum tier does not use it.
+ */
 export function applicationOutcome(plan: MembershipPlanCode): ApplicationOutcome {
-  if (membershipTrack(plan) === "organisation") {
-    return {kind: "review", billingInterval: "none", status: "pending_review"};
-  }
   if (plan === "community") return {kind: "free", billingInterval: "none", status: "active"};
+  if (plan === "patron") return {kind: "review", billingInterval: "none", status: "pending_review"};
   return {kind: "checkout", billingInterval: "annual", status: "pending_payment"};
 }
 
-/** Community is a person. Startup, Corporate, and Patron all name a company on the application. */
 export function planCollectsCompany(plan: MembershipPlanCode): boolean {
-  return plan !== "community";
+  if (plan === "individual" || plan === "community") return false;
+  return true;
+}
+
+export function checkoutPlanCodes(): readonly MembershipPlanCode[] {
+  return ["startup", "corporate", "individual", "platinum"];
+}
+
+export function planUsesCheckout(plan: MembershipPlanCode): boolean {
+  return checkoutPlanCodes().includes(plan);
 }
 
 /**
- * Placeholder URLs. Swap the final Drive and WhatsApp links here only —
- * the member checklist, the confirmation screen, and the kit section all read this object.
+ * Placeholder URLs. They stay here until Daisy supplies the final Drive and WhatsApp links.
  * `example.com` is intentional so a forgotten placeholder cannot point at a real file.
  */
 export const MEMBERSHIP_KIT_LINKS = {
@@ -67,14 +89,16 @@ export const BR_UPLOAD_LIMITS = {
 
 export type BrContentType = (typeof BR_UPLOAD_LIMITS.contentTypes)[number];
 
-/**
- * Lapsed and past-due members go to the existing billing portal. That session
- * already accepts expired and cancelled rows that still have a Stripe customer,
- * and pending Startup checkouts still resume from the same page.
- */
 export function renewalPathForStatus(status: string): "/portal/billing" | null {
   if (status === "past_due" || status === "cancel_at_period_end" || status === "expired" || status === "cancelled") {
     return "/portal/billing";
   }
   return null;
+}
+
+/** Public label for a stored plan code. Legacy codes do not use their old names. */
+export function publicPlanCode(plan: MembershipPlanCode): OpsMembershipCode | "corporate" {
+  if (plan === "corporate") return "corporate";
+  if (plan === "platinum" || plan === "patron") return "platinum";
+  return "individual";
 }

@@ -7,6 +7,7 @@ import {jobsRepository} from "@/lib/db/repos/jobs";
 import {stripeBillingAdapter} from "@/lib/billing/stripe";
 import {processRefundFailure, type RefundFailureCommand} from "@/lib/billing/refund-failure";
 import {processRefundSuccess, type RefundSuccessCommand} from "@/lib/billing/refund-success";
+import {planUsesCheckout} from "@/config/membership-journey";
 import type {Actor, MembershipPlanCode, MembershipStatus} from "@/lib/membership/lifecycle";
 
 const supportedEventTypes = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "invoice.paid", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"] as const;
@@ -23,7 +24,7 @@ export interface TicketProcessor { process(actor: Actor, command: TicketWebhookC
 export interface RefundFailureProcessor { process(actor: Actor, command: RefundFailureCommand): Promise<"processed" | "duplicate">; }
 export interface RefundSuccessProcessor { process(actor: Actor, command: RefundSuccessCommand): Promise<"processed" | "duplicate">; }
 export class WebhookInputError extends Error { readonly code = "INVALID_WEBHOOK_EVENT"; constructor() { super("INVALID_WEBHOOK_EVENT"); this.name = "WebhookInputError"; } }
-const metadataSchema = z.object({membershipId: z.string().uuid(), applicationId: z.string().uuid(), planCode: z.enum(["community", "startup", "corporate", "patron"])}).strict();
+const metadataSchema = z.object({membershipId: z.string().uuid(), applicationId: z.string().uuid(), planCode: z.enum(["community", "startup", "corporate", "patron", "individual", "platinum"])}).strict();
 type StripeObject = Record<string, unknown>;
 function objectValue(value: unknown): StripeObject { if (!value || typeof value !== "object") throw new WebhookInputError(); return value as StripeObject; }
 function stringId(value: unknown): string { if (typeof value === "string" && value.length > 0) return value; if (value && typeof value === "object" && "id" in value && typeof value.id === "string") return value.id; throw new WebhookInputError(); }
@@ -55,7 +56,7 @@ function subscriptionStatus(object: StripeObject): {status: MembershipStatus; ca
 export function normalizeMembershipStripeEvent(event: Stripe.Event): WebhookLifecycleCommand | null {
   if (!(supportedEventTypes as readonly string[]).includes(event.type)) return null;
   const eventType = event.type as SupportedStripeEventType; const object = objectValue(event.data?.object); const metadata = metadataFor(eventType, object);
-  if (metadata.planCode !== "startup" && metadata.planCode !== "corporate") throw new WebhookInputError();
+  if (!planUsesCheckout(metadata.planCode)) throw new WebhookInputError();
   if (isCheckoutActivation(eventType) && object.client_reference_id !== metadata.membershipId) throw new WebhookInputError();
   if (eventType === "checkout.session.completed" && object.payment_status === "unpaid") return null;
   const customerId = stringId(object.customer); const details = subscriptionDetails(object.parent); const subscriptionId = eventType.startsWith("customer.subscription.") ? stringId(object.id) : stringId(object.subscription ?? details?.subscription);

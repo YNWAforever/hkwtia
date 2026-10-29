@@ -3,7 +3,6 @@ import {getJoinDraft} from "@/lib/membership/join-draft";
 import {inviteDefaults} from "@/lib/membership/join-invite-attribution";
 import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
-import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 
@@ -12,7 +11,7 @@ import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
-import {membershipTrack, planCollectsCompany} from "@/config/membership-journey";
+import {planCollectsCompany} from "@/config/membership-journey";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
 
@@ -52,11 +51,8 @@ export default async function CompanyPage({params, searchParams}: Props) {
   const t = await getTranslations("Join");
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,applicationId,locale);
-  const organisation = membershipTrack(plan) === "organisation";
   const action = saveCompany.bind(null, locale, plan, applicationId);
-  const fieldNames = organisation
-    ? ["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description", "primaryName", "primaryEmail", "primaryPhone", "secondaryName", "secondaryEmail", "secondaryPhone", "businessRegistration"]
-    : ["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"];
+  const fieldNames = ["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"];
   const legalName = draft.company?.legalName ?? defaults.legalName ?? "";
   const displayName = draft.company?.displayName ?? defaults.companyDisplayName ?? "";
   // Existing presentation names need confirmation even when they originally matched the legal name.
@@ -67,9 +63,9 @@ export default async function CompanyPage({params, searchParams}: Props) {
     <section className="glass-card p-6 sm:p-10">
       <JoinProgress active="company" labels={labels} showCompany/>
       <h1 className="font-serif text-4xl font-semibold">{t("companyTitle")}</h1>
-      <p className="mt-4 text-muted-foreground">{organisation ? t("organisation.intro") : t("companyDescription")}</p>
+      <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
-        <JoinForm splitBusinessRegistration={organisation} action={action} fieldNames={fieldNames} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
+        <JoinForm action={action} fieldNames={fieldNames} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
           <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={legalName} required/>
           <details className="rounded-md border border-border p-4" open={showOptional}>
             <summary className="min-h-11 cursor-pointer content-center font-medium">{t("optionalCompanyTitle")}</summary>
@@ -83,41 +79,10 @@ export default async function CompanyPage({params, searchParams}: Props) {
               <div><label className="mb-2 block text-sm font-medium" htmlFor="description">{t("fields.description")}</label><textarea aria-describedby="description-error" className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2" id="description" name="description" defaultValue={draft.company?.description??""}/></div>
             </div>
           </details>
-          {organisation ? <OrganisationFields locale={locale} plan={plan} primaryName={draft.profile?.displayName ?? ""} primaryEmail={draft.profile?.email ?? ""} primaryPhone={draft.profile?.phone ?? ""} t={t}/> : null}
           <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>
     </section>
-  );
-}
-
-function OrganisationFields({locale, plan, primaryName, primaryEmail, primaryPhone, t}: {
-  locale: AppLocale;
-  plan: PlanCode;
-  primaryName: string;
-  primaryEmail: string;
-  primaryPhone: string;
-  t: Awaited<ReturnType<typeof getTranslations>>;
-}) {
-  return (
-    <div className="space-y-5">
-      <input name="tier" type="hidden" value={plan}/>
-      <p className="text-sm font-medium">{t("organisation.tierValue", {tier: t(`plans.${plan}`)})}</p>
-      <Link className="text-link" href={localizedPath(locale, "/join")}>{t("organisation.changeTier")}</Link>
-      <h2 className="font-serif text-2xl font-semibold">{t("organisation.primaryTitle")}</h2>
-      <Field autoComplete="name" label={t("organisation.fields.primaryName")} name="primaryName" defaultValue={primaryName} required/>
-      <Field autoComplete="email" label={t("organisation.fields.primaryEmail")} name="primaryEmail" defaultValue={primaryEmail} required type="email"/>
-      <Field autoComplete="tel" label={t("organisation.fields.primaryPhone")} name="primaryPhone" defaultValue={primaryPhone} type="tel"/>
-      <h2 className="font-serif text-2xl font-semibold">{t("organisation.secondaryTitle")}</h2>
-      <Field autoComplete="name" label={t("organisation.fields.secondaryName")} name="secondaryName" required/>
-      <Field autoComplete="email" label={t("organisation.fields.secondaryEmail")} name="secondaryEmail" required type="email"/>
-      <Field autoComplete="tel" label={t("organisation.fields.secondaryPhone")} name="secondaryPhone" type="tel"/>
-      <div>
-        <label className="mb-2 block text-sm font-medium" htmlFor="businessRegistration">{t("organisation.fields.br")}</label>
-        <input accept="application/pdf,image/jpeg,image/png" aria-describedby="businessRegistration-error" className="min-h-11 w-full" id="businessRegistration" name="businessRegistration" required type="file"/>
-        <p className="mt-2 text-sm text-muted-foreground" id="businessRegistration-hint">{t("organisation.brHint")}</p>
-      </div>
-    </div>
   );
 }
 

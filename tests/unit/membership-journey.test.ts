@@ -2,9 +2,8 @@ import {describe, expect, it} from "vitest";
 
 import {
   MEMBERSHIP_KIT_LINKS,
-  MEMBERSHIP_TRACKS,
+  OPS_MEMBERSHIP_TIERS,
   applicationOutcome,
-  membershipTrack,
   planCollectsCompany,
   renewalPathForStatus,
 } from "@/config/membership-journey";
@@ -12,17 +11,19 @@ import {deriveOnboardingChecklist} from "@/lib/portal/onboarding-checklist";
 import {directoryCardModel} from "@/lib/members/profile-hooks";
 
 describe("membership onboarding journey", () => {
-  it("keeps the four tier names and maps them onto two tracks", () => {
-    expect(MEMBERSHIP_TRACKS.individual).toEqual(["community", "startup"]);
-    expect(MEMBERSHIP_TRACKS.organisation).toEqual(["corporate", "patron"]);
-    expect(membershipTrack("startup")).toBe("individual");
-    expect(membershipTrack("patron")).toBe("organisation");
+  it("offers Individual, Corporate, and Platinum at the ops prices", () => {
+    expect(OPS_MEMBERSHIP_TIERS.map((tier) => [tier.code, tier.annualPriceHkd])).toEqual([
+      ["individual", 500],
+      ["corporate", 1800],
+      ["platinum", 4800],
+    ]);
   });
 
-  it("sends individual paid plans to the existing checkout and organisation plans to review", () => {
+  it("sends the ops tiers to checkout and keeps only the legacy patron exception on review", () => {
+    expect(applicationOutcome("individual")).toEqual({kind: "checkout", billingInterval: "annual", status: "pending_payment"});
+    expect(applicationOutcome("corporate")).toEqual({kind: "checkout", billingInterval: "annual", status: "pending_payment"});
+    expect(applicationOutcome("platinum")).toEqual({kind: "checkout", billingInterval: "annual", status: "pending_payment"});
     expect(applicationOutcome("community")).toEqual({kind: "free", billingInterval: "none", status: "active"});
-    expect(applicationOutcome("startup")).toEqual({kind: "checkout", billingInterval: "annual", status: "pending_payment"});
-    expect(applicationOutcome("corporate")).toEqual({kind: "review", billingInterval: "none", status: "pending_review"});
     expect(applicationOutcome("patron")).toEqual({kind: "review", billingInterval: "none", status: "pending_review"});
   });
 

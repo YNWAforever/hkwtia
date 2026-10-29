@@ -32,6 +32,10 @@ export interface BillingEnv {
   stripeWebhookSecret: string;
   stripeStartupPriceId: string;
   stripeCorporatePriceId: string;
+  /** TODO: create this Stripe price (HK$500 / year) outside this repo, then set the id. Not required to boot. */
+  stripeIndividualPriceId: string;
+  /** TODO: create this Stripe price (HK$4,800 / year) outside this repo, then set the id. Not required to boot. */
+  stripePlatinumPriceId: string;
 }
 
 export interface AutomationEnv {
@@ -391,6 +395,8 @@ export function parseBillingEnv(environment: Environment = process.env): Billing
     stripeWebhookSecret: valueFor(environment, "STRIPE_WEBHOOK_SECRET"),
     stripeStartupPriceId: valueFor(environment, "STRIPE_STARTUP_PRICE_ID"),
     stripeCorporatePriceId: valueFor(environment, "STRIPE_CORPORATE_PRICE_ID"),
+    stripeIndividualPriceId: valueFor(environment, "STRIPE_INDIVIDUAL_PRICE_ID"),
+    stripePlatinumPriceId: valueFor(environment, "STRIPE_PLATINUM_PRICE_ID"),
   };
 }
 

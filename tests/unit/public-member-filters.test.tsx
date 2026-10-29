@@ -6,7 +6,7 @@ import {MemberFilters} from "@/components/marketing/member-filters";
 const labels = {
   search: "Search members", tag: "Industry", anyTag: "All industries", plan: "Membership", anyPlan: "All tiers",
   submit: "Search", apply: "Apply filters", clear: "Clear",
-  plans: {community: "Community", startup: "Startup", corporate: "Corporate", patron: "Patron"},
+  plans: {community: "Community", startup: "Startup", corporate: "Corporate", patron: "Patron", individual: "Individual", platinum: "Platinum"},
 } as const;
 
 describe("public member directory filters", () => {

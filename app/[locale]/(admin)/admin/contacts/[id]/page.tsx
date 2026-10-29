@@ -143,7 +143,7 @@ export default async function AdminLeadPage({params, searchParams}: Props) {
           hasEmail={contact.email !== null}
           labels={{
             title: t("lead.invite.title"), plan: t("lead.invite.plan"),
-            plans: {community: t("lead.invite.plans.community"), startup: t("lead.invite.plans.startup"), corporate: t("lead.invite.plans.corporate")},
+            plans: {individual: t("lead.invite.plans.individual"), corporate: t("lead.invite.plans.corporate"), platinum: t("lead.invite.plans.platinum")},
             create: t("lead.invite.create"), linkLabel: t("lead.invite.linkLabel"), copy: t("lead.invite.copy"),
             copied: t("lead.invite.copied"), messageLabel: t("lead.invite.messageLabel"), email: t("lead.invite.email"),
             whatsapp: t("lead.invite.whatsapp"), sent: t("lead.invite.sent"), failed: t("lead.invite.failed"),

@@ -1,4 +1,4 @@
-import {membershipTrack} from "@/config/membership-journey";
+import {OPS_MEMBERSHIP_TIERS} from "@/config/membership-journey";
 import {membershipSelfServicePolicy} from "@/lib/membership/policy-self-service";
 import {PLAN_CATALOG} from "@/lib/membership/plans";
 import type { Metadata } from "next";
@@ -21,11 +21,6 @@ import { siteConfig } from "@/config/site";
 import type { AppLocale } from "@/i18n/routing";
 import { membershipPlansRepository } from "@/lib/db/repos/membership-plans";
 import { buildPageMetadata } from "@/lib/metadata";
-import {
-  buildPublicMembershipCatalog,
-  publicPriceIds,
-  type PublicMembershipTier,
-} from "@/lib/membership/public-catalog";
 import { routeBreadcrumbItems } from "@/lib/seo/route-breadcrumbs";
 import { buildBreadcrumbData } from "@/lib/structured-data";
 
@@ -46,22 +41,6 @@ const DIMENSION_KEYS = [
   "support",
   "renewal",
 ] as const;
-
-function priceLines(
-  price: PublicMembershipTier["price"],
-  labels: Readonly<{
-    free: string;
-    review: string;
-    annual: string;
-    monthly: string;
-  }>,
-): readonly string[] {
-  if (price.kind === "free") return [labels.free];
-  if (price.kind === "review") return [labels.review];
-  return price.options.map(
-    (option) => `${option.amount} ${labels[option.cadence]}`,
-  );
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -103,40 +82,22 @@ export default async function MembershipPage({ params }: Props) {
   function renderPlans(
     rows: Awaited<ReturnType<typeof membershipPlansRepository.list>> | null,
   ) {
-    const publicTiers =
-      rows === null
-        ? []
-        : buildPublicMembershipCatalog({
-            locale,
-            rows,
-            priceIds: publicPriceIds(),
-          });
-    const labels = {
-      free: t("priceLabels.free"),
-      review: t("priceLabels.review"),
-      annual: t("cadenceLabels.annual"),
-      monthly: t("cadenceLabels.monthly"),
-    };
-    const tiers: PlanGridTier[] = publicTiers.map((tier) => ({
+    void rows;
+    const annual = t("cadenceLabels.annual");
+    // Willy's ops list is the public price. It does not wait on the database catalog,
+    // and it does not invent a Stripe product. Checkout still needs the price id.
+    const money = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
+    const tiers: PlanGridTier[] = OPS_MEMBERSHIP_TIERS.map((tier) => ({
       code: tier.code,
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
-      priceLines: priceLines(tier.price, labels),
+      priceLines: [`${money.format(tier.annualPriceHkd)} ${annual}`],
       seatLabel: t("compare.seats", {count: PLAN_CATALOG[tier.code].seatAllowance}),
-      // Programme D-5: the copy for each tier's real entitlements lives in the
-      // bundle beside lib/membership/entitlements.ts; the old shared triple
-      // said the same thing about every tier, which sells nothing.
       benefits: t.raw(`tierBenefits.${tier.code}`) as string[],
-      action: membershipTrack(tier.code) === "organisation" ? t("actions.apply") : t("actions.join"),
-      href: tier.cta.href,
+      action: t("actions.join"),
+      href: `/join?plan=${tier.code}`,
     }));
-    // "Ready" means both configured Startup/Corporate price ids actually resolved into the
-    // catalog -- the same gate buildPublicMembershipCatalog already applies, read back here.
-    // If either tier didn't resolve, PlanGrid silently omits it, so the page must not claim
-    // both fees shown are confirmed -- only one would even be on the page.
-    const pricingReady =
-      publicTiers.some((tier) => tier.code === "startup") &&
-      publicTiers.some((tier) => tier.code === "corporate");
+    const pricingReady = true;
     return (
       <Section id="plans" labelledBy="membership-plans-title">
         <h2 className="sr-only" id="membership-plans-title">

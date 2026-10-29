@@ -13,7 +13,12 @@ export type MembershipOption = Readonly<{
   available: boolean;
 }>;
 
-type CatalogEnvironment = Readonly<{stripeStartupPriceId: string; stripeCorporatePriceId: string}>;
+type CatalogEnvironment = Readonly<{
+  stripeStartupPriceId: string;
+  stripeCorporatePriceId: string;
+  stripeIndividualPriceId?: string;
+  stripePlatinumPriceId?: string;
+}>;
 
 const freeOrReviewPlans = new Set<PlanCode>(["community", "patron"]);
 
@@ -23,16 +28,19 @@ function paidPriceReference(planCode: PlanCode, environment: CatalogEnvironment)
       return environment.stripeStartupPriceId.trim() || null;
     case "corporate":
       return environment.stripeCorporatePriceId.trim() || null;
+    case "individual":
+      // TODO: no live Stripe price is created here. Checkout stays closed until this env var is set.
+      return environment.stripeIndividualPriceId?.trim() || null;
+    case "platinum":
+      // TODO: no live Stripe price is created here. Checkout stays closed until this env var is set.
+      return environment.stripePlatinumPriceId?.trim() || null;
     case "community":
     case "patron":
-      // These cases should never be reached due to the early return in resolveMembershipOption
-      // but we include them for exhaustiveness checking
       return null;
-    default:
-      // Exhaustiveness check: if a new plan is added to MEMBERSHIP_PLAN_CODES,
-      // this will fail to compile unless it's handled above.
+    default: {
       const _exhaustive: never = planCode;
       return _exhaustive;
+    }
   }
 }
 
@@ -41,7 +49,8 @@ function paidPriceReference(planCode: PlanCode, environment: CatalogEnvironment)
  * Billing interval is part of plan identity: free/review plans resolve to "none" only; each paid
  * option is an inseparable (planCode, billingInterval, priceReference) tuple, available only when
  * exactly one configured Stripe price mapping exists for it. Only STRIPE_STARTUP_PRICE_ID and
- * STRIPE_CORPORATE_PRICE_ID exist today, and both are actionable only as the annual option --
+ * STRIPE_CORPORATE_PRICE_ID, plus optional STRIPE_INDIVIDUAL_PRICE_ID and
+ * STRIPE_PLATINUM_PRICE_ID. Each is actionable only as the annual option --
  * monthly is deliberately unavailable until a distinct provider mapping is separately approved,
  * not inferred here.
  */
@@ -52,13 +61,6 @@ export function resolveMembershipOption(
 ): MembershipOption {
   if (freeOrReviewPlans.has(planCode)) {
     return {planCode, billingInterval: "none", priceReference: null, available: billingInterval === "none"};
-  }
-
-  // New Corporate applications are reviewed (interval none, no charge). Annual
-  // stays available below so an in-flight pending_payment membership can still
-  // resolve the existing Stripe price.
-  if (planCode === "corporate" && billingInterval === "none") {
-    return {planCode, billingInterval: "none", priceReference: null, available: true};
   }
 
   if (billingInterval !== "annual") {

@@ -1,3 +1,5 @@
+-- MUST NOT be applied until Willy confirms. Pay-first joins do not write this table.
+-- It remains only for a possible later optional Business Registration record.
 CREATE TABLE "organisation_application_details" (
 	"application_id" uuid PRIMARY KEY NOT NULL,
 	"tier_code" text NOT NULL,
