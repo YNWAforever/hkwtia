@@ -181,6 +181,7 @@ const securityHeaders = [
  * redirects without re-checking.
  */
 const nextConfig: NextConfig = {
+  experimental: {serverActions: {bodySizeLimit: 4 * 1024 * 1024}},
   async headers() {
     return [{source: "/:path*", headers: [...securityHeaders]}];
   },

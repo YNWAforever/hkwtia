@@ -20,6 +20,7 @@ import {profilesRepository} from "@/lib/db/repos/profiles";
 import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
 import {applicationOutcome, BR_UPLOAD_LIMITS, membershipTrack, planCollectsCompany} from "@/config/membership-journey";
 import {saveOrganisationApplication} from "@/lib/db/repos/organisation-applications";
+import {brUploadReferenceSchema, readBusinessRegistrationParts, stageBusinessRegistrationPart} from "@/lib/membership/br-parts";
 import {BrDocumentError, storeBusinessRegistration} from "@/lib/membership/br-document";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {whatsappConsentFields} from "@/lib/whatsapp/consent";
@@ -274,12 +275,27 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     // create a company row. Production refuses a stub: the bytes would be gone.
     let storedBr: Awaited<ReturnType<typeof storeBusinessRegistration>> | null = null;
     if (organisationParsed?.success) {
+      if (formData.get("brTooLarge") === "1") return formError(locale, "businessRegistration", "errors.brSize");
       const file = formData.get("businessRegistration");
-      if (!(file instanceof File) || file.size === 0) return formError(locale, "businessRegistration", "errors.brRequired");
-      if (file.size > BR_UPLOAD_LIMITS.maxBytes) return formError(locale, "businessRegistration", "errors.brSize");
-      const bytes = new Uint8Array(await file.arrayBuffer());
+      const upload = formData.has("brUploadId") ? brUploadReferenceSchema.safeParse({
+        uploadId: formData.get("brUploadId"), partCount: formData.get("brPartCount"), fileName: formData.get("brFileName"),
+      }) : null;
+      if (upload && !upload.success) return formError(locale, "businessRegistration", "errors.brType");
       try {
-        storedBr = await storeBusinessRegistration({applicationId, fileName: file.name || "registration", bytes});
+        if (upload?.success && formData.has("brPartIndex")) {
+          if (!(file instanceof File) || file.size === 0) return formError(locale, "businessRegistration", "errors.brRequired");
+          await stageBusinessRegistrationPart({...upload.data, applicationId, partIndex: Number(formData.get("brPartIndex")), bytes: new Uint8Array(await file.arrayBuffer())});
+          return {};
+        }
+        if (upload?.success) {
+          const staged = await readBusinessRegistrationParts({...upload.data, applicationId});
+          storedBr = await storeBusinessRegistration({applicationId, fileName: upload.data.fileName, bytes: staged.bytes});
+          await staged.cleanup();
+        } else {
+          if (!(file instanceof File) || file.size === 0) return formError(locale, "businessRegistration", "errors.brRequired");
+          if (file.size > BR_UPLOAD_LIMITS.maxBytes) return formError(locale, "businessRegistration", "errors.brSize");
+          storedBr = await storeBusinessRegistration({applicationId, fileName: file.name || "registration", bytes: new Uint8Array(await file.arrayBuffer())});
+        }
       } catch (error) {
         if (!(error instanceof BrDocumentError)) throw error;
         const key = error.code === "BR_TOO_LARGE" ? "errors.brSize"

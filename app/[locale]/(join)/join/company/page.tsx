@@ -69,7 +69,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("companyTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{organisation ? t("organisation.intro") : t("companyDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={fieldNames} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
+        <JoinForm splitBusinessRegistration={organisation} action={action} fieldNames={fieldNames} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
           <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={legalName} required/>
           <details className="rounded-md border border-border p-4" open={showOptional}>
             <summary className="min-h-11 cursor-pointer content-center font-medium">{t("optionalCompanyTitle")}</summary>

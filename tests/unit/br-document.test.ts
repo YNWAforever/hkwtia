@@ -27,6 +27,13 @@ describe("business registration upload", () => {
     expect(stored).toMatchObject({status: "pending_provider", key: null, contentType: "application/pdf"});
   });
 
+  it("refuses to discard registration bytes in production outside Vercel", async () => {
+    await expect(storeBusinessRegistration(
+      {applicationId: APPLICATION, fileName: "br.pdf", bytes: pdf},
+      {providerConfigured: false, environment: {NODE_ENV: "production"}},
+    )).rejects.toThrow("BR_STORAGE_FAILED");
+  });
+
   it("stores under the application id when the provider is configured", async () => {
     const stored = await storeBusinessRegistration(
       {applicationId: APPLICATION, fileName: "br.pdf", bytes: pdf},

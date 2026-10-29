@@ -1,22 +1,32 @@
 "use client";
 
-import {useActionState, useEffect, useRef, type ReactNode} from "react";
+import {submitWithBrParts} from "@/lib/membership/br-submission";
+
+import {useActionState, useEffect, useRef, useSyncExternalStore, type ReactNode} from "react";
+
+const subscribeToHydration = () => () => {};
+const hydratedSnapshot = () => true;
+const serverSnapshot = () => false;
 
 export type JoinFormState = Readonly<{message?: string; fieldErrors?: Readonly<Record<string, string>>}>;
 export const initialJoinFormState: JoinFormState = {};
 
-export function JoinForm({action, children, fieldNames, submitLabel, pendingLabel, submitDisabled = false}: {
+export function JoinForm({action, children, fieldNames, submitLabel, pendingLabel, submitDisabled = false, splitBusinessRegistration = false}: {
   action: (state: JoinFormState, formData: FormData) => Promise<JoinFormState>;
   children: ReactNode;
   fieldNames: readonly string[];
   submitLabel: string;
   pendingLabel: string;
   submitDisabled?: boolean;
+  splitBusinessRegistration?: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const submitted = useRef<JoinFormState | null>(null);
-  // Keep the server action reference intact for submission before hydration.
-  const [state, formAction, pending] = useActionState(action, initialJoinFormState);
+  // Preserve native action metadata until hydration enables bounded file submissions.
+  const hydrated = useSyncExternalStore(subscribeToHydration, hydratedSnapshot, serverSnapshot);
+  const [state, formAction, pending] = useActionState(splitBusinessRegistration && hydrated
+    ? (state: JoinFormState, data: FormData) => submitWithBrParts(action, state, data)
+    : action, initialJoinFormState);
   const hasErrors = Boolean(state.message || Object.keys(state.fieldErrors ?? {}).length);
 
   useEffect(() => {

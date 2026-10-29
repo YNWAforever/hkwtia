@@ -114,8 +114,14 @@ export async function storeBusinessRegistration(
     throw new BrDocumentError("BR_TYPE");
   }
   const inspected = inspectBusinessRegistration(input.fileName, input.bytes);
-  const configured = dependencies.providerConfigured ?? providerConfigured(dependencies.environment ?? process.env);
-  if (!configured) return {status: "pending_provider", key: null, ...inspected};
+  const environment = dependencies.environment ?? process.env;
+  const configured = dependencies.providerConfigured ?? providerConfigured(environment);
+  if (!configured) {
+    const production = environment.VERCEL_ENV === "production"
+      || (environment.NODE_ENV === "production" && environment.VERCEL_ENV !== "preview" && environment.VERCEL_ENV !== "development");
+    if (production) throw new BrDocumentError("BR_STORAGE_FAILED");
+    return {status: "pending_provider", key: null, ...inspected};
+  }
   const key = `membership-br/${input.applicationId}/${inspected.sha256}`;
   await (dependencies.put ?? putWithR2)({key, bytes: input.bytes, contentType: inspected.contentType, sha256: inspected.sha256});
   return {status: "stored", key, ...inspected};

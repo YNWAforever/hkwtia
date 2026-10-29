@@ -1,7 +1,9 @@
+import {File as NodeFile} from "node:buffer";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const authState = vi.hoisted(() => ({input: null as null | {email: string; callbackURL?: string}}));
 const redirectState = vi.hoisted(() => ({url: null as string | null, order: [] as string[], attributed: [] as unknown[][]}));
+const brState = vi.hoisted(() => ({staged: [] as unknown[][], read: [] as unknown[][], saved: [] as unknown[][], cleaned: 0}));
 const billingState = vi.hoisted(() => ({scoped: true, calls: [] as unknown[][], sessionCalls: [] as unknown[][]}));
 const repoState = vi.hoisted(() => ({
   application: {id: "application-a", applicantUserId: "user-a", companyId: null as string | null, planCode: "startup", currentStep: "company", status: "draft"},
@@ -38,7 +40,14 @@ vi.mock("@/lib/auth/server", () => ({
 vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "user-a", profileId: "user-a"}), getActor: vi.fn()}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {getById: async () => repoState.application, update: async () => repoState.application}}));
 vi.mock("@/lib/db/repos/memberships", () => ({membershipsRepository: {getByApplicationId: async () => ({id: "membership-a"})}}));
-vi.mock("@/lib/db/repos/organisation-applications", () => ({saveOrganisationApplication: async () => undefined}));
+vi.mock("@/lib/db/repos/organisation-applications", () => ({saveOrganisationApplication: async (...args: unknown[]) => {brState.saved.push(args);}}));
+vi.mock("@/lib/membership/br-parts", async (original) => {
+  const actual = await original<typeof import("@/lib/membership/br-parts")>();
+  return {...actual,
+    stageBusinessRegistrationPart: async (...args: unknown[]) => {brState.staged.push(args);},
+    readBusinessRegistrationParts: async (...args: unknown[]) => {brState.read.push(args); return {bytes: new Uint8Array([0x25, 0x50, 0x44, 0x46]), cleanup: async () => {brState.cleaned += 1;}};},
+  };
+});
 vi.mock("@/lib/membership/br-document", () => ({
   storeBusinessRegistration: async () => ({status: "pending_provider", key: null, sha256: "ab".repeat(32), byteSize: 8, contentType: "application/pdf", fileName: "br.pdf"}),
   BrDocumentError: class BrDocumentError extends Error { code: string; constructor(code: string) { super(code); this.code = code; this.name = "BrDocumentError"; } },
@@ -86,6 +95,7 @@ import {beginMembershipCheckoutAction, requestMagicLink, resumeJoinAction, saveC
 
 describe("join Server Actions", () => {
   beforeEach(() => {
+    brState.staged = []; brState.read = []; brState.saved = []; brState.cleaned = 0;
     limiterState.sends = 0;
     authState.input = null;
     redirectState.url = null;
@@ -197,6 +207,55 @@ describe("join Server Actions", () => {
     });
     expect(redirectState.url).toBe("/join/checkout?membership_id=membership-a");
   });
+  it("localizes an oversized BR before a company write", async () => {
+    repoState.application.planCode = "corporate";
+    const form = new FormData();
+    for (const [key, value] of Object.entries({legalName: "Acme", tier: "corporate", primaryName: "A", primaryEmail: "a@example.test", secondaryName: "B", secondaryEmail: "b@example.test", brTooLarge: "1"})) form.set(key, value);
+    await expect(saveCompany("en", "corporate", "application-a", {}, form)).resolves.toEqual({fieldErrors: {businessRegistration: "localized:errors.brSize"}});
+    expect(repoState.createdCompanyInput).toBeNull();
+    expect(repoState.completedInput).toBeNull();
+  });
+
+  it("stages a bounded corporate BR part without writing a company or completing membership", async () => {
+    repoState.application.planCode = "corporate";
+    const form = new FormData();
+    for (const [key, value] of Object.entries({legalName: "Acme", tier: "corporate", primaryName: "A", primaryEmail: "a@example.test", secondaryName: "B", secondaryEmail: "b@example.test", brUploadId: "10000000-0000-4000-8000-000000000002", brPartCount: "3", brPartIndex: "0", brFileName: "br.pdf"})) form.set(key, value);
+    const file = new File([new Uint8Array(3 * 1024 * 1024)], "part");
+    Object.defineProperty(file, "arrayBuffer", {value: () => new NodeFile([new Uint8Array(3 * 1024 * 1024)], "part").arrayBuffer()});
+    form.set("businessRegistration", file);
+    await expect(saveCompany("en", "corporate", "application-a", {}, form)).resolves.toEqual({});
+    expect(repoState.createdCompanyInput).toBeNull();
+    expect(repoState.completedInput).toBeNull();
+    expect(brState.staged).toHaveLength(1);
+    expect(brState.staged[0][0]).toMatchObject({applicationId: "application-a", partIndex: 0, partCount: 3});
+  });
+
+  it("refuses another applicant's staged BR reference before reading R2", async () => {
+    repoState.application.planCode = "corporate";
+    repoState.application.applicantUserId = "user-b";
+    const form = new FormData();
+    for (const [key, value] of Object.entries({legalName: "Acme", tier: "corporate", primaryName: "A", primaryEmail: "a@example.test", secondaryName: "B", secondaryEmail: "b@example.test", brUploadId: "10000000-0000-4000-8000-000000000002", brPartCount: "3", brFileName: "br.pdf"})) form.set(key, value);
+    await expect(saveCompany("en", "corporate", "application-a", {}, form)).resolves.toEqual({message: "localized:errors.save"});
+    expect(brState.read).toHaveLength(0);
+    expect(brState.staged).toHaveLength(0);
+    expect(repoState.createdCompanyInput).toBeNull();
+  });
+
+  it("stores a staged organisation document and contacts before completing the review outcome", async () => {
+    repoState.application.planCode = "corporate";
+    repoState.completeResult = {applicationId: "application-a", next: "review", membershipId: "membership-a"};
+    const form = new FormData();
+    for (const [key, value] of Object.entries({legalName: "Acme", tier: "corporate", primaryName: "A", primaryEmail: "a@example.test", secondaryName: "B", secondaryEmail: "b@example.test", brUploadId: "10000000-0000-4000-8000-000000000002", brPartCount: "3", brFileName: "br.pdf"})) form.set(key, value);
+    await expect(saveCompany("en", "corporate", "application-a", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(brState.read).toHaveLength(1);
+    expect(brState.read[0][0]).toMatchObject({applicationId: "application-a", partCount: 3});
+    expect(brState.saved).toHaveLength(1);
+    expect(brState.saved[0][1]).toMatchObject({tier: "corporate", primaryEmail: "a@example.test", secondaryEmail: "b@example.test"});
+    expect(brState.cleaned).toBe(1);
+    expect(repoState.completedInput).toMatchObject({plan: "corporate", billingInterval: "none"});
+    expect(redirectState.url).toBe("/join/complete?membership_id=membership-a");
+  });
+
   it.each([null, "", "   "])("uses the legal name when an optional company display name is %s", async (name) => {
     const form = new FormData();
     form.set("legalName", "  Acme Limited  ");

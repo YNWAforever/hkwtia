@@ -57,6 +57,9 @@ export const MEMBERSHIP_KIT_LINKS = {
   whatsappCommunity: "https://example.com/wtia/whatsapp",
 } as const;
 
+// Each action request stays below Next's 4 MB and Vercel's 4.5 MB body limits.
+export const BR_UPLOAD_PART_BYTES = 3 * 1024 * 1024;
+
 export const BR_UPLOAD_LIMITS = {
   maxBytes: 8 * 1024 * 1024,
   contentTypes: ["application/pdf", "image/jpeg", "image/png"] as const,
