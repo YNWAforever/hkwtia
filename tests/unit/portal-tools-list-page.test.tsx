@@ -52,7 +52,7 @@ describe("/portal/tools", () => {
     render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
 
     const card = within(toolCard());
-    expect(card.getByText(`tools.includedWith|plans.startup, plans.corporate and plans.patron`)).toBeVisible();
+    expect(card.getByText(`tools.includedWith|plans.individual, plans.corporate and plans.platinum`)).toBeVisible();
     expect(card.queryByRole("link", {name: "tools.open"})).not.toBeInTheDocument();
     expect(card.getByRole("link", {name: "tools.viewPlans"})).toHaveAttribute("href", "/membership");
   });

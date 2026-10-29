@@ -56,41 +56,41 @@ function harness(locale: "en" | "zh-HK" = "en", overrides: Partial<{email: strin
 describe("createLeadInvite", () => {
   it("returns an unprefixed absolute link for an English contact", async () => {
     const {deps} = harness("en");
-    await expect(createLeadInvite(admin, contactId, "community", deps)).resolves.toEqual({
+    await expect(createLeadInvite(admin, contactId, "individual", deps)).resolves.toEqual({
       url: `https://wtia.example.test/join/invite/${TOKEN}`, inviteId,
     });
   });
 
   it("returns the /zh link for a zh-HK contact", async () => {
     const {deps} = harness("zh-HK");
-    const result = await createLeadInvite(admin, contactId, "startup", deps);
+    const result = await createLeadInvite(admin, contactId, "corporate", deps);
     expect(result.url).toBe(`https://wtia.example.test/zh/join/invite/${TOKEN}`);
   });
 
-  it("refuses patron before touching the repository", async () => {
+  it.each(["community", "startup", "patron"])("refuses %s before touching the repository", async (plan) => {
     const {deps} = harness();
-    await expect(createLeadInvite(admin, contactId, "patron", deps)).rejects.toThrow();
+    await expect(createLeadInvite(admin, contactId, plan, deps)).rejects.toThrow();
     expect(deps.invites.create).not.toHaveBeenCalled();
   });
 
   it("refuses a non-admin actor", async () => {
     const {deps} = harness();
-    await expect(createLeadInvite(ANONYMOUS_ACTOR as never, contactId, "community", deps)).rejects.toThrow("FORBIDDEN");
+    await expect(createLeadInvite(ANONYMOUS_ACTOR as never, contactId, "individual", deps)).rejects.toThrow("FORBIDDEN");
     expect(deps.invites.create).not.toHaveBeenCalled();
   });
 
   // Final review I3: a new link silently retired one the lead may already hold.
   it.each(["live", "opened"])("refuses to supersede a %s link without the explicit confirmation", async (state) => {
     const {deps} = harness("en", {latestState: state});
-    await expect(createLeadInvite(admin, contactId, "community", deps)).rejects.toThrow("INVITE_SUPERSEDE_UNCONFIRMED");
-    await expect(createLeadInvite(admin, contactId, "community", deps, false)).rejects.toThrow("INVITE_SUPERSEDE_UNCONFIRMED");
+    await expect(createLeadInvite(admin, contactId, "individual", deps)).rejects.toThrow("INVITE_SUPERSEDE_UNCONFIRMED");
+    await expect(createLeadInvite(admin, contactId, "individual", deps, false)).rejects.toThrow("INVITE_SUPERSEDE_UNCONFIRMED");
     expect(deps.invites.create).not.toHaveBeenCalled();
-    await expect(createLeadInvite(admin, contactId, "community", deps, true)).resolves.toMatchObject({inviteId});
+    await expect(createLeadInvite(admin, contactId, "individual", deps, true)).resolves.toMatchObject({inviteId});
   });
 
   it.each(["consumed", "expired", "superseded"])("needs no confirmation when the latest link is %s", async (state) => {
     const {deps} = harness("en", {latestState: state});
-    await expect(createLeadInvite(admin, contactId, "community", deps)).resolves.toMatchObject({inviteId});
+    await expect(createLeadInvite(admin, contactId, "platinum", deps)).resolves.toMatchObject({inviteId});
   });
 });
 

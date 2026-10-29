@@ -10,6 +10,7 @@ import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import {applicationOutcome, planCollectsCompany} from "@/config/membership-journey";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {resolveMembershipOption} from "@/lib/membership/catalog";
 import {billingEnv} from "@/lib/config/env";
@@ -149,7 +150,7 @@ async function validateCompanyTarget(
   deps: ReturnType<typeof dependencies>,
 ): Promise<string | null> {
   const plan = getPlan(planCode);
-  const companyPlan = plan.audience === "startup" || plan.audience === "corporate";
+  const companyPlan = planCollectsCompany(plan.code);
   if (companyPlan && !company?.id) throw new Error("COMPANY_REQUIRED");
   if (!companyPlan && company) throw new Error("COMPANY_NOT_ALLOWED");
   if (!company?.id) return null;
@@ -249,11 +250,17 @@ export async function completeApplication(
   const input = completeApplicationSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
   const plan = getPlan(input.plan);
-  // Validate (planCode, billingInterval) against the membership catalog before touching
-  // profile, company, application, or membership state -- a missing, duplicated, or
-  // unsupported interval must fail closed before any write.
-  const catalogEnvironment = plan.billingBehavior === "checkout"
-    ? billingEnv()
+  // Pay-first tiers must name the interval the catalog accepts. A mismatch fails
+  // before billing env or any write. Individual and Platinum price ids are optional
+  // and are not part of the production billing contract.
+  const outcome = applicationOutcome(plan.code);
+  if (input.billingInterval !== outcome.billingInterval) throw new Error("UNSUPPORTED_BILLING_INTERVAL");
+  const catalogEnvironment = outcome.kind === "checkout"
+    ? {
+        ...billingEnv(),
+        stripeIndividualPriceId: process.env.STRIPE_INDIVIDUAL_PRICE_ID ?? "",
+        stripePlatinumPriceId: process.env.STRIPE_PLATINUM_PRICE_ID ?? "",
+      }
     : {stripeStartupPriceId: "", stripeCorporatePriceId: ""};
   const membershipOption = resolveMembershipOption(plan.code, input.billingInterval, catalogEnvironment);
   if (!membershipOption.available) throw new Error("UNSUPPORTED_BILLING_INTERVAL");
@@ -283,7 +290,7 @@ export async function completeApplication(
 
   await requirePolicyAcceptanceForApplication(actor,application.id);
   const target = companyId ? {ownerUserId: null, companyId} : {ownerUserId: actor.profileId, companyId: null};
-  const membershipStatus = plan.billingBehavior === "free" ? "active" : plan.billingBehavior === "review" ? "pending_review" : "pending_payment";
+  const membershipStatus = outcome.status;
   const membership = await createMembershipOnce(actor, application.id, {
     ...target,
     planCode: plan.code,

@@ -32,7 +32,7 @@ export async function getBillingSummary(actor: Actor, dependencies: BillingSumma
   requireMember(actor);
   const records = await dependencies.memberships.listBilling(actor);
   const memberships = await Promise.all(records.map(async (membership): Promise<BillingMembershipSummary> => {
-    let recovery: BillingRecovery = membership.status === "pending_payment" && !membership.stripeSubscriptionId && membership.applicationId && ["startup", "corporate"].includes(membership.planCode) ? "new_checkout" : "support";
+    let recovery: BillingRecovery = membership.status === "pending_payment" && !membership.stripeSubscriptionId && membership.applicationId && ["startup", "corporate", "individual", "platinum"].includes(membership.planCode) ? "new_checkout" : "support";
     let providerAvailable = true;
     let canViewHistory = Boolean(membership.stripeCustomerId);
     if (membership.stripeSubscriptionId) {

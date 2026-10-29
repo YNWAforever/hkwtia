@@ -11,6 +11,7 @@ import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
+import {planCollectsCompany} from "@/config/membership-journey";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
 
@@ -40,7 +41,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
   setRequestLocale(locale);
   const plan = planCode(value(query.plan));
   const applicationId = value(query.application);
-  if (!plan || !applicationId || (plan !== "startup" && plan !== "corporate")) redirect(localizedPath(locale, "/membership"));
+  if (!plan || !applicationId || !planCollectsCompany(plan)) redirect(localizedPath(locale, "/membership"));
   const actor = await getActor().catch(() => null);
   if (!actor) redirect(`${localizedPath(locale, "/join")}?plan=${plan}`);
   if(actor.kind!=="member")notFound();
@@ -51,6 +52,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,applicationId,locale);
   const action = saveCompany.bind(null, locale, plan, applicationId);
+  const fieldNames = ["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"];
   const legalName = draft.company?.legalName ?? defaults.legalName ?? "";
   const displayName = draft.company?.displayName ?? defaults.companyDisplayName ?? "";
   // Existing presentation names need confirmation even when they originally matched the legal name.
@@ -63,7 +65,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("companyTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
+        <JoinForm action={action} fieldNames={fieldNames} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
           <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={legalName} required/>
           <details className="rounded-md border border-border p-4" open={showOptional}>
             <summary className="min-h-11 cursor-pointer content-center font-medium">{t("optionalCompanyTitle")}</summary>

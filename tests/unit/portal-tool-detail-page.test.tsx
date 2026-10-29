@@ -68,7 +68,7 @@ describe("/portal/tools/[key]", () => {
 
     expect(container.querySelector("iframe")).toBeNull();
     expect(screen.getByText("tools.lockedTitle")).toBeVisible();
-    expect(screen.getByText("tools.includedWith|plans.startup, plans.corporate and plans.patron")).toBeVisible();
+    expect(screen.getByText("tools.includedWith|plans.individual, plans.corporate and plans.platinum")).toBeVisible();
     expect(screen.getByRole("link", {name: /tools\.viewPlans/})).toHaveAttribute("href", "/membership");
   });
 

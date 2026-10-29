@@ -43,23 +43,14 @@ describe("ConversionPaths", () => {
     expect(within(partnership).getByRole("link", {name: bundles.en.Home.conversionPaths.partnership.primaryAction})).toHaveAttribute("href", "/contact");
     expect(within(partnership).getByRole("link", {name: bundles.en.Home.conversionPaths.partnership.secondaryAction})).toHaveAttribute("href", "/about");
   });
-  it("shows paid home fees only when the same persisted catalog and configured price reference reconcile", async () => {
-    plans.list.mockResolvedValueOnce([{
-      code: "startup", audience: "startup", billingBehavior: "checkout", seatAllowance: 5,
-      active: true, annualPriceHkd: 1200, monthlyPriceHkd: null, stripePriceReference: null,
-    }]);
-    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_test_startup");
+  it("shows the ops list fees for Individual, Corporate, and Platinum", async () => {
+    plans.list.mockResolvedValueOnce([]);
     const {ConversionPaths} = await import("@/components/home/conversion-paths");
     render(await ConversionPaths({locale: "en"}));
     const membership = screen.getByText(bundles.en.Home.conversionPaths.membership.title).closest("article")!;
-    expect(within(membership).getByText(/HK\$1,200/)).toBeInTheDocument();
-    expect(within(membership).getByText(/Startup/)).toBeInTheDocument();
-    // Round 27: a plan-and-fee list, not paragraphs inside the action row's flex wrapper (which
-    // spaced two one-line fees 50px apart on a phone).
     const fees = membership.querySelector("dl")!;
     expect(fees).toHaveAttribute("aria-label", bundles.en.Home.conversionPaths.membership.catalogPricesLabel);
-    expect([...fees.querySelectorAll("dt")].map((n) => n.textContent)).toEqual(["Startup"]);
-    expect([...fees.querySelectorAll("dd")].map((n) => n.textContent)).toEqual(["HK$1,200 per year"]);
-    expect(within(membership).getAllByRole("listitem")).toHaveLength(3);
+    expect([...fees.querySelectorAll("dt")].map((n) => n.textContent)).toEqual(["Individual", "Corporate", "Platinum"]);
+    expect([...fees.querySelectorAll("dd")].map((n) => n.textContent)).toEqual(["HK$500 per year", "HK$1,800 per year", "HK$4,800 per year"]);
   });
 });

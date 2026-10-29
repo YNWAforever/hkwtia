@@ -11,6 +11,7 @@ import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
+import {planCollectsCompany} from "@/config/membership-journey";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
 
@@ -47,7 +48,7 @@ export default async function ProfilePage({params, searchParams}: Props) {
   if(!draft)notFound();
   const defaults = await inviteDefaults();
   const t = await getTranslations("Join");
-  const companyPlan = plan === "startup" || plan === "corporate";
+  const companyPlan = planCollectsCompany(plan);
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,value(query.application),locale);
   const action = saveProfile.bind(null, locale, plan, value(query.application) ?? null);

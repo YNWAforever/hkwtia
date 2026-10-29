@@ -12,7 +12,7 @@ type EmailState =
   | Readonly<{status: "idle"}>
   | Readonly<{status: "sent" | "failed" | "error"}>;
 
-const PLAN_CODES = ["community", "startup", "corporate"] as const;
+const PLAN_CODES = ["individual", "corporate", "platinum"] as const;
 
 /**
  * Phase E. Create a personal join link and hand it over.
@@ -96,7 +96,7 @@ export function LeadJoinLinkPanel({
         <input name="contactId" type="hidden" value={contactId} />
         <label className="text-sm" htmlFor="lead-invite-plan">
           <span className="mb-1 block text-xs text-muted-foreground">{labels.plan}</span>
-          <select className="min-h-11 rounded-md border border-input bg-background px-3 text-sm" defaultValue="community" id="lead-invite-plan" name="planCode">
+          <select className="min-h-11 rounded-md border border-input bg-background px-3 text-sm" defaultValue="individual" id="lead-invite-plan" name="planCode">
             {PLAN_CODES.map((code) => <option key={code} value={code}>{labels.plans[code]}</option>)}
           </select>
         </label>

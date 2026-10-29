@@ -1,4 +1,5 @@
 import type {MemberTool} from "@/config/member-tools";
+import {publicPlanCode} from "@/config/membership-journey";
 import type {MembershipPlanCode, MembershipStatus} from "@/lib/membership/constants";
 import {isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
 
@@ -32,5 +33,6 @@ export function toolFrameSrc(tool: MemberTool, token: string): string {
  * without the Oxford comma that `en` (US) inserts. The plan names themselves come from the caller's translations.
  */
 export function toolPlanList(tool: MemberTool, locale: string, planName: (plan: MembershipPlanCode) => string): string {
-  return new Intl.ListFormat(locale === "en" ? "en-GB" : locale, {style: "long", type: "conjunction"}).format(tool.tiers.map(planName));
+  const tiers = [...new Set(tool.tiers.map(publicPlanCode))];
+  return new Intl.ListFormat(locale === "en" ? "en-GB" : locale, {style: "long", type: "conjunction"}).format(tiers.map(planName));
 }

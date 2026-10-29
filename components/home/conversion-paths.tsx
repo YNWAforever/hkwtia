@@ -5,8 +5,7 @@ import {ActionLink} from '@/components/wt/action-link';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
-import {membershipPlansRepository} from '@/lib/db/repos/membership-plans';
-import {buildPublicMembershipCatalog, publicPriceIds} from '@/lib/membership/public-catalog';
+import {OPS_MEMBERSHIP_TIERS} from '@/config/membership-journey';
 
 // D-7: the donor's /partner-with-us and /partners are not ported PublicRoute members yet,
 // so partnership points at hkwtia's real /contact and /about destinations instead.
@@ -18,19 +17,16 @@ const panels = [
 // Section 13 of 13 -- the last homepage section. app/styles/wisetech.css:774 .conversion-section
 // (gradient background); :775 .conversion-grid (bordered 2-column panel layout).
 export async function ConversionPaths({locale, copyOverrides}: HomeCopyProps) {
-  const [t, tMembership, rows] = await Promise.all([
+  const [t, tMembership] = await Promise.all([
     getHomeTranslations({locale, copyOverrides, namespace: 'Home.conversionPaths'}),
     getTranslations({locale, namespace: 'Membership'}),
-    membershipPlansRepository.list().catch(() => null),
   ]);
-  const catalog = rows === null ? [] : buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()});
-  const prices = catalog.flatMap((tier) => tier.price.kind === 'paid'
-    ? tier.price.options.map((option) => ({
-        key: `${tier.code}-${option.cadence}`,
-        plan: tMembership(`tiers.${tier.code}.name`),
-        fee: `${option.amount} ${tMembership(`cadenceLabels.${option.cadence}`)}`,
-      }))
-    : []);
+  const money = new Intl.NumberFormat(locale, {style: 'currency', currency: 'HKD', minimumFractionDigits: 0, maximumFractionDigits: 0});
+  const prices = OPS_MEMBERSHIP_TIERS.map((tier) => ({
+    key: tier.code,
+    plan: tMembership(`tiers.${tier.code}.name`),
+    fee: `${money.format(tier.annualPriceHkd)} ${tMembership('cadenceLabels.annual')}`,
+  }));
 
   return (
     <Section labelledBy="conversion-paths-title" id="conversion-paths" className="conversion-section">

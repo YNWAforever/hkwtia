@@ -353,6 +353,37 @@ export const membershipApplications = pgTable(
   ],
 );
 
+/**
+ * Corporate / Patron apply packet: company contacts plus the Business Registration
+ * file reference. The bytes live in private R2 when that provider is configured;
+ * `pending_provider` means the hash was recorded and the object was not stored.
+ */
+export const organisationApplicationDetails = pgTable("organisation_application_details", {
+  applicationId: uuid("application_id").primaryKey().references(() => membershipApplications.id, {onDelete: "cascade"}),
+  tierCode: text("tier_code").notNull(),
+  primaryName: text("primary_name").notNull(),
+  primaryEmail: text("primary_email").notNull(),
+  primaryPhone: text("primary_phone"),
+  secondaryName: text("secondary_name").notNull(),
+  secondaryEmail: text("secondary_email").notNull(),
+  secondaryPhone: text("secondary_phone"),
+  brFileName: text("br_file_name").notNull(),
+  brContentType: text("br_content_type").notNull(),
+  brByteSize: integer("br_byte_size").notNull(),
+  brSha256: text("br_sha256").notNull(),
+  brStorageKey: text("br_storage_key"),
+  brStorageStatus: text("br_storage_status").notNull(),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("organisation_application_tier_check", sql`${table.tierCode} IN ('corporate', 'patron')`),
+  check("organisation_application_br_status_check", sql`${table.brStorageStatus} IN ('stored', 'pending_provider')`),
+  check("organisation_application_br_type_check", sql`${table.brContentType} IN ('application/pdf', 'image/jpeg', 'image/png')`),
+  check("organisation_application_br_size_check", sql`${table.brByteSize} BETWEEN 1 AND 8388608`),
+  check("organisation_application_br_sha_check", sql`${table.brSha256} ~ '^[a-f0-9]{64}$'`),
+  check("organisation_application_br_key_check", sql`(${table.brStorageStatus} = 'stored' AND ${table.brStorageKey} IS NOT NULL) OR (${table.brStorageStatus} = 'pending_provider' AND ${table.brStorageKey} IS NULL)`),
+]);
+
 export const memberships = pgTable(
   "memberships",
   {

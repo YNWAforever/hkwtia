@@ -119,9 +119,9 @@ function harness() {
 }
 
 describe("membership join orchestration", () => {
-  // The "corporate" checkout fixture below needs resolveMembershipOption() (catalog.ts) to see
-  // a configured Stripe price mapping for the "annual" interval, or completeApplication() fails
-  // closed with UNSUPPORTED_BILLING_INTERVAL before reaching the behavior under test.
+  // The startup checkout fixture needs resolveMembershipOption() to see a configured
+  // Stripe price for the annual interval, or completeApplication() fails closed
+  // with UNSUPPORTED_BILLING_INTERVAL before reaching the behavior under test.
   beforeEach(() => {
     vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
     vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
@@ -236,7 +236,25 @@ describe("membership join orchestration", () => {
     expect(deps.inspect().enrollmentRows).toHaveLength(9);
   });
 
-  it("returns a typed checkout command for paid plans without activating them", async () => {
+  it("returns a typed checkout command for startup without activating it", async () => {
+    const deps = harness();
+    const result = await completeApplication(
+      actor,
+      {
+        plan: "startup",
+        billingInterval: "annual",
+        profile: {displayName: "Startup Member"},
+        company: {id: "company-a", legalName: "Startup Ltd", displayName: "Startup"},
+      },
+      deps,
+    );
+
+    expect(result.next).toBe("checkout");
+    expect(result.checkout).toMatchObject({kind: "membership_checkout", planCode: "startup"});
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "startup", status: "pending_payment", billingInterval: "annual"}]);
+  });
+
+  it("sends a new corporate application to checkout", async () => {
     const deps = harness();
     const result = await completeApplication(
       actor,
@@ -262,7 +280,7 @@ describe("membership join orchestration", () => {
         plan: "patron",
         billingInterval: "none",
         profile: {displayName: "Patron"},
-        company: null,
+        company: {id: "company-a", legalName: "Patron Ltd", displayName: "Patron"},
       },
       deps,
     );

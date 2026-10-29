@@ -3,14 +3,15 @@ import {describe, expect, it} from "vitest";
 import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
 describe("planChooserItems", () => {
-  it("links self-serve plans to /join?plan= and patron to /contact, locale-prefixed", () => {
+  it("links the ops tiers to /join?plan=, locale-prefixed", () => {
     const en = planChooserItems("en");
-    expect(en.map((item) => item.code)).toEqual(["community", "startup", "corporate", "patron"]);
-    expect(en.find((item) => item.code === "startup")?.href).toBe("/join?plan=startup");
-    expect(en.find((item) => item.code === "patron")).toMatchObject({href: "/contact", kind: "contact"});
+    expect(en.map((item) => item.code)).toEqual(["individual", "corporate", "platinum"]);
+    expect(en.find((item) => item.code === "individual")).toMatchObject({href: "/join?plan=individual", annualPriceHkd: 500});
+    expect(en.find((item) => item.code === "corporate")?.annualPriceHkd).toBe(1800);
+    expect(en.find((item) => item.code === "platinum")?.annualPriceHkd).toBe(4800);
 
     const zh = planChooserItems("zh-HK");
-    expect(zh.find((item) => item.code === "community")?.href).toBe("/zh/join?plan=community");
-    expect(zh.find((item) => item.code === "patron")?.href).toBe("/zh/contact");
+    expect(zh.find((item) => item.code === "individual")?.href).toBe("/zh/join?plan=individual");
+    expect(zh.find((item) => item.code === "platinum")?.href).toBe("/zh/join?plan=platinum");
   });
 });

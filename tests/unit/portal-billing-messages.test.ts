@@ -21,7 +21,7 @@ describe("billing messages", () => {
   });
 
   it("reads the plan heading as a membership in Chinese and leaves English as the plan name", () => {
-    expect(tEn("billing.planHeading", {plan: tEn("plans.startup")})).toBe("Startup");
-    expect(tZh("billing.planHeading", {plan: tZh("plans.startup")})).toBe("初創會籍");
+    expect(tEn("billing.planHeading", {plan: tEn("plans.startup")})).toBe("Individual");
+    expect(tZh("billing.planHeading", {plan: tZh("plans.startup")})).toBe("個人會籍");
   });
 });

@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
 import {CheckoutStatus} from "@/components/billing/checkout-status";
+import {JoinNextSteps} from "@/components/join/next-steps";
 import type {AppLocale} from "@/i18n/routing";
 import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
@@ -71,6 +72,23 @@ export default async function CompletePage({params, searchParams}: Props) {
           support={{href: localizedPath(locale, "/contact"), label: t("checkoutSummary.contactSupport")}}
         />
       </div>
+      {state.display === "failed" ? null : (
+        <JoinNextSteps
+          labels={{
+            title: t("nextSteps.title"),
+            lead: t(state.display === "review" ? "nextSteps.organisationLead" : state.display === "active" ? "nextSteps.individualLead" : "nextSteps.processingLead"),
+            noPayment: t("nextSteps.noPayment"),
+            welcomeKit: t("nextSteps.welcomeKit"),
+            associationKit: t("nextSteps.associationKit"),
+            login: t("nextSteps.login"),
+            whatsapp: t("nextSteps.whatsapp"),
+            whatsappCommunity: t("nextSteps.whatsappCommunity"),
+            events: t("nextSteps.events"),
+          }}
+          locale={locale}
+          variant={state.display === "review" ? "organisation" : "individual"}
+        />
+      )}
     </section>
   );
 }

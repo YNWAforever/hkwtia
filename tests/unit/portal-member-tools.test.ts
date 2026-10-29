@@ -10,7 +10,7 @@ describe("member tool availability", () => {
     expect(isToolAvailable(tool, [{planCode: "community", status: "active"}])).toBe(false);
   });
 
-  it.each(["startup", "corporate", "patron"] as const)("opens for %s", (plan) => {
+  it.each(["startup", "corporate", "patron", "individual", "platinum"] as const)("opens for %s", (plan) => {
     expect(isToolAvailable(tool, [{planCode: plan, status: "active"}])).toBe(true);
   });
 
@@ -20,6 +20,8 @@ describe("member tool availability", () => {
 
   it.each(["pending_payment", "pending_review"] as const)("locks a %s paid plan", (status) => {
     expect(isToolAvailable(tool, [{planCode: "startup", status}])).toBe(false);
+    expect(isToolAvailable(tool, [{planCode: "individual", status}])).toBe(false);
+    expect(isToolAvailable(tool, [{planCode: "platinum", status}])).toBe(false);
   });
 
   it.each(["active", "past_due", "cancel_at_period_end"] as const)("honours a %s paid plan", (status) => {

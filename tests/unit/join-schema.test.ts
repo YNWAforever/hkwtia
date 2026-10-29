@@ -10,7 +10,7 @@ import {getPlan, PLAN_CODES} from "@/lib/membership/plans";
 
 describe("membership join schemas", () => {
   it("exposes the four stable plan codes and metadata", () => {
-    expect(PLAN_CODES).toEqual(["community", "startup", "corporate", "patron"]);
+    expect(PLAN_CODES).toEqual(["community", "startup", "corporate", "patron", "individual", "platinum"]);
     expect(getPlan("community")).toMatchObject({code: "community", billingBehavior: "free"});
     expect(getPlan("startup")).toMatchObject({code: "startup", billingBehavior: "checkout"});
     expect(getPlan("corporate")).toMatchObject({code: "corporate", billingBehavior: "checkout"});

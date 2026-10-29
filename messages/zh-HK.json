@@ -510,7 +510,7 @@
       "destinations": {
         "membership": {
           "label": "會籍",
-          "copy": "比較各級會籍及年費，由免費社群會籍至企業會籍。"
+          "copy": "比較個人、企業及白金會籍的年費。"
         },
         "showcase": {
           "label": "會員及方案展示",
@@ -823,24 +823,34 @@
       "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "以電郵或 WhatsApp 接收活動更新"],
       "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
       "corporate": ["精選會員專頁及商標牆", "無限次提交活動（經審核）", "3 個方案展示頁", "WhatsApp 優先支援通道", "包含會員工具"],
-      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"]
+      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"],
+      "individual": ["會員專頁", "每季最多提交 2 個活動供 WTIA 審核", "1 個方案展示", "WhatsApp 更新"],
+      "platinum": ["包括企業會籍的全部", "精選展示位置", "與 WTIA 合辦活動", "專屬 WhatsApp 支援"]
     },
     "tiers": {
       "community": {
-        "name": "社群",
-        "description": "接收 WTIA 公開消息及機遇。"
+        "name": "個人",
+        "description": "舊有個人會籍。新申請請選擇個人會籍並網上付款。"
       },
       "startup": {
-        "name": "初創",
-        "description": "適合早期科技公司及團隊。"
+        "name": "個人",
+        "description": "舊有計劃。新申請請選擇個人會籍並網上付款。"
       },
       "corporate": {
         "name": "企業",
-        "description": "適合積極參與創科生態的成熟機構。"
+        "description": "適合機構。網上付款。"
       },
       "patron": {
-        "name": "贊助人",
-        "description": "適合支持 WTIA 使命的策略夥伴。"
+        "name": "白金",
+        "description": "舊有計劃。新申請請選擇白金會籍並網上付款。"
+      },
+      "individual": {
+        "name": "個人",
+        "description": "適合個人。網上付款。付款成功後會籍生效。"
+      },
+      "platinum": {
+        "name": "白金",
+        "description": "機構的最高會籍。網上付款。"
       }
     },
     "dimensionsTitle": "會籍內容",
@@ -848,7 +858,7 @@
     "faq": {
       "0": {
         "question": "誰可以申請？",
-        "answer": "社群會籍面向個人；初創及企業會籍由機構申請。贊助會籍由 WTIA 職員跟進。WTIA 會在審核時確認資格。"
+        "answer": "個人會籍適合一個人。企業及白金會籍適合機構。三種會籍均於網上付款。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
       },
       "1": {
         "question": "在哪裡查看現行會費？",
@@ -864,11 +874,11 @@
       },
       "4": {
         "question": "公司會籍包含多少席位？",
-        "answer": "現行網站目錄設定為初創五席、企業二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
+        "answer": "個人會籍為一席。企業及白金會籍為二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
       },
       "5": {
         "question": "審批需時多久？",
-        "answer": "申請狀態可在會員專區查看。WTIA 未在本頁公布固定審批時限；如時間緊迫，請聯絡會員團隊。"
+        "answer": "個人、企業及白金會籍均於網上付款。付款成功後會籍即時確認。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
       },
       "6": {
         "question": "可以退款嗎？",
@@ -894,8 +904,26 @@
     },
     "actions": {
       "join": "選擇此計劃",
+      "apply": "申請此計劃",
       "contact": "聯絡我們",
       "discuss": "討論此參與路徑"
+    },
+    "tracks": {
+      "title": "兩種加入方式",
+      "individual": {
+        "title": "個人",
+        "copy": "每年 HK$500。網上付款。付款成功後會籍生效。"
+      },
+      "organisation": {
+        "title": "公司",
+        "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者與個人會籍一樣，先付款。"
+      },
+      "sla": "如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+    },
+    "renew": {
+      "title": "續會或重新加入",
+      "copy": "如會籍已失效、逾期或將於期末結束，請登入並沿用現有的帳單頁面繼續。",
+      "action": "登入以續會或重新加入"
     },
     "unavailable": "會員計劃暫時未能提供",
     "sme": {
@@ -938,7 +966,7 @@
     "closing": {
       "eyebrow": "隨時歡迎你",
       "title": "選擇級別，或先向我們查詢。",
-      "copy": "社群、初創及企業會籍均可網上申請。贊助人會籍或其他查詢，可直接與我們聯絡。",
+      "copy": "個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。我們會盡量在 5 個工作天內回覆。",
       "join": "立即加入",
       "contact": "電郵會員團隊"
     }
@@ -1013,16 +1041,53 @@
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
     "choosePlanTitle": "選擇會員計劃",
-    "choosePlanDescription": "選擇最適合貴機構參與方式的計劃。你可先在會員計劃頁比較費用及權益。",
+    "choosePlanDescription": "個人、企業及白金會籍均於網上付款。選擇級別後前往安全結帳。",
     "choosePlanCompare": "比較計劃及費用",
     "choosePlan": {
-      "community": "免費。保持聯繫、報名公開活動、接收更新。",
-      "startup": "適合初創科技團隊：會員專頁、每季 2 個經審核活動、1 個方案展示頁。",
-      "corporate": "適合成熟機構：精選專頁、無限次經審核活動、WhatsApp 優先支援。",
-      "patron": "WTIA 使命的策略支持者 — 請與團隊聯絡。"
+      "community": "新申請請選擇個人會籍。",
+      "startup": "新申請請選擇個人會籍。",
+      "corporate": "機構每年 HK$1,800。現在網上付款。",
+      "patron": "新申請請選擇白金會籍。",
+      "individual": "個人每年 HK$500。現在網上付款。",
+      "platinum": "每年 HK$4,800。現在網上付款。"
     },
     "choosePlanAction": "以{plan}繼續",
+    "choosePlanPrice": "每年 {amount}",
     "choosePlanContact": "聯絡 WTIA",
+    "tracks": {
+      "individual": {"title": "個人", "copy": "每年 HK$500。網上付款。付款成功後會籍生效。"},
+      "organisation": {"title": "公司", "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者均先付款。"}
+    },
+    "organisation": {
+      "intro": "公司資料會與申請一併儲存。商業登記證可在付款後補交，並非必須。",
+      "tierValue": "級別：{tier}",
+      "changeTier": "選擇其他級別",
+      "primaryTitle": "主要聯絡人",
+      "secondaryTitle": "次要聯絡人",
+      "brHint": "PDF、JPEG 或 PNG，最大 8 MB。",
+      "fields": {
+        "primaryName": "主要聯絡人姓名",
+        "primaryEmail": "主要聯絡人電郵",
+        "primaryPhone": "主要聯絡人電話（選填）",
+        "secondaryName": "次要聯絡人姓名",
+        "secondaryEmail": "次要聯絡人電郵",
+        "secondaryPhone": "次要聯絡人電話（選填）",
+        "br": "商業登記證"
+      }
+    },
+    "nextSteps": {
+      "title": "下一步",
+      "individualLead": "你的會籍已生效。請下載資料冊、登入，並選擇第一個活動。",
+      "processingLead": "付款正在確認。會籍生效後即可使用這些連結。",
+      "organisationLead": "如這宗申請需要人工例外處理，Willy 會在 5 個工作天內回覆。",
+      "noPayment": "現時尚未收款。WTIA 會在審核後與你聯絡。",
+      "welcomeKit": "下載迎新資料冊",
+      "associationKit": "下載協會資料冊",
+      "login": "會員登入",
+      "whatsapp": "在個人檔案選擇接收 WhatsApp",
+      "whatsappCommunity": "WhatsApp 社群",
+      "events": "即將舉行的活動"
+    },
     "optionalProfileTitle": "聯絡資料（選填）",
     "optionalProfileHint": "你可以現在填寫，亦可只填姓名後繼續。如要接收 WhatsApp 消息，須另行明確同意。",
     "optionalCompanyTitle": "公司資料（選填）",
@@ -1039,10 +1104,12 @@
       "company": "公司資料"
     },
     "plans": {
-      "community": "社群",
-      "startup": "初創",
+      "community": "個人",
+      "startup": "個人",
       "corporate": "企業",
-      "patron": "贊助人"
+      "patron": "白金",
+      "individual": "個人",
+      "platinum": "白金"
     },
     "fields": {
       "email": "電郵地址",
@@ -1068,6 +1135,11 @@
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
       "companyNotAllowed": "此計劃不接受公司資料。",
+      "tier": "請選擇個人、企業或白金，並以該級別繼續。",
+      "brRequired": "請上載商業登記證。",
+      "brType": "請上載 PDF、JPEG 或 PNG 格式的商業登記證。",
+      "brSize": "檔案超過 8 MB。",
+      "brStorage": "未能儲存商業登記證，請再試一次。",
       "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
@@ -1081,8 +1153,8 @@
         "description": "你的付費會籍已可進入安全付款程序。"
       },
       "review": {
-        "title": "申請審批中",
-        "description": "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
+        "title": "審核中",
+        "description": "如需人工例外處理，Willy 會在 5 個工作天內回覆。"
       }
     },
     "whatsapp": {
@@ -1626,10 +1698,12 @@
       "clear": "清除"
     },
     "plans": {
-      "community": "社群",
-      "startup": "初創",
+      "community": "個人",
+      "startup": "個人",
       "corporate": "企業",
-      "patron": "贊助人"
+      "patron": "白金",
+      "individual": "個人",
+      "platinum": "白金"
     },
     "resultsTitle": "本頁顯示 {count} 個會員",
     "resultsHeading": "會員名錄",
@@ -2287,6 +2361,25 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "checklist": {
+      "title": "入會清單",
+      "lead": "完成這些項目，以用盡會籍。個人檔案與 WhatsApp 跟你已儲存的檔案。資料冊與第一個活動是現在可以開啟的連結。",
+      "kitsTitle": "迎新資料冊及協會資料冊",
+      "kitsLead": "在秘書處公布最終 Drive 連結前，這些是暫代檔案。",
+      "done": "已完成",
+      "todo": "待辦",
+      "profile": "完善個人檔案",
+      "welcomeKit": "下載迎新資料冊",
+      "associationKit": "下載協會資料冊",
+      "whatsapp": "加入 WhatsApp",
+      "whatsappCommunity": "開啟 WhatsApp 社群",
+      "firstEvent": "報名第一個活動",
+      "registration": "稍後補上商業登記證（選填）"
+    },
+    "renew": {
+      "action": "續會或重新加入",
+      "rejoin": "開始新申請"
+    },
     "firstResult": {
       "title": "開始使用你的會員權益",
       "event": "下一個活動",
@@ -2370,7 +2463,7 @@
       },
       "under_review": {
         "title": "你的會籍正待審批",
-        "body": "我們正在審核你的申請。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
+        "body": "這是人工例外處理。Willy 會在 5 個工作天內回覆。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
       },
       "inactive": {
         "title": "目前未能使用會員權益",
@@ -2450,7 +2543,7 @@
       "label": "下一步",
       "past_due": {"title": "請更新付款資料", "body": "上次付款未能完成。請更新付款資料，以保持會籍有效。", "action": "前往帳單"},
       "pending_payment": {"title": "完成付款", "body": "完成付款後，會籍即會生效。", "action": "前往帳單"},
-      "pending_review": {"title": "你的申請正在審核", "body": "審核完成後，WTIA 會與你聯絡。", "action": "查看申請詳情"},
+      "pending_review": {"title": "你的申請正在審核", "body": "Willy 會在 5 個工作天內回覆。", "action": "查看申請詳情"},
       "profile": {"title": "完善個人資料", "body": "加上職銜及聯絡偏好，方便 WTIA 與你聯絡。", "action": "前往個人資料"},
       "company": {"title": "填寫公司資料", "body": "公司資料會用於會籍、名額及展示頁。", "action": "前往公司資料"}
     },
@@ -2480,10 +2573,12 @@
     "membershipOptions": "查看會籍選項",
     "welcome": "歡迎回來，{name}。",
     "plans": {
-      "community": "社群",
-      "startup": "初創",
+      "community": "個人",
+      "startup": "個人",
       "corporate": "企業",
-      "patron": "贊助"
+      "patron": "白金",
+      "individual": "個人",
+      "platinum": "白金"
     },
     "onboardingProgress": "已完成 {completed} / {total} 個步驟",
     "status": {
@@ -2512,7 +2607,7 @@
       "pending_review": {
         "label": "審核中",
         "title": "申請審核中",
-        "description": "WTIA 完成審核後會與你聯絡。"
+        "description": "Willy 會在 5 個工作天內回覆。"
       }
     },
     "profileTitle": "我的個人資料",
@@ -2704,7 +2799,7 @@
         "INVALID": "請檢查必填欄位、日期及連結，然後再試。",
         "EVENT_SLUG_TAKEN": "此網頁地址已被另一活動使用。",
         "EVENT_QUOTA_EXCEEDED": "貴計劃本季的經審核活動名額已用完。請儲存為草稿或升級計劃。",
-        "EVENT_PUBLISHING_NOT_INCLUDED": "社群會籍不包括發布活動。",
+        "EVENT_PUBLISHING_NOT_INCLUDED": "此會籍不包括發布活動。",
         "EVENT_NOT_EDITABLE": "此活動已發布；如需修改，請聯絡 WTIA。",
         "EVENT_HERO_MEDIA_INVALID": "此圖片並非你上載的圖片。",
         "NO_MANAGED_COMPANY": "發布活動需要你管理的公司。",
@@ -2931,7 +3026,7 @@
     "transparency": "了解智能助理運作方式",
     "prompts": {
       "home": ["WTIA 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
-      "membership": ["哪種會籍適合我的機構？", "初創企業可獲得甚麼權益？"],
+      "membership": ["哪種會籍適合我的機構？", "企業會籍包括甚麼？"],
       "showcase": ["尋找服務中小企的供應商", "引薦流程如何運作？"],
       "events": ["哪些活動適合零售業？", "顯示粵語活動"]
     },
@@ -3335,7 +3430,7 @@
         "invite": {
           "title": "專屬入會連結",
           "plan": "會籍計劃",
-          "plans": {"community": "社群會員", "startup": "初創會員", "corporate": "企業會員"},
+          "plans": {"community": "個人", "startup": "個人", "corporate": "企業", "individual": "個人", "platinum": "白金"},
           "create": "建立入會連結",
           "linkLabel": "入會連結（只顯示一次）",
           "copy": "複製連結",
@@ -3880,7 +3975,7 @@
         "companyChoose": "請從已登記公司中選擇，或清空搜尋。",
         "companySearching": "正在搜尋公司…"},
       "view": "查看",
-      "planCodes": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助人"},
+      "planCodes": {"community": "個人", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
       "statusCodes": {"active": "有效", "past_due": "逾期未付", "cancel_at_period_end": "期末終止", "pending_review": "待審批", "pending_payment": "待付款", "cancelled": "已取消", "expired": "已過期"},
       "title": "會員",
       "description": "搜尋會員檔案、公司、會籍及參與分數。",
@@ -3927,9 +4022,11 @@
       "nameEn": "名稱（英文）",
       "nameZh": "名稱（繁體中文）",
       "corporate": "企業",
-      "startup": "初創",
-      "community": "社群",
-      "patron": "贊助",
+      "startup": "初創（舊有）",
+      "community": "社群（舊有）",
+      "patron": "贊助人（舊有）",
+      "individual": "個人",
+      "platinum": "白金",
       "active": "有效",
       "pastDue": "逾期未付款",
       "pendingReview": "待審核",
@@ -4004,10 +4101,12 @@
       "addNote": "新增備註",
       "campaign": "建立推廣活動",
       "plans": {
-        "community": "社群",
-        "startup": "初創",
+        "community": "個人",
+        "startup": "個人",
         "corporate": "企業",
-        "patron": "贊助"
+        "patron": "白金",
+        "individual": "個人",
+        "platinum": "白金"
       },
       "statuses": {
         "active": "生效",
@@ -4599,7 +4698,7 @@
         "joinedColumn": "實際加入",
         "countColumn": "會員",
         "emptyPlans": "此期間沒有已付費的邀請。",
-        "plan": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助"},
+        "plan": {"community": "個人", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
         "estimateHeading": "歸因首年會費",
         "estimateLabel": "估算",
         "estimateNote": "按已加入方案的首年年費標價計算，未與 Stripe 對賬，請勿視為已入賬收入。"

@@ -75,6 +75,15 @@ describe("join pages with an invite prefill", () => {
     expect(valueOf(html, "whatsappNumber")).toBe("+85291234567");
   });
 
+  it("does not ask for a business registration before corporate checkout", async () => {
+    const html = renderToStaticMarkup(await CompanyPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({plan: "corporate", application: APPLICATION_ID}),
+    }));
+    expect(html).not.toContain('name="businessRegistration"');
+    expect(html).toContain('name="legalName"');
+  });
+
   it("fills legal name and company display name from the organisation", async () => {
     const html = await companyHtml();
     expect(valueOf(html, "legalName")).toBe("Acme Ltd");

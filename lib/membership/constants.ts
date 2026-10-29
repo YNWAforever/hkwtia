@@ -10,6 +10,6 @@ export const MEMBERSHIP_STATUSES = [
 
 export type MembershipStatus = (typeof MEMBERSHIP_STATUSES)[number];
 
-export const MEMBERSHIP_PLAN_CODES = ["community", "startup", "corporate", "patron"] as const;
+export const MEMBERSHIP_PLAN_CODES = ["community", "startup", "corporate", "patron", "individual", "platinum"] as const;
 
 export type MembershipPlanCode = (typeof MEMBERSHIP_PLAN_CODES)[number];

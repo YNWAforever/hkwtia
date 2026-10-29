@@ -166,7 +166,7 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
           purchaseAmount: t("member360.purchaseAmount"),
           refundReason: t("member360.refundReason"),
           refundedAt: t("member360.refundedAt"),
-          planCodes: Object.fromEntries(["community", "startup", "corporate", "patron"].map((code) => [code, t(`members.planCodes.${code}`)])),
+          planCodes: Object.fromEntries(["community", "startup", "corporate", "patron", "individual", "platinum"].map((code) => [code, t(`members.planCodes.${code}`)])),
           membershipStatuses: Object.fromEntries(["active", "past_due", "cancel_at_period_end", "pending_review", "pending_payment", "cancelled", "expired"].map((code) => [code, t(`members.statusCodes.${code}`)])),
           purchaseStatuses: Object.fromEntries(["pending", "paid", "expired", "failed", "refunded", "refund_failed"].map((code) => [code, t(`member360.purchaseStatuses.${code}`)])),
           refundReasons: Object.fromEntries(["oversold", "staff", "cancelled"].map((code) => [code, t(`member360.refundReasons.${code}`)])),

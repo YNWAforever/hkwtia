@@ -5,6 +5,7 @@ import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {isIndustryTag} from "@/config/industry-tags";
+import {publicPlanCode} from "@/config/membership-journey";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
@@ -349,7 +350,9 @@ function directoryFilters(filters: MemberFilters): SQL {
     predicates.push(sql`${companies.tags} @> ARRAY[${filters.tag}]::text[]`);
   }
   if (filters.plan !== null && (MEMBERSHIP_PLAN_CODES as readonly string[]).includes(filters.plan)) {
-    predicates.push(sql`active_plan.plan_code = ${filters.plan}`);
+    const tier = publicPlanCode(filters.plan);
+    const codes = MEMBERSHIP_PLAN_CODES.filter((code) => publicPlanCode(code) === tier);
+    predicates.push(sql`active_plan.plan_code IN (${sql.join(codes.map((code) => sql`${code}`), sql`, `)})`);
   }
   return predicates.length === 0 ? sql`` : sql` AND ${sql.join(predicates, sql` AND `)}`;
 }

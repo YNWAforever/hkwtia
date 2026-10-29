@@ -58,9 +58,9 @@ function defaultDependencies(): LeadInviteDependencies {
   };
 }
 
-// `patron` is invitation-by-review elsewhere; a lead link never offers it. The
-// repository refuses it too, but failing here keeps the refusal ahead of any read.
-const planSchema = z.enum(["community", "startup", "corporate"]);
+// New lead links are the pay-first ops tiers. Patron stays a Willy-only
+// exception and is not minted here. Legacy community and startup links still open.
+const planSchema = z.enum(["individual", "corporate", "platinum"]);
 const idSchema = z.string().uuid();
 const messageSchema = z.string().trim().max(1000);
 

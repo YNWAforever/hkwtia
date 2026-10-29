@@ -25,7 +25,7 @@ export default async function ApprovalsPage({params}: Props) {
   const messages: ApprovalActionMessages = {success: t("success"), validation: t("validation"), alreadyDecided: t("alreadyDecided"), notFound: t("notFound"), error: t("error"),stale:t("stale")};
   const action = decideApprovalAction.bind(null, `/${locale}/admin/approvals`, messages);
   const labels = {
-    planCodes: Object.fromEntries(["community", "startup", "corporate", "patron"].map(code => [code, plans(code as "community" | "startup" | "corporate" | "patron")])),
+    planCodes: Object.fromEntries(["community", "startup", "corporate", "patron", "individual", "platinum"].map(code => [code, plans(code as "community" | "startup" | "corporate" | "patron" | "individual" | "platinum")])),
     caption: t("caption"), empty: t("empty"), actionType: t("actionType"), requestedAt: t("requestedAt"), summary: t("summary"), actions: t("actions"),
     approve: t("approve"), reject: t("reject"), deciding: t("deciding"), unavailable: t("unavailable"),
     memberReference: t("memberReference"), locale: t("locale"), agentRunReference: t("agentRunReference"),

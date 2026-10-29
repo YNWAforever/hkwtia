@@ -142,10 +142,12 @@ describe("/membership rewrite", () => {
     const html = await renderMembership([community, startup, patron]);
 
     expect(html).toContain('class="plan-grid"');
-    expect(html).toContain('id="community"');
-    expect(html).toContain('id="startup"');
-    expect(html).not.toContain('id="corporate"');
-    expect(html).toContain('id="patron"');
+    expect(html).toContain('id="individual"');
+    expect(html).toContain('id="corporate"');
+    expect(html).toContain('id="platinum"');
+    expect(html).not.toContain('id="community"');
+    expect(html).not.toContain('id="startup"');
+    expect(html).not.toContain('id="patron"');
     // Scoped to the plan-grid region: the page also renders <article> tags in the
     // membership-dimensions panel and the first-90-days step grid, so counting across the
     // whole page (as a naive `html.match(/<article/g)` would) overcounts. The test's intent,
@@ -154,15 +156,16 @@ describe("/membership rewrite", () => {
       html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
     expect((planGridHtml.match(/<article/g) ?? []).length).toBe(3);
     expect(html).toContain(bundles.en.Membership.sme.title);
-    expect(html).toContain('href="/join?plan=community"');
-    expect(html).toContain('href="/join?plan=startup"');
-    expect(html).toContain('href="/contact"');
+    expect(html).toContain('href="/join?plan=individual"');
+    expect(html).toContain('href="/join?plan=corporate"');
+    expect(html).toContain('href="/join?plan=platinum"');
+    expect(html).toContain("HK$500");
+    expect(html).toContain("HK$1,800");
+    expect(html).toContain("HK$4,800");
     expect(html).toContain(bundles.en.Membership.actions.join);
-    expect(html).toContain(bundles.en.Membership.actions.contact);
-    // This render carries community/startup/patron, so pin a startup benefit
-    // and the patron one to prove each tier gets its own list.
-    expect(html).toContain(bundles.en.Membership.tierBenefits.startup[1]);
-    expect(html).toContain(bundles.en.Membership.tierBenefits.patron[2]);
+    expect(html).toContain(bundles.en.Membership.tracks.sla);
+    expect(html).toContain(bundles.en.Membership.tierBenefits.individual[1]);
+    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[2]);
   });
 
   it("shows the confirmed-pricing note when both configured price ids resolve", async () => {
@@ -173,28 +176,13 @@ describe("/membership rewrite", () => {
     expect(html).not.toContain(bundles.en.Membership.pricing.fallbackCopy);
   });
 
-  it("falls back to the donor's confirm-with-team pricing copy otherwise", async () => {
-    const html = await renderMembership([community]);
-
-    expect(html).toContain(bundles.en.Membership.pricing.fallbackCopy);
-  });
-
-  it("falls back to the confirm-with-team copy when only one of the two named tiers resolves", async () => {
-    // Discriminates pricingReady's AND from an OR regression: startup alone resolving
-    // must not be enough to claim both fees are confirmed. Under OR this would incorrectly
-    // show readyCopy; the two pre-existing pricing tests (both tiers, or neither) can't
-    // tell AND from OR apart.
-    const html = await renderMembership([community, startup]);
-
-    expect(html).toContain(bundles.en.Membership.pricing.fallbackCopy);
-    expect(html).not.toContain(bundles.en.Membership.pricing.readyCopy);
-  });
-
-  it("renders exactly one honest unavailable state for an empty catalog, unchanged", async () => {
+  it("still shows the ops prices when the database catalog is empty", async () => {
     const html = await renderMembership([]);
 
-    expect(html.match(/Membership is currently unavailable/g)).toHaveLength(1);
-    expect(html).not.toContain('class="plan-grid"');
+    expect(html).toContain('class="plan-grid"');
+    expect(html).toContain("HK$500");
+    expect(html).toContain(bundles.en.Membership.pricing.readyCopy);
+    expect(html).not.toContain("Membership is currently unavailable");
   });
 
   it("renders the 12-tile membership-dimensions panel", async () => {
