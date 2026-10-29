@@ -31,11 +31,11 @@ export async function isolatedBatchDatabase() {
       }
     }
     await pool.query(`
-      CREATE TABLE profiles (id text PRIMARY KEY, display_name text NOT NULL, email text, phone text, job_title text, locale text NOT NULL, role text NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
+      CREATE TABLE profiles (id text PRIMARY KEY, auth_user_id text UNIQUE, display_name text NOT NULL, email text, phone text, job_title text, locale text NOT NULL, role text NOT NULL, directory_visible boolean NOT NULL DEFAULT false, updated_at timestamptz NOT NULL DEFAULT now());
       CREATE TABLE companies (id uuid PRIMARY KEY, display_name text NOT NULL);
       CREATE TABLE company_members (user_id text NOT NULL, company_id uuid NOT NULL, revoked_at timestamptz);
-      CREATE TABLE membership_plans (code text PRIMARY KEY, seat_allowance integer NOT NULL);
-      CREATE TABLE memberships (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_user_id text, company_id uuid, plan_code text NOT NULL, status text NOT NULL, seat_limit integer NOT NULL DEFAULT 0, billing_period_end timestamptz, stripe_customer_id text, stripe_subscription_id text, updated_at timestamptz NOT NULL DEFAULT now());
+      CREATE TABLE membership_plans (code text PRIMARY KEY, seat_allowance integer NOT NULL, audience text NOT NULL DEFAULT 'legacy', billing_behavior text NOT NULL DEFAULT 'checkout', annual_price_hkd integer, active boolean NOT NULL DEFAULT true);
+      CREATE TABLE memberships (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_user_id text, company_id uuid, plan_code text NOT NULL, status text NOT NULL, seat_limit integer NOT NULL DEFAULT 0, billing_interval text NOT NULL DEFAULT 'annual', billing_period_start timestamptz, billing_period_end timestamptz, stripe_customer_id text, stripe_subscription_id text, updated_at timestamptz NOT NULL DEFAULT now());
       CREATE UNIQUE INDEX memberships_owner_live_unique ON memberships (owner_user_id) WHERE owner_user_id IS NOT NULL AND status NOT IN ('cancelled','expired');
       CREATE TABLE engagement_scores (profile_id text PRIMARY KEY, score numeric NOT NULL);
       CREATE TABLE contacts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id text, display_name text, email text, source text, stage text, owner_profile_id text, tags text[] NOT NULL DEFAULT ARRAY[]::text[], locale text NOT NULL DEFAULT 'en', whatsapp_opt_in boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());

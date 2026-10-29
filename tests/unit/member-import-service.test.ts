@@ -5,7 +5,8 @@ import {uploadMemberImport, validateMemberImport, confirmMemberImport, type Impo
 const staff = {kind: "staff", userId: "staff", profileId: "staff"} as const;
 const member = {kind: "member", userId: "member", profileId: "member"} as const;
 const id = "11111111-1111-4111-8111-111111111111";
-const store = {upload: vi.fn(async () => ({uploadId: id, headers: ["Email"], rowCount: 1})), validate: vi.fn(async () => ({runId: id, state: "validated", total: 1, create: 1, update: 0, unchanged: 0, duplicate: 0, conflict: 0, invalid: 0})), confirm: vi.fn(async () => ({runId: id, state: "confirmed", total: 1, create: 1, update: 0, unchanged: 0, duplicate: 0, conflict: 0, invalid: 0}))};
+const emptyCounts = {total: 1, create: 1, update: 0, unchanged: 0, duplicate: 0, conflict: 0, invalid: 0, wouldCreateMembership: 0, wouldSetExpired: 0, contactOnly: 0, skipped: 0};
+const store = {upload: vi.fn(async () => ({uploadId: id, headers: ["Email"], rowCount: 1})), validate: vi.fn(async () => ({runId: id, state: "validated", ...emptyCounts})), confirm: vi.fn(async () => ({runId: id, state: "confirmed", ...emptyCounts}))};
 
 describe("member import actor and payload boundary", () => {
   it("authorizes before parsing bytes and rejects forged actors or privileged mappings", async () => {

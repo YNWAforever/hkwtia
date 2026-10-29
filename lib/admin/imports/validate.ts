@@ -1,9 +1,9 @@
 import {z} from "zod";
 
+import {decideMembershipImport, isLegacyMemberKey, normaliseMappedMembershipFields} from "@/lib/admin/imports/membership-decision";
 import type {ParsedMemberImport} from "@/lib/admin/imports/parse";
-import {MEMBERSHIP_PLAN_CODES} from "@/lib/membership/constants";
 
-export const importMappingSchema = z.object({profileId: z.string().min(1).max(100).optional(), displayName: z.string().min(1).max(100).optional(), email: z.string().min(1).max(100).optional(), locale: z.string().min(1).max(100).optional(), planCode: z.string().min(1).max(100).optional(), renewalAt: z.string().min(1).max(100).optional(), tags: z.string().min(1).max(100).optional(), ownerProfileId: z.string().min(1).max(100).optional()}).strict().refine((mapping) => !!(mapping.profileId || mapping.email), "IMPORT_IDENTITY_MAPPING_REQUIRED");
+export const importMappingSchema = z.object({profileId: z.string().min(1).max(100).optional(), displayName: z.string().min(1).max(100).optional(), email: z.string().min(1).max(100).optional(), locale: z.string().min(1).max(100).optional(), tier: z.string().min(1).max(100).optional(), membershipStatus: z.string().min(1).max(100).optional(), expiryAt: z.string().min(1).max(100).optional(), renewAt: z.string().min(1).max(100).optional(), joinedAt: z.string().min(1).max(100).optional(), legacyMemberId: z.string().min(1).max(100).optional(), planCode: z.string().min(1).max(100).optional(), renewalAt: z.string().min(1).max(100).optional(), tags: z.string().min(1).max(100).optional(), ownerProfileId: z.string().min(1).max(100).optional()}).strict().refine((mapping) => !!(mapping.profileId || mapping.email), "IMPORT_IDENTITY_MAPPING_REQUIRED");
 export type ImportMapping = z.infer<typeof importMappingSchema>;
 export type ImportValidationRow = Readonly<{rowNumber: number; status: "update_candidate" | "new_contact_candidate" | "duplicate" | "invalid"; reasons: readonly string[]; values: Readonly<Record<string, unknown>>}>;
 
@@ -14,8 +14,10 @@ function validDay(value: string): boolean {
   return date.getUTCFullYear() === year && date.getUTCMonth() + 1 === month && date.getUTCDate() === day;
 }
 
+const DATE_FIELDS = ["renewalAt", "expiryAt", "renewAt", "joinedAt"] as const;
+
 /** Validation is advisory. Matching and commit still re-read trusted profile/contact rows in the database. */
-export function validateMemberImportRows(parsed: ParsedMemberImport, input: ImportMapping): readonly ImportValidationRow[] {
+export function validateMemberImportRows(parsed: ParsedMemberImport, input: ImportMapping, options: Readonly<{membershipWrites?: boolean}> = {}): readonly ImportValidationRow[] {
   const mapping = importMappingSchema.parse(input);
   const columns = Object.values(mapping);
   if (new Set(columns).size !== columns.length || columns.some((column) => !parsed.headers.includes(column))) throw new Error("IMPORT_MAPPING_INVALID");
@@ -30,6 +32,8 @@ export function validateMemberImportRows(parsed: ParsedMemberImport, input: Impo
     }
     const profileId = values.profileId;
     if (profileId !== undefined && (typeof profileId !== "string" || profileId.length > 200)) reasons.push("PROFILE_ID_INVALID");
+    // IN00001-style register keys are not profiles.id. Mapping that column onto the trusted member id must not look up or create a profile.
+    if (typeof profileId === "string" && isLegacyMemberKey(profileId)) reasons.push("LEGACY_MEMBER_ID_NOT_PROFILE");
     const name = values.displayName;
     if (name !== undefined && (typeof name !== "string" || name.length > 200)) reasons.push("DISPLAY_NAME_INVALID");
     const email = values.email;
@@ -42,8 +46,14 @@ export function validateMemberImportRows(parsed: ParsedMemberImport, input: Impo
     }
     if (!profileId && !email) reasons.push("IDENTITY_MISSING");
     if (values.locale !== undefined && values.locale !== "en" && values.locale !== "zh-HK") reasons.push("LOCALE_INVALID");
-    if (values.planCode !== undefined && !(MEMBERSHIP_PLAN_CODES as readonly string[]).includes(String(values.planCode))) reasons.push("PLAN_INVALID");
-    if (values.renewalAt !== undefined && !validDay(String(values.renewalAt))) reasons.push("DATE_INVALID");
+    normaliseMappedMembershipFields(values, reasons);
+    if (DATE_FIELDS.some((field) => values[field] !== undefined && !validDay(String(values[field])))) reasons.push("DATE_INVALID");
+    if (values.legacyMemberId !== undefined && String(values.legacyMemberId).length > 64) reasons.push("LEGACY_MEMBER_ID_INVALID");
+    if (options.membershipWrites) {
+      const decision = decideMembershipImport(values);
+      values.membershipDecision = decision;
+      if (decision.outcome === "skipped" && decision.reason) reasons.push(decision.reason);
+    }
     if (values.tags !== undefined) {
       const tags = String(values.tags).split(";").map((value) => value.trim()).filter(Boolean);
       if (tags.length > 10 || tags.some((tag) => tag.length > 30)) reasons.push("TAGS_INVALID");
