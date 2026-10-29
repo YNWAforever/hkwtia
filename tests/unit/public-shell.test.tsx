@@ -231,10 +231,13 @@ describe("public shell server surfaces", () => {
     expect(marked[0]).toHaveAttribute("href", "/events");
   });
 
-  it("marks the event-first trigger and keeps the trigger hook", async () => {
-    const markup = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
-    expect(markup).toContain("nav-button event-first");
-    expect(markup).toContain('data-navigation-trigger="events-programmes"');
-    expect(markup).toContain('class="desktop-nav"');
+  it("keeps the event-first overview usable before desktop menu enhancement", async () => {
+    render(await SiteHeader({locale: "en", hasAnnouncement: true}));
+    const nav = screen.getByRole("navigation", {name: "Primary navigation"});
+    expect(nav).toHaveClass("desktop-nav");
+    expect(within(nav).getByRole("link", {name: "Events & Programmes"}))
+      .toHaveClass("nav-button", "event-first");
+    expect(within(nav).getByRole("link", {name: "Events & Programmes"}))
+      .toHaveAttribute("href", "/events");
   });
 });

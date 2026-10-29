@@ -1,7 +1,7 @@
 import {Suspense} from "react";
 import {getTranslations} from "next-intl/server";
 
-import {DesktopMegaNavigation} from "@/components/layout/desktop-mega-navigation";
+import {DeferredDesktopNavigation} from "@/components/layout/deferred-desktop-navigation";
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {HeaderShell} from "@/components/layout/header-shell";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
@@ -55,7 +55,8 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
       <div className="header-inner" inert={navigationPending} aria-hidden={navigationPending || undefined}>
         <DualBrandLockup labels={brand} priority />
         <Suspense fallback={<div aria-hidden="true" className="desktop-nav" />}>
-          {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DesktopMegaNavigation
+          {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DeferredDesktopNavigation
+            locale={locale}
             groups={navigation.groups}
             primaryLabel={t("primaryLabel")}
             exploreLabel={t("explore")}

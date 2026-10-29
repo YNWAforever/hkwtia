@@ -10,6 +10,7 @@ import {Link} from '@/i18n/navigation';
 // integration manifest's `photos` provenance. It replaced the /images/projects-hero.jpg
 // placeholder that stood in until the donor photography was cleared for use.
 const HERO_IMAGE = '/archive/tech-connect-ai-leaders.webp';
+const HERO_SRC_SET = '/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w';
 
 // Donor top-spanning scrim (design doc §2, closes E-47): app/styles/wisetech.css:92 .hero;
 // :93 .hero-image/.hero-scrim/.network-field; :99 .hero-content; :102 .hero-actions;
@@ -20,9 +21,12 @@ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
 
   return (
     <section className="hero defer-following-sections" aria-labelledby="hero-title">
+      {/* React hoists the responsive hint into the head, including during a streamed render.
+          Use the picture's exact candidates so the hint never downloads a second photograph. */}
+      <link rel="preload" as="image" href={image} imageSrcSet={HERO_SRC_SET} imageSizes="100vw" fetchPriority="high" />
       <picture>
         {/* Same pinned photograph, resized offline. The first request needs no server transform. */}
-        <source type="image/webp" sizes="100vw" srcSet="/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w" />
+        <source type="image/webp" sizes="100vw" srcSet={HERO_SRC_SET} />
         <Image alt={t('imageAlt')} className="hero-image" fill loading="eager" fetchPriority="high" sizes="100vw" src={image} unoptimized />
       </picture>
       <div className="hero-scrim" aria-hidden="true" />
