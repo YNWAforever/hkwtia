@@ -31,6 +31,7 @@ export function DualBrandLockup({labels, priority = false, className}: DualBrand
       className={cn("brand min-h-11 min-w-11 max-w-full", className)}
       href="/"
       aria-label={labels.homeLabel}
+      prefetch={false}
     >
       <span className="brand-logo-wrap">
         <Image

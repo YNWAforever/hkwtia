@@ -47,6 +47,11 @@ const brand = {
   logoAlt: "WTIA",
 };
 
+async function openMenu() {
+  fireEvent.click(screen.getByRole("button", {name: labels.open}));
+  return screen.findByRole("dialog");
+}
+
 describe("MobileNavigation", () => {
   beforeEach(() => { route.pathname = "/events"; });
   afterEach(async () => {
@@ -64,10 +69,9 @@ describe("MobileNavigation", () => {
     expect(screen.getByRole("button", {name: labels.open})).toBeEnabled();
   });
 
-  it("puts event and join actions first, then utilities, the eyebrow and the four groups", () => {
+  it("puts event and join actions first, then utilities, the eyebrow and the four groups", async () => {
     render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />);
-    fireEvent.click(screen.getByRole("button", {name: labels.open}));
-    const dialog = screen.getByRole("dialog");
+    const dialog = await openMenu();
 
     const priority = within(dialog).getByTestId("mobile-priority-actions");
     const priorityLinks = within(priority).getAllByRole("link");
@@ -90,9 +94,9 @@ describe("MobileNavigation", () => {
     expect(dialog.querySelector(".mobile-accordion")!.children[0].tagName).toBe("H3");
   });
 
-  it("shows at most five leaves per group and closes each panel with a view-all link", () => {
+  it("shows at most five leaves per group and closes each panel with a view-all link", async () => {
     render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />);
-    fireEvent.click(screen.getByRole("button", {name: labels.open}));
+    await openMenu();
     fireEvent.click(screen.getByRole("button", {name: "groups.eventsProgrammes.label"}));
 
     const panel = document.querySelector(".mobile-accordion-panel")!;
@@ -109,7 +113,7 @@ describe("MobileNavigation", () => {
   it("opens a group, marks the exact current leaf, closes on navigation, and returns focus", async () => {
     render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />);
     const trigger = screen.getByRole("button", {name: labels.open});
-    fireEvent.click(trigger);
+    await openMenu();
     fireEvent.click(screen.getByRole("button", {name: "groups.eventsProgrammes.label"}));
     const eventLink = screen.getByRole("link", {name: "links.events"});
     expect(eventLink).toHaveAttribute("aria-current", "page");
@@ -131,7 +135,7 @@ describe("MobileNavigation", () => {
     // referentially identical to the last one (tests/unit/concierge-shell.test.tsx:80-82).
     const menu = () => <MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />;
     const view = render(menu());
-    fireEvent.click(screen.getByRole("button", {name: labels.open}));
+    await openMenu();
     fireEvent.click(screen.getByRole("button", {name: "groups.eventsProgrammes.label"}));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
@@ -140,7 +144,7 @@ describe("MobileNavigation", () => {
 
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     // Reopening starts from the top rather than on the group the reader left two pages ago.
-    fireEvent.click(screen.getByRole("button", {name: labels.open}));
+    await openMenu();
     expect(screen.getByRole("button", {name: "groups.eventsProgrammes.label"}))
       .toHaveAttribute("aria-expanded", "false");
   });
@@ -148,13 +152,13 @@ describe("MobileNavigation", () => {
   it("resets stale accordion state after Escape and reopen", async () => {
     render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />);
     const trigger = screen.getByRole("button", {name: labels.open});
-    fireEvent.click(trigger);
+    await openMenu();
     const group = screen.getByRole("button", {name: "groups.eventsProgrammes.label"});
     fireEvent.click(group);
     expect(group).toHaveAttribute("aria-expanded", "true");
     fireEvent.keyDown(screen.getByRole("dialog"), {key: "Escape"});
     await waitFor(() => expect(trigger).toHaveFocus());
-    fireEvent.click(trigger);
+    await openMenu();
     expect(screen.getByRole("button", {name: "groups.eventsProgrammes.label"})).toHaveAttribute("aria-expanded", "false");
   });
   it("closes and resets after the locale action while preserving locale navigation", async () => {
@@ -163,14 +167,14 @@ describe("MobileNavigation", () => {
     window.history.replaceState(null, "", "/events?filter=member#schedule");
     render(<MobileNavigation locale="en" navigation={navigation} labels={labels} brand={brand} />);
     const trigger = screen.getByRole("button", {name: labels.open});
-    fireEvent.click(trigger);
+    await openMenu();
     const group = screen.getByRole("button", {name: "groups.eventsProgrammes.label"});
     fireEvent.click(group);
     fireEvent.click(screen.getByRole("button", {name: labels.switchToChinese}));
     expect(routerReplace).toHaveBeenCalledWith("/events?filter=member#schedule", {locale: "zh-HK"});
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(trigger).toHaveFocus();
-    fireEvent.click(trigger);
+    await openMenu();
     expect(screen.getByRole("button", {name: "groups.eventsProgrammes.label"})).toHaveAttribute("aria-expanded", "false");
   });
 });

@@ -68,8 +68,10 @@ describe("public shell server surfaces", () => {
     expect(screen.getByRole("link", {name: join})).toHaveAttribute("href", "/join");
     expect(screen.getByRole("link", {name: search})).toHaveAttribute("href", "/showcase");
     expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("src", "/images/wtia-logo.png");
-    expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("data-priority", "true");
-    expect(imagePriorities).toContain(true);
+    // priority preloads the logo ahead of the page hero. The homepage LCP is the
+    // hero photograph, so the header mark stays on next/image's lazy default.
+    expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("data-priority", "false");
+    expect(imagePriorities).not.toContain(true);
     view.unmount();
   });
 

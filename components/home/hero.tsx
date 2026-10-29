@@ -10,7 +10,13 @@ import {Link} from '@/i18n/navigation';
 // integration manifest's `photos` provenance. It replaced the /images/projects-hero.jpg
 // placeholder that stood in until the donor photography was cleared for use.
 const HERO_IMAGE = '/archive/tech-connect-ai-leaders.webp';
-const HERO_SRC_SET = '/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w';
+// Weekly Lighthouse run 40850403806: the hero was the LCP element with an 841ms
+// load delay. The <picture> srcset is not visible to the preload scanner until
+// the body is parsed. React hoists this link into <head>, including during a
+// streamed render. href is the 960 candidate the mobile audit selects, and
+// imageSrcSet is the picture's exact list, so the hint does not download a
+// second photograph.
+const HERO_SOURCE_SET = '/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w';
 
 // Donor top-spanning scrim (design doc §2, closes E-47): app/styles/wisetech.css:92 .hero;
 // :93 .hero-image/.hero-scrim/.network-field; :99 .hero-content; :102 .hero-actions;
@@ -21,12 +27,10 @@ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
 
   return (
     <section className="hero defer-following-sections" aria-labelledby="hero-title">
-      {/* React hoists the responsive hint into the head, including during a streamed render.
-          Use the picture's exact candidates so the hint never downloads a second photograph. */}
-      <link rel="preload" as="image" href={image} imageSrcSet={HERO_SRC_SET} imageSizes="100vw" fetchPriority="high" />
+      <link rel="preload" as="image" href="/archive/tech-connect-ai-leaders-960.webp" imageSrcSet={HERO_SOURCE_SET} imageSizes="100vw" fetchPriority="high" type="image/webp" />
       <picture>
         {/* Same pinned photograph, resized offline. The first request needs no server transform. */}
-        <source type="image/webp" sizes="100vw" srcSet={HERO_SRC_SET} />
+        <source type="image/webp" sizes="100vw" srcSet={HERO_SOURCE_SET} />
         <Image alt={t('imageAlt')} className="hero-image" fill loading="eager" fetchPriority="high" sizes="100vw" src={image} unoptimized />
       </picture>
       <div className="hero-scrim" aria-hidden="true" />
@@ -40,8 +44,8 @@ export async function Hero({locale, copyOverrides}: HomeCopyProps) {
               registrations, and a first click must not land on an empty state. The route
               finder (#pathways) answers "where do I start" for every audience on this page. */}
           <ActionLink href="#pathways" variant="button">{t('actions.findRoute')}</ActionLink>
-          <ActionLink href="/join" variant="text-link-light">{t('actions.join')}</ActionLink>
-          <ActionLink href="/events" variant="text-link-light">{t('actions.findEvent')}</ActionLink>
+          <ActionLink href="/join" variant="text-link-light" prefetch={false}>{t('actions.join')}</ActionLink>
+          <ActionLink href="/events" variant="text-link-light" prefetch={false}>{t('actions.findEvent')}</ActionLink>
         </div>
       </div>
       <div className="hero-note">{t('note')}</div>

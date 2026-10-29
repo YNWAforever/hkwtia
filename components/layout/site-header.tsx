@@ -1,7 +1,7 @@
 import {Suspense} from "react";
 import {getTranslations} from "next-intl/server";
 
-import {DeferredDesktopNavigation} from "@/components/layout/deferred-desktop-navigation";
+import {DesktopNavGate} from "@/components/layout/desktop-nav-gate";
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {HeaderShell} from "@/components/layout/header-shell";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
@@ -53,9 +53,13 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
   return (
     <HeaderShell hasAnnouncement={hasAnnouncement}>
       <div className="header-inner" inert={navigationPending} aria-hidden={navigationPending || undefined}>
-        <DualBrandLockup labels={brand} priority />
+        {/* Not priority. priority (and loading="eager") makes React 19 preload the
+            logo ahead of the hero. Run 40850403806's homepage LCP was that hero, with
+            an 841ms load delay. The mark is ~88px and is in the header, so a lazy
+            default still fetches it as soon as it is laid out. */}
+        <DualBrandLockup labels={brand} />
         <Suspense fallback={<div aria-hidden="true" className="desktop-nav" />}>
-          {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DeferredDesktopNavigation
+          {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DesktopNavGate
             locale={locale}
             groups={navigation.groups}
             primaryLabel={t("primaryLabel")}
@@ -65,8 +69,10 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
         </Suspense>
         <div className="header-actions">
           {/* No search surface exists yet (spec §4.4 SearchPage row); the icon opens the
-              showcase, which is the only place a reader can look records up today. */}
-          <Link className="search-link" href="/showcase" aria-label={t("search")}>
+              showcase, which is the only place a reader can look records up today.
+              prefetch is off on these in-viewport links: the homepage trace prefetched
+              /join and /member-login while the hero was still loading. */}
+          <Link className="search-link" href="/showcase" aria-label={t("search")} prefetch={false}>
             <span aria-hidden="true">⌕</span>
           </Link>
           <LocaleSwitcher
@@ -78,11 +84,11 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
             switchToChineseLabel={mobileLabels.switchToChinese}
           />
           <WhatsAppLink className="signin-link" label={tWhatsApp("chat")} locale={locale} prefill={tWhatsApp("prefill.header")} source="header" />
-          <Link className="signin-link member-login-link" href={navigation.memberPortal.href}>
+          <Link className="signin-link member-login-link" href={navigation.memberPortal.href} prefetch={false}>
             {navigation.memberPortal.label}
           </Link>
           {/* Plain Link, not ActionLink: the donor's header button carries no arrow (errata E-16). */}
-          <Link className="button button-small" href={navigation.actions.join.href}>
+          <Link className="button button-small" href={navigation.actions.join.href} prefetch={false}>
             {navigation.actions.join.label}
           </Link>
           <Suspense fallback={<div aria-hidden="true" className="mobile-trigger" />}>

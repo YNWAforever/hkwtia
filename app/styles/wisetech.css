@@ -676,7 +676,15 @@ p,li,dd { line-height: 1.68; }
 .event-date-block time { text-shadow: 0 2px 18px rgba(0,0,0,.55); }
 .event-date-block span { color: white; }
 
-.gba-section { background-color: var(--wt-ink); background-image: linear-gradient(90deg,rgba(7,34,57,.97) 0%,rgba(15,76,129,.88) 48%,rgba(15,76,129,.38) 100%),url("/archive/asia-smart-shanghai.webp"); background-position: center; background-size: cover; }
+/* The full 1800px photograph is 168KB. Weekly Lighthouse run 40850403806
+ * fetched it during the homepage critical path, where it contended with the
+ * hero. The band is below the fold and covered by the same heavy gradient, so
+ * the painted result is a pre-sized derivative. The 960 candidate lives in a
+ * min-width query so a phone (the audit viewport) does not download it. */
+.gba-section { background-color: var(--wt-ink); background-image: linear-gradient(0deg,rgba(7,34,57,.97) 0%,rgba(15,76,129,.78) 62%,rgba(15,76,129,.46) 100%),url("/archive/asia-smart-shanghai-640.webp"); background-position: center; background-size: cover; }
+@media (min-width: 821px) {
+  .gba-section { background-image: linear-gradient(90deg,rgba(7,34,57,.97) 0%,rgba(15,76,129,.88) 48%,rgba(15,76,129,.38) 100%),url("/archive/asia-smart-shanghai-960.webp"); }
+}
 .gba-map { opacity: .52; }
 
 @media(max-width:1320px) {
@@ -697,7 +705,7 @@ p,li,dd { line-height: 1.68; }
   .event-card-v2 { grid-template-columns: 1fr; }
   .event-date-block { min-height: 240px; }
   .event-card-photo { object-position: center; }
-  .gba-section { background-image: linear-gradient(0deg,rgba(7,34,57,.97) 0%,rgba(15,76,129,.78) 62%,rgba(15,76,129,.46) 100%),url("/archive/asia-smart-shanghai.webp"); }
+  .gba-section { background-image: linear-gradient(0deg,rgba(7,34,57,.97) 0%,rgba(15,76,129,.78) 62%,rgba(15,76,129,.46) 100%),url("/archive/asia-smart-shanghai-640.webp"); }
 }
 
 @media(max-width:520px) {

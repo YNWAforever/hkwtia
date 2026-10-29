@@ -14,7 +14,10 @@ vi.mock("@/components/layout/dual-brand-lockup", () => ({DualBrandLockup: () => 
 vi.mock("@/components/layout/locale-switcher", () => ({LocaleSwitcher: () => null}));
 vi.mock("@/components/layout/mobile-navigation", () => ({MobileNavigation: () => <button>Mobile menu</button>}));
 vi.mock("@/components/marketing/whatsapp-link", () => ({WhatsAppLink: () => null}));
-vi.mock("@/i18n/navigation", () => ({Link: ({href, children, ...props}: React.ComponentProps<"a">) => <a href={href} {...props}>{children}</a>}));
+vi.mock("@/i18n/navigation", () => ({
+  usePathname: () => "/events",
+  Link: ({href, children, ...props}: React.ComponentProps<"a">) => <a href={href} {...props}>{children}</a>,
+}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key}));
 
 import {SiteHeader} from "@/components/layout/site-header";

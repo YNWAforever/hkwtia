@@ -67,6 +67,8 @@ describe("Hero", () => {
     expect(preload, "Discover the responsive LCP image before the streamed hero body").not.toBeNull();
     expect(preload).toHaveAttribute("imagesrcset", responsiveSource!.getAttribute("srcset"));
     expect(preload).toHaveAttribute("imagesizes", "100vw");
+    expect(preload).toHaveAttribute("fetchpriority", "high");
+    expect(preload).toHaveAttribute("type", "image/webp");
     const entries = responsiveSource!.getAttribute("srcset")!.split(",").map(entry => entry.trim().split(" "));
     expect(entries.map(entry => entry[1])).toEqual(["480w", "960w", "1800w"]);
     for (const [path] of entries) {
