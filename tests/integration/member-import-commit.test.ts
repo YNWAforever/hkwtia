@@ -58,6 +58,10 @@ describe.skipIf(!enabled)("member import staging on disposable PostgreSQL", () =
     for (const claim of claims) expect(await worker.executeClaim(claim, batchOperationHandlers.import_commit!, now)).toBe("settled");
     const final = await batches.preview(staff, batchId);
     expect(final).toMatchObject({state: "completed", counters: {succeeded: 2, failed: 0}});
+    const runState = await fixture.pool.query("SELECT state FROM member_import_runs WHERE id=$1", [run.runId]);
+    expect(runState.rows[0]?.state).toBe("committed");
+    const runAudit = await fixture.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE action='member.import.committed' AND target_id=$1", [run.runId]);
+    expect(runAudit.rows[0]?.n).toBe(1);
     const profile = await fixture.pool.query("SELECT locale FROM profiles WHERE id='a'");
     expect(profile.rows[0]?.locale).toBe("zh-HK");
     const contacts = await fixture.pool.query("SELECT email,source,profile_id FROM contacts WHERE email='brandnew@example.test'");
@@ -90,6 +94,9 @@ describe.skipIf(!enabled)("member import staging on disposable PostgreSQL", () =
     expect(await worker.executeClaim(claim!, batchOperationHandlers.import_commit!, now)).toBe("settled");
     const final = await batches.preview(staff, batchId);
     expect(final.counters.skipped).toBe(1);
+    expect(final.state).toBe("completed");
+    const runState = await fixture.pool.query("SELECT state FROM member_import_runs WHERE id=$1", [run.runId]);
+    expect(runState.rows[0]?.state).toBe("committed");
     const profile = await fixture.pool.query("SELECT locale FROM profiles WHERE id='a'");
     expect(profile.rows[0]?.locale).toBe("zh-HK");
     const auditAfter = await fixture.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE action='member.import.row.committed'");
