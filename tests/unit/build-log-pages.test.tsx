@@ -197,8 +197,8 @@ describe("published posts through news routes", () => {
 
   // D-1: the locale-specific record title, branded at runtime with that locale's separator.
   it.each([
-    ["en", "How we built the AI-Ops dashboard | WiseTech Hong Kong"],
-    ["zh-HK", "我們如何建立 AI 營運儀表板｜WiseTech Hong Kong"],
+    ["en", "How we built the AI-Ops dashboard | WTIA"],
+    ["zh-HK", "我們如何建立 AI 營運儀表板｜WTIA"],
   ])("selects the %s build-log title for metadata", async (locale, title) => {
     const metadata = await generateMetadata({
       params: Promise.resolve({locale, slug: summary.slug}),

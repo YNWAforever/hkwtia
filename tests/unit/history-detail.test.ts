@@ -211,7 +211,7 @@ describe("history detail pages", () => {
 
       expect(await generateMetadata({params: Promise.resolve({locale, slug: gallerySlug})})).toEqual(expected);
       expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
-      expect(expected.title.endsWith(locale === "zh-HK" ? "｜WiseTech Hong Kong" : " | WiseTech Hong Kong")).toBe(true);
+      expect(expected.title.endsWith(locale === "zh-HK" ? "｜WTIA" : " | WTIA")).toBe(true);
     }
   });
 

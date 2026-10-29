@@ -90,7 +90,7 @@ describe("/programs/cpai", () => {
       const expected = {
         locale,
         pathname: "/programs/cpai",
-        title: `${bundles[locale].programs.cpai.title}${locale === "zh-HK" ? "｜" : " | "}WiseTech Hong Kong`,
+        title: `${bundles[locale].programs.cpai.title}${locale === "zh-HK" ? "｜" : " | "}WTIA`,
         description: bundles[locale].programs.cpai.description,
         image: programs.find((item) => item.id === "cpai")!.image,
       };

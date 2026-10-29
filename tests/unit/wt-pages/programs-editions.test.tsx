@@ -120,7 +120,7 @@ describe("/programs/asa (representative of asa/hkict/tct)", () => {
       expect(metadata).toMatchObject({
         locale,
         pathname: `/programs/${id}`,
-        title: `${programme.title}${locale === "zh-HK" ? "｜" : " | "}WiseTech Hong Kong`,
+        title: `${programme.title}${locale === "zh-HK" ? "｜" : " | "}WTIA`,
         description: programme.description,
       });
       expect(metadata.title).not.toBe(programme.title);

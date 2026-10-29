@@ -18,13 +18,13 @@
     "closeMenu": "關閉選單"
   },
   "Metadata": {
-    "title": "WiseTech Hong Kong",
+    "title": "WTIA",
     "description": "連繫香港及大灣區創新力量，接通全球市場。"
   },
   "Navigation": {
     "brand": {
-      "publicName": "WiseTech Hong Kong",
-      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准"
+      "publicName": "WTIA",
+      "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台"
     },
     "groups": {
       "eventsProgrammes": {
@@ -97,7 +97,7 @@
     },
     "actions": {
       "findEvent": "尋找活動",
-      "join": "加入 WiseTech",
+      "join": "加入 WTIA",
       "memberSignIn": "會員登入"
     },
     "mobile": {
@@ -111,12 +111,12 @@
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
-    "menuDescription": "瀏覽 WiseTech Hong Kong 服務及切換語言。",
+    "menuDescription": "瀏覽 WTIA 服務及切換語言。",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "切換至中文",
-    "homeLabel": "WiseTech Hong Kong 首頁",
+    "homeLabel": "WTIA 首頁",
     "logoAlt": "WTIA",
     "primaryLabel": "主要導覽"
   },
@@ -127,12 +127,12 @@
   "Footer": {
     "staffSignIn": "職員登入",
     "brand": {
-      "publicName": "WiseTech Hong Kong",
-      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台",
-      "homeLabel": "WiseTech Hong Kong 首頁",
+      "publicName": "WTIA",
+      "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台",
+      "homeLabel": "WTIA 首頁",
       "logoAlt": "WTIA"
     },
-    "legalLine": "WiseTech Hong Kong 為 Hong Kong Wireless Technology Industry Association 的品牌名稱，中文法定名稱待正式批准。",
+    "legalLine": "香港無線科技商會（WTIA）。",
     "columns": {
       "explore": "探索",
       "membership": "會員",
@@ -147,16 +147,16 @@
       "submit": "準備活動通知電郵",
       "success": "你的電郵程式應會開啟並備妥查詢；本頁不會自動建立訂閱。",
       "error": "請輸入有效工作電郵。",
-      "mailSubject": "WiseTech 活動通知",
-      "mailBody": "請將 {email} 加入 WiseTech 活動通知名單。"
+      "mailSubject": "WTIA 活動通知",
+      "mailBody": "請將 {email} 加入 WTIA 活動通知名單。"
     },
-    "summary": "WiseTech Hong Kong 透過 WTIA 經核實的公開服務，連繫科技企業、專業人士及計劃。",
+    "summary": "WTIA 連繫香港無線科技社群的科技企業、專業人士及計劃。",
     "addressLines": [
       "香港觀塘鴻圖道 73-75 號",
       "KOHO 4 樓"
     ],
     "privacy": "私隱聲明",
-    "copyright": "© {year} WiseTech Hong Kong。由 WTIA 營運。版權所有。"
+    "copyright": "© {year} WTIA。版權所有。"
   },
   "Email": {
     "brand": "WTIA",
@@ -413,7 +413,7 @@
     }
   },
   "Unsubscribe": {
-    "metaTitle": "電郵偏好設定｜WiseTech Hong Kong",
+    "metaTitle": "電郵偏好設定｜WTIA",
     "metaDescription": "更新你的 WTIA 推廣電郵偏好。",
     "eyebrow": "電郵偏好設定",
     "confirmTitle": "停止接收 WTIA 推廣電郵？",
@@ -433,21 +433,21 @@
     }
   },
   "Home": {
-    "metaTitle": "WiseTech Hong Kong",
-    "metaDescription": "WiseTech Hong Kong 連接可信 AI+ 應用、活動、會員、方案、計劃及大灣區市場機遇。",
+    "metaTitle": "WTIA",
+    "metaDescription": "WTIA 連結香港無線科技社群的活動、會員、方案、計劃及大灣區市場機遇。",
     "hero": {
-      "eyebrow": "WiseTech Hong Kong",
+      "eyebrow": "香港無線科技",
       "title": "香港如何引領 AI+ 時代？",
-      "lead": "WiseTech Hong Kong 是 Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台，連結企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場。",
+      "lead": "WTIA 連結香港的無線科技社群，包括企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場，推動可信的 AI+ 應用。",
       "imageAlt": "WTIA Tech Connect 全民 AI 香港活動的講者及主辦團隊",
       "actions": {
         "findRoute": "找出你的路徑",
         "findEvent": "瀏覽活動",
-        "join": "加入 WiseTech",
+        "join": "加入 WTIA",
         "members": "探索會員及方案"
       },
-      "note": "WiseTech Hong Kong · AI+ 產業平台",
-      "discover": "探索 WiseTech"
+      "note": "WTIA · 香港無線科技商會",
+      "discover": "探索 WTIA"
     },
     "openNow": {
       "loading": "正在載入社群活動…",
@@ -730,7 +730,7 @@
     }
   },
   "About": {
-    "metaTitle": "關於我們｜WiseTech Hong Kong",
+    "metaTitle": "關於我們｜WTIA",
     "metaDescription": "了解 WTIA 在香港無線科技社群的角色。",
     "eyebrow": "關於 WTIA",
     "title": "凝聚無線科技業界的共同力量。",
@@ -757,7 +757,7 @@
     "historyLink": "閱讀我們的歷史"
   },
   "Chairman": {
-    "metaTitle": "主席的話｜WiseTech Hong Kong",
+    "metaTitle": "主席的話｜WTIA",
     "metaDescription": "WTIA 主席的話。",
     "eyebrow": "領導",
     "title": "主席的話",
@@ -767,7 +767,7 @@
     "signature": "WTIA 主席"
   },
   "Committees": {
-    "metaTitle": "委員會｜WiseTech Hong Kong",
+    "metaTitle": "委員會｜WTIA",
     "metaDescription": "了解 WTIA 委員會如何支援管治、計劃及會員。",
     "eyebrow": "管治",
     "title": "把參與轉化為行動的委員會。",
@@ -787,7 +787,7 @@
     }
   },
   "History": {
-    "metaTitle": "歷史｜WiseTech Hong Kong",
+    "metaTitle": "歷史｜WTIA",
     "metaDescription": "香港無線科技商會二十五年歷程，由2001年至2025年。",
     "eyebrow": "自2001年",
     "title": "我們的歷史",
@@ -806,7 +806,7 @@
   "Membership": {
     "compare": {"audience": "適合對象", "fee": "會費", "uses": "主要用途", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
-    "metaTitle": "會員計劃｜WiseTech Hong Kong",
+    "metaTitle": "會員計劃｜WTIA",
     "metaDescription": "比較 WTIA 會員級別及權益。",
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
@@ -981,7 +981,7 @@
     "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
     "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "invite": {
-      "metaTitle": "你的專屬邀請｜WiseTech Hong Kong",
+      "metaTitle": "你的專屬邀請｜WTIA",
       "welcomeNamed": "歡迎你，{name}",
       "welcome": "歡迎加入 WTIA",
       "invitedBy": "{inviter} 邀請你成為 WTIA {plan}會員。",
@@ -1001,7 +1001,7 @@
     },
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
-    "metaTitle": "會籍申請｜WiseTech Hong Kong",
+    "metaTitle": "會籍申請｜WTIA",
     "metaDescription": "網上申請 WTIA 會籍：選擇級別、建立帳戶，加入香港創科社群。",
     "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
     "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
@@ -1235,12 +1235,12 @@
     }
   },
   "Programmes": {
-    "metaTitle": "計劃總覽｜WiseTech Hong Kong",
+    "metaTitle": "計劃總覽｜WTIA",
     "metaDescription": "WTIA 計劃及獎項的正式紀錄：Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI，包括歷屆內容及下一步。",
     "hero": {
       "eyebrow": "計劃",
       "title": "把參與轉化為進步的計劃。",
-      "lead": "探索 WiseTech 生態系統的獎項、學習、市場拓展及產業發展計劃，每項均以 WTIA 自身的結構化紀錄為依據。",
+      "lead": "探索 WTIA 生態系統的獎項、學習、市場拓展及產業發展計劃，每項均以商會自身的結構化紀錄為依據。",
       "breadcrumbCurrent": "計劃總覽"
     },
     "groupings": {
@@ -1282,7 +1282,7 @@
     }
   },
   "Partners": {
-    "metaTitle": "合作夥伴｜WiseTech Hong Kong",
+    "metaTitle": "合作夥伴｜WTIA",
     "metaDescription": "WTIA 已發布的夥伴紀錄：支持機構、區域夥伴、媒體夥伴、計劃夥伴及贊助機構，每項均已確認合作關係及標誌使用權。",
     "hero": {
       "eyebrow": "夥伴生態系統",
@@ -1334,7 +1334,7 @@
     }
   },
   "LaunchPad": {
-    "metaTitle": "創科起動｜WiseTech Hong Kong",
+    "metaTitle": "創科起動｜WTIA",
     "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",
     "eyebrow": "創科起動",
     "title": "協助科技團隊走向全球市場。",
@@ -1492,7 +1492,7 @@
     "clinicCta": "預約諮詢"
   },
   "Showcase": {
-    "metaTitle": "展示頁｜WiseTech Hong Kong",
+    "metaTitle": "展示頁｜WTIA",
     "metaDescription": "探索 WTIA 會員公司、產品及實用科技方案。",
     "detailFallbackDescription": "WTIA 會員展示",
     "eyebrow": "AI 展示",
@@ -1609,7 +1609,7 @@
     }
   },
   "Members": {
-    "metaTitle": "會員｜WiseTech Hong Kong",
+    "metaTitle": "會員｜WTIA",
     "metaDescription": "WTIA 會員名錄中的香港無線及 AI+ 科技企業。",
     "eyebrow": "會員名錄",
     "title": "WTIA 會員",
@@ -1653,7 +1653,7 @@
     }
   },
   "AiOps": {
-    "metaTitle": "公開 AI-Ops｜WiseTech Hong Kong",
+    "metaTitle": "公開 AI-Ops｜WTIA",
     "metaDescription": "公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。",
     "eyebrow": "公開 AI-Ops",
     "title": "公開量度 AI 營運",
@@ -1714,7 +1714,7 @@
     "operationsMethodology": "涵蓋智能助理結果、人工接手及重開案件。人手處理、覆核及返工分開計時；等候不計作職員工時。試點前須固定比較組。"
   },
   "Events": {
-    "metaTitle": "活動｜WiseTech Hong Kong",
+    "metaTitle": "活動｜WTIA",
     "metaDescription": "探索 WTIA 活動及社群聚會。",
     "eyebrow": "活動",
     "title": "活動",
@@ -1939,7 +1939,7 @@
     }
   },
   "News": {
-    "metaTitle": "消息｜WiseTech Hong Kong",
+    "metaTitle": "消息｜WTIA",
     "metaDescription": "閱讀 WTIA 最新消息。",
     "eyebrow": "消息",
     "title": "WTIA 最新消息",
@@ -1970,7 +1970,7 @@
     }
   },
   "Contact": {
-    "metaTitle": "聯絡我們｜WiseTech Hong Kong",
+    "metaTitle": "聯絡我們｜WTIA",
     "metaDescription": "聯絡香港無線科技商會。",
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
@@ -2047,11 +2047,11 @@
       }
     },
     "conciergeTitle": "未確定從哪裡開始？",
-    "conciergeDescription": "透過 WTIA 現有的 Concierge 諮詢 WiseTech。",
-    "conciergeLauncher": "問 WiseTech"
+    "conciergeDescription": "向 WTIA 查詢會籍、活動及計劃。",
+    "conciergeLauncher": "問 WTIA"
   },
   "Privacy": {
-    "metaTitle": "私隱｜WiseTech Hong Kong",
+    "metaTitle": "私隱｜WTIA",
     "metaDescription": "WTIA 平台如何收集、使用及保存你的資料。",
     "eyebrow": "私隱",
     "title": "我們如何處理你的資料",
@@ -2162,7 +2162,7 @@
     ]
   },
   "RefundPolicy": {
-    "metaTitle": "退款政策｜WiseTech Hong Kong",
+    "metaTitle": "退款政策｜WTIA",
     "metaDescription": "WTIA 如何及何時就付費門票訂單退款，以及我們取消活動時的安排。",
     "eyebrow": "政策",
     "title": "退款政策",
@@ -2201,7 +2201,7 @@
     ]
   },
   "AiTransparency": {
-    "metaTitle": "AI 透明度｜WiseTech Hong Kong",
+    "metaTitle": "AI 透明度｜WTIA",
     "metaDescription": "WTIA Concierge 的運作方式、能力範圍，以及何時交由真人接手。",
     "eyebrow": "AI 透明度",
     "title": "WTIA Concierge 如何運作",
@@ -2927,10 +2927,10 @@
   },
   "Concierge": {
     "_review": true,
-    "launcher": "問 WiseTech",
+    "launcher": "問 WTIA",
     "transparency": "了解智能助理運作方式",
     "prompts": {
-      "home": ["WiseTech 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
+      "home": ["WTIA 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
       "membership": ["哪種會籍適合我的機構？", "初創企業可獲得甚麼權益？"],
       "showcase": ["尋找服務中小企的供應商", "引薦流程如何運作？"],
       "events": ["哪些活動適合零售業？", "顯示粵語活動"]

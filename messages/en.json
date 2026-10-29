@@ -17,12 +17,12 @@
     "closeMenu": "Close menu"
   },
   "Metadata": {
-    "title": "WiseTech Hong Kong",
+    "title": "WTIA",
     "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
   },
   "Navigation": {
     "brand": {
-      "publicName": "WiseTech Hong Kong",
+      "publicName": "WTIA",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association"
     },
     "groups": {
@@ -96,7 +96,7 @@
     },
     "actions": {
       "findEvent": "Find an event",
-      "join": "Join WiseTech",
+      "join": "Join WTIA",
       "memberSignIn": "Member sign in"
     },
     "mobile": {
@@ -110,12 +110,12 @@
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
-    "menuDescription": "Explore WiseTech Hong Kong journeys and change language.",
+    "menuDescription": "Explore WTIA journeys and change language.",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "Switch to Chinese",
-    "homeLabel": "WiseTech Hong Kong home",
+    "homeLabel": "WTIA home",
     "logoAlt": "WTIA",
     "primaryLabel": "Primary navigation"
   },
@@ -126,12 +126,12 @@
   "Footer": {
     "staffSignIn": "Staff sign in",
     "brand": {
-      "publicName": "WiseTech Hong Kong",
+      "publicName": "WTIA",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
-      "homeLabel": "WiseTech Hong Kong home",
+      "homeLabel": "WTIA home",
       "logoAlt": "WTIA"
     },
-    "legalLine": "WiseTech Hong Kong — the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association.",
+    "legalLine": "Hong Kong Wireless Technology Industry Association (WTIA).",
     "columns": {
       "explore": "Explore",
       "membership": "Membership",
@@ -146,17 +146,17 @@
       "submit": "Prepare activity-update email",
       "success": "Your email app should open with a prepared request. This page does not create a subscription automatically.",
       "error": "Enter a valid work email.",
-      "mailSubject": "WiseTech activity updates",
-      "mailBody": "Please add {email} to the WiseTech activity update list."
+      "mailSubject": "WTIA activity updates",
+      "mailBody": "Please add {email} to the WTIA activity update list."
     },
-    "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
+    "summary": "WTIA connects technology businesses, practitioners and programmes across Hong Kong's wireless technology community.",
     "addressLines": [
       "4/F, KOHO",
       "73-75 Hung To Road",
       "Kwun Tong, Hong Kong"
     ],
     "privacy": "Privacy statement",
-    "copyright": "© {year} WiseTech Hong Kong. Operated by WTIA. All rights reserved."
+    "copyright": "© {year} WTIA. All rights reserved."
   },
   "Email": {
     "brand": "WTIA",
@@ -413,7 +413,7 @@
     }
   },
   "Unsubscribe": {
-    "metaTitle": "Email preferences | WiseTech Hong Kong",
+    "metaTitle": "Email preferences | WTIA",
     "metaDescription": "Update your WTIA marketing email preference.",
     "eyebrow": "Email preferences",
     "confirmTitle": "Stop WTIA marketing email?",
@@ -433,21 +433,21 @@
     }
   },
   "Home": {
-    "metaTitle": "WiseTech Hong Kong",
-    "metaDescription": "WiseTech Hong Kong connects trusted AI+ adoption, events, members, solutions, programmes and GBA market opportunities.",
+    "metaTitle": "WTIA",
+    "metaDescription": "WTIA connects Hong Kong's wireless technology community through events, members, solutions, programmes and Greater Bay Area opportunities.",
     "hero": {
-      "eyebrow": "WiseTech Hong Kong",
+      "eyebrow": "Hong Kong wireless technology",
       "title": "How can Hong Kong lead the AI+ era?",
-      "lead": "WiseTech Hong Kong is the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association — connecting corporates, SMEs, startups, professionals, academia, investors, public bodies, GBA partners and international markets.",
+      "lead": "WTIA connects Hong Kong's wireless technology community — corporates, SMEs, startups, professionals, academia, investors, public bodies, Greater Bay Area partners and international markets — around trusted AI+ adoption.",
       "imageAlt": "Speakers and organisers at WTIA Tech Connect AI for ALL in Hong Kong",
       "actions": {
         "findRoute": "Find your route",
         "findEvent": "Browse events",
-        "join": "Join WiseTech",
+        "join": "Join WTIA",
         "members": "Explore Members & Solutions"
       },
-      "note": "WiseTech Hong Kong · AI+ Industry Platform",
-      "discover": "Discover WiseTech"
+      "note": "WTIA · Hong Kong Wireless Technology Industry Association",
+      "discover": "Discover WTIA"
     },
     "openNow": {
       "loading": "Loading community opportunities…",
@@ -730,7 +730,7 @@
     }
   },
   "About": {
-    "metaTitle": "About | WiseTech Hong Kong",
+    "metaTitle": "About | WTIA",
     "metaDescription": "Learn about WTIA's role in Hong Kong's wireless technology community.",
     "eyebrow": "About WTIA",
     "title": "A connected voice for wireless technology.",
@@ -757,7 +757,7 @@
     "historyLink": "Read our history"
   },
   "Chairman": {
-    "metaTitle": "Chairman's Message | WiseTech Hong Kong",
+    "metaTitle": "Chairman's Message | WTIA",
     "metaDescription": "A message from the WTIA chairman.",
     "eyebrow": "Leadership",
     "title": "Chairman's message",
@@ -767,7 +767,7 @@
     "signature": "Chairman, WTIA"
   },
   "Committees": {
-    "metaTitle": "Committees | WiseTech Hong Kong",
+    "metaTitle": "Committees | WTIA",
     "metaDescription": "How WTIA committees support governance, programmes and members.",
     "eyebrow": "Governance",
     "title": "Committees that turn participation into action.",
@@ -787,7 +787,7 @@
     }
   },
   "History": {
-    "metaTitle": "History | WiseTech Hong Kong",
+    "metaTitle": "History | WTIA",
     "metaDescription": "Twenty-five years of the Hong Kong Wireless Technology Industry Association, 2001 to 2025.",
     "eyebrow": "Since 2001",
     "title": "Our history",
@@ -806,7 +806,7 @@
   "Membership": {
     "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "What you can do", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
     "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
-    "metaTitle": "Membership | WiseTech Hong Kong",
+    "metaTitle": "Membership | WTIA",
     "metaDescription": "Compare WTIA membership tiers and benefits.",
     "eyebrow": "Membership",
     "breadcrumbCurrent": "Membership",
@@ -981,7 +981,7 @@
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
     "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "invite": {
-      "metaTitle": "Your personal invitation | WiseTech Hong Kong",
+      "metaTitle": "Your personal invitation | WTIA",
       "welcomeNamed": "Welcome, {name}",
       "welcome": "Welcome to WTIA",
       "invitedBy": "{inviter} has invited you to join WTIA as a {plan} member.",
@@ -1001,7 +1001,7 @@
     },
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
-    "metaTitle": "Membership application | WiseTech Hong Kong",
+    "metaTitle": "Membership application | WTIA",
     "metaDescription": "Apply for WTIA membership online. Choose a tier, create your account and join Hong Kong's technology community.",
     "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
     "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
@@ -1235,12 +1235,12 @@
     }
   },
   "Programmes": {
-    "metaTitle": "Programmes | WiseTech Hong Kong",
+    "metaTitle": "Programmes | WTIA",
     "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions and where each leads next.",
     "hero": {
       "eyebrow": "Programmes",
       "title": "Programmes that turn participation into progress.",
-      "lead": "Explore awards, learning, market-access and industry-development programmes across the WiseTech ecosystem, each one backed by WTIA's own typed record.",
+      "lead": "Explore awards, learning, market-access and industry-development programmes across WTIA's ecosystem, each one backed by the association's own typed record.",
       "breadcrumbCurrent": "Programmes"
     },
     "groupings": {
@@ -1282,7 +1282,7 @@
     }
   },
   "Partners": {
-    "metaTitle": "Partners | WiseTech Hong Kong",
+    "metaTitle": "Partners | WTIA",
     "metaDescription": "WTIA's published partner records: supporting organisations, regional, media, programme and sponsor partners, each with a confirmed relationship and confirmed logo rights.",
     "hero": {
       "eyebrow": "Partner ecosystem",
@@ -1334,7 +1334,7 @@
     }
   },
   "LaunchPad": {
-    "metaTitle": "Launch Pad | WiseTech Hong Kong",
+    "metaTitle": "Launch Pad | WTIA",
     "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
@@ -1492,7 +1492,7 @@
     "clinicCta": "Book a clinic"
   },
   "Showcase": {
-    "metaTitle": "Showcase | WiseTech Hong Kong",
+    "metaTitle": "Showcase | WTIA",
     "metaDescription": "Discover WTIA member companies, products, and practical technology solutions.",
     "detailFallbackDescription": "WTIA member showcase",
     "eyebrow": "AI Showcase",
@@ -1609,7 +1609,7 @@
     }
   },
   "Members": {
-    "metaTitle": "Members | WiseTech Hong Kong",
+    "metaTitle": "Members | WTIA",
     "metaDescription": "Hong Kong wireless and AI+ technology companies in the WTIA member directory.",
     "eyebrow": "Member directory",
     "title": "WTIA members",
@@ -1653,7 +1653,7 @@
     }
   },
   "AiOps": {
-    "metaTitle": "AI-Ops in public | WiseTech Hong Kong",
+    "metaTitle": "AI-Ops in public | WTIA",
     "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",
     "eyebrow": "AI-Ops in public",
     "title": "Operational AI, measured in public",
@@ -1714,7 +1714,7 @@
     "operationsMethodology": "Include bot outcomes, human handoffs and reopened cases. Measure human work, review and rework separately; waiting is not staff work. Fix a comparison group before the pilot."
   },
   "Events": {
-    "metaTitle": "Events | WiseTech Hong Kong",
+    "metaTitle": "Events | WTIA",
     "metaDescription": "Discover WTIA events and community gatherings.",
     "eyebrow": "Events",
     "title": "Events",
@@ -1939,7 +1939,7 @@
     }
   },
   "News": {
-    "metaTitle": "News | WiseTech Hong Kong",
+    "metaTitle": "News | WTIA",
     "metaDescription": "Read the latest news from WTIA.",
     "eyebrow": "News",
     "title": "WTIA news",
@@ -1970,7 +1970,7 @@
     }
   },
   "Contact": {
-    "metaTitle": "Contact | WiseTech Hong Kong",
+    "metaTitle": "Contact | WTIA",
     "metaDescription": "Contact the Hong Kong Wireless Technology Industry Association.",
     "eyebrow": "Contact",
     "title": "Let's connect",
@@ -2047,11 +2047,11 @@
       }
     },
     "conciergeTitle": "Not sure where to start?",
-    "conciergeDescription": "Ask WiseTech through WTIA's existing Concierge.",
-    "conciergeLauncher": "Ask WiseTech"
+    "conciergeDescription": "Ask WTIA about membership, events and programmes.",
+    "conciergeLauncher": "Ask WTIA"
   },
   "Privacy": {
-    "metaTitle": "Privacy | WiseTech Hong Kong",
+    "metaTitle": "Privacy | WTIA",
     "metaDescription": "How the WTIA platform collects, uses and retains your information.",
     "eyebrow": "Privacy",
     "title": "How we handle your information",
@@ -2162,7 +2162,7 @@
     ]
   },
   "RefundPolicy": {
-    "metaTitle": "Refund policy | WiseTech Hong Kong",
+    "metaTitle": "Refund policy | WTIA",
     "metaDescription": "How and when WTIA refunds a paid ticket order, and what happens if we cancel an event.",
     "eyebrow": "Policy",
     "title": "Refund policy",
@@ -2201,7 +2201,7 @@
     ]
   },
   "AiTransparency": {
-    "metaTitle": "AI Transparency | WiseTech Hong Kong",
+    "metaTitle": "AI Transparency | WTIA",
     "metaDescription": "How the WTIA Concierge works, what it can do, and when a person takes over.",
     "eyebrow": "AI transparency",
     "title": "How the WTIA Concierge works",
@@ -2926,10 +2926,10 @@
     }
   },
   "Concierge": {
-    "launcher": "Ask WiseTech",
+    "launcher": "Ask WTIA",
     "transparency": "How this assistant works",
     "prompts": {
-      "home": ["How can WiseTech help my organisation?", "Show the AI+ industry pathways"],
+      "home": ["How can WTIA help my organisation?", "Show the AI+ industry pathways"],
       "membership": ["Which membership suits my organisation?", "What benefits do startups receive?"],
       "showcase": ["Find providers serving SMEs", "How do introductions work?"],
       "events": ["Which event is relevant to retail?", "Show Cantonese events"]

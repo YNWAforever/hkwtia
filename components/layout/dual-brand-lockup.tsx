@@ -6,7 +6,7 @@ import {cn} from "@/lib/utils";
 export type DualBrandLockupLabels = {
   homeLabel: string;
   publicName: string;
-  /** D-10: the association's own description of itself, including the zh legal-name note. */
+  /** The association name shown under the wordmark. */
   descriptor: string;
   logoAlt: string;
 };

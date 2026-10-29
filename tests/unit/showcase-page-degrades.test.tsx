@@ -70,8 +70,8 @@ describe("public Showcase detail metadata", () => {
   // D-1: a listing's name is a record title, so the page brands it at runtime with the locale's
   // separator -- never the retired "<name> | WTIA Showcase" shape, and never a bare name.
   it.each([
-    ["en", "Harbour Vision AI | WiseTech Hong Kong", "Public description"],
-    ["zh-HK", "港灣視野 AI｜WiseTech Hong Kong", "公開描述"],
+    ["en", "Harbour Vision AI | WTIA", "Public description"],
+    ["zh-HK", "港灣視野 AI｜WTIA", "公開描述"],
   ] as const)("brands the %s listing title and keeps the listing's own description", async (locale, title, description) => {
     showcase.getPublishedBySlug.mockResolvedValue(row);
 
