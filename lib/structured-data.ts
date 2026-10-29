@@ -19,7 +19,7 @@ export function buildOrganizationData(): WithContext<Organization> {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: siteConfig.name,
-    alternateName: ['WiseTech Hong Kong', 'HKWTA', 'WTIA'],
+    alternateName: ['HKWTA', 'WTIA'],
     description: siteConfig.defaultDescription,
     url: absoluteUrl('/'),
     logo: absoluteUrl(siteConfig.defaultImage),

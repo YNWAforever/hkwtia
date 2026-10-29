@@ -55,8 +55,8 @@ describe("page indexability", () => {
   it.each([
     ["join/checkout", joinCheckoutMetadata, "translated:metaTitle"],
     ["join/complete", joinCompleteMetadata, "translated:metaTitle"],
-    ["join/profile", joinProfileMetadata, "translated:profileTitle | WiseTech Hong Kong"],
-    ["join/company", joinCompanyMetadata, "translated:companyTitle | WiseTech Hong Kong"],
+    ["join/profile", joinProfileMetadata, "translated:profileTitle | WTIA"],
+    ["join/company", joinCompanyMetadata, "translated:companyTitle | WTIA"],
   ])("gives %s a branded tab title", async (_name, build, title) => {
     const metadata = await build({params, searchParams: Promise.resolve({})} as never);
     expect(metadata.title).toBe(title);
@@ -65,7 +65,7 @@ describe("page indexability", () => {
   it("brands the zh-HK join step titles with the fullwidth separator", async () => {
     const zhParams = Promise.resolve({locale: "zh-HK"});
     const metadata = await joinProfileMetadata({params: zhParams, searchParams: Promise.resolve({})} as never);
-    expect(metadata.title).toBe("translated:profileTitle｜WiseTech Hong Kong");
+    expect(metadata.title).toBe("translated:profileTitle｜WTIA");
   });
 
   it("lets the join entry page be indexed with full metadata", async () => {

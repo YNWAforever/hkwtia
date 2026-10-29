@@ -38,7 +38,7 @@ describe('share image', () => {
 
   it('defaults to a generated card titled with the page, not the transparent logo', () => {
     // The logo default (a 2001x721 transparent PNG) previewed as half a globe on black.
-    const url = imageOf(buildPageMetadata({locale: 'en', pathname: '/membership', title: 'Membership | WiseTech Hong Kong', description: 'd'}));
+    const url = imageOf(buildPageMetadata({locale: 'en', pathname: '/membership', title: 'Membership | WTIA', description: 'd'}));
 
     expect(url.pathname).toBe('/api/og');
     expect(url.searchParams.get('kind')).toBe('page');
@@ -46,15 +46,15 @@ describe('share image', () => {
   });
 
   it('drops the zh-HK fullwidth brand suffix from the card title', () => {
-    const url = imageOf(buildPageMetadata({locale: 'zh-HK', pathname: '/membership', title: '會員計劃｜WiseTech Hong Kong', description: 'd'}));
+    const url = imageOf(buildPageMetadata({locale: 'zh-HK', pathname: '/membership', title: '會員計劃｜WTIA', description: 'd'}));
 
     expect(url.searchParams.get('title')).toBe('會員計劃');
   });
 
   it('uses the brand as the card title when the page title is only the brand', () => {
-    const url = imageOf(buildPageMetadata({locale: 'en', pathname: '/', title: 'WiseTech Hong Kong', description: 'd'}));
+    const url = imageOf(buildPageMetadata({locale: 'en', pathname: '/', title: 'WTIA', description: 'd'}));
 
-    expect(url.searchParams.get('title')).toBe('WiseTech Hong Kong');
+    expect(url.searchParams.get('title')).toBe('WTIA');
   });
 
   it('keeps an image the page names, and sends the same one to Twitter', () => {

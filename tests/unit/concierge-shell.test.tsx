@@ -42,7 +42,7 @@ afterEach(() => {
 describe("Concierge shell", () => {
   it("wears the donor trigger with the W+ badge and the WiseTech label", () => {
     render(<ConciergeWidget locale="en" labels={labels} prompts={prompts} transparencyLabel={transparency} />);
-    const launcher = screen.getByRole("button", {name: "Ask WiseTech"});
+    const launcher = screen.getByRole("button", {name: "Ask WTIA"});
     expect(launcher).toHaveClass("concierge-trigger", "touch-manipulation");
     expect(within(launcher).getByText("W+")).toHaveAttribute("aria-hidden", "true");
   });
@@ -52,14 +52,14 @@ describe("Concierge shell", () => {
     vi.stubGlobal("fetch", fetchSpy);
     pathnameState.current = "/";
     render(<ConciergeWidget locale="en" labels={labels} prompts={prompts} transparencyLabel={transparency} />);
-    fireEvent.click(screen.getByRole("button", {name: "Ask WiseTech"}));
+    fireEvent.click(screen.getByRole("button", {name: "Ask WTIA"}));
 
-    const first = screen.getByRole("button", {name: "How can WiseTech help my organisation?"});
+    const first = screen.getByRole("button", {name: "How can WTIA help my organisation?"});
     expect(screen.getByRole("button", {name: "Show the AI+ industry pathways"})).toBeInTheDocument();
     fireEvent.click(first);
 
     const composer = screen.getByRole("textbox", {name: labels.messageLabel});
-    expect(composer).toHaveValue("How can WiseTech help my organisation?");
+    expect(composer).toHaveValue("How can WTIA help my organisation?");
     expect(composer).toHaveFocus();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -67,9 +67,9 @@ describe("Concierge shell", () => {
   it("picks the prompt set from the current section, locale prefix included", () => {
     pathnameState.current = "/zh/events";
     render(<ConciergeWidget locale="zh-HK" labels={labels} prompts={prompts} transparencyLabel={transparency} />);
-    fireEvent.click(screen.getByRole("button", {name: "Ask WiseTech"}));
+    fireEvent.click(screen.getByRole("button", {name: "Ask WTIA"}));
     expect(screen.getByRole("button", {name: "Which event is relevant to retail?"})).toBeInTheDocument();
-    expect(screen.queryByRole("button", {name: "How can WiseTech help my organisation?"})).toBeNull();
+    expect(screen.queryByRole("button", {name: "How can WTIA help my organisation?"})).toBeNull();
   });
 
   it("follows a soft navigation without remounting", () => {
@@ -84,16 +84,16 @@ describe("Concierge shell", () => {
       <ConciergeWidget locale="en" labels={labels} prompts={prompts} transparencyLabel={transparency} />
     );
     const view = render(widget());
-    const launcher = screen.getByRole("button", {name: "Ask WiseTech"});
+    const launcher = screen.getByRole("button", {name: "Ask WTIA"});
     fireEvent.click(launcher);
-    expect(screen.getByRole("button", {name: "How can WiseTech help my organisation?"})).toBeInTheDocument();
+    expect(screen.getByRole("button", {name: "How can WTIA help my organisation?"})).toBeInTheDocument();
 
     pathnameState.current = "/events";
     view.rerender(widget());
 
     expect(launcher).toBeInTheDocument();
     expect(screen.getByRole("button", {name: "Which event is relevant to retail?"})).toBeInTheDocument();
-    expect(screen.queryByRole("button", {name: "How can WiseTech help my organisation?"})).toBeNull();
+    expect(screen.queryByRole("button", {name: "How can WTIA help my organisation?"})).toBeNull();
   });
 
   it("stops offering openers once the transcript has a message", async () => {
@@ -102,8 +102,8 @@ describe("Concierge shell", () => {
     ])));
     pathnameState.current = "/";
     render(<ConciergeWidget locale="en" labels={labels} prompts={prompts} transparencyLabel={transparency} />);
-    fireEvent.click(screen.getByRole("button", {name: "Ask WiseTech"}));
-    fireEvent.click(screen.getByRole("button", {name: "How can WiseTech help my organisation?"}));
+    fireEvent.click(screen.getByRole("button", {name: "Ask WTIA"}));
+    fireEvent.click(screen.getByRole("button", {name: "How can WTIA help my organisation?"}));
     fireEvent.click(screen.getByRole("button", {name: labels.send}));
 
     // The chips go on the optimistic append inside sendTurn, before fetch resolves, so waiting
@@ -112,7 +112,7 @@ describe("Concierge shell", () => {
     // termination puts `labels.send` back.
     await waitFor(() =>
       expect(screen.getByRole("button", {name: labels.send})).toBeInTheDocument());
-    expect(screen.queryByRole("button", {name: "How can WiseTech help my organisation?"})).toBeNull();
+    expect(screen.queryByRole("button", {name: "How can WTIA help my organisation?"})).toBeNull();
     expect(screen.queryByRole("button", {name: "Show the AI+ industry pathways"})).toBeNull();
     expect(screen.queryByText(labels.empty)).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
@@ -121,14 +121,14 @@ describe("Concierge shell", () => {
   it("links the transparency page with a locale-correct href and hides it when unlabelled", () => {
     pathnameState.current = "/";
     const view = render(<ConciergeWidget locale="zh-HK" labels={labels} prompts={prompts} transparencyLabel={transparency} />);
-    fireEvent.click(screen.getByRole("button", {name: "Ask WiseTech"}));
+    fireEvent.click(screen.getByRole("button", {name: "Ask WTIA"}));
     expect(screen.getByRole("link", {name: transparency}))
       .toHaveAttribute("href", "/zh/ai-transparency");
     view.unmount();
 
     render(<ConciergeWidget locale="en" labels={labels} />);
-    fireEvent.click(screen.getByRole("button", {name: "Ask WiseTech"}));
+    fireEvent.click(screen.getByRole("button", {name: "Ask WTIA"}));
     expect(screen.queryByRole("link", {name: transparency})).toBeNull();
-    expect(screen.queryByRole("button", {name: "How can WiseTech help my organisation?"})).toBeNull();
+    expect(screen.queryByRole("button", {name: "How can WTIA help my organisation?"})).toBeNull();
   });
 });

@@ -141,7 +141,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
         showcase: {title: "Members and solutions"},
         launchpad: {title: "Launch Pad"},
       },
-      conciergeLauncher: "Ask WiseTech",
+      conciergeLauncher: "Ask WTIA",
     });
     expect(zh).toMatchObject({
       address: "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
@@ -154,7 +154,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
       },
       // Unified with Concierge.launcher in 4158b40: the shell launcher and this page's
       // launcher are the same control to a reader, so they carry one label.
-      conciergeLauncher: "問 WiseTech",
+      conciergeLauncher: "問 WTIA",
     });
   });
 });

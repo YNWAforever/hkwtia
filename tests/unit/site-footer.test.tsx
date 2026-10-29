@@ -123,7 +123,7 @@ describe("SiteFooter", () => {
     expect(within(footer).getByRole("button", {name: "Switch to Chinese"})).toBeInTheDocument();
     expect(within(footer).queryByRole("link", {name: /terms|accessibility/i})).toBeNull();
     expect(footer.querySelector(".footer-bottom small")?.textContent)
-      .toContain(`© ${new Date().getFullYear()} WiseTech Hong Kong.`);
+      .toContain(`© ${new Date().getFullYear()} WTIA.`);
   });
 
   /**
@@ -263,7 +263,7 @@ describe("SiteFooter", () => {
     const fallback = within(footer).getByRole("link", {name: "Prepare activity-update email"});
     expect(fallback).toHaveAttribute(
       "href",
-      `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent("WiseTech activity updates")}`,
+      `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent("WTIA activity updates")}`,
     );
 
     // Still offered after a successful handoff: the success panel replaces the form, and a
@@ -332,7 +332,7 @@ describe("SiteFooter", () => {
     expect(assign).toHaveBeenCalledTimes(1);
     const target = decodeURIComponent(assign.mock.calls[0]![0] as string);
     expect(target.startsWith(`mailto:${siteConfig.contact.email}?`)).toBe(true);
-    expect(target).toContain("subject=WiseTech activity updates");
+    expect(target).toContain("subject=WTIA activity updates");
     expect(target).toContain("body=reader@example.com");
     expect(target).not.toContain("undefined");
     expect(target).not.toContain("[object Object]");
@@ -347,7 +347,7 @@ describe("SiteFooter", () => {
     submit();
 
     const target = decodeURIComponent(assign.mock.calls[0]![0] as string);
-    expect(target).toContain("body=Please add reader@example.com to the WiseTech activity update list.");
+    expect(target).toContain("body=Please add reader@example.com to the WTIA activity update list.");
   });
 
   /**

@@ -1,6 +1,7 @@
 import {ImageResponse} from "next/og";
 import {z} from "zod";
 
+import {siteConfig} from "@/config/site";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl, hasUrlObfuscation} from "@/lib/media/url";
 import {renderOgCard} from "@/lib/og/renderers";
 import {resolveOgRenderer, type OgEntityKind} from "@/lib/og/resolve-renderer";
@@ -41,7 +42,7 @@ export async function GET(request: Request): Promise<Response> {
   // page entirely, so fall through to the card that needs nothing.
   const entity = parsed.success
     ? {kind: parsed.data.kind as OgEntityKind, title: parsed.data.title, eyebrow: parsed.data.eyebrow, imageUrl: safeImageUrl(url.searchParams.get("image"), url)}
-    : {kind: "page" as const, title: "WiseTech Hong Kong", eyebrow: "WTIA", imageUrl: null};
+    : {kind: "page" as const, title: siteConfig.publicBrand, eyebrow: siteConfig.shortName, imageUrl: null};
 
   const {renderer, props} = resolveOgRenderer(entity);
   return new ImageResponse(renderOgCard(renderer, props), {width: 1200, height: 630});
