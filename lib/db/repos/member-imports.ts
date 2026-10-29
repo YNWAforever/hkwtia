@@ -22,8 +22,8 @@ function rows(result: unknown): unknown[] {
   return [];
 }
 function first(result: unknown): unknown {return rows(result)[0];}
-const uploadSchema = z.object({id: z.string().uuid(), fileDigest: z.string(), parsedSnapshot: z.object({headers: z.array(z.string()), rows: z.array(z.object({rowNumber: z.number().int(), cells: z.record(z.string())}))}), expiresAt: z.coerce.date()});
-const runSchema = z.object({id: z.string().uuid(), state: z.enum(["validated", "confirmed", "committed", "expired"]), summary: z.record(z.number()), expiresAt: z.coerce.date()});
+const uploadSchema = z.object({id: z.string().uuid(), fileDigest: z.string(), parsedSnapshot: z.object({headers: z.array(z.string()), rows: z.array(z.object({rowNumber: z.number().int(), cells: z.record(z.string(), z.string())}))}), expiresAt: z.coerce.date()});
+const runSchema = z.object({id: z.string().uuid(), state: z.enum(["validated", "confirmed", "committed", "expired"]), summary: z.record(z.string(), z.number()), expiresAt: z.coerce.date()});
 const profileFactSchema = z.object({id: z.string(), role: z.string(), email: z.string().nullable(), locale: z.string(), updatedAt: z.string(), tags: z.array(z.string()).default([]), ownerProfileId: z.string().nullable()});
 const emailRow = z.object({id: z.string(), email: z.string()});
 const ownerRow = z.object({id: z.string(), role: z.string()});
@@ -123,7 +123,7 @@ export function createMemberImportRepository(loadDatabase: () => Promise<BatchDa
       const db = await loadDatabase();
       const run = runSchema.parse(first(await db.execute(sql`SELECT ${memberImportRuns.id} AS id, ${memberImportRuns.state} AS state, ${memberImportRuns.summary} AS summary, ${memberImportRuns.expiresAt} AS "expiresAt" FROM ${memberImportRuns} WHERE ${memberImportRuns.id} = ${runId}::uuid AND ${memberImportRuns.actorProfileId} = ${actor.profileId}`)));
       if (run.expiresAt.getTime() <= now().getTime() || run.state === "expired") throw new Error("IMPORT_RUN_EXPIRED");
-      const detail = z.array(z.object({rowNumber: z.coerce.number().int(), status: z.enum(["create", "update", "unchanged", "duplicate", "conflict", "invalid"]), values: z.record(z.unknown()), before: z.record(z.unknown()), targetId: z.string().nullable(), expectedVersion: z.string().nullable(), reason: z.string().nullable()})).parse(rows(await db.execute(sql`SELECT ${memberImportRows.rowNumber} AS "rowNumber", ${memberImportRows.validationStatus} AS status, ${memberImportRows.validatedPayload} AS values, ${memberImportRows.beforeSnapshot} AS before, ${memberImportRows.matchTargetId} AS "targetId", ${memberImportRows.expectedVersion} AS "expectedVersion", ${memberImportRows.conflictReason} AS reason FROM ${memberImportRows} WHERE ${memberImportRows.runId} = ${runId}::uuid ORDER BY ${memberImportRows.rowNumber} LIMIT 5001`)));
+      const detail = z.array(z.object({rowNumber: z.coerce.number().int(), status: z.enum(["create", "update", "unchanged", "duplicate", "conflict", "invalid"]), values: z.record(z.string(), z.unknown()), before: z.record(z.string(), z.unknown()), targetId: z.string().nullable(), expectedVersion: z.string().nullable(), reason: z.string().nullable()})).parse(rows(await db.execute(sql`SELECT ${memberImportRows.rowNumber} AS "rowNumber", ${memberImportRows.validationStatus} AS status, ${memberImportRows.validatedPayload} AS values, ${memberImportRows.beforeSnapshot} AS before, ${memberImportRows.matchTargetId} AS "targetId", ${memberImportRows.expectedVersion} AS "expectedVersion", ${memberImportRows.conflictReason} AS reason FROM ${memberImportRows} WHERE ${memberImportRows.runId} = ${runId}::uuid ORDER BY ${memberImportRows.rowNumber} LIMIT 5001`)));
       if (detail.length > 5000) throw new Error("IMPORT_TOO_MANY_ROWS");
       return {summary: summary(run.id, run.state, run.summary), rows: detail};
     },

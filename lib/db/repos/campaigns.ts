@@ -41,7 +41,7 @@ import {parseRecipientFactsRow, recipientFactsProjection, type RecipientFacts} f
 import {projectedAudience} from "@/lib/db/repos/segments";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
-const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown()), filterVersion: z.number().int()});
+const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.string(), z.unknown()), filterVersion: z.number().int()});
 const campaignRowSchema = z.object({id: z.string().uuid()});
 const countRowSchema = z.object({count: z.coerce.number()});
 const idempotencyKeySchema = z.string().uuid();
@@ -51,7 +51,7 @@ const auditSummarySchema = z.object({
   action: z.enum(["campaign.queued", "campaign.drafted"]),
   eligible: z.number().int().nonnegative(),
   blocked: z.number().int().nonnegative(),
-  byReason: z.record(z.number().int().nonnegative()),
+  byReason: z.record(z.string(), z.number().int().nonnegative()),
 }).strict();
 /**
  * `channel` is `text` + CHECK rather than a pgEnum (S-3), so nothing between
@@ -65,12 +65,12 @@ const campaignRecordSchema = z.object({
   channel: z.enum(["email", "whatsapp"]),
   template: z.string().nullable(),
   templateKey: z.string().nullable(),
-  variablesTemplate: z.record(z.string()).nullable().transform((value) => value ?? {}),
+  variablesTemplate: z.record(z.string(), z.string()).nullable().transform((value) => value ?? {}),
   status: z.enum(CAMPAIGN_STATUSES as [CampaignStatus, ...CampaignStatus[]]),
   segmentId: z.string().uuid(),
   createdByProfileId: z.string(),
   scheduledAt: z.coerce.date().nullable(),
-  templatePreviews: z.record(z.string()).optional(),
+  templatePreviews: z.record(z.string(), z.string()).optional(),
   reviewRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   reviewedAt: z.coerce.date().nullable(),
   reviewedByProfileId: z.string().nullable(),
@@ -112,7 +112,7 @@ const recipientCommon = {
   email: z.string().trim().email().nullable().default(null),
   whatsappNumber: z.string().trim().min(1).max(32).nullable().default(null),
   locale: z.string().min(1).max(10),
-  variables: z.record(z.string()),
+  variables: z.record(z.string(), z.string()),
   status: z.enum(["queued", "suppressed"]).default("queued"),
   blockedReason: z.string().trim().min(1).max(64).nullable().default(null),
 };

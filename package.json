@@ -43,7 +43,7 @@
     "@ai-sdk/openai": "^4.0.20",
     "@aws-sdk/client-s3": "^3.1120.0",
     "@hookform/resolvers": "^3.10.0",
-    "@neondatabase/auth": "^0.5.0-beta",
+    "@neondatabase/auth": "^0.6.0-beta",
     "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -87,7 +87,7 @@
     "input-otp": "^1.4.2",
     "jszip": "3.10.1",
     "lucide-react": "^0.462.0",
-    "next": "^16.3.8",
+    "next": "^16.4.1",
     "next-intl": "^4.13.2",
     "pg": "^8.22.0",
     "qrcode": "^1.5.4",
@@ -103,7 +103,7 @@
     "sonner": "^1.7.4",
     "stripe": "^22.3.1",
     "tailwind-merge": "^2.6.0",
-    "zod": "^3.25.76"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
@@ -121,7 +121,7 @@
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.32.0",
-    "eslint-config-next": "^16.3.8",
+    "eslint-config-next": "^16.4.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
@@ -136,14 +136,23 @@
     "vitest": "^4.1.11"
   },
   "overrides": {
-    "@neondatabase/auth-ui@0.3.0-beta": {
-      "@better-auth/core": "1.6.23",
+    "@neondatabase/auth@0.6.0-beta": {
+      "better-auth": "1.7.7",
+      "@better-auth/core": "1.7.7"
+    },
+    "@neondatabase/auth-ui@0.4.0-beta": {
+      "better-auth": "1.7.7",
+      "@better-auth/core": "1.7.7",
+      "@better-auth/passkey": "1.7.7",
       "@daveyplate/better-auth-ui": "3.3.15"
     },
     "picomatch@2": "^2.3.2",
     "exceljs": {
       "uuid": "11.1.1"
     },
-    "fast-uri": "3.1.7"
+    "fast-uri": "3.1.9",
+    "baseline-browser-mapping": "2.11.0",
+    "vite": "7.3.7",
+    "zod": "$zod"
   }
 }

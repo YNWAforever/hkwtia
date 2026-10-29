@@ -12,6 +12,14 @@ const authTreeCommand = `npm ls --package-lock-only ${authTreePackages.join(" ")
 const authTreeProcessTimeoutMs = 18_000;
 const authTreeContractTimeoutMs = 50_000;
 const neonAuthLockRoots = ["node_modules/@neondatabase/auth", "node_modules/@neondatabase/auth-ui"];
+const auditMinimumVersions: Record<string, [number, number, number]> = {
+  vite: [7, 3, 7],
+  next: [16, 4, 1],
+  zod: [4, 6, 6],
+  "better-auth": [1, 7, 7],
+  "baseline-browser-mapping": [2, 11, 0],
+  "fast-uri": [3, 1, 9],
+};
 // Phase B1 (B-8) split the single `quality` job three ways: `checks` runs the static gates and the
 // build, `tests` shards the unit suite across two runners, and `quality` aggregates every required job
 // so the branch-protection check name PRs #47-#49 were gated on survives. T11 also
@@ -65,9 +73,9 @@ const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> 
     peer: true,
   },
   "node_modules/fast-uri": {
-    version: "3.1.7",
-    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.7.tgz",
-    integrity: "sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==",
+    version: "3.1.9",
+    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.9.tgz",
+    integrity: "sha512-hS/0Wt3Ya043oKXs0sIxrMpKQITXhMLIrVAKKXi4gozGC9v7YRWVnXIZzjNPTO02M9BdxLCWqK1yRXgNziVyJQ==",
     funding: [
       {type: "github", url: "https://github.com/sponsors/fastify"},
       {type: "opencollective", url: "https://opencollective.com/fastify"},
@@ -116,12 +124,40 @@ function resolvedVersions(lockfile: Record<string, unknown>, packageName: string
 }
 
 function resolvedVersionsUnder(lockfile: Record<string, unknown>, packageName: string, roots: string[]) {
-  const packages = lockfile.packages as Record<string, {version?: string}>;
-  return Object.entries(packages)
-    .filter(([path]) => roots.some((root) => path.startsWith(`${root}/node_modules/`)))
-    .filter(([path]) => path.endsWith(`/node_modules/${packageName}`))
-    .map(([, packageInfo]) => packageInfo.version)
-    .filter((version): version is string => Boolean(version));
+  const packages = lockfile.packages as Record<string, {version?: string; dependencies?: Record<string, string>}>;
+  const pending = [...roots];
+  const visited = new Set<string>();
+  const versions: string[] = [];
+  while (pending.length) {
+    const path = pending.pop()!;
+    if (visited.has(path)) continue;
+    visited.add(path);
+    const entry = packages[path];
+    if (!entry) continue;
+    if ((path === `node_modules/${packageName}` || path.endsWith(`/node_modules/${packageName}`)) && entry.version) versions.push(entry.version);
+    for (const name of Object.keys(entry.dependencies ?? {})) {
+      // Follow the dependency's real resolution, including hoisting, rather than
+      // assuming every package stays physically nested below the Neon SDK.
+      let parent = path;
+      while (parent) {
+        const candidate = `${parent}/node_modules/${name}`;
+        if (packages[candidate]) {pending.push(candidate); break;}
+        const boundary = parent.lastIndexOf("/node_modules/");
+        parent = boundary < 0 ? "" : parent.slice(0, boundary);
+      }
+      if (!parent && packages[`node_modules/${name}`]) pending.push(`node_modules/${name}`);
+    }
+  }
+  return versions;
+}
+
+function auditVersionViolations(lockfile: Record<string, unknown>) {
+  return Object.entries(auditMinimumVersions).flatMap(([name, minimum]) => {
+    const versions = resolvedVersions(lockfile, name);
+    if (versions.length === 0) return [`${name}: missing`];
+    return versions.filter((version) => !versionAtLeast(version, minimum))
+      .map((version) => `${name}@${version}`);
+  });
 }
 
 function npm10OptionalPeerClosureMismatches(lockfile: Record<string, unknown>) {
@@ -200,13 +236,35 @@ function runAuthTreeCheck(cwd: string, options: AuthTreeProcessOptions = {}) {
 }
 
 describe("CI and production dependency security contract", () => {
+  it("resolves patched versions of every dependency blocking the production audit", () => {
+    expect(auditVersionViolations(readJson("package-lock.json"))).toEqual([]);
+  });
+
+  it("detects vulnerable, nested and missing audit dependencies without rejecting patched samples", () => {
+    const packages = Object.fromEntries(Object.entries(auditMinimumVersions).map(([name, version]) => [
+      `node_modules/${name}`, {version: version.join(".")},
+    ]));
+    const safe = {packages};
+    expect(Object.keys(packages)).toHaveLength(6);
+    expect(auditVersionViolations(safe)).toEqual([]);
+    for (const [name, minimum] of Object.entries(auditMinimumVersions)) {
+      const vulnerableVersion = [minimum[0], minimum[1], minimum[2] - 1].join(".");
+      const hostile = structuredClone(safe);
+      hostile.packages[`node_modules/parent/node_modules/${name}`] = {version: vulnerableVersion};
+      expect(auditVersionViolations(hostile)).toEqual([`${name}@${vulnerableVersion}`]);
+      const missing = structuredClone(safe);
+      delete missing.packages[`node_modules/${name}`];
+      expect(auditVersionViolations(missing)).toEqual([`${name}: missing`]);
+    }
+  });
+
   it("declares scoped patched production dependency constraints", () => {
     const packageJson = readJson("package.json");
     const overrides = packageJson.overrides as Record<string, string | Record<string, string>>;
-    const neonAuthUiOverrides = overrides["@neondatabase/auth-ui@0.3.0-beta"] as Record<string, string>;
+    const neonAuthUiOverrides = overrides["@neondatabase/auth-ui@0.4.0-beta"] as Record<string, string>;
 
-    expect((packageJson.dependencies as Record<string, string>)["@neondatabase/auth"], "package.json must declare @neondatabase/auth as ^0.5.0-beta").toBe("^0.5.0-beta");
-    expect(neonAuthUiOverrides?.["@better-auth/core"], "Neon Auth UI must use the matching Better Auth core family").toBe("1.6.23");
+    expect((packageJson.dependencies as Record<string, string>)["@neondatabase/auth"], "Neon Auth must use the SDK built against Better Auth 1.7").toBe("^0.6.0-beta");
+    expect(neonAuthUiOverrides?.["@better-auth/core"], "Neon Auth UI must use the matching patched Better Auth core family").toBe("1.7.7");
     expect(neonAuthUiOverrides?.["@daveyplate/better-auth-ui"], "Neon Auth UI must avoid the peer-invalid 3.4.0 dependency graph").toBe("3.3.15");
     expect(overrides["@better-auth/core"], "package.json must not override Better Auth core globally").toBeUndefined();
     expect(overrides["@daveyplate/better-auth-ui"], "package.json must not override Better Auth UI globally").toBeUndefined();
@@ -225,15 +283,15 @@ describe("CI and production dependency security contract", () => {
     const picomatch2Versions = picomatchVersions.filter((version) => version.startsWith("2."));
 
     expect(betterAuthVersions.length, "Neon Auth lock subtrees must resolve Better Auth").toBeGreaterThan(0);
-    expect(betterAuthVersions.every((version) => version === "1.6.23"), `Neon Auth lock subtrees contain non-Neon Better Auth versions: ${betterAuthVersions.join(", ")}`).toBe(true);
+    expect(betterAuthVersions.every((version) => version === "1.7.7"), `Neon Auth lock subtrees contain mismatched Better Auth versions: ${betterAuthVersions.join(", ")}`).toBe(true);
     expect(betterAuthCoreVersions.length, "Neon Auth lock subtrees must resolve Better Auth core").toBeGreaterThan(0);
-    expect(betterAuthCoreVersions.every((version) => version === "1.6.23"), `Neon Auth lock subtrees contain non-Neon Better Auth core versions: ${betterAuthCoreVersions.join(", ")}`).toBe(true);
+    expect(betterAuthCoreVersions.every((version) => version === "1.7.7"), `Neon Auth lock subtrees contain mismatched Better Auth core versions: ${betterAuthCoreVersions.join(", ")}`).toBe(true);
     expect(betterAuthApiKeyVersions, "the peer-invalid Better Auth API key plugin must not remain in the Neon Auth lock subtrees").toEqual([]);
-    expect(betterCallVersions.length, "Neon Auth lock subtrees must resolve Better Call").toBeGreaterThan(0);
-    expect(betterCallVersions.every((version) => version === "1.3.7"), `Neon Auth lock subtrees contain non-Neon Better Call versions: ${betterCallVersions.join(", ")}`).toBe(true);
+    expect(betterCallVersions.length, "the Auth dependency tree must resolve Better Call").toBeGreaterThan(0);
+    expect(betterCallVersions.every((version) => version === "1.4.0"), `Neon Auth lock subtrees contain mismatched Better Call versions: ${betterCallVersions.join(", ")}`).toBe(true);
     expect(betterAuthUiVersions.length, "Neon Auth UI lock subtree must resolve Better Auth UI").toBeGreaterThan(0);
     expect(betterAuthUiVersions.every((version) => version === "3.3.15"), `Neon Auth UI lock subtree contains incompatible Better Auth UI versions: ${betterAuthUiVersions.join(", ")}`).toBe(true);
-    expect(betterAuthVersions.every((version) => versionAtLeast(version, [1, 6, 22])), `Neon Auth lock subtrees contain unsafe better-auth versions: ${betterAuthVersions.join(", ")}`).toBe(true);
+    expect(betterAuthVersions.every((version) => versionAtLeast(version, [1, 7, 7])), `Neon Auth lock subtrees contain unsafe better-auth versions: ${betterAuthVersions.join(", ")}`).toBe(true);
     expect(picomatchVersions.length, "package-lock.json must resolve Picomatch entries including node_modules/picomatch").toBeGreaterThan(0);
     expect(picomatch2Versions.length, "package-lock.json must retain and patch at least one Picomatch 2.x entry").toBeGreaterThan(0);
     expect(picomatch2Versions.every((version) => versionAtLeast(version, [2, 3, 2])), `package-lock.json contains unsafe Picomatch 2.x versions: ${picomatch2Versions.join(", ")}`).toBe(true);
@@ -291,6 +349,20 @@ describe("CI and production dependency security contract", () => {
 
     expect(resolvedVersions(withUnrelatedBetterAuth, "better-auth")).toContain("9.9.9");
     expect(resolvedVersionsUnder(withUnrelatedBetterAuth, "better-auth", neonAuthLockRoots)).not.toContain("9.9.9");
+  });
+
+  it("follows hoisted and nested Auth dependencies and terminates on cyclic SDK peers", () => {
+    const fixture = {packages: {
+      "node_modules/@neondatabase/auth": {dependencies: {"better-auth": "1.7.7", "@neondatabase/auth-ui": "0.4.0-beta"}},
+      "node_modules/@neondatabase/auth-ui": {dependencies: {"@neondatabase/auth": "0.6.0-beta"}},
+      "node_modules/better-auth": {version: "1.7.7"},
+    }};
+    expect(resolvedVersionsUnder(fixture, "better-auth", neonAuthLockRoots)).toEqual(["1.7.7"]);
+    const hostile = {packages: {...fixture.packages,
+      "node_modules/@neondatabase/auth/node_modules/better-auth": {version: "1.6.23"},
+    }};
+    expect(resolvedVersionsUnder(hostile, "better-auth", neonAuthLockRoots)).toEqual(["1.6.23"]);
+    expect(resolvedVersionsUnder({packages: {}}, "better-auth", neonAuthLockRoots)).toEqual([]);
   });
 
   it("fails hard when a hostile dependency-tree child exceeds a short deadline", () => {

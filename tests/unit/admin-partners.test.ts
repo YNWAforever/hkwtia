@@ -80,6 +80,16 @@ describe("general partner repository", () => {
 
 function landing(overrides: Record<string, unknown> = {}) { return {id: partnerId, organizationEn: "Bridge Co", organizationZhHk: "橋樑公司", market: "Singapore", region: "Asia", mouStatus: "signed", contact: {email: "private@example.com"}, notes: "private negotiation", publishedAt: now, archivedAt: null, createdAt: now, updatedAt: now, ...overrides}; }
 describe("Launch Pad partner repository", () => {
+  it("preserves omitted contact details on a partial update and rejects an empty patch", async () => {
+    const tx = {insertPartner: vi.fn(), lockPartner: vi.fn(async () => landing()), updatePartner: vi.fn(async (_id: string, input: Record<string, unknown>) => landing(input)), setPublishedAt: vi.fn(), setArchivedAt: vi.fn(), insertAudit: vi.fn()};
+    const dependencies: LandingPartnerMutationDependencies = {transaction: (work) => work(tx as never)};
+    await expect(updateLandingPartner(staff, partnerId, {region: "Updated region"}, dependencies)).resolves.toMatchObject({contact: landing().contact});
+    expect(tx.updatePartner).toHaveBeenCalledWith(partnerId, {region: "Updated region"});
+    tx.updatePartner.mockClear();
+    await expect(updateLandingPartner(staff, partnerId, {}, dependencies)).rejects.toThrow("LANDING_PARTNER_UPDATE_EMPTY");
+    expect(tx.updatePartner).not.toHaveBeenCalled();
+  });
+
   it("authorizes before parsing and audits creation in its transaction", async () => {
     const tx = {insertPartner: vi.fn(async (input: Record<string, unknown>) => landing(input)), lockPartner: vi.fn(async () => landing()), updatePartner: vi.fn(), setPublishedAt: vi.fn(), setArchivedAt: vi.fn(), insertAudit: vi.fn(async () => undefined)};
     const dependencies: LandingPartnerMutationDependencies = {transaction: (work) => work(tx as never)};

@@ -18,7 +18,7 @@ const segmentRowSchema = z.object({
 });
 const countRowSchema = z.object({total: z.coerce.number()});
 const savedSegmentSchema = z.object({
-  id: z.string().uuid(), ownerProfileId: z.string(), nameEn: z.string(), nameZh: z.string().nullable(), filterVersion: z.number().int(), filters: z.record(z.unknown()), createdAt: z.coerce.date(), updatedAt: z.coerce.date(),
+  id: z.string().uuid(), ownerProfileId: z.string(), nameEn: z.string(), nameZh: z.string().nullable(), filterVersion: z.number().int(), filters: z.record(z.string(), z.unknown()), createdAt: z.coerce.date(), updatedAt: z.coerce.date(),
 });
 
 /**

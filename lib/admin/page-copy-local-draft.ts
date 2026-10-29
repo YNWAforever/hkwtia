@@ -13,7 +13,7 @@ type Store = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 const ttl = 24 * 60 * 60 * 1000;
 const schema = z.object({schemaVersion: z.literal(1), namespace: z.string(),
   baseRevision: z.string().regex(/^[a-f0-9]{64}$/), updatedAt: z.string().datetime(),
-  changes: z.record(z.string().max(50_000))}).strict();
+  changes: z.record(z.string(), z.string().max(50_000))}).strict();
 
 export function localCopyDraftKey(identity: string, namespace: PageCopyNamespace): string {
   if (!identity || !isPageCopyNamespace(namespace)) throw new Error("INVALID_COPY_DRAFT_SCOPE");

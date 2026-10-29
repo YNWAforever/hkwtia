@@ -19,7 +19,7 @@ function optional(formData: FormData, key: string): string | null {
  * select values fall back to the safe member defaults rather than reaching the
  * repository, whose schema would reject `invite_only`/`ticketed` anyway.
  */
-export function memberEventInputFromFormData(formData: FormData): MemberEventInput {
+export function memberEventInputFromFormData(formData: FormData): MemberEventInput & {startsAt: Date; endsAt: Date | null} {
   const capacity = optional(formData, "capacity");
   const endsAt = optional(formData, "endsAt");
   const format = text(formData, "format");

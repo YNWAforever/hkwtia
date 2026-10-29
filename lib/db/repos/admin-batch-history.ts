@@ -13,7 +13,7 @@ import {getDb} from "@/lib/db/repos/common";
 
 const exactInstant = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
 const cursorSchema = z.object({v: z.literal(1), at: z.string().regex(exactInstant), id: z.string().uuid(), state: z.enum(BATCH_STATES).nullable(), operation: batchOperationSchema.nullable()}).strict();
-const countersSchema = z.record(z.number().int().nonnegative());
+const countersSchema = z.record(z.string(), z.number().int().nonnegative());
 const rowSchema = z.object({id: z.string().uuid(), operation: batchOperationSchema, state: z.enum(BATCH_STATES), createdAt: z.coerce.date(), cursorAt: z.string().regex(exactInstant), actorLabel: z.string(), counters: countersSchema});
 const PAGE_SIZE = 25;
 

@@ -45,6 +45,29 @@ describe("join form recovery", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("New member name");
   });
 
+  it("preserves values when a fast submission resets before pending or the error state renders", async () => {
+    const {container, rerender} = form();
+    fireEvent.change(screen.getByLabelText("Name"), {target: {value: "New member name"}});
+    fireEvent.submit(container.querySelector("form")!);
+    container.querySelector("form")!.reset();
+    expect(screen.getByLabelText("Name")).toHaveValue("New member name");
+    await act(async () => {actionState.value = {message: "Unable to save"};});
+    rerender(formElement());
+    expect(screen.getByLabelText("Name")).toHaveValue("New member name");
+    expect(screen.getByRole("alert")).toHaveTextContent("Unable to save");
+  });
+
+  it("still resets a successful fast submission after its result renders", async () => {
+    const {container, rerender} = form();
+    fireEvent.change(screen.getByLabelText("Name"), {target: {value: "New member name"}});
+    fireEvent.submit(container.querySelector("form")!);
+    container.querySelector("form")!.reset();
+    expect(screen.getByLabelText("Name")).toHaveValue("New member name");
+    await act(async () => {actionState.value = {};});
+    rerender(formElement());
+    expect(screen.getByLabelText("Name")).toHaveValue("Saved name");
+  });
+
   it("opens the optional section and focuses the first invalid field after server validation", () => {
     actionState.value = {fieldErrors: {phone: "Use a valid phone"}};
     const {container} = form();

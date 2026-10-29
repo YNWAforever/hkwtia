@@ -14,9 +14,20 @@ export function JoinForm({action, children, fieldNames, submitLabel, pendingLabe
   submitDisabled?: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const submitted = useRef<JoinFormState | null>(null);
   // Keep the server action reference intact for submission before hydration.
   const [state, formAction, pending] = useActionState(action, initialJoinFormState);
   const hasErrors = Boolean(state.message || Object.keys(state.fieldErrors ?? {}).length);
+
+  useEffect(() => {
+    const form = formRef.current;
+    // React suppresses synthetic events while committing its automatic reset.
+    const preserveSubmission = (event: Event) => {
+      if (submitted.current !== null) event.preventDefault();
+    };
+    form?.addEventListener("reset", preserveSubmission);
+    return () => { form?.removeEventListener("reset", preserveSubmission); };
+  }, []);
 
   useEffect(() => {
     const form = formRef.current;
@@ -37,9 +48,16 @@ export function JoinForm({action, children, fieldNames, submitLabel, pendingLabe
     firstInvalid?.focus();
   }, [state, fieldNames]);
 
+  useEffect(() => {
+    if (pending || submitted.current === null || state === submitted.current) return;
+    submitted.current = null;
+    if (!hasErrors) formRef.current?.reset();
+  }, [state, pending, hasErrors]);
+
   return (
     <form action={formAction} className="space-y-5" noValidate ref={formRef}
-      onReset={(event) => { if (pending || hasErrors) event.preventDefault(); }}>
+      onSubmitCapture={() => { submitted.current = state; }}
+      onReset={(event) => { if (submitted.current !== null || pending || hasErrors) event.preventDefault(); }}>
       {children}
       {fieldNames.map((name) => state.fieldErrors?.[name] ? (
         <p className="text-sm text-destructive" id={`${name}-error`} key={name} role="alert">{state.fieldErrors[name]}</p>

@@ -82,6 +82,13 @@ describe("the event write boundary prices only ticketed events", () => {
     await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies, current.updatedAt)).resolves.toMatchObject({ticketPriceHkdCents: 25_000});
     expect(update).toHaveBeenCalledWith(id, expect.objectContaining({ticketPriceHkdCents: 25_000}), expect.any(Date));
   });
+
+  it("rejects an empty partial update before transaction work", async () => {
+    const current = storedEvent("rsvp");
+    const transaction = vi.fn();
+    await expect(updateEvent(staff, current.id, {}, {transaction}, current.updatedAt)).rejects.toThrow("event update is empty");
+    expect(transaction).not.toHaveBeenCalled();
+  });
 });
 
 // Staff-authorised only: the member schema omits the price, so a member cannot
