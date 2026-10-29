@@ -3913,6 +3913,7 @@
     "OWNER_INVALID": "Staff owner ID is invalid.",
     "OWNER_NOT_STAFF": "The selected owner must be an existing staff member.",
     "EMAIL_CANDIDATE_REVIEW": "This email matches an existing identity or contact. Review it without merging identities.",
+    "IMPORT_ALREADY_APPLIED": "This row matches a contact already created by an import, so nothing will be written.",
     "PROFILE_ID_NOT_MEMBER": "The ID does not identify an existing member profile.",
     "EMAIL_IDENTITY_CONFLICT": "Email does not match this member ID. Review the original record.",
     "NAME_REQUIRES_REVIEW": "Review name changes in the member profile; this import cannot change identity details.",

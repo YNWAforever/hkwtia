@@ -58,6 +58,8 @@ describe.skipIf(!enabled)("member import membership writes on disposable Postgre
     await repo.confirm(staff, staged.runId, [2, 3, 4, 5, 6, 7]);
     const {batches, batchId} = await commitRun(staged.runId, now);
     expect(await batches.preview(staff, batchId)).toMatchObject({state: "completed", counters: {succeeded: 6, failed: 0}});
+    const runState = await fixture.pool.query("SELECT state FROM member_import_runs WHERE id=$1", [staged.runId]);
+    expect(runState.rows[0]?.state).toBe("committed");
 
     const ada = await fixture.pool.query("SELECT id, auth_user_id, directory_visible FROM profiles WHERE email='ada.active@example.test'");
     expect(ada.rows).toHaveLength(1);
@@ -95,7 +97,7 @@ describe.skipIf(!enabled)("member import membership writes on disposable Postgre
     const annotated = csv.split("\n").map((line, index) => index === 0 ? `${line},Note` : line ? `${line},` : line).join("\n");
     const second = await repo.upload(staff, new TextEncoder().encode(annotated), "csv");
     const rerun = await repo.validate(staff, second.uploadId, mapping);
-    expect(rerun).toMatchObject({conflict: 6, wouldCreateMembership: 0, skipped: 2});
+    expect(rerun).toMatchObject({conflict: 0, unchanged: 6, create: 0, wouldCreateMembership: 0, skipped: 2});
     const after = await fixture.pool.query("SELECT count(*)::int AS n FROM memberships WHERE owner_user_id=$1", [ada.rows[0]?.id]);
     expect(after.rows[0]?.n).toBe(1);
   }, 60_000);
@@ -152,5 +154,31 @@ describe.skipIf(!enabled)("member import membership writes on disposable Postgre
     expect(preview.items[0]?.reasonCode).toBe("MEMBERSHIP_WRITE_PRODUCTION_FORBIDDEN");
     const written = await fixture.pool.query("SELECT count(*)::int AS n FROM contacts WHERE email='prod.block@example.test'");
     expect(written.rows[0]?.n).toBe(0);
+  }, 60_000);
+
+  it("leaves the run confirmed when the batch completes with failed items", async () => {
+    const now = new Date("2026-10-29T00:00:00.000Z");
+    const repo = createMemberImportRepository(async () => fixture.database, () => now);
+    const file = "Email,Name,Tier,Status,Expiry\nfail.item@example.test,Fail,Individual,active,2027-04-30\n";
+    const upload = await repo.upload(staff, new TextEncoder().encode(file), "csv");
+    const staged = await repo.validate(staff, upload.uploadId, {email: "Email", displayName: "Name", tier: "Tier", membershipStatus: "Status", expiryAt: "Expiry"});
+    await repo.confirm(staff, staged.runId, [2]);
+    const request = batchRequestSchema.parse({operation: "import_commit", idempotencyKey: randomUUID(), payload: {importRunId: staged.runId}});
+    const batches = createAdminBatchesRepository(async () => fixture.database, () => now);
+    const worker = createAdminBatchWorkerRepository(async () => fixture.database);
+    const {batchId} = await batches.create(staff, request, batchPreviewDigest(request));
+    expect(await worker.prepareNext(batchOperationHandlers, now)).toBe(true);
+    const preview = await batches.preview(staff, batchId);
+    await batches.commit(staff, batchId, preview.digest);
+    vi.stubEnv("VERCEL_ENV", "production");
+    const claims = await worker.claimItems("import-fail-worker", now, 5);
+    for (const claim of claims) expect(await worker.executeClaim(claim, batchOperationHandlers.import_commit!, now)).toBe("settled");
+    expect(await batches.preview(staff, batchId)).toMatchObject({state: "completed_with_errors"});
+    const runState = await fixture.pool.query("SELECT state FROM member_import_runs WHERE id=$1", [staged.runId]);
+    expect(runState.rows[0]?.state).toBe("confirmed");
+    const committed = await fixture.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE action='member.import.committed' AND target_id=$1", [staged.runId]);
+    expect(committed.rows[0]?.n).toBe(0);
+    const contact = await fixture.pool.query("SELECT count(*)::int AS n FROM contacts WHERE email='fail.item@example.test'");
+    expect(contact.rows[0]?.n).toBe(0);
   }, 60_000);
 });

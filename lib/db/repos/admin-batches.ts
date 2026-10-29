@@ -12,6 +12,7 @@ import {resolveBatchCapability} from "@/lib/admin/batches/capabilities";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 import {adminBatchItems, adminBatches, auditEvents, profiles} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
+import {markCompletedImportRuns} from "@/lib/db/repos/import-run-completion";
 
 export type BatchExecutor = Readonly<{execute: (statement: SQL) => PromiseLike<unknown>}>;
 export type BatchDatabase = BatchExecutor & Readonly<{transaction: <T>(run: (tx: BatchExecutor) => Promise<T>, config?: {isolationLevel: "read committed" | "repeatable read"}) => Promise<T>}>;
@@ -205,16 +206,27 @@ async function refreshBatchCountersFor(tx: BatchExecutor, batchIds: readonly str
   const ids = [...new Set(batchIds)];
   if (!ids.length) return;
   if (ids.length > 100) throw new Error("INVALID_BATCH_COUNTER_SCOPE");
-  await tx.execute(sql`WITH counts AS (
+  const completedImports = rows(await tx.execute(sql`WITH counts AS (
     SELECT batch_id, count(*) FILTER (WHERE state='pending')::int AS pending,
       count(*) FILTER (WHERE state='running')::int AS running,
       count(*) FILTER (WHERE state='succeeded')::int AS succeeded,
       count(*) FILTER (WHERE state='skipped')::int AS skipped,
       count(*) FILTER (WHERE state='failed')::int AS failed
     FROM ${adminBatchItems} WHERE batch_id = ANY(ARRAY[${sql.join(ids.map(id=>sql`${id}::uuid`),sql`, `)}]::uuid[]) GROUP BY batch_id
-  ) UPDATE ${adminBatches} SET counters=jsonb_build_object('pending',counts.pending,'running',counts.running,'succeeded',counts.succeeded,'skipped',counts.skipped,'failed',counts.failed),
-    state=CASE WHEN ${adminBatches.state}='cancelled' THEN 'cancelled' WHEN counts.running>0 THEN 'running' WHEN counts.pending>0 THEN 'queued' WHEN counts.failed>0 THEN 'completed_with_errors' ELSE 'completed' END,
-    updated_at=${now} FROM counts WHERE ${adminBatches.id}=counts.batch_id AND ${adminBatches.state} IN ('queued','running','cancelled')`);
+  ), updated AS (
+    UPDATE ${adminBatches} SET counters=jsonb_build_object('pending',counts.pending,'running',counts.running,'succeeded',counts.succeeded,'skipped',counts.skipped,'failed',counts.failed),
+      state=CASE WHEN ${adminBatches.state}='cancelled' THEN 'cancelled' WHEN counts.running>0 THEN 'running' WHEN counts.pending>0 THEN 'queued' WHEN counts.failed>0 THEN 'completed_with_errors' ELSE 'completed' END,
+      updated_at=${now}
+    FROM counts WHERE ${adminBatches.id}=counts.batch_id AND ${adminBatches.state} IN ('queued','running','cancelled')
+    RETURNING ${adminBatches.id} AS id, ${adminBatches.actorProfileId} AS actor_profile_id, ${adminBatches.operation} AS operation, ${adminBatches.state} AS state, ${adminBatches.selectionSnapshot} AS selection_snapshot
+  )
+  SELECT id, actor_profile_id AS "actorProfileId", selection_snapshot->'payload'->>'importRunId' AS "importRunId"
+  FROM updated WHERE operation = 'import_commit' AND state = 'completed'`));
+  const ready = completedImports.flatMap((row) => {
+    const parsed = z.object({id: z.string().uuid(), actorProfileId: z.string().min(1), importRunId: z.string().uuid()}).safeParse(row);
+    return parsed.success ? [parsed.data] : [];
+  });
+  if (ready.length) await markCompletedImportRuns(tx, ready);
 }
 async function refreshBatchCounters(tx: BatchExecutor, batchId: string, now: Date): Promise<void> {
   await refreshBatchCountersFor(tx, [batchId], now);

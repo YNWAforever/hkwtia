@@ -3914,6 +3914,7 @@
     "OWNER_INVALID": "負責職員編號無效。",
     "OWNER_NOT_STAFF": "負責人必須是現有職員。",
     "EMAIL_CANDIDATE_REVIEW": "此電郵符合現有身份或聯絡人。請核對，勿自行合併身份。",
+    "IMPORT_ALREADY_APPLIED": "此列與先前匯入建立的聯絡人相同，不會再寫入。",
     "PROFILE_ID_NOT_MEMBER": "此編號不屬於現有會員檔案。",
     "EMAIL_IDENTITY_CONFLICT": "電郵與此會員編號不符。請核對原有紀錄。",
     "NAME_REQUIRES_REVIEW": "姓名修改須在會員檔案核對；此匯入不能修改身份資料。",

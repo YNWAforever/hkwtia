@@ -13,7 +13,7 @@ import {parseMemberImport, type ParsedMemberImport} from "@/lib/admin/imports/pa
 import {validateMemberImportRows, type ImportMapping} from "@/lib/admin/imports/validate";
 import type {ImportGateway, ImportRunSummary} from "@/lib/admin/imports/service";
 import {requireAdmin} from "@/lib/auth/authorize";
-import {auditEvents, memberImportRows, memberImportRuns, memberImportUploads, memberOperationsMetadata, profiles, contacts} from "@/lib/db/server-schema";
+import {auditEvents, contacts, memberImportRows, memberImportRuns, memberImportUploads, memberOperationsMetadata, memberships, profiles} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 import type {BatchDatabase, BatchExecutor} from "@/lib/db/repos/admin-batches";
@@ -27,14 +27,16 @@ function first(result: unknown): unknown {return rows(result)[0];}
 const uploadSchema = z.object({id: z.string().uuid(), fileDigest: z.string(), parsedSnapshot: z.object({headers: z.array(z.string()), rows: z.array(z.object({rowNumber: z.number().int(), cells: z.record(z.string(), z.string())}))}), expiresAt: z.coerce.date()});
 const runSchema = z.object({id: z.string().uuid(), state: z.enum(["validated", "confirmed", "committed", "expired"]), summary: z.record(z.string(), z.number()), expiresAt: z.coerce.date()});
 const profileFactSchema = z.object({id: z.string(), role: z.string(), email: z.string().nullable(), locale: z.string(), updatedAt: z.string(), tags: z.array(z.string()).default([]), ownerProfileId: z.string().nullable()});
-const emailRow = z.object({id: z.string(), email: z.string()});
+const emailProfileRow = z.object({id: z.string(), email: z.string(), role: z.string(), displayName: z.string(), locale: z.string(), directoryVisible: z.boolean(), authUserId: z.string().nullable()});
+const emailContactRow = z.object({id: z.string(), email: z.string(), source: z.string(), profileId: z.string().nullable(), displayName: z.string().nullable(), locale: z.string(), stage: z.string(), ownerProfileId: z.string().nullable(), tags: z.array(z.string()).default([])});
+const emailMembershipRow = z.object({ownerUserId: z.string(), planCode: z.string(), status: z.string(), billingPeriodStart: z.string().nullable(), billingPeriodEnd: z.string().nullable()});
 const ownerRow = z.object({id: z.string(), role: z.string()});
 function summary(runId: string, state: string, counts: Record<string, number>): ImportRunSummary {
   return {runId, state, total: counts.total ?? 0, create: counts.create ?? 0, update: counts.update ?? 0, unchanged: counts.unchanged ?? 0, duplicate: counts.duplicate ?? 0, conflict: counts.conflict ?? 0, invalid: counts.invalid ?? 0, wouldCreateMembership: counts.wouldCreateMembership ?? 0, wouldSetExpired: counts.wouldSetExpired ?? 0, contactOnly: counts.contactOnly ?? 0, skipped: counts.skipped ?? 0};
 }
-function groupByEmail(values: readonly z.infer<typeof emailRow>[]) {
-  const result = new Map<string, string[]>();
-  for (const row of values) result.set(row.email, [...(result.get(row.email) ?? []), row.id]);
+function groupByEmail<T extends {email: string}>(values: readonly T[]) {
+  const result = new Map<string, T[]>();
+  for (const row of values) result.set(row.email, [...(result.get(row.email) ?? []), row]);
   return result;
 }
 async function matchRows(tx: BatchExecutor, parsed: ParsedMemberImport, mapping: ImportMapping, membershipWrites: boolean): Promise<MatchedImportRow[]> {
@@ -43,8 +45,10 @@ async function matchRows(tx: BatchExecutor, parsed: ParsedMemberImport, mapping:
   const emails = [...new Set(validated.map((row) => row.values.email).filter((value): value is string => typeof value === "string"))];
   const ownerIds = [...new Set(validated.map((row) => row.values.ownerProfileId).filter((value): value is string => typeof value === "string"))];
   const profileRows = profileIds.length ? z.array(profileFactSchema).parse(rows(await tx.execute(sql`SELECT ${profiles.id} AS id, ${profiles.role} AS role, ${profiles.email} AS email, ${profiles.locale} AS locale, ${profiles.updatedAt}::text AS "updatedAt", coalesce(${memberOperationsMetadata.tags}, ARRAY[]::text[]) AS tags, ${memberOperationsMetadata.ownerProfileId} AS "ownerProfileId" FROM ${profiles} LEFT JOIN ${memberOperationsMetadata} ON ${memberOperationsMetadata.profileId} = ${profiles.id} WHERE ${inArray(profiles.id, profileIds)}`))) : [];
-  const existingProfiles = emails.length ? z.array(emailRow).parse(rows(await tx.execute(sql`SELECT ${profiles.id} AS id, lower(${profiles.email}) AS email FROM ${profiles} WHERE ${inArray(sql`lower(${profiles.email})`, emails)}`))) : [];
-  const existingContacts = emails.length ? z.array(emailRow).parse(rows(await tx.execute(sql`SELECT ${contacts.id}::text AS id, lower(${contacts.email}) AS email FROM ${contacts} WHERE ${inArray(sql`lower(${contacts.email})`, emails)}`))) : [];
+  const existingProfiles = emails.length ? z.array(emailProfileRow).parse(rows(await tx.execute(sql`SELECT ${profiles.id} AS id, lower(${profiles.email}) AS email, ${profiles.role} AS role, ${profiles.displayName} AS "displayName", ${profiles.locale} AS locale, ${profiles.directoryVisible} AS "directoryVisible", ${profiles.authUserId} AS "authUserId" FROM ${profiles} WHERE ${inArray(sql`lower(${profiles.email})`, emails)}`))) : [];
+  const existingContacts = emails.length ? z.array(emailContactRow).parse(rows(await tx.execute(sql`SELECT ${contacts.id}::text AS id, lower(${contacts.email}) AS email, ${contacts.source} AS source, ${contacts.profileId} AS "profileId", ${contacts.displayName} AS "displayName", ${contacts.locale} AS locale, ${contacts.stage} AS stage, ${contacts.ownerProfileId} AS "ownerProfileId", coalesce(${contacts.tags}, ARRAY[]::text[]) AS tags FROM ${contacts} WHERE ${inArray(sql`lower(${contacts.email})`, emails)}`))) : [];
+  const emailProfileIds = [...new Set(existingProfiles.map((row) => row.id))];
+  const existingMemberships = emailProfileIds.length ? z.array(emailMembershipRow).parse(rows(await tx.execute(sql`SELECT ${memberships.ownerUserId} AS "ownerUserId", ${memberships.planCode} AS "planCode", ${memberships.status} AS status, CASE WHEN ${memberships.billingPeriodStart} IS NULL THEN NULL ELSE to_char(${memberships.billingPeriodStart} AT TIME ZONE 'UTC', 'YYYY-MM-DD') END AS "billingPeriodStart", CASE WHEN ${memberships.billingPeriodEnd} IS NULL THEN NULL ELSE to_char(${memberships.billingPeriodEnd} AT TIME ZONE 'UTC', 'YYYY-MM-DD') END AS "billingPeriodEnd" FROM ${memberships} WHERE ${inArray(memberships.ownerUserId, emailProfileIds)}`))) : [];
   const owners = ownerIds.length ? z.array(ownerRow).parse(rows(await tx.execute(sql`SELECT ${profiles.id} AS id, ${profiles.role} AS role FROM ${profiles} WHERE ${inArray(profiles.id, ownerIds)}`))) : [];
   const byId = new Map(profileRows.map((row) => [row.id, row]));
   const profilesByEmail = groupByEmail(existingProfiles);
@@ -53,7 +57,10 @@ async function matchRows(tx: BatchExecutor, parsed: ParsedMemberImport, mapping:
   return validated.map((row) => {
     const values = row.values;
     const email = typeof values.email === "string" ? values.email : "";
-    const facts: ImportMatchFacts = {profile: byId.get(String(values.profileId ?? "")) ?? null, emailProfileIds: profilesByEmail.get(email) ?? [], emailContactIds: contactsByEmail.get(email) ?? [], ownerRole: ownerRoles.get(String(values.ownerProfileId ?? "")) ?? null};
+    const emailProfiles = profilesByEmail.get(email) ?? [];
+    const emailContacts = contactsByEmail.get(email) ?? [];
+    const ownedIds = new Set(emailProfiles.map((item) => item.id));
+    const facts: ImportMatchFacts = {profile: byId.get(String(values.profileId ?? "")) ?? null, emailProfileIds: emailProfiles.map((item) => item.id), emailContactIds: emailContacts.map((item) => item.id), emailProfiles, emailContacts, emailMemberships: existingMemberships.filter((item) => ownedIds.has(item.ownerUserId)), ownerRole: ownerRoles.get(String(values.ownerProfileId ?? "")) ?? null};
     return matchMemberImportRow(row, facts);
   });
 }
