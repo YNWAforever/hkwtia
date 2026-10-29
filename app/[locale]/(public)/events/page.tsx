@@ -211,9 +211,9 @@ export default async function EventsPage({ params, searchParams }: Props) {
           aria-label={t("activityStrip.label")}
           className="activity-type-strip"
         >
-          <Link href="/events?status=open">{t("activityStrip.openLabel")}</Link>
-          <Link href="/launchpad">{t("activityStrip.launchpadLabel")}</Link>
-          <Link href="/showcase">{t("activityStrip.showcaseLabel")}</Link>
+          <Link href="/events?status=open" prefetch={false}>{t("activityStrip.openLabel")}</Link>
+          <Link href="/launchpad" prefetch={false}>{t("activityStrip.launchpadLabel")}</Link>
+          <Link href="/showcase" prefetch={false}>{t("activityStrip.showcaseLabel")}</Link>
         </nav>
         <EventFilterPanel
           filters={filters}
@@ -326,7 +326,7 @@ export default async function EventsPage({ params, searchParams }: Props) {
         </Suspense>
         <div className="inner-card-grid">
           {RECOMMENDATIONS.map((item, index) => (
-            <Link className="inner-card" href={item.href} key={item.key}>
+            <Link className="inner-card" href={item.href} key={item.key} prefetch={false}>
               <span className="inner-card-index">
                 {String(index + 1).padStart(2, "0")}
               </span>
