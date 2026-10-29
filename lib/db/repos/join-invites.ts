@@ -6,6 +6,7 @@ import {z} from "zod";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, contacts, eventGuestRegistrations, joinInvites, leads, membershipApplications, memberships, profiles} from "@/lib/db/server-schema";
 import {insertContactActivity} from "@/lib/db/repos/contact-activities";
+import {ensureOpsMembershipPlan} from "@/lib/db/repos/membership-plans";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
 import type {AppLocale} from "@/i18n/routing";
@@ -184,6 +185,7 @@ export function createJoinInvitesRepository(loadDatabase: AutomationDatabaseLoad
         `))[0];
         if (!locked) throw new Error("CONTACT_NOT_FOUND");
 
+        await ensureOpsMembershipPlan(transaction, parsed.planCode);
         await transaction.execute(sql`
           UPDATE ${joinInvites}
           SET superseded_at = now()

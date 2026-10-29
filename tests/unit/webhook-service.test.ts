@@ -32,6 +32,14 @@ function captureProcessor() {
 }
 
 describe("Stripe webhook lifecycle mapping", () => {
+  it.each(["startup", "corporate", "individual", "platinum"] as const)("keeps the paid %s code when activating a correlated Checkout", async (planCode) => {
+    const {commands, processor} = captureProcessor();
+    const event = checkoutCompleted("evt_paid_plan", {metadata: {membershipId, applicationId, planCode}});
+    await expect(processStripeEvent(event, systemActor("stripe-webhook"), processor)).resolves.toBe("processed");
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toMatchObject({planCode, membershipId, applicationId, nextStatus: "active"});
+  });
+
   it("activates checkout only with the exact membership, application, plan, customer, subscription, and session correlation", async () => {
     const {commands, processor} = captureProcessor();
     await expect(processStripeEvent(checkoutCompleted(), systemActor("stripe-webhook"), processor)).resolves.toBe("processed");

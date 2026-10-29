@@ -1,10 +1,11 @@
 import Link from "next/link";
 
 import {INDUSTRY_TAGS, industryTagLabel} from "@/config/industry-tags";
+import {OPS_MEMBERSHIP_TIERS, publicPlanCode} from "@/config/membership-journey";
 import type {AppLocale} from "@/i18n/routing";
 import type {MemberFilters as FilterValues} from "@/lib/db/repos/company-profiles";
 import {memberFilterQuery} from "@/lib/members/public";
-import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
+import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {localizedPath} from "@/lib/urls";
 
 type Labels = Readonly<{
@@ -43,9 +44,9 @@ export function MemberFilters({locale, filters, labels}: Readonly<{locale: AppLo
         </span>
         <span>
           <label htmlFor="member-plan">{labels.plan}</label>
-          <select defaultValue={filters.plan ?? ""} id="member-plan" name="plan">
+          <select defaultValue={filters.plan ? publicPlanCode(filters.plan) : ""} id="member-plan" name="plan">
             <option value="">{labels.anyPlan}</option>
-            {MEMBERSHIP_PLAN_CODES.filter((plan, index, codes) => codes.findIndex((candidate) => labels.plans[candidate] === labels.plans[plan]) === index).map((plan) => (
+            {OPS_MEMBERSHIP_TIERS.map(({code: plan}) => (
               <option key={plan} value={plan}>{labels.plans[plan]}</option>
             ))}
           </select>

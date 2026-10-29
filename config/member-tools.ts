@@ -33,7 +33,7 @@ export const MEMBER_TOOLS: readonly MemberTool[] = Object.freeze([
     url: "https://content-calendar-internal.vercel.app/",
     tokenParam: "token",
     tokenField: "contentCalendarToken",
-    tiers: Object.freeze(["startup", "corporate", "patron"] as const),
+    tiers: Object.freeze(["startup", "corporate", "patron", "individual", "platinum"] as const),
   }),
 ]);
 
