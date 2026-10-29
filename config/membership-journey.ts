@@ -1,18 +1,18 @@
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 
 /**
- * Public memberships Willy confirmed on 2026-10-29:
- * Individual HK$500, Corporate HK$1,800, Platinum HK$4,800. All three pay first.
+ * Public memberships:
+ * Community is free and active immediately (`applicationOutcome`).
+ * Individual HK$500, Corporate HK$1,800, and Platinum HK$4,800 stay pay-first.
  *
- * Stored plan codes still include the legacy community / startup / patron rows so
- * existing memberships load. New joins use individual, corporate, and platinum.
- * Community and Startup are not offered. Patron remains only as a legacy review
- * exception, and that exception is for Willy alone — not a committee.
+ * Stored plan codes still include startup and patron so existing memberships load.
+ * Startup is not offered. Patron remains only as a legacy review exception, and
+ * that exception is for Willy alone — not a committee.
  *
  * Stripe: Corporate reuses STRIPE_CORPORATE_PRICE_ID. Individual and Platinum need
  * price ids that do not exist in this repo. Do not create live Stripe products here.
  * Set STRIPE_INDIVIDUAL_PRICE_ID and STRIPE_PLATINUM_PRICE_ID when those prices exist.
- * Checkout fails closed until they are set.
+ * Checkout fails closed until they are set. Community does not use Stripe.
  */
 export const OPS_MEMBERSHIP_TIERS = [
   {code: "individual", annualPriceHkd: 500, collectsCompany: false, stripeEnv: "STRIPE_INDIVIDUAL_PRICE_ID"},
@@ -32,9 +32,11 @@ export function opsTier(code: OpsMembershipCode) {
   return tier;
 }
 
-/** Legacy join links keep working, but the public name is the ops tier. */
+/**
+ * Startup and patron links still land on the current paid tier.
+ * Community is offered again, so `/join?plan=community` is not redirected.
+ */
 export const LEGACY_JOIN_REDIRECT: Readonly<Partial<Record<MembershipPlanCode, OpsMembershipCode>>> = {
-  community: "individual",
   startup: "individual",
   patron: "platinum",
 };
@@ -46,9 +48,9 @@ export type ApplicationOutcome = Readonly<{
 }>;
 
 /**
- * New Individual, Corporate, and Platinum memberships pay before they are active.
- * Community stays free for rows already in flight. Patron stays a review exception
- * for Willy; the public Platinum tier does not use it.
+ * Community is free and active on completion. Individual, Corporate, and Platinum
+ * pay before they are active. Patron stays a review exception for Willy; the
+ * public Platinum tier does not use it.
  */
 export function applicationOutcome(plan: MembershipPlanCode): ApplicationOutcome {
   if (plan === "community") return {kind: "free", billingInterval: "none", status: "active"};
@@ -96,8 +98,9 @@ export function renewalPathForStatus(status: string): "/portal/billing" | null {
   return null;
 }
 
-/** Public label for a stored plan code. Legacy codes do not use their old names. */
-export function publicPlanCode(plan: MembershipPlanCode): OpsMembershipCode | "corporate" {
+/** Public label for a stored plan code. Startup folds into Individual; patron folds into Platinum. */
+export function publicPlanCode(plan: MembershipPlanCode): "community" | OpsMembershipCode {
+  if (plan === "community") return "community";
   if (plan === "corporate") return "corporate";
   if (plan === "platinum" || plan === "patron") return "platinum";
   return "individual";

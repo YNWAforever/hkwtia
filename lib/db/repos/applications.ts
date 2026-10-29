@@ -224,6 +224,46 @@ export const applicationsRepository = {
     return rows[0];
   },
 
+  /**
+   * First-touch campaign fields are written once. A later "how did you hear
+   * about us" answer fills `heard_about` only while that column is still empty.
+   * Requires migration 0070. Do not deploy the join form until it is applied.
+   */
+  async recordSignupAttribution(
+    actor: Actor,
+    applicationId: string,
+    attribution: Readonly<{
+      utmSource: string | null;
+      utmMedium: string | null;
+      utmCampaign: string | null;
+      utmTerm: string | null;
+      utmContent: string | null;
+      referralCode: string | null;
+      referrerHost: string | null;
+      landingPath: string | null;
+      heardAbout: string | null;
+    }>,
+  ): Promise<void> {
+    requireMember(actor);
+    const id = z.string().uuid().parse(applicationId);
+    const db = await getDb();
+    await db.execute(sql`
+      UPDATE ${membershipApplicationsTable}
+      SET utm_source = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_source, ${attribution.utmSource}) ELSE utm_source END,
+          utm_medium = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_medium, ${attribution.utmMedium}) ELSE utm_medium END,
+          utm_campaign = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_campaign, ${attribution.utmCampaign}) ELSE utm_campaign END,
+          utm_term = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_term, ${attribution.utmTerm}) ELSE utm_term END,
+          utm_content = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_content, ${attribution.utmContent}) ELSE utm_content END,
+          referral_code = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(referral_code, ${attribution.referralCode}) ELSE referral_code END,
+          referrer_host = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(referrer_host, ${attribution.referrerHost}) ELSE referrer_host END,
+          landing_path = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(landing_path, ${attribution.landingPath}) ELSE landing_path END,
+          heard_about = COALESCE(heard_about, ${attribution.heardAbout}),
+          attribution_captured_at = COALESCE(attribution_captured_at, now()),
+          updated_at = now()
+      WHERE id = ${id} AND applicant_user_id = ${actor.profileId}
+    `);
+  },
+
   async update(
     actor: Actor,
     applicationId: string,

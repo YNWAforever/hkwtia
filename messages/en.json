@@ -341,6 +341,27 @@
         "body": "The event is currently full. Your place is not confirmed. You can cancel your waitlist request here: {cancelUrl}",
         "cta": "View the event"
       },
+      "event_member_confirmation": {
+        "subject": "You're registered: {eventTitle}",
+        "preview": "Your WTIA event RSVP is confirmed.",
+        "heading": "You're registered",
+        "body": "Hello {recipientName}, your place at {eventTitle} is confirmed. If you cannot attend, cancel the registration from your WTIA events page so the seat can be released.",
+        "cta": "View the event"
+      },
+      "event_member_waitlist": {
+        "subject": "Waitlisted: {eventTitle}",
+        "preview": "Your place is not confirmed.",
+        "heading": "You're on the waitlist",
+        "body": "Hello {recipientName}, {eventTitle} is currently full. Your place is not confirmed. You can cancel the waitlist request from your WTIA events page.",
+        "cta": "View the event"
+      },
+      "event_member_rsvp_withdrawn": {
+        "subject": "RSVP cancelled: {eventTitle}",
+        "preview": "Your seat has been released.",
+        "heading": "Your RSVP is cancelled",
+        "body": "Hello {recipientName}, your registration for {eventTitle} is cancelled and the seat has been released. This does not cancel the event.",
+        "cta": "View the event"
+      },
       "event_rsvp_cancelled": {
         "subject": "Cancelled: {eventTitle}",
         "preview": "Your WTIA event RSVP is affected.",
@@ -510,7 +531,7 @@
       "destinations": {
         "membership": {
           "label": "Membership",
-          "copy": "Compare Individual, Corporate, and Platinum annual fees."
+          "copy": "Compare free Community with Individual, Corporate, and Platinum."
         },
         "showcase": {
           "label": "Member & solution showcase",
@@ -820,7 +841,7 @@
       "visibility": "WTIA visibility opportunities"
     },
     "tierBenefits": {
-      "community": ["Directory card on /members", "RSVP to public WTIA events", "Activity updates by email or WhatsApp"],
+      "community": ["Directory card on /members", "RSVP to public WTIA events", "Event submissions are not included", "Member tools are not included"],
       "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
       "corporate": ["Featured member profile and logo wall", "Unlimited reviewed event publishing", "3 showcase listings", "Priority WhatsApp support lane", "Member tools included"],
       "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"],
@@ -829,8 +850,8 @@
     },
     "tiers": {
       "community": {
-        "name": "Individual",
-        "description": "Legacy personal membership. New joins use Individual and pay online."
+        "name": "Community",
+        "description": "Free. A directory card and RSVP to public events. No event submissions and no member tools."
       },
       "startup": {
         "name": "Individual",
@@ -858,7 +879,7 @@
     "faq": {
       "0": {
         "question": "Who can apply?",
-        "answer": "Individual is for one person. Corporate and Platinum are for organisations. All three are paid online. For a question or a special case, we aim to reply within 5 working days."
+        "answer": "Community is free for one person. Individual is HK$500 a year for one person. Corporate and Platinum are for organisations and are paid online. For a question or a special case, we aim to reply within 5 working days."
       },
       "1": {
         "question": "Where are current fees?",
@@ -874,11 +895,11 @@
       },
       "4": {
         "question": "How many company seats are included?",
-        "answer": "Individual includes one seat. Corporate and Platinum include 25 seats. Company owners or administrators manage invitations in the portal; your agreement controls the confirmed allowance."
+        "answer": "Community and Individual include one seat. Corporate and Platinum include 25 seats. Company owners or administrators manage invitations in the portal; your agreement controls the confirmed allowance."
       },
       "5": {
         "question": "How long does approval take?",
-        "answer": "Individual, Corporate, and Platinum are paid online. Membership is confirmed when payment succeeds. For a question or a special case, we aim to reply within 5 working days."
+        "answer": "Community is free and becomes active when you submit. Individual, Corporate, and Platinum are paid online and are confirmed when payment succeeds. For a question or a special case, we aim to reply within 5 working days."
       },
       "6": {
         "question": "Can I get a refund?",
@@ -912,7 +933,7 @@
       "title": "Two ways to join",
       "individual": {
         "title": "Individual",
-        "copy": "HK$500 a year. Pay online. Membership starts when payment succeeds."
+        "copy": "Community is free. Individual is HK$500 a year, paid online, and starts when payment succeeds."
       },
       "organisation": {
         "title": "Company",
@@ -966,7 +987,7 @@
     "closing": {
       "eyebrow": "Ready when you are",
       "title": "Choose your tier, or ask us first.",
-      "copy": "Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message. We aim to reply within 5 working days.",
+      "copy": "Community is free. Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message. We aim to reply within 5 working days.",
       "join": "Join now",
       "contact": "Email the membership team"
     }
@@ -1041,21 +1062,22 @@
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
     "choosePlanTitle": "Choose a membership plan",
-    "choosePlanDescription": "Individual, Corporate, and Platinum are paid online. Choose a tier to continue to secure checkout.",
+    "choosePlanDescription": "Community is free. Individual, Corporate, and Platinum are paid online. Choose a tier to continue.",
     "choosePlanCompare": "Compare plans and fees",
     "choosePlan": {
-      "community": "New joins use Individual.",
+      "community": "Free. A directory card and public event RSVP. No event submissions and no member tools.",
       "startup": "New joins use Individual.",
       "corporate": "HK$1,800 a year for an organisation. Pay online now.",
       "patron": "New joins use Platinum.",
       "individual": "HK$500 a year for one person. Pay online now.",
       "platinum": "HK$4,800 a year. Pay online now."
     },
+    "choosePlanFree": "Free",
     "choosePlanAction": "Continue with {plan}",
     "choosePlanPrice": "{amount} per year",
     "choosePlanContact": "Contact WTIA",
     "tracks": {
-      "individual": {"title": "Individual", "copy": "HK$500 a year. Pay online. Membership starts when payment succeeds."},
+      "individual": {"title": "Individual", "copy": "Community is free. Individual is HK$500 a year. Pay online. Membership starts when payment succeeds."},
       "organisation": {"title": "Company", "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online."}
     },
     "organisation": {
@@ -1104,7 +1126,7 @@
       "company": "Company details"
     },
     "plans": {
-      "community": "Individual",
+      "community": "Community",
       "startup": "Individual",
       "corporate": "Corporate",
       "patron": "Platinum",
@@ -1114,6 +1136,7 @@
     "fields": {
       "email": "Email address",
       "displayName": "Display name",
+      "heardAbout": "How did you hear about us? (optional)",
       "phone": "Phone (optional)",
       "jobTitle": "Job title (optional)",
       "whatsappNumber": "WhatsApp number (optional)",
@@ -1135,12 +1158,13 @@
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",
       "companyNotAllowed": "This plan does not accept company details.",
-      "tier": "Choose Individual, Corporate, or Platinum, then continue with that tier.",
+      "tier": "Choose Community, Individual, Corporate, or Platinum, then continue with that tier.",
       "brRequired": "Upload the Business Registration.",
       "brType": "Upload a PDF, JPEG, or PNG Business Registration.",
       "brSize": "That file is larger than 8 MB.",
       "brStorage": "We could not store the Business Registration. Please try again.",
-      "whatsappNumber": "Enter a valid WhatsApp number with country code"
+      "whatsappNumber": "Enter a valid WhatsApp number with country code",
+      "heardAbout": "Use 200 characters or fewer."
     },
     "status": {
       "failed": {"title": "Payment needs attention", "description": "We could not confirm an active membership. Please check your billing status or contact WTIA."},
@@ -1698,7 +1722,7 @@
       "clear": "Clear"
     },
     "plans": {
-      "community": "Individual",
+      "community": "Community",
       "startup": "Individual",
       "corporate": "Corporate",
       "patron": "Platinum",
@@ -1960,7 +1984,9 @@
       "unauthenticated": "Sign in to register.",
       "ineligible": "An eligible membership is required.",
       "closed": "Registration is closed.",
-      "error": "We could not register you for this event. Please try again."
+      "error": "We could not register you for this event. Please try again.",
+      "cancel": "Cancel registration",
+      "cancelPending": "Cancelling…"
     }
   },
   "Ticket": {
@@ -2412,6 +2438,15 @@
       "eventCancelled": "This event has been cancelled.",
       "viewOrder": "View order",
       "viewEvent": "View event",
+      "cancel": "Cancel registration",
+      "cancelPending": "Cancelling…",
+      "cancelResult": {
+        "cancelled": "Your registration has been cancelled and the seat is free.",
+        "already_cancelled": "This registration is already cancelled.",
+        "not_registered": "There is no registration to cancel.",
+        "not_cancellable": "This registration can no longer be cancelled.",
+        "error": "We could not cancel your registration. Please try again."
+      },
       "first": "First page",
       "next": "Next page"
     },
@@ -2573,7 +2608,7 @@
     "membershipOptions": "View membership options",
     "welcome": "Welcome back, {name}.",
     "plans": {
-      "community": "Individual",
+      "community": "Community",
       "startup": "Individual",
       "corporate": "Corporate",
       "patron": "Platinum",
@@ -3429,7 +3464,7 @@
         "invite": {
           "title": "Personal join link",
           "plan": "Plan",
-          "plans": {"community": "Individual", "startup": "Individual", "corporate": "Corporate", "individual": "Individual", "platinum": "Platinum"},
+          "plans": {"community": "Community", "startup": "Individual", "corporate": "Corporate", "individual": "Individual", "platinum": "Platinum"},
           "create": "Create a join link",
           "linkLabel": "Join link (shown once)",
           "copy": "Copy link",
@@ -4000,7 +4035,7 @@
         "companyChoose": "Choose a registered company result or clear the search.",
         "companySearching": "Searching companies…"},
       "view": "View",
-      "planCodes": {"community": "Individual", "startup": "Individual", "corporate": "Corporate", "patron": "Platinum", "individual": "Individual", "platinum": "Platinum"},
+      "planCodes": {"community": "Community", "startup": "Individual", "corporate": "Corporate", "patron": "Platinum", "individual": "Individual", "platinum": "Platinum"},
       "statusCodes": {"active": "Active", "past_due": "Past due", "cancel_at_period_end": "Ends at period end", "pending_review": "Pending review", "pending_payment": "Awaiting payment", "cancelled": "Cancelled", "expired": "Expired"},
       "title": "Members",
       "description": "Search member profiles, companies, memberships, and engagement scores.",
@@ -4048,7 +4083,7 @@
       "nameZh": "Name (Traditional Chinese)",
       "corporate": "Corporate",
       "startup": "Startup (legacy)",
-      "community": "Community (legacy)",
+      "community": "Community",
       "patron": "Patron (legacy)",
       "individual": "Individual",
       "platinum": "Platinum",
@@ -4126,7 +4161,7 @@
       "addNote": "Add note",
       "campaign": "Queue campaign",
       "plans": {
-        "community": "Individual",
+        "community": "Community",
         "startup": "Individual",
         "corporate": "Corporate",
         "patron": "Platinum",
@@ -4695,7 +4730,7 @@
         "joinedColumn": "Joined",
         "countColumn": "Members",
         "emptyPlans": "No paid invitations in this window.",
-        "plan": {"community": "Individual", "startup": "Individual", "corporate": "Corporate", "patron": "Platinum", "individual": "Individual", "platinum": "Platinum"},
+        "plan": {"community": "Community", "startup": "Individual", "corporate": "Corporate", "patron": "Platinum", "individual": "Individual", "platinum": "Platinum"},
         "estimateHeading": "Attributed first-year fees",
         "estimateLabel": "Estimate",
         "estimateNote": "Joined plans at their annual list price for the first year. Not reconciled with Stripe, so do not read it as booked revenue."

@@ -90,6 +90,7 @@ describe("JoinPage portal continuation auth", () => {
   it("renders the plan chooser on a bare /join and the unavailable state for a malformed plan", async () => {
     const chooser = renderToStaticMarkup(await JoinPage(props("zh-HK", {})));
     expect(chooser).toContain("localized:choosePlanTitle");
+    expect(chooser).toContain('href="/zh/join?plan=community"');
     expect(chooser).toContain('href="/zh/join?plan=individual"');
     expect(chooser).toContain('href="/zh/join?plan=corporate"');
     expect(chooser).toContain('href="/zh/join?plan=platinum"');

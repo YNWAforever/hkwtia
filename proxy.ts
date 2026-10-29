@@ -9,6 +9,14 @@ import {
 
 import {authEnv} from "@/lib/config/env";
 import {allowedAdminDestination} from "@/lib/auth/login-destination";
+import {
+  ATTRIBUTION_COOKIE,
+  ATTRIBUTION_TTL_SECONDS,
+  captureFirstTouch,
+  decodeFirstTouch,
+  encodeFirstTouch,
+  isDocumentNavigation,
+} from "@/lib/membership/attribution";
 import {isPortalContinuation} from "@/lib/portal/continuation";
 import {localizedPath} from "@/lib/urls";
 import {routing} from "./i18n/routing";
@@ -159,8 +167,22 @@ export function anonymousPortalLoginRedirect(request: NextRequest): NextResponse
   return NextResponse.redirect(login, 307);
 }
 
+function rememberFirstTouch(request: NextRequest, response: NextResponse): void {
+  if (!isDocumentNavigation(request.headers, request.method)) return;
+  if (decodeFirstTouch(request.cookies.get(ATTRIBUTION_COOKIE)?.value)) return;
+  const touch = captureFirstTouch({href: request.url, referrer: request.headers.get("referer")});
+  response.cookies.set(ATTRIBUTION_COOKIE, encodeFirstTouch(touch), {
+    httpOnly: true,
+    secure: request.nextUrl.protocol === "https:",
+    sameSite: "lax",
+    path: "/",
+    maxAge: ATTRIBUTION_TTL_SECONDS,
+  });
+}
+
 export default async function middleware(request: NextRequest): Promise<NextResponse> {
   const response=(await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? anonymousPortalLoginRedirect(request) ?? intlMiddleware(request);
+  rememberFirstTouch(request, response);
   if(/(?:^|\/)admin\/cms-preview(?:\/|$)/.test(request.nextUrl.pathname)) {
     response.headers.set("Cache-Control","private, no-store, max-age=0");
     response.headers.set("X-Robots-Tag","noindex, nofollow");

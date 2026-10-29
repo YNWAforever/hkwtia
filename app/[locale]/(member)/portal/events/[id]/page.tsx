@@ -5,8 +5,11 @@ import {TicketCheckoutForm} from "@/components/marketing/ticket-checkout-form";
 import {portalAccessNotice} from "@/components/portal/access-notice";
 import {PortalPageHeader} from "@/components/portal/page-header";
 import type {AppLocale} from "@/i18n/routing";
+import {CancelRsvpForm} from "@/components/portal/cancel-rsvp-form";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import {cancelOwnRsvpAction} from "@/lib/events/member-cancel-action";
 import {portalPageActor} from "@/lib/portal/page-actor";
+import {getMyRegistrationStatuses} from "@/lib/portal/my-events";
 import {readPortalPage} from "@/lib/portal/access-state";
 import {getPortalEvent} from "@/lib/portal/member-event";
 import {formatPortalDate} from "@/lib/portal/format-date";
@@ -30,13 +33,18 @@ export default async function PortalEventPage({params}: Props) {
     getTicketCheckoutLabels(locale), actor.kind === "member" ? profilesRepository.getById(actor, actor.profileId) : null,
   ]);
   const canBuy = event.registrationMode === "ticketed" && event.ticketPriceHkdCents !== null && new Date(event.startsAt) > new Date();
+  const rsvpStatuses = event.registrationMode === "rsvp" && actor.kind === "member"
+    ? await getMyRegistrationStatuses(actor, [event.id]).catch(() => ({} as Awaited<ReturnType<typeof getMyRegistrationStatuses>>))
+    : {};
+  const rsvpStatus = rsvpStatuses[event.id];
+  const canCancel = rsvpStatus === "registered" || rsvpStatus === "waitlist";
   return <div className="space-y-6">
     <PortalPageHeader eyebrow={t("events.title")} title={event.title} lead={formatPortalDate(locale, event.startsAt)} />
     {event.venue ? <p>{event.venue}</p> : null}
     <p className="whitespace-pre-line">{event.description}</p>
     {canBuy ? <TicketCheckoutForm eventId={event.id} locale={locale} labels={labels} defaultBuyerName={profile?.displayName ?? ""} defaultBuyerEmail={profile?.email ?? ""}
       pricePerSeat={tTicket("price", {price: formatTicketPrice(event.ticketPriceHkdCents, locale)})} unitAmountHkdCents={event.ticketPriceHkdCents!}
-      eventStartsAt={event.startsAt} refundPolicyHref={localizedPath(locale, "/refund-policy")} /> : <p>{t("events.registrationUnavailable")}</p>}
+      eventStartsAt={event.startsAt} refundPolicyHref={localizedPath(locale, "/refund-policy")} /> : canCancel && rsvpStatus ? <CancelRsvpForm action={cancelOwnRsvpAction} eventId={event.id} label={t("myEvents.cancel")} locale={locale} pendingLabel={t("myEvents.cancelPending")} statusLabel={t(`myEvents.rsvpStatus.${rsvpStatus}`)}/> : <p>{t("events.registrationUnavailable")}</p>}
     <PrivateLink className="text-link" href={localizedPath(locale, "/portal/events")}>{t("events.title")}</PrivateLink>
   </div>;
 }

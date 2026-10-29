@@ -46,7 +46,7 @@ export function MemberFilters({locale, filters, labels}: Readonly<{locale: AppLo
           <label htmlFor="member-plan">{labels.plan}</label>
           <select defaultValue={filters.plan ? publicPlanCode(filters.plan) : ""} id="member-plan" name="plan">
             <option value="">{labels.anyPlan}</option>
-            {OPS_MEMBERSHIP_TIERS.map(({code: plan}) => (
+            {(["community", ...OPS_MEMBERSHIP_TIERS.map(({code}) => code)] as const).map((plan) => (
               <option key={plan} value={plan}>{labels.plans[plan]}</option>
             ))}
           </select>

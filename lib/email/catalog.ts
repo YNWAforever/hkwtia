@@ -31,6 +31,9 @@ export const EMAIL_TEMPLATE_IDS = [
   "batch_profile_update",
   "event_guest_confirmation",
   "event_guest_waitlist",
+  "event_member_confirmation",
+  "event_member_waitlist",
+  "event_member_rsvp_withdrawn",
   "event_rsvp_cancelled",
   "event_reminder_24h",
   "event_ticket_confirmation",
@@ -97,6 +100,13 @@ const DEFAULT_CLASSIFICATION = {
   // their cancel link, so it is transactional and must never gain a marketing footer.
   event_guest_confirmation: "transactional",
   event_guest_waitlist: "transactional",
+  // Member RSVP receipt: a reply to the member's own registration. Transactional,
+  // like the guest receipt, and never given a marketing footer.
+  event_member_confirmation: "transactional",
+  event_member_waitlist: "transactional",
+  // The member withdrew their own RSVP. Distinct from event_rsvp_cancelled,
+  // which is sent when WTIA cancels the event.
+  event_member_rsvp_withdrawn: "transactional",
   event_rsvp_cancelled: "transactional",
   // 24-hour reminder for a seat the member booked (Phase B1, B-5): a service
   // message about their own registration, so it ignores marketing suppression.

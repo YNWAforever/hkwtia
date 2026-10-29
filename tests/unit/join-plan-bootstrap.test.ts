@@ -35,6 +35,8 @@ function unseededCatalog() {
       const row: Record<string, unknown> = {
         id: applicationId, applicantUserId: member.profileId, companyId: null,
         planCode: plan, currentStep: "profile", status: "draft", inviteId: null,
+        utmSource: null, utmMedium: null, utmCampaign: null, utmTerm: null, utmContent: null,
+        referralCode: null, referrerHost: null, landingPath: null, heardAbout: null, attributionCapturedAt: null,
         createdAt: now, updatedAt: now,
       };
       return {rows: [Object.keys(getTableColumns(membershipApplications)).map((key) => row[key])]};

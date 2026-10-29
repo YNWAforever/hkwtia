@@ -341,6 +341,27 @@
         "body": "活動目前額滿，你的名額尚未確認。如要取消候補，請使用此連結：{cancelUrl}",
         "cta": "查看活動"
       },
+      "event_member_confirmation": {
+        "subject": "已登記：{eventTitle}",
+        "preview": "你的 WTIA 活動報名已確認。",
+        "heading": "你已成功報名",
+        "body": "{recipientName}，你好。你在 {eventTitle} 的名額已確認。如未能出席，請在 WTIA 活動頁取消報名，以便釋出名額。",
+        "cta": "查看活動"
+      },
+      "event_member_waitlist": {
+        "subject": "候補中：{eventTitle}",
+        "preview": "你的名額尚未確認。",
+        "heading": "你已加入候補名單",
+        "body": "{recipientName}，你好。{eventTitle} 目前額滿，你的名額尚未確認。你可在 WTIA 活動頁取消候補。",
+        "cta": "查看活動"
+      },
+      "event_member_rsvp_withdrawn": {
+        "subject": "已取消報名：{eventTitle}",
+        "preview": "你的名額已釋出。",
+        "heading": "你的報名已取消",
+        "body": "{recipientName}，你好。你已取消 {eventTitle} 的報名，名額已釋出。這不會取消活動本身。",
+        "cta": "查看活動"
+      },
       "event_rsvp_cancelled": {
         "subject": "活動已取消：{eventTitle}",
         "preview": "你報名的 WTIA 活動已取消。",
@@ -510,7 +531,7 @@
       "destinations": {
         "membership": {
           "label": "會籍",
-          "copy": "比較個人、企業及白金會籍的年費。"
+          "copy": "比較免費社群會籍，以及個人、企業及白金會籍。"
         },
         "showcase": {
           "label": "會員及方案展示",
@@ -820,7 +841,7 @@
       "visibility": "WTIA 展示機會"
     },
     "tierBenefits": {
-      "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "以電郵或 WhatsApp 接收活動更新"],
+      "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "不包括提交活動", "不包括會員工具"],
       "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
       "corporate": ["精選會員專頁及商標牆", "無限次提交活動（經審核）", "3 個方案展示頁", "WhatsApp 優先支援通道", "包含會員工具"],
       "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"],
@@ -829,8 +850,8 @@
     },
     "tiers": {
       "community": {
-        "name": "個人",
-        "description": "舊有個人會籍。新申請請選擇個人會籍並網上付款。"
+        "name": "社群",
+        "description": "免費。會員名片，以及報名公開活動。不包括提交活動，亦不包括會員工具。"
       },
       "startup": {
         "name": "個人",
@@ -858,7 +879,7 @@
     "faq": {
       "0": {
         "question": "誰可以申請？",
-        "answer": "個人會籍適合一個人。企業及白金會籍適合機構。三種會籍均於網上付款。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+        "answer": "社群會籍免費，適合一個人。個人會籍每年 HK$500，適合一個人。企業及白金會籍適合機構，並於網上付款。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
       },
       "1": {
         "question": "在哪裡查看現行會費？",
@@ -874,11 +895,11 @@
       },
       "4": {
         "question": "公司會籍包含多少席位？",
-        "answer": "個人會籍為一席。企業及白金會籍為二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
+        "answer": "社群及個人會籍各為一席。企業及白金會籍為二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
       },
       "5": {
         "question": "審批需時多久？",
-        "answer": "個人、企業及白金會籍均於網上付款。付款成功後會籍即時確認。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+        "answer": "社群會籍免費，提交後即時生效。個人、企業及白金會籍均於網上付款，付款成功後確認。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
       },
       "6": {
         "question": "可以退款嗎？",
@@ -912,7 +933,7 @@
       "title": "兩種加入方式",
       "individual": {
         "title": "個人",
-        "copy": "每年 HK$500。網上付款。付款成功後會籍生效。"
+        "copy": "社群會籍免費。個人會籍每年 HK$500，網上付款，付款成功後生效。"
       },
       "organisation": {
         "title": "公司",
@@ -966,7 +987,7 @@
     "closing": {
       "eyebrow": "隨時歡迎你",
       "title": "選擇級別，或先向我們查詢。",
-      "copy": "個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。我們會盡量在 5 個工作天內回覆。",
+      "copy": "社群會籍免費。個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。我們會盡量在 5 個工作天內回覆。",
       "join": "立即加入",
       "contact": "電郵會員團隊"
     }
@@ -1041,21 +1062,22 @@
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
     "choosePlanTitle": "選擇會員計劃",
-    "choosePlanDescription": "個人、企業及白金會籍均於網上付款。選擇級別後前往安全結帳。",
+    "choosePlanDescription": "社群會籍免費。個人、企業及白金會籍均於網上付款。選擇級別後繼續。",
     "choosePlanCompare": "比較計劃及費用",
     "choosePlan": {
-      "community": "新申請請選擇個人會籍。",
+      "community": "免費。會員名片及公開活動報名。不包括提交活動，亦不包括會員工具。",
       "startup": "新申請請選擇個人會籍。",
       "corporate": "機構每年 HK$1,800。現在網上付款。",
       "patron": "新申請請選擇白金會籍。",
       "individual": "個人每年 HK$500。現在網上付款。",
       "platinum": "每年 HK$4,800。現在網上付款。"
     },
+    "choosePlanFree": "免費",
     "choosePlanAction": "以{plan}繼續",
     "choosePlanPrice": "每年 {amount}",
     "choosePlanContact": "聯絡 WTIA",
     "tracks": {
-      "individual": {"title": "個人", "copy": "每年 HK$500。網上付款。付款成功後會籍生效。"},
+      "individual": {"title": "個人", "copy": "社群會籍免費。個人會籍每年 HK$500。網上付款。付款成功後會籍生效。"},
       "organisation": {"title": "公司", "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者均先付款。"}
     },
     "organisation": {
@@ -1104,7 +1126,7 @@
       "company": "公司資料"
     },
     "plans": {
-      "community": "個人",
+      "community": "社群",
       "startup": "個人",
       "corporate": "企業",
       "patron": "白金",
@@ -1114,6 +1136,7 @@
     "fields": {
       "email": "電郵地址",
       "displayName": "顯示名稱",
+      "heardAbout": "你如何認識我們？（選填）",
       "phone": "電話（選填）",
       "jobTitle": "職銜（選填）",
       "whatsappNumber": "WhatsApp 號碼（選填）",
@@ -1135,12 +1158,13 @@
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
       "companyNotAllowed": "此計劃不接受公司資料。",
-      "tier": "請選擇個人、企業或白金，並以該級別繼續。",
+      "tier": "請選擇社群、個人、企業或白金，並以該級別繼續。",
       "brRequired": "請上載商業登記證。",
       "brType": "請上載 PDF、JPEG 或 PNG 格式的商業登記證。",
       "brSize": "檔案超過 8 MB。",
       "brStorage": "未能儲存商業登記證，請再試一次。",
-      "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
+      "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼",
+      "heardAbout": "請以 200 字以內填寫。"
     },
     "status": {
       "failed": {"title": "付款狀態需查核", "description": "現時未能確認會籍已啟用。請查核付款狀態或聯絡 WTIA。"},
@@ -1698,7 +1722,7 @@
       "clear": "清除"
     },
     "plans": {
-      "community": "個人",
+      "community": "社群",
       "startup": "個人",
       "corporate": "企業",
       "patron": "白金",
@@ -1960,7 +1984,9 @@
       "unauthenticated": "請先登入再登記。",
       "ineligible": "需要符合資格的會籍。",
       "closed": "活動登記已截止。",
-      "error": "未能為你登記此活動，請再試一次。"
+      "error": "未能為你登記此活動，請再試一次。",
+      "cancel": "取消報名",
+      "cancelPending": "取消中…"
     }
   },
   "Ticket": {
@@ -2412,6 +2438,15 @@
       "eventCancelled": "此活動已取消。",
       "viewOrder": "查看訂單",
       "viewEvent": "查看活動",
+      "cancel": "取消報名",
+      "cancelPending": "取消中…",
+      "cancelResult": {
+        "cancelled": "已取消報名，名額已釋出。",
+        "already_cancelled": "這項報名已經取消。",
+        "not_registered": "沒有可取消的報名。",
+        "not_cancellable": "這項報名已不能取消。",
+        "error": "未能取消報名，請再試一次。"
+      },
       "first": "第一頁",
       "next": "下一頁"
     },
@@ -2573,7 +2608,7 @@
     "membershipOptions": "查看會籍選項",
     "welcome": "歡迎回來，{name}。",
     "plans": {
-      "community": "個人",
+      "community": "社群",
       "startup": "個人",
       "corporate": "企業",
       "patron": "白金",
@@ -3430,7 +3465,7 @@
         "invite": {
           "title": "專屬入會連結",
           "plan": "會籍計劃",
-          "plans": {"community": "個人", "startup": "個人", "corporate": "企業", "individual": "個人", "platinum": "白金"},
+          "plans": {"community": "社群", "startup": "個人", "corporate": "企業", "individual": "個人", "platinum": "白金"},
           "create": "建立入會連結",
           "linkLabel": "入會連結（只顯示一次）",
           "copy": "複製連結",
@@ -4001,7 +4036,7 @@
         "companyChoose": "請從已登記公司中選擇，或清空搜尋。",
         "companySearching": "正在搜尋公司…"},
       "view": "查看",
-      "planCodes": {"community": "個人", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
+      "planCodes": {"community": "社群", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
       "statusCodes": {"active": "有效", "past_due": "逾期未付", "cancel_at_period_end": "期末終止", "pending_review": "待審批", "pending_payment": "待付款", "cancelled": "已取消", "expired": "已過期"},
       "title": "會員",
       "description": "搜尋會員檔案、公司、會籍及參與分數。",
@@ -4049,7 +4084,7 @@
       "nameZh": "名稱（繁體中文）",
       "corporate": "企業",
       "startup": "初創（舊有）",
-      "community": "社群（舊有）",
+      "community": "社群",
       "patron": "贊助人（舊有）",
       "individual": "個人",
       "platinum": "白金",
@@ -4127,7 +4162,7 @@
       "addNote": "新增備註",
       "campaign": "建立推廣活動",
       "plans": {
-        "community": "個人",
+        "community": "社群",
         "startup": "個人",
         "corporate": "企業",
         "patron": "白金",
@@ -4724,7 +4759,7 @@
         "joinedColumn": "實際加入",
         "countColumn": "會員",
         "emptyPlans": "此期間沒有已付費的邀請。",
-        "plan": {"community": "個人", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
+        "plan": {"community": "社群", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
         "estimateHeading": "歸因首年會費",
         "estimateLabel": "估算",
         "estimateNote": "按已加入方案的首年年費標價計算，未與 Stripe 對賬，請勿視為已入賬收入。"

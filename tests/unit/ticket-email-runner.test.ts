@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
-import {deliverTicketEmailsForOrder, drainTicketEmailOutbox, type TicketEmailRunnerDependencies} from "@/lib/billing/ticket-email-runner";
+import {deliverTicketEmailsForOrder, drainTicketEmailOutbox, TICKET_EMAIL_BATCH_LIMIT, TICKET_EMAIL_RATE_LIMIT_BACKOFF_MS, TICKET_EMAIL_SEND_CONCURRENCY, TICKET_EMAIL_START_INTERVAL_MS, type TicketEmailRunnerDependencies} from "@/lib/billing/ticket-email-runner";
+import {DeliveryFailure} from "@/lib/email/transport";
 import type {OrderRecord} from "@/lib/db/repos/event-orders";
 import type {TicketEmailClaim} from "@/lib/db/repos/ticket-email-outbox";
 import {createTestTransport} from "@/lib/email/transport";
@@ -60,7 +61,10 @@ describe("ticket email outbox runner", () => {
   it("freezes the rendered receipt before sending and settles the claimed notice", async () => {
     const {dependencies, outbox, renderEmail, transport} = fixture();
     await deliverTicketEmailsForOrder(orderId, dependencies, now);
-    expect(outbox.claimForOrder).toHaveBeenCalledWith(orderId, now, 3);
+    expect(TICKET_EMAIL_BATCH_LIMIT).toBe(16);
+    expect(TICKET_EMAIL_BATCH_LIMIT).toBeLessThanOrEqual(25);
+    expect(TICKET_EMAIL_SEND_CONCURRENCY).toBeLessThanOrEqual(4);
+    expect(outbox.claimForOrder).toHaveBeenCalledWith(orderId, now, TICKET_EMAIL_BATCH_LIMIT);
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({
       template: "event_ticket_confirmation", locale: "en", recipientName: "Ada",
     }));
@@ -210,5 +214,60 @@ describe("ticket email outbox runner", () => {
     expect(renderEmail).not.toHaveBeenCalled();
     expect(outbox.freezePayload).not.toHaveBeenCalled();
     expect(transport.sends).toEqual([expect.objectContaining(payload)]);
+  });
+
+  it("spaces starts, backs off after a rate limit, and keeps the idempotency key", async () => {
+    const {claim, dependencies, outbox} = fixture();
+    const secondId = "44444444-4444-4444-8444-444444444442";
+    outbox.claimForOrder.mockResolvedValue([
+      claim,
+      {...claim, id: secondId, eventKey: "ticket-confirmation:second"},
+    ]);
+    const sleeps: number[] = [];
+    const paced = {
+      ...dependencies,
+      sleep: async (milliseconds: number) => {
+        sleeps.push(milliseconds);
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
+      },
+      transport: {send: async () => { throw new DeliveryFailure("retryable_rate_limit"); }},
+    };
+    await deliverTicketEmailsForOrder(orderId, paced, now);
+    expect(sleeps).toEqual([TICKET_EMAIL_START_INTERVAL_MS, TICKET_EMAIL_RATE_LIMIT_BACKOFF_MS]);
+    expect(outbox.markRetryable).toHaveBeenCalledWith(noticeId, 1, now, "retryable_rate_limit");
+    expect(outbox.markRetryable).toHaveBeenCalledWith(secondId, 1, now, "retryable_rate_limit");
+    expect(outbox.freezePayload).toHaveBeenCalledWith(noticeId, 1, expect.objectContaining({
+      idempotencyKey: "ticket-confirmation:" + orderId,
+    }), now);
+  });
+
+  it("does not run more than four provider sends at once", async () => {
+    const {claim, dependencies, outbox} = fixture();
+    const claims = [0, 1, 2, 3, 4].map((index) => ({
+      ...claim,
+      id: `44444444-4444-4444-8444-44444444444${index}`,
+      eventKey: `ticket-confirmation:${index}`,
+    }));
+    outbox.claimForOrder.mockResolvedValue(claims);
+    let inFlight = 0;
+    let maxInFlight = 0;
+    let started = 0;
+    const waiting: Array<() => void> = [];
+    const paced = {
+      ...dependencies,
+      sleep: async () => {},
+      transport: {send: () => new Promise<{status: "sent"; providerId: string}>((resolve) => {
+        started += 1;
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        waiting.push(() => { inFlight -= 1; resolve({status: "sent", providerId: "paced"}); });
+        if (waiting.length === TICKET_EMAIL_SEND_CONCURRENCY || started === claims.length) {
+          for (const finish of waiting.splice(0)) finish();
+        }
+      })},
+    };
+    await deliverTicketEmailsForOrder(orderId, paced, now);
+    expect(maxInFlight).toBeLessThanOrEqual(TICKET_EMAIL_SEND_CONCURRENCY);
+    expect(outbox.markSent).toHaveBeenCalledTimes(claims.length);
   });
 });

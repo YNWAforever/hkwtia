@@ -84,14 +84,18 @@ export default async function MembershipPage({ params }: Props) {
   ) {
     void rows;
     const annual = t("cadenceLabels.annual");
-    // Willy's ops list is the public price. It does not wait on the database catalog,
-    // and it does not invent a Stripe product. Checkout still needs the price id.
+    // Paid prices are the ops list. Community is free and does not wait on Stripe.
+    // Checkout for the paid tiers still needs a price id; this page does not create one.
     const money = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
-    const tiers: PlanGridTier[] = OPS_MEMBERSHIP_TIERS.map((tier) => ({
+    const offer = [
+      {code: "community" as const, annualPriceHkd: null},
+      ...OPS_MEMBERSHIP_TIERS,
+    ];
+    const tiers: PlanGridTier[] = offer.map((tier) => ({
       code: tier.code,
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
-      priceLines: [`${money.format(tier.annualPriceHkd)} ${annual}`],
+      priceLines: [tier.annualPriceHkd === null ? t("priceLabels.free") : `${money.format(tier.annualPriceHkd)} ${annual}`],
       seatLabel: t("compare.seats", {count: PLAN_CATALOG[tier.code].seatAllowance}),
       benefits: t.raw(`tierBenefits.${tier.code}`) as string[],
       action: t("actions.join"),

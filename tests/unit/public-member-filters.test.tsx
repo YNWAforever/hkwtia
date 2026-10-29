@@ -16,7 +16,7 @@ describe("public member directory filters", () => {
     render(<MemberFilters filters={{q: null, tag: null, plan: "platinum"}} labels={{...labels, plans}} locale={locale} />);
     const select = screen.getByRole("combobox", {name: labels.plan});
     expect(within(select).getAllByRole("option").map((option) => (option as HTMLOptionElement).value))
-      .toEqual(["", "individual", "corporate", "platinum"]);
+      .toEqual(["", "community", "individual", "corporate", "platinum"]);
     expect(select).toHaveValue("platinum");
   });
 

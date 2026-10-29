@@ -18,6 +18,7 @@ import {auditEvents, companies, companyMembers, eventCancellationIntents, eventC
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, type EventFilters} from "@/lib/events/filters";
 import {eventBoundary, PUBLIC_EVENT_PAGE_SIZE, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
+import {deliverMemberRsvpNotice, type MemberRsvpNoticeKind} from "@/lib/events/member-rsvp-mail";
 import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/events/reminder-enrollment";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
@@ -160,7 +161,7 @@ export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transa
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
 export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
-  lockEvent: (eventId: string) => Promise<Readonly<{id: string; slug?: string; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
+  lockEvent: (eventId: string) => Promise<Readonly<{id: string; slug?: string; titleEn?: string; titleZh?: string | null; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
   hasEligibleMembership: (profileId: string) => Promise<boolean>;
   getRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: RegistrationStatus}> | null>;
   countRegistered: (eventId: string) => Promise<number>;
@@ -518,7 +519,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
 async function defaultRegistrationDependencies(): Promise<EventRegistrationDependencies> {
   const db = await getDb();
   return {transaction: (work) => db.transaction(async (tx) => work({
-    lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published, registrationMode: events.registrationMode, visibility: events.visibility, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
+    lockEvent: async (eventId) => (await tx.select({id: events.id, slug: events.slug, titleEn: events.titleEn, titleZh: events.titleZh, capacity: events.capacity, published: events.published, registrationMode: events.registrationMode, visibility: events.visibility, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
     hasEligibleMembership: async (profileId) => Boolean((await tx.select({id: memberships.id}).from(memberships)
       .leftJoin(companyMembers, and(eq(companyMembers.companyId, memberships.companyId), eq(companyMembers.userId, profileId), isNull(companyMembers.revokedAt)))
       .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses), membershipGrantValiditySql())).limit(1))[0]),
@@ -541,7 +542,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
   requireMember(actor);
   const {eventId} = registrationInputSchema.parse(input);
   const resolved = dependencies ?? await defaultRegistrationDependencies();
-  const outcome = await resolved.transaction<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"; startsAt?: Date}>>(async (transaction) => {
+  const outcome = await resolved.transaction<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"; startsAt?: Date; slug?: string; titleEn?: string; titleZh?: string | null}>>(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
     if (!event || !event.published || event.visibility === "invite_only" || isAuditDemoEventSlug(event.slug)) throw new Error("EVENT_NOT_FOUND");
     if (event.registrationMode !== "rsvp") throw new Error("EVENT_REGISTRATION_NOT_RSVP");
@@ -553,7 +554,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
     const disposition = event.capacity !== null && await transaction.countRegistered(eventId) >= event.capacity ? "waitlist" : "registered";
     await transaction.upsertRegistration(eventId, actor.profileId, disposition);
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: "member", action: "event.registration.created", targetType: "event", targetId: eventId, metadata: {disposition}});
-    return {disposition, startsAt: event.startsAt};
+    return {disposition, startsAt: event.startsAt, slug: event.slug, titleEn: event.titleEn, titleZh: event.titleZh ?? null};
   });
   if (outcome.disposition === "registered" && outcome.startsAt) {
     // Programme B-5 (S-2): the 24-hour reminder is enrolled after the seat has
@@ -564,6 +565,75 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
     // registration into an error the member retries into a duplicate.
     await (resolved.enrollReminder ?? enrollEventReminder)({profileId: actor.profileId, eventId, startsAt: outcome.startsAt})
       .catch((error: unknown) => { console.error("event-reminder-enrolment", {profileId: actor.profileId, eventId, error}); });
+  }
+  if (!dependencies && (outcome.disposition === "registered" || outcome.disposition === "waitlist") && outcome.slug && outcome.titleEn) {
+    await notifyMemberRsvp({
+      profileId: actor.profileId, eventId, kind: outcome.disposition, slug: outcome.slug,
+      titleEn: outcome.titleEn, titleZh: outcome.titleZh ?? null,
+    }).catch((error: unknown) => { console.error("member-rsvp-confirmation", {profileId: actor.profileId, eventId, error}); });
+  }
+  return {disposition: outcome.disposition};
+}
+
+export type MemberCancelDisposition = "cancelled" | "already_cancelled" | "not_registered" | "not_cancellable";
+
+type MemberCancelDependencies = Readonly<{
+  transaction: <T>(work: (transaction: Readonly<{
+    lockEvent: (eventId: string) => Promise<Readonly<{slug: string; titleEn: string; titleZh: string | null}> | null>;
+    lockRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: string}> | null>;
+    markCancelled: (eventId: string, profileId: string) => Promise<void>;
+    insertAudit: (input: Readonly<{actorUserId: string; actorType: "member"; action: "event.registration.cancelled"; targetType: "event"; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
+  }>) => Promise<T>) => Promise<T>;
+}>;
+
+async function defaultCancelDependencies(): Promise<MemberCancelDependencies> {
+  const db = await getDb();
+  return {transaction: (work) => db.transaction(async (tx) => work({
+    lockEvent: async (eventId) => (await tx.select({slug: events.slug, titleEn: events.titleEn, titleZh: events.titleZh}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
+    lockRegistration: async (eventId, profileId) => (await tx.select({status: eventRegistrations.status}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.profileId, profileId))).for("update"))[0] ?? null,
+    markCancelled: async (eventId, profileId) => { await tx.update(eventRegistrations).set({status: "cancelled", checkedInAt: null}).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.profileId, profileId))); },
+    insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
+  }))};
+}
+
+async function notifyMemberRsvp(input: Readonly<{profileId: string; eventId: string; kind: MemberRsvpNoticeKind; slug: string; titleEn: string; titleZh: string | null}>): Promise<void> {
+  const db = await getDb();
+  const [profile] = await db.select({email: profiles.email, displayName: profiles.displayName, locale: profiles.locale}).from(profiles).where(eq(profiles.id, input.profileId)).limit(1);
+  if (!profile?.email) return;
+  const locale = profile.locale === "zh-HK" ? "zh-HK" : "en";
+  const eventTitle = locale === "zh-HK" && input.titleZh ? input.titleZh : input.titleEn;
+  await deliverMemberRsvpNotice({
+    to: profile.email, recipientName: profile.displayName, locale, kind: input.kind,
+    eventId: input.eventId, profileId: input.profileId, eventTitle, slug: input.slug,
+  });
+}
+
+/**
+ * A signed-in member releases their own seat. Waitlisted members are not promoted:
+ * that would admit someone who has not confirmed they can still attend.
+ */
+export async function cancelOwnEventRegistration(actor: Actor, input: unknown, dependencies?: MemberCancelDependencies): Promise<Readonly<{disposition: MemberCancelDisposition}>> {
+  requireMember(actor);
+  const {eventId} = registrationInputSchema.parse(input);
+  const resolved = dependencies ?? await defaultCancelDependencies();
+  const outcome = await resolved.transaction(async (transaction) => {
+    const event = await transaction.lockEvent(eventId);
+    const registration = await transaction.lockRegistration(eventId, actor.profileId);
+    if (!event || !registration) return {disposition: "not_registered" as const};
+    if (registration.status === "cancelled") return {disposition: "already_cancelled" as const};
+    if (registration.status !== "registered" && registration.status !== "waitlist") return {disposition: "not_cancellable" as const};
+    await transaction.markCancelled(eventId, actor.profileId);
+    await transaction.insertAudit({
+      actorUserId: actor.profileId, actorType: "member", action: "event.registration.cancelled",
+      targetType: "event", targetId: eventId, metadata: {previousStatus: registration.status},
+    });
+    return {disposition: "cancelled" as const, slug: event.slug, titleEn: event.titleEn, titleZh: event.titleZh};
+  });
+  if (!dependencies && outcome.disposition === "cancelled" && outcome.slug && outcome.titleEn) {
+    await notifyMemberRsvp({
+      profileId: actor.profileId, eventId, kind: "withdrawn", slug: outcome.slug,
+      titleEn: outcome.titleEn, titleZh: outcome.titleZh ?? null,
+    }).catch((error: unknown) => { console.error("member-rsvp-withdrawn", {profileId: actor.profileId, eventId, error}); });
   }
   return {disposition: outcome.disposition};
 }

@@ -142,10 +142,10 @@ describe("/membership rewrite", () => {
     const html = await renderMembership([community, startup, patron]);
 
     expect(html).toContain('class="plan-grid"');
+    expect(html).toContain('id="community"');
     expect(html).toContain('id="individual"');
     expect(html).toContain('id="corporate"');
     expect(html).toContain('id="platinum"');
-    expect(html).not.toContain('id="community"');
     expect(html).not.toContain('id="startup"');
     expect(html).not.toContain('id="patron"');
     // Scoped to the plan-grid region: the page also renders <article> tags in the
@@ -154,8 +154,10 @@ describe("/membership rewrite", () => {
     // per its name, is "the plan grid itself has four cards."
     const planGridHtml =
       html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
-    expect((planGridHtml.match(/<article/g) ?? []).length).toBe(3);
+    expect((planGridHtml.match(/<article/g) ?? []).length).toBe(4);
     expect(html).toContain(bundles.en.Membership.sme.title);
+    expect(html).toContain('href="/join?plan=community"');
+    expect(html).toContain("Free");
     expect(html).toContain('href="/join?plan=individual"');
     expect(html).toContain('href="/join?plan=corporate"');
     expect(html).toContain('href="/join?plan=platinum"');
