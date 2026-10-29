@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {
+  LEGACY_JOIN_REDIRECT,
   MEMBERSHIP_KIT_LINKS,
   OPS_MEMBERSHIP_TIERS,
   applicationOutcome,
@@ -17,6 +18,12 @@ describe("membership onboarding journey", () => {
       ["corporate", 1800],
       ["platinum", 4800],
     ]);
+  });
+
+  it("keeps community on its own join link and redirects only startup and patron", () => {
+    expect(LEGACY_JOIN_REDIRECT.community).toBeUndefined();
+    expect(LEGACY_JOIN_REDIRECT.startup).toBe("individual");
+    expect(LEGACY_JOIN_REDIRECT.patron).toBe("platinum");
   });
 
   it("sends the ops tiers to checkout and keeps only the legacy patron exception on review", () => {

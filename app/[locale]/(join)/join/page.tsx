@@ -53,7 +53,7 @@ export default async function JoinPage({params, searchParams}: Props) {
   // status -- but every one is /join at the same canonical URL, so each carries the same trail.
   const trail = <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/join", tRoot))} />;
   const rawPlan = queryValue(query.plan);
-  if (!queryValue(query.application) && (rawPlan === "community" || rawPlan === "startup" || rawPlan === "patron")) {
+  if (!queryValue(query.application) && (rawPlan === "startup" || rawPlan === "patron")) {
     const nextPlan = LEGACY_JOIN_REDIRECT[rawPlan];
     const params = new URLSearchParams();
     if (nextPlan) params.set("plan", nextPlan);
@@ -102,11 +102,11 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active="plan" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {planChooserItems(locale).map((item) => (
             <li className="rounded-lg border border-border p-5" key={item.code}>
               <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>
-              <p className="mt-2 text-sm font-medium">{t("choosePlanPrice", {amount: new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0}).format(item.annualPriceHkd)})}</p>
+              <p className="mt-2 text-sm font-medium">{item.annualPriceHkd === null ? t("choosePlanFree") : t("choosePlanPrice", {amount: new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0}).format(item.annualPriceHkd)})}</p>
               <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
               <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
                 {t("choosePlanAction", {plan: t(`plans.${item.code}`)})}

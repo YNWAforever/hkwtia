@@ -5,7 +5,8 @@ import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 describe("planChooserItems", () => {
   it("links the ops tiers to /join?plan=, locale-prefixed", () => {
     const en = planChooserItems("en");
-    expect(en.map((item) => item.code)).toEqual(["individual", "corporate", "platinum"]);
+    expect(en.map((item) => item.code)).toEqual(["community", "individual", "corporate", "platinum"]);
+    expect(en.find((item) => item.code === "community")).toMatchObject({href: "/join?plan=community", annualPriceHkd: null});
     expect(en.find((item) => item.code === "individual")).toMatchObject({href: "/join?plan=individual", annualPriceHkd: 500});
     expect(en.find((item) => item.code === "corporate")?.annualPriceHkd).toBe(1800);
     expect(en.find((item) => item.code === "platinum")?.annualPriceHkd).toBe(4800);

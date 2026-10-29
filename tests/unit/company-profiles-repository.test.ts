@@ -64,7 +64,8 @@ function uniqueViolation(wrapped: boolean): Error {
 
 describe("companyProfilesRepository (programme B-6, B-7)", () => {
   it.each([
-    ["individual", ["community", "startup", "individual"]],
+    ["community", ["community"]],
+    ["individual", ["startup", "individual"]],
     ["platinum", ["patron", "platinum"]],
     ["patron", ["patron", "platinum"]],
   ] as const)("includes stored aliases when filtering the public %s tier", async (plan, codes) => {

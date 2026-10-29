@@ -23,6 +23,8 @@ import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import {attributeJoinInvite} from "@/lib/membership/join-invite-attribution";
+import {cleanHeardAbout, heardAboutTooLong} from "@/lib/membership/attribution";
+import {persistSignupAttribution} from "@/lib/membership/signup-attribution";
 import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {createCheckoutSession} from "@/lib/billing/checkout-service";
@@ -92,6 +94,7 @@ export async function resumeJoinAction(formData: FormData): Promise<void> {
     companyId: typeof companyId === "string" && companyId ? companyId : null,
     newApplication: formData.get("intent") === "new",
   });
+  await persistSignupAttribution(actor, result.applicationId, null);
   const destination = destinationForJoin(locale, plan, result.applicationId, result.next);
   if (destination.kind === "page") redirect(destination.href!);
   const membership = await membershipsRepository.getByApplicationId(actor, result.applicationId);
@@ -149,6 +152,8 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
   try {
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
+    if (heardAboutTooLong(formData.get("heardAbout"))) return formError(locale, "heardAbout", "errors.heardAbout");
+    const heardAbout = cleanHeardAbout(formData.get("heardAbout"));
     // Validate a resumed draft before profile/consent writes or contact linking.
     const resumed = applicationId ? await startJoin(actor, {plan, applicationId}) : null;
     if(policyAcceptanceEnabled()){
@@ -177,13 +182,21 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // number comes from the parsed form because `profileSchema` has already
     // normalised it; the address from the saved row, since the join form never
     // asks for one.
+    const application = resumed ?? await startJoin(actor, {plan, applicationId});
+    const id = application.applicationId;
+    const stored = await persistSignupAttribution(actor, id, heardAbout);
+    // Contact linking stays off the critical path: a merge failure must not
+    // turn a saved profile into errors.save. Attribution is copied onto the
+    // linked contact only when join found one; join does not create contacts.
     void contactsRepository.linkProfile(contactWriterActor("import"), {
       profileId: actor.profileId,
       email: saved?.email ?? existing?.email ?? null,
       phoneE164: parsed.data.whatsappNumber,
+    }).then(async (link) => {
+      if (link.linked && stored) {
+        await persistSignupAttribution(actor, id, heardAbout, {contactId: link.linked, profileId: actor.profileId});
+      }
     }).catch(() => undefined);
-    const application = resumed ?? await startJoin(actor, {plan, applicationId});
-    const id = application.applicationId;
     if(policyAcceptanceEnabled()&&formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId:id,policyVersion:String(formData.get("policyVersion"))});
     const companyPlan = planCollectsCompany(plan);
     if (companyPlan) {
@@ -248,6 +261,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
       jobTitle: profile.jobTitle,
       locale: profile.locale,
     }, company: {...parsed.data, id: company.id}});
+    await persistSignupAttribution(actor, result.applicationId, null);
     await attributeJoinInvite(actor, result.applicationId);
     redirectToOutcome(locale, plan, result);
   } catch (error) {

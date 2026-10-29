@@ -61,7 +61,7 @@ export default async function ProfilePage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("profileTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("profileDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("continue")}>
+        <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber", "heardAbout"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("continue")}>
           <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" defaultValue={draft.profile?.displayName??defaults.displayName??""} required/>
           <details className="rounded-md border border-border p-4" open={showOptional}>
             <summary className="min-h-11 cursor-pointer content-center font-medium">{t("optionalProfileTitle")}</summary>
@@ -79,6 +79,10 @@ export default async function ProfilePage({params, searchParams}: Props) {
               </div>
             </div>
           </details>
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="heardAbout">{t("fields.heardAbout")}</label>
+            <input aria-describedby="heardAbout-error" className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="heardAbout" maxLength={200} name="heardAbout"/>
+          </div>
           <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>

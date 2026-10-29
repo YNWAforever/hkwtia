@@ -8,6 +8,7 @@ vi.mock("@/lib/portal/page-actor", () => ({portalPageActor: async () => ({kind: 
 vi.mock("@/lib/portal/member-event", () => ({getPortalEvent: state.read}));
 vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {getById: state.profile}}));
 vi.mock("@/lib/tickets/labels", () => ({getTicketCheckoutLabels: async () => ({})}));
+vi.mock("@/lib/portal/my-events", () => ({getMyRegistrationStatuses: async () => ({})}));
 vi.mock("@/components/marketing/ticket-checkout-form", () => ({TicketCheckoutForm: (props: Record<string, unknown>) => {state.checkout(props); return <form data-checkout="existing-form"/>;}}));
 import Page from "@/app/[locale]/(member)/portal/events/[id]/page";
 const event = {id: "event", title: "Private event", description: "Protected details", startsAt: "2099-01-01", venue: "WTIA", registrationMode: "ticketed", ticketPriceHkdCents: 25000};

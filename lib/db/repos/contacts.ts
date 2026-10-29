@@ -1365,6 +1365,46 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         membership: membership ? {planCode: membership.plan_code, status: membership.status} : null,
       };
     },
+
+    /**
+     * Copies join attribution onto a contact that this sign-up linked.
+     * Join does not create a contact. Campaign fields stick only while
+     * `attribution_captured_at` is still null, so an older source is kept.
+     * Requires migration 0070.
+     */
+    async stampSignupAttribution(actor: unknown, input: Readonly<{
+      contactId: string;
+      profileId: string;
+      utmSource: string | null;
+      utmMedium: string | null;
+      utmCampaign: string | null;
+      utmTerm: string | null;
+      utmContent: string | null;
+      referralCode: string | null;
+      referrerHost: string | null;
+      landingPath: string | null;
+      heardAbout: string | null;
+    }>): Promise<void> {
+      requireContactWriter(actor);
+      const contactId = z.string().uuid().parse(input.contactId);
+      const profileId = z.string().min(1).max(128).parse(input.profileId);
+      const database = await loadDatabase();
+      await database.execute(sql`
+        UPDATE ${contacts}
+        SET utm_source = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_source, ${input.utmSource}) ELSE utm_source END,
+            utm_medium = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_medium, ${input.utmMedium}) ELSE utm_medium END,
+            utm_campaign = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_campaign, ${input.utmCampaign}) ELSE utm_campaign END,
+            utm_term = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_term, ${input.utmTerm}) ELSE utm_term END,
+            utm_content = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(utm_content, ${input.utmContent}) ELSE utm_content END,
+            referral_code = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(referral_code, ${input.referralCode}) ELSE referral_code END,
+            referrer_host = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(referrer_host, ${input.referrerHost}) ELSE referrer_host END,
+            landing_path = CASE WHEN attribution_captured_at IS NULL THEN COALESCE(landing_path, ${input.landingPath}) ELSE landing_path END,
+            heard_about = COALESCE(heard_about, ${input.heardAbout}),
+            attribution_captured_at = COALESCE(attribution_captured_at, now()),
+            updated_at = now()
+        WHERE id = ${contactId} AND profile_id = ${profileId}
+      `);
+    },
   };
 }
 

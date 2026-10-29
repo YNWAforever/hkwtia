@@ -34,6 +34,9 @@ const REQUIRED_TEMPLATE_IDS = [
   "batch_profile_update",
   "event_guest_confirmation",
   "event_guest_waitlist",
+  "event_member_confirmation",
+  "event_member_waitlist",
+  "event_member_rsvp_withdrawn",
   "event_rsvp_cancelled",
   "event_reminder_24h",
   "event_ticket_confirmation",
@@ -75,9 +78,9 @@ const FIXTURE_VARIABLES = {
 } as const;
 
 describe("email catalogue", () => {
-  it("contains exactly the 35 registered template IDs in stable order", () => {
+  it("contains exactly the 38 registered template IDs in stable order", () => {
     expect(EMAIL_TEMPLATE_IDS).toEqual(REQUIRED_TEMPLATE_IDS);
-    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(35);
+    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(38);
   });
 
   it("keeps the guest confirmation transactional and carries the cancel link in its body", () => {

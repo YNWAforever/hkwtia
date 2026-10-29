@@ -4,7 +4,7 @@ const a = {kind: "member", userId: "auth-a", profileId: "a"} as const;
 const b = {...a, profileId: "b"};
 const ids = [1, 2, 3].map(n => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`);
 function setup() {
-  const rows = ids.map(id => ({id, applicantUserId: "a", planCode: "community", companyId: null, currentStep: "profile", status: "draft", inviteId: null, createdAt: new Date("2026-10-26T00:00:00Z"), updatedAt: new Date("2026-10-26T00:00:00Z"), cursorTime: "2026-10-26T00:00:00.000123Z"} satisfies OwnedApplicationRow));
+  const rows = ids.map(id => ({id, applicantUserId: "a", planCode: "community" as const, companyId: null, currentStep: "profile" as const, status: "draft" as const, inviteId: null, utmSource: null, utmMedium: null, utmCampaign: null, utmTerm: null, utmContent: null, referralCode: null, referrerHost: null, landingPath: null, heardAbout: null, attributionCapturedAt: null, createdAt: new Date("2026-10-26T00:00:00Z"), updatedAt: new Date("2026-10-26T00:00:00Z"), cursorTime: "2026-10-26T00:00:00.000123Z"} satisfies OwnedApplicationRow));
   const select = vi.fn<OwnedApplicationPort["select"]>(async query => rows.filter(r => r.applicantUserId === query.ownerId && (!query.after || r.cursorTime < query.after.time || (r.cursorTime === query.after.time && r.id < query.after.id))).sort((x, y) => y.id.localeCompare(x.id)).slice(0, query.take));
   const find = vi.fn<OwnedApplicationPort["find"]>(async query => rows.find(r => r.id === query.id && r.applicantUserId === query.ownerId) ?? null);
   return {reader: createOwnedApplicationReader({select, find}), select, find};

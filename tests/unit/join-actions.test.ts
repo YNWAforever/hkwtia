@@ -89,6 +89,9 @@ vi.mock("@/lib/membership/join-service", () => ({
 vi.mock("@/lib/membership/join-invite-attribution", () => ({
   attributeJoinInvite: async (...args: unknown[]) => { redirectState.order.push("attribute"); redirectState.attributed.push(args); },
 }));
+vi.mock("@/lib/membership/signup-attribution", () => ({
+  persistSignupAttribution: async () => null,
+}));
 
 import {beginMembershipCheckoutAction, requestMagicLink, resumeJoinAction, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
 

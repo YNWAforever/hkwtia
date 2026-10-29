@@ -20,6 +20,7 @@ import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
 import {deriveEventDisplayStatus} from "@/lib/events/status";
 import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
+import {cancelOwnRsvpAction} from "@/lib/events/member-cancel-action";
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
 import type {RegistrationActionState} from "@/lib/events/registration-state";
 import {formatTicketPrice} from "@/lib/tickets/format";
@@ -221,7 +222,7 @@ export default async function EventPage({params}: Props) {
               ) : registrationUnavailable ? (
                 <p className="portal-status-note" role="alert">{t("guest.unavailable")}</p>
               ) : (
-                <EventRegistrationForm key={`${displayEvent.id}:${savedRegistration ?? "new"}`} initialStatus={savedRegistration} statusLabel={savedRegistrationLabel} action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
+                <EventRegistrationForm key={`${displayEvent.id}:${savedRegistration ?? "new"}`} initialStatus={savedRegistration} statusLabel={savedRegistrationLabel} action={registerAction} cancelAction={cancelOwnRsvpAction} cancelLabel={t("registration.cancel")} cancelPendingLabel={t("registration.cancelPending")} locale={appLocale} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
               )}
             </div>
           </div>

@@ -30,10 +30,24 @@ export type TicketEmailRunnerDependencies = Readonly<{
   appUrl: string;
   passSecret: string;
   recordMetric?: (metric: TicketEmailMetric) => void;
+  /** Tests inject this so a paced batch does not wait on the wall clock. */
+  sleep?: (milliseconds: number) => Promise<void>;
 }>;
 
 const SEND_TIMEOUT_MS = 6_000;
-const BATCH_LIMIT = 3;
+/**
+ * Resend's default team limit is 10 requests/second, shared with every other
+ * sender on the same API key. This job stays at 4 starts/second (250ms apart,
+ * at most 4 in flight) so a ticket backlog cannot take the whole budget.
+ *
+ * The worker allows 30s. Four sends that each hit the 6s deadline, repeated
+ * for 16 notices, finishes in about 24s. The outbox claim cap is 25.
+ */
+export const TICKET_EMAIL_BATCH_LIMIT = 16;
+export const TICKET_EMAIL_SEND_CONCURRENCY = 4;
+export const TICKET_EMAIL_START_INTERVAL_MS = 250;
+export const TICKET_EMAIL_RATE_LIMIT_BACKOFF_MS = 1_000;
+const BATCH_LIMIT = TICKET_EMAIL_BATCH_LIMIT;
 
 function formatHkd(cents: number, locale: "en" | "zh-HK"): string {
   return new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {
@@ -134,44 +148,85 @@ function emitMetric(dependencies: TicketEmailRunnerDependencies, metric: TicketE
   catch { /* Telemetry cannot change a provider send or settlement outcome. */ }
 }
 
+function defaultSleep(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => { setTimeout(resolve, milliseconds); });
+}
+
 async function processClaims(
   claims: readonly TicketEmailClaim[], dependencies: TicketEmailRunnerDependencies, now: Date,
 ): Promise<void> {
-  for (const claim of claims) {
+  const sleep = dependencies.sleep ?? defaultSleep;
+  let active = 0;
+  let rateLimited = false;
+  const waiting: Array<() => void> = [];
+  const pending: Array<Promise<unknown>> = [];
+  function release(): void {
+    active -= 1;
+    waiting.shift()?.();
+  }
+  async function acquire(): Promise<void> {
+    if (active < TICKET_EMAIL_SEND_CONCURRENCY) {
+      active += 1;
+      return;
+    }
+    await new Promise<void>((resolve) => { waiting.push(resolve); });
+    active += 1;
+  }
+  for (let index = 0; index < claims.length; index += 1) {
+    if (index > 0) await sleep(TICKET_EMAIL_START_INTERVAL_MS);
+    if (rateLimited) {
+      rateLimited = false;
+      await sleep(TICKET_EMAIL_RATE_LIMIT_BACKOFF_MS);
+    }
+    await acquire();
+    const claim = claims[index];
+    if (!claim) {
+      release();
+      break;
+    }
+    pending.push(processClaim(claim, dependencies, now, () => { rateLimited = true; }).finally(release));
+  }
+  await Promise.all(pending);
+}
+
+async function processClaim(
+  claim: TicketEmailClaim, dependencies: TicketEmailRunnerDependencies, now: Date,
+  onRateLimit?: () => void,
+): Promise<boolean> {
     let order: OrderRecord | null;
     try {
       order = await dependencies.orders.orderById(claim.orderId);
     } catch {
       await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "order_read_failed");
-      continue;
+      return false;
     }
     if (!order) {
       await dependencies.outbox.markBlocked(claim.id, claim.attemptCount, now, "order_missing");
-      continue;
+      return false;
     }
     if (!admissible(claim.kind, order.status)) {
       await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
-      continue;
+      return false;
     }
 
     if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
       if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "ticket_resend_paused");
-        continue;
+        return false;
       }
       if (!claim.seatId) {
         await dependencies.outbox.markBlocked(claim.id, claim.attemptCount, now, "seat_missing");
-        continue;
+        return false;
       }
       let valid: boolean;
       try {valid = await dependencies.orders.resendEligible(claim.seatId, now);}
       catch {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "resend_eligibility_read_failed");
-        continue;
+        return false;
       }
       if (!valid) {
         await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
-        continue;
+        return false;
       }
     }
 
@@ -181,11 +236,11 @@ async function processClaims(
         verified = await dependencies.refundVerified(order);
       } catch {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "refund_verify_failed");
-        continue;
+        return false;
       }
       if (!verified) {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "refund_pending");
-        continue;
+        return false;
       }
       if (order.status === "refund_pending") {
         try {
@@ -199,7 +254,7 @@ async function processClaims(
           order = current;
         } catch {
           await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "refund_commit_failed");
-          continue;
+          return false;
         }
       }
     }
@@ -215,9 +270,9 @@ async function processClaims(
         } else {
           await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "render_failed");
         }
-        continue;
+        return false;
       }
-      if (!await dependencies.outbox.freezePayload(claim.id, claim.attemptCount, payload, now)) continue;
+      if (!await dependencies.outbox.freezePayload(claim.id, claim.attemptCount, payload, now)) return false;
     }
 
     // Rendering/freezing may overlap a refund or revocation. Check the current
@@ -226,25 +281,25 @@ async function processClaims(
     try {currentOrder = await dependencies.orders.orderById(claim.orderId);}
     catch {
       await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "order_read_failed");
-      continue;
+      return false;
     }
     if (!currentOrder || !admissible(claim.kind, currentOrder.status)) {
       await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
-      continue;
+      return false;
     }
     if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
       if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "ticket_resend_paused");
-        continue;
+        return false;
       }
       let valid: boolean;
       try {valid = claim.seatId !== null
         && await dependencies.orders.resendEligible(claim.seatId, now);}
       catch {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "resend_eligibility_read_failed");
-        continue;
+        return false;
       }
-      if (!valid) {await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now); continue;}
+      if (!valid) {await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now); return false;}
     }
 
     const startedAt = performance.now();
@@ -269,14 +324,17 @@ async function processClaims(
           : error instanceof DeliveryFailure && error.code === "provider_client_error" ? "refused" : "uncertain",
         durationMs: providerDurationMs,
       });
+      const rateLimited = error instanceof DeliveryFailure && error.code === "retryable_rate_limit";
+      if (rateLimited) onRateLimit?.();
       if (error instanceof DeliveryFailure && error.code === "provider_client_error") {
         await dependencies.outbox.markBlocked(claim.id, claim.attemptCount, now, error.code);
       } else {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now,
           error instanceof DeliveryFailure ? error.code : "delivery_unknown");
       }
+      return rateLimited;
     }
-  }
+    return false;
 }
 
 export async function deliverTicketEmailsForOrder(

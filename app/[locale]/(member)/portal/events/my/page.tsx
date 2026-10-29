@@ -3,6 +3,8 @@ import {PrivateLink} from "@/components/internal-shell/private-link";
 import {PortalPageHeader} from "@/components/portal/page-header";
 import type {AppLocale} from "@/i18n/routing";
 import {portalPageActor} from "@/lib/portal/page-actor";
+import {CancelRsvpForm} from "@/components/portal/cancel-rsvp-form";
+import {cancelOwnRsvpAction} from "@/lib/events/member-cancel-action";
 import {getMyRegistrations} from "@/lib/portal/my-events";
 import {formatPortalDate} from "@/lib/portal/format-date";
 import {localizedPath} from "@/lib/urls";
@@ -25,7 +27,9 @@ export default async function MyEventsPage({params, searchParams}: Props) {
     {page.items.length ? <ul className="portal-card-grid">{page.items.map((item) => <li className="portal-card" key={`${item.source}:${item.id}`}>
       <p>{t(`myEvents.source.${item.source}`)}</p>
       <h2>{item.title}</h2><p>{formatPortalDate(locale, item.startsAt)}</p>
-      <p>{item.source === "ticket" ? t(`orders.status.${item.status}`) : t(`myEvents.rsvpStatus.${item.status}`)}</p>
+      {item.source === "rsvp" && (item.status === "registered" || item.status === "waitlist") && !item.eventCancelled
+        ? <CancelRsvpForm action={cancelOwnRsvpAction} eventId={item.eventId} label={t("myEvents.cancel")} locale={locale} pendingLabel={t("myEvents.cancelPending")} statusLabel={t(`myEvents.rsvpStatus.${item.status}`)}/>
+        : <p>{item.source === "ticket" ? t(`orders.status.${item.status}`) : t(`myEvents.rsvpStatus.${item.status}`)}</p>}
       {item.eventCancelled ? <p>{t("myEvents.eventCancelled")}</p> : null}
       {item.href ? <PrivateLink className="text-link" href={item.href}>{t(item.source === "ticket" ? "myEvents.viewOrder" : "myEvents.viewEvent")}</PrivateLink> : null}
     </li>)}</ul> : <p>{t("myEvents.empty")}</p>}
