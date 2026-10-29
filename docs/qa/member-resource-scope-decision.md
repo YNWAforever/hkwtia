@@ -1,10 +1,10 @@
 # T-MP08 — member resources scope decision
 
-Status: decision prepared; product selection and end-to-end acceptance outstanding. Neither option has been selected on behalf of WTIA. Original UC-MP59 remains untested, not passed.
+Status: historical alternatives; Task 11 version/authorization contract added in R2, but approved source and protected delivery remain missing; product selection and end-to-end acceptance outstanding. Neither option has been selected on behalf of WTIA. Original UC-MP59 remains untested, not passed.
 
 ## Verified implementation evidence
 
-- `lib/portal/content.ts`: the default `documents.listApproved` adapter returns an empty array. There is no registered resource source behind that interface.
+- `lib/portal/content.ts`: default `documents.listApproved` now uses `createMemberResourceReader` with an empty version source. Published/latest-version/plan and current membership contracts are unit tested; no registered owner source, database resource lifecycle or protected byte delivery exists. See `docs/acceptance/hkwtia-20261025r1/r2-resources-binding.md`.
 - `lib/db/repos/media.ts`, `lib/media/image-upload.ts`: reusable staff/member image ownership, validated image types, object metadata, checksums and audit records. Upload/delivery accepts PNG, JPEG and WebP; this is not a general document ingestion contract.
 - `app/api/media/[id]/route.ts`, `lib/media/media-delivery-route.ts`: the bucket is private, but the application image delivery endpoint is anonymous and uses **public CDN caching for 300 seconds**. An object's private bucket location does not make its download member-only. Do not use this endpoint for confidential member documents.
 - `media.ts`: archive checks and reference checks exist. They are not a draft/published/withdrawn/versioned member-resource lifecycle. Existing publicly cached images may remain readable for five minutes after archive, as explicitly recorded in that feature.

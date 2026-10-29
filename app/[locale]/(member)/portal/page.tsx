@@ -1,3 +1,6 @@
+import {OnboardingChecklist} from "@/components/portal/onboarding-checklist";
+import {renewalPathForStatus} from "@/config/membership-journey";
+import {deriveOnboardingChecklist} from "@/lib/portal/onboarding-checklist";
 import {PrivateLink} from "@/components/internal-shell/private-link";
 import type {ComponentProps} from "react";
 
@@ -54,7 +57,8 @@ export default async function PortalPage({params}: Props) {
       <div className="flex flex-wrap items-center gap-3">
         <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/applications")}>{t("applications.nav")}</PrivateLink>
         <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/profile")}>{t("profile")}</PrivateLink>
-        <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/billing")}>{t("billing.title")}</PrivateLink>
+        <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/billing")}>{t("renew.action")}</PrivateLink>
+        <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/join")}>{t("renew.rejoin")}</PrivateLink>
         <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />
         <a className="min-h-11 content-center underline underline-offset-4" href={localizedPath(locale, "/membership")}>
           {t("membershipOptions")}
@@ -143,6 +147,30 @@ export default async function PortalPage({params}: Props) {
         empty: t("firstResult.empty"), unavailable: t("firstResult.unavailable", {reference: firstResult.kind === "unavailable" ? firstResult.reference : ""}),
         browseEvents: t("firstResult.browseEvents"), retry: t("firstResult.retry"),
       }}/> : null}
+      {renewalPathForStatus(primaryStatus) ? <PrivateLink className="portal-button-outline" href={localizedPath(locale, "/portal/billing")}>{t("renew.action")}</PrivateLink> : null}
+      <OnboardingChecklist
+        items={deriveOnboardingChecklist({profileComplete: onboarding.profileComplete, whatsappOptIn: profile.whatsappOptIn, planCode: membership.planCode})}
+        labels={{
+          title: t("checklist.title"),
+          lead: t("checklist.lead"),
+          kitsTitle: t("checklist.kitsTitle"),
+          kitsLead: t("checklist.kitsLead"),
+          done: t("checklist.done"),
+          todo: t("checklist.todo"),
+          items: {
+            profile: t("checklist.profile"),
+            welcomeKit: t("checklist.welcomeKit"),
+            associationKit: t("checklist.associationKit"),
+            whatsapp: t("checklist.whatsapp"),
+            firstEvent: t("checklist.firstEvent"),
+            registration: t("checklist.registration"),
+          },
+          welcomeKit: t("checklist.welcomeKit"),
+          associationKit: t("checklist.associationKit"),
+          whatsappCommunity: t("checklist.whatsappCommunity"),
+        }}
+        locale={locale}
+      />
       <MembershipGlance
         locale={locale}
         companyId={membership.companyId}

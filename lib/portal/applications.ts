@@ -1,5 +1,6 @@
 import "server-only";
 
+import type {OwnedApplicationPageInput} from "@/lib/membership/owned-application-reader";
 import {z} from "zod";
 
 import {applicationsRepository} from "@/lib/db/repos/applications";
@@ -29,6 +30,8 @@ type ApplicationRecord = Pick<
 
 type ApplicationReader = Readonly<{
   listOwned: (actor: Actor) => Promise<readonly ApplicationRecord[]>;
+  getOwnedById: (actor: Actor, id: string) => Promise<ApplicationRecord | null>;
+  listOwnedPage: (actor: Actor, input: OwnedApplicationPageInput) => Promise<{items: readonly ApplicationRecord[]; nextCursor: string | null}>;
 }>;
 
 export type PortalApplicationDependencies = Readonly<{
@@ -94,7 +97,17 @@ export async function getMemberApplication(
 ): Promise<MemberApplicationView | null> {
   requireMember(actor);
   if (!z.string().uuid().safeParse(id).success) return null;
-  const applications = await inputDependencies.applications.listOwned(actor);
-  const application = ownedBy(actor, applications).find((row) => row.id === id);
-  return application ? project(application) : null;
+  const application = await inputDependencies.applications.getOwnedById(actor, id);
+  return application && application.applicantUserId === actor.profileId ? project(application) : null;
+}
+
+/** Paged portal history; the legacy unbounded helper remains available to callers. */
+export async function getMemberApplicationsPage(
+  actor: Actor,
+  input: OwnedApplicationPageInput = {},
+  inputDependencies: PortalApplicationDependencies = defaultDependencies,
+) {
+  requireMember(actor);
+  const page = await inputDependencies.applications.listOwnedPage(actor, input);
+  return {items: ownedBy(actor, page.items).map(project), nextCursor: page.nextCursor};
 }

@@ -1,0 +1,2998 @@
+{
+  "date": "2026-10-26",
+  "baseHead": "45dbecbe21b153ddd0da300a783e5625f2e6a1f4",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "pr": 212,
+  "stackedOn": 211,
+  "serverMode": "Guarded production rebuild --webpack and next start on localhost:3212; APP_URL/NEXT_PUBLIC_SITE_URL/PLAYWRIGHT_BASE_URL same origin",
+  "versions": {
+    "node": "22.23.4",
+    "next": "16.4.3",
+    "chromium": "149.0.7827.55"
+  },
+  "target": {
+    "projectId": "dark-cake-07139424",
+    "branchId": "br-restless-pond-a11dpkvd",
+    "verification": "localAcceptanceTarget -> verifyAcceptanceTarget before production child; existing fixture read-only; no migration/seed/write"
+  },
+  "environment": {
+    "inheritedNames": [
+      "PATH",
+      "HOME",
+      "TMPDIR",
+      "LANG"
+    ],
+    "explicitNames": [
+      "NODE_ENV",
+      "DATABASE_URL",
+      "APP_URL",
+      "NEXT_PUBLIC_SITE_URL",
+      "NEON_AUTH_BASE_URL",
+      "NEON_AUTH_COOKIE_SECRET",
+      "CONCIERGE_COOKIE_SECRET",
+      "AGENTS_ENABLED",
+      "NEXT_TELEMETRY_DISABLED",
+      "PLAYWRIGHT_BASE_URL"
+    ],
+    "dummyNames": [
+      "NEON_AUTH_BASE_URL",
+      "NEON_AUTH_COOKIE_SECRET",
+      "CONCIERGE_COOKIE_SECRET"
+    ],
+    "dummyAuth": "loopback closed port, no real Auth credentials or sessions",
+    "absent": "All Stripe, AI provider, messaging, email, Vercel/Preview credentials and mutation flags; Turnstile absent; no production keys",
+    "browserNames": [
+      "HKWTIA_ANONYMOUS_ACCEPTANCE",
+      "PLAYWRIGHT_BASE_URL"
+    ],
+    "authState": "Explicit empty cookies/origins, no storageState file; cross-origin browser requests aborted"
+  },
+  "commands": [
+    "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts build",
+    "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts start",
+    "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-directory-readback.ts",
+    "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=<loopback> npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --reporter=json",
+    "npx -y -p node@22 -c \"npm test\"",
+    "npx -y -p node@22 -c \"npm run typecheck && npm run lint\"",
+    "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=http://localhost:3212 npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --project=chromium --reporter=json",
+    "LHCI_BASE_URL=http://localhost:3212 CHROME_PATH=<Playwright Chromium executable> npx -y -p node@22 node node_modules/@lhci/cli/src/cli.js collect --config=lighthouserc.js"
+  ],
+  "runs": [
+    {
+      "name": "initial",
+      "passed": 0,
+      "failed": 16,
+      "reason": "All navigation hits redirect loop",
+      "durationMs": 34638
+    },
+    {
+      "name": "one retry plus initial-hop diagnostics",
+      "passed": 4,
+      "failed": 16,
+      "flaky": 0,
+      "durationMs": 29400
+    }
+  ],
+  "excludedAttempts": [
+    "Pre-server exploratory locale test failed connection refusal; not behavioral evidence.",
+    "First build failed new launcher ProcessEnv type; corrected before successful build/start.",
+    "Gate check without PLAYWRIGHT_BASE_URL invoked managed-server configuration and failed before tests; excluded. Repeated gate with explicit loopback base."
+  ],
+  "initialBoundaryResponses": [
+    {
+      "path": "/admin",
+      "status": 307,
+      "location": "/admin-login?next=%2Fadmin"
+    },
+    {
+      "path": "/admin/members",
+      "status": 307,
+      "location": "/admin-login?next=%2Fadmin%2Fmembers"
+    },
+    {
+      "path": "/portal",
+      "status": 307,
+      "location": "/member-login?next=%2Fportal"
+    },
+    {
+      "path": "/portal/company",
+      "status": 307,
+      "location": "/member-login?next=%2Fportal%2Fcompany"
+    },
+    {
+      "path": "/zh/admin",
+      "status": 307,
+      "location": "/zh/admin-login?next=%2Fadmin"
+    },
+    {
+      "path": "/zh/admin/members",
+      "status": 307,
+      "location": "/zh/admin-login?next=%2Fadmin%2Fmembers"
+    },
+    {
+      "path": "/zh/portal",
+      "status": 307,
+      "location": "/zh/member-login?next=%2Fportal"
+    },
+    {
+      "path": "/zh/portal/company",
+      "status": 307,
+      "location": "/zh/member-login?next=%2Fportal%2Fcompany"
+    }
+  ],
+  "publicHttpDiagnostics": [
+    {
+      "path": "/",
+      "status": 307,
+      "location": "/"
+    },
+    {
+      "path": "/about",
+      "status": 307,
+      "location": "/about"
+    },
+    {
+      "path": "/zh",
+      "status": 307,
+      "location": "/zh-HK"
+    }
+  ],
+  "directoryPreflight": {
+    "rows": 1,
+    "directoryVisible": false,
+    "published": false,
+    "publicAbsence": "PROVEN_LOCAL_EN_ZH"
+  },
+  "checks": {
+    "build": "PASS",
+    "unit": {
+      "passed": 7984,
+      "skipped": 659,
+      "failed": 0,
+      "filesPassed": 909,
+      "filesSkipped": 118
+    },
+    "typecheck": "PASS",
+    "lint": {
+      "errors": 0,
+      "warnings": 77
+    },
+    "browser": "28 passed / 2 failed; unchanged deliberately unconfigured paid-tier assertions only.",
+    "screenshots": "Captured under ignored test-results/",
+    "axe": "64 settled + 2 reduced-motion scans clear; 8 paused mid-entrance hero scans have zero color-contrast violations.",
+    "keyboard": "Skip-link focus/Enter exercised",
+    "screenReader": "NOT_TESTED",
+    "lhci": "30 local lab reports collected; no upload",
+    "fieldINP": "NOT_TESTED",
+    "focusedInventory": "2 passed",
+    "typecheckAfterNextEnvRestore": "PASS",
+    "lintAfterFinalSpecEdits": {
+      "errors": 0,
+      "warnings": 77
+    }
+  },
+  "results": [
+    {
+      "id": "UC22-01",
+      "oldStatus": "BLOCKED",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "64 EN/ZH public renders and settled axe scans clear; 32 paused CTA samples opaque at 8.451873:1. Local only; Preview/SSO open."
+    },
+    {
+      "id": "UC22-03",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Community/Patron render; four-tier assertion remains red: Startup/Corporate unavailable without deliberately absent Stripe price IDs."
+    },
+    {
+      "id": "UC22-04",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Rendered tier headings, plans anchor, FAQ and contact help checked in both locales; paid seats/checkout remain unverified."
+    },
+    {
+      "id": "UC22-05",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Locale round-trip retains query/hash and localized contact hrefs."
+    },
+    {
+      "id": "UC22-07",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Anonymous admin routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
+    },
+    {
+      "id": "UC22-08",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Anonymous portal routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
+    },
+    {
+      "id": "UC22-09",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Membership plans anchor, FAQ and manual contact link exercised in both locales."
+    },
+    {
+      "id": "UC22-34",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Existing hidden/unpublished synthetic company absent from healthy EN/ZH directory; preflight read-only, no fixture writes."
+    },
+    {
+      "id": "UC22-52",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Disabled concierge POST returns 503 and localized alert/manual support link in EN/ZH; no provider calls."
+    },
+    {
+      "id": "UC22-55",
+      "oldStatus": "PARTIAL",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Movement-only CTA entrance: 32 samples at 0/450/600/800ms across four widths × EN/ZH, all ancestor opacities 1, white/#1a4f82 ratio 8.451873:1; eight 600ms hero axe scans clear. Settled/reduced-motion checks retained. Screen reader and real devices open."
+    },
+    {
+      "id": "UC22-57",
+      "oldStatus": "NOT RUN",
+      "newStatus": "PARTIAL",
+      "localResult": "PARTIAL",
+      "detail": "Same-config LHCI repeated after CSS fix: three runs per ten URLs, medians in movementOnlyEntranceRun.lighthouse. Shared-host local lab; controlled performance, field INP and Preview/SSO open."
+    }
+  ],
+  "serverStopped": true,
+  "deployment": "NOT_RUN",
+  "remoteCI": "BLOCKED: billing; stacked-ci-trigger.patch untouched",
+  "launcherFixBaseHead": "37887794ed21e4c71a74bcc906d6c9321a61090d",
+  "historicalFailedAttempt": {
+    "serverMode": "Next production build --webpack / next start; 127.0.0.1:3212; no dev server used for evidence",
+    "runs": [
+      {
+        "name": "initial",
+        "passed": 0,
+        "failed": 16,
+        "reason": "All navigation hits redirect loop",
+        "durationMs": 34638
+      },
+      {
+        "name": "one retry plus initial-hop diagnostics",
+        "passed": 4,
+        "failed": 16,
+        "flaky": 0,
+        "durationMs": 29400
+      }
+    ],
+    "publicHttpDiagnostics": [
+      {
+        "path": "/",
+        "status": 307,
+        "location": "/"
+      },
+      {
+        "path": "/about",
+        "status": 307,
+        "location": "/about"
+      },
+      {
+        "path": "/zh",
+        "status": 307,
+        "location": "/zh-HK"
+      }
+    ],
+    "checks": {
+      "build": "PASS",
+      "unit": {
+        "passed": 7984,
+        "skipped": 659,
+        "failed": 0,
+        "filesPassed": 909,
+        "filesSkipped": 118
+      },
+      "typecheck": "PASS",
+      "lint": {
+        "errors": 0,
+        "warnings": 77
+      },
+      "browser": "See localhostRuns/browserFailures; unmet checks remain failures",
+      "screenshots": "Captured under ignored test-results/",
+      "axe": "Executed; serious contrast finding observed",
+      "keyboard": "Skip-link focus/Enter exercised",
+      "screenReader": "NOT_TESTED",
+      "lhci": "30 local lab reports collected; no upload",
+      "fieldINP": "NOT_TESTED"
+    },
+    "results": [
+      {
+        "id": "UC22-01",
+        "oldStatus": "NOT RUN",
+        "newStatus": "BLOCKED",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-03",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Stripe price IDs absent deliberately; populated four-tier comparison remains unverified independently of redirect blocker."
+      },
+      {
+        "id": "UC22-04",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-05",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-07",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "PARTIAL",
+        "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+      },
+      {
+        "id": "UC22-08",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "PARTIAL",
+        "detail": "Initial 307 to locale-correct login with exact next= destination verified; login rendering loops."
+      },
+      {
+        "id": "UC22-09",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-34",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions. Guarded read-only preflight found exactly one existing hidden, unpublished synthetic company; public absence NOT proven."
+      },
+      {
+        "id": "UC22-52",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-55",
+        "oldStatus": "PARTIAL",
+        "newStatus": "PARTIAL",
+        "localResult": "BLOCKED",
+        "detail": "Browser navigation fails with ERR_TOO_MANY_REDIRECTS before render/assertions."
+      },
+      {
+        "id": "UC22-57",
+        "oldStatus": "NOT RUN",
+        "newStatus": "NOT RUN",
+        "localResult": "NOT_RUN",
+        "detail": "Optional LHCI omitted: public navigation loops; field INP NOT_TESTED."
+      }
+    ]
+  },
+  "rootCause": "Launcher origin mismatch: 127.0.0.1 request rewritten to absolute localhost/en, external rewrite re-enters as-needed locale redirect. Verified before fix: 307 Location /, x-middleware-rewrite http://localhost:3212/en; after: 200, relative /en. No production routing change.",
+  "localhostRuns": [
+    {
+      "name": "first",
+      "startTime": "2026-10-26T12:31:23.868Z",
+      "duration": 179425.91999999998,
+      "expected": 17,
+      "skipped": 0,
+      "unexpected": 3,
+      "flaky": 0
+    },
+    {
+      "name": "final",
+      "startTime": "2026-10-26T12:34:57.589Z",
+      "duration": 94153.961,
+      "expected": 15,
+      "skipped": 0,
+      "unexpected": 5,
+      "flaky": 0
+    }
+  ],
+  "renderObservations": [
+    {
+      "case": "en 375 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "en 768 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": [
+            {
+              "id": "color-contrast",
+              "impact": "serious"
+            }
+          ]
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "en 1024 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "en 1440 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "How can Hong Kong lead the AI+ era?",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "A connected voice for wireless technology.",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "Chairman's message",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "Committees that turn participation into action.",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "Choose the membership that fits your needs",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "Operational AI, measured in public",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "Let's connect",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA members",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 375 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": [
+            {
+              "id": "color-contrast",
+              "impact": "serious"
+            }
+          ]
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 768 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 1024 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": [
+            {
+              "id": "color-contrast",
+              "impact": "serious"
+            }
+          ]
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    },
+    {
+      "case": "/zh 1440 public render, keyboard and axe",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "heading": "香港如何引領 AI+ 時代？",
+          "axe": []
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "heading": "凝聚無線科技業界的共同力量。",
+          "axe": []
+        },
+        {
+          "path": "/about/chairman",
+          "status": 200,
+          "heading": "主席的話",
+          "axe": []
+        },
+        {
+          "path": "/about/committees",
+          "status": 200,
+          "heading": "把參與轉化為行動的委員會。",
+          "axe": []
+        },
+        {
+          "path": "/membership",
+          "status": 200,
+          "heading": "選擇適合你的會籍",
+          "axe": []
+        },
+        {
+          "path": "/ai-ops",
+          "status": 200,
+          "heading": "公開量度 AI 營運",
+          "axe": []
+        },
+        {
+          "path": "/contact",
+          "status": 200,
+          "heading": "與我們聯繫",
+          "axe": []
+        },
+        {
+          "path": "/members",
+          "status": 200,
+          "heading": "WTIA 會員",
+          "axe": []
+        }
+      ]
+    }
+  ],
+  "browserFailures": [
+    "en 768 public render, keyboard and axe",
+    "/zh 375 public render, keyboard and axe",
+    "/zh 1024 public render, keyboard and axe",
+    "en membership four tiers, help and anchor",
+    "/zh membership four tiers, help and anchor"
+  ],
+  "lighthouse": {
+    "scope": "Local mobile simulated lab; concurrent browser/unit/check load during part of collection; no upload or assertion PASS claimed",
+    "numberOfRuns": 3,
+    "fieldINP": "NOT_TESTED",
+    "urls": [
+      {
+        "url": "http://localhost:3212/programmes",
+        "runs": 3,
+        "lcpMs": 2487.658,
+        "cls": 0,
+        "tbtMs": 98.0
+      },
+      {
+        "url": "http://localhost:3212/zh/events",
+        "runs": 3,
+        "lcpMs": 2866.041,
+        "cls": 0,
+        "tbtMs": 41.5
+      },
+      {
+        "url": "http://localhost:3212/events",
+        "runs": 3,
+        "lcpMs": 2925.611,
+        "cls": 0,
+        "tbtMs": 150
+      },
+      {
+        "url": "http://localhost:3212/zh/programmes",
+        "runs": 3,
+        "lcpMs": 2710.787,
+        "cls": 0,
+        "tbtMs": 82
+      },
+      {
+        "url": "http://localhost:3212/",
+        "runs": 3,
+        "lcpMs": 2937.512,
+        "cls": 0,
+        "tbtMs": 527.5
+      },
+      {
+        "url": "http://localhost:3212/zh/membership",
+        "runs": 3,
+        "lcpMs": 2334.861,
+        "cls": 0,
+        "tbtMs": 68
+      },
+      {
+        "url": "http://localhost:3212/zh/partners",
+        "runs": 3,
+        "lcpMs": 2417.124,
+        "cls": 0,
+        "tbtMs": 84
+      },
+      {
+        "url": "http://localhost:3212/membership",
+        "runs": 3,
+        "lcpMs": 2567.909,
+        "cls": 0,
+        "tbtMs": 178
+      },
+      {
+        "url": "http://localhost:3212/zh",
+        "runs": 3,
+        "lcpMs": 2940.522,
+        "cls": 0,
+        "tbtMs": 152
+      },
+      {
+        "url": "http://localhost:3212/partners",
+        "runs": 3,
+        "lcpMs": 2712.452,
+        "cls": 0,
+        "tbtMs": 77
+      }
+    ]
+  },
+  "settledContrastRun": {
+    "baseHead": "cd84a0126d43c8fc79892f075c1848dd9459676a",
+    "diagnosis": {
+      "earlyLoad": {
+        "initial": {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(26, 79, 130)",
+          "ancestors": [
+            {
+              "tag": "A",
+              "className": "button",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "hero-actions",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "className": "hero-content shell",
+              "opacity": "1"
+            },
+            {
+              "tag": "SECTION",
+              "className": "hero defer-following-sections",
+              "opacity": "1"
+            },
+            {
+              "tag": "MAIN",
+              "className": "",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "site-root",
+              "opacity": "1"
+            },
+            {
+              "tag": "BODY",
+              "className": "",
+              "opacity": "1"
+            },
+            {
+              "tag": "HTML",
+              "className": "",
+              "opacity": "1"
+            }
+          ]
+        },
+        "settled": {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(26, 79, 130)",
+          "ancestors": [
+            {
+              "tag": "A",
+              "className": "button",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "hero-actions",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "hero-content shell",
+              "opacity": "1"
+            },
+            {
+              "tag": "SECTION",
+              "className": "hero defer-following-sections",
+              "opacity": "1"
+            },
+            {
+              "tag": "MAIN",
+              "className": "",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "site-root",
+              "opacity": "1"
+            },
+            {
+              "tag": "BODY",
+              "className": "",
+              "opacity": "1"
+            },
+            {
+              "tag": "HTML",
+              "className": "",
+              "opacity": "1"
+            }
+          ]
+        },
+        "hover": {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(15, 76, 129)",
+          "ancestors": [
+            {
+              "tag": "A",
+              "className": "button",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "hero-actions",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "hero-content shell",
+              "opacity": "1"
+            },
+            {
+              "tag": "SECTION",
+              "className": "hero defer-following-sections",
+              "opacity": "1"
+            },
+            {
+              "tag": "MAIN",
+              "className": "",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "className": "site-root",
+              "opacity": "1"
+            },
+            {
+              "tag": "BODY",
+              "className": "",
+              "opacity": "1"
+            },
+            {
+              "tag": "HTML",
+              "className": "",
+              "opacity": "1"
+            }
+          ]
+        }
+      },
+      "midAnimation": {
+        "method": "Pause actual xp-rise on hero-actions at currentTime 533.43909ms; no CSS override",
+        "ancestorOpacity": 0.552,
+        "computedForeground": "rgb(255, 255, 255)",
+        "computedBackground": "rgb(26, 79, 130)",
+        "axeForeground": "#96b0c7",
+        "axeBackground": "#154e82",
+        "axeRatio": 3.81
+      },
+      "wcagRatios": {
+        "mid": 3.818211859297599,
+        "settled": 8.451872660563113,
+        "hover": 8.856708611655117
+      },
+      "cssChanged": false
+    },
+    "testFirst": {
+      "probe": "Pause actual hero-actions animation at 530ms before new homeContrast assertion",
+      "result": "FAIL: Unsettled opacity: 0.539506",
+      "initialUnforcedProbe": "Passed: load had already settled; not red evidence",
+      "temporaryProbeRemoved": true
+    },
+    "browser": {
+      "startTime": "2026-10-26T13:03:32.638Z",
+      "duration": 194159.28,
+      "expected": 20,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "failures": [
+      "en membership four tiers, help and anchor",
+      "/zh membership four tiers, help and anchor"
+    ],
+    "observations": [
+      {
+        "case": "en 375 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "en 768 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "en 1024 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "en 1440 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 375 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 768 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 1024 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 1440 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      }
+    ],
+    "reducedMotion": [
+      {
+        "case": "en reduced-motion home axe",
+        "data": {
+          "contrast": {
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "ratio": 8.451872660563113
+          },
+          "violations": []
+        }
+      },
+      {
+        "case": "/zh reduced-motion home axe",
+        "data": {
+          "contrast": {
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "ratio": 8.451872660563113
+          },
+          "violations": []
+        }
+      }
+    ],
+    "contrastCleared": true,
+    "lighthouse": {
+      "scope": "Same local mobile simulated settings and ten URLs; initial collection overlaps browser replay, unit suite finished before LHCI. Shared-host lab, no upload or assertion PASS.",
+      "fieldINP": "NOT_TESTED",
+      "medians": [
+        {
+          "url": "http://localhost:3212/events",
+          "runs": 3,
+          "lcpMs": 2882.484,
+          "cls": 0,
+          "tbtMs": 43.5
+        },
+        {
+          "url": "http://localhost:3212/membership",
+          "runs": 3,
+          "lcpMs": 2333.814,
+          "cls": 0,
+          "tbtMs": 82
+        },
+        {
+          "url": "http://localhost:3212/",
+          "runs": 3,
+          "lcpMs": 2872.657,
+          "cls": 0,
+          "tbtMs": 138
+        },
+        {
+          "url": "http://localhost:3212/partners",
+          "runs": 3,
+          "lcpMs": 2508.431,
+          "cls": 0,
+          "tbtMs": 94.0
+        },
+        {
+          "url": "http://localhost:3212/zh/programmes",
+          "runs": 3,
+          "lcpMs": 2712.939,
+          "cls": 0,
+          "tbtMs": 93
+        },
+        {
+          "url": "http://localhost:3212/zh/events",
+          "runs": 3,
+          "lcpMs": 2868.645,
+          "cls": 0,
+          "tbtMs": 50
+        },
+        {
+          "url": "http://localhost:3212/zh/membership",
+          "runs": 3,
+          "lcpMs": 2711.858,
+          "cls": 0,
+          "tbtMs": 86.5
+        },
+        {
+          "url": "http://localhost:3212/zh/partners",
+          "runs": 3,
+          "lcpMs": 2713.906,
+          "cls": 0,
+          "tbtMs": 80
+        },
+        {
+          "url": "http://localhost:3212/programmes",
+          "runs": 3,
+          "lcpMs": 2712.904,
+          "cls": 0,
+          "tbtMs": 108
+        },
+        {
+          "url": "http://localhost:3212/zh",
+          "runs": 3,
+          "lcpMs": 2938.16,
+          "cls": 0,
+          "tbtMs": 161
+        }
+      ]
+    },
+    "checks": {
+      "unit": "7984 passed / 659 skipped / zero failures; 909 passed files / 118 skipped",
+      "typecheck": "PASS; repeated after restoring next-env.d.ts",
+      "lint": "PASS: zero errors / 77 existing warnings",
+      "build": "PASS: guarded launcher Node 22 production webpack build",
+      "nextEnvRestored": true,
+      "inventory": "2 passed / 1 file after inventory update"
+    },
+    "rawOutputs": [
+      ".tmp/anon/diagnosis.json",
+      ".tmp/anon/load-sample.json",
+      ".tmp/anon/mid-axe.json",
+      ".tmp/anon/contrast-red-hostile.log",
+      ".tmp/anon/browser-contrast.json",
+      ".tmp/anon/lhci-contrast.log",
+      ".lighthouseci/",
+      ".tmp/anon/server-stopped-contrast.log"
+    ],
+    "serverStopped": true,
+    "beforeBrowserStats": {
+      "passed": 15,
+      "failed": 5,
+      "transientContrastFailures": 3,
+      "paidTierFailures": 2
+    },
+    "versions": {
+      "node": "22.23.4",
+      "next": "16.4.3",
+      "chromium": "149.0.7827.55"
+    },
+    "commands": [
+      "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts build",
+      "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts start",
+      "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=http://localhost:3212 npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --project=chromium --reporter=json",
+      "LHCI_BASE_URL=http://localhost:3212 CHROME_PATH=<Playwright Chromium executable> npx -y -p node@22 node node_modules/@lhci/cli/src/cli.js collect --config=lighthouserc.js",
+      "npx -y -p node@22 -c 'npm test'",
+      "npx -y -p node@22 -c 'npm run typecheck && npm run lint'"
+    ]
+  },
+  "latestRun": "movementOnlyEntranceRun",
+  "movementOnlyEntranceRun": {
+    "baseHead": "39dfa831851053456c288c9a71e114ca5b82f156",
+    "codeCommit": "cafee8090aef874dda140c7e8506f919a6b3ab9f",
+    "change": "Only hero-actions uses transform-only xp-rise-move; inherited 760ms/easing/both and 420ms delay unchanged. WCAG 1.4.3 comment; colours, other hero effects and reduced-motion unchanged. No other CTA ancestor fade found in CSS/component/layout review or runtime samples.",
+    "testFirst": {
+      "oldCss": "New en 375 mid-entrance test failed before CSS edit: Unsettled opacity: 0 at 0ms; .tmp/anon/move-red.log",
+      "harnessCorrection": "First green attempt: 0/8 because scroll-driven animation currentTime rejects milliseconds. Final harness freezes document.timeline effects only; still checks every CTA ancestor.",
+      "focusedFinal": "8 passed / 0 failed",
+      "cssUnit": "Temporarily select old xp-rise: FAIL expected transform-only, received opacity + transform; restored movement keyframes: 2 passed. Hostile/safe samples and minimum counts included."
+    },
+    "browser": {
+      "startTime": "2026-10-26T13:34:55.975Z",
+      "duration": 189108.54499999998,
+      "expected": 28,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "failures": [
+      "en membership four tiers, help and anchor",
+      "/zh membership four tiers, help and anchor"
+    ],
+    "midEntrance": [
+      {
+        "case": "en 375 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "en 768 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "en 1024 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "en 1440 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "/zh 375 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "/zh 768 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "/zh 1024 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      },
+      {
+        "case": "/zh 1440 home mid-entrance contrast",
+        "data": [
+          {
+            "time": 0,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 450,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 600,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          {
+            "time": 800,
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          }
+        ]
+      }
+    ],
+    "observations": [
+      {
+        "case": "en 375 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "en 768 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "en 1024 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "en 1440 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "How can Hong Kong lead the AI+ era?",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "A connected voice for wireless technology.",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "Chairman's message",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "Committees that turn participation into action.",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "Choose the membership that fits your needs",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "Operational AI, measured in public",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "Let's connect",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA members",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 375 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 768 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 1024 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      },
+      {
+        "case": "/zh 1440 public render, keyboard and axe",
+        "data": [
+          {
+            "path": "/",
+            "status": 200,
+            "contrast": {
+              "foreground": "rgb(255, 255, 255)",
+              "background": "rgb(26, 79, 130)",
+              "opacities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "ratio": 8.451872660563113
+            },
+            "heading": "香港如何引領 AI+ 時代？",
+            "axe": []
+          },
+          {
+            "path": "/about",
+            "status": 200,
+            "heading": "凝聚無線科技業界的共同力量。",
+            "axe": []
+          },
+          {
+            "path": "/about/chairman",
+            "status": 200,
+            "heading": "主席的話",
+            "axe": []
+          },
+          {
+            "path": "/about/committees",
+            "status": 200,
+            "heading": "把參與轉化為行動的委員會。",
+            "axe": []
+          },
+          {
+            "path": "/membership",
+            "status": 200,
+            "heading": "選擇適合你的會籍",
+            "axe": []
+          },
+          {
+            "path": "/ai-ops",
+            "status": 200,
+            "heading": "公開量度 AI 營運",
+            "axe": []
+          },
+          {
+            "path": "/contact",
+            "status": 200,
+            "heading": "與我們聯繫",
+            "axe": []
+          },
+          {
+            "path": "/members",
+            "status": 200,
+            "heading": "WTIA 會員",
+            "axe": []
+          }
+        ]
+      }
+    ],
+    "reducedMotion": [
+      {
+        "case": "en reduced-motion home axe",
+        "data": {
+          "contrast": {
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          "violations": []
+        }
+      },
+      {
+        "case": "/zh reduced-motion home axe",
+        "data": {
+          "contrast": {
+            "foreground": "rgb(255, 255, 255)",
+            "background": "rgb(26, 79, 130)",
+            "opacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "ratio": 8.451872660563113
+          },
+          "violations": []
+        }
+      }
+    ],
+    "heroMidAxe": {
+      "timeMs": 600,
+      "scans": 8,
+      "colorContrastViolations": 0
+    },
+    "lighthouse": {
+      "scope": "Same lighthouserc.js, 3 runs per 10 URLs; mobile simulated shared-host local lab; collection after browser and initial checks; final unit rerun overlaps collection; no upload or assertion/category PASS",
+      "fieldINP": "NOT_TESTED",
+      "medians": [
+        {
+          "url": "http://localhost:3212/",
+          "runs": 3,
+          "lcpMs": 2863.746,
+          "cls": 0,
+          "tbtMs": 181
+        },
+        {
+          "url": "http://localhost:3212/events",
+          "runs": 3,
+          "lcpMs": 2938.341,
+          "cls": 0,
+          "tbtMs": 53.5
+        },
+        {
+          "url": "http://localhost:3212/membership",
+          "runs": 3,
+          "lcpMs": 2713.77,
+          "cls": 0,
+          "tbtMs": 74
+        },
+        {
+          "url": "http://localhost:3212/partners",
+          "runs": 3,
+          "lcpMs": 2524.69,
+          "cls": 0,
+          "tbtMs": 84
+        },
+        {
+          "url": "http://localhost:3212/programmes",
+          "runs": 3,
+          "lcpMs": 2712.588,
+          "cls": 0,
+          "tbtMs": 76
+        },
+        {
+          "url": "http://localhost:3212/zh",
+          "runs": 3,
+          "lcpMs": 2928.869,
+          "cls": 0,
+          "tbtMs": 115.5
+        },
+        {
+          "url": "http://localhost:3212/zh/events",
+          "runs": 3,
+          "lcpMs": 2596.899,
+          "cls": 0,
+          "tbtMs": 81.0
+        },
+        {
+          "url": "http://localhost:3212/zh/membership",
+          "runs": 3,
+          "lcpMs": 2236.871,
+          "cls": 0,
+          "tbtMs": 166.0
+        },
+        {
+          "url": "http://localhost:3212/zh/partners",
+          "runs": 3,
+          "lcpMs": 2714.758,
+          "cls": 0,
+          "tbtMs": 87.0
+        },
+        {
+          "url": "http://localhost:3212/zh/programmes",
+          "runs": 3,
+          "lcpMs": 2566.111,
+          "cls": 0,
+          "tbtMs": 190.5
+        }
+      ]
+    },
+    "checks": {
+      "unit": "7986 passed / 659 skipped / zero failures; 910 passed files / 118 skipped",
+      "typecheck": "PASS after restoring next-env.d.ts",
+      "lint": "PASS zero errors / 77 existing warnings",
+      "build": "PASS guarded Node 22 production webpack build",
+      "nextEnvRestored": true
+    },
+    "rawOutputs": [
+      ".tmp/anon/move-red.log",
+      ".tmp/anon/move-green.json",
+      ".tmp/anon/browser-move.json",
+      ".tmp/anon/lhci-move.log",
+      ".lighthouseci/"
+    ],
+    "serverStopped": true,
+    "port3212Listener": false,
+    "scope": "Existing branch PR #212; no Auth, write flags, fixture mutation, deployment or stacked-ci-trigger.patch application; existing read-only directory preflight retained.",
+    "testCommit": "2de5fb9c",
+    "commands": [
+      "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts build",
+      "npx -y -p node@22 node --import tsx scripts/acceptance/anonymous-runtime.ts start",
+      "HKWTIA_ANONYMOUS_ACCEPTANCE=true PLAYWRIGHT_BASE_URL=http://localhost:3212 npx -y -p node@22 node node_modules/@playwright/test/cli.js test tests/e2e/hkwtia-anonymous-acceptance.spec.ts --project=chromium --reporter=json",
+      "LHCI_BASE_URL=http://localhost:3212 CHROME_PATH=<Playwright Chromium executable> npx -y -p node@22 node node_modules/@lhci/cli/src/cli.js collect --config=lighthouserc.js",
+      "npx -y -p node@22 -c 'npm test'",
+      "npx -y -p node@22 -c 'npm run typecheck && npm run lint'"
+    ]
+  }
+}

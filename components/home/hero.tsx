@@ -12,9 +12,10 @@ import {Link} from '@/i18n/navigation';
 const HERO_IMAGE = '/archive/tech-connect-ai-leaders.webp';
 // Weekly Lighthouse run 40850403806: the hero was the LCP element with an 841ms
 // load delay. The <picture> srcset is not visible to the preload scanner until
-// the body is parsed, and the header logo preload was occupying the early
-// high-priority image slot. This link is hoisted to <head> and selects the same
-// candidate the picture does, so the request starts with the document.
+// the body is parsed. React hoists this link into <head>, including during a
+// streamed render. href is the 960 candidate the mobile audit selects, and
+// imageSrcSet is the picture's exact list, so the hint does not download a
+// second photograph.
 const HERO_SOURCE_SET = '/archive/tech-connect-ai-leaders-480.webp 480w, /archive/tech-connect-ai-leaders-960.webp 960w, /archive/tech-connect-ai-leaders-1800.webp 1800w';
 
 // Donor top-spanning scrim (design doc §2, closes E-47): app/styles/wisetech.css:92 .hero;

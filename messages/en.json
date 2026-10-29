@@ -17,12 +17,12 @@
     "closeMenu": "Close menu"
   },
   "Metadata": {
-    "title": "WiseTech Hong Kong",
+    "title": "WTIA",
     "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
   },
   "Navigation": {
     "brand": {
-      "publicName": "WiseTech Hong Kong",
+      "publicName": "WTIA",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association"
     },
     "groups": {
@@ -96,7 +96,7 @@
     },
     "actions": {
       "findEvent": "Find an event",
-      "join": "Join WiseTech",
+      "join": "Join WTIA",
       "memberSignIn": "Member sign in"
     },
     "mobile": {
@@ -110,12 +110,12 @@
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
-    "menuDescription": "Explore WiseTech Hong Kong journeys and change language.",
+    "menuDescription": "Explore WTIA journeys and change language.",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "Switch to Chinese",
-    "homeLabel": "WiseTech Hong Kong home",
+    "homeLabel": "WTIA home",
     "logoAlt": "WTIA",
     "primaryLabel": "Primary navigation"
   },
@@ -126,12 +126,12 @@
   "Footer": {
     "staffSignIn": "Staff sign in",
     "brand": {
-      "publicName": "WiseTech Hong Kong",
+      "publicName": "WTIA",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
-      "homeLabel": "WiseTech Hong Kong home",
+      "homeLabel": "WTIA home",
       "logoAlt": "WTIA"
     },
-    "legalLine": "WiseTech Hong Kong — the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association.",
+    "legalLine": "Hong Kong Wireless Technology Industry Association (WTIA).",
     "columns": {
       "explore": "Explore",
       "membership": "Membership",
@@ -146,17 +146,17 @@
       "submit": "Prepare activity-update email",
       "success": "Your email app should open with a prepared request. This page does not create a subscription automatically.",
       "error": "Enter a valid work email.",
-      "mailSubject": "WiseTech activity updates",
-      "mailBody": "Please add {email} to the WiseTech activity update list."
+      "mailSubject": "WTIA activity updates",
+      "mailBody": "Please add {email} to the WTIA activity update list."
     },
-    "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
+    "summary": "WTIA connects technology businesses, practitioners and programmes across Hong Kong's wireless technology community.",
     "addressLines": [
       "4/F, KOHO",
       "73-75 Hung To Road",
       "Kwun Tong, Hong Kong"
     ],
     "privacy": "Privacy statement",
-    "copyright": "© {year} WiseTech Hong Kong. Operated by WTIA. All rights reserved."
+    "copyright": "© {year} WTIA. All rights reserved."
   },
   "Email": {
     "brand": "WTIA",
@@ -413,7 +413,7 @@
     }
   },
   "Unsubscribe": {
-    "metaTitle": "Email preferences | WiseTech Hong Kong",
+    "metaTitle": "Email preferences | WTIA",
     "metaDescription": "Update your WTIA marketing email preference.",
     "eyebrow": "Email preferences",
     "confirmTitle": "Stop WTIA marketing email?",
@@ -433,21 +433,21 @@
     }
   },
   "Home": {
-    "metaTitle": "WiseTech Hong Kong",
-    "metaDescription": "WiseTech Hong Kong connects trusted AI+ adoption, events, members, solutions, programmes and GBA market opportunities.",
+    "metaTitle": "WTIA",
+    "metaDescription": "WTIA connects Hong Kong's wireless technology community through events, members, solutions, programmes and Greater Bay Area opportunities.",
     "hero": {
-      "eyebrow": "WiseTech Hong Kong",
+      "eyebrow": "Hong Kong wireless technology",
       "title": "How can Hong Kong lead the AI+ era?",
-      "lead": "WiseTech Hong Kong is the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association — connecting corporates, SMEs, startups, professionals, academia, investors, public bodies, GBA partners and international markets.",
+      "lead": "WTIA connects Hong Kong's wireless technology community — corporates, SMEs, startups, professionals, academia, investors, public bodies, Greater Bay Area partners and international markets — around trusted AI+ adoption.",
       "imageAlt": "Speakers and organisers at WTIA Tech Connect AI for ALL in Hong Kong",
       "actions": {
         "findRoute": "Find your route",
         "findEvent": "Browse events",
-        "join": "Join WiseTech",
+        "join": "Join WTIA",
         "members": "Explore Members & Solutions"
       },
-      "note": "WiseTech Hong Kong · AI+ Industry Platform",
-      "discover": "Discover WiseTech"
+      "note": "WTIA · Hong Kong Wireless Technology Industry Association",
+      "discover": "Discover WTIA"
     },
     "openNow": {
       "loading": "Loading community opportunities…",
@@ -510,7 +510,7 @@
       "destinations": {
         "membership": {
           "label": "Membership",
-          "copy": "Compare plans and annual fees, from free Community to Corporate."
+          "copy": "Compare Individual, Corporate, and Platinum annual fees."
         },
         "showcase": {
           "label": "Member & solution showcase",
@@ -730,7 +730,7 @@
     }
   },
   "About": {
-    "metaTitle": "About | WiseTech Hong Kong",
+    "metaTitle": "About | WTIA",
     "metaDescription": "Learn about WTIA's role in Hong Kong's wireless technology community.",
     "eyebrow": "About WTIA",
     "title": "A connected voice for wireless technology.",
@@ -757,7 +757,7 @@
     "historyLink": "Read our history"
   },
   "Chairman": {
-    "metaTitle": "Chairman's Message | WiseTech Hong Kong",
+    "metaTitle": "Chairman's Message | WTIA",
     "metaDescription": "A message from the WTIA chairman.",
     "eyebrow": "Leadership",
     "title": "Chairman's message",
@@ -767,7 +767,7 @@
     "signature": "Chairman, WTIA"
   },
   "Committees": {
-    "metaTitle": "Committees | WiseTech Hong Kong",
+    "metaTitle": "Committees | WTIA",
     "metaDescription": "How WTIA committees support governance, programmes and members.",
     "eyebrow": "Governance",
     "title": "Committees that turn participation into action.",
@@ -787,7 +787,7 @@
     }
   },
   "History": {
-    "metaTitle": "History | WiseTech Hong Kong",
+    "metaTitle": "History | WTIA",
     "metaDescription": "Twenty-five years of the Hong Kong Wireless Technology Industry Association, 2001 to 2025.",
     "eyebrow": "Since 2001",
     "title": "Our history",
@@ -804,12 +804,13 @@
     }
   },
   "Membership": {
+    "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "What you can do", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
     "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
-    "metaTitle": "Membership | WiseTech Hong Kong",
+    "metaTitle": "Membership | WTIA",
     "metaDescription": "Compare WTIA membership tiers and benefits.",
     "eyebrow": "Membership",
     "breadcrumbCurrent": "Membership",
-    "title": "Find your place in Hong Kong's technology community.",
+    "title": "Choose the membership that fits your needs",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
     "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
@@ -822,24 +823,34 @@
       "community": ["Directory card on /members", "RSVP to public WTIA events", "Activity updates by email or WhatsApp"],
       "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
       "corporate": ["Featured member profile and logo wall", "Unlimited reviewed event publishing", "3 showcase listings", "Priority WhatsApp support lane", "Member tools included"],
-      "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"]
+      "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"],
+      "individual": ["Member profile page", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates"],
+      "platinum": ["Everything in Corporate", "Featured placement", "Co-branded WTIA events", "Dedicated WhatsApp support"]
     },
     "tiers": {
       "community": {
-        "name": "Community",
-        "description": "Stay connected to public WTIA news and opportunities."
+        "name": "Individual",
+        "description": "Legacy personal membership. New joins use Individual and pay online."
       },
       "startup": {
-        "name": "Startup",
-        "description": "For early-stage technology companies and teams."
+        "name": "Individual",
+        "description": "Legacy plan. New joins use Individual and pay online."
       },
       "corporate": {
         "name": "Corporate",
-        "description": "For established organisations engaging the ecosystem."
+        "description": "For an organisation. Pay online."
       },
       "patron": {
-        "name": "Patron",
-        "description": "For strategic supporters of WTIA's mission."
+        "name": "Platinum",
+        "description": "Legacy plan. New joins use Platinum and pay online."
+      },
+      "individual": {
+        "name": "Individual",
+        "description": "For one person. Pay online. Membership starts when payment succeeds."
+      },
+      "platinum": {
+        "name": "Platinum",
+        "description": "The top WTIA membership for an organisation. Pay online."
       }
     },
     "dimensionsTitle": "Membership features",
@@ -847,7 +858,7 @@
     "faq": {
       "0": {
         "question": "Who can apply?",
-        "answer": "Community is for individuals. Startup and Corporate applications are for organisations. Patron starts with WTIA staff. WTIA confirms eligibility during review."
+        "answer": "Individual is for one person. Corporate and Platinum are for organisations. All three are paid online. For a question or a special case, we aim to reply within 5 working days."
       },
       "1": {
         "question": "Where are current fees?",
@@ -863,11 +874,11 @@
       },
       "4": {
         "question": "How many company seats are included?",
-        "answer": "The current site catalog allows five Startup seats and 25 Corporate seats. Company owners or administrators manage invitations in the portal; your agreement controls the confirmed allowance."
+        "answer": "Individual includes one seat. Corporate and Platinum include 25 seats. Company owners or administrators manage invitations in the portal; your agreement controls the confirmed allowance."
       },
       "5": {
         "question": "How long does approval take?",
-        "answer": "Your application status appears in the member portal. WTIA has not published a fixed review deadline here; contact the membership team if timing matters."
+        "answer": "Individual, Corporate, and Platinum are paid online. Membership is confirmed when payment succeeds. For a question or a special case, we aim to reply within 5 working days."
       },
       "6": {
         "question": "Can I get a refund?",
@@ -893,8 +904,26 @@
     },
     "actions": {
       "join": "Choose this plan",
+      "apply": "Apply for this plan",
       "contact": "Contact us",
       "discuss": "Discuss this pathway"
+    },
+    "tracks": {
+      "title": "Two ways to join",
+      "individual": {
+        "title": "Individual",
+        "copy": "HK$500 a year. Pay online. Membership starts when payment succeeds."
+      },
+      "organisation": {
+        "title": "Company",
+        "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online the same way as Individual."
+      },
+      "sla": "For a question or a special case, we aim to reply within 5 working days."
+    },
+    "renew": {
+      "title": "Renew or rejoin",
+      "copy": "If your membership has lapsed, is past due, or is set to end, sign in and continue through the existing billing page.",
+      "action": "Sign in to renew or rejoin"
     },
     "unavailable": "Membership is currently unavailable",
     "sme": {
@@ -937,7 +966,7 @@
     "closing": {
       "eyebrow": "Ready when you are",
       "title": "Choose your tier, or ask us first.",
-      "copy": "Community, Startup and Corporate membership can be applied for online. Patron membership and any other question can start with a direct message.",
+      "copy": "Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message. We aim to reply within 5 working days.",
       "join": "Join now",
       "contact": "Email the membership team"
     }
@@ -980,7 +1009,7 @@
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
     "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "invite": {
-      "metaTitle": "Your personal invitation | WiseTech Hong Kong",
+      "metaTitle": "Your personal invitation | WTIA",
       "welcomeNamed": "Welcome, {name}",
       "welcome": "Welcome to WTIA",
       "invitedBy": "{inviter} has invited you to join WTIA as a {plan} member.",
@@ -1000,7 +1029,7 @@
     },
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
-    "metaTitle": "Membership application | WiseTech Hong Kong",
+    "metaTitle": "Membership application | WTIA",
     "metaDescription": "Apply for WTIA membership online. Choose a tier, create your account and join Hong Kong's technology community.",
     "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
     "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
@@ -1012,16 +1041,53 @@
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
     "choosePlanTitle": "Choose a membership plan",
-    "choosePlanDescription": "Pick the plan that fits how your organisation participates. You can compare fees and benefits on the membership page first.",
+    "choosePlanDescription": "Individual, Corporate, and Platinum are paid online. Choose a tier to continue to secure checkout.",
     "choosePlanCompare": "Compare plans and fees",
     "choosePlan": {
-      "community": "Free. Stay connected, RSVP to public events, receive updates.",
-      "startup": "For early-stage technology teams: profile page, 2 reviewed events a quarter, 1 showcase listing.",
-      "corporate": "For established organisations: featured profile, unlimited reviewed events, priority WhatsApp support.",
-      "patron": "Strategic supporters of WTIA's mission — talk to the team."
+      "community": "New joins use Individual.",
+      "startup": "New joins use Individual.",
+      "corporate": "HK$1,800 a year for an organisation. Pay online now.",
+      "patron": "New joins use Platinum.",
+      "individual": "HK$500 a year for one person. Pay online now.",
+      "platinum": "HK$4,800 a year. Pay online now."
     },
     "choosePlanAction": "Continue with {plan}",
+    "choosePlanPrice": "{amount} per year",
     "choosePlanContact": "Contact WTIA",
+    "tracks": {
+      "individual": {"title": "Individual", "copy": "HK$500 a year. Pay online. Membership starts when payment succeeds."},
+      "organisation": {"title": "Company", "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online."}
+    },
+    "organisation": {
+      "intro": "Company details are saved with your application. Business Registration is optional and can be added after payment.",
+      "tierValue": "Tier: {tier}",
+      "changeTier": "Choose a different tier",
+      "primaryTitle": "Primary contact",
+      "secondaryTitle": "Secondary contact",
+      "brHint": "PDF, JPEG, or PNG. Maximum 8 MB.",
+      "fields": {
+        "primaryName": "Primary contact name",
+        "primaryEmail": "Primary contact email",
+        "primaryPhone": "Primary contact phone (optional)",
+        "secondaryName": "Secondary contact name",
+        "secondaryEmail": "Secondary contact email",
+        "secondaryPhone": "Secondary contact phone (optional)",
+        "br": "Business Registration"
+      }
+    },
+    "nextSteps": {
+      "title": "What to do next",
+      "individualLead": "Your membership is active. Download the kits, sign in, and pick a first event.",
+      "processingLead": "Payment is being confirmed. These links are ready for when your membership is active.",
+      "organisationLead": "If this application needs a manual exception, Willy will reply within 5 working days.",
+      "noPayment": "No payment has been taken yet.",
+      "welcomeKit": "Download the Welcome Kit",
+      "associationKit": "Download the Association Kit",
+      "login": "Member login",
+      "whatsapp": "WhatsApp opt-in on your profile",
+      "whatsappCommunity": "WhatsApp community",
+      "events": "Upcoming events"
+    },
     "optionalProfileTitle": "Contact details (optional)",
     "optionalProfileHint": "Add these now if you like, or continue with just your name. WhatsApp updates require your explicit consent.",
     "optionalCompanyTitle": "Company details (optional)",
@@ -1038,10 +1104,12 @@
       "company": "Company details"
     },
     "plans": {
-      "community": "Community",
-      "startup": "Startup",
+      "community": "Individual",
+      "startup": "Individual",
       "corporate": "Corporate",
-      "patron": "Patron"
+      "patron": "Platinum",
+      "individual": "Individual",
+      "platinum": "Platinum"
     },
     "fields": {
       "email": "Email address",
@@ -1067,6 +1135,11 @@
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",
       "companyNotAllowed": "This plan does not accept company details.",
+      "tier": "Choose Individual, Corporate, or Platinum, then continue with that tier.",
+      "brRequired": "Upload the Business Registration.",
+      "brType": "Upload a PDF, JPEG, or PNG Business Registration.",
+      "brSize": "That file is larger than 8 MB.",
+      "brStorage": "We could not store the Business Registration. Please try again.",
       "whatsappNumber": "Enter a valid WhatsApp number with country code"
     },
     "status": {
@@ -1080,8 +1153,8 @@
         "description": "Your paid membership is ready for secure checkout."
       },
       "review": {
-        "title": "Application under review",
-        "description": "WTIA will review your Patron application. No payment has been requested."
+        "title": "Under review",
+        "description": "If this needs a manual exception, Willy will reply within 5 working days."
       }
     },
     "whatsapp": {
@@ -1234,12 +1307,12 @@
     }
   },
   "Programmes": {
-    "metaTitle": "Programmes | WiseTech Hong Kong",
+    "metaTitle": "Programmes | WTIA",
     "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions and where each leads next.",
     "hero": {
       "eyebrow": "Programmes",
       "title": "Programmes that turn participation into progress.",
-      "lead": "Explore awards, learning, market-access and industry-development programmes across the WiseTech ecosystem, each one backed by WTIA's own typed record.",
+      "lead": "Explore awards, learning, market-access and industry-development programmes across WTIA's ecosystem, each one backed by the association's own typed record.",
       "breadcrumbCurrent": "Programmes"
     },
     "groupings": {
@@ -1281,7 +1354,7 @@
     }
   },
   "Partners": {
-    "metaTitle": "Partners | WiseTech Hong Kong",
+    "metaTitle": "Partners | WTIA",
     "metaDescription": "WTIA's published partner records: supporting organisations, regional, media, programme and sponsor partners, each with a confirmed relationship and confirmed logo rights.",
     "hero": {
       "eyebrow": "Partner ecosystem",
@@ -1333,7 +1406,7 @@
     }
   },
   "LaunchPad": {
-    "metaTitle": "Launch Pad | WiseTech Hong Kong",
+    "metaTitle": "Launch Pad | WTIA",
     "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
@@ -1491,7 +1564,7 @@
     "clinicCta": "Book a clinic"
   },
   "Showcase": {
-    "metaTitle": "Showcase | WiseTech Hong Kong",
+    "metaTitle": "Showcase | WTIA",
     "metaDescription": "Discover WTIA member companies, products, and practical technology solutions.",
     "detailFallbackDescription": "WTIA member showcase",
     "eyebrow": "AI Showcase",
@@ -1608,7 +1681,7 @@
     }
   },
   "Members": {
-    "metaTitle": "Members | WiseTech Hong Kong",
+    "metaTitle": "Members | WTIA",
     "metaDescription": "Hong Kong wireless and AI+ technology companies in the WTIA member directory.",
     "eyebrow": "Member directory",
     "title": "WTIA members",
@@ -1625,10 +1698,12 @@
       "clear": "Clear"
     },
     "plans": {
-      "community": "Community",
-      "startup": "Startup",
+      "community": "Individual",
+      "startup": "Individual",
       "corporate": "Corporate",
-      "patron": "Patron"
+      "patron": "Platinum",
+      "individual": "Individual",
+      "platinum": "Platinum"
     },
     "resultsTitle": "{count} members on this page",
     "resultsHeading": "Member directory",
@@ -1652,7 +1727,7 @@
     }
   },
   "AiOps": {
-    "metaTitle": "AI-Ops in public | WiseTech Hong Kong",
+    "metaTitle": "AI-Ops in public | WTIA",
     "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",
     "eyebrow": "AI-Ops in public",
     "title": "Operational AI, measured in public",
@@ -1713,7 +1788,7 @@
     "operationsMethodology": "Include bot outcomes, human handoffs and reopened cases. Measure human work, review and rework separately; waiting is not staff work. Fix a comparison group before the pilot."
   },
   "Events": {
-    "metaTitle": "Events | WiseTech Hong Kong",
+    "metaTitle": "Events | WTIA",
     "metaDescription": "Discover WTIA events and community gatherings.",
     "eyebrow": "Events",
     "title": "Events",
@@ -1938,7 +2013,7 @@
     }
   },
   "News": {
-    "metaTitle": "News | WiseTech Hong Kong",
+    "metaTitle": "News | WTIA",
     "metaDescription": "Read the latest news from WTIA.",
     "eyebrow": "News",
     "title": "WTIA news",
@@ -1969,7 +2044,7 @@
     }
   },
   "Contact": {
-    "metaTitle": "Contact | WiseTech Hong Kong",
+    "metaTitle": "Contact | WTIA",
     "metaDescription": "Contact the Hong Kong Wireless Technology Industry Association.",
     "eyebrow": "Contact",
     "title": "Let's connect",
@@ -2046,11 +2121,11 @@
       }
     },
     "conciergeTitle": "Not sure where to start?",
-    "conciergeDescription": "Ask WiseTech through WTIA's existing Concierge.",
-    "conciergeLauncher": "Ask WiseTech"
+    "conciergeDescription": "Ask WTIA about membership, events and programmes.",
+    "conciergeLauncher": "Ask WTIA"
   },
   "Privacy": {
-    "metaTitle": "Privacy | WiseTech Hong Kong",
+    "metaTitle": "Privacy | WTIA",
     "metaDescription": "How the WTIA platform collects, uses and retains your information.",
     "eyebrow": "Privacy",
     "title": "How we handle your information",
@@ -2161,7 +2236,7 @@
     ]
   },
   "RefundPolicy": {
-    "metaTitle": "Refund policy | WiseTech Hong Kong",
+    "metaTitle": "Refund policy | WTIA",
     "metaDescription": "How and when WTIA refunds a paid ticket order, and what happens if we cancel an event.",
     "eyebrow": "Policy",
     "title": "Refund policy",
@@ -2200,7 +2275,7 @@
     ]
   },
   "AiTransparency": {
-    "metaTitle": "AI Transparency | WiseTech Hong Kong",
+    "metaTitle": "AI Transparency | WTIA",
     "metaDescription": "How the WTIA Concierge works, what it can do, and when a person takes over.",
     "eyebrow": "AI transparency",
     "title": "How the WTIA Concierge works",
@@ -2286,6 +2361,25 @@
     "retry": "Try again"
   },
   "Portal": {
+    "checklist": {
+      "title": "Onboarding checklist",
+      "lead": "Finish these to get the most from your membership. Profile and WhatsApp follow your saved profile. Kit downloads and the first event are links you can open now.",
+      "kitsTitle": "Welcome Kit and Association Kit",
+      "kitsLead": "Placeholder files until the Secretariat publishes the final Drive links.",
+      "done": "Done",
+      "todo": "To do",
+      "profile": "Complete your profile",
+      "welcomeKit": "Download the Welcome Kit",
+      "associationKit": "Download the Association Kit",
+      "whatsapp": "Join WhatsApp",
+      "whatsappCommunity": "Open the WhatsApp community",
+      "firstEvent": "RSVP to your first event",
+      "registration": "Add your Business Registration later (optional)"
+    },
+    "renew": {
+      "action": "Renew or rejoin",
+      "rejoin": "Start a new application"
+    },
     "firstResult": {
       "title": "Put your membership to work",
       "event": "Your next event",
@@ -2369,7 +2463,7 @@
       },
       "under_review": {
         "title": "Your membership is under review",
-        "body": "Your application is awaiting review. You can update your own profile and view your billing history while you wait."
+        "body": "This is a manual exception. Willy will reply within 5 working days. You can update your own profile and view your billing history while you wait."
       },
       "inactive": {
         "title": "Your member benefits are unavailable",
@@ -2396,6 +2490,7 @@
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "applications": {
+      "paging": {"label": "Application pages", "first": "Back to latest applications", "next": "Older applications"},
       "nav": "My applications",
       "title": "My applications",
       "description": "Track each membership application, what needs attention and what to do next.",
@@ -2448,7 +2543,7 @@
       "label": "Your next step",
       "past_due": {"title": "Update your payment details", "body": "Your last payment did not go through. Update billing to keep your membership active.", "action": "Go to billing"},
       "pending_payment": {"title": "Complete your payment", "body": "Your membership activates once payment is complete.", "action": "Go to billing"},
-      "pending_review": {"title": "Your application is under review", "body": "WTIA will contact you when the review is complete.", "action": "View application details"},
+      "pending_review": {"title": "Your application is under review", "body": "Willy will reply within 5 working days.", "action": "View application details"},
       "profile": {"title": "Complete your profile", "body": "Add your role and contact preferences so WTIA can reach you.", "action": "Open profile"},
       "company": {"title": "Add your company details", "body": "Your company details are used for your membership, seats and showcase listing.", "action": "Open company"}
     },
@@ -2478,10 +2573,12 @@
     "membershipOptions": "View membership options",
     "welcome": "Welcome back, {name}.",
     "plans": {
-      "community": "Community",
-      "startup": "Startup",
+      "community": "Individual",
+      "startup": "Individual",
       "corporate": "Corporate",
-      "patron": "Patron"
+      "patron": "Platinum",
+      "individual": "Individual",
+      "platinum": "Platinum"
     },
     "onboardingProgress": "{completed} of {total} steps complete",
     "status": {
@@ -2510,7 +2607,7 @@
       "pending_review": {
         "label": "Under review",
         "title": "Application under review",
-        "description": "WTIA will contact you when your application has been reviewed."
+        "description": "Willy will reply within 5 working days."
       }
     },
     "profileTitle": "My profile",
@@ -2702,7 +2799,7 @@
         "INVALID": "Check the required fields, dates and links, then try again.",
         "EVENT_SLUG_TAKEN": "That page address is already used by another event.",
         "EVENT_QUOTA_EXCEEDED": "Your plan's quota of reviewed events for this quarter is used up. Save as draft or upgrade.",
-        "EVENT_PUBLISHING_NOT_INCLUDED": "Community membership does not include event publishing.",
+        "EVENT_PUBLISHING_NOT_INCLUDED": "This membership does not include event publishing.",
         "EVENT_NOT_EDITABLE": "This event has already been published; ask WTIA to reopen it.",
         "EVENT_HERO_MEDIA_INVALID": "That image is not one you uploaded.",
         "NO_MANAGED_COMPANY": "Event publishing needs a company you manage.",
@@ -2924,11 +3021,11 @@
     }
   },
   "Concierge": {
-    "launcher": "Ask WiseTech",
+    "launcher": "Ask WTIA",
     "transparency": "How this assistant works",
     "prompts": {
-      "home": ["How can WiseTech help my organisation?", "Show the AI+ industry pathways"],
-      "membership": ["Which membership suits my organisation?", "What benefits do startups receive?"],
+      "home": ["How can WTIA help my organisation?", "Show the AI+ industry pathways"],
+      "membership": ["Which membership suits my organisation?", "What does Corporate membership include?"],
       "showcase": ["Find providers serving SMEs", "How do introductions work?"],
       "events": ["Which event is relevant to retail?", "Show Cantonese events"]
     },
@@ -3332,7 +3429,7 @@
         "invite": {
           "title": "Personal join link",
           "plan": "Plan",
-          "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate"},
+          "plans": {"community": "Individual", "startup": "Individual", "corporate": "Corporate", "individual": "Individual", "platinum": "Platinum"},
           "create": "Create a join link",
           "linkLabel": "Join link (shown once)",
           "copy": "Copy link",
@@ -3741,7 +3838,7 @@
         "rejected": "Rejected"
       }
     },
-    "applicationQueue": {"title":"Applications and payments","description":"Each row is one application. Its membership and latest billing attempt are shown separately so unfinished applications and payment reconciliation remain visible.","caption":"Application operations queue","applicant":"Applicant","application":"Application","step":"Saved step","membership":"Linked membership","billing":"Latest billing attempt","updated":"Updated (Hong Kong time)","none":"No record","empty":"No applications match this queue.","back":"Back to members","views":"Application queues","viewsLabels":{"draft":"Unfinished join","pending_payment":"Awaiting payment","pending_review":"Awaiting review"},"search":"Name, email, company or application ID","sort":"Sort","sortNewest":"Newest updated","sortOldest":"Oldest updated","pageSize":"Rows per page","totalMatching":"{count} applications match this search and status.","invalid":"The queue filter or cursor is invalid. Clear the filters and retry.","unavailable":"The application queue is unavailable. Try again shortly.","loading":"Loading applications…","draft":"Draft","steps":{"profile":"Profile","company":"Company","checkout":"Checkout","complete":"Complete","review":"Review"},"billingStates":{"active":"Open attempt","completed":"Completed attempt","abandoned":"Abandoned attempt","expired":"Expired attempt"}},
+    "applicationQueue": {"title":"Applications and payments","description":"Each row is one application. Its membership and latest billing attempt are shown separately so unfinished applications and payment reconciliation remain visible.","caption":"Application operations queue","applicant":"Applicant","application":"Application","step":"Saved step","membership":"Linked membership","billing":"Latest billing attempt","updated":"Updated (Hong Kong time)","none":"No record","empty":"No applications match this queue.","back":"Back to members","views":"Application queues","viewsLabels":{"submitted":"Submitted","draft":"Unfinished join","pending_payment":"Awaiting payment","pending_review":"Awaiting review"},"search":"Name, email, company or application ID","sort":"Sort","sortNewest":"Newest updated","sortOldest":"Oldest updated","pageSize":"Rows per page","totalMatching":"{count} applications match this search and status.","invalid":"The queue filter or cursor is invalid. Clear the filters and retry.","unavailable":"The application queue is unavailable. Try again shortly.","loading":"Loading applications…","draft":"Draft","steps":{"profile":"Profile","company":"Company","checkout":"Checkout","complete":"Complete","review":"Review"},"billingStates":{"active":"Open attempt","completed":"Completed attempt","abandoned":"Abandoned attempt","expired":"Expired attempt"}},
     "batchGrants": {"title":"Membership grants","formTitle":"Prepare finite grants","description":"Choose explicit targets, dates and a reason. Review each target and its conflicts before committing. No payment is recorded.","back":"Back to members","plan":"Plan","start":"Starts (Hong Kong time)","expiry":"Expires (Hong Kong time)","reason":"Reason for grant","preview":"Preview grants","kind":"Target type","profile":"Individual profiles","company":"Companies","ids":"Target IDs","help":"Enter one trusted profile or company ID per line, up to 5000 targets. The preview shows names, plan seats and conflicts. Dates apply to every target.","disabled":"Bulk grants are not enabled for this environment.","success":"Grant prepared.","invalid":"Check the target IDs, plan, dates and reason.","duplicate":"A target already has a live membership.","error":"Could not prepare grants. Check your permissions and try again."},
     "imports": {
   "title": "Import members",
@@ -3877,7 +3974,7 @@
         "companyChoose": "Choose a registered company result or clear the search.",
         "companySearching": "Searching companies…"},
       "view": "View",
-      "planCodes": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
+      "planCodes": {"community": "Individual", "startup": "Individual", "corporate": "Corporate", "patron": "Platinum", "individual": "Individual", "platinum": "Platinum"},
       "statusCodes": {"active": "Active", "past_due": "Past due", "cancel_at_period_end": "Ends at period end", "pending_review": "Pending review", "pending_payment": "Awaiting payment", "cancelled": "Cancelled", "expired": "Expired"},
       "title": "Members",
       "description": "Search member profiles, companies, memberships, and engagement scores.",
@@ -3924,9 +4021,11 @@
       "nameEn": "Name (English)",
       "nameZh": "Name (Traditional Chinese)",
       "corporate": "Corporate",
-      "startup": "Startup",
-      "community": "Community",
-      "patron": "Patron",
+      "startup": "Startup (legacy)",
+      "community": "Community (legacy)",
+      "patron": "Patron (legacy)",
+      "individual": "Individual",
+      "platinum": "Platinum",
       "active": "Active",
       "pastDue": "Past due",
       "pendingReview": "Pending review",
@@ -4001,10 +4100,12 @@
       "addNote": "Add note",
       "campaign": "Queue campaign",
       "plans": {
-        "community": "Community",
-        "startup": "Startup",
+        "community": "Individual",
+        "startup": "Individual",
         "corporate": "Corporate",
-        "patron": "Patron"
+        "patron": "Platinum",
+        "individual": "Individual",
+        "platinum": "Platinum"
       },
       "statuses": {
         "active": "Active",
@@ -4568,7 +4669,7 @@
         "joinedColumn": "Joined",
         "countColumn": "Members",
         "emptyPlans": "No paid invitations in this window.",
-        "plan": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
+        "plan": {"community": "Individual", "startup": "Individual", "corporate": "Corporate", "patron": "Platinum", "individual": "Individual", "platinum": "Platinum"},
         "estimateHeading": "Attributed first-year fees",
         "estimateLabel": "Estimate",
         "estimateNote": "Joined plans at their annual list price for the first year. Not reconciled with Stripe, so do not read it as booked revenue."
@@ -5180,5 +5281,20 @@
     "invalid": "The request is invalid.",
     "dirty": "Unsaved edits are present. Save or retain them before copying an approved draft.",
     "noHistory": "No saved draft for this language."
+  },
+  "Supplement": {
+    "preview": "Publication preview",
+    "visible": "Visible to the applicant",
+    "publish": "Publish request",
+    "respond": "Submit response",
+    "text": "Answer",
+    "url": "HTTPS URL",
+    "due": "Due",
+    "saved": "Saved",
+    "validation": "Check your answers. Your input is retained.",
+    "forbidden": "You cannot act on this request.",
+    "conflict": "This request changed. Reload before trying again.",
+    "unknown": "Outcome unknown. Check the operation receipt before retrying.",
+    "receipt": "Operation receipt"
   }
 }

@@ -60,6 +60,7 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
         <DualBrandLockup labels={brand} />
         <Suspense fallback={<div aria-hidden="true" className="desktop-nav" />}>
           {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DesktopNavGate
+            locale={locale}
             groups={navigation.groups}
             primaryLabel={t("primaryLabel")}
             exploreLabel={t("explore")}

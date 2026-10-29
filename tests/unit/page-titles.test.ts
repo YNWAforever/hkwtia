@@ -29,8 +29,10 @@ function metaTitles(bundle: Record<string, unknown>): [string, string][] {
   return out.filter(([namespace]) => !allowlist.has(namespace));
 }
 
-// Design D-1: the public brand is WiseTech Hong Kong; WTIA stays the legal short name in
-// openGraph.siteName and the copy, not in the title suffix.
+// November 2026 soft launch: the public title suffix is WTIA. Bundle metaTitles carry it
+// themselves; record and programme titles append the same suffix through brandedTitle().
+// A title is either exactly the brand (home and the default metadata title) or ends with
+// the locale separator plus the brand, once.
 describe("page titles", () => {
   it("declares the same set of metaTitle keys in both bundles", () => {
     const englishKeys = metaTitles(en).map(([namespace]) => namespace).sort();
@@ -42,18 +44,25 @@ describe("page titles", () => {
   it("suffixes every English metaTitle with the public brand", () => {
     const titles = metaTitles(en);
     expect(titles.length).toBeGreaterThanOrEqual(16);
+    const suffix = ` | ${siteConfig.publicBrand}`;
     for (const [namespace, title] of titles) {
-      expect(title === siteConfig.publicBrand || title.endsWith(` | ${siteConfig.publicBrand}`), `${namespace}: ${title}`).toBe(true);
-      expect(title, namespace).not.toMatch(/\| WTIA$/);
-      expect(title, namespace).not.toContain("WTIA");
+      expect(title === siteConfig.publicBrand || title.endsWith(suffix), `${namespace}: ${title}`).toBe(true);
+      expect(title, namespace).not.toMatch(/WiseTech/i);
+      if (title.endsWith(suffix)) {
+        expect(title.slice(0, -suffix.length), namespace).not.toContain(siteConfig.publicBrand);
+      }
     }
     expect(en.Metadata.title).toBe(siteConfig.publicBrand);
   });
 
   it("suffixes every Chinese metaTitle with the fullwidth separator and the same brand", () => {
+    const suffix = `｜${siteConfig.publicBrand}`;
     for (const [namespace, title] of metaTitles(zh)) {
-      expect(title === siteConfig.publicBrand || title.endsWith(`｜${siteConfig.publicBrand}`), `${namespace}: ${title}`).toBe(true);
-      expect(title, namespace).not.toContain("WTIA");
+      expect(title === siteConfig.publicBrand || title.endsWith(suffix), `${namespace}: ${title}`).toBe(true);
+      expect(title, namespace).not.toMatch(/WiseTech/i);
+      if (title.endsWith(suffix)) {
+        expect(title.slice(0, -suffix.length), namespace).not.toContain(siteConfig.publicBrand);
+      }
       // The fullwidth bar carries its own spacing; an ASCII " | " would render a doubled gap.
       expect(title, namespace).not.toContain(" | ");
     }
@@ -63,11 +72,11 @@ describe("page titles", () => {
   // Record-titled pages (events, news, showcase, history) and the lowercase-namespace programme
   // pages brand at runtime through this helper instead of a metaTitle key.
   it("brands a runtime title with the same locale-specific suffix the bundles use", () => {
-    expect(brandedTitle("en", "Harbour Vision AI")).toBe("Harbour Vision AI | WiseTech Hong Kong");
-    expect(brandedTitle("zh-HK", "港灣視野 AI")).toBe("港灣視野 AI｜WiseTech Hong Kong");
+    expect(brandedTitle("en", "Harbour Vision AI")).toBe(`Harbour Vision AI | ${siteConfig.publicBrand}`);
+    expect(brandedTitle("zh-HK", "港灣視野 AI")).toBe(`港灣視野 AI｜${siteConfig.publicBrand}`);
     expect(brandedTitle("zh-HK", "港灣視野 AI")).not.toContain(" | ");
-    expect(siteConfig.publicBrand).toBe("WiseTech Hong Kong");
-    // openGraph.siteName stays the legal short name; only <title> carries the public brand.
+    expect(siteConfig.publicBrand).toBe("WTIA");
+    // openGraph.siteName stays the legal short name. For this launch it matches the title suffix.
     expect(siteConfig.shortName).toBe("WTIA");
   });
 });

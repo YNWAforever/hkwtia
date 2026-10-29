@@ -3,19 +3,23 @@
 import {useEffect, useState, type ComponentType} from "react";
 
 import type {LocalizedNavigationGroup} from "@/config/navigation";
-import {Link, usePathname} from "@/i18n/navigation";
+import {usePathname} from "@/i18n/navigation";
+import type {AppLocale} from "@/i18n/routing";
+import {localizedPath} from "@/lib/urls";
 import {cn} from "@/lib/utils";
 
-// `.desktop-nav { display: none }` at max-width 1120px (app/styles/wisetech.css).
-// Lighthouse's mobile viewport is 412px, so the Radix mega menu never paints there.
-// Loading it on every visit still evaluated @radix-ui/react-navigation-menu during
-// the first tasks (Weekly Lighthouse run 40850403806: homepage TBT 510ms, /events
-// first paint blocked until those tasks yielded). The static links are the
-// no-JS and first-paint navigation; the menu replaces them only when the
+// `.desktop-nav` is `display: none` through 1240px. An earlier max-width:1120px
+// rule is overridden by the later max-width:1240px rule in app/styles/wisetech.css,
+// so the menu cannot paint until 1241px. Lighthouse's mobile viewport is 412px.
+// Loading Radix on every visit still evaluated @radix-ui/react-navigation-menu
+// during the first tasks (Weekly Lighthouse run 40850403806: homepage TBT 510ms,
+// /events first paint blocked until those tasks yielded). The static links are
+// the no-JS and first-paint navigation; the menu replaces them only when the
 // viewport can show it.
-const DESKTOP_NAV_QUERY = "(min-width: 1121px)";
+const DESKTOP_NAV_QUERY = "(min-width: 1241px)";
 
 type DesktopNavGateProps = {
+  locale: AppLocale;
   groups: readonly LocalizedNavigationGroup[];
   primaryLabel: string;
   exploreLabel: string;
@@ -28,7 +32,7 @@ function pathBelongsToGroup(pathname: string, group: LocalizedNavigationGroup) {
   ));
 }
 
-function StaticDesktopNav({groups, primaryLabel}: DesktopNavGateProps) {
+function StaticDesktopNav({locale, groups, primaryLabel}: DesktopNavGateProps) {
   const pathname = usePathname();
 
   return (
@@ -38,15 +42,17 @@ function StaticDesktopNav({groups, primaryLabel}: DesktopNavGateProps) {
           const current = pathBelongsToGroup(pathname, group);
           return (
             <li key={group.id}>
-              <Link
+              {/* Plain anchor, already localized. A next-intl Link here would prefetch
+                  the landing pages during first paint, which is the request the hero
+                  was losing to, and a client Link is not available before hydration. */}
+              <a
                 className={cn("nav-button", group.eventFirst && "event-first", current && "current")}
                 data-navigation-trigger={group.id}
                 data-current={current ? "true" : undefined}
-                href={group.landingHref}
-                prefetch={false}
+                href={localizedPath(locale, group.landingHref)}
               >
                 {group.label}
-              </Link>
+              </a>
             </li>
           );
         })}
@@ -55,8 +61,8 @@ function StaticDesktopNav({groups, primaryLabel}: DesktopNavGateProps) {
   );
 }
 
-export function DesktopNavGate(props: DesktopNavGateProps) {
-  const [Nav, setNav] = useState<ComponentType<DesktopNavGateProps> | null>(null);
+export function DesktopNavGate({locale, ...props}: DesktopNavGateProps) {
+  const [Nav, setNav] = useState<ComponentType<Omit<DesktopNavGateProps, "locale">> | null>(null);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -66,6 +72,8 @@ export function DesktopNavGate(props: DesktopNavGateProps) {
       if (!media.matches || cancelled) return;
       void import("./desktop-mega-navigation").then((mod) => {
         if (!cancelled) setNav(() => mod.DesktopMegaNavigation);
+      }).catch(() => {
+        // Keep the server-rendered overview links usable if the menu chunk fails to load.
       });
     };
     load();
@@ -76,6 +84,6 @@ export function DesktopNavGate(props: DesktopNavGateProps) {
     };
   }, []);
 
-  if (!Nav) return <StaticDesktopNav {...props} />;
+  if (!Nav) return <StaticDesktopNav locale={locale} {...props} />;
   return <Nav {...props} />;
 }

@@ -7,6 +7,7 @@ import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {appEnv, billingEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
+import {planUsesCheckout} from "@/config/membership-journey";
 import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {localizedPath} from "@/lib/urls";
 
@@ -34,7 +35,13 @@ function defaultDependencies(): CheckoutDependencies {
     priceForPlan: (planCode) => {
       const price = planCode === "startup"
         ? billing.stripeStartupPriceId
-        : planCode === "corporate" ? billing.stripeCorporatePriceId : "";
+        : planCode === "corporate"
+          ? billing.stripeCorporatePriceId
+          : planCode === "individual"
+            ? billing.stripeIndividualPriceId
+            : planCode === "platinum"
+              ? billing.stripePlatinumPriceId
+              : "";
       if (!price.trim()) throw new Error("STRIPE_PRICE_NOT_CONFIGURED");
       return price;
     },
@@ -72,7 +79,7 @@ export async function getAuthorizedBillingMembership(
 function validateCheckoutMembership(membership: MembershipRecord): void {
   if (membership.status !== "pending_payment") throw new Error("MEMBERSHIP_NOT_PENDING_PAYMENT");
   if (membership.stripeSubscriptionId) throw new Error("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
-  if (membership.planCode !== "startup" && membership.planCode !== "corporate") {
+  if (!planUsesCheckout(membership.planCode)) {
     throw new Error("PLAN_DOES_NOT_USE_CHECKOUT");
   }
   if (!membership.applicationId) throw new Error("MEMBERSHIP_APPLICATION_REQUIRED");

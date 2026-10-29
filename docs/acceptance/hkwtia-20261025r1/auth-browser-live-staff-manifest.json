@@ -1,0 +1,134 @@
+{
+ "run": "staffLiveProduction",
+ "date": "2026-10-27",
+ "timezone": "Asia/Hong_Kong",
+ "host": "https://hkwtia.vercel.app",
+ "deploymentProtectionWall": false,
+ "deployment": {
+  "id": "dpl_5TMerrJ1oURQsBYhau8cNrUHCLmi",
+  "target": "production",
+  "state": "READY",
+  "createdAtHkt": "2026-10-20T03:44:59+08:00",
+  "gitRef": "release",
+  "gitSha": "6833eb9a162733a6bd53b7226449f3a2f1aa6a93",
+  "promotes": "main@3eb9992d",
+  "pr212Deployed": false,
+  "pr212Fix": "a34a631c"
+ },
+ "passwordsUsed": false,
+ "secretsRecorded": false,
+ "emailsRecorded": false,
+ "phoneNumbersRecorded": false,
+ "mode": "read-only",
+ "cleanCookieContext": true,
+ "siteDataCleared": "cookies and storage for hkwtia.vercel.app via browser site-data UI; empty cookie jar confirmed before login",
+ "actor": {
+  "role": "staff",
+  "displayName": "Willy Lai",
+  "staffRole": "Superadmin",
+  "workspace": "Staff",
+  "signIn": "Google OAuth (signed in by Willy in box browser handoff)",
+  "loginRoute": "/admin-login",
+  "landing": "/admin",
+  "isStaffDFixture": false
+ },
+ "magicLinkStaffTested": false,
+ "dashboardSnapshot": {
+  "atHkt": "2026-10-27T00:52+08:00 (approx)",
+  "unfinishedApplications": 5,
+  "submitted": 1,
+  "memberPagesReview": 0,
+  "listingsReview": 0,
+  "pendingApprovals": 0,
+  "openStaffTasks": 3,
+  "openStaffTasksLabel": "CANARY 20261019 Follow up documents",
+  "atRisk": 0,
+  "draftNews": 0,
+  "profileRecords": 4,
+  "activeMemberships": 1,
+  "unrevokedCompanySeats": 1,
+  "reconciledWithDb": false
+ },
+ "observations": [
+  {
+   "route": "/admin",
+   "result": "PASS_OBSERVED",
+   "detail": "Staff workspace; Willy Lai, Superadmin"
+  },
+  {
+   "route": "/admin/members",
+   "result": "PASS_OBSERVED",
+   "detail": "rendered in session"
+  },
+  {
+   "route": "/admin/members/queue",
+   "result": "PASS_OBSERVED",
+   "detail": "Applications and payments queue rendered; submitted ID set not compared with dashboard"
+  },
+  {
+   "route": "/admin/events-mgmt",
+   "result": "PASS_OBSERVED",
+   "detail": "WTIA Global Growth Demo Briefing listed"
+  },
+  {
+   "route": "/admin/inbox",
+   "result": "OBSERVED",
+   "detail": "No conversations yet"
+  },
+  {
+   "route": "/portal",
+   "result": "PASS_OBSERVED",
+   "detail": "staff redirected to /admin (no member portal for staff)"
+  },
+  {
+   "route": "session",
+   "result": "PASS_OBSERVED",
+   "detail": "sticky across /admin, /admin/members, /admin/members/queue, /admin/events-mgmt, /admin/inbox, /admin and /portal redirect"
+  }
+ ],
+ "writes": "none (no approvals, actions, messages, saves)",
+ "notExercised": [
+  "staff magic link",
+  "staff D fixture role (non-Superadmin)",
+  "any write",
+  "dashboard vs queue submitted ID-set comparison",
+  "queue filter/paging",
+  "application case / draft review",
+  "zero-write DB readback after NONSTAFF refusals",
+  "PR #212 exact-head deployment (Preview behind SSO)",
+  "member->staff->member round trip",
+  "Stripe",
+  "screen reader"
+ ],
+ "evidenceAddedTo": [
+  "UC22-08",
+  "UC22-13",
+  "UC22-33",
+  "UC22-42",
+  "UC22-43",
+  "UC22-50"
+ ],
+ "blockersReworded": [
+  "UC22-11",
+  "UC22-13",
+  "UC22-21",
+  "UC22-22",
+  "UC22-23",
+  "UC22-29",
+  "UC22-30",
+  "UC22-33",
+  "UC22-35",
+  "UC22-36",
+  "UC22-39",
+  "UC22-42",
+  "UC22-43",
+  "UC22-50"
+ ],
+ "statusChanges": {},
+ "counts": {
+  "PASS": 0,
+  "PARTIAL": 49,
+  "BLOCKED": 11,
+  "NOT RUN": 0
+ }
+}

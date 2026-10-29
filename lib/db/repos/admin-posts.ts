@@ -1,3 +1,4 @@
+import {partialUpdate} from "@/lib/validation/partial-update";
 import "server-only";
 
 import {and, asc, desc, eq, isNull} from "drizzle-orm";
@@ -31,7 +32,7 @@ const newsInputObjectSchema = z.object({
 }).strict();
 
 const newsInputSchema = newsInputObjectSchema;
-const newsUpdateSchema = newsInputObjectSchema.partial().extend({
+const newsUpdateSchema = partialUpdate(newsInputObjectSchema).extend({
   bodyMdx: newsInputObjectSchema.shape.bodyMdx,
   bodyMdxZhHk: newsInputObjectSchema.shape.bodyMdxZhHk,
 });

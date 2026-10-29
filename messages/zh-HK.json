@@ -18,13 +18,13 @@
     "closeMenu": "關閉選單"
   },
   "Metadata": {
-    "title": "WiseTech Hong Kong",
+    "title": "WTIA",
     "description": "連繫香港及大灣區創新力量，接通全球市場。"
   },
   "Navigation": {
     "brand": {
-      "publicName": "WiseTech Hong Kong",
-      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准"
+      "publicName": "WTIA",
+      "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台"
     },
     "groups": {
       "eventsProgrammes": {
@@ -97,7 +97,7 @@
     },
     "actions": {
       "findEvent": "尋找活動",
-      "join": "加入 WiseTech",
+      "join": "加入 WTIA",
       "memberSignIn": "會員登入"
     },
     "mobile": {
@@ -111,12 +111,12 @@
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
-    "menuDescription": "瀏覽 WiseTech Hong Kong 服務及切換語言。",
+    "menuDescription": "瀏覽 WTIA 服務及切換語言。",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "切換至中文",
-    "homeLabel": "WiseTech Hong Kong 首頁",
+    "homeLabel": "WTIA 首頁",
     "logoAlt": "WTIA",
     "primaryLabel": "主要導覽"
   },
@@ -127,12 +127,12 @@
   "Footer": {
     "staffSignIn": "職員登入",
     "brand": {
-      "publicName": "WiseTech Hong Kong",
-      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台",
-      "homeLabel": "WiseTech Hong Kong 首頁",
+      "publicName": "WTIA",
+      "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台",
+      "homeLabel": "WTIA 首頁",
       "logoAlt": "WTIA"
     },
-    "legalLine": "WiseTech Hong Kong 為 Hong Kong Wireless Technology Industry Association 的品牌名稱，中文法定名稱待正式批准。",
+    "legalLine": "香港無線科技商會（WTIA）。",
     "columns": {
       "explore": "探索",
       "membership": "會員",
@@ -147,16 +147,16 @@
       "submit": "準備活動通知電郵",
       "success": "你的電郵程式應會開啟並備妥查詢；本頁不會自動建立訂閱。",
       "error": "請輸入有效工作電郵。",
-      "mailSubject": "WiseTech 活動通知",
-      "mailBody": "請將 {email} 加入 WiseTech 活動通知名單。"
+      "mailSubject": "WTIA 活動通知",
+      "mailBody": "請將 {email} 加入 WTIA 活動通知名單。"
     },
-    "summary": "WiseTech Hong Kong 透過 WTIA 經核實的公開服務，連繫科技企業、專業人士及計劃。",
+    "summary": "WTIA 連繫香港無線科技社群的科技企業、專業人士及計劃。",
     "addressLines": [
       "香港觀塘鴻圖道 73-75 號",
       "KOHO 4 樓"
     ],
     "privacy": "私隱聲明",
-    "copyright": "© {year} WiseTech Hong Kong。由 WTIA 營運。版權所有。"
+    "copyright": "© {year} WTIA。版權所有。"
   },
   "Email": {
     "brand": "WTIA",
@@ -413,7 +413,7 @@
     }
   },
   "Unsubscribe": {
-    "metaTitle": "電郵偏好設定｜WiseTech Hong Kong",
+    "metaTitle": "電郵偏好設定｜WTIA",
     "metaDescription": "更新你的 WTIA 推廣電郵偏好。",
     "eyebrow": "電郵偏好設定",
     "confirmTitle": "停止接收 WTIA 推廣電郵？",
@@ -433,21 +433,21 @@
     }
   },
   "Home": {
-    "metaTitle": "WiseTech Hong Kong",
-    "metaDescription": "WiseTech Hong Kong 連接可信 AI+ 應用、活動、會員、方案、計劃及大灣區市場機遇。",
+    "metaTitle": "WTIA",
+    "metaDescription": "WTIA 連結香港無線科技社群的活動、會員、方案、計劃及大灣區市場機遇。",
     "hero": {
-      "eyebrow": "WiseTech Hong Kong",
+      "eyebrow": "香港無線科技",
       "title": "香港如何引領 AI+ 時代？",
-      "lead": "WiseTech Hong Kong 是 Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台，連結企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場。",
+      "lead": "WTIA 連結香港的無線科技社群，包括企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場，推動可信的 AI+ 應用。",
       "imageAlt": "WTIA Tech Connect 全民 AI 香港活動的講者及主辦團隊",
       "actions": {
         "findRoute": "找出你的路徑",
         "findEvent": "瀏覽活動",
-        "join": "加入 WiseTech",
+        "join": "加入 WTIA",
         "members": "探索會員及方案"
       },
-      "note": "WiseTech Hong Kong · AI+ 產業平台",
-      "discover": "探索 WiseTech"
+      "note": "WTIA · 香港無線科技商會",
+      "discover": "探索 WTIA"
     },
     "openNow": {
       "loading": "正在載入社群活動…",
@@ -510,7 +510,7 @@
       "destinations": {
         "membership": {
           "label": "會籍",
-          "copy": "比較各級會籍及年費，由免費社群會籍至企業會籍。"
+          "copy": "比較個人、企業及白金會籍的年費。"
         },
         "showcase": {
           "label": "會員及方案展示",
@@ -730,7 +730,7 @@
     }
   },
   "About": {
-    "metaTitle": "關於我們｜WiseTech Hong Kong",
+    "metaTitle": "關於我們｜WTIA",
     "metaDescription": "了解 WTIA 在香港無線科技社群的角色。",
     "eyebrow": "關於 WTIA",
     "title": "凝聚無線科技業界的共同力量。",
@@ -757,7 +757,7 @@
     "historyLink": "閱讀我們的歷史"
   },
   "Chairman": {
-    "metaTitle": "主席的話｜WiseTech Hong Kong",
+    "metaTitle": "主席的話｜WTIA",
     "metaDescription": "WTIA 主席的話。",
     "eyebrow": "領導",
     "title": "主席的話",
@@ -767,7 +767,7 @@
     "signature": "WTIA 主席"
   },
   "Committees": {
-    "metaTitle": "委員會｜WiseTech Hong Kong",
+    "metaTitle": "委員會｜WTIA",
     "metaDescription": "了解 WTIA 委員會如何支援管治、計劃及會員。",
     "eyebrow": "管治",
     "title": "把參與轉化為行動的委員會。",
@@ -787,7 +787,7 @@
     }
   },
   "History": {
-    "metaTitle": "歷史｜WiseTech Hong Kong",
+    "metaTitle": "歷史｜WTIA",
     "metaDescription": "香港無線科技商會二十五年歷程，由2001年至2025年。",
     "eyebrow": "自2001年",
     "title": "我們的歷史",
@@ -804,12 +804,13 @@
     }
   },
   "Membership": {
+    "compare": {"audience": "適合對象", "fee": "會費", "uses": "主要用途", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
-    "metaTitle": "會員計劃｜WiseTech Hong Kong",
+    "metaTitle": "會員計劃｜WTIA",
     "metaDescription": "比較 WTIA 會員級別及權益。",
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
-    "title": "在香港創科社群找到你的定位。",
+    "title": "選擇適合你的會籍",
     "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
     "tiersTitle": "會員級別",
     "tiersIntro": "現行會費及付款週期以目前會員目錄為準。",
@@ -822,24 +823,34 @@
       "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "以電郵或 WhatsApp 接收活動更新"],
       "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
       "corporate": ["精選會員專頁及商標牆", "無限次提交活動（經審核）", "3 個方案展示頁", "WhatsApp 優先支援通道", "包含會員工具"],
-      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"]
+      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"],
+      "individual": ["會員專頁", "每季最多提交 2 個活動供 WTIA 審核", "1 個方案展示", "WhatsApp 更新"],
+      "platinum": ["包括企業會籍的全部", "精選展示位置", "與 WTIA 合辦活動", "專屬 WhatsApp 支援"]
     },
     "tiers": {
       "community": {
-        "name": "社群",
-        "description": "接收 WTIA 公開消息及機遇。"
+        "name": "個人",
+        "description": "舊有個人會籍。新申請請選擇個人會籍並網上付款。"
       },
       "startup": {
-        "name": "初創",
-        "description": "適合早期科技公司及團隊。"
+        "name": "個人",
+        "description": "舊有計劃。新申請請選擇個人會籍並網上付款。"
       },
       "corporate": {
         "name": "企業",
-        "description": "適合積極參與創科生態的成熟機構。"
+        "description": "適合機構。網上付款。"
       },
       "patron": {
-        "name": "贊助人",
-        "description": "適合支持 WTIA 使命的策略夥伴。"
+        "name": "白金",
+        "description": "舊有計劃。新申請請選擇白金會籍並網上付款。"
+      },
+      "individual": {
+        "name": "個人",
+        "description": "適合個人。網上付款。付款成功後會籍生效。"
+      },
+      "platinum": {
+        "name": "白金",
+        "description": "機構的最高會籍。網上付款。"
       }
     },
     "dimensionsTitle": "會籍內容",
@@ -847,7 +858,7 @@
     "faq": {
       "0": {
         "question": "誰可以申請？",
-        "answer": "社群會籍面向個人；初創及企業會籍由機構申請。贊助會籍由 WTIA 職員跟進。WTIA 會在審核時確認資格。"
+        "answer": "個人會籍適合一個人。企業及白金會籍適合機構。三種會籍均於網上付款。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
       },
       "1": {
         "question": "在哪裡查看現行會費？",
@@ -863,11 +874,11 @@
       },
       "4": {
         "question": "公司會籍包含多少席位？",
-        "answer": "現行網站目錄設定為初創五席、企業二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
+        "answer": "個人會籍為一席。企業及白金會籍為二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
       },
       "5": {
         "question": "審批需時多久？",
-        "answer": "申請狀態可在會員專區查看。WTIA 未在本頁公布固定審批時限；如時間緊迫，請聯絡會員團隊。"
+        "answer": "個人、企業及白金會籍均於網上付款。付款成功後會籍即時確認。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
       },
       "6": {
         "question": "可以退款嗎？",
@@ -893,8 +904,26 @@
     },
     "actions": {
       "join": "選擇此計劃",
+      "apply": "申請此計劃",
       "contact": "聯絡我們",
       "discuss": "討論此參與路徑"
+    },
+    "tracks": {
+      "title": "兩種加入方式",
+      "individual": {
+        "title": "個人",
+        "copy": "每年 HK$500。網上付款。付款成功後會籍生效。"
+      },
+      "organisation": {
+        "title": "公司",
+        "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者與個人會籍一樣，先付款。"
+      },
+      "sla": "如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+    },
+    "renew": {
+      "title": "續會或重新加入",
+      "copy": "如會籍已失效、逾期或將於期末結束，請登入並沿用現有的帳單頁面繼續。",
+      "action": "登入以續會或重新加入"
     },
     "unavailable": "會員計劃暫時未能提供",
     "sme": {
@@ -937,7 +966,7 @@
     "closing": {
       "eyebrow": "隨時歡迎你",
       "title": "選擇級別，或先向我們查詢。",
-      "copy": "社群、初創及企業會籍均可網上申請。贊助人會籍或其他查詢，可直接與我們聯絡。",
+      "copy": "個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。我們會盡量在 5 個工作天內回覆。",
       "join": "立即加入",
       "contact": "電郵會員團隊"
     }
@@ -980,7 +1009,7 @@
     "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
     "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "invite": {
-      "metaTitle": "你的專屬邀請｜WiseTech Hong Kong",
+      "metaTitle": "你的專屬邀請｜WTIA",
       "welcomeNamed": "歡迎你，{name}",
       "welcome": "歡迎加入 WTIA",
       "invitedBy": "{inviter} 邀請你成為 WTIA {plan}會員。",
@@ -1000,7 +1029,7 @@
     },
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
-    "metaTitle": "會籍申請｜WiseTech Hong Kong",
+    "metaTitle": "會籍申請｜WTIA",
     "metaDescription": "網上申請 WTIA 會籍：選擇級別、建立帳戶，加入香港創科社群。",
     "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
     "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
@@ -1012,16 +1041,53 @@
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
     "choosePlanTitle": "選擇會員計劃",
-    "choosePlanDescription": "選擇最適合貴機構參與方式的計劃。你可先在會員計劃頁比較費用及權益。",
+    "choosePlanDescription": "個人、企業及白金會籍均於網上付款。選擇級別後前往安全結帳。",
     "choosePlanCompare": "比較計劃及費用",
     "choosePlan": {
-      "community": "免費。保持聯繫、報名公開活動、接收更新。",
-      "startup": "適合初創科技團隊：會員專頁、每季 2 個經審核活動、1 個方案展示頁。",
-      "corporate": "適合成熟機構：精選專頁、無限次經審核活動、WhatsApp 優先支援。",
-      "patron": "WTIA 使命的策略支持者 — 請與團隊聯絡。"
+      "community": "新申請請選擇個人會籍。",
+      "startup": "新申請請選擇個人會籍。",
+      "corporate": "機構每年 HK$1,800。現在網上付款。",
+      "patron": "新申請請選擇白金會籍。",
+      "individual": "個人每年 HK$500。現在網上付款。",
+      "platinum": "每年 HK$4,800。現在網上付款。"
     },
     "choosePlanAction": "以{plan}繼續",
+    "choosePlanPrice": "每年 {amount}",
     "choosePlanContact": "聯絡 WTIA",
+    "tracks": {
+      "individual": {"title": "個人", "copy": "每年 HK$500。網上付款。付款成功後會籍生效。"},
+      "organisation": {"title": "公司", "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者均先付款。"}
+    },
+    "organisation": {
+      "intro": "公司資料會與申請一併儲存。商業登記證可在付款後補交，並非必須。",
+      "tierValue": "級別：{tier}",
+      "changeTier": "選擇其他級別",
+      "primaryTitle": "主要聯絡人",
+      "secondaryTitle": "次要聯絡人",
+      "brHint": "PDF、JPEG 或 PNG，最大 8 MB。",
+      "fields": {
+        "primaryName": "主要聯絡人姓名",
+        "primaryEmail": "主要聯絡人電郵",
+        "primaryPhone": "主要聯絡人電話（選填）",
+        "secondaryName": "次要聯絡人姓名",
+        "secondaryEmail": "次要聯絡人電郵",
+        "secondaryPhone": "次要聯絡人電話（選填）",
+        "br": "商業登記證"
+      }
+    },
+    "nextSteps": {
+      "title": "下一步",
+      "individualLead": "你的會籍已生效。請下載資料冊、登入，並選擇第一個活動。",
+      "processingLead": "付款正在確認。會籍生效後即可使用這些連結。",
+      "organisationLead": "如這宗申請需要人工例外處理，Willy 會在 5 個工作天內回覆。",
+      "noPayment": "現時尚未收款。WTIA 會在審核後與你聯絡。",
+      "welcomeKit": "下載迎新資料冊",
+      "associationKit": "下載協會資料冊",
+      "login": "會員登入",
+      "whatsapp": "在個人檔案選擇接收 WhatsApp",
+      "whatsappCommunity": "WhatsApp 社群",
+      "events": "即將舉行的活動"
+    },
     "optionalProfileTitle": "聯絡資料（選填）",
     "optionalProfileHint": "你可以現在填寫，亦可只填姓名後繼續。如要接收 WhatsApp 消息，須另行明確同意。",
     "optionalCompanyTitle": "公司資料（選填）",
@@ -1038,10 +1104,12 @@
       "company": "公司資料"
     },
     "plans": {
-      "community": "社群",
-      "startup": "初創",
+      "community": "個人",
+      "startup": "個人",
       "corporate": "企業",
-      "patron": "贊助人"
+      "patron": "白金",
+      "individual": "個人",
+      "platinum": "白金"
     },
     "fields": {
       "email": "電郵地址",
@@ -1067,6 +1135,11 @@
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
       "companyNotAllowed": "此計劃不接受公司資料。",
+      "tier": "請選擇個人、企業或白金，並以該級別繼續。",
+      "brRequired": "請上載商業登記證。",
+      "brType": "請上載 PDF、JPEG 或 PNG 格式的商業登記證。",
+      "brSize": "檔案超過 8 MB。",
+      "brStorage": "未能儲存商業登記證，請再試一次。",
       "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
@@ -1080,8 +1153,8 @@
         "description": "你的付費會籍已可進入安全付款程序。"
       },
       "review": {
-        "title": "申請審批中",
-        "description": "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
+        "title": "審核中",
+        "description": "如需人工例外處理，Willy 會在 5 個工作天內回覆。"
       }
     },
     "whatsapp": {
@@ -1234,12 +1307,12 @@
     }
   },
   "Programmes": {
-    "metaTitle": "計劃總覽｜WiseTech Hong Kong",
+    "metaTitle": "計劃總覽｜WTIA",
     "metaDescription": "WTIA 計劃及獎項的正式紀錄：Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI，包括歷屆內容及下一步。",
     "hero": {
       "eyebrow": "計劃",
       "title": "把參與轉化為進步的計劃。",
-      "lead": "探索 WiseTech 生態系統的獎項、學習、市場拓展及產業發展計劃，每項均以 WTIA 自身的結構化紀錄為依據。",
+      "lead": "探索 WTIA 生態系統的獎項、學習、市場拓展及產業發展計劃，每項均以商會自身的結構化紀錄為依據。",
       "breadcrumbCurrent": "計劃總覽"
     },
     "groupings": {
@@ -1281,7 +1354,7 @@
     }
   },
   "Partners": {
-    "metaTitle": "合作夥伴｜WiseTech Hong Kong",
+    "metaTitle": "合作夥伴｜WTIA",
     "metaDescription": "WTIA 已發布的夥伴紀錄：支持機構、區域夥伴、媒體夥伴、計劃夥伴及贊助機構，每項均已確認合作關係及標誌使用權。",
     "hero": {
       "eyebrow": "夥伴生態系統",
@@ -1333,7 +1406,7 @@
     }
   },
   "LaunchPad": {
-    "metaTitle": "創科起動｜WiseTech Hong Kong",
+    "metaTitle": "創科起動｜WTIA",
     "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",
     "eyebrow": "創科起動",
     "title": "協助科技團隊走向全球市場。",
@@ -1491,7 +1564,7 @@
     "clinicCta": "預約諮詢"
   },
   "Showcase": {
-    "metaTitle": "展示頁｜WiseTech Hong Kong",
+    "metaTitle": "展示頁｜WTIA",
     "metaDescription": "探索 WTIA 會員公司、產品及實用科技方案。",
     "detailFallbackDescription": "WTIA 會員展示",
     "eyebrow": "AI 展示",
@@ -1608,7 +1681,7 @@
     }
   },
   "Members": {
-    "metaTitle": "會員｜WiseTech Hong Kong",
+    "metaTitle": "會員｜WTIA",
     "metaDescription": "WTIA 會員名錄中的香港無線及 AI+ 科技企業。",
     "eyebrow": "會員名錄",
     "title": "WTIA 會員",
@@ -1625,10 +1698,12 @@
       "clear": "清除"
     },
     "plans": {
-      "community": "社群",
-      "startup": "初創",
+      "community": "個人",
+      "startup": "個人",
       "corporate": "企業",
-      "patron": "贊助人"
+      "patron": "白金",
+      "individual": "個人",
+      "platinum": "白金"
     },
     "resultsTitle": "本頁顯示 {count} 個會員",
     "resultsHeading": "會員名錄",
@@ -1652,7 +1727,7 @@
     }
   },
   "AiOps": {
-    "metaTitle": "公開 AI-Ops｜WiseTech Hong Kong",
+    "metaTitle": "公開 AI-Ops｜WTIA",
     "metaDescription": "公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。",
     "eyebrow": "公開 AI-Ops",
     "title": "公開量度 AI 營運",
@@ -1713,7 +1788,7 @@
     "operationsMethodology": "涵蓋智能助理結果、人工接手及重開案件。人手處理、覆核及返工分開計時；等候不計作職員工時。試點前須固定比較組。"
   },
   "Events": {
-    "metaTitle": "活動｜WiseTech Hong Kong",
+    "metaTitle": "活動｜WTIA",
     "metaDescription": "探索 WTIA 活動及社群聚會。",
     "eyebrow": "活動",
     "title": "活動",
@@ -1938,7 +2013,7 @@
     }
   },
   "News": {
-    "metaTitle": "消息｜WiseTech Hong Kong",
+    "metaTitle": "消息｜WTIA",
     "metaDescription": "閱讀 WTIA 最新消息。",
     "eyebrow": "消息",
     "title": "WTIA 最新消息",
@@ -1969,7 +2044,7 @@
     }
   },
   "Contact": {
-    "metaTitle": "聯絡我們｜WiseTech Hong Kong",
+    "metaTitle": "聯絡我們｜WTIA",
     "metaDescription": "聯絡香港無線科技商會。",
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
@@ -2046,11 +2121,11 @@
       }
     },
     "conciergeTitle": "未確定從哪裡開始？",
-    "conciergeDescription": "透過 WTIA 現有的 Concierge 諮詢 WiseTech。",
-    "conciergeLauncher": "問 WiseTech"
+    "conciergeDescription": "向 WTIA 查詢會籍、活動及計劃。",
+    "conciergeLauncher": "問 WTIA"
   },
   "Privacy": {
-    "metaTitle": "私隱｜WiseTech Hong Kong",
+    "metaTitle": "私隱｜WTIA",
     "metaDescription": "WTIA 平台如何收集、使用及保存你的資料。",
     "eyebrow": "私隱",
     "title": "我們如何處理你的資料",
@@ -2161,7 +2236,7 @@
     ]
   },
   "RefundPolicy": {
-    "metaTitle": "退款政策｜WiseTech Hong Kong",
+    "metaTitle": "退款政策｜WTIA",
     "metaDescription": "WTIA 如何及何時就付費門票訂單退款，以及我們取消活動時的安排。",
     "eyebrow": "政策",
     "title": "退款政策",
@@ -2200,7 +2275,7 @@
     ]
   },
   "AiTransparency": {
-    "metaTitle": "AI 透明度｜WiseTech Hong Kong",
+    "metaTitle": "AI 透明度｜WTIA",
     "metaDescription": "WTIA Concierge 的運作方式、能力範圍，以及何時交由真人接手。",
     "eyebrow": "AI 透明度",
     "title": "WTIA Concierge 如何運作",
@@ -2286,6 +2361,25 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "checklist": {
+      "title": "入會清單",
+      "lead": "完成這些項目，以用盡會籍。個人檔案與 WhatsApp 跟你已儲存的檔案。資料冊與第一個活動是現在可以開啟的連結。",
+      "kitsTitle": "迎新資料冊及協會資料冊",
+      "kitsLead": "在秘書處公布最終 Drive 連結前，這些是暫代檔案。",
+      "done": "已完成",
+      "todo": "待辦",
+      "profile": "完善個人檔案",
+      "welcomeKit": "下載迎新資料冊",
+      "associationKit": "下載協會資料冊",
+      "whatsapp": "加入 WhatsApp",
+      "whatsappCommunity": "開啟 WhatsApp 社群",
+      "firstEvent": "報名第一個活動",
+      "registration": "稍後補上商業登記證（選填）"
+    },
+    "renew": {
+      "action": "續會或重新加入",
+      "rejoin": "開始新申請"
+    },
     "firstResult": {
       "title": "開始使用你的會員權益",
       "event": "下一個活動",
@@ -2369,7 +2463,7 @@
       },
       "under_review": {
         "title": "你的會籍正待審批",
-        "body": "我們正在審核你的申請。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
+        "body": "這是人工例外處理。Willy 會在 5 個工作天內回覆。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
       },
       "inactive": {
         "title": "目前未能使用會員權益",
@@ -2396,6 +2490,7 @@
     "navGroups": {"me": "我的帳戶", "company": "我的公司", "benefits": "會員權益"},
     "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},
     "applications": {
+      "paging": {"label": "申請分頁", "first": "返回最新申請", "next": "較早的申請"},
       "nav": "我的申請",
       "title": "我的申請",
       "description": "查看每份會籍申請的狀態、需要處理的資料及下一步。",
@@ -2448,7 +2543,7 @@
       "label": "下一步",
       "past_due": {"title": "請更新付款資料", "body": "上次付款未能完成。請更新付款資料，以保持會籍有效。", "action": "前往帳單"},
       "pending_payment": {"title": "完成付款", "body": "完成付款後，會籍即會生效。", "action": "前往帳單"},
-      "pending_review": {"title": "你的申請正在審核", "body": "審核完成後，WTIA 會與你聯絡。", "action": "查看申請詳情"},
+      "pending_review": {"title": "你的申請正在審核", "body": "Willy 會在 5 個工作天內回覆。", "action": "查看申請詳情"},
       "profile": {"title": "完善個人資料", "body": "加上職銜及聯絡偏好，方便 WTIA 與你聯絡。", "action": "前往個人資料"},
       "company": {"title": "填寫公司資料", "body": "公司資料會用於會籍、名額及展示頁。", "action": "前往公司資料"}
     },
@@ -2478,10 +2573,12 @@
     "membershipOptions": "查看會籍選項",
     "welcome": "歡迎回來，{name}。",
     "plans": {
-      "community": "社群",
-      "startup": "初創",
+      "community": "個人",
+      "startup": "個人",
       "corporate": "企業",
-      "patron": "贊助"
+      "patron": "白金",
+      "individual": "個人",
+      "platinum": "白金"
     },
     "onboardingProgress": "已完成 {completed} / {total} 個步驟",
     "status": {
@@ -2510,7 +2607,7 @@
       "pending_review": {
         "label": "審核中",
         "title": "申請審核中",
-        "description": "WTIA 完成審核後會與你聯絡。"
+        "description": "Willy 會在 5 個工作天內回覆。"
       }
     },
     "profileTitle": "我的個人資料",
@@ -2702,7 +2799,7 @@
         "INVALID": "請檢查必填欄位、日期及連結，然後再試。",
         "EVENT_SLUG_TAKEN": "此網頁地址已被另一活動使用。",
         "EVENT_QUOTA_EXCEEDED": "貴計劃本季的經審核活動名額已用完。請儲存為草稿或升級計劃。",
-        "EVENT_PUBLISHING_NOT_INCLUDED": "社群會籍不包括發布活動。",
+        "EVENT_PUBLISHING_NOT_INCLUDED": "此會籍不包括發布活動。",
         "EVENT_NOT_EDITABLE": "此活動已發布；如需修改，請聯絡 WTIA。",
         "EVENT_HERO_MEDIA_INVALID": "此圖片並非你上載的圖片。",
         "NO_MANAGED_COMPANY": "發布活動需要你管理的公司。",
@@ -2925,11 +3022,11 @@
   },
   "Concierge": {
     "_review": true,
-    "launcher": "問 WiseTech",
+    "launcher": "問 WTIA",
     "transparency": "了解智能助理運作方式",
     "prompts": {
-      "home": ["WiseTech 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
-      "membership": ["哪種會籍適合我的機構？", "初創企業可獲得甚麼權益？"],
+      "home": ["WTIA 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
+      "membership": ["哪種會籍適合我的機構？", "企業會籍包括甚麼？"],
       "showcase": ["尋找服務中小企的供應商", "引薦流程如何運作？"],
       "events": ["哪些活動適合零售業？", "顯示粵語活動"]
     },
@@ -3333,7 +3430,7 @@
         "invite": {
           "title": "專屬入會連結",
           "plan": "會籍計劃",
-          "plans": {"community": "社群會員", "startup": "初創會員", "corporate": "企業會員"},
+          "plans": {"community": "個人", "startup": "個人", "corporate": "企業", "individual": "個人", "platinum": "白金"},
           "create": "建立入會連結",
           "linkLabel": "入會連結（只顯示一次）",
           "copy": "複製連結",
@@ -3742,7 +3839,7 @@
         "rejected": "已拒絕"
       }
     },
-    "applicationQueue": {"title":"入會申請及付款","description":"每列代表一份申請。相關會籍及最新付款嘗試分開顯示，方便跟進未完成申請及核對付款。","caption":"入會申請工作清單","applicant":"申請人","application":"申請","step":"已儲存步驟","membership":"相關會籍","billing":"最新付款嘗試","updated":"更新時間（香港時間）","none":"未有記錄","empty":"此清單沒有符合條件的申請。","back":"返回會員","views":"申請工作清單","viewsLabels":{"draft":"待完成入會","pending_payment":"待付款","pending_review":"待審批"},"search":"姓名、電郵、機構或申請 ID","sort":"排序","sortNewest":"最近更新","sortOldest":"最早更新","pageSize":"每頁列數","totalMatching":"目前搜尋及狀態共有 {count} 份申請。","invalid":"清單篩選或分頁資料無效。請清除篩選後重試。","unavailable":"暫時無法載入申請清單，請稍後重試。","loading":"正在載入申請…","draft":"草稿","steps":{"profile":"個人資料","company":"機構資料","checkout":"付款","complete":"完成","review":"審批"},"billingStates":{"active":"進行中的付款嘗試","completed":"已完成付款嘗試","abandoned":"已放棄付款嘗試","expired":"已到期付款嘗試"}},
+    "applicationQueue": {"title":"入會申請及付款","description":"每列代表一份申請。相關會籍及最新付款嘗試分開顯示，方便跟進未完成申請及核對付款。","caption":"入會申請工作清單","applicant":"申請人","application":"申請","step":"已儲存步驟","membership":"相關會籍","billing":"最新付款嘗試","updated":"更新時間（香港時間）","none":"未有記錄","empty":"此清單沒有符合條件的申請。","back":"返回會員","views":"申請工作清單","viewsLabels":{"submitted":"已提交","draft":"待完成入會","pending_payment":"待付款","pending_review":"待審批"},"search":"姓名、電郵、機構或申請 ID","sort":"排序","sortNewest":"最近更新","sortOldest":"最早更新","pageSize":"每頁列數","totalMatching":"目前搜尋及狀態共有 {count} 份申請。","invalid":"清單篩選或分頁資料無效。請清除篩選後重試。","unavailable":"暫時無法載入申請清單，請稍後重試。","loading":"正在載入申請…","draft":"草稿","steps":{"profile":"個人資料","company":"機構資料","checkout":"付款","complete":"完成","review":"審批"},"billingStates":{"active":"進行中的付款嘗試","completed":"已完成付款嘗試","abandoned":"已放棄付款嘗試","expired":"已到期付款嘗試"}},
     "batchGrants": {"title":"贈送會籍","formTitle":"準備有限期贈送會籍","description":"選擇明確對象、日期及理由。提交前請檢查每個對象及衝突；此操作不會記錄付款。","back":"返回會員","plan":"會籍計劃","start":"生效時間（香港時間）","expiry":"到期時間（香港時間）","reason":"贈送理由","preview":"預覽贈送會籍","kind":"對象類型","profile":"個人會員檔案","company":"機構","ids":"對象 ID","help":"每行輸入一個可信會員檔案或機構 ID，最多 5000 個。預覽會顯示名稱、計劃名額及衝突。日期適用於所有對象。","disabled":"此環境尚未啟用批量贈送會籍。","success":"已準備贈送會籍。","invalid":"請檢查對象 ID、計劃、日期及理由。","duplicate":"對象已有尚未結束的會籍。","error":"無法準備贈送會籍。請檢查權限後重試。"},
     "imports": {
   "title": "匯入會員資料",
@@ -3878,7 +3975,7 @@
         "companyChoose": "請從已登記公司中選擇，或清空搜尋。",
         "companySearching": "正在搜尋公司…"},
       "view": "查看",
-      "planCodes": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助人"},
+      "planCodes": {"community": "個人", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
       "statusCodes": {"active": "有效", "past_due": "逾期未付", "cancel_at_period_end": "期末終止", "pending_review": "待審批", "pending_payment": "待付款", "cancelled": "已取消", "expired": "已過期"},
       "title": "會員",
       "description": "搜尋會員檔案、公司、會籍及參與分數。",
@@ -3925,9 +4022,11 @@
       "nameEn": "名稱（英文）",
       "nameZh": "名稱（繁體中文）",
       "corporate": "企業",
-      "startup": "初創",
-      "community": "社群",
-      "patron": "贊助",
+      "startup": "初創（舊有）",
+      "community": "社群（舊有）",
+      "patron": "贊助人（舊有）",
+      "individual": "個人",
+      "platinum": "白金",
       "active": "有效",
       "pastDue": "逾期未付款",
       "pendingReview": "待審核",
@@ -4002,10 +4101,12 @@
       "addNote": "新增備註",
       "campaign": "建立推廣活動",
       "plans": {
-        "community": "社群",
-        "startup": "初創",
+        "community": "個人",
+        "startup": "個人",
         "corporate": "企業",
-        "patron": "贊助"
+        "patron": "白金",
+        "individual": "個人",
+        "platinum": "白金"
       },
       "statuses": {
         "active": "生效",
@@ -4597,7 +4698,7 @@
         "joinedColumn": "實際加入",
         "countColumn": "會員",
         "emptyPlans": "此期間沒有已付費的邀請。",
-        "plan": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助"},
+        "plan": {"community": "個人", "startup": "個人", "corporate": "企業", "patron": "白金", "individual": "個人", "platinum": "白金"},
         "estimateHeading": "歸因首年會費",
         "estimateLabel": "估算",
         "estimateNote": "按已加入方案的首年年費標價計算，未與 Stripe 對賬，請勿視為已入賬收入。"
@@ -5209,5 +5310,20 @@
     "invalid": "請求無效。",
     "dirty": "目前有未儲存修改。複製已批准草稿前，請先儲存或保留修改。",
     "noHistory": "這個語言未有已儲存草稿。"
+  },
+  "Supplement": {
+    "preview": "發布預覽",
+    "visible": "申請人可見",
+    "publish": "發布補件要求",
+    "respond": "提交回覆",
+    "text": "回覆",
+    "url": "HTTPS 網址",
+    "due": "期限",
+    "saved": "已儲存",
+    "validation": "請檢查回覆，輸入已保留。",
+    "forbidden": "你無權處理此要求。",
+    "conflict": "要求已變更，請重新載入。",
+    "unknown": "結果未明，重試前請查核操作收據。",
+    "receipt": "操作收據"
   }
 }

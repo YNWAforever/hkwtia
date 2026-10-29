@@ -59,7 +59,7 @@ test("mobile Sheet traps focus, resets Accordion, closes on navigation, and rest
   await page.keyboard.press("Shift+Tab");
   expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true);
   await expect(dialog.getByRole("link", {name: "尋找活動"})).toHaveAttribute("href", "/zh/events");
-  await expect(dialog.getByRole("link", {name: "加入 WiseTech"})).toHaveAttribute("href", "/zh/join");
+  await expect(dialog.getByRole("link", {name: "加入 WTIA"})).toHaveAttribute("href", "/zh/join");
   const group = dialog.getByRole("button", {name: "活動及計劃"});
   await group.click();
   await expect(dialog.getByRole("link", {name: "活動", exact: true})).toHaveAttribute("aria-current", "page");
@@ -73,7 +73,7 @@ test("mobile Sheet traps focus, resets Accordion, closes on navigation, and rest
   await expect(page.getByRole("button", {name: "活動及計劃"})).toHaveAttribute("aria-expanded", "false");
 
   await group.click();
-  await dialog.getByRole("link", {name: "加入 WiseTech"}).click();
+  await dialog.getByRole("link", {name: "加入 WTIA"}).click();
   await expect(page).toHaveURL(/\/zh\/join$/);
   await expect(dialog).toBeHidden();
 });

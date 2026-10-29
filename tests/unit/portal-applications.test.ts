@@ -33,7 +33,7 @@ function dependencies(rows: readonly MembershipApplication[]): PortalApplication
   applications: {listOwned: ReturnType<typeof vi.fn>};
 } {
   return {
-    applications: {listOwned: vi.fn(async () => rows)},
+    applications: {listOwned: vi.fn(async () => rows), listOwnedPage: vi.fn(async () => ({items: rows, nextCursor: null})), getOwnedById: vi.fn(async (_actor: Actor, id: string) => rows.find(row => row.id === id) ?? null)},
   };
 }
 
@@ -109,6 +109,12 @@ describe("member-owned application projection", () => {
     } as MembershipApplication;
     const [view] = await getMemberApplications(member, dependencies([hostile]));
     expect(JSON.stringify(view)).not.toMatch(/STAFF_NOTE|Synthetic Staff|stripeCustomerId|auditEvents/);
+  });
+
+  it("detail reads use the owned ID reader without listing history", async () => {
+    const row = application(); const deps = dependencies([row]);
+    expect(await getMemberApplication(member, row.id, deps)).toMatchObject({id: row.id});
+    expect(deps.applications.listOwned).not.toHaveBeenCalled();
   });
 
   it("returns the same owned projection from the detail read", async () => {

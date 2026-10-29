@@ -59,16 +59,16 @@ describe("Hero", () => {
     expect(image).toHaveAttribute("fetchpriority", "high");
     expect(image).toHaveAttribute("loading", "eager");
     expect(image).toHaveAttribute("sizes", "100vw");
-    const preload = document.querySelector('link[rel="preload"][as="image"]');
-    expect(preload, "The hero candidate must be requested from the document head").not.toBeNull();
-    expect(preload).toHaveAttribute("imagesizes", "100vw");
-    expect(preload).toHaveAttribute("fetchpriority", "high");
-    expect(preload!.getAttribute("imagesrcset")).toContain("/archive/tech-connect-ai-leaders-960.webp");
-
     const responsiveSource = image.closest("picture")?.querySelector("source") ?? null;
     expect(responsiveSource, "The hero should use precomputed responsive files without a cold optimizer request").not.toBeNull();
     expect(responsiveSource).toHaveAttribute("type", "image/webp");
     expect(responsiveSource).toHaveAttribute("sizes", "100vw");
+    const preload = document.head.querySelector('link[rel="preload"][as="image"]');
+    expect(preload, "Discover the responsive LCP image before the streamed hero body").not.toBeNull();
+    expect(preload).toHaveAttribute("imagesrcset", responsiveSource!.getAttribute("srcset"));
+    expect(preload).toHaveAttribute("imagesizes", "100vw");
+    expect(preload).toHaveAttribute("fetchpriority", "high");
+    expect(preload).toHaveAttribute("type", "image/webp");
     const entries = responsiveSource!.getAttribute("srcset")!.split(",").map(entry => entry.trim().split(" "));
     expect(entries.map(entry => entry[1])).toEqual(["480w", "960w", "1800w"]);
     for (const [path] of entries) {

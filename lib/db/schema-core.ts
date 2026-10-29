@@ -348,9 +348,41 @@ export const membershipApplications = pgTable(
   },
   (table) => [
     index("membership_applications_applicant_idx").on(table.applicantUserId),
+    index("membership_applications_owned_page_idx").on(table.applicantUserId, table.updatedAt.desc(), table.id.desc()),
     index("membership_applications_company_idx").on(table.companyId),
   ],
 );
+
+/**
+ * Corporate / Patron apply packet: company contacts plus the Business Registration
+ * file reference. The bytes live in private R2 when that provider is configured;
+ * `pending_provider` means the hash was recorded and the object was not stored.
+ */
+export const organisationApplicationDetails = pgTable("organisation_application_details", {
+  applicationId: uuid("application_id").primaryKey().references(() => membershipApplications.id, {onDelete: "cascade"}),
+  tierCode: text("tier_code").notNull(),
+  primaryName: text("primary_name").notNull(),
+  primaryEmail: text("primary_email").notNull(),
+  primaryPhone: text("primary_phone"),
+  secondaryName: text("secondary_name").notNull(),
+  secondaryEmail: text("secondary_email").notNull(),
+  secondaryPhone: text("secondary_phone"),
+  brFileName: text("br_file_name").notNull(),
+  brContentType: text("br_content_type").notNull(),
+  brByteSize: integer("br_byte_size").notNull(),
+  brSha256: text("br_sha256").notNull(),
+  brStorageKey: text("br_storage_key"),
+  brStorageStatus: text("br_storage_status").notNull(),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("organisation_application_tier_check", sql`${table.tierCode} IN ('corporate', 'patron')`),
+  check("organisation_application_br_status_check", sql`${table.brStorageStatus} IN ('stored', 'pending_provider')`),
+  check("organisation_application_br_type_check", sql`${table.brContentType} IN ('application/pdf', 'image/jpeg', 'image/png')`),
+  check("organisation_application_br_size_check", sql`${table.brByteSize} BETWEEN 1 AND 8388608`),
+  check("organisation_application_br_sha_check", sql`${table.brSha256} ~ '^[a-f0-9]{64}$'`),
+  check("organisation_application_br_key_check", sql`(${table.brStorageStatus} = 'stored' AND ${table.brStorageKey} IS NOT NULL) OR (${table.brStorageStatus} = 'pending_provider' AND ${table.brStorageKey} IS NULL)`),
+]);
 
 export const memberships = pgTable(
   "memberships",
@@ -2351,4 +2383,52 @@ export const aiDraftWork = pgTable("ai_draft_work", {
  check("ai_draft_work_state_check", sql`${table.state} IN ('claimed','requesting','succeeded','unknown','failed_before_request')`),
  check("ai_draft_work_provider_request_id_check", sql`length(${table.providerRequestId}) BETWEEN 1 AND 255`),
  check("ai_draft_work_effect_state", sql`(${table.state} IN ('claimed','failed_before_request') AND ${table.requestStartedAt} IS NULL AND ${table.draftId} IS NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NULL) OR (${table.state} IN ('requesting','unknown') AND ${table.requestStartedAt} IS NOT NULL AND ${table.draftId} IS NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NULL) OR (${table.state}='succeeded' AND ${table.requestStartedAt} IS NOT NULL AND ((${table.draftId} IS NOT NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NULL) OR (${table.kind}='renewal' AND ${table.draftId} IS NULL AND ${table.approvalId} IS NOT NULL AND ${table.postId} IS NULL) OR (${table.kind}='board' AND ${table.draftId} IS NULL AND ${table.approvalId} IS NULL AND ${table.postId} IS NOT NULL)))`),
+]);
+
+// T22-04A: private persistence contracts; member reads use explicit service projection.
+export const applicationSupplementRequests = pgTable("application_supplement_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  applicationId: uuid("application_id").notNull().references(() => membershipApplications.id, {onDelete: "cascade"}),
+  version: integer("version").notNull(),
+  status: text("status").$type<import("@/lib/membership/supplement-service").StoredSupplement["status"]>().notNull(),
+  items: jsonb("items").$type<import("@/lib/membership/supplement-service").StoredSupplement["items"]>().notNull(),
+  dueAt: text("due_at"),
+  createdBy: text("created_by").notNull(),
+  publishedAt: text("published_at"),
+  closedAt: text("closed_at"),
+  staffContext: text("staff_context"),
+  replacesRequestId: uuid("replaces_request_id").references((): AnyPgColumn => applicationSupplementRequests.id),
+  cancellationReason: text("cancellation_reason"),
+}, t => [
+  uniqueIndex("application_supplement_one_open").on(t.applicationId).where(sql`${t.status} IN ('published', 'responded')`),
+  check("application_supplement_status", sql`${t.status} IN ('draft','published','responded','closed','cancelled')`),
+  check("application_supplement_version", sql`${t.version} > 0`),
+  check("application_supplement_items", sql`jsonb_typeof(${t.items}) = 'array' AND jsonb_array_length(${t.items}) BETWEEN 1 AND 10`),
+  check("application_supplement_publication", sql`${t.status} NOT IN ('published','responded','closed') OR ${t.publishedAt} IS NOT NULL`),
+]);
+export const applicationSupplementResponses = pgTable("application_supplement_responses", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  requestId: uuid("request_id").notNull().references(() => applicationSupplementRequests.id, {onDelete: "cascade"}),
+  requestVersion: integer("request_version").notNull(),
+  applicantUserId: text("applicant_user_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
+  answers: jsonb("answers").$type<import("@/lib/membership/supplement-service").SupplementState["responses"][number]["answers"]>().notNull(),
+  submittedAt: text("submitted_at").notNull(),
+  operationId: uuid("operation_id").notNull(),
+}, t => [
+  uniqueIndex("application_supplement_response_operation").on(t.applicantUserId,t.operationId),
+  uniqueIndex("application_supplement_response_version").on(t.requestId,t.requestVersion),
+  check("application_supplement_response_version_positive", sql`${t.requestVersion} > 0`),
+  check("application_supplement_answers", sql`jsonb_typeof(${t.answers}) = 'array' AND jsonb_array_length(${t.answers}) <= 10`),
+]);
+export const applicationSupplementReceipts = pgTable("application_supplement_receipts", {
+  actor: text("actor").notNull(),
+  operationRequestId: uuid("operation_request_id").notNull(),
+  applicationId: uuid("application_id").notNull().references(() => membershipApplications.id, {onDelete: "cascade"}),
+  requestId: uuid("request_id").notNull().references(() => applicationSupplementRequests.id, {onDelete: "cascade"}),
+  kind: text("kind").$type<import("@/lib/membership/supplement-service").SupplementState["receipts"][number]["kind"]>().notNull(),
+  payloadHash: text("payload_hash").notNull(),
+  result: jsonb("result").$type<import("@/lib/membership/supplement-service").SupplementState["receipts"][number]["result"]>().notNull(),
+}, t => [
+  primaryKey({columns: [t.actor,t.operationRequestId]}),
+  check("application_supplement_receipt_kind", sql`${t.kind} IN ('create','publish','respond','close','cancel')`),
 ]);

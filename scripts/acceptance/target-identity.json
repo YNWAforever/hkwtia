@@ -1,0 +1,16 @@
+{
+  "projectId": "dark-cake-07139424",
+  "branchId": "br-restless-pond-a11dpkvd",
+  "branchName": "r2-acceptance-20261026",
+  "parentBranchId": "br-steep-queen-a1au2vfd",
+  "host": "ep-lively-pond-a1sfsb3e-pooler.ap-southeast-1.aws.neon.tech",
+  "database": "neondb",
+  "schema": "public",
+  "protected": false,
+  "default": false,
+  "primary": false,
+  "archived": false,
+  "restrictedActions": [],
+  "verifiedAt": "2026-10-26T06:03:00Z",
+  "expiresAt": "2026-11-02T06:03:00Z"
+}

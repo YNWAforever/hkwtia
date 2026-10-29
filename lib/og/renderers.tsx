@@ -1,5 +1,6 @@
 import type {CSSProperties, ReactElement} from "react";
 
+import {siteConfig} from "@/config/site";
 import type {OgProps, OgRendererName} from "@/lib/og/resolve-renderer";
 
 // The site's palette, resolved to literals: Satori has no CSS variables.
@@ -38,7 +39,7 @@ function editorialCard({title, eyebrow}: OgProps): OgCardElement {
         <div style={{display: "flex", width: 110, height: 4, backgroundColor: SAND, marginBottom: 28}} />
         <div style={{display: "flex", fontFamily: "serif", fontSize: 68, lineHeight: 1.15}}>{title}</div>
       </div>
-      <div style={{display: "flex", fontSize: 24, letterSpacing: 3, opacity: 0.75}}>WISETECH HONG KONG</div>
+      <div style={{display: "flex", fontSize: 24, letterSpacing: 3, opacity: 0.75}}>{siteConfig.publicBrand}</div>
     </div>
   );
 }

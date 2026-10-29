@@ -18,6 +18,7 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {contactWriterActor, contactsRepository} from "@/lib/db/repos/contacts";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
+import {applicationOutcome, planCollectsCompany} from "@/config/membership-journey";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
@@ -47,7 +48,7 @@ async function formError(locale: AppLocale, field: string, key = "errors.require
 }
 
 function defaultBillingInterval(plan: PlanCode): BillingInterval {
-  return getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+  return applicationOutcome(plan).billingInterval;
 }
 
 // completeApplication() already knows exactly where the applicant belongs next --
@@ -184,7 +185,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     const application = resumed ?? await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
     if(policyAcceptanceEnabled()&&formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId:id,policyVersion:String(formData.get("policyVersion"))});
-    const companyPlan = ["startup", "corporate"].includes(plan);
+    const companyPlan = planCollectsCompany(plan);
     if (companyPlan) {
       await applicationsRepository.update(actor, id, {currentStep: "company"});
       const destination = destinationForJoin(locale, plan, id, "company");
@@ -207,7 +208,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
 }
 
 export async function saveCompany(locale: AppLocale, plan: PlanCode, applicationId: string, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
-  if (!["startup", "corporate"].includes(plan)) return formError(locale, "legalName", "errors.companyNotAllowed");
+  if (!planCollectsCompany(plan)) return formError(locale, "legalName", "errors.companyNotAllowed");
   const displayName = formData.get("companyDisplayName");
   const parsed = companySchema.safeParse({
     legalName: formData.get("legalName"),

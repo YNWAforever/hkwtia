@@ -56,10 +56,10 @@ export const approvedFactPackSchema = z
         z.string().regex(/^[a-f0-9]{64}$/),
       )
       .refine((value) => Object.keys(value).length <= 64)
-      .default({}),
+      .prefault({}),
     sourceUrls: z
       .record(z.string().min(1).max(255), z.string().url().max(2000))
-      .default({}),
+      .prefault({}),
     displayLabels: z
       .object({
         yes: z.string().min(1).max(120),

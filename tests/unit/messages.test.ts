@@ -140,12 +140,12 @@ describe('message bundles', () => {
     });
     expect(en.Navigation.actions).toEqual({
       findEvent: "Find an event",
-      join: "Join WiseTech",
+      join: "Join WTIA",
       memberSignIn: "Member sign in",
     });
     expect(zh.Navigation.actions).toEqual({
       findEvent: "尋找活動",
-      join: "加入 WiseTech",
+      join: "加入 WTIA",
       memberSignIn: "會員登入",
     });
   });

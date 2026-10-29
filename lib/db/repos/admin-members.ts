@@ -1,3 +1,4 @@
+import {APPLICATION_QUEUE_STATUSES, APPLICATION_QUEUE_FILTERS, resolveApplicationQueueStatuses, type ApplicationQueueStatus} from "@/lib/admin/application-queue-filter";
 import "server-only";
 
 import {inArray, sql, type SQL} from "drizzle-orm";
@@ -251,11 +252,11 @@ export async function getMemberTimelinePage(actor: Actor, profileIdInput: unknow
   return {kind, page: {items, nextCursor: hasNext && key ? encodeScopedCursor(scope, [key.cursor_at.toISOString(), key.cursor_id, ""]) : null}};
 }
 
-export const APPLICATION_QUEUE_STATUSES = ["draft", "pending_payment", "pending_review"] as const;
-export type ApplicationQueueStatus = (typeof APPLICATION_QUEUE_STATUSES)[number];
+export {APPLICATION_QUEUE_STATUSES};
+export type {ApplicationQueueStatus};
 export type ApplicationQueueCounts = Readonly<Record<ApplicationQueueStatus, number>>;
 export const applicationQueueQuerySchema = z.object({
-  status: z.enum(APPLICATION_QUEUE_STATUSES).default("draft"),
+  status: z.enum(APPLICATION_QUEUE_FILTERS).default("draft"),
   search: z.string().trim().max(120).default(""),
   sort: z.enum(["updated_desc", "updated_asc"]).default("updated_desc"),
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -324,7 +325,7 @@ async function getApplicationQueuePage(actor: Actor, input: unknown): Promise<Ap
       WHERE ${billingAttempts.membershipId} = ${memberships.id}
       ORDER BY ${billingAttempts.attemptNumber} DESC, ${billingAttempts.id} DESC LIMIT 1
     ) latest_billing ON TRUE
-    WHERE ${membershipApplications.status} = ${query.status} AND ${search} AND ${after}
+    WHERE ${inArray(membershipApplications.status, [...resolveApplicationQueueStatuses(query.status)])} AND ${search} AND ${after}
     ORDER BY ${order} LIMIT ${query.limit + 1}
   `)));
   const page = found.slice(0, query.limit);
@@ -332,7 +333,7 @@ async function getApplicationQueuePage(actor: Actor, input: unknown): Promise<Ap
   return {
     items: page.map(({updatedAt, updatedKey, ...item}) => {void updatedKey; return {...item, updatedAt: updatedAt.toISOString()};}),
     nextCursor: found.length > query.limit && last ? encodeScopedCursor(scope, [last.updatedKey, last.applicationId, ""]) : null,
-    totalMatching: counts[query.status],
+    totalMatching: resolveApplicationQueueStatuses(query.status).reduce((total, status) => total + counts[status], 0),
     counts,
   };
 }

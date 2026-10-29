@@ -82,7 +82,7 @@ describe("joinInvitesRepository.create", () => {
     });
     const repository = createJoinInvitesRepository(async () => fake.database as never);
 
-    const result = await repository.create(admin, {contactId, planCode: "startup"});
+    const result = await repository.create(admin, {contactId, planCode: "corporate"});
 
     expect(fake.outer).toHaveLength(0);
     expect(fake.transactions).toHaveLength(1);
@@ -108,7 +108,7 @@ describe("joinInvitesRepository.create", () => {
     });
     const repository = createJoinInvitesRepository(async () => fake.database as never);
 
-    const {token} = await repository.create(admin, {contactId, planCode: "community"});
+    const {token} = await repository.create(admin, {contactId, planCode: "individual"});
 
     const params = fake.transactions[0]!.flatMap((statement) => [...statement.params]);
     expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
@@ -120,7 +120,7 @@ describe("joinInvitesRepository.create", () => {
   it("refuses patron and unknown contacts", async () => {
     const repository = createJoinInvitesRepository(async () => fakeDatabase().database as never);
     await expect(repository.create(admin, {contactId, planCode: "patron" as never})).rejects.toThrow();
-    await expect(repository.create(admin, {contactId, planCode: "startup"})).rejects.toThrow("CONTACT_NOT_FOUND");
+    await expect(repository.create(admin, {contactId, planCode: "individual"})).rejects.toThrow("CONTACT_NOT_FOUND");
   });
 });
 

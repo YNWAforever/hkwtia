@@ -1,0 +1,96 @@
+{
+  "task": "T22-06",
+  "date": "2026-10-26",
+  "startingHead": "a3dda1d1e3b7dfbdcfb289192a38fa9921715d07",
+  "testedCodeHead": "433d2c90015619c8ea6c343055c3cf31ed2971f0",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "pullRequest": 212,
+  "target": {
+    "projectId": "dark-cake-07139424",
+    "branchId": "br-restless-pond-a11dpkvd",
+    "localConfig": ".env.acceptance.local (gitignored; never serialized)",
+    "gate": "localAcceptanceTarget / verifyAcceptanceTarget before clients",
+    "production": false
+  },
+  "migration": {
+    "name": "0067_owned_application_paging",
+    "result": "PASS_GUARDED_WEBSOCKET_MIGRATOR",
+    "snapshotDiff": "Only membership_applications composite index plus snapshot identity"
+  },
+  "fixture": {
+    "runId": "t22-06-owned-paging",
+    "bulkRows": 10000,
+    "totalOwnedRows": 10001,
+    "sameTimestampRows": 10000,
+    "sameTimestamp": "2026-10-26T00:00:00.000123Z",
+    "actors": "SYNTHETIC_UNBOUND_TO_AUTH",
+    "cleanup": "EXACT_GENERATED_IDS_AND_EXACT_RUN_MANIFEST; ABSENCE_READBACK_PASS; SETUP_CLEANS_INTERRUPTED_RUN"
+  },
+  "testFirst": {
+    "baselineBehavior": "5_PASS_ON_EXISTING_CANDIDATE",
+    "indexExpectation": "FAIL: applicant index reads 10001 rows plus sort for 21 returned rows",
+    "tupleSqlExpectation": "FAIL_ON_PREVIOUS_OR_PREDICATE",
+    "intermediateFailures": [
+      "WebSocket setup error: zero behavior passes; five skipped; unhandled connection termination",
+      "Retry: 3 failed / 2 passed; stale setup rows and implicit null ordering/index mismatch caught"
+    ],
+    "fixes": [
+      "Dedicated-manifest cleanup before seed",
+      "Explicit DESC NULLS LAST matches generated composite index",
+      "Tuple boundary permits deep index seek"
+    ]
+  },
+  "fourLayers": {
+    "code": "IMPLEMENTED",
+    "tests": "PASS_LOCAL_AND_GATED_DB",
+    "deployment": "NOT_DEPLOYED; NO_MERGE_OR_MANUAL_DEPLOY; REMOTE_CI_PREVIEW_UNVERIFIED",
+    "runtime": "ISOLATED_DB_PASS; AUTH_BROWSER_STRIPE_SINK_BLOCKED"
+  },
+  "commands": [
+    "npx -y -p node@22 node --experimental-strip-types scripts/db-migrate.ts --acceptance-websocket",
+    "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/owned-applications.test.ts --silent=false",
+    "npx vitest run tests/unit/owned-applications-sql.test.ts tests/unit/owned-application-reader.test.ts tests/unit/portal-applications.test.ts",
+    "npm test",
+    "npm run lint",
+    "npm run typecheck",
+    "npm run build",
+    "npm run audit:strings",
+    "git diff --check"
+  ],
+  "results": {
+    "gatedDb": {
+      "passed": 5,
+      "skipped": 0,
+      "durationSeconds": 82.39
+    },
+    "focusedUnit": {
+      "passed": 21
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 77
+    },
+    "build": "PASS",
+    "typecheck": "PASS_BEFORE_AND_AFTER_BUILD",
+    "strings": "PASS_359_TSX_FILES",
+    "diffCheck": "PASS",
+    "fullUnit": {
+      "exit": 0,
+      "passed": 7959,
+      "skipped": 656,
+      "filesPassed": 903,
+      "filesSkipped": 116,
+      "durationSeconds": 154.69
+    }
+  },
+  "explainArtifact": "t22-06-explain.json",
+  "evidence": "t22-06.md",
+  "limitations": [
+    "Client p95 has only 20 sequential local-runner samples per page",
+    "Serialized repository bytes are not HTTP wire or DB protocol bytes",
+    "Synthetic actor injection is not session/HTTP/browser authorization acceptance",
+    "No Stripe or notification provider call",
+    "No production target",
+    "No exact-head remote CI or deployment evidence"
+  ]
+}

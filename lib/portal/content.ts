@@ -1,5 +1,6 @@
 import "server-only";
 
+import {createMemberResourceReader} from "@/lib/portal/member-resources";
 import type {EventRecord} from "@/content/schemas";
 import {listReceipts, type Receipt} from "@/lib/billing/receipt-service";
 import {listDirectoryPage, listMemberEventPage, type DirectoryQuery, type DirectoryPage, type MemberEventPage, type PageInput} from "@/lib/db/repos/portal-paging";
@@ -67,7 +68,7 @@ const defaultPortalContentDependencies: PortalContentDependencies = {
   directory: {page: listDirectoryPage},
   events: {page: listMemberEventPage},
   documents: {
-    listApproved: async () => [],
+    listApproved: createMemberResourceReader({memberships: requestMemberships, versions: async () => []}).listApproved,
     listReceipts: async (actor, membership) => {
       if (!membership.stripeCustomerId) return [];
       try {

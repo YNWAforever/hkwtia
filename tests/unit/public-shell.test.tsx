@@ -58,11 +58,11 @@ import {localizeNavigation} from "@/config/navigation";
 
 describe("public shell server surfaces", () => {
   it.each([
-    ["en", "Events & Programmes", "Join WiseTech", "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association", "Search solutions"],
-    ["zh-HK", "活動及計劃", "加入 WiseTech", "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准", "搜尋方案"],
+    ["en", "Events & Programmes", "Join WTIA", "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association", "Search solutions"],
+    ["zh-HK", "活動及計劃", "加入 WTIA", "香港無線科技商會持續發展中的 AI+ 產業平台", "搜尋方案"],
   ] as const)("renders complete %s header copy", async (locale, group, join, descriptor, search) => {
     const view = render(await SiteHeader({locale, hasAnnouncement: true}));
-    expect(screen.getByText("WiseTech Hong Kong")).toBeInTheDocument();
+    expect(view.container.querySelector(".brand-copy strong")?.textContent).toBe("WTIA");
     expect(screen.getByText(descriptor)).toBeInTheDocument();
     expect(screen.getAllByText(group).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", {name: join})).toHaveAttribute("href", "/join");
@@ -233,10 +233,13 @@ describe("public shell server surfaces", () => {
     expect(marked[0]).toHaveAttribute("href", "/events");
   });
 
-  it("marks the event-first trigger and keeps the trigger hook", async () => {
-    const markup = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
-    expect(markup).toContain("nav-button event-first");
-    expect(markup).toContain('data-navigation-trigger="events-programmes"');
-    expect(markup).toContain('class="desktop-nav"');
+  it("keeps the event-first overview usable before desktop menu enhancement", async () => {
+    render(await SiteHeader({locale: "en", hasAnnouncement: true}));
+    const nav = screen.getByRole("navigation", {name: "Primary navigation"});
+    expect(nav).toHaveClass("desktop-nav");
+    expect(within(nav).getByRole("link", {name: "Events & Programmes"}))
+      .toHaveClass("nav-button", "event-first");
+    expect(within(nav).getByRole("link", {name: "Events & Programmes"}))
+      .toHaveAttribute("href", "/events");
   });
 });

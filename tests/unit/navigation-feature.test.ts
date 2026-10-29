@@ -91,8 +91,8 @@ describe("navigation feature aside", () => {
         expect(typeof messageAt(bundle, key), `${name}:${key}`).toBe("string");
       }
     }
-    expect(messageAt(en, "Concierge.launcher")).toBe("Ask WiseTech");
-    expect(messageAt(zh, "Concierge.launcher")).toBe("問 WiseTech");
+    expect(messageAt(en, "Concierge.launcher")).toBe("Ask WTIA");
+    expect(messageAt(zh, "Concierge.launcher")).toBe("問 WTIA");
     expect(messageAt(en, "Footer.newsletter.mailBody")).toContain("{email}");
     expect(messageAt(zh, "Footer.newsletter.mailBody")).toContain("{email}");
     // The operator line is replaced by the D-10 descriptor; leaving it behind would let a

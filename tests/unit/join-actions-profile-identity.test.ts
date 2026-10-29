@@ -28,6 +28,11 @@ vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {
   getById: async () => repoState.application,
   update: async () => repoState.application,
 }}));
+vi.mock("@/lib/db/repos/organisation-applications", () => ({saveOrganisationApplication: async () => undefined}));
+vi.mock("@/lib/membership/br-document", () => ({
+  storeBusinessRegistration: async () => ({status: "stored", key: "membership-br/test", sha256: "ab".repeat(32), byteSize: 8, contentType: "application/pdf", fileName: "br.pdf"}),
+  BrDocumentError: class BrDocumentError extends Error {},
+}));
 vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   createForApplication: async () => ({id: "company-1", legalName: "Company", displayName: "Company"}),
   update: vi.fn(),

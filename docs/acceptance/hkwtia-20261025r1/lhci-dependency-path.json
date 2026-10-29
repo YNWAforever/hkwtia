@@ -1,0 +1,24 @@
+[
+  {
+    "name": "@lhci/cli",
+    "version": "0.15.1",
+    "location": "node_modules/@lhci/cli",
+    "isWorkspace": false,
+    "dependents": [
+      {
+        "type": "dev",
+        "name": "@lhci/cli",
+        "spec": "^0.15.1",
+        "from": {
+          "location": "/workspace/hkwtia"
+        }
+      }
+    ],
+    "dev": true,
+    "optional": false,
+    "devOptional": true,
+    "peer": false,
+    "bundled": false,
+    "overridden": true
+  }
+]

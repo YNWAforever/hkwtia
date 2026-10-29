@@ -143,22 +143,24 @@ describe("membership checkout", () => {
     expect(setup.dependencies.memberships.getById).not.toHaveBeenCalled();
   });
 
-  it("loads only billing and app contracts in the default checkout dependency loader", async () => {
+  it.each(["startup", "corporate", "individual", "platinum"] as const)("maps %s to its own price and metadata through the default checkout loader", async (planCode) => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("APP_URL", "https://members.example.test");
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
     vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_example");
     vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
     vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+    vi.stubEnv("STRIPE_INDIVIDUAL_PRICE_ID", "price_individual");
+    vi.stubEnv("STRIPE_PLATINUM_PRICE_ID", "price_platinum");
 
     const actor = actorFor("user@example.test");
-    const record = membership() as MembershipRecord;
+    const record = membership({planCode}) as MembershipRecord;
     const attempt: BillingAttempt = {
       id: "attempt-default-1",
       membershipId,
       attemptNumber: 1,
       idempotencyKey: `membership-checkout:${membershipId}:1`,
-      priceReference: "price_startup",
+      priceReference: `price_${planCode}`,
       state: "active",
       stripeCheckoutSessionId: null,
       checkoutUrl: null,
@@ -191,6 +193,24 @@ describe("membership checkout", () => {
     await expect(
       createCheckoutSession(actor, membershipId, "en"),
     ).resolves.toEqual({url: stripe.checkoutUrl});
+    expect(billingAttemptsRepository.claimActive).toHaveBeenCalledWith(actor, membershipId, `price_${planCode}`, planCode);
+    expect(stripe.checkoutRequests[0]).toMatchObject({priceReference: `price_${planCode}`, metadata: {planCode}});
+  });
+
+  it.each(["individual", "platinum"] as const)("fails closed for an unconfigured %s price before claiming or calling Stripe", async (planCode) => {
+    vi.stubEnv("APP_URL", "https://members.example.test");
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+    vi.stubEnv("STRIPE_INDIVIDUAL_PRICE_ID", "");
+    vi.stubEnv("STRIPE_PLATINUM_PRICE_ID", "");
+    const stripe = new FakeStripeBillingAdapter();
+    vi.spyOn(stripeModule, "stripeBillingAdapter").mockReturnValue(stripe);
+    vi.spyOn(membershipsRepository, "getBillingAccess").mockResolvedValue(membership({planCode}) as Awaited<ReturnType<typeof membershipsRepository.getBillingAccess>>);
+    const claim = vi.spyOn(billingAttemptsRepository, "claimActive");
+    await expect(createCheckoutSession(actorFor("user@example.test"), membershipId, "en"))
+      .rejects.toThrow("STRIPE_PRICE_NOT_CONFIGURED");
+    expect(claim).not.toHaveBeenCalled();
+    expect(stripe.checkoutRequests).toEqual([]);
   });
 });
 

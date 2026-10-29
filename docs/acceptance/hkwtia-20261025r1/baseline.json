@@ -1,0 +1,80 @@
+{
+  "repo": "YNWAforever/hkwtia",
+  "remote": "https://github.com/YNWAforever/hkwtia.git",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "head": "e88d1316f385918bff7e7de6323b5dc4aed89b01",
+  "initialDirty": [
+    "?? docs/superpowers/plans/2026-10-23-hkwtia-product-development.md"
+  ],
+  "historicalCommits": {
+    "52e2f6664c32efcb731b990d9fb8bc7ea56b20c4": "absent",
+    "b984a7e41fbaf86673b03a304c24074283cc8283": "absent",
+    "e842204": {
+      "availability": "absent",
+      "dependencyChange": "superseded by Next ^16.4.3 at current HEAD; other changes require verification"
+    },
+    "af85dd1": "absent",
+    "52e2f66": "absent",
+    "1fa14f8": "absent",
+    "8293bd5e": "absent"
+  },
+  "remoteMain": "3d8b0f9e16228df4d5f4d8d3b311c275f82cca8c",
+  "remoteRelease": "6833eb9a162733a6bd53b7226449f3a2f1aa6a93",
+  "pr210": "OPEN",
+  "pr211": "OPEN; base main; head e88d1316",
+  "deployment": "UNKNOWN: no current deployment source/target/alias verified",
+  "graphTools": "unavailable in tool catalog",
+  "initialRuntime": {
+    "node": "20.19.2",
+    "npm": "11.21.1",
+    "ciNode": "22"
+  },
+  "authorization": {
+    "allowed": [
+      "repo edits",
+      "local checks",
+      "commits",
+      "branch push",
+      "stacked PR"
+    ],
+    "excluded": [
+      "merge",
+      "deploy",
+      "production writes",
+      "live Stripe",
+      "messages"
+    ]
+  },
+  "tasks": {
+    "T22-01": {
+      "code": "not-started",
+      "tests": "not-tested",
+      "deployment": "not-deployed",
+      "runtime": "not-tested"
+    },
+    "T22-02": {
+      "code": "not-started",
+      "tests": "not-tested",
+      "deployment": "not-deployed",
+      "runtime": "blocked"
+    },
+    "T22-03": {
+      "code": "not-started",
+      "tests": "not-tested",
+      "deployment": "not-deployed",
+      "runtime": "not-tested"
+    },
+    "T22-05": {
+      "code": "not-started",
+      "tests": "not-tested",
+      "deployment": "not-deployed",
+      "runtime": "not-tested"
+    },
+    "T-MP12A": {
+      "code": "not-started",
+      "tests": "not-tested",
+      "deployment": "not-deployed",
+      "runtime": "blocked"
+    }
+  }
+}

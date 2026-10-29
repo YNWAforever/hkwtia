@@ -46,7 +46,7 @@ export const createCampaignSchema = z.object({
   channel: z.enum(["email", "whatsapp"]).default("email"),
   template: z.string().trim().min(1).max(100).nullable().default(null),
   templateKey: z.string().trim().min(1).max(100).nullable().default(null),
-  variablesTemplate: z.record(z.string(), z.string().max(1000)).default({}),
+  variablesTemplate: z.record(z.string(), z.string().max(1000)).prefault({}),
   localeStrategy: z.literal("profile").default("profile"),
   idempotencyKey: z.string().uuid(),
   status: z.enum(["draft", "queued"]).default("draft"),

@@ -1,4 +1,5 @@
 import "server-only";
+import {createOwnedApplicationsRepository} from "@/lib/db/repos/owned-applications";
 
 import { randomUUID, createHash } from "node:crypto";
 import { deriveApplicationTriage } from "@/lib/ai/application-triage";
@@ -22,6 +23,7 @@ import {
   type MembershipApplication,
 } from "@/lib/db/server-schema";
 import { forbidden, getDb, requireMember } from "@/lib/db/repos/common";
+import {ensureOpsMembershipPlan} from "@/lib/db/repos/membership-plans";
 
 export type ApplicationInput = Pick<MembershipApplication, "planCode"> &
   Partial<Pick<MembershipApplication, "companyId" | "currentStep" | "status">>;
@@ -58,6 +60,7 @@ function applicationScope(actor: Actor, applicationId: string) {
 const applicationCases = createApplicationCasesRepository();
 
 export const applicationsRepository = {
+  ...createOwnedApplicationsRepository(),
   getApplicationCase: applicationCases.getApplicationCase,
   getApplicationTriage: applicationCases.getApplicationTriage,
   updateApplicationCase: applicationCases.updateApplicationCase,
@@ -140,6 +143,7 @@ export const applicationsRepository = {
           .limit(1);
         if (existing[0]) return existing[0];
       }
+      await ensureOpsMembershipPlan(tx, input.planCode);
       const created = await tx
         .insert(membershipApplicationsTable)
         .values({
@@ -212,6 +216,7 @@ export const applicationsRepository = {
   ): Promise<MembershipApplication> {
     requireMember(actor);
     const db = await getDb();
+    await ensureOpsMembershipPlan(db, input.planCode);
     const rows = await db
       .insert(membershipApplicationsTable)
       .values({ ...input, applicantUserId: actor.profileId })

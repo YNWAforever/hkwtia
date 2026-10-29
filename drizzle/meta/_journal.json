@@ -456,6 +456,34 @@
       "when": 1792002705463,
       "tag": "0065_portal_seat_batches",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1792995522216,
+      "tag": "0066_application_supplements",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1792996785920,
+      "tag": "0067_owned_application_paging",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1793308800000,
+      "tag": "0068_organisation_application_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1793312400000,
+      "tag": "0069_ops_plan_codes",
+      "breakpoints": true
     }
   ]
 }

@@ -11,7 +11,7 @@ const namespaceSchema = z.string().min(1).max(64).regex(
   "KB_NAMESPACE_INVALID",
 );
 const localeSchema = z.enum(["en", "zh-HK"], {
-  error: "KB_LOCALE_INVALID",
+  error: () => "KB_LOCALE_INVALID",
 });
 const uuidSchema = z.string().uuid("KB_DOCUMENT_ID_INVALID");
 
@@ -67,7 +67,7 @@ const searchRowSchema = z.object({
   ref: knowledgeRefSchema,
   offsetStart: z.number().int().nonnegative(),
   offsetEnd: z.number().int().positive(),
-  structuredFacts: z.record(z.string(), z.union([z.string(),z.number().finite(),z.boolean(),z.null()])).default({}),
+  structuredFacts: z.record(z.string(), z.union([z.string(),z.number().finite(),z.boolean(),z.null()])).prefault({}),
 }).strict();
 
 function resultRows(result: unknown): unknown[] {

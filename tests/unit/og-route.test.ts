@@ -44,8 +44,18 @@ describe("renderOgCard", () => {
 
   it("renders the title into the tree so a missing headline is caught here, not by eye", () => {
     const element = renderOgCard("editorial", {title: "A distinctive headline", eyebrow: "News"});
+    const tree = JSON.stringify(element);
 
-    expect(JSON.stringify(element)).toContain("A distinctive headline");
+    expect(tree).toContain("A distinctive headline");
+    expect(tree).toContain("WTIA");
+    expect(tree).not.toMatch(/WiseTech/i);
+  });
+
+  it("falls back to the WTIA brand when the query is incomplete", async () => {
+    const tree = await (await GET(new Request("https://hkwtia.test/api/og"))).text();
+
+    expect(tree).toContain("WTIA");
+    expect(tree).not.toMatch(/WiseTech/i);
   });
 
   it("never darkens a logo, unlike the photo treatment", () => {

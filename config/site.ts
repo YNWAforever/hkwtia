@@ -45,9 +45,10 @@ export const siteContact: SiteContact = {
 export const siteConfig = {
   name: 'Hong Kong Wireless Technology Industry Association',
   shortName: 'WTIA',
-  // Design D-1: the public brand every <title> is suffixed with ("<page> | WiseTech Hong Kong").
-  // `shortName` stays the legal short name and still feeds openGraph.siteName; only titles use this.
-  publicBrand: 'WiseTech Hong Kong',
+  // November 2026 soft launch: every public <title> is suffixed with WTIA
+  // ("<page> | WTIA", fullwidth bar in zh-HK). The WiseTech rename is deferred.
+  // `shortName` stays the legal short name and still feeds openGraph.siteName.
+  publicBrand: 'WTIA',
   defaultDescription:
     'Connecting Hong Kong\'s wireless technology community through collaboration, innovation and industry development.',
   defaultImage: '/images/wtia-logo.png',

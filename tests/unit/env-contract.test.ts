@@ -78,6 +78,8 @@ describe("runtime environment contract", () => {
       stripeWebhookSecret: "whsec_example",
       stripeStartupPriceId: "price_startup",
       stripeCorporatePriceId: "price_corporate",
+      stripeIndividualPriceId: "",
+      stripePlatinumPriceId: "",
     });
     expect(parseAutomationEnv({
       NODE_ENV: "production",

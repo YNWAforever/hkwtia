@@ -1,6 +1,6 @@
 import {renderToStaticMarkup} from "react-dom/server";
-import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import {cleanup, fireEvent, render, screen, waitFor, within} from "@testing-library/react";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import {MobileNavigation} from "@/components/layout/mobile-navigation";
 import {localizeNavigation} from "@/config/navigation";
@@ -54,6 +54,12 @@ async function openMenu() {
 
 describe("MobileNavigation", () => {
   beforeEach(() => { route.pathname = "/events"; });
+  afterEach(async () => {
+    cleanup();
+    // Radix restores focus in a zero-delay unmount timer. Drain it while this
+    // jsdom realm is alive, before Vitest restores the global Event constructor.
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+  });
 
   it("does not offer a keyboard trigger before its client event handlers are installed", () => {
     const container = document.createElement("div");

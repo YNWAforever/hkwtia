@@ -106,9 +106,9 @@ describe("preview session harness", () => {
   it("turns Playwright traces off whenever a Preview credential is present", () => {
     expect(playwrightConfig).toContain("storageState: process.env.PLAYWRIGHT_STORAGE_STATE || undefined");
     // M5: a retry trace records request headers, so it would capture the `_vercel_jwt` cookie
-    // exactly like the share-token path already avoided. Pinned verbatim here and in
+    // exactly like the share-token path already avoided (and the Preview OIDC header, R2). Pinned verbatim here and in
     // tests/unit/m2-browser-acceptance-contract.test.ts.
-    expect(playwrightConfig).toContain("trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE ? 'off' : 'on-first-retry'");
+    expect(playwrightConfig).toContain("trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE || process.env.PLAYWRIGHT_PREVIEW_OIDC === 'true' ? 'off' : 'on-first-retry'");
     expect(lighthouse).toContain("process.env.LHCI_COOKIE_FILE");
     expect(lighthouse).toMatch(/startServerCommand: remote \? undefined : 'npm\.cmd run start'/);
   });

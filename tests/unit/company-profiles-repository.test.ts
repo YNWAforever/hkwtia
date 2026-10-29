@@ -63,6 +63,20 @@ function uniqueViolation(wrapped: boolean): Error {
 }
 
 describe("companyProfilesRepository (programme B-6, B-7)", () => {
+  it.each([
+    ["individual", ["community", "startup", "individual"]],
+    ["platinum", ["patron", "platinum"]],
+    ["patron", ["patron", "platinum"]],
+  ] as const)("includes stored aliases when filtering the public %s tier", async (plan, codes) => {
+    const {execute, load} = db([[]]);
+    const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
+    await repository.listPublished({q: null, tag: null, plan});
+    expect(execute).toHaveBeenCalledOnce();
+    const query = new PgDialect().sqlToQuery(execute.mock.calls[0]![0] as Parameters<PgDialect["sqlToQuery"]>[0]);
+    expect(query.params).toEqual(expect.arrayContaining([...codes]));
+    expect(query.sql).toMatch(/active_plan\.plan_code IN \(/);
+  });
+
   it("public reads need no actor and only see published profiles", async () => {
     const {execute, load} = db([[directoryRow]]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});

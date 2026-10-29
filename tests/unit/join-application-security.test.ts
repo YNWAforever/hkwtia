@@ -48,6 +48,11 @@ vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {
 vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {
   getById: boundary.getProfile, update: boundary.updateProfile, ensure: boundary.ensureProfile,
 }}));
+vi.mock("@/lib/db/repos/organisation-applications", () => ({saveOrganisationApplication: async () => undefined}));
+vi.mock("@/lib/membership/br-document", () => ({
+  storeBusinessRegistration: async () => ({status: "stored", key: "membership-br/test", sha256: "ab".repeat(32), byteSize: 8, contentType: "application/pdf", fileName: "br.pdf"}),
+  BrDocumentError: class BrDocumentError extends Error {},
+}));
 vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   getById: boundary.getCompany, createForApplication: boundary.createCompany, update: boundary.updateCompany,
 }}));

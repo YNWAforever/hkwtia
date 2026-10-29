@@ -2,6 +2,7 @@ import "server-only";
 
 import {and, eq, isNull, sql} from "drizzle-orm";
 
+import {planUsesCheckout} from "@/config/membership-journey";
 import type {Actor, MembershipPlanCode, MembershipRecord} from "@/lib/membership/lifecycle";
 import {billingAttempts, companyMembers, memberships, type BillingAttempt} from "@/lib/db/server-schema";
 import {forbidden, getDb} from "@/lib/db/repos/common";
@@ -148,7 +149,7 @@ async function lockCheckoutMembership(
   if (!membership) forbidden();
   if (membership.status !== "pending_payment") attemptError("MEMBERSHIP_NOT_PENDING_PAYMENT");
   if (membership.stripeSubscriptionId) attemptError("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
-  if (membership.planCode !== "startup" && membership.planCode !== "corporate") {
+  if (!planUsesCheckout(membership.planCode)) {
     attemptError("PLAN_DOES_NOT_USE_CHECKOUT");
   }
   if (!membership.applicationId) attemptError("MEMBERSHIP_APPLICATION_REQUIRED");

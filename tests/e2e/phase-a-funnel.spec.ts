@@ -26,10 +26,10 @@ const locales = [
 for (const {locale, prefix} of locales) {
   const copy = bundle(locale);
 
-  test(`${locale}: bare /join renders the plan chooser with four plans`, async ({page}) => {
+  test(`${locale}: bare /join renders the plan chooser with the three paid tiers`, async ({page}) => {
     await page.goto(`${prefix}/join`);
     await expect(page.getByRole("heading", {level: 1, name: copy.Join.choosePlanTitle})).toBeVisible();
-    for (const code of ["community", "startup", "corporate", "patron"]) {
+    for (const code of ["individual", "corporate", "platinum"]) {
       await expect(page.getByRole("heading", {level: 2, name: copy.Join.plans[code]})).toBeVisible();
     }
     await expect(page.getByRole("link", {name: copy.Join.choosePlanCompare})).toHaveAttribute("href", `${prefix}/membership`);
@@ -38,7 +38,7 @@ for (const {locale, prefix} of locales) {
     // what tell them apart.
     await page.goto(`${prefix}/join?plan=gold`);
     await expect(page.getByText(copy.Join.invalidPlanDescription)).toBeVisible();
-    await expect(page.getByRole("heading", {level: 2, name: copy.Join.plans.startup})).toHaveCount(0);
+    await expect(page.getByRole("heading", {level: 2, name: copy.Join.plans.individual})).toHaveCount(0);
   });
 
   test(`${locale}: /events interest form acknowledges a submission`, async ({page}) => {

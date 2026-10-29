@@ -19,8 +19,8 @@ import {StatusLabel} from "@/components/wt/status-label";
 import {StepGrid} from "@/components/wt/step-grid";
 
 vi.mock("next/image", () => ({
-  default: ({fill, priority: _priority, sizes, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {fill?: boolean; priority?: boolean}) =>
-    <img {...props} data-fill={String(Boolean(fill))} data-sizes={sizes} />,
+  default: ({fill, priority: _priority, preload, sizes, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {fill?: boolean; priority?: boolean; preload?: boolean}) =>
+    <img {...props} data-fill={String(Boolean(fill))} data-preload={String(Boolean(preload))} data-sizes={sizes} />,
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({href, prefetch, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string; prefetch?: boolean}) => <a href={href} data-prefetch={String(prefetch ?? "auto")} {...props} />,
@@ -172,6 +172,7 @@ describe("wt primitives", () => {
     );
     const section = document.querySelector("section");
     expect(section).toHaveClass("page-hero", "inner-page-hero");
+    expect(screen.getByRole("img", {name: "Community"})).toHaveAttribute("data-preload", "true");
     expect(screen.getByRole("heading", {level: 1})).toHaveTextContent("Find an activity");
     expect(screen.getByText("Events", {selector: "p"})).toHaveClass("eyebrow", "light");
     const image = screen.getByRole("img", {name: "Community"});

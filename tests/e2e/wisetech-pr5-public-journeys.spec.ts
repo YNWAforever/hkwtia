@@ -127,7 +127,7 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
   // The subject is the contact page's own ContactConciergeLauncher, not the shell's fixed
   // launcher: this case belongs to the /contact journey, and before WP-2 the role query named
   // only that button because `Concierge.launcher` still read "Ask WTIA". Task 1 renamed it to
-  // match `Contact.conciergeLauncher`, so two controls now answer to "Ask WiseTech" on this
+  // match `Contact.conciergeLauncher`, so two controls now answer to "Ask WTIA" on this
   // route. That duplicate accessible name is intentional -- one name for one action, repeated
   // by the shell -- so the fix is to scope the query to the page's own landmark, the same way
   // the Membership case above does, and not to rename either control.
@@ -135,7 +135,7 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
   // Scoping is not about focus return: both controls restore focus after Escape, because
   // ContactConciergeLauncher focuses itself before opening the panel
   // (components/marketing/contact-concierge-launcher.tsx:9).
-  const launcher = page.locator("main#main-content").getByRole("button", {name: "Ask WiseTech"});
+  const launcher = page.locator("main#main-content").getByRole("button", {name: "Ask WTIA"});
   await launcher.click();
 
   await expect(page.getByRole("dialog", {name: "WTIA Concierge"})).toBeVisible();

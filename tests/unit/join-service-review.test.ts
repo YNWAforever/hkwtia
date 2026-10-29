@@ -106,10 +106,8 @@ function durableHarness() {
 }
 
 describe("join review fixes", () => {
-  // The corporate/startup fixtures below exercise the checkout path, which requires
-  // resolveMembershipOption() (lib/membership/catalog.ts) to see a configured Stripe price
-  // mapping for the "annual" interval -- otherwise completeApplication() fails closed with
-  // UNSUPPORTED_BILLING_INTERVAL before reaching the behavior these tests actually assert.
+  // Startup checkout needs a configured annual Stripe price. Corporate review uses
+  // interval none and must not require that price.
   beforeEach(() => {
     vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
     vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");

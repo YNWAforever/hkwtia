@@ -1,5 +1,6 @@
 import "server-only";
-import {sql, type SQL} from "drizzle-orm";
+import {resolveApplicationQueueStatuses} from "@/lib/admin/application-queue-filter";
+import {inArray, sql, type SQL} from "drizzle-orm";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import {approvals, companies, membershipApplications, companyMembers, engagementScores, memberships, posts, profiles, showcaseListings, staffTasks} from "@/lib/db/server-schema";
@@ -61,7 +62,7 @@ export function createAdminDashboardRepository(loadDatabase: () => Promise<Count
         count(sql`SELECT count(*) AS count FROM ${staffTasks} WHERE ${staffTasks.status} = 'open'`),
         count(sql`SELECT count(*) AS count FROM ${posts} WHERE ${posts.kind} = 'news' AND ${posts.publishedAt} IS NULL`),
         count(sql`SELECT count(*) AS count FROM ${membershipApplications} WHERE ${membershipApplications.status}='draft'`),
-        count(sql`SELECT count(*) AS count FROM ${membershipApplications} WHERE ${membershipApplications.status} IN ('pending_review','pending_payment')`),
+        count(sql`SELECT count(*) AS count FROM ${membershipApplications} WHERE ${inArray(membershipApplications.status, [...resolveApplicationQueueStatuses("submitted")])}`),
         count(sql`SELECT count(*) AS count FROM ${profiles}`),
         count(sql`SELECT count(*) AS count FROM ${memberships} WHERE ${memberships.status}='active'`),
         count(sql`SELECT count(*) AS count FROM ${companyMembers} WHERE ${companyMembers.revokedAt} IS NULL`),

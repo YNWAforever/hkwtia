@@ -66,7 +66,7 @@ describe("M2 authenticated browser release contract", () => {
     expect(spec).toContain('name: en.Admin.campaigns.actions.approveEmail, exact: true');
     expect(spec).toContain('hostname.endsWith(".vercel.app")');
     // Traces are off for the storage-state path too: a retry trace would record the `_vercel_jwt` request header.
-    expect(config).toContain("trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE ? 'off' : 'on-first-retry'");
+    expect(config).toContain("trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE || process.env.PLAYWRIGHT_PREVIEW_OIDC === 'true' ? 'off' : 'on-first-retry'");
   });
 
   it("casts approval audit target ids across the text and UUID boundary", () => {

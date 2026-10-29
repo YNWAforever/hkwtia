@@ -37,7 +37,7 @@ for (const locale of ["en", "zh-HK"] as const) {
     await page.screenshot({path: `docs/audits/hkwtia-2026-10-03-full-fix/evidence/t15/${locale}-static-hero.png`});
     expect((await page.goto(prefix + "/membership"))?.status()).toBe(200);
     await expect(page.locator("main h1")).toBeVisible();
-    for (const code of ["community", "startup", "corporate", "patron"]) {
+    for (const code of ["individual", "corporate", "platinum"]) {
       const card = page.locator(`#plans article#${code}`);
       await expect(card).toBeVisible();
       await expect(card.locator("h2")).toHaveText(

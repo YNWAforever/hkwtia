@@ -1,3 +1,4 @@
+import {partialUpdate} from "@/lib/validation/partial-update";
 import "server-only";
 
 import {and, asc, desc, eq, gt, isNotNull, isNull, lte} from "drizzle-orm";
@@ -58,7 +59,7 @@ function validWindow(
 }
 
 const announcementInputSchema = announcementInputObjectSchema.superRefine(validWindow);
-const announcementUpdateSchema = announcementInputObjectSchema.partial().superRefine((value, context) => {
+const announcementUpdateSchema = partialUpdate(announcementInputObjectSchema).superRefine((value, context) => {
   if (Object.keys(value).length === 0) {
     context.addIssue({code: z.ZodIssueCode.custom, message: "ANNOUNCEMENT_UPDATE_EMPTY"});
   }
