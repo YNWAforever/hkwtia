@@ -30,6 +30,8 @@ const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const publicReadLimitSchema = z.number().int().min(1).max(PUBLIC_EVENT_PAGE_SIZE);
 // Rendered as anchors on the public page: `z.url()` alone admits javascript: and data: schemes.
 const httpUrlSchema = z.string().trim().url().max(500).refine((value) => /^https?:\/\//i.test(value), {message: "must be an http(s) URL"});
+const eventTagsSchema = z.array(z.string().max(200)).max(10)
+  .transform((tags) => [...new Set(tags.map(normaliseEventTag).filter((tag): tag is string => tag !== null))]);
 const eventInputObjectSchema = z.object({
   slug: slugSchema,
   titleEn: z.string().trim().min(1).max(200),
@@ -56,8 +58,7 @@ const eventInputObjectSchema = z.object({
   // is `tags @> ARRAY['ai']`, so a row tagged "AI" or "Machine Learning" was unreachable.
   // Admin-authored and member-authored tags alike land as `ai` / `machine-learning`;
   // anything that normalises to nothing (punctuation only, over 40 chars) is dropped.
-  tags: z.array(z.string().max(200)).max(10).default([])
-    .transform((tags) => [...new Set(tags.map(normaliseEventTag).filter((tag): tag is string => tag !== null))]),
+  tags: eventTagsSchema.default([]),
 }).strict();
 // Mirrors the `events_online_url_check` and `events_external_registration_check`
 // constraints so a bad form fails validation instead of a transaction.
@@ -97,6 +98,8 @@ function assertSupportedTicketVisibility(mode: string, visibility: EventVisibili
   }
 }
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
+// Zod 4 applies defaults inside optional fields. `partialUpdate` drops omitted
+// create-time defaults so a patch cannot rewrite columns the caller left out.
 const eventUpdateSchema = partialUpdate(eventInputObjectSchema).superRefine((input, context) => {
   if (Object.keys(input).length === 0) context.addIssue({code: z.ZodIssueCode.custom, message: "event update is empty"});
   addEventShapeIssues(input, context);
