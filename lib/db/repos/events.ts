@@ -1,3 +1,4 @@
+import {partialUpdate} from "@/lib/validation/partial-update";
 import "server-only";
 import {memberUpcomingPredicate} from "@/lib/db/repos/portal-paging";
 
@@ -97,22 +98,9 @@ function assertSupportedTicketVisibility(mode: string, visibility: EventVisibili
   }
 }
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
-// Zod 4 applies defaults inside optional fields. Updates must leave omitted
-// columns alone, so creation defaults cannot participate in a partial update.
-const eventUpdateSchema = eventInputObjectSchema.partial().extend({
-  titleZh: eventInputObjectSchema.shape.titleZh.removeDefault().optional(),
-  descriptionZh: eventInputObjectSchema.shape.descriptionZh.removeDefault().optional(),
-  endsAt: eventInputObjectSchema.shape.endsAt.removeDefault().optional(),
-  venue: eventInputObjectSchema.shape.venue.removeDefault().optional(),
-  capacity: eventInputObjectSchema.shape.capacity.removeDefault().optional(),
-  memberOnly: eventInputObjectSchema.shape.memberOnly.removeDefault().optional(),
-  published: eventInputObjectSchema.shape.published.removeDefault().optional(),
-  heroMediaId: eventInputObjectSchema.shape.heroMediaId.removeDefault().optional(),
-  format: eventInputObjectSchema.shape.format.removeDefault().optional(),
-  registrationMode: eventInputObjectSchema.shape.registrationMode.removeDefault().optional(),
-  ticketPriceHkdCents: eventInputObjectSchema.shape.ticketPriceHkdCents.removeDefault().optional(),
-  tags: eventTagsSchema.optional(),
-}).superRefine((input, context) => {
+// Zod 4 applies defaults inside optional fields. `partialUpdate` drops omitted
+// create-time defaults so a patch cannot rewrite columns the caller left out.
+const eventUpdateSchema = partialUpdate(eventInputObjectSchema).superRefine((input, context) => {
   if (Object.keys(input).length === 0) context.addIssue({code: z.ZodIssueCode.custom, message: "event update is empty"});
   addEventShapeIssues(input, context);
 });

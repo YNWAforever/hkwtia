@@ -269,7 +269,7 @@ const replyInputSchema = z
     kind: z.enum(["session", "template"]),
     content: z.string().trim().min(1).max(4_096),
     templateKey: z.string().trim().min(1).max(120).nullable().default(null),
-    templateVariables: z.record(z.string(), z.string().max(1_000)).default({}),
+    templateVariables: z.record(z.string(), z.string().max(1_000)).prefault({}),
     // Required, never defaulted: see `outboundKeyFor`. Lower-cased for the reason
     // `conversationIdSchema` is — the key it feeds has to be reproducible byte for
     // byte by the next submit of the same attempt, and a client that upper-cased

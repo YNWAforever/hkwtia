@@ -804,12 +804,13 @@
     }
   },
   "Membership": {
+    "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "What you can do", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
     "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
     "metaTitle": "Membership | WiseTech Hong Kong",
     "metaDescription": "Compare WTIA membership tiers and benefits.",
     "eyebrow": "Membership",
     "breadcrumbCurrent": "Membership",
-    "title": "Find your place in Hong Kong's technology community.",
+    "title": "Choose the membership that fits your needs",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
     "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
@@ -2396,6 +2397,7 @@
     "navGroups": {"me": "Me", "company": "My company", "benefits": "Membership benefits"},
     "shell": {"portalLabel": "Member portal", "backToSite": "Back to public site"},
     "applications": {
+      "paging": {"label": "Application pages", "first": "Back to latest applications", "next": "Older applications"},
       "nav": "My applications",
       "title": "My applications",
       "description": "Track each membership application, what needs attention and what to do next.",
@@ -3741,7 +3743,7 @@
         "rejected": "Rejected"
       }
     },
-    "applicationQueue": {"title":"Applications and payments","description":"Each row is one application. Its membership and latest billing attempt are shown separately so unfinished applications and payment reconciliation remain visible.","caption":"Application operations queue","applicant":"Applicant","application":"Application","step":"Saved step","membership":"Linked membership","billing":"Latest billing attempt","updated":"Updated (Hong Kong time)","none":"No record","empty":"No applications match this queue.","back":"Back to members","views":"Application queues","viewsLabels":{"draft":"Unfinished join","pending_payment":"Awaiting payment","pending_review":"Awaiting review"},"search":"Name, email, company or application ID","sort":"Sort","sortNewest":"Newest updated","sortOldest":"Oldest updated","pageSize":"Rows per page","totalMatching":"{count} applications match this search and status.","invalid":"The queue filter or cursor is invalid. Clear the filters and retry.","unavailable":"The application queue is unavailable. Try again shortly.","loading":"Loading applications…","draft":"Draft","steps":{"profile":"Profile","company":"Company","checkout":"Checkout","complete":"Complete","review":"Review"},"billingStates":{"active":"Open attempt","completed":"Completed attempt","abandoned":"Abandoned attempt","expired":"Expired attempt"}},
+    "applicationQueue": {"title":"Applications and payments","description":"Each row is one application. Its membership and latest billing attempt are shown separately so unfinished applications and payment reconciliation remain visible.","caption":"Application operations queue","applicant":"Applicant","application":"Application","step":"Saved step","membership":"Linked membership","billing":"Latest billing attempt","updated":"Updated (Hong Kong time)","none":"No record","empty":"No applications match this queue.","back":"Back to members","views":"Application queues","viewsLabels":{"submitted":"Submitted","draft":"Unfinished join","pending_payment":"Awaiting payment","pending_review":"Awaiting review"},"search":"Name, email, company or application ID","sort":"Sort","sortNewest":"Newest updated","sortOldest":"Oldest updated","pageSize":"Rows per page","totalMatching":"{count} applications match this search and status.","invalid":"The queue filter or cursor is invalid. Clear the filters and retry.","unavailable":"The application queue is unavailable. Try again shortly.","loading":"Loading applications…","draft":"Draft","steps":{"profile":"Profile","company":"Company","checkout":"Checkout","complete":"Complete","review":"Review"},"billingStates":{"active":"Open attempt","completed":"Completed attempt","abandoned":"Abandoned attempt","expired":"Expired attempt"}},
     "batchGrants": {"title":"Membership grants","formTitle":"Prepare finite grants","description":"Choose explicit targets, dates and a reason. Review each target and its conflicts before committing. No payment is recorded.","back":"Back to members","plan":"Plan","start":"Starts (Hong Kong time)","expiry":"Expires (Hong Kong time)","reason":"Reason for grant","preview":"Preview grants","kind":"Target type","profile":"Individual profiles","company":"Companies","ids":"Target IDs","help":"Enter one trusted profile or company ID per line, up to 5000 targets. The preview shows names, plan seats and conflicts. Dates apply to every target.","disabled":"Bulk grants are not enabled for this environment.","success":"Grant prepared.","invalid":"Check the target IDs, plan, dates and reason.","duplicate":"A target already has a live membership.","error":"Could not prepare grants. Check your permissions and try again."},
     "imports": {
   "title": "Import members",
@@ -5180,5 +5182,20 @@
     "invalid": "The request is invalid.",
     "dirty": "Unsaved edits are present. Save or retain them before copying an approved draft.",
     "noHistory": "No saved draft for this language."
+  },
+  "Supplement": {
+    "preview": "Publication preview",
+    "visible": "Visible to the applicant",
+    "publish": "Publish request",
+    "respond": "Submit response",
+    "text": "Answer",
+    "url": "HTTPS URL",
+    "due": "Due",
+    "saved": "Saved",
+    "validation": "Check your answers. Your input is retained.",
+    "forbidden": "You cannot act on this request.",
+    "conflict": "This request changed. Reload before trying again.",
+    "unknown": "Outcome unknown. Check the operation receipt before retrying.",
+    "receipt": "Operation receipt"
   }
 }

@@ -1,0 +1,210 @@
+{
+  "date": "2026-10-26",
+  "baseHead": "eecb0cfebef668e287d5b5df5a07fb7effa9e854",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "pr": 212,
+  "stackedOn": 211,
+  "scope": "isolated PostgreSQL; synthetic authorization actor objects are not Auth sessions",
+  "target": {
+    "projectId": "dark-cake-07139424",
+    "branchId": "br-restless-pond-a11dpkvd",
+    "loader": "gitignored .env.acceptance.local through localAcceptanceTarget + verifyAcceptanceTarget before Pool construction",
+    "connectionString": "REDACTED; never printed"
+  },
+  "writeFlagsEnabled": false,
+  "supplementFormsMounted": false,
+  "realAuthSessions": false,
+  "deploymentPerformed": false,
+  "codeChanges": "test and acceptance documentation only; production predicate restored byte-for-byte",
+  "runs": [
+    {
+      "marker": "uc224243-01962181-70de-4941-a8cd-25bff52821dc",
+      "projectId": "dark-cake-07139424",
+      "branchId": "br-restless-pond-a11dpkvd",
+      "fixtures": [
+        {
+          "id": "09c7853b-2544-44f5-818a-7aec2372884b",
+          "status": "draft"
+        },
+        {
+          "id": "6fee37b7-3f0a-4673-8324-6a6b710d09d7",
+          "status": "pending_payment"
+        },
+        {
+          "id": "13e6c9b0-e792-417d-84de-61d040b17cdc",
+          "status": "pending_review"
+        },
+        {
+          "id": "9bf844b2-93d2-4c13-8207-9d1e3f31fd8c",
+          "status": "completed"
+        },
+        {
+          "id": "9b4aa302-c870-4b1d-8a93-ad8cbbfb4f79",
+          "status": "abandoned"
+        },
+        {
+          "id": "d2af8f9f-2ce4-4158-89d5-215b008e49a2",
+          "status": "draft"
+        },
+        {
+          "id": "d2b43fd5-aeda-419e-881b-3c05dd9350ab",
+          "status": "draft"
+        },
+        {
+          "id": "f72df462-79f4-4bc7-808d-9d1fb0bfd408",
+          "status": "pending_review"
+        }
+      ],
+      "profileId": "uc224243-01962181-70de-4941-a8cd-25bff52821dc-profile",
+      "expectedIds": [
+        "13e6c9b0-e792-417d-84de-61d040b17cdc",
+        "6fee37b7-3f0a-4673-8324-6a6b710d09d7",
+        "f72df462-79f4-4bc7-808d-9d1fb0bfd408"
+      ],
+      "dashboardIds": [
+        "13e6c9b0-e792-417d-84de-61d040b17cdc",
+        "6fee37b7-3f0a-4673-8324-6a6b710d09d7",
+        "f72df462-79f4-4bc7-808d-9d1fb0bfd408"
+      ],
+      "queueIds": [
+        "13e6c9b0-e792-417d-84de-61d040b17cdc",
+        "6fee37b7-3f0a-4673-8324-6a6b710d09d7",
+        "f72df462-79f4-4bc7-808d-9d1fb0bfd408"
+      ],
+      "countDelta": 3,
+      "pagesPerDirection": 3,
+      "cleanupReadbackAbsent": true,
+      "command": "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/application-queue-submitted-postgres.test.ts",
+      "exitCode": 0,
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "durationSeconds": 15.78
+    },
+    {
+      "marker": "uc224243-2171b492-8fad-4f40-8122-3b0bb5ffedc0",
+      "projectId": "dark-cake-07139424",
+      "branchId": "br-restless-pond-a11dpkvd",
+      "fixtures": [
+        {
+          "id": "5597e152-a6ab-486d-8e22-6f1e94f73698",
+          "status": "draft"
+        },
+        {
+          "id": "71bbbf50-2d1d-4a41-897f-cd33e3a4999c",
+          "status": "pending_payment"
+        },
+        {
+          "id": "747797ba-10c7-4fd8-8500-7592b80e9bae",
+          "status": "pending_review"
+        },
+        {
+          "id": "78db81c7-175d-4b74-8e24-6efef738d733",
+          "status": "completed"
+        },
+        {
+          "id": "fd94f101-0ec5-4ee9-89e0-5a7b3c6e5b9a",
+          "status": "abandoned"
+        },
+        {
+          "id": "e50c5386-dd27-4147-8649-1922d75b0139",
+          "status": "draft"
+        },
+        {
+          "id": "aac2cbdf-091d-434d-80f7-0ae9644e1281",
+          "status": "draft"
+        },
+        {
+          "id": "e5ce379c-7f13-453f-8d0b-9132082650df",
+          "status": "pending_review"
+        }
+      ],
+      "profileId": "uc224243-2171b492-8fad-4f40-8122-3b0bb5ffedc0-profile",
+      "expectedIds": [
+        "71bbbf50-2d1d-4a41-897f-cd33e3a4999c",
+        "747797ba-10c7-4fd8-8500-7592b80e9bae",
+        "e5ce379c-7f13-453f-8d0b-9132082650df"
+      ],
+      "dashboardIds": [
+        "71bbbf50-2d1d-4a41-897f-cd33e3a4999c",
+        "747797ba-10c7-4fd8-8500-7592b80e9bae",
+        "e5ce379c-7f13-453f-8d0b-9132082650df"
+      ],
+      "queueIds": [
+        "71bbbf50-2d1d-4a41-897f-cd33e3a4999c",
+        "747797ba-10c7-4fd8-8500-7592b80e9bae",
+        "e5ce379c-7f13-453f-8d0b-9132082650df"
+      ],
+      "countDelta": 3,
+      "pagesPerDirection": 3,
+      "cleanupReadbackAbsent": true,
+      "command": "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/application-queue-submitted-postgres.test.ts",
+      "exitCode": 0,
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "durationSeconds": 14.58
+    }
+  ],
+  "mutationControl": {
+    "command": "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/application-queue-submitted-postgres.test.ts",
+    "temporaryChange": "shared submitted statuses changed from pending_review/pending_payment to draft",
+    "exitCode": 1,
+    "testsFailed": 1,
+    "observedFailure": "dashboardIds deeply equal expected IDs: three incorrect UUIDs despite count delta still being 3",
+    "assertionLineAtProbe": 82,
+    "cleanupPassed": true,
+    "restored": true,
+    "permanentBypass": false
+  },
+  "verification": [
+    {
+      "command": "npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/unit/application-queue-submitted.test.ts tests/unit/application-queue-submitted-sql.test.ts tests/unit/admin-application-queue-query.test.ts tests/unit/admin-dashboard-queue-counts.test.ts",
+      "exitCode": 0,
+      "filesPassed": 4,
+      "testsPassed": 8
+    },
+    {
+      "command": "npx -y -p node@22 -c 'npm run typecheck && npm run lint'",
+      "exitCode": 0
+    },
+    {
+      "command": "npx -y -p node@22 -c 'npm run typecheck'",
+      "exitCode": 0,
+      "note": "after restoring generated next-env.d.ts build-only changes"
+    },
+    {
+      "command": "npx -y -p node@22 -c 'npm run build'",
+      "exitCode": 0
+    },
+    {
+      "command": "npx -y -p node@22 -c 'npm test'",
+      "exitCode": 0,
+      "filesPassed": 906,
+      "filesSkipped": 117,
+      "testsPassed": 7976,
+      "testsSkipped": 658,
+      "testsFailed": 0,
+      "durationSeconds": 135.62,
+      "note": "acceptance flag absent; gated DB skips are not counted as DB evidence"
+    }
+  ],
+  "layers": {
+    "code": "PASS",
+    "tests": "PASS (see verification)",
+    "deployment": "NOT RUN; push may trigger existing Preview automation",
+    "runtime": "isolated DB PASS; real staff Auth and authenticated HTTP/browser BLOCKED"
+  },
+  "useCases": {
+    "UC22-42": "PARTIAL",
+    "UC22-43": "PARTIAL",
+    "REG-submitted-id-set": "PARTIAL"
+  },
+  "blockers": [
+    "Real staff Auth sessions",
+    "Authenticated HTTP/browser acceptance",
+    "Remote exact-head CI separate from local checks"
+  ]
+}

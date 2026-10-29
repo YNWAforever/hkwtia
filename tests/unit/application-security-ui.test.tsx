@@ -49,6 +49,8 @@ const state = vi.hoisted(() => ({
   actor: null as Actor | null,
   locale: "en" as Locale,
   listOwned: vi.fn(),
+  getOwnedById: vi.fn(),
+  listOwnedPage: vi.fn(),
   getQueuePage: vi.fn(),
   redirect: vi.fn(),
   notFound: vi.fn(),
@@ -76,6 +78,8 @@ vi.mock("@/lib/auth/actor", async (importOriginal) => {
 vi.mock("@/lib/db/repos/applications", () => ({
   applicationsRepository: {
     listOwned: state.listOwned,
+    getOwnedById: state.getOwnedById,
+    listOwnedPage: state.listOwnedPage,
   },
 }));
 
@@ -284,6 +288,13 @@ beforeEach(() => {
     applicationRecord(MEMBER_A_ID, "member-a"),
     applicationRecord(MEMBER_B_ID, "member-b"),
   ]);
+  // Deliberately return a hostile foreign row too: the projection must reject it.
+  state.getOwnedById.mockImplementation(async (_actor: Actor, id: string) => {
+    if (id === MEMBER_A_ID) return applicationRecord(id, "member-a");
+    if (id === MEMBER_B_ID) return applicationRecord(id, "member-b");
+    return null;
+  });
+  state.listOwnedPage.mockResolvedValue({items: [applicationRecord(MEMBER_A_ID, "member-a"), applicationRecord(MEMBER_B_ID, "member-b")], nextCursor: null});
   state.getQueuePage.mockResolvedValue({
     items: [],
     nextCursor: null,
@@ -337,7 +348,7 @@ describe.each(cells)(
       ).not.toBeNull();
       expect(list.container.innerHTML).not.toContain(MEMBER_B_ID);
       expect(list.container.innerHTML).toContain("xl:grid-cols-2");
-      expect(state.listOwned).toHaveBeenCalledWith(state.actor);
+      expect(state.listOwnedPage).toHaveBeenCalledWith(state.actor, {cursor: undefined});
 
       const detail = renderCell(
         cell,
@@ -348,6 +359,8 @@ describe.each(cells)(
           }),
         }),
       );
+      expect(state.getOwnedById).toHaveBeenCalledWith(state.actor, MEMBER_A_ID);
+      expect(state.listOwned).not.toHaveBeenCalled();
       expect(detail.container.innerHTML).toContain(MEMBER_A_ID);
       expect(detail.container.innerHTML).not.toContain(MEMBER_B_ID);
       expect(detail.container.innerHTML).toContain("sm:grid-cols-2");
@@ -397,7 +410,7 @@ describe.each(cells)(
       ).rejects.toThrow(
         `NEXT_REDIRECT:${prefix}/member-login?next=%2Fportal%2Fapplications`,
       );
-      expect(state.listOwned).not.toHaveBeenCalled();
+      expect(state.listOwnedPage).not.toHaveBeenCalled();
 
       state.redirect.mockClear();
       await expect(

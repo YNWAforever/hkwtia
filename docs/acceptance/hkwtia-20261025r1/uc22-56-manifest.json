@@ -1,0 +1,2707 @@
+{
+  "task": "UC22-56",
+  "status": "PARTIAL",
+  "scope": "Database-only timing; no Auth/HTTP/browser acceptance",
+  "startingHead": "6afe4cf20f7c67e6b6e90803beb6b4635cce13fb",
+  "testedCodeHead": "aaed810928a533fd94dda21b506fbf8ce2f88ec7",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "pr": 212,
+  "stackedOn": 211,
+  "environment": {
+    "project": "dark-cake-07139424",
+    "branch": "br-restless-pond-a11dpkvd",
+    "region": "AWS ap-southeast-1 (pinned endpoint hostname)",
+    "computeSize": "Not present in existing pinned metadata; not queried or changed",
+    "client": "box; geographic location and network RTT not independently established; no network shaping",
+    "node": "v22.23.4",
+    "driver": "@neondatabase/serverless Pool via WebSocket, pooled endpoint",
+    "productionReaders": [
+      "listOwnedPage default limit 20, first and deep (~90%) cursor",
+      "getOwnedById detail"
+    ]
+  },
+  "method": {
+    "samplesPerQueryConditionScale": 30,
+    "warmupPerQueryScale": 5,
+    "warm": "reused max:1 Pool connection after warmup",
+    "cold": "fresh max:1 Pool and explicit connect per sample; released connection reused immediately for one reader call, then pool ended",
+    "limitation": "New WebSocket/client connection to pooled endpoint only. PostgreSQL backends, Neon compute and buffer caches can remain warm. No suspension or settings changes. No HTTP/SSR/Auth/browser/device timing. Sequential samples, no concurrency/load claim.",
+    "statistics": "nearest rank ceil(n*p); p95 is 29th of 30",
+    "fixture": "Shared T22-06 bulk insertion, 1,000 then 9,000 additional rows; base fixture adds one owned row; normal ANALYZE after each bulk insertion; no planner forcing",
+    "bytes": "UTF-8 Buffer.byteLength(JSON.stringify(repository result)); excludes wire/protocol/HTTP overhead",
+    "query": "production reader invocation through Node client, including validation, query/network/driver and projection, excluding explicit cold connect",
+    "total": "connect + reader; excludes Pool construction, assertions, serialization and pool.end",
+    "explain": "EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) of actual logged adapter SQL/parameters after warmup; not each timed sample"
+  },
+  "recordedAt": "2026-10-26T11:14:37.297Z",
+  "cleanupVerified": true,
+  "results": [
+    {
+      "scale": 1000,
+      "ownedRows": 1001,
+      "name": "first",
+      "condition": "warm",
+      "query": {
+        "samples": 30,
+        "p50Ms": 251.0369950000004,
+        "p95Ms": 253.10018800000034,
+        "maxMs": 265.382071
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 0.00040500000250176527,
+        "p95Ms": 0.0006659999999101274,
+        "maxMs": 0.0006869999997434206
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 251.03754499999923,
+        "p95Ms": 253.10056800000166,
+        "maxMs": 265.382701999999
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 1000,
+      "ownedRows": 1001,
+      "name": "first",
+      "condition": "cold",
+      "query": {
+        "samples": 30,
+        "p50Ms": 243.58530099999916,
+        "p95Ms": 259.97698200000013,
+        "maxMs": 278.0959389999989
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 737.8619420000032,
+        "p95Ms": 1145.4205060000022,
+        "maxMs": 1500.9570769999991
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 981.6300559999945,
+        "p95Ms": 1392.320925,
+        "maxMs": 1749.6807719999997
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 1000,
+      "ownedRows": 1001,
+      "name": "deep",
+      "condition": "warm",
+      "query": {
+        "samples": 30,
+        "p50Ms": 235.8292599999986,
+        "p95Ms": 237.57974000000104,
+        "maxMs": 245.65512299999682
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 0.000291000003926456,
+        "p95Ms": 0.0005950000049779192,
+        "maxMs": 0.0006690000009257346
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 235.82955599999696,
+        "p95Ms": 237.58010600000125,
+        "maxMs": 245.65538099999685
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 1000,
+      "ownedRows": 1001,
+      "name": "deep",
+      "condition": "cold",
+      "query": {
+        "samples": 30,
+        "p50Ms": 248.2241090000025,
+        "p95Ms": 259.27553400000033,
+        "maxMs": 261.14251499999955
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 773.0879989999958,
+        "p95Ms": 1236.8207059999986,
+        "maxMs": 1389.2574179999938
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 1032.363532999996,
+        "p95Ms": 1497.9632209999982,
+        "maxMs": 1639.9268109999975
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 1000,
+      "ownedRows": 1001,
+      "name": "detail",
+      "condition": "warm",
+      "query": {
+        "samples": 30,
+        "p50Ms": 236.91468399998848,
+        "p95Ms": 237.8966619999992,
+        "maxMs": 241.05250700000033
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 0.0002440000098431483,
+        "p95Ms": 0.00040699999954085797,
+        "maxMs": 0.0004219999973429367
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 236.91488399999798,
+        "p95Ms": 237.89690100000007,
+        "maxMs": 241.0527679999941
+      },
+      "bytes": {
+        "min": 294,
+        "max": 294
+      }
+    },
+    {
+      "scale": 1000,
+      "ownedRows": 1001,
+      "name": "detail",
+      "condition": "cold",
+      "query": {
+        "samples": 30,
+        "p50Ms": 243.79876299999887,
+        "p95Ms": 256.87028800000553,
+        "maxMs": 258.9111810000031
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 767.6858300000022,
+        "p95Ms": 1255.0372440000065,
+        "maxMs": 1444.897723999995
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 1018.4348079999909,
+        "p95Ms": 1506.0091180000163,
+        "maxMs": 1686.5259459999943
+      },
+      "bytes": {
+        "min": 294,
+        "max": 294
+      }
+    },
+    {
+      "scale": 10000,
+      "ownedRows": 10001,
+      "name": "first",
+      "condition": "warm",
+      "query": {
+        "samples": 30,
+        "p50Ms": 236.98811500001466,
+        "p95Ms": 239.67486499997904,
+        "maxMs": 241.1778720000002
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 0.0003339999821037054,
+        "p95Ms": 0.0007310000073630363,
+        "maxMs": 0.0069380000059027225
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 236.98844899999676,
+        "p95Ms": 239.68180299998494,
+        "maxMs": 241.17832100001397
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 10000,
+      "ownedRows": 10001,
+      "name": "first",
+      "condition": "cold",
+      "query": {
+        "samples": 30,
+        "p50Ms": 246.26786199997878,
+        "p95Ms": 257.55069000000367,
+        "maxMs": 257.9162859999924
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 746.3869750000013,
+        "p95Ms": 1260.647740000015,
+        "maxMs": 1261.8480190000264
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 998.8615099999879,
+        "p95Ms": 1517.0297000000137,
+        "maxMs": 1519.7643050000188
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 10000,
+      "ownedRows": 10001,
+      "name": "deep",
+      "condition": "warm",
+      "query": {
+        "samples": 30,
+        "p50Ms": 237.86601100000553,
+        "p95Ms": 245.428946,
+        "maxMs": 288.1387340000074
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 0.000295000005280599,
+        "p95Ms": 0.000614999997196719,
+        "maxMs": 0.0008240000170189887
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 237.8662009999971,
+        "p95Ms": 245.42923099998734,
+        "maxMs": 288.13896899999236
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 10000,
+      "ownedRows": 10001,
+      "name": "deep",
+      "condition": "cold",
+      "query": {
+        "samples": 30,
+        "p50Ms": 245.60622899999726,
+        "p95Ms": 258.71710899999016,
+        "maxMs": 274.8724740000034
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 735.1762999999919,
+        "p95Ms": 987.0871770000085,
+        "maxMs": 1015.2588949999772
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 983.5285099999746,
+        "p95Ms": 1231.320356000011,
+        "maxMs": 1270.4254749999964
+      },
+      "bytes": {
+        "min": 6171,
+        "max": 6171
+      }
+    },
+    {
+      "scale": 10000,
+      "ownedRows": 10001,
+      "name": "detail",
+      "condition": "warm",
+      "query": {
+        "samples": 30,
+        "p50Ms": 240.2114109999966,
+        "p95Ms": 241.32605499998317,
+        "maxMs": 241.56176899999264
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 0.00026199998683296144,
+        "p95Ms": 0.0005320000054780394,
+        "maxMs": 0.0016820000018924475
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 240.21309299999848,
+        "p95Ms": 241.32629299999098,
+        "maxMs": 241.56213099998422
+      },
+      "bytes": {
+        "min": 294,
+        "max": 294
+      }
+    },
+    {
+      "scale": 10000,
+      "ownedRows": 10001,
+      "name": "detail",
+      "condition": "cold",
+      "query": {
+        "samples": 30,
+        "p50Ms": 245.48804099997506,
+        "p95Ms": 258.82726099999854,
+        "maxMs": 259.71042100002524
+      },
+      "connect": {
+        "samples": 30,
+        "p50Ms": 752.9723039999953,
+        "p95Ms": 1135.6927589999977,
+        "maxMs": 1263.293943000026
+      },
+      "total": {
+        "samples": 30,
+        "p50Ms": 1002.5363780000189,
+        "p95Ms": 1378.5790160000033,
+        "maxMs": 1520.841494000022
+      },
+      "bytes": {
+        "min": 294,
+        "max": 294
+      }
+    }
+  ],
+  "plans": [
+    {
+      "scale": 1000,
+      "name": "first",
+      "plan": {
+        "Plan": {
+          "Node Type": "Limit",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.4,
+          "Total Cost": 38.41,
+          "Plan Rows": 21,
+          "Plan Width": 160,
+          "Actual Startup Time": 0.033,
+          "Actual Total Time": 0.062,
+          "Actual Rows": 21,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Shared Hit Blocks": 23,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "membership_applications_owned_page_idx",
+              "Relation Name": "membership_applications",
+              "Alias": "membership_applications",
+              "Startup Cost": 0.4,
+              "Total Cost": 1812.26,
+              "Plan Rows": 1001,
+              "Plan Width": 160,
+              "Actual Startup Time": 0.032,
+              "Actual Total Time": 0.059,
+              "Actual Rows": 21,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Index Cond": "(applicant_user_id = '<synthetic-owner>'::text)",
+              "Rows Removed by Index Recheck": 0,
+              "Index Searches": 1,
+              "Shared Hit Blocks": 23,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.078,
+        "Triggers": [],
+        "Execution Time": 0.088
+      }
+    },
+    {
+      "scale": 1000,
+      "name": "deep",
+      "plan": {
+        "Plan": {
+          "Node Type": "Limit",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 37.37,
+          "Total Cost": 37.43,
+          "Plan Rows": 21,
+          "Plan Width": 160,
+          "Actual Startup Time": 0.204,
+          "Actual Total Time": 0.206,
+          "Actual Rows": 21,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Shared Hit Blocks": 18,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Sort",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 37.37,
+              "Total Cost": 37.46,
+              "Plan Rows": 34,
+              "Plan Width": 160,
+              "Actual Startup Time": 0.203,
+              "Actual Total Time": 0.204,
+              "Actual Rows": 21,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Sort Key": [
+                "updated_at DESC NULLS LAST",
+                "id DESC NULLS LAST"
+              ],
+              "Sort Method": "top-N heapsort",
+              "Sort Space Used": 33,
+              "Sort Space Type": "Memory",
+              "Shared Hit Blocks": 18,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "membership_applications",
+                  "Alias": "membership_applications",
+                  "Startup Cost": 0,
+                  "Total Cost": 36.51,
+                  "Plan Rows": 34,
+                  "Plan Width": 160,
+                  "Actual Startup Time": 0.024,
+                  "Actual Total Time": 0.173,
+                  "Actual Rows": 99,
+                  "Actual Loops": 1,
+                  "Disabled": false,
+                  "Filter": "((applicant_user_id = '<synthetic-owner>'::text) AND (ROW(updated_at, id) < ROW('2026-10-26 00:00:00.000123+00'::timestamp with time zone, '<fixture-uuid>'::uuid)))",
+                  "Rows Removed by Filter": 949,
+                  "Shared Hit Blocks": 18,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.085,
+        "Triggers": [],
+        "Execution Time": 0.233
+      }
+    },
+    {
+      "scale": 1000,
+      "name": "detail",
+      "plan": {
+        "Plan": {
+          "Node Type": "Limit",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.28,
+          "Total Cost": 8.3,
+          "Plan Rows": 1,
+          "Plan Width": 128,
+          "Actual Startup Time": 0.018,
+          "Actual Total Time": 0.018,
+          "Actual Rows": 1,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Shared Hit Blocks": 3,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "membership_applications_pkey",
+              "Relation Name": "membership_applications",
+              "Alias": "membership_applications",
+              "Startup Cost": 0.28,
+              "Total Cost": 8.3,
+              "Plan Rows": 1,
+              "Plan Width": 128,
+              "Actual Startup Time": 0.017,
+              "Actual Total Time": 0.017,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Index Cond": "(id = '<fixture-uuid>'::uuid)",
+              "Rows Removed by Index Recheck": 0,
+              "Filter": "(applicant_user_id = '<synthetic-owner>'::text)",
+              "Rows Removed by Filter": 0,
+              "Index Searches": 1,
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.072,
+        "Triggers": [],
+        "Execution Time": 0.042
+      }
+    },
+    {
+      "scale": 10000,
+      "name": "first",
+      "plan": {
+        "Plan": {
+          "Node Type": "Limit",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.41,
+          "Total Cost": 5.55,
+          "Plan Rows": 21,
+          "Plan Width": 161,
+          "Actual Startup Time": 0.032,
+          "Actual Total Time": 0.071,
+          "Actual Rows": 21,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Shared Hit Blocks": 24,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "membership_applications_owned_page_idx",
+              "Relation Name": "membership_applications",
+              "Alias": "membership_applications",
+              "Startup Cost": 0.41,
+              "Total Cost": 2449.53,
+              "Plan Rows": 10001,
+              "Plan Width": 161,
+              "Actual Startup Time": 0.031,
+              "Actual Total Time": 0.068,
+              "Actual Rows": 21,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Index Cond": "(applicant_user_id = '<synthetic-owner>'::text)",
+              "Rows Removed by Index Recheck": 0,
+              "Index Searches": 1,
+              "Shared Hit Blocks": 24,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.077,
+        "Triggers": [],
+        "Execution Time": 0.096
+      }
+    },
+    {
+      "scale": 10000,
+      "name": "deep",
+      "plan": {
+        "Plan": {
+          "Node Type": "Limit",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.41,
+          "Total Cost": 42.33,
+          "Plan Rows": 21,
+          "Plan Width": 161,
+          "Actual Startup Time": 0.031,
+          "Actual Total Time": 0.089,
+          "Actual Rows": 21,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Shared Hit Blocks": 25,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "membership_applications_owned_page_idx",
+              "Relation Name": "membership_applications",
+              "Alias": "membership_applications",
+              "Startup Cost": 0.41,
+              "Total Cost": 72.28,
+              "Plan Rows": 36,
+              "Plan Width": 161,
+              "Actual Startup Time": 0.03,
+              "Actual Total Time": 0.086,
+              "Actual Rows": 21,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Index Cond": "((applicant_user_id = '<synthetic-owner>'::text) AND (ROW(updated_at, id) < ROW('2026-10-26 00:00:00.000123+00'::timestamp with time zone, '<fixture-uuid>'::uuid)))",
+              "Rows Removed by Index Recheck": 0,
+              "Index Searches": 1,
+              "Shared Hit Blocks": 25,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.085,
+        "Triggers": [],
+        "Execution Time": 0.117
+      }
+    },
+    {
+      "scale": 10000,
+      "name": "detail",
+      "plan": {
+        "Plan": {
+          "Node Type": "Limit",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 0.29,
+          "Total Cost": 8.3,
+          "Plan Rows": 1,
+          "Plan Width": 129,
+          "Actual Startup Time": 0.02,
+          "Actual Total Time": 0.021,
+          "Actual Rows": 1,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Shared Hit Blocks": 3,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "membership_applications_pkey",
+              "Relation Name": "membership_applications",
+              "Alias": "membership_applications",
+              "Startup Cost": 0.29,
+              "Total Cost": 8.3,
+              "Plan Rows": 1,
+              "Plan Width": 129,
+              "Actual Startup Time": 0.019,
+              "Actual Total Time": 0.019,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Index Cond": "(id = '<fixture-uuid>'::uuid)",
+              "Rows Removed by Index Recheck": 0,
+              "Filter": "(applicant_user_id = '<synthetic-owner>'::text)",
+              "Rows Removed by Filter": 0,
+              "Index Searches": 1,
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.079,
+        "Triggers": [],
+        "Execution Time": 0.052
+      }
+    }
+  ],
+  "commands": [
+    "HKWTIA_DB_ACCEPTANCE=1 HKWTIA_DB_TIMING=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/owned-applications-timing.test.ts",
+    "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/owned-applications.test.ts",
+    "npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/unit/db-timing-summary.test.ts tests/unit/owned-applications-sql.test.ts tests/unit/owned-application-reader.test.ts tests/unit/portal-applications.test.ts",
+    "npx -y -p node@22 -c 'npm test'",
+    "npx -y -p node@22 -c 'npm run typecheck && npm run lint'",
+    "npx -y -p node@22 -c 'npm run build'",
+    "npx -y -p node@22 -c 'npm run typecheck && npm run audit:strings'",
+    "git diff --check",
+    "git push origin HEAD"
+  ],
+  "checks": {
+    "focused": "23 passed / 4 files",
+    "ownedApplicationsGated": "5 passed / 1 file; exact-ID cleanup",
+    "timing": "Two successful full runs: 1 passed / 1 file each; 360 samples and 6 plans each; exact-ID cleanup absence verified in both",
+    "full": "7978 passed / 659 skipped; 907 files passed / 118 skipped; exit 0",
+    "typecheck": "PASS before and after build",
+    "lint": "0 errors / 77 existing warnings",
+    "build": "PASS; generated next-env.d.ts restored",
+    "strings": "PASS; 360 TSX files",
+    "diff": "PASS"
+  },
+  "failedAttempts": [
+    {
+      "scope": "Percentile tests",
+      "result": "Stub returned zeros and accepted invalid observations: two intended behavior failures, then green"
+    },
+    {
+      "scope": "Existing gated paging regression before fixture ANALYZE",
+      "result": "4 passed / 1 failed: stale estimate of 8 owner rows caused applicant-index scan of 10001 rows + sort; normal ANALYZE added; rerun 5 passed"
+    },
+    {
+      "scope": "First timing attempt",
+      "result": "All samples collected, cleanup deletes completed, but incorrect readback bind array failed. No accepted numbers/artifact; rerun required and completed"
+    },
+    {
+      "scope": "Optional timing repeat",
+      "result": "Fresh WebSocket connect failed with network/non-101 error after seven complete query-condition groups; exact-ID/profile/company cleanup absence verified. Partial samples excluded; clean full retry completed without per-sample retries."
+    }
+  ],
+  "layers": {
+    "code": "PASS; test/helper/docs only; production reader unchanged",
+    "tests": "PASS local + isolated DB",
+    "deployment": "NOT RUN; push only; remote exact-head CI/Preview unverified",
+    "runtime": "Isolated DB timing PASS; Auth/HTTP/browser BLOCKED"
+  },
+  "blockers": [
+    "Real A/B/staff Auth sessions and authenticated HTTP/browser p95",
+    "Remote exact-head CI; PR #212 stacked on #211",
+    "Other R2 Stripe, sink, owner and browser gates unchanged"
+  ],
+  "successfulRuns": 2,
+  "totalAcceptedTimedCalls": 720,
+  "comparisonRun": {
+    "recordedAt": "2026-10-26T11:04:51.162Z",
+    "cleanupVerified": true,
+    "results": [
+      {
+        "scale": 1000,
+        "ownedRows": 1001,
+        "name": "first",
+        "condition": "warm",
+        "query": {
+          "samples": 30,
+          "p50Ms": 237.68155800000022,
+          "p95Ms": 246.6952280000005,
+          "maxMs": 271.0964810000005
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 0.00044499999785330147,
+          "p95Ms": 0.0007160000004660105,
+          "maxMs": 0.0008100000013655517
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 237.682077999998,
+          "p95Ms": 246.6957199999997,
+          "maxMs": 271.09687100000156
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 1000,
+        "ownedRows": 1001,
+        "name": "first",
+        "condition": "cold",
+        "query": {
+          "samples": 30,
+          "p50Ms": 250.69323799999984,
+          "p95Ms": 260.88123500000074,
+          "maxMs": 347.45659100000194
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 770.6399259999998,
+          "p95Ms": 1742.6840770000053,
+          "maxMs": 1761.206990999999
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 1063.6630819999991,
+          "p95Ms": 2000.477347,
+          "maxMs": 2018.8742530000018
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 1000,
+        "ownedRows": 1001,
+        "name": "deep",
+        "condition": "warm",
+        "query": {
+          "samples": 30,
+          "p50Ms": 256.41835900000297,
+          "p95Ms": 263.2686180000019,
+          "maxMs": 263.7430349999995
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 0.00035799999750452116,
+          "p95Ms": 0.0005870000022696331,
+          "maxMs": 0.0007029999978840351
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 256.41873000000487,
+          "p95Ms": 263.26906099999906,
+          "maxMs": 263.74328400000377
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 1000,
+        "ownedRows": 1001,
+        "name": "deep",
+        "condition": "cold",
+        "query": {
+          "samples": 30,
+          "p50Ms": 255.61521399999037,
+          "p95Ms": 262.7305149999884,
+          "maxMs": 265.12766399999964
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 1006.8910920000053,
+          "p95Ms": 1486.9184490000043,
+          "maxMs": 1532.1684090000053
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 1257.7126540000027,
+          "p95Ms": 1739.302416999999,
+          "maxMs": 1794.8989239999937
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 1000,
+        "ownedRows": 1001,
+        "name": "detail",
+        "condition": "warm",
+        "query": {
+          "samples": 30,
+          "p50Ms": 257.21820099999604,
+          "p95Ms": 261.8512639999972,
+          "maxMs": 268.71739800000796
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 0.00031400000443682075,
+          "p95Ms": 0.00046100000326987356,
+          "maxMs": 0.0005289999971864745
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 257.2185129999998,
+          "p95Ms": 261.85160599999654,
+          "maxMs": 268.7178039999999
+        },
+        "bytes": {
+          "min": 294,
+          "max": 294
+        }
+      },
+      {
+        "scale": 1000,
+        "ownedRows": 1001,
+        "name": "detail",
+        "condition": "cold",
+        "query": {
+          "samples": 30,
+          "p50Ms": 253.8468770000036,
+          "p95Ms": 261.9798840000003,
+          "maxMs": 263.6964219999936
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 770.1126809999987,
+          "p95Ms": 1427.6665610000055,
+          "maxMs": 1728.0664549999929
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 1025.402792000008,
+          "p95Ms": 1691.362982999999,
+          "maxMs": 1981.9168740000023
+        },
+        "bytes": {
+          "min": 294,
+          "max": 294
+        }
+      },
+      {
+        "scale": 10000,
+        "ownedRows": 10001,
+        "name": "first",
+        "condition": "warm",
+        "query": {
+          "samples": 30,
+          "p50Ms": 253.5527600000205,
+          "p95Ms": 257.5203150000016,
+          "maxMs": 261.18047000002116
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 0.0003600000054575503,
+          "p95Ms": 0.0005850000015925616,
+          "maxMs": 0.0010649999894667417
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 253.553287000017,
+          "p95Ms": 257.5206730000209,
+          "maxMs": 261.1807680000202
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 10000,
+        "ownedRows": 10001,
+        "name": "first",
+        "condition": "cold",
+        "query": {
+          "samples": 30,
+          "p50Ms": 255.62496899999678,
+          "p95Ms": 260.9581450000114,
+          "maxMs": 261.6197289999982
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 973.6587629999849,
+          "p95Ms": 1430.3243190000067,
+          "maxMs": 1463.2235149999906
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 1231.7171369999996,
+          "p95Ms": 1670.653182000009,
+          "maxMs": 1717.378578999982
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 10000,
+        "ownedRows": 10001,
+        "name": "deep",
+        "condition": "warm",
+        "query": {
+          "samples": 30,
+          "p50Ms": 252.73416200000793,
+          "p95Ms": 253.69516299999668,
+          "maxMs": 253.82105500000762
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 0.00040400002035312355,
+          "p95Ms": 0.0007280000136233866,
+          "maxMs": 0.0007440000190399587
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 252.73463900000206,
+          "p95Ms": 253.69550800000434,
+          "maxMs": 253.8214020000014
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 10000,
+        "ownedRows": 10001,
+        "name": "deep",
+        "condition": "cold",
+        "query": {
+          "samples": 30,
+          "p50Ms": 251.80024899999262,
+          "p95Ms": 259.98626999999397,
+          "maxMs": 260.7523660000006
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 950.528741999995,
+          "p95Ms": 1406.7326130000001,
+          "maxMs": 1500.5820519999834
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 1197.7214500000118,
+          "p95Ms": 1656.9736930000072,
+          "maxMs": 1753.600888999994
+        },
+        "bytes": {
+          "min": 6171,
+          "max": 6171
+        }
+      },
+      {
+        "scale": 10000,
+        "ownedRows": 10001,
+        "name": "detail",
+        "condition": "warm",
+        "query": {
+          "samples": 30,
+          "p50Ms": 254.11279399998602,
+          "p95Ms": 266.0350990000006,
+          "maxMs": 341.25158300000476
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 0.0003150000120513141,
+          "p95Ms": 0.0005299999902490526,
+          "maxMs": 0.0005630000086966902
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 254.11312100000214,
+          "p95Ms": 266.0353989999858,
+          "maxMs": 341.251940999995
+        },
+        "bytes": {
+          "min": 294,
+          "max": 294
+        }
+      },
+      {
+        "scale": 10000,
+        "ownedRows": 10001,
+        "name": "detail",
+        "condition": "cold",
+        "query": {
+          "samples": 30,
+          "p50Ms": 253.38624799999525,
+          "p95Ms": 260.5585339999525,
+          "maxMs": 260.6756920000189
+        },
+        "connect": {
+          "samples": 30,
+          "p50Ms": 987.846894999966,
+          "p95Ms": 1770.0285210000002,
+          "maxMs": 1906.0591279999935
+        },
+        "total": {
+          "samples": 30,
+          "p50Ms": 1235.9157160000177,
+          "p95Ms": 2027.884580999962,
+          "maxMs": 2154.637439000013
+        },
+        "bytes": {
+          "min": 294,
+          "max": 294
+        }
+      }
+    ],
+    "plans": [
+      {
+        "scale": 1000,
+        "name": "first",
+        "plan": {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.4,
+            "Total Cost": 35.03,
+            "Plan Rows": 21,
+            "Plan Width": 160,
+            "Actual Startup Time": 0.031,
+            "Actual Total Time": 0.062,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Shared Hit Blocks": 24,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "membership_applications_owned_page_idx",
+                "Relation Name": "membership_applications",
+                "Alias": "membership_applications",
+                "Startup Cost": 0.4,
+                "Total Cost": 1651.17,
+                "Plan Rows": 1001,
+                "Plan Width": 160,
+                "Actual Startup Time": 0.03,
+                "Actual Total Time": 0.059,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Index Cond": "(applicant_user_id = '<synthetic-owner>'::text)",
+                "Rows Removed by Index Recheck": 0,
+                "Index Searches": 1,
+                "Shared Hit Blocks": 24,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.079,
+          "Triggers": [],
+          "Execution Time": 0.088
+        }
+      },
+      {
+        "scale": 1000,
+        "name": "deep",
+        "plan": {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 38.37,
+            "Total Cost": 38.43,
+            "Plan Rows": 21,
+            "Plan Width": 160,
+            "Actual Startup Time": 0.204,
+            "Actual Total Time": 0.207,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Shared Hit Blocks": 19,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 38.37,
+                "Total Cost": 38.46,
+                "Plan Rows": 34,
+                "Plan Width": 160,
+                "Actual Startup Time": 0.203,
+                "Actual Total Time": 0.204,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Sort Key": [
+                  "updated_at DESC NULLS LAST",
+                  "id DESC NULLS LAST"
+                ],
+                "Sort Method": "top-N heapsort",
+                "Sort Space Used": 34,
+                "Sort Space Type": "Memory",
+                "Shared Hit Blocks": 19,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "membership_applications",
+                    "Alias": "membership_applications",
+                    "Startup Cost": 0,
+                    "Total Cost": 37.51,
+                    "Plan Rows": 34,
+                    "Plan Width": 160,
+                    "Actual Startup Time": 0.033,
+                    "Actual Total Time": 0.172,
+                    "Actual Rows": 99,
+                    "Actual Loops": 1,
+                    "Disabled": false,
+                    "Filter": "((applicant_user_id = '<synthetic-owner>'::text) AND (ROW(updated_at, id) < ROW('2026-10-26 00:00:00.000123+00'::timestamp with time zone, '<fixture-uuid>'::uuid)))",
+                    "Rows Removed by Filter": 949,
+                    "Shared Hit Blocks": 19,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.084,
+          "Triggers": [],
+          "Execution Time": 0.233
+        }
+      },
+      {
+        "scale": 1000,
+        "name": "detail",
+        "plan": {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 128,
+            "Actual Startup Time": 0.02,
+            "Actual Total Time": 0.02,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "membership_applications_pkey",
+                "Relation Name": "membership_applications",
+                "Alias": "membership_applications",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 128,
+                "Actual Startup Time": 0.019,
+                "Actual Total Time": 0.019,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Index Cond": "(id = '<fixture-uuid>'::uuid)",
+                "Rows Removed by Index Recheck": 0,
+                "Filter": "(applicant_user_id = '<synthetic-owner>'::text)",
+                "Rows Removed by Filter": 0,
+                "Index Searches": 1,
+                "Shared Hit Blocks": 3,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.077,
+          "Triggers": [],
+          "Execution Time": 0.045
+        }
+      },
+      {
+        "scale": 10000,
+        "name": "first",
+        "plan": {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.41,
+            "Total Cost": 5.55,
+            "Plan Rows": 21,
+            "Plan Width": 161,
+            "Actual Startup Time": 0.034,
+            "Actual Total Time": 0.076,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Shared Hit Blocks": 24,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "membership_applications_owned_page_idx",
+                "Relation Name": "membership_applications",
+                "Alias": "membership_applications",
+                "Startup Cost": 0.41,
+                "Total Cost": 2449.53,
+                "Plan Rows": 10001,
+                "Plan Width": 161,
+                "Actual Startup Time": 0.034,
+                "Actual Total Time": 0.073,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Index Cond": "(applicant_user_id = '<synthetic-owner>'::text)",
+                "Rows Removed by Index Recheck": 0,
+                "Index Searches": 1,
+                "Shared Hit Blocks": 24,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.076,
+          "Triggers": [],
+          "Execution Time": 0.101
+        }
+      },
+      {
+        "scale": 10000,
+        "name": "deep",
+        "plan": {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.41,
+            "Total Cost": 42.33,
+            "Plan Rows": 21,
+            "Plan Width": 161,
+            "Actual Startup Time": 0.036,
+            "Actual Total Time": 0.082,
+            "Actual Rows": 21,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Shared Hit Blocks": 25,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "membership_applications_owned_page_idx",
+                "Relation Name": "membership_applications",
+                "Alias": "membership_applications",
+                "Startup Cost": 0.41,
+                "Total Cost": 72.28,
+                "Plan Rows": 36,
+                "Plan Width": 161,
+                "Actual Startup Time": 0.035,
+                "Actual Total Time": 0.079,
+                "Actual Rows": 21,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Index Cond": "((applicant_user_id = '<synthetic-owner>'::text) AND (ROW(updated_at, id) < ROW('2026-10-26 00:00:00.000123+00'::timestamp with time zone, '<fixture-uuid>'::uuid)))",
+                "Rows Removed by Index Recheck": 0,
+                "Index Searches": 1,
+                "Shared Hit Blocks": 25,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.086,
+          "Triggers": [],
+          "Execution Time": 0.108
+        }
+      },
+      {
+        "scale": 10000,
+        "name": "detail",
+        "plan": {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.29,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 129,
+            "Actual Startup Time": 0.021,
+            "Actual Total Time": 0.021,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "membership_applications_pkey",
+                "Relation Name": "membership_applications",
+                "Alias": "membership_applications",
+                "Startup Cost": 0.29,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 129,
+                "Actual Startup Time": 0.02,
+                "Actual Total Time": 0.02,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Index Cond": "(id = '<fixture-uuid>'::uuid)",
+                "Rows Removed by Index Recheck": 0,
+                "Filter": "(applicant_user_id = '<synthetic-owner>'::text)",
+                "Rows Removed by Filter": 0,
+                "Index Searches": 1,
+                "Shared Hit Blocks": 3,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.08,
+          "Triggers": [],
+          "Execution Time": 0.046
+        }
+      }
+    ],
+    "localActivity": "Local full-suite/static checks overlapped the beginning; diagnostic DB regression had already finished. Main reported repeat ran after other checks finished."
+  },
+  "rawArtifacts": [
+    ".tmp/uc22-56-run1.json",
+    ".tmp/uc22-56.json"
+  ],
+  "retryHardening": {
+    "heading": "Retry hardening",
+    "maxAttempts": 3,
+    "backoffMs": [
+      100,
+      200
+    ],
+    "scope": "Connection acquisition only; no SQL or assertion retries",
+    "maxExhaustedSamplesPerGroup": 2,
+    "samplesPerGroup": 30,
+    "latency": "Successful attempts only; failed attempts and backoff excluded; no imputation",
+    "output": ".tmp/uc22-56-<UUID>.json (ignored; exact recovery manifest/IDs, no secrets)",
+    "cleanup": "Fresh connection pools for exact-ID deletion, fixture cleanup and absence readback; failure is fatal",
+    "replays": [
+      {
+        "runId": "uc22-56-78cf7f22-a439-49a9-929a-af8396f5a638",
+        "rawOutput": ".tmp/uc22-56-78cf7f22-a439-49a9-929a-af8396f5a638.json",
+        "result": "PASS (DB-only harness)",
+        "recordedAt": "2026-10-26T11:33:12.939Z",
+        "cleanupVerified": true,
+        "infrastructure": {
+          "attempts": 5,
+          "failedHandshakes": 0,
+          "retriedSuccesses": 0,
+          "exhausted": 0
+        },
+        "idlePoolErrors": 0,
+        "results": [
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 253.34314599999925,
+              "p95Ms": 259.6763229999997,
+              "maxMs": 259.76821800000107
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 253.34314599999925,
+              "p95Ms": 259.6763229999997,
+              "maxMs": 259.76821800000107
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 249.07105500000034,
+              "p95Ms": 263.82250600000407,
+              "maxMs": 279.4910799999998
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 970.5581129999991,
+              "p95Ms": 1457.938059,
+              "maxMs": 1776.3268420000022
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1216.6645070000013,
+              "p95Ms": 1714.3934700000027,
+              "maxMs": 2039.212873000004
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 255.41798600000038,
+              "p95Ms": 261.0318760000082,
+              "maxMs": 267.4522799999977
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 255.41798600000038,
+              "p95Ms": 261.0318760000082,
+              "maxMs": 267.4522799999977
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 248.52527199999895,
+              "p95Ms": 262.8795519999985,
+              "maxMs": 279.9793659999996
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 773.2352600000013,
+              "p95Ms": 1277.416710999998,
+              "maxMs": 1474.8622639999958
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1029.754592000012,
+              "p95Ms": 1540.0269249999983,
+              "maxMs": 1730.319755000004
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 253.5456819999963,
+              "p95Ms": 256.83062999999675,
+              "maxMs": 257.8446600000025
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 253.5456819999963,
+              "p95Ms": 256.83062999999675,
+              "maxMs": 257.8446600000025
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 247.10192899999674,
+              "p95Ms": 265.4475959999836,
+              "maxMs": 274.9937009999994
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 775.7481849999895,
+              "p95Ms": 1486.7034200000053,
+              "maxMs": 1673.1347020000103
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1040.5127179999836,
+              "p95Ms": 1731.3040390000097,
+              "maxMs": 1929.2919300000067
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 242.05354700001772,
+              "p95Ms": 242.6266229999892,
+              "maxMs": 259.4369089999818
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 242.05354700001772,
+              "p95Ms": 242.6266229999892,
+              "maxMs": 259.4369089999818
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.68381499999668,
+              "p95Ms": 257.67839399998775,
+              "maxMs": 259.8066499999841
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 770.7587910000002,
+              "p95Ms": 1230.9364430000132,
+              "maxMs": 1239.920924999984
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1028.437184999988,
+              "p95Ms": 1475.0908960000088,
+              "maxMs": 1487.5391789999849
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 248.48692799999844,
+              "p95Ms": 251.03064400001313,
+              "maxMs": 253.7994769999932
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 248.48692799999844,
+              "p95Ms": 251.03064400001313,
+              "maxMs": 253.7994769999932
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.6226500000048,
+              "p95Ms": 256.37643299999763,
+              "maxMs": 257.1302259999793
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 934.838493999996,
+              "p95Ms": 1245.767796,
+              "maxMs": 1474.586427000002
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1176.4069730000047,
+              "p95Ms": 1493.219580999983,
+              "maxMs": 1717.8325550000009
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 248.53383999998914,
+              "p95Ms": 249.69882399999187,
+              "maxMs": 251.75817999997525
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 248.53383999998914,
+              "p95Ms": 249.69882399999187,
+              "maxMs": 251.75817999997525
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.01419700001134,
+              "p95Ms": 258.1557479999901,
+              "maxMs": 263.17770599998767
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 764.6170869999914,
+              "p95Ms": 1266.4689779999899,
+              "maxMs": 1446.9554079999798
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1019.797219,
+              "p95Ms": 1521.6354799999972,
+              "maxMs": 1697.6333710000035
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          }
+        ]
+      },
+      {
+        "runId": "uc22-56-f8d5a98f-3fc0-48c1-ac3c-dc0f243b341b",
+        "rawOutput": ".tmp/uc22-56-f8d5a98f-3fc0-48c1-ac3c-dc0f243b341b.json",
+        "result": "PASS (DB-only harness)",
+        "recordedAt": "2026-10-26T11:38:11.129Z",
+        "cleanupVerified": true,
+        "infrastructure": {
+          "attempts": 5,
+          "failedHandshakes": 0,
+          "retriedSuccesses": 0,
+          "exhausted": 0
+        },
+        "idlePoolErrors": 0,
+        "results": [
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 236.90811699999904,
+              "p95Ms": 239.1501419999986,
+              "maxMs": 251.71740599999976
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 236.90811699999904,
+              "p95Ms": 239.1501419999986,
+              "maxMs": 251.71740599999976
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 247.63335700000243,
+              "p95Ms": 258.0387980000014,
+              "maxMs": 268.7722480000011
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 753.2950999999957,
+              "p95Ms": 1021.9745689999982,
+              "maxMs": 1026.4295889999994
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1004.6112700000012,
+              "p95Ms": 1275.1751609999992,
+              "maxMs": 1295.2018370000005
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 237.4936549999984,
+              "p95Ms": 238.38507599999866,
+              "maxMs": 238.6642800000045
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 237.4936549999984,
+              "p95Ms": 238.38507599999866,
+              "maxMs": 238.6642800000045
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.4495670000033,
+              "p95Ms": 259.03666300000623,
+              "maxMs": 290.87686800000665
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 745.7898019999993,
+              "p95Ms": 1186.782831000004,
+              "maxMs": 1236.8749559999997
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 997.4884129999991,
+              "p95Ms": 1432.5963670000056,
+              "maxMs": 1481.052061999988
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 255.1520210000017,
+              "p95Ms": 255.87795199999528,
+              "maxMs": 256.27371700000367
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 255.1520210000017,
+              "p95Ms": 255.87795199999528,
+              "maxMs": 256.27371700000367
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 1000,
+            "ownedRows": 1001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.5838619999995,
+              "p95Ms": 258.16485899998224,
+              "maxMs": 259.20324699999765
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 934.3281480000005,
+              "p95Ms": 1396.1992129999999,
+              "maxMs": 1405.4081370000058
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1176.3179930000042,
+              "p95Ms": 1642.0748139999923,
+              "maxMs": 1656.8053710000095
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 236.33985600000597,
+              "p95Ms": 241.97510400001192,
+              "maxMs": 256.1098770000099
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 236.33985600000597,
+              "p95Ms": 241.97510400001192,
+              "maxMs": 256.1098770000099
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "first",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.87704299998586,
+              "p95Ms": 259.42507299999124,
+              "maxMs": 261.91844700000365
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 770.336897000001,
+              "p95Ms": 1220.3829039999982,
+              "maxMs": 1243.564916000003
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1030.1619739999878,
+              "p95Ms": 1461.495219000004,
+              "maxMs": 1494.8881640000036
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 239.94483200000832,
+              "p95Ms": 241.9241949999996,
+              "maxMs": 242.20878600000287
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 239.94483200000832,
+              "p95Ms": 241.9241949999996,
+              "maxMs": 242.20878600000287
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "deep",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 249.03313900000649,
+              "p95Ms": 275.91761599999154,
+              "maxMs": 321.9905420000141
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 749.9371460000111,
+              "p95Ms": 1035.8372059999965,
+              "maxMs": 1736.581192999991
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1008.0710759999929,
+              "p95Ms": 1357.8277480000106,
+              "maxMs": 1995.170649000007
+            },
+            "bytes": {
+              "min": 6171,
+              "max": 6171
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "warm",
+            "handshakes": {
+              "attempts": 0,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 236.158110999997,
+              "p95Ms": 236.69863800000167,
+              "maxMs": 250.1923550000065
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 236.158110999997,
+              "p95Ms": 236.69863800000167,
+              "maxMs": 250.1923550000065
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          },
+          {
+            "scale": 10000,
+            "ownedRows": 10001,
+            "name": "detail",
+            "condition": "cold",
+            "handshakes": {
+              "attempts": 30,
+              "failedHandshakes": 0,
+              "retriedSuccesses": 0,
+              "exhausted": 0
+            },
+            "failedSamples": 0,
+            "query": {
+              "samples": 30,
+              "p50Ms": 245.9869609999878,
+              "p95Ms": 257.3347369999974,
+              "maxMs": 263.3884750000143
+            },
+            "connect": {
+              "samples": 30,
+              "p50Ms": 755.9225650000153,
+              "p95Ms": 1189.0721509999712,
+              "maxMs": 1244.0368709999893
+            },
+            "total": {
+              "samples": 30,
+              "p50Ms": 1008.1043870000285,
+              "p95Ms": 1435.7558239999926,
+              "maxMs": 1491.0936470000015
+            },
+            "bytes": {
+              "min": 294,
+              "max": 294
+            }
+          }
+        ]
+      }
+    ],
+    "validation": {
+      "node": "22",
+      "focused": {
+        "files": 5,
+        "passed": 38
+      },
+      "gatedOwnedApplications": {
+        "passed": 5
+      },
+      "fullSuite": {
+        "passed": 7982,
+        "skipped": 659,
+        "failed": 0,
+        "passedFiles": 908,
+        "skippedFiles": 118
+      },
+      "typecheck": "PASS",
+      "lint": "PASS (0 errors; 77 existing warnings)",
+      "build": "PASS",
+      "tdd": "Observed classifier/backoff behavioral failures before implementation; removed failed-pool end call once and observed lifecycle test fail, then restored and passed"
+    }
+  }
+}

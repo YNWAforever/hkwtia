@@ -1,0 +1,88 @@
+{
+  "task": "T22-04A persistence",
+  "date": "2026-10-26",
+  "codeHead": "da9cbf9a370ae78d02b20bc4cc7a62306b21e624",
+  "codeTree": "a11478490332d65c846904b296dbf8e47fd82c81",
+  "migration": "0066_application_supplements",
+  "migrationSha256": "32148991640141aaa2b9665f3f3c58ee83552001a2aef1621cce1ee5929c5289",
+  "target": {
+    "projectId": "dark-cake-07139424",
+    "branchId": "br-restless-pond-a11dpkvd",
+    "branchName": "r2-acceptance-20261026",
+    "gate": "localAcceptanceTarget -> verifyAcceptanceTarget before client construction"
+  },
+  "layers": {
+    "code": "IMPLEMENTED_INJECTABLE_UNMOUNTED",
+    "tests": "LOCAL_QUALITY_AND_5_GATED_DB_PASS",
+    "deployment": "NOT_DEPLOYED",
+    "runtime": "ISOLATED_DB_PASS_AUTH_HTTP_BROWSER_STRIPE_SINK_BLOCKED"
+  },
+  "testFirst": {
+    "importFailure": "NOT_COUNTED",
+    "node20WebSocketFailure": "NOT_COUNTED_NODE22_USED_AFTERWARD",
+    "placeholderPort": "SAVES_UNKNOWN_INSTEAD_OF_SAVED",
+    "scopeGuard": "EXPECTED_SCOPE_REQUIRED_RECEIVED_NOT_IMPLEMENTED",
+    "finalFocused": "26_PASS"
+  },
+  "databaseEvidence": {
+    "migrationExistingData": "ACTUAL_0066_SQL_ON_CLONED_EXISTING_ROWS_IN_ROLLED_BACK_SCHEMA",
+    "memberProjection": "DRAFT_HIDDEN_A_ONLY_STAFF_CONTEXT_EXCLUDED",
+    "idempotency": "SAME_KEY_REPLAY_DIFFERENT_PAYLOAD_REFUSED",
+    "concurrency": "TWO_DISTINCT_SYNTHETIC_STAFF_TWO_INSTANCES_ONE_SAVED_ONE_CONFLICT",
+    "constraint": "DIRECT_SECOND_OPEN_REJECTED_23505",
+    "versions": "STALE_RESPONSE_REJECTED",
+    "receipt": "POSTCOMMIT_LOST_RETURN_RECOVERED_NO_DUPLICATE_RESPONSE_OR_AUDIT",
+    "rollback": "AUDIT_FK_FAILURE_ROLLS_BACK_REQUEST_AND_RECEIPT",
+    "cleanup": "EXACT_FIXTURE_IDS_AND_TARGET_AUDITS_NO_T22_02_FIXTURE_CHANGES"
+  },
+  "commands": [
+    {
+      "command": "npx -y -p node@22 node --experimental-strip-types scripts/db-migrate.ts --acceptance-websocket",
+      "result": "PASS"
+    },
+    {
+      "command": "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/application-supplements.test.ts",
+      "result": "5_PASS_FINAL_REPLAY"
+    },
+    {
+      "command": "npx vitest run tests/unit/supplement-repository.test.ts tests/unit/supplement-service.test.ts tests/unit/application-supplements.test.ts",
+      "result": "26_PASS"
+    },
+    {
+      "command": "npm test",
+      "result": "7959_PASS_651_SKIP_903_FILES_PASS_115_FILES_SKIP_EXIT_0"
+    },
+    {
+      "command": "npm run lint",
+      "result": "PASS_0_ERRORS_77_EXISTING_WARNINGS"
+    },
+    {
+      "command": "npm run typecheck",
+      "result": "PASS_BEFORE_AND_AFTER_BUILD"
+    },
+    {
+      "command": "npm run build",
+      "result": "PASS_NEXT_16.4.3"
+    },
+    {
+      "command": "npm run audit:strings",
+      "result": "PASS_359_TSX_FILES"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "blockers": [
+    "Verified real Auth/session identities and HTTP/Server Action positive/negative controls",
+    "Mounted member/staff browser round trip",
+    "Stripe test configuration",
+    "Notification sink",
+    "Existing stacked-base remote CI trigger limitation"
+  ],
+  "credentialsPublished": false,
+  "productionWrites": 0,
+  "providerCalls": 0,
+  "manualDeployment": false,
+  "merge": false
+}

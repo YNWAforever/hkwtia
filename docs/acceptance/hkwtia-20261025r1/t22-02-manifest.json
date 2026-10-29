@@ -1,0 +1,125 @@
+{
+  "task": "T22-02",
+  "runId": "r2-20261026-db",
+  "date": "2026-10-26",
+  "baselineHead": "1e98adbda3ad96b2029184a137053b12f9040da4",
+  "target": {
+    "projectId": "dark-cake-07139424",
+    "projectName": "hkwtia-isolated-test-20261025",
+    "branchId": "br-restless-pond-a11dpkvd",
+    "branchName": "r2-acceptance-20261026",
+    "parentBranchId": "br-steep-queen-a1au2vfd",
+    "protected": false,
+    "default": false,
+    "primary": false,
+    "databaseReadback": "neondb",
+    "schemaReadback": "public",
+    "identityEvidence": "Neon get_branch + list_branch_computes; exact endpoint binding pinned in scripts/acceptance/target-identity.json",
+    "metadataExpiresAt": "2026-11-02T06:03:00Z"
+  },
+  "fourLayers": {
+    "code": "IMPLEMENTED_DB_SCOPE",
+    "tests": "PASS_OFFLINE_AND_LIVE_DB; BLOCKED_REAL_AUTH_HTTP",
+    "deployment": "NOT_DEPLOYED",
+    "runtime": "PASS_DB; BLOCKED_AUTH_STRIPE_SINK"
+  },
+  "fixtures": {
+    "labels": [
+      "A",
+      "B",
+      "C",
+      "SEAT",
+      "REVOKED",
+      "D",
+      "E",
+      "NONSTAFF",
+      "FREE"
+    ],
+    "profiles": 9,
+    "companies": 1,
+    "memberships": 8,
+    "distinctMembershipStatuses": 7,
+    "applications": {
+      "draft": 3,
+      "pending_review": 2,
+      "pending_payment": 1
+    },
+    "companySeats": 3,
+    "revokedSeats": 1,
+    "authIdentitiesProvisioned": 0,
+    "authBinding": "synthetic-unbound only; not usable login identities",
+    "repeatSeed": "PASS_NO_DUPLICATES",
+    "exactIdCleanupAndReadback": "PASS_THEN_RESEEDED",
+    "finalState": "run-scoped fixtures retained; private manifest gitignored with mode 0600"
+  },
+  "controls": {
+    "negativeTargetCases": 26,
+    "dbClientCreatesOnRefusal": 0,
+    "providerCallsOnRefusal": 0,
+    "mutationControl": "bypassing verifier made all 23 original negative cases fail; restored",
+    "aOwnApplicationRead": "PASS_LIVE_POSTGRESQL_REPOSITORY",
+    "bReadAApplication": "REFUSED_NULL",
+    "nonstaffAdminAuthorization": "REFUSED_BEFORE_WRITE_AND_PROVIDER_CALLBACKS",
+    "profileContactApplicationAuditSideEffects": "ZERO_BY_ROW_DIGEST_COMPARISON",
+    "realAuthHttpServerActions": "BLOCKED"
+  },
+  "commands": [
+    {
+      "command": "npm run db:migrate (guarded local DATABASE_URL_TEST)",
+      "result": "TCP_DID_NOT_COMPLETE; bounded independent TCP probe timed out; process terminated"
+    },
+    {
+      "command": "npm run db:migrate -- --acceptance-websocket",
+      "result": "PASS_SAME_DRIZZLE_SQL_AND_JOURNAL"
+    },
+    {
+      "command": "node --import tsx scripts/acceptance/seed.ts r2-20261026-db",
+      "result": "PASS"
+    },
+    {
+      "command": "HKWTIA_DB_ACCEPTANCE=1 npx vitest run tests/integration/hkwtia-identity.test.ts",
+      "result": "3_PASS"
+    },
+    {
+      "command": "npx vitest run tests/unit/{hkwtia-acceptance-target,hkwtia-fixtures,acceptance-guard,db-script-contract,seed-guard-boundary}.test.ts",
+      "result": "65_PASS"
+    },
+    {
+      "command": "npm test (without acceptance environment)",
+      "result": "7958_PASS_646_SKIP; 902_FILES_PASS_114_SKIP; EXIT_0"
+    },
+    {
+      "command": "npm run build",
+      "result": "PASS_NEXT_16.4.3"
+    },
+    {
+      "command": "npm run typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run lint",
+      "result": "PASS_0_ERRORS_77_WARNINGS"
+    },
+    {
+      "command": "npm run audit:strings",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "blocked": [
+    "No verified isolated Auth tenant/session configuration or real A/B/staff credentials supplied",
+    "No Stripe test key/webhook/price configuration supplied; zero Stripe calls",
+    "No verified notification sink supplied; zero notification calls",
+    "Real authenticated HTTP/server-action mutation positive/negative controls remain unexecuted",
+    "No manual deployment authorized; existing stacked-base remote CI trigger limitation remains"
+  ],
+  "credentialsPublished": false,
+  "fullFixtureIdentifiersPublished": false,
+  "productionWrites": 0,
+  "providerCalls": 0,
+  "manualDeployment": false,
+  "codeHead": "9cb4483c"
+}

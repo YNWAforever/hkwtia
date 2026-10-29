@@ -1,0 +1,1796 @@
+{
+ "task": "T22-07",
+ "scope": "UC22-01\u201360 existing membership/staff features (R2); R3/R4 capabilities not claimed",
+ "date": "2026-10-26",
+ "branch": "wtia/hkwtia-plan-r1-20261025",
+ "pr": 212,
+ "inventoryBaseHead": "6681eb970968d0a70f385e2771628bbfc2f1f86f",
+ "testedCodeHead": "a5891fccfd3761186e69c25b411b0b16b001eeac",
+ "statusRules": {
+  "PASS": "Fresh actual/result/evidence for the full UC including real identity/Stripe/DB where the UC requires it",
+  "PARTIAL": "Current-tree offline unit and/or isolated-DB evidence exists; acceptance-critical runtime layer still open",
+  "BLOCKED": "Core dependency of the UC is unavailable (Auth sessions, Stripe test, sink, legal approval, owner materials, tool contract, remote CI)",
+  "NOT RUN": "No external blocker for an offline/anonymous run, but not executed in this run"
+ },
+ "caveat": "Original Test_Cases.csv / Fixture_Runbook are not present in the repo or box; per-UC themes are inferred from plan \u00a77 group definitions and task-level UC references (themeSource). Re-map against the original CSV when supplied.",
+ "counts": {
+  "PARTIAL": 49,
+  "BLOCKED": 11
+ },
+ "total": 60,
+ "cases": [
+  {
+   "id": "UC22-01",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Public entry pages render (anonymous)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-public-catalog.test.ts",
+    "tests/unit/navigation.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Preview anonymous suite PASS 15/15 on 06ccd701 (r2-blockers-unblock.md); PASS promotion awaits review against the original UC checklist (Test_Cases.csv absent)"
+   ],
+   "nextWithoutAuth": "Review Preview 15/15 evidence against the original UC22-01 checklist; promote to PASS if it matches.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "64 EN/ZH public renders and settled axe scans clear; 32 paused CTA samples opaque at 8.451873:1. Local only; Preview/SSO open.",
+    "run": "movementOnlyEntranceRun (code cafee809)"
+   },
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Live production host has no Deployment Protection wall; public entry rendered before sign-in. Production code, not PR head; Preview/SSO for PR head still open."
+   },
+   "previewOidcEvidence": {
+    "date": "2026-10-27",
+    "deployment": "dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC",
+    "url": "https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app",
+    "commit": "b10686e3",
+    "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
+    "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
+    "result": "/ and /zh/membership and /membership HTTP 200 on Preview, app HTML (not SSO); /sitemap.xml HTTP 500 on Preview (production 200) \u2014 finding",
+    "fixtureSmoke": {
+     "date": "2026-10-27",
+     "deployment": "dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX",
+     "url": "https://hkwtia-43pniorq6-ynwaforevers-projects.vercel.app",
+     "commit": "6cae5603",
+     "spec": "tests/e2e/preview-oidc-anonymous-smoke.spec.ts",
+     "fixture": "tests/fixtures/preview-oidc.ts",
+     "result": "3 passed (home 200; /membership and /zh/membership four tiers)",
+     "scope": "minimal smoke; full anonymous suite still not run on Preview"
+    }
+   },
+   "previewAnonymousEvidence": {
+    "document": "r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt",
+    "spec": "tests/e2e/preview-oidc-anonymous-acceptance.spec.ts",
+    "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+    "deployedSha": "06ccd701",
+    "result": "PASS 15/15",
+    "detail": "8 public paths x EN/ZH x 375/768/1024/1440: 200, single h1, no horizontal overflow, skip link, settled home CTA contrast, axe 0 serious/critical; membership four tiers + anchor/help; anonymous /admin,/portal -> login with next; reduced-motion home axe; locale round-trip. First run on 57c4540c-era code: 10 failed on .open-now-record > span 4.48:1, fixed in 06ccd701."
+   }
+  },
+  {
+   "id": "UC22-02",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Current concierge chat UI (not R3 actions)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/concierge-widget.test.tsx",
+    "tests/unit/concierge-shell.test.tsx",
+    "tests/unit/concierge-unavailable-ui.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real AI provider evaluation",
+    "Browser"
+   ],
+   "nextWithoutAuth": "Local Playwright disabled-provider path (manual fallback) without Auth"
+  },
+  {
+   "id": "UC22-03",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Four-tier membership comparison",
+   "themeSource": "plan Task 5 (T22-05)",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-page-catalog.test.tsx",
+    "tests/unit/membership-catalog.test.ts",
+    "tests/unit/membership-tier-content.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser visual matrix on populated catalog"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Community/Patron render; four-tier assertion remains red: Startup/Corporate unavailable without deliberately absent Stripe price IDs."
+   },
+   "previewOidcEvidence": {
+    "date": "2026-10-27",
+    "deployment": "dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC",
+    "url": "https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app",
+    "commit": "b10686e3",
+    "method": "vercel curl --deployment + scripts/preview-oidc-anon-check.mjs (origin-scoped x-vercel-trusted-oidc-idp-token)",
+    "doc": "r2-blockers-unblock.md#preview-oidc-proven--2026-10-27",
+    "result": "EN+ZH /membership .plan-grid article ids = community,startup,corporate,patron; Startup HK$2,400/yr HK$250/mo; Corporate HK$12,000/yr HK$1,200/mo \u2014 Stripe price IDs configured on Preview env; local acceptance still omits them",
+    "fixtureSmoke": {
+     "date": "2026-10-27",
+     "deployment": "dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX",
+     "url": "https://hkwtia-43pniorq6-ynwaforevers-projects.vercel.app",
+     "commit": "6cae5603",
+     "spec": "tests/e2e/preview-oidc-anonymous-smoke.spec.ts",
+     "fixture": "tests/fixtures/preview-oidc.ts",
+     "result": "3 passed (home 200; /membership and /zh/membership four tiers)",
+     "scope": "minimal smoke; full anonymous suite still not run on Preview"
+    }
+   }
+  },
+  {
+   "id": "UC22-04",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Comparison seats/help/anchor",
+   "themeSource": "plan Task 5 (T22-05)",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-page-catalog.test.tsx",
+    "tests/unit/membership-links.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser visual matrix"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Rendered tier headings, plans anchor, FAQ and contact help checked in both locales; paid seats/checkout remain unverified."
+   }
+  },
+  {
+   "id": "UC22-05",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Locale EN/ZH switching and hrefs",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/locale-switcher.test.tsx",
+    "tests/unit/locale-href-boundary.test.ts",
+    "tests/unit/membership-links-locale.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Locale round-trip retains query/hash and localized contact hrefs."
+   }
+  },
+  {
+   "id": "UC22-06",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "next= destination preserved through login",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/login-destination.test.ts",
+    "tests/unit/login-outcome-redirect.test.tsx",
+    "tests/unit/login-entry-routing.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-07",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Anonymous admin boundary",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-page-auth.test.ts",
+    "tests/unit/admin-page-auth-source.test.ts",
+    "tests/unit/admin-login-guard.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Anonymous admin routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
+   }
+  },
+  {
+   "id": "UC22-08",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Anonymous portal boundary / admin redirect",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-admin-redirect.test.tsx",
+    "tests/unit/portal-navigation-access.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Anonymous portal routes redirect to rendered locale-correct login; initial 307 preserves exact next. No real Auth."
+   },
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Signed-in member B at /admin redirected to /admin-login \"Staff access is unavailable for this account\" (live production)."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Signed-in member A at /admin redirected to /admin-login (live production)."
+   },
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Signed-in staff at /portal redirected to /admin (staff do not see member portal) on live production."
+   }
+  },
+  {
+   "id": "UC22-09",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Membership page help / CTA",
+   "themeSource": "plan Task 5 (T22-05)",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-page-catalog.test.tsx",
+    "tests/unit/join-plan-chooser.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser visual"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Membership plans anchor, FAQ and manual contact link exercised in both locales."
+   }
+  },
+  {
+   "id": "UC22-10",
+   "group": "UC22-01\u201310 public entry, chat UI, four tiers, locale/next, anonymous admin boundary (T22-05/07)",
+   "theme": "Policy / self-service copy consistency",
+   "themeSource": "plan Task 5 + Task 12",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-self-service-policy.test.ts",
+    "tests/unit/refund-policy-links.test.tsx",
+    "tests/unit/policy-pages.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP10 policy/legal approval"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-11",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Real login member A (positive control)",
+   "themeSource": "plan Task 2",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/login-resolution.test.ts",
+    "tests/unit/member-login-actions.test.ts",
+    "tests/unit/proxy.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Member A magic-link verified on PR #212 Preview; Preview member profiles for A/B seeded 2026-10-27 (role=member, DB resolve = member) but /portal session not yet browser-proven (headed handoff pending); production magic link unconfirmed",
+    "Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised)",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)",
+    "Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production"
+   ],
+   "nextWithoutAuth": null,
+   "priorLiveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member A",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "BLOCKED",
+    "detail": "Two fresh A magic links: Neon verify succeeds, redirect to /member-login with session verifier that never clears; /portal redirects to login; no A session. Reused B token -> INVALID_TOKEN (expected). Google not tried. Code inspection confirms cookie-presence exchange suppression matching symptoms, without captured live cookie state. PR #212 fixes exchange and isolates old session/cache cookies; not deployed or live accepted."
+   },
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Real member A session on production via Google (clean cookie jar): /portal Corporate PAYMENT PENDING 25 seats; session sticky across portal routes and after /admin denial. Magic-link path still unconfirmed (automated send blocked; see operational note). Older production, PR #212 fix a34a631c undeployed; exact-head/Preview evidence open."
+   },
+   "previewAuthEvidence": {
+    "document": "r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile",
+    "actor": "member A",
+    "signIn": "Neon Auth magic link",
+    "host": "PR #212 Preview branch alias",
+    "deployment": "dpl_ABbWNxaAmyQJ5kV1ovnzDZbQuCbo",
+    "deployedSha": "0498d94e",
+    "result": "PASS (needs-profile)",
+    "detail": "send ?sent=1; verified create-member-profile screen, sticky after reload. No Preview profile, so no /portal session; Create member profile not clicked."
+   },
+   "previewAuthEvidenceStaff": {
+    "document": "r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt",
+    "actor": "staff (Superadmin, Preview-only profile)",
+    "signIn": "Neon Auth magic link",
+    "host": "PR #212 Preview branch alias",
+    "deployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
+    "deployedSha": "2435152d",
+    "spec": "tests/e2e/preview-oidc-staff-magic-link.spec.ts",
+    "result": "PASS (auth path)",
+    "detail": "send ?sent=1 on /admin-login; link landed /admin; /admin reload sticky; /portal -> /admin. 1 passed (4.7m). Google off on Preview. Not staff D; read-only."
+   }
+  },
+  {
+   "id": "UC22-12",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Real login member B (negative control vs A)",
+   "themeSource": "plan Task 2",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/login-resolution-server.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "B-vs-A cross-account access attempt (A and B sessions exist; only distinct dashboards observed)",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Real member B magic-link session on live production: /portal Community ACTIVE 1 seat; own applications, profile (unsaved), billing observed. B-vs-A negative control not yet compared."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A dashboard (Corporate PAYMENT PENDING 25 seats, company Test HIDDEN) is distinct from B's (Community ACTIVE 1 seat). No cross-account access attempt."
+   }
+  },
+  {
+   "id": "UC22-13",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Real login staff D / NONSTAFF refusal",
+   "themeSource": "plan Task 2",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-login-actions.test.ts",
+    "tests/unit/admin-login-guard.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised)",
+    "Zero-write DB readback for refused NONSTAFF",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "NONSTAFF refusal observed: member B /admin -> /admin-login denial. Staff D positive control and zero-write readback not exercised."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Second NONSTAFF refusal: member A /admin -> /admin-login 'staff access unavailable'; session kept. Staff D and zero-write readback open."
+   },
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Staff positive control: Willy Lai (Superadmin) signed in via Google on /admin-login in a clean cookie jar; session sticky across /admin, members, queue, events-mgmt, inbox. Not the staff D fixture role; staff magic link and zero-write readback open."
+   },
+   "previewAuthEvidenceStaff": {
+    "document": "r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt",
+    "actor": "staff (Superadmin, Preview-only profile)",
+    "signIn": "Neon Auth magic link",
+    "host": "PR #212 Preview branch alias",
+    "deployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
+    "deployedSha": "2435152d",
+    "spec": "tests/e2e/preview-oidc-staff-magic-link.spec.ts",
+    "result": "PASS (auth path)",
+    "detail": "send ?sent=1 on /admin-login; link landed /admin; /admin reload sticky; /portal -> /admin. 1 passed (4.7m). Google off on Preview. Not staff D; read-only."
+   }
+  },
+  {
+   "id": "UC22-14",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Free (community) join",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/hosted-free-onboarding.test.ts",
+    "tests/unit/join-service.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (FREE fixture)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-15",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Paid join checkout",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/checkout-service.test.ts",
+    "tests/unit/membership-checkout-status-route.test.ts",
+    "tests/unit/join-billing-pages.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Stripe test mode",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "BLOCKED",
+    "detail": "Member A /portal/billing: PAYMENT PENDING Corporate 25 seats with Continue payment present; NOT clicked, no Stripe action."
+   }
+  },
+  {
+   "id": "UC22-16",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Owner checks on join/application",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-application-security.test.ts",
+    "tests/unit/join-actions-profile-identity.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A read OK, B read of A = null)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-17",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Retained input / resume",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-form-recovery.test.tsx",
+    "tests/unit/join-draft.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null,
+   "notes": "tests/integration/join-resume.test.ts exists but is gated and was skipped in the focused run"
+  },
+  {
+   "id": "UC22-18",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Identity/target gate and existing security fixes",
+   "themeSource": "plan Task 2 + Task 3",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/hkwtia-acceptance-target.test.ts",
+    "tests/unit/acceptance-guard.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Exact-head remote CI (stacked base; workflow scope)"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-19",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "Dependency/security release gate",
+   "themeSource": "plan Task 3",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/ci-security-contract.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Exact-head remote CI (stacked base; workflow scope)",
+    "Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md)"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-20",
+   "group": "UC22-11\u201320 real login, free/paid, owner checks, retained input, no second subscription (T22-01/02/07)",
+   "theme": "No second subscription",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/billing-checkout-locking.test.ts",
+    "tests/unit/membership-uniqueness-schema.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Stripe test mode"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-21",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Multiple memberships view/selection",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-membership-selection.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (8 memberships)"
+   ],
+   "blockers": [
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B shows a single Community ACTIVE membership; multi-membership selection not exercised."
+   }
+  },
+  {
+   "id": "UC22-22",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Seven membership statuses",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/membership-lifecycle.test.ts",
+    "tests/unit/membership-entitlements.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (all 7 statuses seeded)"
+   ],
+   "blockers": [
+    "Staff walk of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "ACTIVE status rendered for member B; other six statuses not observed live."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "PAYMENT PENDING status rendered for member A (Corporate); remaining statuses not observed live."
+   }
+  },
+  {
+   "id": "UC22-23",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Own applications list (SQL paging)",
+   "themeSource": "plan Task 10",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/owned-applications-sql.test.ts",
+    "tests/unit/owned-application-reader.test.ts",
+    "tests/unit/portal-sql-paging.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md)"
+   ],
+   "blockers": [
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B own list: Community Complete (17 Oct 2026), Startup Draft (29 Sept 2026). Isolation vs A not compared."
+   }
+  },
+  {
+   "id": "UC22-24",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Own application detail + supplement history",
+   "themeSource": "plan Task 8 + Task 10",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/owned-application-reader.test.ts",
+    "tests/unit/supplement-service.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md)",
+    "T22-04A 0066 gated SQL cases (t22-04a.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-25",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Member supplement response",
+   "themeSource": "plan Task 8 + Task 9",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/supplement-service.test.ts",
+    "tests/unit/supplement-ui.test.tsx",
+    "tests/unit/supplement-actions.test.ts",
+    "tests/unit/supplement-binding.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md)",
+    "Gated SQL binding cases (r2-resources-binding.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Bound forms unmounted; write flag disabled"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-26",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Application form submit",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-schema.test.ts",
+    "tests/unit/join-actions.test.ts",
+    "tests/unit/join-page.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-27",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Form validation and correction",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/join-schema.test.ts",
+    "tests/unit/join-form-recovery.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-28",
+   "group": "UC22-21\u201328 multi-membership, seven statuses, own applications, supplements, forms, consent (T22-04/06/07/09)",
+   "theme": "Consent capture/withdrawal",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/profile-consent-audit.test.ts",
+    "tests/unit/whatsapp-consent.test.ts",
+    "tests/unit/contacts-consent-audit.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (opt-ins false)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-29",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Company profile edit",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/company-profile-core.test.ts",
+    "tests/unit/update-company-action.test.ts",
+    "tests/unit/portal-company-forms.test.tsx"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A owns company)"
+   ],
+   "blockers": [
+    "Staff walk of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Company/listing gated for Community tier (member B); edit path not exercised."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A /portal/company: Company Test, public page HIDDEN; viewed read-only, edit not exercised."
+   }
+  },
+  {
+   "id": "UC22-30",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Seat assignment",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-seat-mutations.test.ts",
+    "tests/unit/portal-seat-bulk.test.ts",
+    "tests/integration/seat-capacity.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (SEAT fixture)"
+   ],
+   "blockers": [
+    "Staff walk of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Seat page unavailable vs dashboard 25 seats for PAYMENT PENDING Corporate (finding, undiagnosed)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Seats page empty for member B (1 seat); assignment not exercised."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A /portal/company/seats: 'Seat access is unavailable for this company' despite dashboard 25 seats (finding, likely PAYMENT PENDING gate; undiagnosed). Assignment not exercised."
+   }
+  },
+  {
+   "id": "UC22-31",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Seat/role revocation",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/company-portal-role-race.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (REVOKED fixture)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-32",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Existing external tool identity exchange contract",
+   "themeSource": "plan Task 7",
+   "status": "BLOCKED",
+   "offlineEvidence": [],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP12A sandbox contract / T-MP12B"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-33",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Public company profile review (staff)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/company-profiles-repository.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Staff review of a public company profile (staff session exists; dashboard review counts observed only)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Dashboard shows 0 member pages and 0 listings awaiting review (snapshot ~00:52 HKT); no review performed."
+   }
+  },
+  {
+   "id": "UC22-34",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Public directory isolation (opt-in only)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/public-directory-availability.test.tsx",
+    "tests/unit/directory-paging.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (directory visibility false)"
+   ],
+   "blockers": [
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Existing hidden/unpublished synthetic company absent from healthy EN/ZH directory; preflight read-only, no fixture writes."
+   }
+  },
+  {
+   "id": "UC22-35",
+   "group": "UC22-29\u201335 company, seats, revocation, public review, directory isolation (T22-07, T-MP12)",
+   "theme": "Portal directory isolation",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-directory.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Portal directory empty for member B; isolation vs A not compared."
+   }
+  },
+  {
+   "id": "UC22-36",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Event registration",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/event-registration-form.test.tsx",
+    "tests/unit/event-registration-public-action.test.ts",
+    "tests/unit/guest-rsvp-recovery.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Authenticated browser/HTTP",
+    "Notification sink",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B /portal/events/my and events empty; registration not exercised."
+   }
+  },
+  {
+   "id": "UC22-37",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Ticket purchase",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/ticket-checkout-action-recovery.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Stripe test mode",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-38",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Stripe webhook processing",
+   "themeSource": "inferred",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/webhook-service.test.ts",
+    "tests/unit/webhook-route.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Stripe test mode"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-39",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Approved member resources",
+   "themeSource": "plan Task 11",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/member-resource-access.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP08 owner materials + private delivery",
+    "Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production)",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Documents empty for member B; approved resources not exercised."
+   }
+  },
+  {
+   "id": "UC22-40",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Receipts",
+   "themeSource": "plan Task 11",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/portal-billing-page.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Stripe test mode",
+    "T-MP08 owner materials + private delivery",
+    "Real A/B/staff Auth sessions"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-41",
+   "group": "UC22-36\u201341 events, tickets, webhook, resources, receipts, cancellation policy (T22-07, T-MP08/10)",
+   "theme": "Cancellation/refund policy effect",
+   "themeSource": "plan Task 12",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/membership-self-service-policy.test.ts",
+    "tests/unit/refund-policy-links.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP10 policy/legal approval",
+    "Stripe test mode"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-42",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Dashboard submitted count = queue ID set",
+   "themeSource": "plan Task 4",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/application-queue-submitted.test.ts",
+    "tests/unit/application-queue-submitted-sql.test.ts",
+    "tests/unit/admin-dashboard-queue-counts.test.ts"
+   ],
+   "dbEvidence": [
+    "UC22-42/43 gated PostgreSQL exact ID sets, count delta, bidirectional paging and cleanup (uc22-42-43.md; uc22-42-43-manifest.json)"
+   ],
+   "blockers": [
+    "Live dashboard-vs-queue submitted ID-set comparison (staff session exists; dashboard 1 submitted observed)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Dashboard shows 1 submitted (snapshot ~00:52 HKT); /admin/members/queue rendered; submitted ID set not compared live."
+   }
+  },
+  {
+   "id": "UC22-43",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Submitted queue filter/list",
+   "themeSource": "plan Task 4",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-application-queue-query.test.ts",
+    "tests/unit/application-queue-table.test.tsx",
+    "tests/unit/r2-daily-nav.test.tsx"
+   ],
+   "dbEvidence": [
+    "UC22-42/43 gated PostgreSQL exact ID sets, count delta, bidirectional paging and cleanup (uc22-42-43.md; uc22-42-43-manifest.json)"
+   ],
+   "blockers": [
+    "Live submitted filter/list exercise (staff session exists; queue page rendered only)",
+    "Authenticated browser/HTTP",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "/admin/members/queue (Applications and payments) rendered in staff session; filter/list/paging not exercised."
+   }
+  },
+  {
+   "id": "UC22-44",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Unknown save \u2192 receipt reconciliation",
+   "themeSource": "plan Task 8",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/supplement-service.test.ts",
+    "tests/unit/supplement-ui.test.tsx"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md) (lost-response reconciliation)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-45",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Version conflict / concurrency",
+   "themeSource": "plan Task 8",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/supplement-service.test.ts",
+    "tests/unit/supplement-repository.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md) (distinct-staff concurrency, unique index)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-46",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Bulk actions",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-batch-service.test.ts",
+    "tests/unit/admin-batch-runner.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Notification sink"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-47",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Import",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/member-import-service.test.ts",
+    "tests/unit/member-import-validation.test.ts",
+    "tests/unit/member-import-upload-route.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-48",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Staff case handling (current, non-R3)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/application-case-actions.test.ts",
+    "tests/unit/application-case-form.test.tsx",
+    "tests/unit/application-case-facts.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-49",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Staff draft review/adopt (current)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/application-draft-actions.test.ts",
+    "tests/unit/application-draft-adopt.test.tsx",
+    "tests/unit/ai-draft-validation.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-50",
+   "group": "UC22-42\u201350 same-denominator lists, unknown save, conflict, bulk, import, staff guard (T22-03/04/07/08/10)",
+   "theme": "Staff guard (NONSTAFF refused, zero writes)",
+   "themeSource": "plan Task 2 + Task 8",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/admin-server-action-boundaries.test.ts",
+    "tests/unit/supplement-actions.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (NONSTAFF zero row change)",
+    "T22-04A 0066 gated SQL cases (t22-04a.md)"
+   ],
+   "blockers": [
+    "Staff D fixture role session (Superadmin positive access and members A/B refusals observed on live production)",
+    "Authenticated browser/HTTP",
+    "Zero-write DB readback for refused NONSTAFF",
+    "Exact-head deployment (live production = main@3eb9992d, not PR #212)"
+   ],
+   "nextWithoutAuth": null,
+   "liveAuthEvidence": {
+    "document": "auth-browser-live-member-b.md",
+    "manifest": "auth-browser-live-member-b-manifest.json",
+    "actor": "member B",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member B (NONSTAFF) refused at /admin on live production; zero-write DB readback not performed."
+   },
+   "liveAuthEvidenceMemberA": {
+    "document": "auth-browser-live-member-a.md",
+    "manifest": "auth-browser-live-member-a-manifest.json",
+    "actor": "member A",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Member A (NONSTAFF) refused at /admin on live production; zero-write DB readback not performed."
+   },
+   "liveAuthEvidenceStaff": {
+    "document": "auth-browser-live-staff.md",
+    "manifest": "auth-browser-live-staff-manifest.json",
+    "actor": "staff (Superadmin)",
+    "signIn": "Google OAuth",
+    "host": "https://hkwtia.vercel.app",
+    "deployedSha": "6833eb9a (main@3eb9992d)",
+    "result": "PARTIAL",
+    "detail": "Staff (Superadmin) reached /admin and sub-routes, complementing member A/B NONSTAFF refusals; read-only, zero-write DB readback not performed."
+   }
+  },
+  {
+   "id": "UC22-51",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "Concierge cites sources (current)",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/ai-concierge-grounding.test.ts",
+    "tests/unit/concierge-service.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real AI provider evaluation",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-52",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "Concierge provider failure path",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/concierge-unavailable-ui.test.tsx",
+    "tests/unit/concierge-readiness.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real AI provider evaluation",
+    "Authenticated browser/HTTP"
+   ],
+   "nextWithoutAuth": "Resolve local production-start redirect loop, then rerun gated anonymous Playwright against guarded isolated runtime.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Disabled concierge POST returns 503 and localized alert/manual support link in EN/ZH; no provider calls."
+   }
+  },
+  {
+   "id": "UC22-53",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "Concierge data isolation",
+   "themeSource": "inferred",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/concierge-security.test.ts",
+    "tests/integration/concierge-route.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Real AI provider evaluation"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-54",
+   "group": "UC22-51\u201354 AI sources/failure/isolation, external tool contract (T22-09/10, T-MP12)",
+   "theme": "External tool authorization contract",
+   "themeSource": "plan Task 7",
+   "status": "BLOCKED",
+   "offlineEvidence": [],
+   "dbEvidence": [],
+   "blockers": [
+    "T-MP12A sandbox contract / T-MP12B"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-55",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Mobile widths / zoom / keyboard / screen reader",
+   "themeSource": "plan Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/mobile-navigation.test.tsx",
+    "tests/unit/supplement-ui.test.tsx"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Browser/device matrix",
+    "Screen reader"
+   ],
+   "nextWithoutAuth": "Screen reader and real-device checks remain open; settled and reduced-motion local axe complete.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Movement-only CTA entrance: 32 samples at 0/450/600/800ms across four widths \u00d7 EN/ZH, all ancestor opacities 1, white/#1a4f82 ratio 8.451873:1; eight 600ms hero axe scans clear. Settled/reduced-motion checks retained. Screen reader and real devices open.",
+    "run": "movementOnlyEntranceRun (code cafee809)"
+   },
+   "previewAnonymousEvidence": {
+    "document": "r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt",
+    "spec": "tests/e2e/preview-oidc-anonymous-acceptance.spec.ts",
+    "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+    "deployedSha": "06ccd701",
+    "result": "PASS 15/15",
+    "detail": "8 public paths x EN/ZH x 375/768/1024/1440: 200, single h1, no horizontal overflow, skip link, settled home CTA contrast, axe 0 serious/critical; membership four tiers + anchor/help; anonymous /admin,/portal -> login with next; reduced-motion home axe; locale round-trip. First run on 57c4540c-era code: 10 failed on .open-now-record > span 4.48:1, fixed in 06ccd701."
+   }
+  },
+  {
+   "id": "UC22-56",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Private list performance (20-row p95 \u22642s)",
+   "themeSource": "plan Task 10 + Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/portal-sql-paging.test.ts"
+   ],
+   "dbEvidence": [
+    "T22-06 0067 10k paging/EXPLAIN (t22-06.md) (21 index rows, no sort)",
+    "UC22-56 1k/10k: 30 warm + 30 fresh-connection samples per production first/deep/detail reader, p50/p95/max/rows/bytes/EXPLAIN and exact-ID cleanup (uc22-56.md; uc22-56-manifest.json)",
+    "Retry hardening: bounded connection-only retries, per-group handshake/exhaustion counts, successful-attempt percentiles, unique raw manifests and fresh-pool exact-ID cleanup (uc22-56.md Retry hardening; status remains PARTIAL); two full hardened replays PASS (DB-only), 0 handshake failures / retries / exhausted samples each, cleanup verified in both"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated HTTP/browser 20-row list p95 remains unmeasured"
+   ],
+   "nextWithoutAuth": "DB-only timing completed; optional isolated DB replay via double gate. Full private-list p95 requires real Auth and HTTP/browser measurement."
+  },
+  {
+   "id": "UC22-57",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Public performance LCP/CLS (INP field)",
+   "themeSource": "plan Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/production-lhci-target.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "RUM for field INP"
+   ],
+   "nextWithoutAuth": "Obtain field RUM for INP (Vercel Speed Insights or equivalent); optionally repeat lab on a controlled device.",
+   "localBrowserEvidence": {
+    "document": "anon-browser-local.md",
+    "manifest": "anon-browser-local-manifest.json",
+    "result": "PARTIAL",
+    "detail": "Same-config LHCI repeated after CSS fix: three runs per ten URLs, medians in movementOnlyEntranceRun.lighthouse. Shared-host local lab; controlled performance, field INP and Preview/SSO open.",
+    "run": "movementOnlyEntranceRun (code cafee809)"
+   },
+   "previewLighthouseEvidence": {
+    "document": "r2-blockers-unblock.md#preview-lighthouse-lab-uc22-57--2026-10-27-hkt",
+    "manifest": "uc22-57-preview-lighthouse.json",
+    "deployment": "dpl_7cA2U1EsfN5jNVxa5xbzrFrcygYq",
+    "commit": "06ccd701",
+    "result": "PARTIAL",
+    "detail": "Ten lighthouserc URLs x3, mobile simulated: perf medians 0.94-0.99, a11y 1.00, CLS 0, LCP 1.9-2.4s, TBT 39-111ms. SEO 0.54/BP 0.61 from Preview noindex, vercel.live toolbar, robots.txt fetch outside OIDC path, deployment-URL canonical; plus footer mailto form mixed-content observation. Field INP NOT_TESTED."
+   }
+  },
+  {
+   "id": "UC22-58",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Hong Kong date boundaries (UTC 15:59/16:00)",
+   "themeSource": "plan Task 14",
+   "status": "PARTIAL",
+   "offlineEvidence": [
+    "tests/unit/hong-kong-time.test.ts",
+    "tests/unit/event-hong-kong-datetime.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Rendered browser check"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-59",
+   "group": "UC22-55\u201359 mobile/keyboard, performance, HK dates, exact-head gate (T22-01/13)",
+   "theme": "Exact-head CI gate",
+   "themeSource": "plan Task 3",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/ci-security-contract.test.ts"
+   ],
+   "dbEvidence": [],
+   "blockers": [
+    "Exact-head remote CI (stacked base; workflow scope)",
+    "stacked-ci-trigger.patch unapplied"
+   ],
+   "nextWithoutAuth": null
+  },
+  {
+   "id": "UC22-60",
+   "group": "UC22-60 member\u2192staff\u2192member same application (T22-04/07)",
+   "theme": "Member\u2192staff\u2192member same application, persisted readback",
+   "themeSource": "plan Task 9/15",
+   "status": "BLOCKED",
+   "offlineEvidence": [
+    "tests/unit/supplement-binding.test.ts",
+    "tests/unit/supplement-ui.test.tsx"
+   ],
+   "dbEvidence": [
+    "T22-04A 0066 gated SQL cases (t22-04a.md)",
+    "Gated SQL binding cases (r2-resources-binding.md)"
+   ],
+   "blockers": [
+    "Real A/B/staff Auth sessions",
+    "Authenticated browser/HTTP",
+    "Bound forms unmounted; write flag disabled"
+   ],
+   "nextWithoutAuth": null
+  }
+ ],
+ "additionalRegressions": [
+  {
+   "id": "REG-submitted-id-set",
+   "theme": "Submitted uses ID set, not count",
+   "status": "PARTIAL",
+   "evidence": [
+    "application-queue-submitted-sql.test.ts (rendered Drizzle predicate, exact UUIDs; mutation control)",
+    "application-queue-submitted-postgres.test.ts: isolated PostgreSQL exact IDs + equal-count draft mutation observed red, restored green (uc22-42-43.md)"
+   ],
+   "blockers": [
+    "Real staff Auth session and authenticated browser/HTTP"
+   ]
+  },
+  {
+   "id": "REG-listOwned-untruncated",
+   "theme": "listOwned for non-portal callers not truncated",
+   "status": "PARTIAL",
+   "evidence": [
+    "owned-application-reader.test.ts",
+    "join-resume retains complete owned history (r2-progress.md)"
+   ],
+   "blockers": [
+    "Runtime caller check with Auth"
+   ]
+  },
+  {
+   "id": "REG-late-stream-company-switch",
+   "theme": "Late stream after company switch",
+   "status": "NOT RUN",
+   "evidence": [],
+   "blockers": [
+    "R3 (T22-09) scope \u2014 not claimed in T22-07"
+   ]
+  },
+  {
+   "id": "REG-personal-outcomes",
+   "theme": "Personal outcomes",
+   "status": "NOT RUN",
+   "evidence": [],
+   "blockers": [
+    "R3 (T22-12A) scope"
+   ]
+  },
+  {
+   "id": "REG-provider-unknown-outcome",
+   "theme": "Provider without idempotency \u2192 unknown",
+   "status": "NOT RUN",
+   "evidence": [],
+   "blockers": [
+    "R4 (T22-11) scope"
+   ]
+  }
+ ],
+ "focusedRun": {
+  "command": "npx -p node@22 node node_modules/vitest/vitest.mjs run <all offlineEvidence files> + tests/integration/join-resume.test.ts (DATABASE_URL unset)",
+  "exitCode": 0,
+  "files": 106,
+  "testsPassed": 1235,
+  "testsFailed": 0,
+  "testsSkipped": 3,
+  "skippedFiles": [
+   "tests/integration/join-resume.test.ts (gated; not counted as evidence)"
+  ],
+  "headAtRun": "6681eb970968d0a70f385e2771628bbfc2f1f86f",
+  "scope": "offline unit/jsdom/rendered-SQL only; no Auth, browser, Stripe, sink or provider"
+ },
+ "liveAuthRun": {
+  "document": "auth-browser-live-member-b.md",
+  "date": "2026-10-26",
+  "actor": "member B",
+  "deployedSha": "6833eb9a",
+  "notExercised": [
+   "member A",
+   "staff D"
+  ]
+ },
+ "liveAuthRuns": [
+  {
+   "document": "auth-browser-live-member-b.md",
+   "date": "2026-10-26",
+   "actor": "member B",
+   "deployedSha": "6833eb9a",
+   "notExercised": [
+    "member A",
+    "staff D"
+   ]
+  },
+  {
+   "document": "auth-browser-live-member-a.md",
+   "manifest": "auth-browser-live-member-a-manifest.json",
+   "date": "2026-10-27",
+   "actor": "member A",
+   "signIn": "Google OAuth",
+   "deployedSha": "6833eb9a",
+   "notExercised": [
+    "member A magic link",
+    "staff D",
+    "PR #212 exact-head"
+   ]
+  },
+  {
+   "document": "auth-browser-live-staff.md",
+   "manifest": "auth-browser-live-staff-manifest.json",
+   "date": "2026-10-27",
+   "actor": "staff (Superadmin)",
+   "signIn": "Google OAuth",
+   "deployedSha": "6833eb9a",
+   "notExercised": [
+    "staff magic link",
+    "staff D fixture role",
+    "any staff write",
+    "PR #212 exact-head"
+   ]
+  },
+  {
+   "document": "r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt",
+   "date": "2026-10-27",
+   "actor": "staff (Superadmin)",
+   "signIn": "Neon Auth magic link (Preview)",
+   "deployedSha": "2435152d",
+   "notExercised": [
+    "staff D fixture role",
+    "any staff write",
+    "Google on Preview",
+    "production"
+   ]
+  }
+ ],
+ "r2BlockersUnblock": {
+  "date": "2026-10-27",
+  "doc": "r2-blockers-unblock.md",
+  "inventoryUnchanged": true,
+  "previewDeployment": "dpl_2PJRwnya2prEY68ZE43aMpgbQFgG",
+  "previewUrl": "https://hkwtia-l4eh06gmt-ynwaforevers-projects.vercel.app",
+  "preferredPath": "vercel login + vc curl / x-vercel-trusted-oidc-idp-token",
+  "cliLoggedOut": false,
+  "stackedCiPatchApplied": false,
+  "cliLinked": "ynwaforever -> ynwaforevers-projects/hkwtia",
+  "previewOidcProven": true,
+  "previewOidcDeployment": "dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC",
+  "previewOidcUrl": "https://hkwtia-gv0jvfuis-ynwaforevers-projects.vercel.app",
+  "previewOidcCommit": "b10686e3",
+  "previewFourTiers": true,
+  "previewSitemapStatus": 500,
+  "browserOidcScript": "scripts/preview-oidc-anon-check.mjs",
+  "computerUseBrowserNeedsHeaderInjection": true,
+  "deploymentProtectionChanged": false,
+  "previewStaffMagicLink": "PASS",
+  "previewStaffMagicLinkDeployment": "dpl_7hfjp2cBTot72M7KYLkfPhY8XUkW",
+  "previewStaffMagicLinkCommit": "2435152d",
+  "previewMemberAMagicLink": "PASS (needs-profile)",
+  "previewGoogleEnabled": false,
+  "previewAnonymousAcceptance": "PASS 15/15",
+  "previewAnonymousAcceptanceCommit": "06ccd701",
+  "openNowRecordContrastFix": "06ccd701",
+  "previewMemberProfilesSeeded": {
+   "date": "2026-10-27",
+   "authorizedBy": "Willy (t26s330)",
+   "neonProject": "solitary-wave-52860119",
+   "branch": "br-dark-forest-az0shpz9",
+   "rows": [
+    {
+     "id": "03f1f159-44d0-4e77-b92e-a8b603054ef8",
+     "actor": "member A",
+     "role": "member",
+     "onboardingState": "profile"
+    },
+    {
+     "id": "38259cd6-7080-407f-9c19-895770e23584",
+     "actor": "member B",
+     "role": "member",
+     "onboardingState": "profile"
+    }
+   ],
+   "mirrors": "profileIdentityRepository.provisionMember insert",
+   "memberships": 1,
+   "companyLinks": 0,
+   "applications": 0,
+   "portalSessionBrowserProven": true,
+   "doc": "r2-blockers-unblock.md#preview-member-profiles-for-ab--seeded-2026-10-27-hkt"
+  },
+  "previewAbPortalHeadedProve": {
+   "date": "2026-10-27",
+   "r2": "r2-43",
+   "memberA": {
+    "exit": 0,
+    "duration": "2.6m",
+    "dashboard": "membership-unavailable",
+    "routes200": 11
+   },
+   "memberB": {
+    "exit": 0,
+    "duration": "1.7m",
+    "dashboard": "membership-unavailable",
+    "routes200": 11
+   },
+   "doc": "r2-blockers-unblock.md#members-ab-preview-portal-headed-prove--pass-2026-10-27-hkt"
+  },
+  "previewAbMembershipFixturesSeeded": {
+   "date": "2026-10-27",
+   "authorizedBy": "Willy (t34s383 option 1 mirror Production)",
+   "neonProject": "solitary-wave-52860119",
+   "branch": "br-dark-forest-az0shpz9",
+   "memberA": {
+    "profileId": "03f1f159-44d0-4e77-b92e-a8b603054ef8",
+    "membershipId": "a7c10001-1027-4a01-8f01-000000000003",
+    "plan": "corporate",
+    "status": "pending_payment",
+    "seatLimit": 25,
+    "companyId": "a7c10001-1027-4a01-8f01-000000000001",
+    "companyName": "Test",
+    "directoryVisible": false,
+    "publicProfileStatus": "hidden",
+    "companyMemberId": "a7c10001-1027-4a01-8f01-000000000002",
+    "companyMemberRole": "owner"
+   },
+   "memberB": {
+    "profileId": "38259cd6-7080-407f-9c19-895770e23584",
+    "membershipId": "b7c10001-1027-4b01-8f01-000000000001",
+    "plan": "community",
+    "status": "active",
+    "seatLimit": 1,
+    "applications": [
+     {
+      "id": "b7c10001-1027-4b01-8f01-000000000002",
+      "plan": "community",
+      "status": "completed",
+      "currentStep": "complete"
+     },
+     {
+      "id": "b7c10001-1027-4b01-8f01-000000000003",
+      "plan": "startup",
+      "status": "draft",
+      "currentStep": "profile"
+     }
+    ]
+   },
+   "totalsDelta": {
+    "memberships": 2,
+    "companies": 1,
+    "companyMembers": 1,
+    "applications": 2
+   },
+   "doc": "r2-blockers-unblock.md#preview-ab-membership-company-fixtures--seeded-2026-10-27-hkt"
+  }
+ }
+}

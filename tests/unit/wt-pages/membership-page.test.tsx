@@ -138,7 +138,7 @@ describe("/membership rewrite", () => {
     membershipPlans.list.mockReset();
   });
 
-  it("renders the plan grid with four anchors plus a fifth, distinct SME card", async () => {
+  it("renders available plans and separate unnumbered decision help", async () => {
     const html = await renderMembership([community, startup, patron]);
 
     expect(html).toContain('class="plan-grid"');
@@ -152,7 +152,7 @@ describe("/membership rewrite", () => {
     // per its name, is "the plan grid itself has four cards."
     const planGridHtml =
       html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
-    expect((planGridHtml.match(/<article/g) ?? []).length).toBe(4);
+    expect((planGridHtml.match(/<article/g) ?? []).length).toBe(3);
     expect(html).toContain(bundles.en.Membership.sme.title);
     expect(html).toContain('href="/join?plan=community"');
     expect(html).toContain('href="/join?plan=startup"');

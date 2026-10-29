@@ -1,0 +1,229 @@
+# T22-07 offline use-case inventory — 2026-10-26
+
+Scope: UC22-01–60, the existing membership/staff features for R2 (plan Task 15). R3/R4 capabilities (T22-09/10/11/12) are **not** claimed here. This is an **offline inventory**, not the T22-07 acceptance run (exceptions: read-only real member B, member A and staff sessions on live production are recorded in [auth-browser-live-member-b.md](auth-browser-live-member-b.md), [auth-browser-live-member-a.md](auth-browser-live-member-a.md) and [auth-browser-live-staff.md](auth-browser-live-staff.md)); otherwise no real Auth session, authenticated HTTP/browser, Stripe test, notification sink, AI provider or deployment was used. Machine-readable copy: [t22-07-inventory.json](t22-07-inventory.json).
+
+Inventory base HEAD `6681eb970968d0a70f385e2771628bbfc2f1f86f` (docs-only after tested code HEAD `a5891fcc`, whose full suite passed 7,976 / 657 skipped per `r2-resources-binding-verification.json`).
+
+| Status | Count | Meaning |
+| --- | ---: | --- |
+| PASS | 0 | Fresh actual/result/evidence for the whole UC, incl. real identity/Stripe/DB where required |
+| PARTIAL | 49 | Current-tree offline unit/jsdom and/or isolated-Neon evidence; acceptance-critical runtime layer still open |
+| BLOCKED | 11 | Core dependency unavailable (Auth sessions, Stripe test, sink, T-MP10 approval, T-MP08 materials, T-MP12 contract, remote CI) |
+| NOT RUN | 0 | No external blocker for an anonymous/local run, but not executed yet |
+
+**No UC is PASS.** Every UC22-01–60 acceptance requires real Auth/HTTP/browser, Stripe or owner/legal input for at least one layer; offline evidence never substitutes (plan Task 15 exact completion condition).
+
+## Caveat — case definitions
+
+The original `Test_Cases.csv` / `Fixture_Runbook` from the audit ZIP are not in this repo or on the box. Per-UC themes are inferred from the plan §7 group definitions; rows marked ¹ are explicitly referenced by a plan task (Tasks 2–14). Re-map each row against the original CSV before the acceptance run; do not treat these themes as the canonical case wording.
+
+## Focused offline run (this inventory)
+
+`npx -p node@22 node node_modules/vitest/vitest.mjs run <every file cited below>` with `DATABASE_URL` unset: **exit 0, 106 files, 1,235 passed / 0 failed / 3 skipped**. `tests/integration/join-resume.test.ts` is gated and was skipped; it is not counted as evidence. Isolated-DB evidence is cited from the existing superseding records ([t22-02](t22-02.md), [t22-04a](t22-04a.md), [t22-06](t22-06.md), [resources/binding](r2-resources-binding.md)) and was not rerun here.
+
+## Cases
+
+| UC | Theme | Status | Offline / DB evidence | Blockers | Next without Auth |
+| --- | --- | --- | --- | --- | --- |
+| UC22-01 | Public entry pages render (anonymous) | **PARTIAL** | `membership-public-catalog.test.ts`, `navigation.test.ts`; [64 local settled render/axe combinations](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26); [live member B](auth-browser-live-member-b.md) | Preview anonymous suite PASS 15/15 on 06ccd701 (r2-blockers-unblock.md); PASS promotion awaits review against the original UC checklist (Test_Cases.csv absent) | Review Preview 15/15 against the original UC22-01 checklist; promote if it matches |
+| UC22-02 | Current concierge chat UI (not R3 actions) | **PARTIAL** | `concierge-widget.test.tsx`, `concierge-shell.test.tsx`, `concierge-unavailable-ui.test.tsx` | Real AI provider evaluation; Browser | Local Playwright disabled-provider path (manual fallback) without Auth |
+| UC22-03 | Four-tier membership comparison ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-catalog.test.ts`, `membership-tier-content.test.ts` | Browser visual matrix on populated catalog | Local Playwright visual at 375/768/1024/1440 |
+| UC22-04 | Comparison seats/help/anchor ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `membership-links.test.tsx` | Browser visual matrix | Same local Playwright run |
+| UC22-05 | Locale EN/ZH switching and hrefs | **PARTIAL** | `locale-switcher.test.tsx`, `locale-href-boundary.test.ts`, `membership-links-locale.test.tsx` | Browser | Local Playwright anonymous locale round-trip |
+| UC22-06 | next= destination preserved through login | **PARTIAL** | `login-destination.test.ts`, `login-outcome-redirect.test.tsx`, `login-entry-routing.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-07 | Anonymous admin boundary | **PARTIAL** | `admin-page-auth.test.ts`, `admin-page-auth-source.test.ts`, `admin-login-guard.test.ts` | Authenticated browser/HTTP | Anonymous HTTP probe of /admin/* on local server (no Auth needed for the negative control) |
+| UC22-08 | Anonymous portal boundary / admin redirect | **PARTIAL** | `portal-admin-redirect.test.tsx`, `portal-navigation-access.test.ts`; [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md); [live staff](auth-browser-live-staff.md) | Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | Anonymous HTTP probe of /portal/* on local server |
+| UC22-09 | Membership page help / CTA ¹ | **PARTIAL** | `membership-page-catalog.test.tsx`, `join-plan-chooser.test.ts` | Browser visual | Local Playwright |
+| UC22-10 | Policy / self-service copy consistency ¹ | **PARTIAL** | `membership-self-service-policy.test.ts`, `refund-policy-links.test.tsx`, `policy-pages.test.ts` | T-MP10 policy/legal approval | — |
+| UC22-11 | Real login member A (positive control) ¹ | **PARTIAL** | `login-resolution.test.ts`, `member-login-actions.test.ts`, `proxy.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member A attempt](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding); [live member A](auth-browser-live-member-a.md) | Member A magic-link verified on PR #212 Preview; Preview member profiles for A/B seeded 2026-10-27; A/B `/portal` headed prove PASS 2026-10-27 (r2-43); Preview membership/company fixtures seeded (mirror Production); production magic link unconfirmed; Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised); Exact-head deployment (live production = main@3eb9992d, not PR #212); Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production | — |
+| UC22-12 | Real login member B (negative control vs A) ¹ | **PARTIAL** | `login-resolution-server.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md) | B-vs-A cross-account access attempt (A and B sessions exist; only distinct dashboards observed); Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-13 | Real login staff D / NONSTAFF refusal ¹ | **PARTIAL** | `admin-login-actions.test.ts`, `admin-login-guard.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md); [live staff](auth-browser-live-staff.md) | Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised); Zero-write DB readback for refused NONSTAFF; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-14 | Free (community) join | **PARTIAL** | `hosted-free-onboarding.test.ts`, `join-service.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (FREE fixture) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-15 | Paid join checkout | **BLOCKED** | `checkout-service.test.ts`, `membership-checkout-status-route.test.ts`, `join-billing-pages.test.tsx`; [live member A](auth-browser-live-member-a.md) | Real A/B/staff Auth sessions; Stripe test mode; Notification sink | — |
+| UC22-16 | Owner checks on join/application | **PARTIAL** | `join-application-security.test.ts`, `join-actions-profile-identity.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A read OK, B read of A = null) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-17 | Retained input / resume | **PARTIAL** | `join-form-recovery.test.tsx`, `join-draft.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-18 | Identity/target gate and existing security fixes ¹ | **PARTIAL** | `hkwtia-acceptance-target.test.ts`, `acceptance-guard.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) | Real A/B/staff Auth sessions; Exact-head remote CI (stacked base; workflow scope) | — |
+| UC22-19 | Dependency/security release gate ¹ | **PARTIAL** | `ci-security-contract.test.ts` | Exact-head remote CI (stacked base; workflow scope); Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md) | — |
+| UC22-20 | No second subscription | **BLOCKED** | `billing-checkout-locking.test.ts`, `membership-uniqueness-schema.test.ts` | Real A/B/staff Auth sessions; Stripe test mode | — |
+| UC22-21 | Multiple memberships view/selection | **PARTIAL** | `portal-membership-selection.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (8 memberships); [live member B](auth-browser-live-member-b.md) | Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-22 | Seven membership statuses | **PARTIAL** | `membership-lifecycle.test.ts`, `membership-entitlements.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (all 7 statuses seeded); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md) | Staff walk of this route (A, B and Superadmin staff sessions exist on live production); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-23 | Own applications list (SQL paging) ¹ | **PARTIAL** | `owned-applications-sql.test.ts`, `owned-application-reader.test.ts`, `portal-sql-paging.test.ts`; DB: T22-06 0067 10k paging/EXPLAIN (t22-06.md); [live member B](auth-browser-live-member-b.md) | Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-24 | Own application detail + supplement history ¹ | **PARTIAL** | `owned-application-reader.test.ts`, `supplement-service.test.ts`; DB: T22-06 0067 10k paging/EXPLAIN (t22-06.md); T22-04A 0066 gated SQL cases (t22-04a.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-25 | Member supplement response ¹ | **PARTIAL** | `supplement-service.test.ts`, `supplement-ui.test.tsx`, `supplement-actions.test.ts`, `supplement-binding.test.ts`; DB: T22-04A 0066 gated SQL cases (t22-04a.md); Gated SQL binding cases (r2-resources-binding.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Bound forms unmounted; write flag disabled | — |
+| UC22-26 | Application form submit | **PARTIAL** | `join-schema.test.ts`, `join-actions.test.ts`, `join-page.test.tsx` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-27 | Form validation and correction | **PARTIAL** | `join-schema.test.ts`, `join-form-recovery.test.tsx` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-28 | Consent capture/withdrawal | **PARTIAL** | `profile-consent-audit.test.ts`, `whatsapp-consent.test.ts`, `contacts-consent-audit.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (opt-ins false) | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Notification sink | — |
+| UC22-29 | Company profile edit | **PARTIAL** | `company-profile-core.test.ts`, `update-company-action.test.ts`, `portal-company-forms.test.tsx`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (A owns company); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md) | Staff walk of this route (A, B and Superadmin staff sessions exist on live production); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-30 | Seat assignment | **PARTIAL** | `portal-seat-mutations.test.ts`, `portal-seat-bulk.test.ts`, `seat-capacity.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (SEAT fixture); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md) | Staff walk of this route (A, B and Superadmin staff sessions exist on live production); Seat page unavailable vs dashboard 25 seats for PAYMENT PENDING Corporate (finding, undiagnosed); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-31 | Seat/role revocation | **PARTIAL** | `company-portal-role-race.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (REVOKED fixture) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-32 | Existing external tool identity exchange contract ¹ | **BLOCKED** | — | T-MP12A sandbox contract / T-MP12B | — |
+| UC22-33 | Public company profile review (staff) | **PARTIAL** | `company-profiles-repository.test.ts`; [live staff](auth-browser-live-staff.md) | Staff review of a public company profile (staff session exists; dashboard review counts observed only); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-34 | Public directory isolation (opt-in only) | **PARTIAL** | `public-directory-availability.test.tsx`, `directory-paging.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (directory visibility false) | Authenticated browser/HTTP | Anonymous local check that seeded company is absent from public directory on isolated Neon |
+| UC22-35 | Portal directory isolation | **PARTIAL** | `portal-directory.test.tsx`; [live member B](auth-browser-live-member-b.md) | Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-36 | Event registration | **PARTIAL** | `event-registration-form.test.tsx`, `event-registration-public-action.test.ts`, `guest-rsvp-recovery.test.ts`; [live member B](auth-browser-live-member-b.md) | Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production); Authenticated browser/HTTP; Notification sink; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-37 | Ticket purchase | **BLOCKED** | `ticket-checkout-action-recovery.test.ts` | Real A/B/staff Auth sessions; Stripe test mode; Notification sink | — |
+| UC22-38 | Stripe webhook processing | **BLOCKED** | `webhook-service.test.ts`, `webhook-route.test.ts` | Stripe test mode | — |
+| UC22-39 | Approved member resources ¹ | **BLOCKED** | `member-resource-access.test.ts`; [live member B](auth-browser-live-member-b.md) | T-MP08 owner materials + private delivery; Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production); Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-40 | Receipts ¹ | **BLOCKED** | `portal-billing-page.test.tsx` | Stripe test mode; T-MP08 owner materials + private delivery; Real A/B/staff Auth sessions | — |
+| UC22-41 | Cancellation/refund policy effect ¹ | **BLOCKED** | `membership-self-service-policy.test.ts`, `refund-policy-links.test.tsx` | T-MP10 policy/legal approval; Stripe test mode | — |
+| UC22-42 | Dashboard submitted count = queue ID set ¹ | **PARTIAL** | `application-queue-submitted.test.ts`, `application-queue-submitted-sql.test.ts`, `admin-dashboard-queue-counts.test.ts`; DB: [gated PostgreSQL exact ID sets/count/paging](uc22-42-43.md); [live staff](auth-browser-live-staff.md) | Live dashboard-vs-queue submitted ID-set comparison (staff session exists; dashboard 1 submitted observed); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — (DB evidence completed; Auth/browser remains blocked) |
+| UC22-43 | Submitted queue filter/list ¹ | **PARTIAL** | `admin-application-queue-query.test.ts`, `application-queue-table.test.tsx`, `r2-daily-nav.test.tsx`; DB: [gated PostgreSQL exact ID sets/count/paging](uc22-42-43.md); [live staff](auth-browser-live-staff.md) | Live submitted filter/list exercise (staff session exists; queue page rendered only); Authenticated browser/HTTP; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — (DB evidence completed; Auth/browser remains blocked) |
+| UC22-44 | Unknown save → receipt reconciliation ¹ | **PARTIAL** | `supplement-service.test.ts`, `supplement-ui.test.tsx`; DB: T22-04A 0066 gated SQL cases (t22-04a.md) (lost-response reconciliation) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-45 | Version conflict / concurrency ¹ | **PARTIAL** | `supplement-service.test.ts`, `supplement-repository.test.ts`; DB: T22-04A 0066 gated SQL cases (t22-04a.md) (distinct-staff concurrency, unique index) | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-46 | Bulk actions | **PARTIAL** | `admin-batch-service.test.ts`, `admin-batch-runner.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Notification sink | — |
+| UC22-47 | Import | **PARTIAL** | `member-import-service.test.ts`, `member-import-validation.test.ts`, `member-import-upload-route.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-48 | Staff case handling (current, non-R3) | **PARTIAL** | `application-case-actions.test.ts`, `application-case-form.test.tsx`, `application-case-facts.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-49 | Staff draft review/adopt (current) | **PARTIAL** | `application-draft-actions.test.ts`, `application-draft-adopt.test.tsx`, `ai-draft-validation.test.ts` | Real A/B/staff Auth sessions; Authenticated browser/HTTP | — |
+| UC22-50 | Staff guard (NONSTAFF refused, zero writes) ¹ | **PARTIAL** | `admin-server-action-boundaries.test.ts`, `supplement-actions.test.ts`; DB: T22-02 isolated Neon fixtures/scoped reads (t22-02.md) (NONSTAFF zero row change); T22-04A 0066 gated SQL cases (t22-04a.md); [live member B](auth-browser-live-member-b.md); [live member A](auth-browser-live-member-a.md); [live staff](auth-browser-live-staff.md) | Staff D fixture role session (Superadmin positive access and members A/B refusals observed on live production); Authenticated browser/HTTP; Zero-write DB readback for refused NONSTAFF; Exact-head deployment (live production = main@3eb9992d, not PR #212) | — |
+| UC22-51 | Concierge cites sources (current) | **PARTIAL** | `ai-concierge-grounding.test.ts`, `concierge-service.test.ts` | Real AI provider evaluation; Authenticated browser/HTTP | — |
+| UC22-52 | Concierge provider failure path | **PARTIAL** | `concierge-unavailable-ui.test.tsx`, `concierge-readiness.test.ts` | Real AI provider evaluation; Authenticated browser/HTTP | Local Playwright with provider disabled |
+| UC22-53 | Concierge data isolation | **PARTIAL** | `concierge-security.test.ts`, `concierge-route.test.ts` | Real A/B/staff Auth sessions; Real AI provider evaluation | — |
+| UC22-54 | External tool authorization contract ¹ | **BLOCKED** | — | T-MP12A sandbox contract / T-MP12B | — |
+| UC22-55 | Mobile widths / zoom / keyboard / screen reader ¹ | **PARTIAL** | `mobile-navigation.test.tsx`, `supplement-ui.test.tsx`; [eight CTA ratios 8.452:1, 64 settled + two reduced-motion axe scans clear](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26) | Real-device matrix; Screen reader | Screen reader and real-device checks remain open |
+| UC22-56 | Private list performance (20-row p95 ≤2s) ¹ | **PARTIAL** | `portal-sql-paging.test.ts`; DB: [1k/10k production reader timing, 30 warm/30 fresh connections, plans/rows/bytes + cleanup; retry hardening: 2 full DB replays, 0 handshake failures/exhausted, cleanup verified](uc22-56.md#retry-hardening) | Real A/B/staff Auth sessions; authenticated HTTP/browser p95 unmeasured | DB timing completed; optional isolated replay. Full target requires Auth + HTTP/browser measurement |
+| UC22-57 | Public performance LCP/CLS (INP field) ¹ | **PARTIAL** | `production-lhci-target.test.ts`; [repeated three-run medians for ten URLs](anon-browser-local.md#repeated-uc22-57-lab-medians) | RUM for field INP (Preview lab done 2026-10-27: perf ≥0.94 / a11y 1.00 on 10 URLs, [uc22-57-preview-lighthouse.json](uc22-57-preview-lighthouse.json)) | Field INP (RUM) remains open; controlled-device lab optional |
+| UC22-58 | Hong Kong date boundaries (UTC 15:59/16:00) ¹ | **PARTIAL** | `hong-kong-time.test.ts`, `event-hong-kong-datetime.test.ts` | Rendered browser check | — |
+| UC22-59 | Exact-head CI gate ¹ | **BLOCKED** | `ci-security-contract.test.ts` | Exact-head remote CI (stacked base; workflow scope); stacked-ci-trigger.patch unapplied | — |
+| UC22-60 | Member→staff→member same application, persisted readback ¹ | **BLOCKED** | `supplement-binding.test.ts`, `supplement-ui.test.tsx`; DB: T22-04A 0066 gated SQL cases (t22-04a.md); Gated SQL binding cases (r2-resources-binding.md) | Real A/B/staff Auth sessions; Authenticated browser/HTTP; Bound forms unmounted; write flag disabled | — |
+
+¹ Theme anchored to an explicit plan task reference; others inferred from the §7 group.
+
+## Additional regressions (§7, appended — do not alter the 72 originals)
+
+| ID | Status | Evidence / blocker |
+| --- | --- | --- |
+| REG-submitted-id-set | PARTIAL | `application-queue-submitted-sql.test.ts`; [PostgreSQL exact UUID sets, equal-count mutation red/restored green](uc22-42-43.md); real staff Auth/browser remains blocked |
+| REG-listOwned-untruncated | PARTIAL | `owned-application-reader.test.ts`; join-resume keeps full history; runtime caller check needs Auth |
+| REG-late-stream-company-switch | NOT RUN | R3 (T22-09) scope |
+| REG-personal-outcomes | NOT RUN | R3 (T22-12A) scope |
+| REG-provider-unknown-outcome | NOT RUN | R4 (T22-11) scope |
+
+## Blocker index
+
+| Blocker | UCs (status BLOCKED or remaining layer) |
+| --- | --- |
+| Authenticated browser/HTTP | 33: 06, 07, 08, 14, 16, 17, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 60 |
+| Real A/B/staff Auth sessions | 24: 06, 14, 15, 16, 17, 18, 20, 24, 25, 26, 27, 28, 31, 37, 40, 44, 45, 46, 47, 48, 49, 53, 56, 60 |
+| Exact-head deployment (live production = main@3eb9992d, not PR #212) | 16: 08, 11, 12, 13, 21, 22, 23, 29, 30, 33, 35, 36, 39, 42, 43, 50 |
+| Stripe test mode | 6: 15, 20, 37, 38, 40, 41 |
+| Notification sink | 5: 15, 28, 36, 37, 46 |
+| Member A and staff walks of this route (A, B and Superadmin staff sessions exist on live production) | 5: 21, 23, 35, 36, 39 |
+| Real AI provider evaluation | 4: 02, 51, 52, 53 |
+| Exact-head remote CI (stacked base; workflow scope) | 3: 18, 19, 59 |
+| Staff walk of this route (A, B and Superadmin staff sessions exist on live production) | 3: 22, 29, 30 |
+| Browser | 2: 02, 05 |
+| T-MP10 policy/legal approval | 2: 10, 41 |
+| Staff D fixture role session (Superadmin staff session proven via Google on production and via magic link on PR #212 Preview; staff D role not exercised) | 2: 11, 13 |
+| Zero-write DB readback for refused NONSTAFF | 2: 13, 50 |
+| Bound forms unmounted; write flag disabled | 2: 25, 60 |
+| T-MP12A sandbox contract / T-MP12B | 2: 32, 54 |
+| T-MP08 owner materials + private delivery | 2: 39, 40 |
+| Preview anonymous suite PASS 15/15 on 06ccd701 (r2-blockers-unblock.md); PASS promotion awaits review against the original UC checklist (Test_Cases.csv absent) | 1: 01 |
+| Browser visual matrix on populated catalog | 1: 03 |
+| Browser visual matrix | 1: 04 |
+| Browser visual | 1: 09 |
+| Member A magic-link verified on PR #212 Preview; Preview member profiles for A/B seeded 2026-10-27 (role=member, DB resolve = member) but /portal session not yet browser-proven (headed handoff pending); production magic link unconfirmed | 1: 11 |
+| Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production | 1: 11 |
+| B-vs-A cross-account access attempt (A and B sessions exist; only distinct dashboards observed) | 1: 12 |
+| Full-tree audit exit 1 under accepted dev-only LHCI exception (dependency-disposition.md) | 1: 19 |
+| Seat page unavailable vs dashboard 25 seats for PAYMENT PENDING Corporate (finding, undiagnosed) | 1: 30 |
+| Staff review of a public company profile (staff session exists; dashboard review counts observed only) | 1: 33 |
+| Live dashboard-vs-queue submitted ID-set comparison (staff session exists; dashboard 1 submitted observed) | 1: 42 |
+| Live submitted filter/list exercise (staff session exists; queue page rendered only) | 1: 43 |
+| Staff D fixture role session (Superadmin positive access and members A/B refusals observed on live production) | 1: 50 |
+| Browser/device matrix | 1: 55 |
+| Screen reader | 1: 55 |
+| Authenticated HTTP/browser 20-row list p95 remains unmeasured | 1: 56 |
+| RUM for field INP | 1: 57 |
+| Preview lab/RUM not run (Preview reachable via OIDC since 2026-10-27; see r2-blockers-unblock.md) | 1: 57 |
+| Rendered browser check | 1: 58 |
+| stacked-ci-trigger.patch unapplied | 1: 59 |
+
+## Next steps that do not need Auth
+
+1. **UC22-42/43 isolated PG completed:** [evidence](uc22-42-43.md) proves exact fixture ID sets through production readers, count delta and bidirectional paging. Staff Auth/browser acceptance remains BLOCKED; rows remain PARTIAL.
+2. **UC22-56 DB timing completed:** [evidence](uc22-56.md) records 1k/10k fixtures, 30 warm / 30 fresh-connection samples per production first/deep/detail reader, p50/p95/max, plans, rows, bytes and cleanup. Optional isolated replay needs no Auth; full private-list HTTP/browser p95 remains BLOCKED on real Auth.
+3. **UC22-01/03/04/05/07/08/09/34/52/55 local anonymous browser:** `next build && next start` against the isolated catalog, Playwright anonymous smoke + four widths + keyboard, anonymous `/admin` and `/portal` negative probes, seeded company absent from public directory, provider-disabled concierge fallback. Preview remains SSO-protected; this would be local-runtime evidence only.
+4. **UC22-57:** local three-run LHCI on `next start` (lab LCP/CLS only; field INP stays NOT_TESTED).
+5. **Acceptance harness skeleton:** `tests/e2e/hkwtia-membership-admin-acceptance.spec.ts` that loads this JSON, emits per-UC `case-results.json/csv` with role/fixture/SHA/actual/result/evidence/cleanup, and maps Playwright `skip` to BLOCKED/NOT RUN (never PASS). Auth cases stay skipped until sessions exist.
+6. **Obtain original Test_Cases.csv** and reconcile themes.
+
+No write flag was enabled, no production Neon was touched and nothing was deployed.
+
+## Local anonymous production-start attempt — 2026-10-26
+
+[Browser evidence](anon-browser-local.md) / [manifest](anon-browser-local-manifest.json): build/start passed, but both anonymous browser runs encountered locale redirect loops before public render. Four initial-hop HTTP boundary checks passed on retry; login destinations still loop. UC22-01 moves NOT RUN → BLOCKED; other statuses remain unchanged. Current counts: **0 PASS, 44 PARTIAL, 15 BLOCKED, 1 NOT RUN**. Per-row `localBrowserEvidence` in JSON distinguishes these results from prior offline evidence. Historical browser next steps in the table now depend on resolving the local redirect loop. No screenshots, axe, keyboard, screen reader, Lighthouse, field INP, Preview or deployment PASS.
+
+
+## Localhost follow-up reconciliation — 2026-10-26
+
+[Updated evidence](anon-browser-local.md#localhost-follow-up--2026-10-26) / [manifest](anon-browser-local-manifest.json) supersedes the local launcher blocker above. UC22-01 BLOCKED → PARTIAL; UC22-57 NOT RUN → PARTIAL; remaining targeted cases stay PARTIAL. All 64 public render combinations completed. Final anonymous Chromium run: 15 passed / 5 failed (three serious home CTA contrast cases and two deliberately unconfigured four-tier catalog cases). Login redirects, locale/query/hash, manual help, disabled concierge 503/fallback and hidden-company exclusion verified locally. Three Lighthouse runs per ten public URLs record median LCP/CLS/TBT; field INP and screen reader NOT_TESTED. No Preview/SSO PASS. Current counts: **0 PASS, 46 PARTIAL, 14 BLOCKED, 0 NOT RUN**. Historical next-step rows above are superseded by per-UC JSON evidence and the findings in the updated document.
+
+
+## Settled contrast reconciliation — 2026-10-26
+
+[New replay evidence](anon-browser-local.md#settled-cta-contrast-replay--2026-10-26) / manifest `settledContrastRun` supersedes the home contrast blocker: exact 3.81 axe finding reproduced at ancestor opacity 0.552; settled white on #1a4f82 is 8.452:1. No CSS change. All 64 settled public axe scans and two reduced-motion home scans clear; eight width/locale CTA assertions pass. Anonymous suite **20 passed / 2 failed**; remaining failures are deliberately unconfigured paid tiers, still PARTIAL. UC22-01/55/57 remain **PARTIAL**, with updated per-row JSON evidence; Preview/SSO/deployment, screen reader and field INP remain open. Repeated LHCI medians for three runs per same ten URLs are linked above. Totals unchanged: **0 PASS, 46 PARTIAL, 14 BLOCKED, 0 NOT RUN**.
+
+
+## Movement-only home CTA entrance — 2026-10-26
+
+Approved CSS fix `cafee809`: hero-actions retains movement/timing and full opacity (WCAG 1.4.3). [Evidence](anon-browser-local.md#movement-only-cta-entrance--2026-10-26) / manifest `movementOnlyEntranceRun`: old CSS failed new assertion with opacity 0; focused replay 8/8 green; full anonymous suite **28 passed / 2 failed** (unchanged paid-tier configuration failures). All 32 paused samples across four widths × EN/ZH at 0/450/600/800ms: every CTA ancestor opacity 1, white/#1a4f82 **8.451873:1**; eight paused hero axe scans clear. Existing 64 settled public scans and reduced-motion checks remain clear. Same-config three-run LHCI per ten URLs repeated; medians in linked evidence. Node 22 units **7,986 passed / 659 skipped**, typecheck/lint/build green (77 existing lint warnings); next-env.d.ts restored, server stopped, no listener on 3212.
+
+UC22-01/55/57 and paid-tier finding remain **PARTIAL**. Inventory **0 PASS / 46 PARTIAL / 14 BLOCKED / 0 NOT RUN**. Preview/SSO, screen reader, real devices, controlled performance/field INP, Auth, Stripe/provider acceptance and exact-head remote CI remain open. Same branch/PR, no deployment, Auth, write flags, fixture changes or CI patch application.
+
+## Live member B Auth/browser UAT — 2026-10-26
+
+[Evidence](auth-browser-live-member-b.md) / [manifest](auth-browser-live-member-b-manifest.json): real member B magic-link (Neon Auth) session on live production `https://hkwtia.vercel.app` (no Deployment Protection wall; deployed `release@6833eb9a` = main@3eb9992d, **not** PR #212 head). Read-only portal walk observed; member B at `/admin` was refused. UC22-12 and UC22-13 BLOCKED → PARTIAL; UC22-01/08/21/22/23/29/30/35/36/39/50 gain live evidence with unchanged status. Counts **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**. Member A and staff D magic links (gmail.com) not exercised; no PASS claimed.
+
+## Live member A attempt — 2026-10-26
+
+[Finding](auth-browser-live-member-b.md#member-a-magic-link-attempt--2026-10-26-finding): on production `release@6833eb9a` (not PR #212), two fresh member A magic links verify at Neon Auth but stall at `/member-login` with an uncleared session verifier; `/portal` returns to login, so no A session exists. UC22-11 stays **BLOCKED** (blocker narrowed); UC22-12 stays PARTIAL. Counts unchanged **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**.
+
+### Member A branch fix — 2026-10-26
+
+[Root cause and fix](auth-browser-live-member-b.md#root-cause-and-fix-branch-not-deployed): stale-cookie exchange suppression reproduced test-first; PR #212 exchanges the verifier with old session/cache cookies isolated. Fix on PR #212 deployed to Preview only (magic-link exchange proven for A/B/staff there); not in production. A session never established on older production. UC22-11 remains **BLOCKED**; counts **0 PASS / 48 PARTIAL / 12 BLOCKED / 0 NOT RUN**. Blocker index regenerated from JSON.
+
+## Live member A Auth/browser UAT — 2026-10-27
+
+[Evidence](auth-browser-live-member-a.md) / [manifest](auth-browser-live-member-a-manifest.json): real member A session on live production `https://hkwtia.vercel.app` (`release@6833eb9a` = main@3eb9992d, older than PR #212; fix `a34a631c` **not deployed**), signed in by Willy **via Google** in a clean cookie jar after automated magic-link send was blocked. Read-only walk: Corporate **PAYMENT PENDING**, 25 seats; session sticky across portal/profile/company/seats/billing and after `/admin` → `/admin-login` refusal. Findings: chip "Test" vs display name "WTIA member"; seats page "unavailable" despite 25 seats. Continue payment **not clicked**. UC22-11 BLOCKED → **PARTIAL** (magic-link path still unconfirmed; exact-head/Preview open); UC22-08/12/13/15/22/29/30/50 gain member A evidence with unchanged status. sessionStorage resend cooldown (`hkwtia-login-resend-member`) recorded as a docs-only UAT note. Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. Blocker index regenerated from JSON.
+
+## Live staff Auth/browser UAT — 2026-10-27
+
+[Evidence](auth-browser-live-staff.md) / [manifest](auth-browser-live-staff-manifest.json): real staff session on live production `https://hkwtia.vercel.app` (`release@6833eb9a` = main@3eb9992d, older than PR #212), signed in by Willy **via Google** on `/admin-login` after clearing site data (empty cookie jar). Identity Willy Lai, **Superadmin** (not the staff D fixture role); staff magic link not tested. Read-only walk: session sticky across `/admin`, `/admin/members`, `/admin/members/queue`, `/admin/events-mgmt`, `/admin/inbox` and back; `/portal` redirects staff to `/admin`. Dashboard snapshot (~00:52 HKT): 1 submitted, 5 unfinished, 0 review/approvals, 3 open staff tasks. No writes, approvals or messages. UC22-08/13/33/42/43/50 gain staff evidence; staff blockers reworded on UC22-11/21/22/23/29/30/35/36/39. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. Blocker index regenerated from JSON.
+
+
+## R2 blockers unblock — 2026-10-27
+
+[Live status and ordered Preview/Stripe/CI unblock paths](r2-blockers-unblock.md). Inventory counts unchanged: **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**. Preferred Preview access: box `vercel login` + `vc curl` / `x-vercel-trusted-oidc-idp-token` (never print token). `stacked-ci-trigger.patch` remains unapplied until Actions billing is fixed.
+
+## Preview OIDC proven — 2026-10-27
+
+[Evidence](r2-blockers-unblock.md#preview-oidc-proven--2026-10-27): box Vercel CLI linked (ynwaforever → `ynwaforevers-projects/hkwtia`); `vercel curl --deployment` and an origin-scoped `x-vercel-trusted-oidc-idp-token` Playwright check (`scripts/preview-oidc-anon-check.mjs`) reach PR #212 Preview `dpl_9aTJMDmyZLdEzmwPHfC3GxKdHdqC` (commit `b10686e3`) without disabling SSO. Preview `/membership` EN+ZH render **all four tiers** (community/startup/corporate/patron, paid prices shown), so the paid-tier gap is local-env only. Finding: Preview `/sitemap.xml` HTTP 500 (production 200). UC22-01 blocker reworded; UC22-01/03 gain `previewOidcEvidence`. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview OIDC fixture smoke — 2026-10-27
+
+[Evidence](r2-blockers-unblock.md#preview-oidc-playwright-fixture--sitemap-diagnosis--2026-10-27): opt-in Playwright fixture `tests/fixtures/preview-oidc.ts`; minimal anonymous smoke on Preview `dpl_HPvtueKUWn76eBgLRtYY81dKJ4hX` (commit `6cae5603`) 3/3 pass (home, EN/ZH membership four tiers). Preview `/sitemap.xml` 500 = unmigrated Preview DB (environment). UC22-01/03 `previewOidcEvidence` gain `fixtureSmoke`. **No status change**; counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview magic-link Auth — 2026-10-27
+
+[Staff Preview magic-link PASS](r2-blockers-unblock.md#staff-preview-magic-link--pass-2026-10-27-hkt) (exact-head `2435152d`, `/admin` sticky, `/portal` → `/admin`) and [Member A Preview PASS (needs-profile)](r2-blockers-unblock.md#member-a-headed-preview-handoff-2026-10-27-hkt--pass-needs-profile) reword UC22-11/13 blockers (per-row `previewAuthEvidence*` in JSON). No status change: staff D role, A/B Preview profiles/membership walks and production remain open; Google is off on Preview. Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview anonymous acceptance — 2026-10-27
+
+[Preview anonymous acceptance PASS 15/15](r2-blockers-unblock.md#preview-anonymous-acceptance--pass-1515-2026-10-27-hkt) on `06ccd701` after fixing the Open Now record label contrast (4.48 → 5.35:1). UC22-01's Preview blocker is cleared; it stays **PARTIAL** pending review against the original UC checklist. UC22-55 gains Preview axe evidence; UC22-57 blocker reworded (Preview reachable; lab/RUM not run). Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview Lighthouse lab — 2026-10-27
+
+[Preview Lighthouse lab](r2-blockers-unblock.md#preview-lighthouse-lab-uc22-57--2026-10-27-hkt) on `06ccd701` (ten URLs × 3, mobile simulated): performance medians 0.94–0.99, accessibility 1.00, CLS 0, LCP 1.9–2.4 s; SEO/best-practices reductions are Preview-environment/harness plus a footer `mailto:` form mixed-content observation. UC22-57 blocker reduced to field INP (RUM); stays **PARTIAL**. Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN**.
+
+## Preview member profiles A/B — 2026-10-27
+
+[Preview-only member profiles seeded](r2-blockers-unblock.md#preview-member-profiles-for-ab--seeded-2026-10-27-hkt) for Member A (`03f1f159-…`) and Member B (`38259cd6-…`), role `member`, mirroring `provisionMember` (Willy-approved). DB resolve returns `member` for both. Counts **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** (`r2BlockersUnblock.previewMemberProfilesSeeded` in JSON).
+
+## Members A/B Preview `/portal` headed prove — 2026-10-27
+
+[r2-43 headed prove](r2-blockers-unblock.md#members-ab-preview-portal-headed-prove--pass-2026-10-27-hkt): A EXIT=0 (2.6m), B EXIT=0 (1.7m); sticky `/portal`; membership-unavailable at the time; 11 portal routes 200. Session gate cleared; membership-data walks awaited fixtures.
+
+## Preview A/B membership/company fixtures — 2026-10-27
+
+[Mirror-Production fixtures seeded](r2-blockers-unblock.md#preview-ab-membership-company-fixtures--seeded-2026-10-27-hkt) (Willy t34s383): A Corporate pending_payment 25 + company Test HIDDEN + owner; B Community active 1 + Community completed + Startup draft. Counts still **0 PASS / 49 PARTIAL / 11 BLOCKED / 0 NOT RUN** — headed re-walk with data still needed; UC22-39 still T-MP08 (`r2BlockersUnblock.previewAbMembershipFixturesSeeded` in JSON).

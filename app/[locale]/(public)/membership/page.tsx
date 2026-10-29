@@ -1,3 +1,5 @@
+import {membershipSelfServicePolicy} from "@/lib/membership/policy-self-service";
+import {PLAN_CATALOG} from "@/lib/membership/plans";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AwaitReadModel } from "@/components/server/await-read-model";
@@ -119,6 +121,7 @@ export default async function MembershipPage({ params }: Props) {
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
       priceLines: priceLines(tier.price, labels),
+      seatLabel: t("compare.seats", {count: PLAN_CATALOG[tier.code].seatAllowance}),
       // Programme D-5: the copy for each tier's real entitlements lives in the
       // bundle beside lib/membership/entitlements.ts; the old shared triple
       // said the same thing about every tier, which sells nothing.
@@ -142,6 +145,7 @@ export default async function MembershipPage({ params }: Props) {
         {tiers.length > 0 ? (
           <>
             <PlanGrid
+              labels={{audience: t("compare.audience"), fee: t("compare.fee"), uses: t("compare.uses"), next: t("compare.next")}}
               sme={{
                 label: t("sme.label"),
                 title: t("sme.title"),
@@ -184,15 +188,12 @@ export default async function MembershipPage({ params }: Props) {
         eyebrow={t("eyebrow")}
         lead={t("summary")}
         title={t("title")}
+        actions={[{href: "#plans", label: t("compare.action")}]}
       />
-      <Section labelledBy="membership-self-service-title">
-        <h2 id="membership-self-service-title">{t("selfService.title")}</h2>
-        <p>{t("selfService.copy")}</p>
-        <div className="mt-6 flex flex-wrap gap-5">
-          <ActionLink href="/portal/billing" prefetch={false} variant="text-link">{t("selfService.billing")}</ActionLink>
-          <ActionLink href="/contact" variant="text-link">{t("selfService.support")}</ActionLink>
-        </div>
-      </Section>
+      <nav aria-label={t("selfService.title")} className="shell flex flex-wrap items-center gap-5 py-6">
+        <ActionLink href={membershipSelfServicePolicy.links.billing.href} prefetch={false} variant="text-link">{t(membershipSelfServicePolicy.links.billing.labelKey)}</ActionLink>
+        <ActionLink href={membershipSelfServicePolicy.links.support.href} variant="text-link">{t(membershipSelfServicePolicy.links.support.labelKey)}</ActionLink>
+      </nav>
       <Suspense
         fallback={
           <div className="min-h-screen">

@@ -39,7 +39,7 @@ const config = {
         `${baseUrl}/zh`, `${baseUrl}/zh/membership`, `${baseUrl}/zh/events`,
         `${baseUrl}/zh/programmes`, `${baseUrl}/zh/partners`
       ],
-      numberOfRuns: 1,
+      numberOfRuns: 3,
       // A remote base URL (a Preview) is already serving; lhci only starts a server when the
       // command is truthy, so `undefined` skips it while the ready pattern/timeout stay harmless.
       startServerCommand: remote ? undefined : 'npm.cmd run start',

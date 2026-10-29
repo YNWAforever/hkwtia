@@ -804,12 +804,13 @@
     }
   },
   "Membership": {
+    "compare": {"audience": "適合對象", "fee": "會費", "uses": "主要用途", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
     "metaTitle": "會員計劃｜WiseTech Hong Kong",
     "metaDescription": "比較 WTIA 會員級別及權益。",
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
-    "title": "在香港創科社群找到你的定位。",
+    "title": "選擇適合你的會籍",
     "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
     "tiersTitle": "會員級別",
     "tiersIntro": "現行會費及付款週期以目前會員目錄為準。",
@@ -2396,6 +2397,7 @@
     "navGroups": {"me": "我的帳戶", "company": "我的公司", "benefits": "會員權益"},
     "shell": {"portalLabel": "會員專區", "backToSite": "返回主網站"},
     "applications": {
+      "paging": {"label": "申請分頁", "first": "返回最新申請", "next": "較早的申請"},
       "nav": "我的申請",
       "title": "我的申請",
       "description": "查看每份會籍申請的狀態、需要處理的資料及下一步。",
@@ -3742,7 +3744,7 @@
         "rejected": "已拒絕"
       }
     },
-    "applicationQueue": {"title":"入會申請及付款","description":"每列代表一份申請。相關會籍及最新付款嘗試分開顯示，方便跟進未完成申請及核對付款。","caption":"入會申請工作清單","applicant":"申請人","application":"申請","step":"已儲存步驟","membership":"相關會籍","billing":"最新付款嘗試","updated":"更新時間（香港時間）","none":"未有記錄","empty":"此清單沒有符合條件的申請。","back":"返回會員","views":"申請工作清單","viewsLabels":{"draft":"待完成入會","pending_payment":"待付款","pending_review":"待審批"},"search":"姓名、電郵、機構或申請 ID","sort":"排序","sortNewest":"最近更新","sortOldest":"最早更新","pageSize":"每頁列數","totalMatching":"目前搜尋及狀態共有 {count} 份申請。","invalid":"清單篩選或分頁資料無效。請清除篩選後重試。","unavailable":"暫時無法載入申請清單，請稍後重試。","loading":"正在載入申請…","draft":"草稿","steps":{"profile":"個人資料","company":"機構資料","checkout":"付款","complete":"完成","review":"審批"},"billingStates":{"active":"進行中的付款嘗試","completed":"已完成付款嘗試","abandoned":"已放棄付款嘗試","expired":"已到期付款嘗試"}},
+    "applicationQueue": {"title":"入會申請及付款","description":"每列代表一份申請。相關會籍及最新付款嘗試分開顯示，方便跟進未完成申請及核對付款。","caption":"入會申請工作清單","applicant":"申請人","application":"申請","step":"已儲存步驟","membership":"相關會籍","billing":"最新付款嘗試","updated":"更新時間（香港時間）","none":"未有記錄","empty":"此清單沒有符合條件的申請。","back":"返回會員","views":"申請工作清單","viewsLabels":{"submitted":"已提交","draft":"待完成入會","pending_payment":"待付款","pending_review":"待審批"},"search":"姓名、電郵、機構或申請 ID","sort":"排序","sortNewest":"最近更新","sortOldest":"最早更新","pageSize":"每頁列數","totalMatching":"目前搜尋及狀態共有 {count} 份申請。","invalid":"清單篩選或分頁資料無效。請清除篩選後重試。","unavailable":"暫時無法載入申請清單，請稍後重試。","loading":"正在載入申請…","draft":"草稿","steps":{"profile":"個人資料","company":"機構資料","checkout":"付款","complete":"完成","review":"審批"},"billingStates":{"active":"進行中的付款嘗試","completed":"已完成付款嘗試","abandoned":"已放棄付款嘗試","expired":"已到期付款嘗試"}},
     "batchGrants": {"title":"贈送會籍","formTitle":"準備有限期贈送會籍","description":"選擇明確對象、日期及理由。提交前請檢查每個對象及衝突；此操作不會記錄付款。","back":"返回會員","plan":"會籍計劃","start":"生效時間（香港時間）","expiry":"到期時間（香港時間）","reason":"贈送理由","preview":"預覽贈送會籍","kind":"對象類型","profile":"個人會員檔案","company":"機構","ids":"對象 ID","help":"每行輸入一個可信會員檔案或機構 ID，最多 5000 個。預覽會顯示名稱、計劃名額及衝突。日期適用於所有對象。","disabled":"此環境尚未啟用批量贈送會籍。","success":"已準備贈送會籍。","invalid":"請檢查對象 ID、計劃、日期及理由。","duplicate":"對象已有尚未結束的會籍。","error":"無法準備贈送會籍。請檢查權限後重試。"},
     "imports": {
   "title": "匯入會員資料",
@@ -5209,5 +5211,20 @@
     "invalid": "請求無效。",
     "dirty": "目前有未儲存修改。複製已批准草稿前，請先儲存或保留修改。",
     "noHistory": "這個語言未有已儲存草稿。"
+  },
+  "Supplement": {
+    "preview": "發布預覽",
+    "visible": "申請人可見",
+    "publish": "發布補件要求",
+    "respond": "提交回覆",
+    "text": "回覆",
+    "url": "HTTPS 網址",
+    "due": "期限",
+    "saved": "已儲存",
+    "validation": "請檢查回覆，輸入已保留。",
+    "forbidden": "你無權處理此要求。",
+    "conflict": "要求已變更，請重新載入。",
+    "unknown": "結果未明，重試前請查核操作收據。",
+    "receipt": "操作收據"
   }
 }

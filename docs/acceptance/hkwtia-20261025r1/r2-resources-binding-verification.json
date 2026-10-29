@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-26",
+  "branch": "wtia/hkwtia-plan-r1-20261025",
+  "startHead": "7c7ddf7ff1a956bbb5e7bb44b110aab8cc4fe868",
+  "testedCodeHead": "a5891fccfd3761186e69c25b411b0b16b001eeac",
+  "pr": 212,
+  "stackedOn": 211,
+  "checks": [
+    {
+      "command": "npx vitest run <nine focused unit suites listed in r2-resources-binding.md>",
+      "exitCode": 0,
+      "filesPassed": 9,
+      "testsPassed": 173
+    },
+    {
+      "command": "HKWTIA_DB_ACCEPTANCE=1 npx -y -p node@22 node node_modules/vitest/vitest.mjs run tests/integration/application-supplements.test.ts",
+      "exitCode": 0,
+      "filesPassed": 1,
+      "testsPassed": 6,
+      "runtimeScope": "synthetic actors on verified isolated Neon child only"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "filesPassed": 906,
+      "filesSkipped": 116,
+      "testsPassed": 7976,
+      "testsSkipped": 657
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 77
+    },
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "afterBuild": true
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "nextVersion": "16.4.3"
+    },
+    {
+      "command": "npm run audit:strings",
+      "exitCode": 0,
+      "tsxFiles": 360
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "observedFailures": [
+    {
+      "case": "resource placeholders",
+      "failed": 4,
+      "passed": 1,
+      "expectedBehaviorFailure": true
+    },
+    {
+      "case": "binding placeholders",
+      "failed": 2,
+      "expectedBehaviorFailure": true
+    },
+    {
+      "case": "action placeholders",
+      "failed": 5,
+      "expectedBehaviorFailure": true
+    },
+    {
+      "case": "first gated SQL run",
+      "failed": 1,
+      "passed": 5,
+      "reason": "new historical rows preceded original empty-history assertion; moved new case after visibility/idempotency cases; final six pass"
+    },
+    {
+      "case": "initial typecheck",
+      "reason": "TSX generic helper required trailing comma; corrected and rechecked"
+    }
+  ],
+  "fourLayers": {
+    "code": "resource contract partial; SQL supplement binding/actions and unmounted wrappers implemented",
+    "tests": "focused, full and six gated SQL cases PASS",
+    "deployment": "no manual deployment, promotion or merge",
+    "runtime": "synthetic isolated SQL PASS; real Auth/HTTP/browser, Stripe test and notification sink BLOCKED"
+  },
+  "resourceLimitations": [
+    "No owner-approved source materials supplied",
+    "Empty default source; no synthetic production content",
+    "No resource SQL schema/CMS editor, private byte storage or protected download route",
+    "No resource DB/download acceptance claimed"
+  ],
+  "featureFlag": {
+    "name": "HKWTIA_SUPPLEMENT_WRITES_ENABLED",
+    "enabled": false
+  },
+  "remoteCI": "not established; stacked base quality workflow trigger limitation remains",
+  "browser": "CLI only; no browser or Playwright acceptance run",
+  "secrets": "omitted; ignored local acceptance config used only by verified target loader"
+}

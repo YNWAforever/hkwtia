@@ -5,7 +5,7 @@ import {ApplicationReadRetry} from "@/components/portal/application-read-retry";
 import {PortalPageHeader} from "@/components/portal/page-header";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import type {AppLocale} from "@/i18n/routing";
-import {getMemberApplications} from "@/lib/portal/applications";
+import {getMemberApplicationsPage} from "@/lib/portal/applications";
 import type {MemberApplicationView} from "@/lib/portal/applications";
 import {
   memberApplicationActionHref,
@@ -17,9 +17,9 @@ import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 
-type Props = Readonly<{params: Promise<{locale: string}>}>;
+type Props = Readonly<{params: Promise<{locale: string}>; searchParams?: Promise<{cursor?: string | string[]}>}>;
 
-export default async function ApplicationsPage({params}: Props) {
+export default async function ApplicationsPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
@@ -27,8 +27,15 @@ export default async function ApplicationsPage({params}: Props) {
   const t = await getTranslations({locale, namespace: "Portal"});
 
   let applications: readonly MemberApplicationView[];
+  let nextCursor: string | null;
+  let cursor: string | undefined;
   try {
-    applications = await getMemberApplications(actor);
+    const query = await searchParams;
+    if (Array.isArray(query?.cursor)) throw Error("INVALID_APPLICATION_PAGE");
+    cursor = query?.cursor;
+    const page = await getMemberApplicationsPage(actor, {cursor});
+    applications = page.items;
+    nextCursor = page.nextCursor;
   } catch {
     console.error("PORTAL_APPLICATIONS_READ_FAILED");
     return (
@@ -146,6 +153,12 @@ export default async function ApplicationsPage({params}: Props) {
           })}
         </ul>
       )}
+      {cursor || nextCursor ? (
+        <nav aria-label={t("applications.paging.label")} className="flex flex-wrap gap-3">
+          {cursor ? <PrivateLink className="portal-button-outline min-h-11" href={localizedPath(locale, "/portal/applications")}>{t("applications.paging.first")}</PrivateLink> : null}
+          {nextCursor ? <PrivateLink className="portal-button-outline min-h-11" href={localizedPath(locale, `/portal/applications?cursor=${encodeURIComponent(nextCursor)}`)}>{t("applications.paging.next")}</PrivateLink> : null}
+        </nav>
+      ) : null}
     </div>
   );
 }

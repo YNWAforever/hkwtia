@@ -1,0 +1,117 @@
+{
+ "run": "memberALiveProduction",
+ "date": "2026-10-27",
+ "timezone": "Asia/Hong_Kong",
+ "host": "https://hkwtia.vercel.app",
+ "deploymentProtectionWall": false,
+ "deployment": {
+  "id": "dpl_5TMerrJ1oURQsBYhau8cNrUHCLmi",
+  "target": "production",
+  "state": "READY",
+  "createdAtHkt": "2026-10-20T03:44:59+08:00",
+  "gitRef": "release",
+  "gitSha": "6833eb9a162733a6bd53b7226449f3a2f1aa6a93",
+  "promotes": "main@3eb9992d",
+  "reverifiedHkt": "2026-10-27",
+  "pr212FixDeployed": false,
+  "pr212Fix": "a34a631c"
+ },
+ "passwordsUsed": false,
+ "secretsRecorded": false,
+ "emailsRecorded": false,
+ "mode": "read-only",
+ "cleanCookieContext": true,
+ "magicLinkAttempt": {
+  "automatedSend": "no network request, no console error, no UI change (click and Enter)",
+  "hypotheses": [
+   "sessionStorage resend cooldown hkwtia-login-resend-member not cleared by cookie clear",
+   "React controlled email input state empty (automation did not trigger onChange) -> native required validation blocks submit"
+  ],
+  "secondTab": "/member-login?sent=1 with app-masked recipient (not recorded beyond mask)",
+  "confirmedOnProduction": false
+ },
+ "actor": {
+  "role": "member A",
+  "signIn": "Google OAuth (signed in by Willy in box browser)",
+  "landing": "/portal",
+  "displayChip": "Test",
+  "profileDisplayName": "WTIA member",
+  "membership": {
+   "tier": "Corporate",
+   "status": "PAYMENT PENDING",
+   "seats": 25
+  }
+ },
+ "observations": [
+  {
+   "route": "/portal",
+   "result": "PASS_OBSERVED",
+   "detail": "Corporate PAYMENT PENDING 25 seats; chip Test"
+  },
+  {
+   "route": "identity",
+   "result": "FINDING",
+   "detail": "chip 'Test' vs display name 'WTIA member' inconsistent"
+  },
+  {
+   "route": "/portal/profile",
+   "result": "PASS_OBSERVED",
+   "detail": "display name WTIA member; job title Test; phone/WhatsApp present (values not recorded); directory off; not saved"
+  },
+  {
+   "route": "/portal/company",
+   "result": "PASS_OBSERVED",
+   "detail": "Company Test; public page HIDDEN; not saved"
+  },
+  {
+   "route": "/portal/company/seats",
+   "result": "FINDING",
+   "detail": "Seat access is unavailable for this company despite dashboard 25 seats; likely PAYMENT PENDING gate; not diagnosed"
+  },
+  {
+   "route": "/portal/billing",
+   "result": "OBSERVED",
+   "detail": "PAYMENT PENDING Corporate 25 seats; Continue payment present, NOT clicked"
+  },
+  {
+   "route": "/admin",
+   "result": "PASS_DENIED",
+   "detail": "redirect /admin-login: staff access unavailable for this account"
+  },
+  {
+   "route": "session",
+   "result": "PASS_OBSERVED",
+   "detail": "sticky across /portal, /portal/profile, /portal/company, /portal/company/seats, /portal/billing and after /admin denial"
+  }
+ ],
+ "aVsB": "Distinct account-specific dashboards (A Corporate PAYMENT PENDING 25 seats vs B Community ACTIVE 1 seat); no cross-account access attempt",
+ "staleCookieDiagnosis": "Not confirmed or refuted live: Google path does not use magic-link verifier exchange",
+ "operationalNote": {
+  "sessionStorageKey": "hkwtia-login-resend-member",
+  "source": "components/auth/sign-in-form.tsx",
+  "clearedByCookieClear": false,
+  "procedure": "Clear cookies and sessionStorage (or fresh private tab), type email with real keystrokes, wait out any Wait N",
+  "productCodeChanged": false
+ },
+ "notExercised": [
+  "member A magic link on production in clean cookie+sessionStorage context",
+  "PR #212 exact-head deployment (Preview behind SSO; a34a631c undeployed)",
+  "staff D",
+  "B-vs-A cross-account access attempt",
+  "any write",
+  "Stripe (Continue payment not clicked)",
+  "zero-write DB readback after /admin refusal",
+  "screen reader",
+  "next= via magic link",
+  "documents, applications, events, directory routes for A"
+ ],
+ "statusChanges": {
+  "UC22-11": "BLOCKED->PARTIAL"
+ },
+ "counts": {
+  "PASS": 0,
+  "PARTIAL": 49,
+  "BLOCKED": 11,
+  "NOT RUN": 0
+ }
+}

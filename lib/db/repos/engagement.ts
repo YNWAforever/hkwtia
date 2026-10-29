@@ -73,7 +73,7 @@ const engagementBaseSchema = z.object({
 const engagementInputSchema = z.discriminatedUnion("type", [
   engagementBaseSchema.extend({type: z.literal(RENEWAL_EVENT_TYPES[0]), metadata: renewalMetadataSchema}),
   engagementBaseSchema.extend({type: z.literal(RENEWAL_EVENT_TYPES[1]), metadata: renewalMetadataSchema}),
-  engagementBaseSchema.extend({type: z.literal("event_attended"), metadata: generalMetadataSchema.default({})}),
+  engagementBaseSchema.extend({type: z.literal("event_attended"), metadata: generalMetadataSchema.prefault({})}),
 ]).superRefine((input, context) => {
   if (input.type !== "event_attended" && Date.parse(input.metadata.periodStart) >= Date.parse(input.metadata.periodEnd)) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["metadata", "periodEnd"], message: "periodEnd must be after periodStart"});

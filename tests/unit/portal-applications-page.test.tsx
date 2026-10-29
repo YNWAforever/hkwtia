@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   detail: vi.fn(),
   continuation: "",
   expired: false,
+  nextCursor: null as string | null,
 }));
 
 function portalCopy(locale: string) {
@@ -46,6 +47,7 @@ vi.mock("@/lib/portal/page-actor", () => ({
 }));
 vi.mock("@/lib/portal/applications", () => ({
   getMemberApplications: state.list,
+  getMemberApplicationsPage: async (...args: unknown[]) => ({items: await state.list(...args), nextCursor: state.nextCursor}),
   getMemberApplication: state.detail,
 }));
 vi.mock("@/components/internal-shell/private-link", () => ({
@@ -87,6 +89,7 @@ describe("member application status pages", () => {
     state.detail.mockReset().mockResolvedValue(view);
     state.continuation = "";
     state.expired = false;
+    state.nextCursor = null;
   });
 
   it.each(["en", "zh-HK"] as const)("renders the member-owned list and responsive detail link in %s", async (locale) => {
@@ -101,6 +104,21 @@ describe("member application status pages", () => {
     expect(html).toContain(`href="${prefix}/join?plan=startup&amp;application=${view.id}"`);
     expect(html).toContain("xl:grid-cols-2");
     expect(html).toContain("min-h-11");
+  });
+
+  it.each(["en", "zh-HK"] as const)("preserves the cursor and localizes paging links in %s", async locale => {
+    state.nextCursor = "next_cursor";
+    const html = renderToStaticMarkup(await ApplicationsPage({...listProps(locale), searchParams: Promise.resolve({cursor: "current_cursor"})}));
+    expect(state.list).toHaveBeenCalledWith(expect.objectContaining({profileId: "profile-a"}), {cursor: "current_cursor"});
+    const prefix = locale === "zh-HK" ? "/zh" : "";
+    expect(html).toContain(`href="${prefix}/portal/applications?cursor=next_cursor"`);
+    expect(html).toContain((locale === "en" ? en : zhHK).Portal.applications.paging.next);
+  });
+
+  it("rejects repeated cursor values with a recovery state", async () => {
+    const html = renderToStaticMarkup(await ApplicationsPage({...listProps(), searchParams: Promise.resolve({cursor: ["a", "b"]})}));
+    expect(html).toContain(en.Portal.applications.unavailableTitle);
+    expect(state.list).not.toHaveBeenCalled();
   });
 
   it("renders a clear empty state without inventing an application", async () => {

@@ -519,8 +519,11 @@
   color: var(--xp-on-ink-muted);
   font-size: 14px;
 }
+/* #8fc4e0 (--xp-signal) measures 4.48:1 on the --wt-ink-soft (#1a4f82) host — found by the
+ * Preview anonymous axe run once a past record rendered. #a8d4ec is the cyan tint
+ * wisetech-shell.css already uses on this host for `.honest-empty .status-label` (5.35:1). */
 .open-now-record > span {
-  color: var(--xp-signal);
+  color: #a8d4ec;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -769,9 +772,11 @@
   .hero-content > .eyebrow { animation-delay: 80ms; }
   .hero-content > h1 { animation-delay: 160ms; }
   .hero-content > p:not(.eyebrow) { animation-delay: 300ms; }
-  .hero-content > .hero-actions { animation-delay: 420ms; }
+  /* Keep action contrast opaque throughout entrance (WCAG 1.4.3). */
+  .hero-content > .hero-actions { animation-name: xp-rise-move; animation-delay: 420ms; }
   .hero-scroll { animation: xp-fade 900ms ease 700ms both; }
 }
+@keyframes xp-rise-move { from { transform: translateY(18px); } }
 @keyframes xp-rise { from { opacity: 0; transform: translateY(18px); } }
 @keyframes xp-fade { from { opacity: 0; } }
 
@@ -1357,3 +1362,15 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
   .inner-card-grid:has(> :last-child:nth-child(6)),
   nav.programme-groupings:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* Four comparable memberships; decision help is a separate, unnumbered panel. */
+.plan-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.plan-grid article { min-width: 0; overflow-wrap: anywhere; }
+.plan-grid .card-index { margin-bottom: 28px; }
+.membership-plan-assistant { margin-top: 24px; padding: 28px; border: 1px solid var(--wt-line); }
+.membership-plan-assistant h2 { font-size: 28px; margin-block: 12px; }
+.membership-plan-assistant .text-link { margin-top: 20px; }
+@media (max-width: 1120px) { .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .plan-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .plan-grid article { transition: none; } .plan-grid article:hover { transform: none; } }
+.plan-grid .plan-field-label { margin-top: 16px; font-weight: 700; }

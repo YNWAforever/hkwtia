@@ -1,4 +1,5 @@
 import "server-only";
+import {createOwnedApplicationsRepository} from "@/lib/db/repos/owned-applications";
 
 import { randomUUID, createHash } from "node:crypto";
 import { deriveApplicationTriage } from "@/lib/ai/application-triage";
@@ -58,6 +59,7 @@ function applicationScope(actor: Actor, applicationId: string) {
 const applicationCases = createApplicationCasesRepository();
 
 export const applicationsRepository = {
+  ...createOwnedApplicationsRepository(),
   getApplicationCase: applicationCases.getApplicationCase,
   getApplicationTriage: applicationCases.getApplicationTriage,
   updateApplicationCase: applicationCases.updateApplicationCase,
