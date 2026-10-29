@@ -166,7 +166,8 @@ describe("page copy scope", () => {
       // patron 4 = 16 array elements) -- 82 + 16 = 98.
       // Experience round 12 (2026-10-07) added breadcrumbCurrent: the breadcrumb had shown the
       // full hero sentence ("Find your place in Hong Kong's technology community.") -- 113 + 1.
-      Membership: 114,
+      // Onboarding journey added 10 public leaves: actions.apply, tracks (6), renew (3) -- 114 + 10.
+      Membership: 124,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
@@ -190,8 +191,9 @@ describe("page copy scope", () => {
       MarketingExtras: 1,
     });
     // 577 + the 22 Home strings of the 2026-10 experience pass (see Home above) = 599,
-    // + Membership.breadcrumbCurrent (experience round 12) = 600, - 4 Partners keys (round 18) = 596.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(596);
+    // + Membership.breadcrumbCurrent (experience round 12) = 600, - 4 Partners keys (round 18) = 596,
+    // + 10 Membership onboarding leaves (actions.apply, tracks, renew) = 606.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(606);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

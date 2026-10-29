@@ -156,9 +156,11 @@ describe("/membership rewrite", () => {
     expect(html).toContain(bundles.en.Membership.sme.title);
     expect(html).toContain('href="/join?plan=community"');
     expect(html).toContain('href="/join?plan=startup"');
+    expect(html).toContain('href="/join?plan=patron"');
     expect(html).toContain('href="/contact"');
     expect(html).toContain(bundles.en.Membership.actions.join);
-    expect(html).toContain(bundles.en.Membership.actions.contact);
+    expect(html).toContain(bundles.en.Membership.actions.apply);
+    expect(html).toContain(bundles.en.Membership.tracks.sla);
     // This render carries community/startup/patron, so pin a startup benefit
     // and the patron one to prove each tier gets its own list.
     expect(html).toContain(bundles.en.Membership.tierBenefits.startup[1]);

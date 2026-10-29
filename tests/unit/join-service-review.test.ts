@@ -106,10 +106,8 @@ function durableHarness() {
 }
 
 describe("join review fixes", () => {
-  // The corporate/startup fixtures below exercise the checkout path, which requires
-  // resolveMembershipOption() (lib/membership/catalog.ts) to see a configured Stripe price
-  // mapping for the "annual" interval -- otherwise completeApplication() fails closed with
-  // UNSUPPORTED_BILLING_INTERVAL before reaching the behavior these tests actually assert.
+  // Startup checkout needs a configured annual Stripe price. Corporate review uses
+  // interval none and must not require that price.
   beforeEach(() => {
     vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
     vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
@@ -131,7 +129,7 @@ describe("join review fixes", () => {
     const deps = durableHarness();
 
     await expect(
-      completeApplication(actor, {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: null}, deps),
+      completeApplication(actor, {plan: "corporate", billingInterval: "none", profile: {displayName: "A"}, company: null}, deps),
     ).rejects.toThrow("COMPANY_REQUIRED");
   });
 
@@ -141,14 +139,14 @@ describe("join review fixes", () => {
     await expect(
       completeApplication(
         actor,
-        {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-b", legalName: "B", displayName: "B"}},
+        {plan: "corporate", billingInterval: "none", profile: {displayName: "A"}, company: {id: "company-b", legalName: "B", displayName: "B"}},
         deps,
       ),
     ).rejects.toThrow("FORBIDDEN");
 
     const accepted = await completeApplication(
       actor,
-      {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
+      {plan: "corporate", billingInterval: "none", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
       deps,
     );
     const application = deps.inspect().applications.get(accepted.applicationId);

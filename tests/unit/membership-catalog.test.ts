@@ -21,6 +21,16 @@ describe("resolveMembershipOption", () => {
     expect(option.available).toBe(false);
   });
 
+  it("resolves a new Corporate application to interval none without a Stripe price", () => {
+    const option = resolveMembershipOption("corporate", "none", {stripeStartupPriceId: "", stripeCorporatePriceId: ""});
+    expect(option).toEqual({planCode: "corporate", billingInterval: "none", priceReference: null, available: true});
+  });
+
+  it("still resolves Corporate annual when the existing Stripe price is configured", () => {
+    const option = resolveMembershipOption("corporate", "annual", env);
+    expect(option).toEqual({planCode: "corporate", billingInterval: "annual", priceReference: "price_corporate_annual", available: true});
+  });
+
   it("fails closed for Patron with a non-none interval (Patron is review-only)", () => {
     const option = resolveMembershipOption("patron", "annual", env);
     expect(option.available).toBe(false);

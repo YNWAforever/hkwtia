@@ -18,7 +18,7 @@ export type PublicMembershipTier = Readonly<{
   code: PlanCode;
   price: PublicMembershipPrice;
   cta: Readonly<{
-    href: "/join?plan=community" | "/join?plan=startup" | "/join?plan=corporate" | "/contact";
+    href: "/join?plan=community" | "/join?plan=startup" | "/join?plan=corporate" | "/join?plan=patron" | "/contact";
     kind: "join" | "contact";
   }>;
 }>;
@@ -108,7 +108,7 @@ export function buildPublicMembershipCatalog(input: Readonly<{
       tiers.push({
         code,
         price: {kind: "review"},
-        cta: {href: "/contact", kind: "contact"},
+        cta: {href: "/join?plan=patron", kind: "join"},
       });
       continue;
     }

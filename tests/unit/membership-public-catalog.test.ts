@@ -100,7 +100,7 @@ describe("public Membership catalog", () => {
   it("enforces the semantic Community and Patron price and CTA rules", () => {
     expect(catalog([validRows[0], validRows[3]])).toEqual([
       {code: "community", price: {kind: "free"}, cta: {href: "/join?plan=community", kind: "join"}},
-      {code: "patron", price: {kind: "review"}, cta: {href: "/contact", kind: "contact"}},
+      {code: "patron", price: {kind: "review"}, cta: {href: "/join?plan=patron", kind: "join"}},
     ]);
     expect(catalog([{...validRows[0], monthlyPriceHkd: 1}])).toEqual([]);
     expect(catalog([{...validRows[3], monthlyPriceHkd: -1}])).toEqual([]);

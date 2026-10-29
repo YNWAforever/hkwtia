@@ -54,6 +54,13 @@ export function resolveMembershipOption(
     return {planCode, billingInterval: "none", priceReference: null, available: billingInterval === "none"};
   }
 
+  // New Corporate applications are reviewed (interval none, no charge). Annual
+  // stays available below so an in-flight pending_payment membership can still
+  // resolve the existing Stripe price.
+  if (planCode === "corporate" && billingInterval === "none") {
+    return {planCode, billingInterval: "none", priceReference: null, available: true};
+  }
+
   if (billingInterval !== "annual") {
     return {planCode, billingInterval, priceReference: null, available: false};
   }

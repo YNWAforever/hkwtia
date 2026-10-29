@@ -25,8 +25,10 @@ describe("versioned shipped self-service copy contract", () => {
     expect(copy.selfService.copy).toContain(locale === "en" ? "Contact WTIA" : "聯絡 WTIA");
   });
   it("pins both languages' existing membership refund and review qualifications", () => {
-    expect(en.Membership.faq["5"].answer).toContain("has not published a fixed review deadline");
-    expect(zhHK.Membership.faq["5"].answer).toContain("未在本頁公布固定審批時限");
+    // The operational aim is public copy. reviewSla stays "unknown" above: it is not
+    // an approved membership-policy term.
+    expect(en.Membership.faq["5"].answer).toContain("5 working days");
+    expect(zhHK.Membership.faq["5"].answer).toContain("5 個工作天");
     expect(en.Membership.faq["6"].answer).toContain("no membership refund entitlement");
     expect(zhHK.Membership.faq["6"].answer).toContain("本頁不承諾會籍退款權益");
   });

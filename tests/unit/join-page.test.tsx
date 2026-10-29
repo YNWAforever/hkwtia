@@ -91,7 +91,8 @@ describe("JoinPage portal continuation auth", () => {
     const chooser = renderToStaticMarkup(await JoinPage(props("zh-HK", {})));
     expect(chooser).toContain("localized:choosePlanTitle");
     expect(chooser).toContain('href="/zh/join?plan=startup"');
-    expect(chooser).toContain('href="/zh/contact"');
+    expect(chooser).toContain('href="/zh/join?plan=patron"');
+    expect(chooser).toContain("localized:tracks.organisation.title");
     expect(chooser).toContain('data-active="plan"');
 
     const malformed = renderToStaticMarkup(await JoinPage(props("en", {plan: "gold"})));

@@ -38,6 +38,11 @@ vi.mock("@/lib/auth/server", () => ({
 vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "user-a", profileId: "user-a"}), getActor: vi.fn()}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {getById: async () => repoState.application, update: async () => repoState.application}}));
 vi.mock("@/lib/db/repos/memberships", () => ({membershipsRepository: {getByApplicationId: async () => ({id: "membership-a"})}}));
+vi.mock("@/lib/db/repos/organisation-applications", () => ({saveOrganisationApplication: async () => undefined}));
+vi.mock("@/lib/membership/br-document", () => ({
+  storeBusinessRegistration: async () => ({status: "pending_provider", key: null, sha256: "ab".repeat(32), byteSize: 8, contentType: "application/pdf", fileName: "br.pdf"}),
+  BrDocumentError: class BrDocumentError extends Error { code: string; constructor(code: string) { super(code); this.code = code; this.name = "BrDocumentError"; } },
+}));
 vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   createForApplication: async (_actor: unknown, _applicationId: string, input: Record<string, unknown>) => {repoState.createdCompanyInput = input; return repoState.company;},
   getById: async () => repoState.company,

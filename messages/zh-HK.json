@@ -868,7 +868,7 @@
       },
       "5": {
         "question": "審批需時多久？",
-        "answer": "申請狀態可在會員專區查看。WTIA 未在本頁公布固定審批時限；如時間緊迫，請聯絡會員團隊。"
+        "answer": "社群會籍即時生效，初創會籍會進入安全結帳。企業及贊助會籍會先經審核。審核中。我們會盡量在 5 個工作天內回覆。"
       },
       "6": {
         "question": "可以退款嗎？",
@@ -894,8 +894,26 @@
     },
     "actions": {
       "join": "選擇此計劃",
+      "apply": "申請此計劃",
       "contact": "聯絡我們",
       "discuss": "討論此參與路徑"
+    },
+    "tracks": {
+      "title": "兩種加入方式",
+      "individual": {
+        "title": "個人",
+        "copy": "社群會籍免費並即時生效。初創會籍以現有的安全結帳即時付款。"
+      },
+      "organisation": {
+        "title": "公司",
+        "copy": "企業及贊助：先提交公司資料，WTIA 會在收款前審核申請。"
+      },
+      "sla": "審核中。我們會盡量在 5 個工作天內回覆。"
+    },
+    "renew": {
+      "title": "續會或重新加入",
+      "copy": "如會籍已失效、逾期或將於期末結束，請登入並沿用現有的帳單頁面繼續。",
+      "action": "登入以續會或重新加入"
     },
     "unavailable": "會員計劃暫時未能提供",
     "sme": {
@@ -1019,10 +1037,44 @@
       "community": "免費。保持聯繫、報名公開活動、接收更新。",
       "startup": "適合初創科技團隊：會員專頁、每季 2 個經審核活動、1 個方案展示頁。",
       "corporate": "適合成熟機構：精選專頁、無限次經審核活動、WhatsApp 優先支援。",
-      "patron": "WTIA 使命的策略支持者 — 請與團隊聯絡。"
+      "patron": "適合策略支持者。請提交公司資料申請，WTIA 會在收款前先審核。"
     },
     "choosePlanAction": "以{plan}繼續",
     "choosePlanContact": "聯絡 WTIA",
+    "tracks": {
+      "individual": {"title": "個人", "copy": "社群會籍即時生效。初創會籍現在以現有結帳付款。"},
+      "organisation": {"title": "公司", "copy": "企業及贊助：請提交公司資料申請。審核中。我們會盡量在 5 個工作天內回覆。"}
+    },
+    "organisation": {
+      "intro": "請填寫公司及兩位聯絡人，並上載商業登記證。審核中。我們會盡量在 5 個工作天內回覆。",
+      "tierValue": "級別：{tier}",
+      "changeTier": "選擇其他級別",
+      "primaryTitle": "主要聯絡人",
+      "secondaryTitle": "次要聯絡人",
+      "brHint": "PDF、JPEG 或 PNG，最大 8 MB。",
+      "fields": {
+        "primaryName": "主要聯絡人姓名",
+        "primaryEmail": "主要聯絡人電郵",
+        "primaryPhone": "主要聯絡人電話（選填）",
+        "secondaryName": "次要聯絡人姓名",
+        "secondaryEmail": "次要聯絡人電郵",
+        "secondaryPhone": "次要聯絡人電話（選填）",
+        "br": "商業登記證"
+      }
+    },
+    "nextSteps": {
+      "title": "下一步",
+      "individualLead": "你的會籍已生效。請下載資料冊、登入，並選擇第一個活動。",
+      "processingLead": "付款正在確認。會籍生效後即可使用這些連結。",
+      "organisationLead": "審核中。我們會盡量在 5 個工作天內回覆。",
+      "noPayment": "現時尚未收款。WTIA 會在審核後與你聯絡。",
+      "welcomeKit": "下載迎新資料冊",
+      "associationKit": "下載協會資料冊",
+      "login": "會員登入",
+      "whatsapp": "在個人檔案選擇接收 WhatsApp",
+      "whatsappCommunity": "WhatsApp 社群",
+      "events": "即將舉行的活動"
+    },
     "optionalProfileTitle": "聯絡資料（選填）",
     "optionalProfileHint": "你可以現在填寫，亦可只填姓名後繼續。如要接收 WhatsApp 消息，須另行明確同意。",
     "optionalCompanyTitle": "公司資料（選填）",
@@ -1068,6 +1120,11 @@
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
       "companyNotAllowed": "此計劃不接受公司資料。",
+      "tier": "請在計劃步驟選擇企業或贊助，並在此確認同一級別。",
+      "brRequired": "請上載商業登記證。",
+      "brType": "請上載 PDF、JPEG 或 PNG 格式的商業登記證。",
+      "brSize": "檔案超過 8 MB。",
+      "brStorage": "未能儲存商業登記證，請再試一次。",
       "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
@@ -1081,8 +1138,8 @@
         "description": "你的付費會籍已可進入安全付款程序。"
       },
       "review": {
-        "title": "申請審批中",
-        "description": "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
+        "title": "審核中",
+        "description": "審核中。我們會盡量在 5 個工作天內回覆。"
       }
     },
     "whatsapp": {
@@ -2287,6 +2344,24 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "checklist": {
+      "title": "入會清單",
+      "lead": "完成這些項目，以用盡會籍。個人檔案與 WhatsApp 跟你已儲存的檔案。資料冊與第一個活動是現在可以開啟的連結。",
+      "kitsTitle": "迎新資料冊及協會資料冊",
+      "kitsLead": "在秘書處公布最終 Drive 連結前，這些是暫代檔案。",
+      "done": "已完成",
+      "todo": "待辦",
+      "profile": "完善個人檔案",
+      "welcomeKit": "下載迎新資料冊",
+      "associationKit": "下載協會資料冊",
+      "whatsapp": "加入 WhatsApp",
+      "whatsappCommunity": "開啟 WhatsApp 社群",
+      "firstEvent": "報名第一個活動"
+    },
+    "renew": {
+      "action": "續會或重新加入",
+      "rejoin": "開始新申請"
+    },
     "firstResult": {
       "title": "開始使用你的會員權益",
       "event": "下一個活動",

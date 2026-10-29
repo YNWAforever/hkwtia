@@ -1,3 +1,4 @@
+import {membershipTrack} from "@/config/membership-journey";
 import {membershipSelfServicePolicy} from "@/lib/membership/policy-self-service";
 import {PLAN_CATALOG} from "@/lib/membership/plans";
 import type { Metadata } from "next";
@@ -126,8 +127,7 @@ export default async function MembershipPage({ params }: Props) {
       // bundle beside lib/membership/entitlements.ts; the old shared triple
       // said the same thing about every tier, which sells nothing.
       benefits: t.raw(`tierBenefits.${tier.code}`) as string[],
-      action:
-        tier.cta.kind === "join" ? t("actions.join") : t("actions.contact"),
+      action: membershipTrack(tier.code) === "organisation" ? t("actions.apply") : t("actions.join"),
       href: tier.cta.href,
     }));
     // "Ready" means both configured Startup/Corporate price ids actually resolved into the
@@ -190,6 +190,27 @@ export default async function MembershipPage({ params }: Props) {
         title={t("title")}
         actions={[{href: "#plans", label: t("compare.action")}]}
       />
+      <Section labelledBy="membership-tracks-title">
+        <h2 id="membership-tracks-title">{t("tracks.title")}</h2>
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="font-serif text-2xl font-semibold">{t("tracks.individual.title")}</h3>
+            <p className="mt-2 text-muted-foreground">{t("tracks.individual.copy")}</p>
+          </div>
+          <div>
+            <h3 className="font-serif text-2xl font-semibold">{t("tracks.organisation.title")}</h3>
+            <p className="mt-2 text-muted-foreground">{t("tracks.organisation.copy")}</p>
+            <p className="mt-2 text-muted-foreground">{t("tracks.sla")}</p>
+          </div>
+        </div>
+      </Section>
+      <Section labelledBy="membership-renew-title">
+        <h2 id="membership-renew-title">{t("renew.title")}</h2>
+        <p className="mt-2 text-muted-foreground">{t("renew.copy")}</p>
+        <div className="mt-4">
+          <ActionLink href="/member-login?next=/portal/billing" prefetch={false} variant="text-link">{t("renew.action")}</ActionLink>
+        </div>
+      </Section>
       <nav aria-label={t("selfService.title")} className="shell flex flex-wrap items-center gap-5 py-6">
         <ActionLink href={membershipSelfServicePolicy.links.billing.href} prefetch={false} variant="text-link">{t(membershipSelfServicePolicy.links.billing.labelKey)}</ActionLink>
         <ActionLink href={membershipSelfServicePolicy.links.support.href} variant="text-link">{t(membershipSelfServicePolicy.links.support.labelKey)}</ActionLink>

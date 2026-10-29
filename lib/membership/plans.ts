@@ -16,6 +16,12 @@ export type Plan = Readonly<{
   active: true;
 }>;
 
+/**
+ * Catalog contract for fees, Stripe price ids, and the membership_plans row.
+ * Join tracks live in config/membership-journey.ts. Corporate stays `checkout`
+ * here so STRIPE_CORPORATE_PRICE_ID remains the renewal price; a new Corporate
+ * application is held for review and does not open Checkout.
+ */
 const plans: Readonly<Record<PlanCode, Plan>> = Object.freeze({
   community: Object.freeze({code: "community", audience: "individual", billingBehavior: "free", stripePriceReference: null, seatAllowance: 1, active: true}),
   startup: Object.freeze({code: "startup", audience: "startup", billingBehavior: "checkout", stripePriceReference: null, seatAllowance: 5, active: true}),

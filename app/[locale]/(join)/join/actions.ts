@@ -18,6 +18,9 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {contactWriterActor, contactsRepository} from "@/lib/db/repos/contacts";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
+import {applicationOutcome, BR_UPLOAD_LIMITS, membershipTrack, planCollectsCompany} from "@/config/membership-journey";
+import {saveOrganisationApplication} from "@/lib/db/repos/organisation-applications";
+import {BrDocumentError, storeBusinessRegistration} from "@/lib/membership/br-document";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
@@ -47,7 +50,23 @@ async function formError(locale: AppLocale, field: string, key = "errors.require
 }
 
 function defaultBillingInterval(plan: PlanCode): BillingInterval {
-  return getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+  return applicationOutcome(plan).billingInterval;
+}
+
+const organisationContactSchema = z.object({
+  tier: z.enum(["corporate", "patron"]),
+  primaryName: z.string().trim().min(1).max(160),
+  primaryEmail: z.string().trim().email().max(254),
+  primaryPhone: z.string().trim().max(64).nullable(),
+  secondaryName: z.string().trim().min(1).max(160),
+  secondaryEmail: z.string().trim().email().max(254),
+  secondaryPhone: z.string().trim().max(64).nullable(),
+});
+
+function emptyToNull(value: FormDataEntryValue | null): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
 }
 
 // completeApplication() already knows exactly where the applicant belongs next --
@@ -184,7 +203,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     const application = resumed ?? await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
     if(policyAcceptanceEnabled()&&formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId:id,policyVersion:String(formData.get("policyVersion"))});
-    const companyPlan = ["startup", "corporate"].includes(plan);
+    const companyPlan = planCollectsCompany(plan);
     if (companyPlan) {
       await applicationsRepository.update(actor, id, {currentStep: "company"});
       const destination = destinationForJoin(locale, plan, id, "company");
@@ -207,7 +226,24 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
 }
 
 export async function saveCompany(locale: AppLocale, plan: PlanCode, applicationId: string, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
-  if (!["startup", "corporate"].includes(plan)) return formError(locale, "legalName", "errors.companyNotAllowed");
+  if (!planCollectsCompany(plan)) return formError(locale, "legalName", "errors.companyNotAllowed");
+  const organisationParsed = membershipTrack(plan) === "organisation"
+    ? organisationContactSchema.safeParse({
+      tier: formData.get("tier"),
+      primaryName: formData.get("primaryName"),
+      primaryEmail: formData.get("primaryEmail"),
+      primaryPhone: emptyToNull(formData.get("primaryPhone")),
+      secondaryName: formData.get("secondaryName"),
+      secondaryEmail: formData.get("secondaryEmail"),
+      secondaryPhone: emptyToNull(formData.get("secondaryPhone")),
+    })
+    : null;
+  if (organisationParsed && !organisationParsed.success) {
+    const field = organisationParsed.error.issues[0]?.path[0]?.toString() ?? "primaryName";
+    const emailField = field === "primaryEmail" || field === "secondaryEmail";
+    return formError(locale, field, field === "tier" ? "errors.tier" : emailField ? "errors.email" : "errors.required");
+  }
+  if (organisationParsed?.success && organisationParsed.data.tier !== plan) return formError(locale, "tier", "errors.tier");
   const displayName = formData.get("companyDisplayName");
   const parsed = companySchema.safeParse({
     legalName: formData.get("legalName"),
@@ -234,10 +270,46 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
       if(formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId,policyVersion:String(formData.get("policyVersion"))});
       else await requirePolicyAcceptanceForApplication(actor,applicationId);
     }
+    // Store the registration before the company write so a rejected file does not
+    // create a company row. Production refuses a stub: the bytes would be gone.
+    let storedBr: Awaited<ReturnType<typeof storeBusinessRegistration>> | null = null;
+    if (organisationParsed?.success) {
+      const file = formData.get("businessRegistration");
+      if (!(file instanceof File) || file.size === 0) return formError(locale, "businessRegistration", "errors.brRequired");
+      if (file.size > BR_UPLOAD_LIMITS.maxBytes) return formError(locale, "businessRegistration", "errors.brSize");
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      try {
+        storedBr = await storeBusinessRegistration({applicationId, fileName: file.name || "registration", bytes});
+      } catch (error) {
+        if (!(error instanceof BrDocumentError)) throw error;
+        const key = error.code === "BR_TOO_LARGE" ? "errors.brSize"
+          : error.code === "BR_REQUIRED" ? "errors.brRequired"
+          : error.code === "BR_STORAGE_FAILED" ? "errors.brStorage"
+          : "errors.brType";
+        return formError(locale, "businessRegistration", key);
+      }
+      if (storedBr.status === "pending_provider" && process.env.VERCEL_ENV === "production") {
+        return formError(locale, "businessRegistration", "errors.brStorage");
+      }
+    }
     const company = application.companyId
       ? await companiesRepository.update(actor, application.companyId, parsed.data)
       : await companiesRepository.createForApplication(actor, applicationId, parsed.data);
     if (!company) return {message: t("errors.save")};
+    if (organisationParsed?.success && storedBr) {
+      const contacts = organisationParsed.data;
+      await saveOrganisationApplication(actor, {
+        applicationId,
+        tier: contacts.tier,
+        primaryName: contacts.primaryName,
+        primaryEmail: contacts.primaryEmail,
+        primaryPhone: contacts.primaryPhone,
+        secondaryName: contacts.secondaryName,
+        secondaryEmail: contacts.secondaryEmail,
+        secondaryPhone: contacts.secondaryPhone,
+        br: storedBr,
+      });
+    }
     const profile = await profilesRepository.getById(actor, actor.profileId);
     if (!profile) return {message: t("errors.profile")};
     const billingInterval = defaultBillingInterval(plan);
@@ -252,6 +324,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))return {message:t(error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"policy.stale":"policy.required")};
+    if (error instanceof BrDocumentError) return formError(locale, "businessRegistration", "errors.brStorage");
     return {message: t("errors.save")};
   }
 }

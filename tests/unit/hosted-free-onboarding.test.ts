@@ -83,8 +83,6 @@ describe("production-mode onboarding without unrelated billing secrets", () => {
   it.each([
     ["community", "en", "complete", "active", "completed"],
     ["community", "zh-HK", "complete", "active", "completed"],
-    ["patron", "en", "review", "pending_review", "pending_review"],
-    ["patron", "zh-HK", "review", "pending_review", "pending_review"],
   ] as const)("completes %s setup in %s without Stripe configuration", async (plan, locale, next, status, applicationStatus) => {
     const state = harness();
     const result = await completeApplication(actor, {
@@ -100,6 +98,35 @@ describe("production-mode onboarding without unrelated billing secrets", () => {
     expect(state.applications.get("application-1")).toMatchObject({currentStep: next, status: applicationStatus});
   });
 
+  it.each(["en", "zh-HK"] as const)("holds a patron application for review without Stripe configuration in %s", async (locale) => {
+    const state = harness();
+    const result = await completeApplication(actor, {
+      plan: "patron",
+      billingInterval: "none",
+      profile: {displayName: "Synthetic Member", locale},
+      company: {id: "synthetic-company", legalName: "Synthetic Company", displayName: "Synthetic Company"},
+    }, state.dependencies);
+
+    expect(result).toEqual({applicationId: "application-1", next: "review", membershipId: "membership-1"});
+    expect(state.memberships).toEqual([{
+      id: "membership-1", applicationId: "application-1", planCode: "patron", status: "pending_review",
+      ownerUserId: null, companyId: "synthetic-company", seatLimit: 1, billingInterval: "none",
+    }]);
+  });
+
+  it("holds a new corporate application for review without Stripe configuration", async () => {
+    const state = harness();
+    const result = await completeApplication(actor, {
+      plan: "corporate",
+      billingInterval: "none",
+      profile: {displayName: "Synthetic Member"},
+      company: {id: "synthetic-company", legalName: "Synthetic Company", displayName: "Synthetic Company"},
+    }, state.dependencies);
+    expect(result.next).toBe("review");
+    expect(result.checkout).toBeUndefined();
+    expect(state.memberships[0]).toMatchObject({status: "pending_review", billingInterval: "none", planCode: "corporate"});
+  });
+
   it.each(["community", "patron"])("rejects a paid interval for %s before any write", async (plan) => {
     const state = harness();
     await expect(completeApplication(actor, {
@@ -110,7 +137,18 @@ describe("production-mode onboarding without unrelated billing secrets", () => {
     expect(state.memberships).toHaveLength(0);
   });
 
-  it.each(["startup", "corporate"])("requires billing configuration for %s before writes", async (plan) => {
+  it("rejects an annual interval for corporate before any write", async () => {
+    const state = harness();
+    await expect(completeApplication(actor, {
+      plan: "corporate", billingInterval: "annual", profile: {displayName: "Synthetic Member"},
+      company: {id: "synthetic-company", legalName: "Synthetic Company", displayName: "Synthetic Company"},
+    }, state.dependencies)).rejects.toThrow("UNSUPPORTED_BILLING_INTERVAL");
+    expect(state.profiles.size).toBe(0);
+    expect(state.applications.size).toBe(0);
+    expect(state.memberships).toHaveLength(0);
+  });
+
+  it.each(["startup"])("requires billing configuration for %s before writes", async (plan) => {
     const state = harness();
     await expect(completeApplication(actor, {
       plan, billingInterval: "annual", profile: {displayName: "Synthetic Member"},

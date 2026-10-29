@@ -19,6 +19,7 @@ import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {buildBreadcrumbData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
+import {MEMBERSHIP_TRACKS, planCollectsCompany} from "@/config/membership-journey";
 import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
 import {requestMagicLink, resumeJoinAction} from "./actions";
@@ -90,17 +91,25 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active="plan" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2">
-          {planChooserItems(locale).map((item) => (
-            <li className="rounded-lg border border-border p-5" key={item.code}>
-              <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
-              <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
-                {item.kind === "join" ? t("choosePlanAction", {plan: t(`plans.${item.code}`)}) : t("choosePlanContact")}
-              </Link>
-            </li>
+        <div className="mt-8 space-y-10">
+          {(["individual", "organisation"] as const).map((track) => (
+            <div key={track}>
+              <h2 className="font-serif text-2xl font-semibold">{t(`tracks.${track}.title`)}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t(`tracks.${track}.copy`)}</p>
+              <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+                {planChooserItems(locale).filter((item) => (MEMBERSHIP_TRACKS[track] as readonly string[]).includes(item.code)).map((item) => (
+                  <li className="rounded-lg border border-border p-5" key={item.code}>
+                    <h3 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
+                    <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
+                      {t("choosePlanAction", {plan: t(`plans.${item.code}`)})}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
         <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("choosePlanCompare")}</Link>
         {trail}
       </section>
@@ -129,7 +138,7 @@ export default async function JoinPage({params, searchParams}: Props) {
     );
   }
 
-  const companyPlan = plan === "startup" || plan === "corporate";
+  const companyPlan = planCollectsCompany(plan);
   if (actor) {
     if (actor.kind !== "member") notFound();
     const applications = await applicationsRepository.listOwned(actor, plan);

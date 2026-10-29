@@ -868,7 +868,7 @@
       },
       "5": {
         "question": "How long does approval take?",
-        "answer": "Your application status appears in the member portal. WTIA has not published a fixed review deadline here; contact the membership team if timing matters."
+        "answer": "Community starts immediately and Startup continues to secure checkout. Corporate and Patron applications are reviewed first. Under review. We aim to reply within 5 working days."
       },
       "6": {
         "question": "Can I get a refund?",
@@ -894,8 +894,26 @@
     },
     "actions": {
       "join": "Choose this plan",
+      "apply": "Apply for this plan",
       "contact": "Contact us",
       "discuss": "Discuss this pathway"
+    },
+    "tracks": {
+      "title": "Two ways to join",
+      "individual": {
+        "title": "Individual",
+        "copy": "Community is free and starts immediately. Startup is paid online with the existing secure checkout."
+      },
+      "organisation": {
+        "title": "Company",
+        "copy": "Corporate and Patron: submit your company details, then WTIA reviews the application before any payment."
+      },
+      "sla": "Under review. We aim to reply within 5 working days."
+    },
+    "renew": {
+      "title": "Renew or rejoin",
+      "copy": "If your membership has lapsed, is past due, or is set to end, sign in and continue through the existing billing page.",
+      "action": "Sign in to renew or rejoin"
     },
     "unavailable": "Membership is currently unavailable",
     "sme": {
@@ -1019,10 +1037,44 @@
       "community": "Free. Stay connected, RSVP to public events, receive updates.",
       "startup": "For early-stage technology teams: profile page, 2 reviewed events a quarter, 1 showcase listing.",
       "corporate": "For established organisations: featured profile, unlimited reviewed events, priority WhatsApp support.",
-      "patron": "Strategic supporters of WTIA's mission — talk to the team."
+      "patron": "For strategic supporters. Apply with your company details. WTIA reviews the application before any payment."
     },
     "choosePlanAction": "Continue with {plan}",
     "choosePlanContact": "Contact WTIA",
+    "tracks": {
+      "individual": {"title": "Individual", "copy": "Community starts immediately. Startup is paid online now with the existing checkout."},
+      "organisation": {"title": "Company", "copy": "Corporate and Patron: apply with your company details. Under review. We aim to reply within 5 working days."}
+    },
+    "organisation": {
+      "intro": "Tell us about the company and both contacts, and upload the Business Registration. Under review. We aim to reply within 5 working days.",
+      "tierValue": "Tier: {tier}",
+      "changeTier": "Choose a different tier",
+      "primaryTitle": "Primary contact",
+      "secondaryTitle": "Secondary contact",
+      "brHint": "PDF, JPEG, or PNG. Maximum 8 MB.",
+      "fields": {
+        "primaryName": "Primary contact name",
+        "primaryEmail": "Primary contact email",
+        "primaryPhone": "Primary contact phone (optional)",
+        "secondaryName": "Secondary contact name",
+        "secondaryEmail": "Secondary contact email",
+        "secondaryPhone": "Secondary contact phone (optional)",
+        "br": "Business Registration"
+      }
+    },
+    "nextSteps": {
+      "title": "What to do next",
+      "individualLead": "Your membership is active. Download the kits, sign in, and pick a first event.",
+      "processingLead": "Payment is being confirmed. These links are ready for when your membership is active.",
+      "organisationLead": "Under review. We aim to reply within 5 working days.",
+      "noPayment": "No payment has been taken. WTIA will contact you after the review.",
+      "welcomeKit": "Download the Welcome Kit",
+      "associationKit": "Download the Association Kit",
+      "login": "Member login",
+      "whatsapp": "WhatsApp opt-in on your profile",
+      "whatsappCommunity": "WhatsApp community",
+      "events": "Upcoming events"
+    },
     "optionalProfileTitle": "Contact details (optional)",
     "optionalProfileHint": "Add these now if you like, or continue with just your name. WhatsApp updates require your explicit consent.",
     "optionalCompanyTitle": "Company details (optional)",
@@ -1068,6 +1120,11 @@
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",
       "companyNotAllowed": "This plan does not accept company details.",
+      "tier": "Choose Corporate or Patron on the plan step, then confirm that same tier here.",
+      "brRequired": "Upload the Business Registration.",
+      "brType": "Upload a PDF, JPEG, or PNG Business Registration.",
+      "brSize": "That file is larger than 8 MB.",
+      "brStorage": "We could not store the Business Registration. Please try again.",
       "whatsappNumber": "Enter a valid WhatsApp number with country code"
     },
     "status": {
@@ -1081,8 +1138,8 @@
         "description": "Your paid membership is ready for secure checkout."
       },
       "review": {
-        "title": "Application under review",
-        "description": "WTIA will review your Patron application. No payment has been requested."
+        "title": "Under review",
+        "description": "Under review. We aim to reply within 5 working days."
       }
     },
     "whatsapp": {
@@ -2287,6 +2344,24 @@
     "retry": "Try again"
   },
   "Portal": {
+    "checklist": {
+      "title": "Onboarding checklist",
+      "lead": "Finish these to get the most from your membership. Profile and WhatsApp follow your saved profile. Kit downloads and the first event are links you can open now.",
+      "kitsTitle": "Welcome Kit and Association Kit",
+      "kitsLead": "Placeholder files until the Secretariat publishes the final Drive links.",
+      "done": "Done",
+      "todo": "To do",
+      "profile": "Complete your profile",
+      "welcomeKit": "Download the Welcome Kit",
+      "associationKit": "Download the Association Kit",
+      "whatsapp": "Join WhatsApp",
+      "whatsappCommunity": "Open the WhatsApp community",
+      "firstEvent": "RSVP to your first event"
+    },
+    "renew": {
+      "action": "Renew or rejoin",
+      "rejoin": "Start a new application"
+    },
     "firstResult": {
       "title": "Put your membership to work",
       "event": "Your next event",

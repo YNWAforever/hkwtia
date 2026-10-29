@@ -32,7 +32,7 @@ describe("authoritative application triage", () => {
       nextActionCode: "contact_applicant",
     });
   });
-  it.each(["startup", "corporate"])(
+  it.each(["startup", "corporate", "patron"])(
     "requires the existing company contract for %s",
     (planCode) => {
       expect(deriveApplicationTriage(source({ planCode }))).toMatchObject({
@@ -106,6 +106,7 @@ describe("authoritative application triage", () => {
     const input = source({
         planCode: "patron",
         status: "pending_review",
+        company: {legalName: "Synthetic Limited", displayName: "Synthetic"},
         membership: { status: "pending_review", stripeSubscriptionId: null },
       }),
       before = structuredClone(input);

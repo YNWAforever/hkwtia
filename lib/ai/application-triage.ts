@@ -5,6 +5,7 @@ import {
   type ProfileInput,
   type CompanyInput,
 } from "@/lib/membership/join-schema";
+import {planCollectsCompany} from "@/config/membership-journey";
 import { getPlan } from "@/lib/membership/plans";
 export type ApplicationTriageInput = Readonly<{
   planCode: string;
@@ -47,8 +48,7 @@ export function deriveApplicationTriage(
         missingFields.push("displayName");
       else validationIssues.push("profile." + field);
     }
-  const companyRequired =
-    plan.audience === "startup" || plan.audience === "corporate";
+  const companyRequired = planCollectsCompany(plan.code);
   if (companyRequired) {
     if (!input.company) missingFields.push("companyName");
     else {
