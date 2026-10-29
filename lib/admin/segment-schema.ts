@@ -66,7 +66,7 @@ export const segmentFilterV1Schema = segmentFilterV1Object.superRefine(refineSco
  */
 const segmentFilterV2Object = segmentFilterV1Object.extend({
   industryTags: z.array(z.string().trim().min(1).max(40)).max(24).default([]).refine((tags) => tags.every(isIndustryTag), "UNKNOWN_INDUSTRY_TAG"),
-  companyPlan: z.array(z.enum(MEMBERSHIP_PLAN_CODES)).max(4).default([]),
+  companyPlan: z.array(z.enum(MEMBERSHIP_PLAN_CODES)).max(MEMBERSHIP_PLAN_CODES.length).default([]),
   event: z.object({
     eventId: z.string().uuid(),
     state: z.enum(SEGMENT_EVENT_STATES),

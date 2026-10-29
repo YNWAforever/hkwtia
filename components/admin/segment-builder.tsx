@@ -3,6 +3,7 @@ import {INDUSTRY_TAGS, industryTagLabel} from "@/config/industry-tags";
 import type {AppLocale} from "@/i18n/routing";
 import type {SegmentSaveActionState} from "@/lib/admin/segment-action-core";
 import type {SegmentFilterSet} from "@/lib/admin/segment-schema";
+import {MEMBERSHIP_PLAN_CODES} from "@/lib/membership/constants";
 import {localizedPath} from "@/lib/urls";
 
 type Vocabulary = Readonly<Record<string, string>>;
@@ -29,6 +30,8 @@ export type SegmentBuilderLabels = Readonly<{
   startup: string;
   community: string;
   patron: string;
+  individual: string;
+  platinum: string;
   active: string;
   pastDue: string;
   pendingReview: string;
@@ -71,7 +74,7 @@ function value(value: number | null): string {
 const selectClass = "min-h-11 w-full rounded-md border border-input bg-background px-3";
 
 export function SegmentBuilder({locale, labels, filter, events, presets, saveAction, campaignDraft, paginationLimit = 50}: Props) {
-  const memberships = [["community", labels.community], ["startup", labels.startup], ["corporate", labels.corporate], ["patron", labels.patron]] as const;
+  const memberships = MEMBERSHIP_PLAN_CODES.map((code) => [code, labels[code]] as const);
   const statuses = [["active", labels.active], ["past_due", labels.pastDue], ["pending_review", labels.pendingReview]] as const;
   // `localizedPath` is the only place that knows `zh-HK` is served at `/zh`;
   // a hand-built `/${locale}/admin/segments` 404s on the Chinese admin.
