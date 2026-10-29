@@ -7,6 +7,8 @@ import {z} from "zod";
 
 import {batchPreviewDigest} from "@/lib/admin/batches/types";
 import {matchMemberImportRow, type ImportMatchFacts, type MatchedImportRow} from "@/lib/admin/imports/match";
+import {membershipImportWriteMode} from "@/lib/admin/imports/membership-write-guard";
+import {tallyImportRows} from "@/lib/admin/imports/membership-decision";
 import {parseMemberImport, type ParsedMemberImport} from "@/lib/admin/imports/parse";
 import {validateMemberImportRows, type ImportMapping} from "@/lib/admin/imports/validate";
 import type {ImportGateway, ImportRunSummary} from "@/lib/admin/imports/service";
@@ -28,15 +30,15 @@ const profileFactSchema = z.object({id: z.string(), role: z.string(), email: z.s
 const emailRow = z.object({id: z.string(), email: z.string()});
 const ownerRow = z.object({id: z.string(), role: z.string()});
 function summary(runId: string, state: string, counts: Record<string, number>): ImportRunSummary {
-  return {runId, state, total: counts.total ?? 0, create: counts.create ?? 0, update: counts.update ?? 0, unchanged: counts.unchanged ?? 0, duplicate: counts.duplicate ?? 0, conflict: counts.conflict ?? 0, invalid: counts.invalid ?? 0};
+  return {runId, state, total: counts.total ?? 0, create: counts.create ?? 0, update: counts.update ?? 0, unchanged: counts.unchanged ?? 0, duplicate: counts.duplicate ?? 0, conflict: counts.conflict ?? 0, invalid: counts.invalid ?? 0, wouldCreateMembership: counts.wouldCreateMembership ?? 0, wouldSetExpired: counts.wouldSetExpired ?? 0, contactOnly: counts.contactOnly ?? 0, skipped: counts.skipped ?? 0};
 }
 function groupByEmail(values: readonly z.infer<typeof emailRow>[]) {
   const result = new Map<string, string[]>();
   for (const row of values) result.set(row.email, [...(result.get(row.email) ?? []), row.id]);
   return result;
 }
-async function matchRows(tx: BatchExecutor, parsed: ParsedMemberImport, mapping: ImportMapping): Promise<MatchedImportRow[]> {
-  const validated = validateMemberImportRows(parsed, mapping);
+async function matchRows(tx: BatchExecutor, parsed: ParsedMemberImport, mapping: ImportMapping, membershipWrites: boolean): Promise<MatchedImportRow[]> {
+  const validated = validateMemberImportRows(parsed, mapping, {membershipWrites});
   const profileIds = [...new Set(validated.map((row) => row.values.profileId).filter((value): value is string => typeof value === "string"))];
   const emails = [...new Set(validated.map((row) => row.values.email).filter((value): value is string => typeof value === "string"))];
   const ownerIds = [...new Set(validated.map((row) => row.values.ownerProfileId).filter((value): value is string => typeof value === "string"))];
@@ -71,6 +73,8 @@ export function createMemberImportRepository(loadDatabase: () => Promise<BatchDa
     },
     async validate(actor, uploadId, mapping) {
       requireAdmin(actor);
+      const mode = membershipImportWriteMode();
+      if (mode === "production_forbidden") throw new Error("MEMBERSHIP_WRITE_PRODUCTION_FORBIDDEN");
       const db = await loadDatabase();
       return db.transaction(async (tx) => {
         const upload = uploadSchema.parse(first(await tx.execute(sql`SELECT ${memberImportUploads.id} AS id, ${memberImportUploads.fileDigest} AS "fileDigest", ${memberImportUploads.parsedSnapshot} AS "parsedSnapshot", ${memberImportUploads.expiresAt} AS "expiresAt" FROM ${memberImportUploads} WHERE ${memberImportUploads.id} = ${uploadId}::uuid AND ${memberImportUploads.actorProfileId} = ${actor.profileId} FOR UPDATE`)));
@@ -78,9 +82,8 @@ export function createMemberImportRepository(loadDatabase: () => Promise<BatchDa
         const digest = batchPreviewDigest(mapping);
         const existing = first(await tx.execute(sql`SELECT ${memberImportRuns.id} AS id, ${memberImportRuns.state} AS state, ${memberImportRuns.summary} AS summary, ${memberImportRuns.expiresAt} AS "expiresAt" FROM ${memberImportRuns} WHERE ${memberImportRuns.actorProfileId} = ${actor.profileId} AND ${memberImportRuns.fileDigest} = ${upload.fileDigest} AND ${memberImportRuns.mappingDigest} = ${digest} LIMIT 1`));
         if (existing) {const run = runSchema.parse(existing); if (run.expiresAt.getTime() <= now().getTime()) throw new Error("IMPORT_RUN_EXPIRED"); return summary(run.id, run.state, run.summary);}
-        const matched = await matchRows(tx, upload.parsedSnapshot, mapping);
-        const counts: Record<string, number> = {total: matched.length, create: 0, update: 0, unchanged: 0, duplicate: 0, conflict: 0, invalid: 0};
-        for (const row of matched) counts[row.status] = (counts[row.status] ?? 0) + 1;
+        const matched = await matchRows(tx, upload.parsedSnapshot, mapping, mode === "on");
+        const counts: Record<string, number> = {...tallyImportRows(matched)};
         const run = z.object({id: z.string().uuid()}).parse(first(await tx.execute(sql`INSERT INTO ${memberImportRuns} (upload_id, actor_profile_id, file_digest, mapping_digest, mapping, state, summary, expires_at) VALUES (${uploadId}::uuid, ${actor.profileId}, ${upload.fileDigest}, ${digest}, ${JSON.stringify(mapping)}::jsonb, 'validated', ${JSON.stringify(counts)}::jsonb, ${new Date(now().getTime() + importRetentionConfig().stagingMs)}) RETURNING ${memberImportRuns.id} AS id`)));
         const records = matched.map((row) => ({row_number: row.rowNumber, validated_payload: row.values, before_snapshot: row.before, validation_status: row.status, match_target_id: row.targetId, expected_version: row.expectedVersion, conflict_reason: row.reason}));
         if (records.length) await tx.execute(sql`INSERT INTO ${memberImportRows} (run_id, row_number, validated_payload, before_snapshot, validation_status, match_target_id, expected_version, conflict_reason) SELECT ${run.id}::uuid, value.row_number, value.validated_payload, value.before_snapshot, value.validation_status, value.match_target_id, value.expected_version, value.conflict_reason FROM jsonb_to_recordset(${JSON.stringify(records)}::jsonb) AS value(row_number integer, validated_payload jsonb, before_snapshot jsonb, validation_status text, match_target_id text, expected_version text, conflict_reason text)`);

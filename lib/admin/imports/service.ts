@@ -8,7 +8,7 @@ import {importMappingSchema, type ImportMapping} from "@/lib/admin/imports/valid
 import {MAX_MEMBER_IMPORT_BYTES} from "@/lib/admin/imports/parse";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
-export type ImportRunSummary = Readonly<{runId: string; state: string; total: number; create: number; update: number; unchanged: number; duplicate: number; conflict: number; invalid: number}>;
+export type ImportRunSummary = Readonly<{runId: string; state: string; total: number; create: number; update: number; unchanged: number; duplicate: number; conflict: number; invalid: number; wouldCreateMembership: number; wouldSetExpired: number; contactOnly: number; skipped: number}>;
 export type ImportGateway = Readonly<{upload: (actor: AdminActor, bytes: Uint8Array, format: "csv" | "xlsx") => Promise<{uploadId: string; headers: readonly string[]; rowCount: number}>; validate: (actor: AdminActor, uploadId: string, mapping: ImportMapping) => Promise<ImportRunSummary>; confirm: (actor: AdminActor, runId: string, rowNumbers: readonly number[]) => Promise<ImportRunSummary>}>;
 const uploadInput = z.object({bytes: z.custom<Uint8Array>((value) => ArrayBuffer.isView(value) && Object.prototype.toString.call(value) === "[object Uint8Array]", "INVALID_IMPORT_BYTES"), format: z.enum(["csv", "xlsx"])}).strict();
 const validationInput = z.object({uploadId: z.string().uuid(), mapping: importMappingSchema}).strict();
