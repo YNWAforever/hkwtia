@@ -63,6 +63,10 @@ describe("Hero", () => {
     expect(responsiveSource, "The hero should use precomputed responsive files without a cold optimizer request").not.toBeNull();
     expect(responsiveSource).toHaveAttribute("type", "image/webp");
     expect(responsiveSource).toHaveAttribute("sizes", "100vw");
+    const preload = document.head.querySelector('link[rel="preload"][as="image"]');
+    expect(preload, "Discover the responsive LCP image before the streamed hero body").not.toBeNull();
+    expect(preload).toHaveAttribute("imagesrcset", responsiveSource!.getAttribute("srcset"));
+    expect(preload).toHaveAttribute("imagesizes", "100vw");
     const entries = responsiveSource!.getAttribute("srcset")!.split(",").map(entry => entry.trim().split(" "));
     expect(entries.map(entry => entry[1])).toEqual(["480w", "960w", "1800w"]);
     for (const [path] of entries) {
