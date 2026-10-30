@@ -54,6 +54,8 @@ describe("legacy url map", () => {
     const byFrom = new Map(legacyUrls.entries.map((entry) => [entry.from, entry]));
 
     for (const milestone of milestonesOnly(milestones)) {
+      // Added after the migration: no WordPress url ever existed, so nothing redirects to it.
+      if (milestone.legacyPath === undefined) continue;
       const entry = byFrom.get(milestone.legacyPath);
       expect(entry, `${milestone.slug} has no legacy-urls entry`).toBeDefined();
       expect({to: entry!.to, kind: entry!.kind}, milestone.slug).toEqual(
