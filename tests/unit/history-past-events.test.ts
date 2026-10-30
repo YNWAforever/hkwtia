@@ -7,10 +7,11 @@ import {milestoneSchema} from "@/content/schemas";
 import {homeArchiveStories} from "@/components/home/archive-stories";
 import {findBySlug} from "@/lib/history/milestones";
 
-// Past-event milestones added from the WTIA Drive archive (past-events-photos.md v2).
+// Past-event milestones added from the WTIA Drive archive (past-events-photos.md v4).
 const NEW_SLUGS = [
   "2026-tech-to-connect-2026-kick-off",
   "2026-tech-to-connect-2026-workshop-series",
+  "2024-hong-kong-ict-awards-ict-startup-award",
 ];
 
 const KEITH_EN = "then-Chairman (now Honorary Chairman) Mr Keith Li";
@@ -45,29 +46,36 @@ describe("past-event history milestones", () => {
       "2024-ict-joint-spring-dinner",
       "2024-japan-delegation-trip",
       "2024-generative-ai-leaders-summit",
-      "2024-hong-kong-ict-awards-ict-startup-award",
       "2024-wtia-innotech-leaders-forum",
       "2024-asia-smart-app-awards-10th-anniversary",
+      "2021-asia-smart-app-awards-8th",
     ]) {
       expect(findBySlug(milestones, slug), slug).toBeNull();
     }
   });
 
-  // The kick-off is featured with no photo: it must not reach the photo-led homepage strip.
-  it("keeps a photo-less featured entry off the homepage photo strip", () => {
-    expect(homeArchiveStories().map(({slug}) => slug)).not.toContain("2026-tech-to-connect-2026-kick-off");
+  // The homepage strip is photo-led: only stories with at least one image reach it.
+  it("keeps every homepage archive story photo-led", () => {
     for (const story of homeArchiveStories()) expect(story.images.length).toBeGreaterThan(0);
   });
 
+  it("wires the kick-off photos and the 2024 ICT Startup Award ceremony photo", () => {
+    expect(bySlug("2026-tech-to-connect-2026-kick-off").images.map(({src}) => src)).toEqual([
+      "/images/history/2026-tech-to-connect-2026-kick-off-1.jpg",
+      "/images/history/2026-tech-to-connect-2026-kick-off-2.jpg",
+      "/images/history/2026-tech-to-connect-2026-kick-off-3.jpg",
+    ]);
+    const ict = bySlug("2024-hong-kong-ict-awards-ict-startup-award");
+    expect(ict.month).toBe("11");
+    expect(ict.images.map(({src}) => src)).toEqual(["/images/history/2024-hong-kong-ict-awards-ict-startup-award-1.jpg"]);
+  });
+
+  // Willy 2026-10-30: 「IoT markets 同 2022–24 ExCo 拎走主打，得返三條」. The third, the 2022/23
+  // Asia Smart App Awards, is still held out while its month awaits verification.
   it("features exactly the agreed entries", () => {
     expect(milestones.filter(({featured}) => featured).map(({slug}) => slug).sort()).toEqual([
-      "2001-establishment-of-wtia",
-      "2014-wi-fi-hk",
       "2026-tech-to-connect-2026-kick-off",
       "asia-smart-innovation-awards-2025",
-      "new-term-of-executive-committee-2022-2024",
-      "the-strategies-for-expanding-global-internet-of-things-iot-markets",
-      "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
     ]);
   });
 
@@ -79,8 +87,9 @@ describe("past-event history milestones", () => {
     }
   });
 
-  it("replaces the third-party ASIA 2025 image with WTIA's own judging photos", () => {
+  it("replaces the third-party ASIA 2025 image with WTIA's ceremony photos", () => {
     const record = bySlug("asia-smart-innovation-awards-2025");
+    expect(record.images.map(({altEn}) => altEn).join(" ")).toContain("ceremony");
     expect(record.images.map(({src}) => src)).toEqual([
       "/images/history/asia-smart-innovation-awards-2025-1.jpg",
       "/images/history/asia-smart-innovation-awards-2025-2.jpg",

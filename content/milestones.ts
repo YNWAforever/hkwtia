@@ -31,7 +31,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/2001-The-Inauguration-of-WTIA-1024x683-1.jpg', altEn: '2001 - Establishment of WTIA (photo 1)', altZh: '2001年－WTIA成立（相片 1）'}
     ],
     legacyPath: '/2001/01/2001-establishment-of-wtia/',
-    featured: true,
+    featured: false,
   },
   {
     slug: '2002-the-1st-wtia-panel-discussion-inter-operator-sms',
@@ -248,7 +248,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/10548114_546835835416447_7807130283769467394_o-1024x683-1.jpg', altEn: '2014 - Wi-Fi.HK (photo 1)', altZh: '2014年－Wi-Fi.HK（相片 1）'}
     ],
     legacyPath: '/2014/01/2014-wi-fi-hk/',
-    featured: true,
+    featured: false,
   },
   {
     slug: '2015-asia-smartphone-apps-contest-summit-2015',
@@ -840,7 +840,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyZh: '物聯網（IoT）是連結萬物的關鍵，是下一場工業革命，正以前所未見的方式改變我們的生活。此外，香港部分地區的5G服務已於2020年4月1日啟用，有助推動大部分物聯網應用；而智慧城市本質上有賴物聯網才能運作，故5G與智慧城市密不可分。\n\n要在本地發展物聯網，善用全球科技基建將大有裨益，例如急速發展的5G流動網絡，可加快數據處理速度並連接更多物聯網裝置。同時，配合現行有關物聯網技術及網絡保安的標準亦屬必要。\n\n香港在資訊及通訊科技（ICT）及電子行業擁有大量人才企業；然而，電子業與資訊及通訊科技業之間聯繫不足，影響了物聯網產品的發展。此外，兩個行業均缺乏足夠資源去理解有關物聯網技術及網絡保安的標準。\n\n為改善此情況，香港無線科技商會（WTIA）委託香港生產力促進局（HKPC），向工業貿易署申請「中小企業發展支援基金」批核，舉辦兩場講座、標準研究、十個技術工作坊及一場為期一天的TechConnect研討會，協助企業掌握有關最新標準及物聯網技術的第一手資訊，藉此加強企業與全球同業之間的聯繫，並最終提升其競爭力。\n\n指南手冊：\n\n[pdf-embedder url=”/wp-content/uploads/2020/11/The-Strategies-for-Expanding-Global-IoT-Markets1.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/10/Survey-for-guidebook.pdf”]\n\n*Any opinions, findings, conclusions or recommendations expressed in this material / event (or by members of the Project team) do not reflect the views of the Government of the Hong Kong Special Administrative Region, Trade and Industry Department or the Vetting Committee of the SME Development Fund and the Dedicated Fund on Branding, Upgrading and Domestic Sales (Organisation Support Programme).',
     images: [],
     legacyPath: '/2020/10/the-strategies-for-expanding-global-internet-of-things-iot-markets/',
-    featured: true,
+    featured: false,
   },
   {
     slug: 'simcardregistration',
@@ -868,7 +868,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyZh: '時任主席（現任榮譽主席）李勁華先生當選2022-2024年度香港無線科技商會主席\n\n香港無線科技商會（WTIA）第十九屆週年大會於2022年9月1日舉行。Innopage Limited聯合創辦人兼行政總裁Keith Li（Li King Wah）先生當選為2022-2024年度主席，任期由2022年9月2日起生效。\n\nKeith Li先生感謝WTIA會員及理事會成員的信任與支持，並表示能夠當選2022-2024年度WTIA主席深感榮幸。他表示WTIA將舉辦各類活動，為會員及業界創造商機、吸納人才。\n\nKeith Li先生表示，將竭力帶領新一屆執行委員會及WTIA會員，共同面對新任期內的挑戰與困難。\n\n以下為2022-2024年度WTIA執行委員會名單：\n\n主席：時任主席（現任榮譽主席）李勁華先生\n\n副主席：Donald Chan先生、Lawrence Cheung博士、Sunny Kok先生\n\n司庫：Nelson Tse先生\n\n執行委員：Alex Kun先生、Antony Ma先生、Ivan So先生（新任）、Jimmy Chan先生、Lawrence Poon博士、Leo To先生、Ping Wong女士、Vincent Tsui先生（新任）\n\n關於WTIA\n\n香港無線科技商會（WTIA）成立於2001年，是一個非牟利、政治中立的貿易協會，致力服務無線及流動通訊行業。',
     images: [],
     legacyPath: '/2022/09/new-term-of-executive-committee-2022-2024/',
-    featured: true,
+    featured: false,
   },
   {
     slug: 'wtia-21st-anniversary-celebration-and-inauguration-gala-dinner',
@@ -889,7 +889,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/304987776_4955423924557594_1709697925414704627_n-1-770x1024.jpg', altEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner (photo 2)', altZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮（相片 2）'}
     ],
     legacyPath: '/2022/09/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner/',
-    featured: true,
+    featured: false,
   },
   {
     slug: 'wtia-20-plus-1st-anniversary-commemorative-book',
@@ -947,9 +947,9 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyEn: 'WTIA held the Asia Smart Innovation Awards 2025 ceremony on 16 October 2025 at Cordis, Hong Kong, alongside the Asia Smart Innovation Summit on the same day. Formerly the Asia Smart App Awards, first held in 2013, the awards were renamed this year and widened to cover IoT, AI, blockchain, big data, cloud and AR/VR. Sponsored by the Cultural and Creative Industries Development Agency (CCIDA) and co-organised with partners from 17 Asian countries and regions, the awards had three categories: Public Sector & Social Innovation, Business & Commercial, and Lifestyle & Culture. Three of the nine finalists came from Hong Kong. The Grand Award went to RIFFAI (Thailand), which also took Gold in Business & Commercial. Hong Kong winners included ASTRI (Silver, Public Sector & Social Innovation), 417 Technology (Silver, Lifestyle & Culture) and SMART IGNITE (Bronze, Lifestyle & Culture; Special Mention – Best Startup). The ceremony was officiated by Dr Lawrence Cheung, Chief Technology Officer of HKPC, and WTIA then-Chairman (now Honorary Chairman) Mr Keith Li.',
     bodyZh: 'WTIA 於 2025 年 10 月 16 日在香港康得思酒店舉行「2025 亞洲智慧創新大獎」頒獎典禮，同日舉行亞洲智慧創新高峰會。大獎前身係 2013 年首辦嘅「亞洲智能應用程式大獎」，今屆起易名，範疇擴展至物聯網、人工智能、區塊鏈、大數據、雲端運算及 AR/VR。大獎由文創產業發展處贊助，聯同 17 個亞洲國家及地區嘅夥伴合辦，設公共事務及社會企業獎、商業應用獎、生活社交及文化獎三大類別。九支決賽隊伍之中有三支來自香港。榮譽大獎由泰國 RIFFAI 奪得，佢同時獲商業應用獎金獎。香港得獎者包括應科院（公共事務及社會企業獎銀獎）、417 Technology（生活社交及文化獎銀獎），以及 SMART IGNITE（生活社交及文化獎銅獎，兼獲特別嘉許－最佳初創企業）。頒獎典禮由香港生產力促進局首席技術總監張梓昌先生及 WTIA 時任主席（現任榮譽主席）李勁華先生主禮。',
     images: [
-      {src: '/images/history/asia-smart-innovation-awards-2025-1.jpg', altEn: 'Finalists presenting to the judging panel at the Asia Smart Innovation Awards 2025 final judging, 15 Oct 2025', altZh: '2025 亞洲智慧創新大獎決賽評審：決賽隊伍向評審匯報，2025 年 10 月 15 日'},
-      {src: '/images/history/asia-smart-innovation-awards-2025-2.jpg', altEn: 'Judges listening to a finalist presentation at the Asia Smart Innovation Awards 2025', altZh: '2025 亞洲智慧創新大獎評審聆聽決賽隊伍匯報'},
-      {src: '/images/history/asia-smart-innovation-awards-2025-3.jpg', altEn: 'A finalist presenting at the Asia Smart Innovation Awards 2025 final judging', altZh: '2025 亞洲智慧創新大獎決賽隊伍匯報'}
+      {src: '/images/history/asia-smart-innovation-awards-2025-1.jpg', altEn: 'Group photo on stage at the Asia Smart Innovation Awards 2025 ceremony', altZh: '2025 亞洲智慧創新大獎頒獎典禮台上大合照'},
+      {src: '/images/history/asia-smart-innovation-awards-2025-2.jpg', altEn: 'Officiating guests raising a toast on stage at the Asia Smart Innovation Awards 2025 ceremony', altZh: '2025 亞洲智慧創新大獎頒獎典禮：主禮嘉賓台上祝酒'},
+      {src: '/images/history/asia-smart-innovation-awards-2025-3.jpg', altEn: 'An award being presented on stage at the Asia Smart Innovation Awards 2025', altZh: '2025 亞洲智慧創新大獎頒獎一刻'}
     ],
     legacyPath: '/2025/11/2025-%e4%ba%9e%e6%b4%b2%e6%99%ba%e6%85%a7%e5%89%b5%e6%96%b0%e5%a4%a7%e7%8d%8e-asia-smart-innovation-awards-2025/',
     featured: true,
@@ -963,7 +963,11 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     titleZh: '「智創互聯 2026」啟動儀式暨機器人與自動化賦能啟動研討會',
     bodyEn: 'On 15 May 2026, WTIA launched Tech to Connect 2026 with a kick-off ceremony and seminar on robotics and automation, this year\'s theme. Speakers from Trio AI, Konica Minolta, CARRYAI and HKBN Enterprise Solutions covered 5G and drones, robots in the workplace, visual language models for industrial safety, and hyperautomation. A panel on Hong Kong\'s automation landscape followed, and a robot dog demonstration closed the session. The series continues through the year with a leaders\' summit, technology seminar and workshops.',
     bodyZh: 'WTIA 於 2026 年 5 月 15 日舉行「智創互聯 2026」啟動儀式暨機器人與自動化賦能啟動研討會，為今年以「機器人與自動化」為主題嘅系列活動揭開序幕。來自 Trio AI、Konica Minolta、CARRYAI 及香港寬頻企業方案嘅講者，分享 5G 與無人機、職場機械人、視覺語言模型應用於工業安全，以及超自動化等題目。之後有小組討論，探討香港自動化產業嘅機遇同挑戰，現場仲有機器狗示範。系列全年陸續舉辦產業領袖峰會、技術推廣研討會及技術工作坊。',
-    images: [],
+    images: [
+      {src: '/images/history/2026-tech-to-connect-2026-kick-off-1.jpg', altEn: 'Officiating guests holding kick-off props on stage to launch Tech to Connect 2026', altZh: '主禮嘉賓手持道具，於台上為「智創互聯 2026」主持啟動儀式'},
+      {src: '/images/history/2026-tech-to-connect-2026-kick-off-2.jpg', altEn: 'Panel discussion', altZh: '小組討論'},
+      {src: '/images/history/2026-tech-to-connect-2026-kick-off-3.jpg', altEn: 'Guests networking at the Tech to Connect 2026 kick-off', altZh: '「智創互聯 2026」啟動禮嘉賓交流'}
+    ],
     featured: true,
   },
   {
@@ -979,6 +983,20 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
       {src: '/images/history/2026-tech-to-connect-2026-workshop-series-1.jpg', altEn: 'Panel discussion on next-generation smart construction sites at the Tech to Connect 2026 workshop, 22 Oct 2026', altZh: '2026 年 10 月 22 日「智創互聯 2026」工作坊：「下一代智慧工地」小組討論'},
       {src: '/images/history/2026-tech-to-connect-2026-workshop-series-2.jpg', altEn: 'Panel discussion at the first Tech to Connect 2026 workshop, 27 Aug 2026', altZh: '2026 年 8 月 27 日第一場「智創互聯 2026」工作坊小組討論'},
       {src: '/images/history/2026-tech-to-connect-2026-workshop-series-3.jpg', altEn: 'Participants at the second Tech to Connect 2026 workshop, 15 Sep 2026', altZh: '2026 年 9 月 15 日第二場「智創互聯 2026」工作坊現場'}
+    ],
+    featured: false,
+  },
+  {
+    slug: '2024-hong-kong-ict-awards-ict-startup-award',
+    kind: 'milestone',
+    year: 2024,
+    month: '11',
+    titleEn: '2024 Hong Kong ICT Awards: ICT Startup Award Ceremony',
+    titleZh: '2024 香港資訊及通訊科技獎：資訊科技初創企業獎頒獎典禮',
+    bodyEn: 'As organiser of the ICT Startup Award of the Hong Kong ICT Awards 2024, WTIA held the award ceremony and congratulated all winners.',
+    bodyZh: 'WTIA 作為 2024 香港資訊及通訊科技獎「資訊科技初創企業獎」嘅主辦機構，舉行頒獎典禮，祝賀各得獎單位。',
+    images: [
+      {src: '/images/history/2024-hong-kong-ict-awards-ict-startup-award-1.jpg', altEn: 'Hong Kong ICT Awards 2024 Presentation Ceremony', altZh: '2024 香港 ICT 大獎頒獎禮'}
     ],
     featured: false,
   },

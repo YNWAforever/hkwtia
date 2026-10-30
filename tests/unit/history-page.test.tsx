@@ -180,22 +180,17 @@ describe("milestone timeline", () => {
     for (const title of ["In 2020 A", "In 2020 B", "In 2005"]) expect(screen.getByText(title)).toBeInTheDocument();
   });
 
-  it("pins the current factual count, year order, and seven featured destinations", async () => {
+  it("pins the current factual count, year order, and two featured destinations", async () => {
     const actual = await vi.importActual<typeof import("@/content/milestones")>("@/content/milestones");
     const history = milestonesOnly(actual.milestones);
 
-    expect(actual.milestones).toHaveLength(63);
-    expect(history).toHaveLength(53);
+    expect(actual.milestones).toHaveLength(64);
+    expect(history).toHaveLength(54);
     expect(byYearDescending(history).map(({year}) => year)).toEqual([
-      2026, 2025, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+      2026, 2025, 2024, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
       2014, 2013, 2007, 2006, 2005, 2003, 2002, 2001,
     ]);
     expect(featuredOnly(history).map(({slug}) => slug)).toEqual([
-      "2001-establishment-of-wtia",
-      "2014-wi-fi-hk",
-      "the-strategies-for-expanding-global-internet-of-things-iot-markets",
-      "new-term-of-executive-committee-2022-2024",
-      "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
       "asia-smart-innovation-awards-2025",
       "2026-tech-to-connect-2026-kick-off",
     ]);
