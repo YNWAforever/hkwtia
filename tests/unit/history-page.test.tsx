@@ -8,7 +8,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {MilestoneTimeline} from "@/components/marketing/milestone-timeline";
 import type {MilestoneRecord} from "@/content/schemas";
-import {byYearDescending, featuredOnly, milestonesOnly} from "@/lib/history/milestones";
+import {byYearDescending, featuredOnly, findBySlug, milestonesOnly} from "@/lib/history/milestones";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -17,17 +17,17 @@ type Locale = "en" | "zh-HK";
 const approvedHistory = {
   en: {
     metaTitle: "History | WTIA",
-    metaDescription: "Twenty-five years of the Hong Kong Wireless Technology Industry Association, 2001 to 2025.",
+    metaDescription: "Twenty-six years of the Hong Kong Wireless Technology Industry Association, 2001 to 2026.",
     eyebrow: "Since 2001",
     title: "Our history",
-    intro: "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
+    intro: "Milestones from twenty-six years of building Hong Kong's wireless and technology industry.",
   },
   "zh-HK": {
     metaTitle: "歷史｜WTIA",
-    metaDescription: "香港無線科技商會二十五年歷程，由2001年至2025年。",
+    metaDescription: "香港無線科技商會二十六年歷程，由2001年至2026年。",
     eyebrow: "自2001年",
     title: "我們的歷史",
-    intro: "回顧香港無線及科技產業二十五年來的發展里程碑。",
+    intro: "回顧香港無線及科技產業二十六年來的發展里程碑。",
   },
 } as const;
 
@@ -180,24 +180,69 @@ describe("milestone timeline", () => {
     for (const title of ["In 2020 A", "In 2020 B", "In 2005"]) expect(screen.getByText(title)).toBeInTheDocument();
   });
 
-  it("pins the current factual count, year order, and six featured destinations", async () => {
+  it("pins the current factual count, year order, and three featured destinations", async () => {
     const actual = await vi.importActual<typeof import("@/content/milestones")>("@/content/milestones");
     const history = milestonesOnly(actual.milestones);
 
-    expect(actual.milestones).toHaveLength(61);
-    expect(history).toHaveLength(51);
+    // 51 archive milestones plus four ready records from Alice v5: ASA 2021,
+    // the 2022/23 Awards, Tech to Connect 2026 kick-off, and the 2026 workshops.
+    expect(actual.milestones).toHaveLength(65);
+    expect(history).toHaveLength(55);
     expect(byYearDescending(history).map(({year}) => year)).toEqual([
-      2025, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+      2026, 2025, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
       2014, 2013, 2007, 2006, 2005, 2003, 2002, 2001,
     ]);
+    // Willy 2026-10-31: these three only, in content order. Each has a photo.
     expect(featuredOnly(history).map(({slug}) => slug)).toEqual([
+      "2023-asia-smart-app-awards-2022-23",
+      "asia-smart-innovation-awards-2025",
+      "2026-tech-to-connect-2026-kick-off",
+    ]);
+    for (const slug of featuredOnly(history).map(({slug: featuredSlug}) => featuredSlug)) {
+      expect(findBySlug(history, slug)?.images.length, slug).toBeGreaterThan(0);
+    }
+
+    const notFeatured = [
       "2001-establishment-of-wtia",
       "2014-wi-fi-hk",
       "the-strategies-for-expanding-global-internet-of-things-iot-markets",
       "new-term-of-executive-committee-2022-2024",
       "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
-      "asia-smart-innovation-awards-2025",
-    ]);
+      "2021-asia-smart-app-awards-8th",
+      "2026-tech-to-connect-2026-workshop-series",
+    ];
+    for (const slug of notFeatured) {
+      expect(findBySlug(history, slug)?.featured, slug).toBe(false);
+    }
+    expect(history.some((milestone) => milestone.year === 2026 && /chair|主席|會長/i.test(`${milestone.slug} ${milestone.titleEn} ${milestone.titleZh}`))).toBe(false);
+
+    const asa2021 = findBySlug(history, "2021-asia-smart-app-awards-8th");
+    expect(asa2021).toMatchObject({
+      year: 2022,
+      month: "06",
+      titleEn: "Asia Smart App Awards 2021",
+      titleZh: "亞洲智能應用程式大獎 2021",
+      featured: false,
+      legacyPath: null,
+    });
+    expect(asa2021?.bodyEn).toContain("The award ceremony was held on 23 June 2022.");
+    expect(asa2021?.bodyEn).toContain("Organised the 8th edition of Asia Smart App Awards.");
+    expect(asa2021?.bodyZh).toContain("頒獎典禮於 2022 年 6 月 23 日舉行。");
+    expect(asa2021?.bodyZh).toContain("舉辦第8屆「亞洲智能應用程式大獎」");
+
+    const awards = findBySlug(history, "2023-asia-smart-app-awards-2022-23");
+    expect(awards).toMatchObject({year: 2023, month: "06", featured: true});
+    expect(awards?.bodyEn).toContain("Eight teams reached the final");
+    expect(awards?.bodyZh).toContain("決賽隊數待核實");
+
+    const asia = findBySlug(history, "asia-smart-innovation-awards-2025");
+    expect(asia?.bodyEn).toContain("then-Chairman (now Honorary Chairman) Mr Keith Li");
+    expect(asia?.bodyZh).toContain("時任主席（現任榮譽主席）李勁華先生");
+    expect(asia?.bodyEn).not.toContain("historic high");
+    expect(asia?.bodyZh).not.toContain("規模創下歷年之最");
+    expect(asia?.images.map(({src}) => src)).not.toContain(
+      "/images/history/562333706_1252562953570355_3640544314971024985_n-3-1.jpg",
+    );
   });
 });
 
