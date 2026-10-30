@@ -72,14 +72,37 @@ export function planUsesCheckout(plan: MembershipPlanCode): boolean {
 }
 
 /**
- * Placeholder URLs. They stay here until Daisy supplies the final Drive and WhatsApp links.
- * `example.com` is intentional so a forgotten placeholder cannot point at a real file.
+ * Onboarding kit URLs. Null until the Secretariat publishes the Drive and WhatsApp links.
+ * Do not substitute a placeholder host: members must not see a dead kit URL.
  */
-export const MEMBERSHIP_KIT_LINKS = {
-  welcomeKit: "https://example.com/wtia/welcome-kit",
-  associationKit: "https://example.com/wtia/association-kit",
-  whatsappCommunity: "https://example.com/wtia/whatsapp",
-} as const;
+export type MembershipKitLinks = Readonly<{
+  welcomeKit: string | null;
+  associationKit: string | null;
+  whatsappCommunity: string | null;
+}>;
+
+export const MEMBERSHIP_KIT_LINKS: MembershipKitLinks = {
+  welcomeKit: null,
+  associationKit: null,
+  whatsappCommunity: null,
+};
+
+/** An https kit URL members may open. Blank values and example.com stay hidden. */
+export function publishedMembershipKitHref(href: string | null | undefined): string | null {
+  if (!href) return null;
+  const trimmed = href.trim();
+  if (!trimmed) return null;
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:") return null;
+  const host = url.hostname.toLowerCase().replace(/\.$/, "");
+  if (host === "example.com" || host.endsWith(".example.com")) return null;
+  return trimmed;
+}
 
 // Each action request stays below Next's 4 MB and Vercel's 4.5 MB body limits.
 export const BR_UPLOAD_PART_BYTES = 3 * 1024 * 1024;
