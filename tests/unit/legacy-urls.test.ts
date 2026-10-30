@@ -3,11 +3,11 @@ import {describe, expect, it} from "vitest";
 import legacyUrls from "@/content/legacy-urls.json";
 import {milestones} from "@/content/milestones";
 import {publicRoutes} from "@/config/public-routes";
-import {featuredOnly, milestonesOnly} from "@/lib/history/milestones";
+import {milestonesOnly} from "@/lib/history/milestones";
 
 const allowed = new Set<string>(publicRoutes);
 
-// Featured milestone detail pages (/about/history/<slug>) are typed content,
+// Milestone detail pages (/about/history/<slug>) are typed content,
 // not a static route, so they can never appear in `publicRoutes` -- but their
 // slugs are still known at build time, from the same milestone record Task 10
 // redirects against. The guarantee this test exists to provide -- no redirect
@@ -15,7 +15,8 @@ const allowed = new Set<string>(publicRoutes);
 // milestone record becomes the second source it checks a destination against,
 // alongside the static route allowlist.
 const milestoneDetailPaths = new Set(
-  featuredOnly(milestonesOnly(milestones)).map(({slug}) => `/about/history/${slug}`),
+  // Every milestone, featured or not: the detail route builds one per milestone.
+  milestonesOnly(milestones).map(({slug}) => `/about/history/${slug}`),
 );
 
 // Task 1's capture recorded 577 urls, 0 missed. `.legacy-capture/inventory.json`
@@ -43,14 +44,14 @@ describe("legacy url map", () => {
     }
   });
 
-  // The allowlist test above only asks whether a destination exists, so flipping a
-  // milestone to `featured` used to leave its legacy WordPress URL still falling back
-  // to the timeline: the detail page was built and sitemapped, but every inbound link
-  // from 25 years of the old site landed one level up from it, silently. The coupling
-  // is the invariant (design spec §6 "Redirect upgrade"), so it is asserted directly.
+  // The allowlist test above only asks whether a destination exists. Every milestone has
+  // its own detail page (app/[locale]/(public)/about/history/[slug]/page.tsx builds one per
+  // milestone), so every legacy WordPress URL for a milestone lands on that page --
+  // `featured` only decides the home-page archive slot and is deliberately not part of
+  // this rule, so un-featuring an entry can never strand 25 years of inbound links.
   // Scoped to kind `milestone`: member stories redirect to /showcase and press releases
   // to /news, which is their own mapping and not this rule.
-  it("points every featured milestone at its detail page and every other one at the timeline", () => {
+  it("points every milestone's legacy url at its own detail page, featured or not", () => {
     const byFrom = new Map(legacyUrls.entries.map((entry) => [entry.from, entry]));
 
     for (const milestone of milestonesOnly(milestones)) {
@@ -59,9 +60,7 @@ describe("legacy url map", () => {
       const entry = byFrom.get(milestone.legacyPath);
       expect(entry, `${milestone.slug} has no legacy-urls entry`).toBeDefined();
       expect({to: entry!.to, kind: entry!.kind}, milestone.slug).toEqual(
-        milestone.featured
-          ? {to: `/about/history/${milestone.slug}`, kind: "equivalent"}
-          : {to: "/about/history", kind: "section-fallback"},
+        {to: `/about/history/${milestone.slug}`, kind: "equivalent"},
       );
     }
   });

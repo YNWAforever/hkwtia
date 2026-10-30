@@ -83,9 +83,9 @@ function YearEntries({locale, readMoreLabel, milestones}: Readonly<{locale: AppL
             <h3 className="editorial-serif text-xl font-semibold text-shell-ink sm:text-2xl">
               {title}
             </h3>
-            {milestone.featured ? (
-              <ReadMore href={href} label={readMoreLabel} />
-            ) : isCompleteInline(paragraphs) ? (
+            {/* `featured` is not consulted here: it only picks the home-page archive slot, so
+                a featured and an un-featured milestone render the same card. */}
+            {isCompleteInline(paragraphs) ? (
               <p className="mt-4 max-w-3xl leading-relaxed text-muted-foreground">{paragraphs[0]}</p>
             ) : (
               <>

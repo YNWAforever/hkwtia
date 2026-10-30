@@ -69,41 +69,44 @@ describe("milestone timeline", () => {
     expect(screen.queryByText("Title EN")).not.toBeInTheDocument();
   });
 
+  // `featured` only picks the home-page archive slot; the timeline card ignores it. A short
+  // body renders whole with no link whether or not it is featured, and a long one previews its
+  // lead and links to its own detail page whether or not it is featured.
   it.each([
-    ["en", "Two sentences only.", "Featured body.", "/about/history/long"],
-    ["zh-HK", "只有兩句。", "專題正文。", "/zh/about/history/long"],
-  ] as const)("renders a non-featured body inline and the featured locale-aware link only in %s", (
+    ["en", "Two sentences only.", "Featured short.", "Lead paragraph of a featured long entry.", "/about/history/long"],
+    ["zh-HK", "只有兩句。", "專題短篇。", "專題長篇嘅第一段，內容足夠長，可以做預覽之用。", "/zh/about/history/long"],
+  ] as const)("renders featured and non-featured milestones with the same card in %s", (
     locale,
     inlineBody,
-    featuredBody,
-    featuredHref,
+    featuredShortBody,
+    featuredLead,
+    longHref,
   ) => {
+    const second = locale === "en" ? "A second paragraph that the timeline does not show." : "時間線唔會顯示呢第二段。";
     renderWithIntl(locale,
       <MilestoneTimeline locale={locale} readMoreLabel={locale === "en" ? "Read more" : "閱讀更多"} milestones={[
-        milestone({
-          slug: "short",
-          titleEn: "Short one",
-          titleZh: "短篇",
-          bodyEn: "Two sentences only.",
-          bodyZh: "只有兩句。",
-        }),
+        milestone({slug: "short", titleEn: "Short one", titleZh: "短篇", bodyEn: "Two sentences only.", bodyZh: "只有兩句。"}),
+        milestone({slug: "featured-short", featured: true, titleEn: "Featured short one", titleZh: "專題短篇標題", bodyEn: "Featured short.", bodyZh: "專題短篇。"}),
         milestone({
           slug: "long",
           featured: true,
           titleEn: "Long one",
           titleZh: "長篇",
-          bodyEn: "Featured body.",
-          bodyZh: "專題正文。",
+          bodyEn: `Lead paragraph of a featured long entry.\n\n${locale === "en" ? second : "x"}`,
+          bodyZh: `專題長篇嘅第一段，內容足夠長，可以做預覽之用。\n\n${locale === "zh-HK" ? second : "x"}`,
         }),
       ]} />,
     );
 
     expect(screen.getByText(inlineBody)).toBeVisible();
-    expect(screen.queryByText(featuredBody)).not.toBeInTheDocument();
+    expect(screen.getByText(featuredShortBody)).toBeVisible();
+    expect(screen.getByText(featuredLead)).toBeVisible();
+    expect(screen.queryByText(second)).not.toBeInTheDocument();
     const links = screen.getAllByRole("link");
     expect(links).toHaveLength(1);
-    expect(links[0]).toHaveAttribute("href", featuredHref);
+    expect(links[0]).toHaveAttribute("href", longHref);
     expect(document.querySelector('a[href$="/about/history/short"]')).not.toBeInTheDocument();
+    expect(document.querySelector('a[href$="/about/history/featured-short"]')).not.toBeInTheDocument();
     expect(document.querySelector('a[href^="/zh/zh"]')).not.toBeInTheDocument();
   });
 

@@ -62,9 +62,10 @@ export const milestoneSchema = z.object({
   // Optional: milestones added after the WordPress migration never had a legacy url,
   // so there is nothing to redirect from. Migrated entries keep theirs verbatim.
   legacyPath: z.string().regex(/^\/\d{4}\/\d{2}\/[a-z0-9%-]+\/$/).optional(),
-  // Frozen at extraction from the word-count threshold, never recomputed at
-  // render time — otherwise a copy edit could move an entry between layouts and
-  // change its URL.
+  // Editorial flag: only selects the home-page archive stories slot
+  // (components/home/archive-stories.tsx). It no longer changes the timeline
+  // layout, the detail page, or the legacy redirect -- every milestone has all
+  // three regardless -- so flipping it can never move or break a URL.
   featured: z.boolean()
 });
 
