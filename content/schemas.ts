@@ -59,7 +59,9 @@ export const milestoneSchema = z.object({
   // manual slug set (12 of the 61 real posts) -- confirmed against the actual
   // capture and against content/legacy-urls.json, which stores the same
   // encoded form as the redirect source Task 10 matches against verbatim.
-  legacyPath: z.string().regex(/^\/\d{4}\/\d{2}\/[a-z0-9%-]+\/$/),
+  // Optional: milestones added after the WordPress migration never had a legacy url,
+  // so there is nothing to redirect from. Migrated entries keep theirs verbatim.
+  legacyPath: z.string().regex(/^\/\d{4}\/\d{2}\/[a-z0-9%-]+\/$/).optional(),
   // Frozen at extraction from the word-count threshold, never recomputed at
   // render time — otherwise a copy edit could move an entry between layouts and
   // change its URL.
