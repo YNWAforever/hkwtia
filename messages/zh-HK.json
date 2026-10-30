@@ -1099,7 +1099,7 @@
     },
     "nextSteps": {
       "title": "下一步",
-      "individualLead": "你的會籍已生效。請下載資料冊、登入，並選擇第一個活動。",
+      "individualLead": "你的會籍已生效。請登入，並選擇第一個活動。",
       "processingLead": "付款正在確認。會籍生效後即可使用這些連結。",
       "organisationLead": "如這宗申請需要人工例外處理，Willy 會在 5 個工作天內回覆。",
       "noPayment": "現時尚未收款。WTIA 會在審核後與你聯絡。",
@@ -2389,9 +2389,9 @@
   "Portal": {
     "checklist": {
       "title": "入會清單",
-      "lead": "完成這些項目，以用盡會籍。個人檔案與 WhatsApp 跟你已儲存的檔案。資料冊與第一個活動是現在可以開啟的連結。",
+      "lead": "完成這些項目，以用盡會籍。個人檔案與 WhatsApp 跟你已儲存的檔案。第一個活動是現在可以開啟的連結。",
       "kitsTitle": "迎新資料冊及協會資料冊",
-      "kitsLead": "在秘書處公布最終 Drive 連結前，這些是暫代檔案。",
+      "kitsLead": "這些是秘書處已公布的檔案。",
       "done": "已完成",
       "todo": "待辦",
       "profile": "完善個人檔案",

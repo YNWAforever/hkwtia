@@ -1099,7 +1099,7 @@
     },
     "nextSteps": {
       "title": "What to do next",
-      "individualLead": "Your membership is active. Download the kits, sign in, and pick a first event.",
+      "individualLead": "Your membership is active. Sign in and pick a first event.",
       "processingLead": "Payment is being confirmed. These links are ready for when your membership is active.",
       "organisationLead": "If this application needs a manual exception, Willy will reply within 5 working days.",
       "noPayment": "No payment has been taken yet.",
@@ -2389,9 +2389,9 @@
   "Portal": {
     "checklist": {
       "title": "Onboarding checklist",
-      "lead": "Finish these to get the most from your membership. Profile and WhatsApp follow your saved profile. Kit downloads and the first event are links you can open now.",
+      "lead": "Finish these to get the most from your membership. Profile and WhatsApp follow your saved profile. The first event is a link you can open now.",
       "kitsTitle": "Welcome Kit and Association Kit",
-      "kitsLead": "Placeholder files until the Secretariat publishes the final Drive links.",
+      "kitsLead": "These are the files the Secretariat has published.",
       "done": "Done",
       "todo": "To do",
       "profile": "Complete your profile",
