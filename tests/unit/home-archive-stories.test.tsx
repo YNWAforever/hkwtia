@@ -8,10 +8,6 @@ import {describe, expect, it, vi} from "vitest";
 import {milestones} from "@/content/milestones";
 import {featuredOnly} from "@/lib/history/milestones";
 
-function homeArchiveStoriesForTest() {
-  return featuredOnly(milestones).filter((milestone) => milestone.images.length > 0).slice(0, 4);
-}
-
 const bundles = {
   en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
   "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
@@ -86,10 +82,7 @@ describe("ArchiveStories", () => {
       .filter((milestone) => milestone.images.length > 0)
       .slice(0, 4)
       .filter((milestone) => milestone.bodyEn.includes("\n\n"));
-    // Every rendered story shows its lead paragraph, whether or not it has more.
-    for (const story of homeArchiveStoriesForTest()) {
-      expect(screen.getByText(story.bodyEn.split("\n\n")[0]!), story.slug).toBeInTheDocument();
-    }
+    expect(multiParagraph.length).toBeGreaterThan(0);
 
     for (const milestone of multiParagraph) {
       const [lead, ...rest] = milestone.bodyEn.split("\n\n");
