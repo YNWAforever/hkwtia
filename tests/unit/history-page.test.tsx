@@ -184,12 +184,12 @@ describe("milestone timeline", () => {
     const actual = await vi.importActual<typeof import("@/content/milestones")>("@/content/milestones");
     const history = milestonesOnly(actual.milestones);
 
-    // 51 archive milestones plus four ready records from Alice v5: ASA 2021,
-    // the 2022/23 Awards, Tech to Connect 2026 kick-off, and the 2026 workshops.
-    expect(actual.milestones).toHaveLength(65);
-    expect(history).toHaveLength(55);
+    // Archive milestones plus Alice's SHIP additions (ASA 2021, 2022/23 Awards,
+    // Tech to Connect 4.0, 2024 ICT Startup, 2026 kick-off and workshops, and two 2020–21 forums).
+    expect(actual.milestones).toHaveLength(69);
+    expect(history).toHaveLength(59);
     expect(byYearDescending(history).map(({year}) => year)).toEqual([
-      2026, 2025, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+      2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
       2014, 2013, 2007, 2006, 2005, 2003, 2002, 2001,
     ]);
     // Willy 2026-10-31: these three only, in content order. Each has a photo.
@@ -225,15 +225,17 @@ describe("milestone timeline", () => {
       featured: false,
       legacyPath: null,
     });
-    expect(asa2021?.bodyEn).toContain("The award ceremony was held on 23 June 2022.");
-    expect(asa2021?.bodyEn).toContain("Organised the 8th edition of Asia Smart App Awards.");
-    expect(asa2021?.bodyZh).toContain("頒獎典禮於 2022 年 6 月 23 日舉行。");
-    expect(asa2021?.bodyZh).toContain("舉辦第8屆「亞洲智能應用程式大獎」");
+    expect(asa2021?.bodyEn).toContain("over 16 regional partners");
+    expect(asa2021?.bodyEn).toContain("over 100 applications");
+    expect(asa2021?.bodyEn).toContain("23 June 2022 at Cyberport 3 Function Room 1–3");
+    expect(asa2021?.bodyZh).toContain("2022 年 6 月 23 日");
+    expect(asa2021?.bodyZh).toContain("Function Room 1–3");
 
     const awards = findBySlug(history, "2023-asia-smart-app-awards-2022-23");
     expect(awards).toMatchObject({year: 2023, month: "06", featured: true});
-    expect(awards?.bodyEn).toContain("Eight teams reached the final");
-    expect(awards?.bodyZh).toContain("決賽隊數待核實");
+    expect(awards?.bodyEn).toContain("29 June 2023");
+    expect(`${awards?.bodyEn} ${awards?.bodyZh}`).not.toContain("待核實");
+    expect(awards?.bodyEn).not.toMatch(/\b(Eight|Nine|Ten|\d+)\s+teams\b/);
 
     const asia = findBySlug(history, "asia-smart-innovation-awards-2025");
     expect(asia?.bodyEn).toContain("then-Chairman (now Honorary Chairman) Mr Keith Li");

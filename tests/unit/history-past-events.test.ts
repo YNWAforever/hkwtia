@@ -49,40 +49,40 @@ describe("past-event history milestones", () => {
       featured: false,
       legacyPath: null,
     });
-    expect(record.bodyEn).toBe(
-      "Organised the 8th edition of Asia Smart App Awards. Co-organised with over 16 regional partners, attracted over 100 applications. The award ceremony was held on 23 June 2022.",
-    );
-    expect(record.bodyZh).toBe(
-      "舉辦第8屆「亞洲智能應用程式大獎」，與來自16個不同亞洲地區的機構合作，成功吸引過百份報名申請。頒獎典禮於 2022 年 6 月 23 日舉行。",
-    );
+    expect(record.bodyEn).toContain("over 16 regional partners");
+    expect(record.bodyEn).toContain("over 100 applications");
+    expect(record.bodyEn).toContain("The presentation ceremony was held on 23 June 2022 at Cyberport 3 Function Room 1–3.");
+    expect(record.bodyZh).toContain("頒獎典禮於 2022 年 6 月 23 日在數碼港 3 期 Function Room 1–3 舉行。");
   });
 
-  it("records the 2022/23 awards in June 2023 and leaves Alice's finalist wording", () => {
+  it("records the 2022/23 awards in June 2023 without an invented finalist count", () => {
     const record = bySlug("2023-asia-smart-app-awards-2022-23");
     expect(record).toMatchObject({year: 2023, month: "06", featured: true, legacyPath: null});
-    expect(record.bodyEn).toContain("Eight teams reached the final, three from Hong Kong.");
-    expect(record.bodyZh).toContain("決賽隊數待核實：先前稿寫 8 隊、post-event 寫 Nine Finalists、邀請函寫 10");
+    expect(record.bodyEn).toContain("On 29 June 2023 at Cyberport");
+    expect(`${record.bodyEn} ${record.bodyZh}`).not.toContain("待核實");
+    expect(record.bodyEn).not.toMatch(/\b(Eight|Nine|Ten)\s+(teams|finalists)\b/i);
   });
 
-  it("does not add a 2026 chairman milestone or any entry still marked unverified", () => {
+  it("does not add a 2026 chairman milestone or any HOLD entry", () => {
     expect(milestones.some((milestone) => milestone.year === 2026 && /chair|主席|會長/i.test(`${milestone.slug} ${milestone.titleEn} ${milestone.titleZh}`))).toBe(false);
     for (const slug of [
-      "2023-tech-to-connect-4-0",
       "2023-insidw-issue-2-launch",
       "2024-ict-joint-spring-dinner",
       "2024-japan-delegation-trip",
       "2024-generative-ai-leaders-summit",
-      "2024-hong-kong-ict-awards-ict-startup-award",
       "2024-wtia-innotech-leaders-forum",
       "2024-asia-smart-app-awards-10th-anniversary",
-      "2020-smart-business-with-iot-webinar",
-      "2021-5g-future-application-forum",
       "2021-tech-to-connect-5g-iot-series",
-      "2021-i-and-t-festival-secondary-schools",
       "2021-hong-kong-ict-awards-ict-startup-award",
     ]) {
       expect(findBySlug(milestones, slug), slug).toBeNull();
     }
+  });
+
+  it("keeps the 2016 Wi-Fi.HK ceremony title free of the stray closing quote", () => {
+    const title = bySlug("2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony").titleEn;
+    expect(title).toBe("2016 – “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony");
+    expect(title.endsWith("Ceremony”")).toBe(false);
   });
 
   it("names Keith Li with Willy's title wherever the record calls him Chairman", () => {
@@ -91,11 +91,19 @@ describe("past-event history milestones", () => {
       expect(bodyZh, slug).not.toMatch(/主席[：:]\s*(Keith Li|李勁華)/);
       expect(`${slug} ${bodyEn} ${bodyZh}`, slug).not.toMatch(/WiseTech/);
     }
-    for (const slug of ["new-term-of-executive-committee-2022-2024", "asia-smart-innovation-awards-2025"]) {
-      const record = bySlug(slug);
-      expect(record.bodyEn, slug).toContain(KEITH_EN);
-      expect(record.bodyZh, slug).toContain(KEITH_ZH);
-      expect(`${record.bodyEn} ${record.bodyZh}`, slug).not.toContain("會長");
+    const asia = bySlug("asia-smart-innovation-awards-2025");
+    expect(asia.bodyEn).toContain(KEITH_EN);
+    expect(asia.bodyZh).toContain(KEITH_ZH);
+    const exco = bySlug("new-term-of-executive-committee-2022-2024");
+    expect(exco.bodyEn).toContain("Honorary Chairman");
+    expect(exco.bodyZh).toContain("榮譽主席");
+    expect(`${asia.bodyEn} ${asia.bodyZh} ${exco.bodyEn} ${exco.bodyZh}`).not.toContain("會長");
+  });
+
+  it("keeps internal verification notes out of every on-site body", () => {
+    for (const {slug, bodyEn, bodyZh} of milestones) {
+      expect(`${bodyEn} ${bodyZh}`, slug).not.toContain("待核實");
+      expect(`${bodyEn} ${bodyZh}`, slug).not.toMatch(/Dora owns/i);
     }
   });
 

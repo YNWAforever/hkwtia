@@ -17,21 +17,21 @@ import {milestoneSchema, type MilestoneRecord} from '@/content/schemas';
 // derived as "<title> (photo N)" per Task 7's decision -- a floor, not a
 // finish; see the task report for images whose original (pre-rename)
 // filenames captured a real caption that a future human pass could use.
+// 2026-10-31: Alice SHIP SEO bodies (61). HOLD slugs are unchanged and were not inserted.
 export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
   {
     slug: '2001-establishment-of-wtia',
     kind: 'milestone',
     year: 2001,
     month: '01',
-    titleEn: '2001 - Establishment of WTIA',
+    titleEn: '2001 – Establishment of WTIA',
     titleZh: '2001年－WTIA成立',
-    bodyEn: 'The Inauguration Ceremony of WTIA was held at Hong Kong Productivity Council, with the exhibition Wireless Application Showcase. 20 companies showcased their latest mobile and wireless application in the Showcase.',
-    bodyZh: 'WTIA的成立典禮於香港生產力促進局舉行，並設有「無線應用展覽」，20間公司於展覽中展示其最新的流動及無線應用產品。',
+    bodyEn: 'In 2001, WTIA / Wireless (香港無線科技商會) was established in Hong Kong to advance the wireless and mobile technology industry. The inauguration ceremony was held at the Hong Kong Productivity Council (HKPC), with a Wireless Application Showcase where 20 companies presented their latest mobile and wireless applications. From the start, WTIA has connected developers, operators and partners across Hong Kong’s ICT community.',
+    bodyZh: '2001 年，WTIA / Wireless（香港無線科技商會）成立，致力推動香港無線及流動科技產業。成立典禮於香港生產力促進局（HKPC）舉行，並設「無線應用展覽」，20 間公司展示最新流動及無線應用。自此 WTIA 一直連繫香港資訊及通訊科技界的開發者、營運商及合作夥伴。',
     images: [
       {src: '/images/history/2001-The-Inauguration-of-WTIA-1024x683-1.jpg', altEn: '2001 - Establishment of WTIA (photo 1)', altZh: '2001年－WTIA成立（相片 1）'}
     ],
     legacyPath: '/2001/01/2001-establishment-of-wtia/',
-    // Willy 2026-10-31: highlights are Tech to Connect 2026, the 2022/23 Awards, and ASIA 2025 only.
     featured: false,
   },
   {
@@ -39,10 +39,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2002,
     month: '01',
-    titleEn: '2002 - The 1st WTIA Panel Discussion: Inter-Operator SMS',
+    titleEn: '2002 – The 1st WTIA Panel Discussion: Inter-Operator SMS',
     titleZh: '2002年－首屆WTIA座談會：跨網絡短訊互通',
-    bodyEn: 'Representatives of mobile network operators discussed the feasibility of transmitting SMS between different operators in the panel discussion of Wireless Technology Forum organized by WTIA in 2002.',
-    bodyZh: '2002年，WTIA舉辦「無線科技論壇」座談會，邀請各流動網絡商代表探討於不同網絡之間傳送短訊（SMS）的可行性。',
+    bodyEn: 'In 2002, WTIA organised its first Wireless Technology Forum panel discussion on inter-operator SMS in Hong Kong. Representatives of mobile network operators examined how short messages could be transmitted across different networks. The session reflected WTIA’s early role in bringing the wireless industry together to solve practical connectivity issues for users and businesses.',
+    bodyZh: '2002 年，WTIA 舉辦首屆「無線科技論壇」座談會，主題為跨網絡短訊（SMS）互通。各流動網絡商代表探討如何在不同網絡之間傳送短訊。活動體現 WTIA 早期匯聚無線業界、共同處理實際互通課題的角色。',
     images: [],
     legacyPath: '/2002/01/2002-the-1st-wtia-panel-discussion-inter-operator-sms/',
     featured: false,
@@ -52,10 +52,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2003,
     month: '01',
-    titleEn: '2003 - Opening of Hong Kong Wireless Development Centre at Cyberport',
+    titleEn: '2003 – Opening of Hong Kong Wireless Development Centre at Cyberport',
     titleZh: '2003年－香港無線科技發展中心於數碼港開幕',
-    bodyEn: 'With support of HKSAR Government, Cyberport and more than 30 corporations, WTIA established the Hong Kong Wireless Development Centre (WDC) to showcase Hong Kong’s latest development and advancement in mobile technology . Feature of the Centre included testing hubs and technical consultancy for mobile application developers, and also demonstration of mobile applications and wireless products that are established in Hong Kong. TD-SCDMA Application Development Centre also set up in WDC and served as the only testing hub for TD-SCDMA network outside Greater China Region.',
-    bodyZh: '在香港特別行政區政府、數碼港及超過30間企業支持下，WTIA成立「香港無線科技發展中心」（WDC），展示香港在流動科技方面的最新發展與成就。中心設有測試中心及技術諮詢服務，供流動應用程式開發者使用，並展示由本港開發的流動應用程式及無線產品。中心內亦設有「TD-SCDMA應用開發中心」，是大中華地區以外唯一的TD-SCDMA網絡測試中心。',
+    bodyEn: 'With support from the HKSAR Government, Cyberport and more than 30 corporations, WTIA established the Hong Kong Wireless Development Centre (WDC) at Cyberport in 2003. The centre offered testing hubs and technical consultancy for mobile application developers, and showcased Hong Kong–built wireless products. A TD-SCDMA Application Development Centre inside WDC served as a testing hub for the TD-SCDMA network outside the Greater China region.',
+    bodyZh: '在香港特區政府、數碼港及超過 30 間企業支持下，WTIA 於 2003 年在數碼港成立「香港無線科技發展中心」（WDC），提供測試中心及技術諮詢，並展示本港開發的無線產品。中心內的「TD-SCDMA 應用開發中心」是大中華地區以外的 TD-SCDMA 網絡測試據點。',
     images: [
       {src: '/images/history/WDC-OPening03-1024x686-1.jpg', altEn: '2003 - Opening of Hong Kong Wireless Development Centre at Cyberport (photo 1)', altZh: '2003年－香港無線科技發展中心於數碼港開幕（相片 1）'}
     ],
@@ -67,10 +67,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2003,
     month: '01',
-    titleEn: '2003 - The 1st WTIA Awards: J2ME Open 2003',
+    titleEn: '2003 – The 1st WTIA Awards: J2ME Open 2003',
     titleZh: '2003年－首屆WTIA大獎：J2ME Open 2003',
-    bodyEn: 'Aimed to encourage development of wireless applications for consumers and enterprises, the contest J2ME Open 2003 was organized by WTIA. Over 300 teams participated the contest.',
-    bodyZh: '為鼓勵開發面向消費者及企業的無線應用程式，WTIA舉辦「J2ME Open 2003」比賽，吸引超過300支隊伍參與。',
+    bodyEn: 'In 2003 WTIA organised J2ME Open 2003, the first WTIA Awards contest, to encourage wireless application development for consumers and enterprises in Hong Kong. Over 300 teams took part. The programme helped put local mobile software talent on the map and set the tone for later WTIA awards that recognise innovation in wireless and ICT.',
+    bodyZh: '2003 年，WTIA 舉辦首屆 WTIA 大獎比賽「J2ME Open 2003」，鼓勵面向消費者及企業的無線應用開發，吸引超過 300 支隊伍參加。活動為本地流動軟件人才提供舞台，亦為其後 WTIA 各類無線及資訊科技獎項奠下基礎。',
     images: [],
     legacyPath: '/2003/01/2003-the-1st-wtia-awards-j2me-open-2003/',
     featured: false,
@@ -80,10 +80,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2003,
     month: '01',
-    titleEn: '2003 - WTIA Partner with PISA to Conduct WLAN War Driving in Hong Kong',
+    titleEn: '2003 – WTIA Partner with PISA to Conduct WLAN War Driving in Hong Kong',
     titleZh: '2003年－WTIA與PISA合作於香港進行WLAN War Driving調查',
-    bodyEn: 'WTIA collaborated with Professional Information Security Association (PISA) to conduct War Driving survey for evaluating the strength of security measures performed by WLAN users in Hong Kong, and raise public awareness of the importance of WLAN security. The project later re-branded as SafeWiFi, and the War Driving transformed as a testing on the security level of Wi-Fi hotspot in Hong Kong.',
-    bodyZh: 'WTIA與專業資訊保安協會（PISA）合作進行「War Driving」調查，評估本港WLAN用戶的保安措施強度，並提高公眾對WLAN保安的關注。項目其後易名為SafeWiFi，War Driving亦轉型為評測本港Wi-Fi熱點保安水平的活動。',
+    bodyEn: 'WTIA partnered with the Professional Information Security Association (PISA) in 2003 to conduct a WLAN war-driving survey in Hong Kong, assessing how securely users configured wireless networks and raising public awareness of Wi-Fi security. The work later evolved into the SafeWiFi programme, shifting from war driving to testing the security of public Wi-Fi hotspots across Hong Kong.',
+    bodyZh: '2003 年，WTIA 與專業資訊保安協會（PISA）合作，在香港進行 WLAN War Driving 調查，評估用戶無線網絡保安設定，並提升公眾對 Wi-Fi 保安的關注。項目其後發展為 SafeWiFi，由 War Driving 轉型為評測本港公共 Wi-Fi 熱點保安水平。',
     images: [
       {src: '/images/history/wlan-wardriving-1024x620-1.jpg', altEn: '2003 - WTIA Partner with PISA to Conduct WLAN War Driving in Hong Kong (photo 1)', altZh: '2003年－WTIA與PISA合作於香港進行WLAN War Driving調查（相片 1）'}
     ],
@@ -95,10 +95,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2005,
     month: '01',
-    titleEn: '2005 - 1st Hong Kong Wireless Technology Excellence Awards',
+    titleEn: '2005 – 1st Hong Kong Wireless Technology Excellence Awards',
     titleZh: '2005年－首屆香港無線科技卓越大獎',
-    bodyEn: 'WTIA and Hong Kong Productivity Council (HKPC) organized the 1st Hong Kong Wireless Technology Excellence Awards to recognize the best mobile and wireless applications developed by local companies.',
-    bodyZh: 'WTIA與香港生產力促進局（HKPC）合辦首屆「香港無線科技卓越大獎」，表揚本地企業開發的優秀流動及無線應用程式。',
+    bodyEn: 'In 2005, WTIA and the Hong Kong Productivity Council (HKPC) organised the first Hong Kong Wireless Technology Excellence Awards. The awards recognised outstanding mobile and wireless applications developed by local companies, strengthening Hong Kong’s profile in wireless ICT and celebrating practical innovation for consumers and enterprises.',
+    bodyZh: '2005 年，WTIA 與香港生產力促進局（HKPC）合辦首屆「香港無線科技卓越大獎」，表揚本地企業開發的優秀流動及無線應用，提升香港在無線資訊科技領域的形象，並肯定面向消費者與企業的實用創新。',
     images: [
       {src: '/images/history/1st-hk-excellence-1024x625-1.jpg', altEn: '2005 - 1st Hong Kong Wireless Technology Excellence Awards (photo 1)', altZh: '2005年－首屆香港無線科技卓越大獎（相片 1）'}
     ],
@@ -110,10 +110,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2005,
     month: '01',
-    titleEn: '2005 - Hong Kong International Wireless Conference 2005',
+    titleEn: '2005 – Hong Kong International Wireless Conference 2005',
     titleZh: '2005年－香港國際無線科技會議2005',
-    bodyEn: 'Thousands of visitors from globe participated this international event organized by WTIA. The event consisted of presentation by reputable speakers and exhibition of 20 local wireless technology applications and solutions providers.',
-    bodyZh: 'WTIA舉辦是次國際盛會，吸引來自世界各地數千名參加者出席。活動包括多位知名講者的專題演講，以及20間本地無線科技應用及方案供應商的展覽。',
+    bodyEn: 'WTIA organised the Hong Kong International Wireless Conference 2005, drawing thousands of visitors from around the world. The programme combined presentations by industry speakers with an exhibition of about 20 local wireless technology application and solution providers, showcasing Hong Kong’s wireless ICT capabilities on an international stage.',
+    bodyZh: 'WTIA 於 2005 年舉辦「香港國際無線科技會議」，吸引來自世界各地數千名參加者。活動結合業界講者專題演講，以及約 20 間本地無線科技應用及方案供應商展覽，向國際展示香港無線資訊科技實力。',
     images: [
       {src: '/images/history/Seminar-2005-1024x712-1.jpg', altEn: '2005 - Hong Kong International Wireless Conference 2005 (photo 1)', altZh: '2005年－香港國際無線科技會議2005（相片 1）'}
     ],
@@ -125,10 +125,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2005,
     month: '01',
-    titleEn: '2005 - Launching of 3G Cyberport Project',
+    titleEn: '2005 – Launching of 3G Cyberport Project',
     titleZh: '2005年－推出3G數碼港計劃',
-    bodyEn: 'Supported by Office of the Government Chief Information Officer (OGCIO), Cyberport and local 3G network operators, WTIA launched the 3G Cyberport Project. The Project consisted of awards, training, forum, and exhibition to promote the development and adoption of 3G applications and solutions in Hong Kong.',
-    bodyZh: '在政府資訊科技總監辦公室（OGCIO）、數碼港及本地3G網絡商支持下，WTIA推出「3G數碼港計劃」，透過獎項、培訓、論壇及展覽，推動香港3G應用及方案的發展與普及。',
+    bodyEn: 'Supported by the Office of the Government Chief Information Officer (OGCIO), Cyberport and local 3G network operators, WTIA launched the 3G Cyberport Project in 2005. Through awards, training, forums and exhibitions, the project promoted the development and adoption of 3G applications and solutions in Hong Kong’s wireless industry.',
+    bodyZh: '在政府資訊科技總監辦公室（OGCIO）、數碼港及本地 3G 網絡商支持下，WTIA 於 2005 年推出「3G 數碼港計劃」，透過獎項、培訓、論壇及展覽，推動香港無線業界開發及採用 3G 應用與方案。',
     images: [],
     legacyPath: '/2005/01/2005-launching-of-3g-cyberport-project/',
     featured: false,
@@ -138,10 +138,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2005,
     month: '01',
-    titleEn: '2005 - Launching of Wireless Services Value Chain Cooperation (WSVCC) platform',
+    titleEn: '2005 – Launching of Wireless Services Value Chain Cooperation (WSVCC) platform',
     titleZh: '2005年－推出「無線服務價值鏈合作」（WSVCC）平台',
-    bodyEn: 'WTIA established the Wireless Services Value Chain Cooperation (WSVCC) platform in the Pearl River Delta of Mainland China in 2005. Content localization services equipped with hardware and technical support were provided in the platform to simplify the process of launching mobile applications in China.',
-    bodyZh: 'WTIA於2005年在中國內地珠江三角洲地區成立「無線服務價值鏈合作」（WSVCC）平台，提供配備硬件及技術支援的內容本地化服務，簡化流動應用程式於中國市場推出的流程。',
+    bodyEn: 'In 2005 WTIA established the Wireless Services Value Chain Cooperation (WSVCC) platform in the Pearl River Delta. The platform offered content localisation services with hardware and technical support, helping Hong Kong developers simplify the process of launching mobile applications in Mainland China and strengthening cross-border wireless business links.',
+    bodyZh: '2005 年，WTIA 在珠江三角洲成立「無線服務價值鏈合作」（WSVCC）平台，提供配備硬件及技術支援的內容本地化服務，協助香港開發者簡化流動應用於內地市場的推出流程，加強跨境無線業務聯繫。',
     images: [
       {src: '/images/history/GZ-Centre-1024x768-1.jpg', altEn: '2005 - Launching of Wireless Services Value Chain Cooperation (WSVCC) platform (photo 1)', altZh: '2005年－推出「無線服務價值鏈合作」（WSVCC）平台（相片 1）'}
     ],
@@ -153,10 +153,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2005,
     month: '01',
-    titleEn: '2005 - The 1st WTIA SMS Donation Campaign',
+    titleEn: '2005 – The 1st WTIA SMS Donation Campaign',
     titleZh: '2005年－首屆WTIA短訊捐款活動',
-    bodyEn: 'WTIA and Internet Professionals Association (iProA) partnered with mobile network operators in Hong Kong to launch an SMS Donation Campaign, and raised HK $2 million for the victims of 2004 Indian Ocean earthquake and tsunami.',
-    bodyZh: 'WTIA與互聯網專業協會（iProA）夥拍本港流動網絡商推出「短訊捐款活動」，為2004年印度洋大地震及海嘯災民籌得港幣200萬元善款。',
+    bodyEn: 'WTIA and the Internet Professional Association (iProA), working with Hong Kong mobile network operators, launched the first WTIA SMS Donation Campaign in 2005. The campaign raised HK$2 million for victims of the 2004 Indian Ocean earthquake and tsunami, showing how wireless technology could support rapid public fundraising.',
+    bodyZh: '2005 年，WTIA 與互聯網專業協會（iProA）夥拍本港流動網絡商推出首屆 WTIA 短訊捐款活動，為 2004 年印度洋地震及海嘯災民籌得港幣 200 萬元，展示無線科技如何支援快速公眾籌款。',
     images: [],
     legacyPath: '/2005/01/2005-the-1st-wtia-sms-donation-campaign/',
     featured: false,
@@ -166,10 +166,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2006,
     month: '01',
-    titleEn: '2006 - Hong Kong ICT Awards: Best Ubiquitous Award',
+    titleEn: '2006 – Hong Kong ICT Awards: Best Ubiquitous Award',
     titleZh: '2006年－香港資訊及通訊科技獎：最佳無處不在運算大獎',
-    bodyEn: 'Steered by the Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, Hong Kong ICT Awards: Best Ubiquitous Award established in 2006 to promote Hong Kong’s identity in providing quality mobile and wireless technology and application, and also honour the best local development in the field. The Award renamed as Hong Kong ICT Awards: Best Mobile Apps Award in 2013.',
-    bodyZh: '「香港資訊及通訊科技獎：最佳無處不在運算大獎」由政府資訊科技總監辦公室（OGCIO）統籌、WTIA籌辦，於2006年設立，旨在建立香港提供優質流動及無線科技應用的形象，並表揚業界最佳的本地發展成果。此獎項於2013年易名為「香港資訊及通訊科技獎：最佳流動應用程式獎」。',
+    bodyEn: 'Steered by OGCIO and organised by WTIA, the Hong Kong ICT Awards: Best Ubiquitous Award was established in 2006 to honour quality local mobile and wireless technology and applications. The category later became the Hong Kong ICT Awards: Best Mobile Apps Award (from 2013), continuing WTIA’s role as organiser of a flagship award track for Hong Kong’s ICT startups and developers.',
+    bodyZh: '「香港資訊及通訊科技獎：最佳無處不在運算大獎」由政府資訊科技總監辦公室（OGCIO）統籌、WTIA 籌辦，於 2006 年設立，表揚優質本地流動及無線科技應用。獎項其後於 2013 年易名為「最佳流動應用程式獎」，WTIA 持續擔任香港 ICT 獎項重要組別的主辦機構。',
     images: [
       {src: '/images/history/ICTAwards01.jpg', altEn: '2006 - Hong Kong ICT Awards: Best Ubiquitous Award (photo 1)', altZh: '2006年－香港資訊及通訊科技獎：最佳無處不在運算大獎（相片 1）'}
     ],
@@ -181,10 +181,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2007,
     month: '01',
-    titleEn: '2007 - Hong Kong Mobile Film Festival',
+    titleEn: '2007 – Hong Kong Mobile Film Festival',
     titleZh: '2007年－香港手機電影節',
-    bodyEn: 'WTIA organized the first Hong Kong Mobile Film Festival in 2007. With activities including production contest, seminar and workshops, the festival aims to nurture local youngsters’ interest and knowledge in mobile film productions and promote the awareness of mobile films appreciation among the general public.',
-    bodyZh: 'WTIA於2007年舉辦首屆「香港手機電影節」，活動包括製作比賽、講座及工作坊，旨在培養本地青年對手機電影製作的興趣與知識，並提升大眾對手機電影欣賞的關注。',
+    bodyEn: 'In 2007 WTIA organised the first Hong Kong Mobile Film Festival. With a production contest, seminars and workshops, the festival nurtured young people’s interest in making films on mobile devices and raised public appreciation of mobile film as a creative medium in Hong Kong’s wireless and digital content scene.',
+    bodyZh: '2007 年，WTIA 舉辦首屆「香港手機電影節」，透過製作比賽、講座及工作坊，培養青年以流動裝置拍片的興趣，並提升大眾對手機電影作為創意媒介的認識，豐富香港無線及數碼內容生態。',
     images: [
       {src: '/images/history/2nd-HKMFF-Launching01-1024x683-1.jpg', altEn: '2007 - Hong Kong Mobile Film Festival (photo 1)', altZh: '2007年－香港手機電影節（相片 1）'}
     ],
@@ -196,10 +196,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2013,
     month: '01',
-    titleEn: '2013 - Asia Smartphone Contest',
+    titleEn: '2013 – Asia Smartphone Contest',
     titleZh: '2013年－亞洲智能手機應用大賽',
-    bodyEn: 'To recognize the excellence of innovative smartphone applications development and provide a platform for top smartphone applications professionals in the region to meet, share, collaborate and learn from each other, WTIA started to organize Asia Smartphone Contest in 2013. 7 Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan was the co-organizer of the Contest.',
-    bodyZh: '為表揚傑出創新的智能手機應用程式開發成果，並為區內頂尖智能手機應用專才提供交流、分享、合作及互相學習的平台，WTIA於2013年起舉辦「亞洲智能手機應用大賽」，並由以色列、中國內地、日本、韓國、馬來西亞、新加坡及台灣等7個亞洲地區共同協辦。',
+    bodyEn: 'In 2013 WTIA launched the Asia Smartphone Contest — the forerunner of today’s Asia Smart App Awards / Asia Smart Innovation Awards — to recognise innovative smartphone apps and connect professionals across Asia. Seven regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore and Taiwan, co-organised the contest, putting Hong Kong and WTIA at the centre of a regional smart-app network.',
+    bodyZh: '2013 年，WTIA 開辦「亞洲智能手機應用大賽」（今日「亞洲智能應用程式大獎」／「亞洲智慧創新大獎」前身），表揚創新智能手機應用，並連繫亞洲各地專才。以色列、中國內地、日本、韓國、馬來西亞、新加坡 及台灣等七個地區共同協辦，令香港與 WTIA 成為區內智能應用網絡的樞紐。',
     images: [
       {src: '/images/history/1978490_525772187522812_9029582140716785616_o-1024x683-1.jpg', altEn: '2013 - Asia Smartphone Contest (photo 1)', altZh: '2013年－亞洲智能手機應用大賽（相片 1）'}
     ],
@@ -211,10 +211,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2013,
     month: '01',
-    titleEn: '2013 - Opening of Mobility Experience Centre at Cyberport',
+    titleEn: '2013 – Opening of Mobility Experience Centre at Cyberport',
     titleZh: '2013年－流動科技體驗中心於數碼港開幕',
-    bodyEn: 'With the support of Cyberport, WDC is renovated as Mobility Experience Centre (MEC) in 2013. The establishment of MEC aims to provide a space for public to experience advanced mobile devices, and also highlights the illustrious accomplishments Hong Kong has achieved in mobile technology. Outstanding and award-winning applications and wireless technology-related products developed by local IT companies are showcasing in the Centre.',
-    bodyZh: '在數碼港支持下，WDC於2013年翻新為「流動科技體驗中心」（MEC）。MEC的成立旨在為公眾提供體驗尖端流動裝置的空間，並展現香港在流動科技領域的卓越成就。中心展出本地資訊科技公司開發的優秀得獎應用程式及無線科技相關產品。',
+    bodyEn: 'With Cyberport’s support, WTIA renovated the Wireless Development Centre into the Mobility Experience Centre (MEC) at Cyberport in 2013. MEC gave the public a place to try advanced mobile devices and highlighted award-winning applications and wireless products from Hong Kong IT companies, reinforcing WTIA’s work on local mobile technology showcase.',
+    bodyZh: '在數碼港支持下，WTIA 於 2013 年將無線科技發展中心翻新為「流動科技體驗中心」（MEC），讓公眾體驗尖端流動裝置，並展示本地資訊科技公司的得獎應用及無線產品，延續 WTIA 推廣香港流動科技的工作。',
     images: [
       {src: '/images/history/902576_358199000946799_1828693650_o-1024x684-1.jpg', altEn: '2013 - Opening of Mobility Experience Centre at Cyberport (photo 1)', altZh: '2013年－流動科技體驗中心於數碼港開幕（相片 1）'}
     ],
@@ -226,10 +226,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2014,
     month: '01',
-    titleEn: '2014 - Made in Hong Kong Smartphone Apps Project',
+    titleEn: '2014 – Made in Hong Kong Smartphone Apps Project',
     titleZh: '2014年－「香港製造」智能手機應用程式計劃',
-    bodyEn: 'In order to assist the local application developers to expand their business in Mainland China market, “Made in Hong Kong” Smartphone Apps Project was organized by WTIA to initiate a series of events. “Made in Hong Kong” Smartphone Apps Gallery is a platform that is specifically designed to promote applications that are developed by local developers to users in Mainland China. Over 500 applications are featured in the Gallery. Moreover, Seminar, workshops and visit to China were also held to facilitate business networking opportunities between local mobile app companies and potential clients in China.',
-    bodyZh: '為協助本地應用程式開發商拓展中國內地市場業務，WTIA舉辦「香港製造」智能手機應用程式計劃，並展開一系列活動。「香港製造」智能手機應用程式廊是專為向中國內地用戶推廣本地開發商作品而設的平台，展出超過500款應用程式。計劃亦舉辦講座、工作坊及訪華團，促進本地流動應用程式公司與內地潛在客戶之間的商業交流機會。',
+    bodyEn: 'WTIA’s “Made in Hong Kong” Smartphone Apps Project helped local developers expand into Mainland China. A dedicated gallery featured over 500 applications by Hong Kong developers for Mainland users, complemented by seminars, workshops and China visits that opened business networking between Hong Kong mobile app companies and potential clients across the border.',
+    bodyZh: 'WTIA「香港製造」智能手機應用程式計劃協助本地開發商拓展中國內地市場。「香港製造」應用程式廊展出超過 500 款本地作品予內地用戶，並配合講座、工作坊及訪華團，促進香港流動應用公司與內地潛在客戶的商業交流。',
     images: [
       {src: '/images/history/10669026_572211736212190_588421535425640444_o-1024x683-1.jpg', altEn: '2014 - Made in Hong Kong Smartphone Apps Project (photo 1)', altZh: '2014年－「香港製造」智能手機應用程式計劃（相片 1）'}
     ],
@@ -241,15 +241,14 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2014,
     month: '01',
-    titleEn: '2014 - Wi-Fi.HK',
+    titleEn: '2014 – Wi-Fi.HK',
     titleZh: '2014年－Wi-Fi.HK',
-    bodyEn: 'WTIA and Office of the Government Chief Information Officer (OGCIO) launched Wi-Fi.HK, a common Wi-Fi brand established to facilitate the public and visitors in locating and accessing the free public Wi-Fi services in Hong Kong. With the support from both public and private sectors, there are over 12,000 hotspots under the brand to provide easy access of free Wi-Fi services to the public and visitors.',
-    bodyZh: 'WTIA與政府資訊科技總監辦公室（OGCIO）推出「Wi-Fi.HK」共用Wi-Fi品牌，方便市民及旅客尋找並使用香港的免費公共Wi-Fi服務。在公私營機構支持下，品牌旗下熱點已超過12,000個，讓市民及旅客輕鬆享用免費Wi-Fi服務。',
+    bodyEn: 'In 2014, WTIA and OGCIO launched Wi-Fi.HK, a common brand that helps the public and visitors find free public Wi-Fi in Hong Kong. Backed by public and private partners, the scheme grew to more than 12,000 hotspots under the Wi-Fi.HK brand, making free wireless internet easier to locate across the city.',
+    bodyZh: '2014 年，WTIA 與政府資訊科技總監辦公室（OGCIO）推出「Wi-Fi.HK」共用品牌，方便市民及旅客尋找香港免費公共 Wi-Fi。在公私營機構支持下，品牌旗下熱點超過 12,000 個，讓全港更易享用免費無線上網。',
     images: [
       {src: '/images/history/10548114_546835835416447_7807130283769467394_o-1024x683-1.jpg', altEn: '2014 - Wi-Fi.HK (photo 1)', altZh: '2014年－Wi-Fi.HK（相片 1）'}
     ],
     legacyPath: '/2014/01/2014-wi-fi-hk/',
-    // Willy 2026-10-31: 2014 stays in the timeline and is not a highlight.
     featured: false,
   },
   {
@@ -259,8 +258,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2015 – Asia Smartphone Apps Contest & Summit 2015',
     titleZh: '2015年－亞洲智能手機應用大賽暨峰會2015',
-    bodyEn: 'To recognize the excellence of innovative smartphone applications development and provide a platform for top smartphone applications professions in the region to meet, share and learn from each other, WTIA started to organise Asia Smartphone Contest in 2013, 7 Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan was the co-organiser of the Contest.',
-    bodyZh: '為表揚傑出創新的智能手機應用程式開發成果，並為區內頂尖智能手機應用專才提供交流、分享及互相學習的平台，WTIA於2013年起舉辦「亞洲智能手機應用大賽」，並由以色列、中國內地、日本、韓國、馬來西亞、新加坡及台灣等7個亞洲地區共同協辦。',
+    bodyEn: 'WTIA continued the Asia Smartphone Apps Contest & Summit in 2015, recognising innovative smartphone applications and giving regional professionals a platform to meet, share and learn. Co-organisers from seven Asian regions — including Israel, Mainland China, Japan, Korea, Malaysia, Singapore and Taiwan — reinforced Hong Kong’s role, through WTIA, as a hub for smart-app collaboration in Asia.',
+    bodyZh: '2015 年，WTIA 繼續舉辦「亞洲智能手機應用大賽暨峰會」，表揚創新智能手機應用，並為區內專才提供交流平台。以色列、中國內地、日本、韓國、馬來西亞、新加坡及台灣等七個亞洲地區共同協辦，鞏固香港經 WTIA 作為亞洲智能應用協作樞紐的角色。',
     images: [
       {src: '/images/history/ASA-2014.png', altEn: '2015 – Asia Smartphone Apps Contest & Summit 2015 (photo 1)', altZh: '2015年－亞洲智能手機應用大賽暨峰會2015（相片 1）'}
     ],
@@ -274,8 +273,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2015 – Hong Kong ICT Awards 2015: Best Mobile Apps Award',
     titleZh: '2015年－香港資訊及通訊科技獎2015：最佳流動應用程式獎',
-    bodyEn: 'Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, The Best Mobile Apps Awards aims to honour the best local mobile and wireless technology and application development, also to encourage further mobile and wireless technology and application development with enhanced creativity, design and commercial value.',
-    bodyZh: '「最佳流動應用程式獎」由政府資訊科技總監辦公室（OGCIO）支持、WTIA籌辦，旨在表揚本地最佳的流動及無線科技應用開發成果，並鼓勵業界以更高的創意、設計及商業價值進一步發展流動及無線科技應用。',
+    bodyEn: 'Supported by OGCIO and organised by WTIA, the Hong Kong ICT Awards 2015: Best Mobile Apps Award honoured outstanding local mobile and wireless applications. The award encouraged Hong Kong developers to raise creativity, design quality and commercial value in apps that serve consumers and enterprises across the ICT sector.',
+    bodyZh: '「香港資訊及通訊科技獎 2015：最佳流動應用程式獎」由政府資訊科技總監辦公室（OGCIO）支持、WTIA 籌辦，表揚傑出本地流動及無線應用，並鼓勵香港開發者以更高創意、設計及商業價值，服務資訊科技界的消費者與企業。',
     images: [
       {src: '/images/history/2015-ICT-Awards.png', altEn: '2015 – Hong Kong ICT Awards 2015: Best Mobile Apps Award (photo 1)', altZh: '2015年－香港資訊及通訊科技獎2015：最佳流動應用程式獎（相片 1）'}
     ],
@@ -289,8 +288,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2015 – SafeWiFi Campaign',
     titleZh: '2015年－SafeWiFi推廣活動',
-    bodyEn: 'In order to raise public awareness in Wi-Fi security, WTIA started SafeWiFi.hk and set up the thematic website in 2001. SafeWiFi Campaign aim at investigating the WiFi usage, assessibility, security and the knowledge of it in Hong Kong, which conducted annual WiFi security survey and co-organize events to promote Wi-Fi security for the public.',
-    bodyZh: '為提高公眾對Wi-Fi保安的關注，WTIA於2001年成立SafeWiFi.hk專題網站。「SafeWiFi推廣活動」旨在調查香港的WiFi使用情況、普及程度、保安水平及相關知識，並定期進行年度WiFi保安調查，同時合辦活動向公眾推廣Wi-Fi保安意識。',
+    bodyEn: 'WTIA’s SafeWiFi Campaign, building on the SafeWiFi.hk thematic site first set up in 2001, continued in 2015 to raise public awareness of Wi-Fi security in Hong Kong. The programme studied Wi-Fi usage, accessibility and security knowledge, ran annual security surveys, and co-organised events so residents and businesses could use wireless networks more safely.',
+    bodyZh: 'WTIA 的 SafeWiFi 推廣活動建基於 2001 年成立的 SafeWiFi.hk 專題網站，於 2015 年繼續提升香港公眾對 Wi-Fi 保安的關注。計劃調查 Wi-Fi 使用、普及程度及保安知識，進行年度保安調查，並合辦活動，協助市民與企業更安全地使用無線網絡。',
     images: [
       {src: '/images/history/2015-SafeWiFi.png', altEn: '2015 – SafeWiFi Campaign (photo 1)', altZh: '2015年－SafeWiFi推廣活動（相片 1）'}
     ],
@@ -302,10 +301,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2015,
     month: '01',
-    titleEn: '2015 - The 5th Hong Kong International Mobile Film Festival and Awards',
+    titleEn: '2015 – The 5th Hong Kong International Mobile Film Festival and Awards',
     titleZh: '2015年－第五屆香港國際手機電影節暨頒獎典禮',
-    bodyEn: 'The Project hosted since 2007, with the funding support from Create Hong Kong of HKSAR Government. With activities including production contest, seminar and workshops, the festival aims to contribute to the industry development through (1) Introducing local talents and their quality mobile videos to the international platforms to encourage mobile contents developments; (2) Broadening the horizons of local talents by facilitating the experience and culture exchanges among excellent filmmakers around the world; (3) Enhancing public awareness of using mobile devices for daily enjoyment',
-    bodyZh: '本計劃自2007年起舉辦，並獲香港特別行政區政府「創意香港」資助。活動包括製作比賽、講座及工作坊，透過以下方式推動業界發展：（一）將本地人才及其優質手機影片帶到國際平台，鼓勵手機內容創作；（二）促進本地人才與世界各地優秀電影工作者的經驗及文化交流，開拓視野；（三）提高大眾對使用流動裝置作日常娛樂的關注。',
+    bodyEn: 'Funded by Create Hong Kong, WTIA hosted the 5th Hong Kong International Mobile Film Festival and Awards in 2015 — a programme running since 2007. Through contests, seminars and workshops, the festival introduced local mobile-video talent to international platforms, fostered exchange with filmmakers worldwide, and encouraged everyday creative use of mobile devices.',
+    bodyZh: '在「創意香港」資助下，WTIA 於 2015 年舉辦第五屆「香港國際手機電影節暨頒獎典禮」（計劃自 2007 年起）。透過比賽、講座及工作坊，電影節將本地手機影片人才帶到國際平台，促進與全球電影工作者交流，並鼓勵大眾以流動裝置進行日常創作。',
     images: [
       {src: '/images/history/2014HKMFF.png', altEn: '2015 - The 5th Hong Kong International Mobile Film Festival and Awards (photo 1)', altZh: '2015年－第五屆香港國際手機電影節暨頒獎典禮（相片 1）'}
     ],
@@ -317,10 +316,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2016,
     month: '01',
-    titleEn: '2016 - Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016',
+    titleEn: '2016 – Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016',
     titleZh: '2016年－亞洲智能手機應用峰會暨頒獎典禮2016',
-    bodyEn: 'To recognize the excellence of innovative smartphone applications development and provide a platform for top smartphone applications professions in the region to meet, share and learn from each other, WTIA started to organise Asia Smartphone Contest in 2013, 9 Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan was the co-organiser of the Contest.',
-    bodyZh: '為表揚傑出創新的智能手機應用程式開發成果，並為區內頂尖智能手機應用專才提供交流、分享及互相學習的平台，WTIA於2013年起舉辦「亞洲智能手機應用大賽」，並由以色列、中國內地、日本、韓國、馬來西亞、新加坡及台灣等9個亞洲地區共同協辦。',
+    bodyEn: 'In 2016 WTIA held the Asia Smartphone Apps Summit cum Award Presentation Ceremony, continuing the regional programme launched in 2013. The summit recognised innovative smartphone apps and brought together co-organisers from Asian regions including Israel, Mainland China, Japan, Korea, Malaysia, Singapore and Taiwan, strengthening Hong Kong’s smart-app network under WTIA.',
+    bodyZh: '2016 年，WTIA 舉行「亞洲智能手機應用峰會暨頒獎典禮」，延續 2013 年開辦的區內計劃。峰會表揚創新智能手機應用，並匯聚以色列、中國內地、日本、韓國、馬來西亞、新加坡及台灣等亞洲地區協辦方，鞏固 WTIA 帶領下的香港智能應用網絡。',
     images: [
       {src: '/images/history/Picture1-1.png', altEn: '2016 - Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016 (photo 1)', altZh: '2016年－亞洲智能手機應用峰會暨頒獎典禮2016（相片 1）'}
     ],
@@ -332,12 +331,12 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2016,
     month: '01',
-    titleEn: '2016 – “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony”',
+    titleEn: '2016 – “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony',
     titleZh: '2016年－「協力推動Wi-Fi.HK」承諾書簽署典禮',
-    bodyEn: 'The Office of the Government Chief Information Officer together with the Hong Kong Wireless Technology Industry Association (WTIA) held the "Building Up Wi-Fi.HK Through Collaboration" Pledging Ceremony on 30 March 2016. The event called for the active participation of public and private organisations in promoting free public Wi-Fi service with the Government through the Wi-Fi.HK scheme to facilitate easy access to the Internet by the public.',
-    bodyZh: '政府資訊科技總監辦公室聯同香港無線科技商會（WTIA）於2016年3月30日舉行「協力推動Wi-Fi.HK」承諾書簽署典禮，呼籲公私營機構積極參與，透過Wi-Fi.HK計劃與政府合作推廣免費公共Wi-Fi服務，方便市民輕鬆上網。',
+    bodyEn: 'On 30 March 2016, OGCIO and WTIA held the “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony. Public and private organisations pledged to expand free public Wi-Fi under the Wi-Fi.HK brand, making it easier for people in Hong Kong to get online and reinforcing WTIA’s partnership with government on city-wide wireless access.',
+    bodyZh: '2016 年 3 月 30 日，政府資訊科技總監辦公室聯同 WTIA 舉行「協力推動 Wi-Fi.HK」承諾書簽署典禮，呼籲公私營機構透過 Wi-Fi.HK 計劃擴展免費公共 Wi-Fi，方便市民上網，並體現 WTIA 與政府在全港無線接達上的合作。',
     images: [
-      {src: '/images/history/2016-Wi-Fi.HK_.png', altEn: '2016 – “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony” (photo 1)', altZh: '2016年－「協力推動Wi-Fi.HK」承諾書簽署典禮（相片 1）'}
+      {src: '/images/history/2016-Wi-Fi.HK_.png', altEn: '2016 – “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony (photo 1)', altZh: '2016年－「協力推動Wi-Fi.HK」承諾書簽署典禮（相片 1）'}
     ],
     legacyPath: '/2016/01/2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony/',
     featured: false,
@@ -347,10 +346,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2016,
     month: '01',
-    titleEn: '2016 - LegCo Information Technology Constituency Election Forum',
+    titleEn: '2016 – LegCo Information Technology Constituency Election Forum',
     titleZh: '2016年－立法會資訊科技界選舉論壇',
-    bodyEn: 'To create a platform for IT voters to understand more about the candidates’ view for the upcoming LEGCO Election IT Functional Constituency, Hong Kong Wireless Technology Industry Association (WTIA), the Hong Kong Information Technology Federation (HKITF), and Professional Information Security Association (PISA) co-organized an Election Forum in 2016 before the legislative election.',
-    bodyZh: '為讓資訊科技界選民更了解候選人對即將舉行的立法會資訊科技功能界別選舉的政綱，香港無線科技商會（WTIA）、香港資訊科技聯會（HKITF）及專業資訊保安協會（PISA）於2016年立法會選舉前合辦選舉論壇。',
+    bodyEn: 'Before the 2016 Legislative Council election, WTIA, the Hong Kong Information Technology Federation (HKITF) and PISA co-organised an election forum for the Information Technology functional constituency. The forum helped IT voters in Hong Kong understand candidates’ views on industry issues, reflecting WTIA’s role in civic engagement for the wireless and ICT sector.',
+    bodyZh: '2016 年立法會選舉前，WTIA、香港資訊科技聯會（HKITF）及專業資訊保安協會（PISA）合辦資訊科技功能界別選舉論壇，協助本港 IT 選民了解候選人政綱，體現 WTIA 在無線及資訊科技界公民參與方面的角色。',
     images: [
       {src: '/images/history/Picture1.png', altEn: '2016 - LegCo Information Technology Constituency Election Forum (photo 1)', altZh: '2016年－立法會資訊科技界選舉論壇（相片 1）'}
     ],
@@ -364,8 +363,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2016 – SafeWiFi Campaign',
     titleZh: '2016年－SafeWiFi推廣活動',
-    bodyEn: 'In order to raise public awareness in Wi-Fi security, WTIA started SafeWiFi.hk and set up the thematic website in 2001. SafeWiFi Campaign aim at investigating the WiFi usage, assessibility, security and the knowledge of it in Hong Kong, which conducted annual WiFi security survey and co-organize events to promote Wi-Fi security for the public.',
-    bodyZh: '為提高公眾對Wi-Fi保安的關注，WTIA於2001年成立SafeWiFi.hk專題網站。「SafeWiFi推廣活動」旨在調查香港的WiFi使用情況、普及程度、保安水平及相關知識，並定期進行年度WiFi保安調查，同時合辦活動向公眾推廣Wi-Fi保安意識。',
+    bodyEn: 'WTIA continued the SafeWiFi Campaign in 2016 to promote Wi-Fi security awareness in Hong Kong. Building on SafeWiFi.hk (launched in 2001), the campaign studied local Wi-Fi usage and security knowledge, conducted annual surveys, and co-organised public events so households and businesses could better protect their wireless connections.',
+    bodyZh: '2016 年，WTIA 繼續推行 SafeWiFi 推廣活動，提升香港 Wi-Fi 保安意識。計劃建基於 2001 年成立的 SafeWiFi.hk，調查本地 Wi-Fi 使用及保安知識，進行年度調查，並合辦公眾活動，協助家庭與企業更好地保護無線連線。',
     images: [
       {src: '/images/history/2016-SafeWiFi.png', altEn: '2016 – SafeWiFi Campaign (photo 1)', altZh: '2016年－SafeWiFi推廣活動（相片 1）'}
     ],
@@ -430,8 +429,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2017 – Asia Smart App Summit cum Award Presentation Ceremony',
     titleZh: '2017年－亞洲智能應用程式峰會暨頒獎典禮',
-    bodyEn: 'With funding support from Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards (formerly known as Asia Smartphone Apps Contest) aim to promote Hong Kong as a capital of Smart App in Asia by gathering the top industry experts across the region. A regional contest for Smart App, the Asia Smart App Awards successfully gather 11 participating countries/ regions in Asia, namely the Mainland, Israel, Japan, Korea, Malaysia, Singapore, Taiwan, Thailand, Indonesia, Philippines and Vietnam, etc. with the support from more than 20 industry organizations in Asia.',
-    bodyZh: '在香港特別行政區政府「創意香港」資助下，「亞洲智能應用大獎」（前稱「亞洲智能手機應用大賽」）旨在匯聚區內頂尖業界專才，建立香港作為亞洲智能應用之都的形象。作為區內智能應用程式的大型比賽，「亞洲智能應用大獎」成功匯聚11個亞洲參賽國家／地區，包括中國內地、以色列、日本、韓國、馬來西亞、新加坡、台灣、泰國、印尼、菲律賓及越南等，並獲區內超過20個業界組織支持。',
+    bodyEn: 'With Create Hong Kong funding, WTIA organised the 2017 Asia Smart App Summit cum Award Presentation Ceremony. Formerly the Asia Smartphone Apps Contest, the Asia Smart App Awards brought together 11 participating countries and regions — including Mainland China, Israel, Japan, Korea, Malaysia, Singapore, Taiwan, Thailand, Indonesia, the Philippines and Vietnam — with support from more than 20 Asian industry organisations, promoting Hong Kong as a smart-app hub.',
+    bodyZh: '在「創意香港」資助下，WTIA 於 2017 年舉辦「亞洲智能應用程式峰會暨頒獎典禮」。大獎前稱「亞洲智能手機應用大賽」，匯聚中國內地、以色列、日本、韓國、馬來西亞、新加坡、台灣、泰國、印尼、菲律賓及越南等 11 個參賽國家／地區，並獲區內超過 20 個業界組織支持，推動香港成為智能應用樞紐。',
     images: [
       {src: '/images/history/2017-Asia-Smart-App-Summit-cum-Award-Presentation-Ceremony-1-1.png', altEn: '2017 – Asia Smart App Summit cum Award Presentation Ceremony (photo 1)', altZh: '2017年－亞洲智能應用程式峰會暨頒獎典禮（相片 1）'}
     ],
@@ -445,8 +444,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2017 – Connected City Conference',
     titleZh: '2017年－互聯城市會議',
-    bodyEn: 'WTIA organised the Connected City Conference and industry experts were invited to present their latest solutions on 5G, LoRaWAN, Sigfox and NB-IoT to build Hong Kong as a smart-city. This is the first Smart City event that centres on connectivity and the newest networks gathered in one setting to discuss IoT, data, security and all the essential ingredients for a truly empowering Smart Hong Kong.',
-    bodyZh: 'WTIA舉辦「互聯城市會議」，邀請業界專才分享5G、LoRaWAN、Sigfox及NB-IoT等最新方案，共建香港成為智慧城市。這是首個以連接性為核心的智慧城市活動，匯聚各種最新網絡技術於同一場合，探討物聯網、數據、保安等打造真正智慧香港所需的重要元素。',
+    bodyEn: 'WTIA organised the Connected City Conference in 2017, inviting experts to present solutions on 5G, LoRaWAN, Sigfox and NB-IoT for a smarter Hong Kong. It was an early smart-city event focused on connectivity, bringing newest networks into one setting to discuss IoT, data and security — core themes for WTIA’s wireless industry work.',
+    bodyZh: '2017 年，WTIA 舉辦「互聯城市會議」，邀請專才分享 5G、LoRaWAN、Sigfox 及 NB-IoT 等方案，共建智慧香港。這是早期以連接性為核心的智慧城市活動，匯聚最新網絡技術，探討物聯網、數據與保安——正是 WTIA 無線業界工作的核心主題。',
     images: [
       {src: '/images/history/2017-Connected-City-Conference-1.png', altEn: '2017 – Connected City Conference (photo 1)', altZh: '2017年－互聯城市會議（相片 1）'}
     ],
@@ -460,8 +459,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2017 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China',
     titleZh: '2017年－拓展中國內地車聯網（IoV）市場網絡',
-    bodyEn: 'Supported by BUD Fund, WTIA organised a series of events, including business networking event, public awareness seminar, study mission, to help Hong Kong enterprises capture opportunities to penetrate or expand business network across China.',
-    bodyZh: '在BUD專項基金支持下，WTIA舉辦一系列活動，包括商業配對活動、公眾教育講座及考察團，協助香港企業把握機會打入或拓展在中國內地的業務網絡。',
+    bodyEn: 'Supported by the BUD Fund, WTIA ran a 2017 series of networking events, seminars and study missions to help Hong Kong enterprises develop Internet of Vehicles (IoV) market links in Mainland China. The programme opened cross-border wireless and ICT business opportunities for members exploring connected-vehicle technologies.',
+    bodyZh: '在 BUD 專項基金支持下，WTIA 於 2017 年舉辦商業配對、公眾講座及考察團，協助香港企業拓展中國內地車聯網（IoV）市場網絡，為有意發展車聯科技的會員打開跨境無線及資訊科技商機。',
     images: [
       {src: '/images/history/2017-IoV-Mission-Tour-to-Chongqing-1.png', altEn: '2017 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China (photo 1)', altZh: '2017年－拓展中國內地車聯網（IoV）市場網絡（相片 1）'}
     ],
@@ -475,8 +474,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2017 Hong Kong ICT Awards – Best Mobile App Award',
     titleZh: '2017年香港資訊及通訊科技獎－最佳流動應用程式獎',
-    bodyEn: 'Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, The Best Mobile Apps Awards aims to honour the best local mobile and wireless technology and application development, also to encourage further mobile and wireless technology and application development with enhanced creativity, design and commercial value.',
-    bodyZh: '「最佳流動應用程式獎」由政府資訊科技總監辦公室（OGCIO）支持、WTIA籌辦，旨在表揚本地最佳的流動及無線科技應用開發成果，並鼓勵業界以更高的創意、設計及商業價值進一步發展流動及無線科技應用。',
+    bodyEn: 'Supported by OGCIO and organised by WTIA, the 2017 Hong Kong ICT Awards – Best Mobile App Award recognised outstanding local mobile and wireless applications. The award encouraged Hong Kong ICT companies to improve creativity, design and commercial value in apps used by consumers and businesses.',
+    bodyZh: '「2017 香港資訊及通訊科技獎－最佳流動應用程式獎」由政府資訊科技總監辦公室（OGCIO）支持、WTIA 籌辦，表揚傑出本地流動及無線應用，並鼓勵香港資訊科技企業提升應用程式的創意、設計及商業價值。',
     images: [
       {src: '/images/history/2017-Hong-Kong-ICT-Awards-Best-Mobile-App-Award-1.png', altEn: '2017 Hong Kong ICT Awards – Best Mobile App Award (photo 1)', altZh: '2017年香港資訊及通訊科技獎－最佳流動應用程式獎（相片 1）'}
     ],
@@ -574,8 +573,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2018 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China',
     titleZh: '2018年－拓展中國內地車聯網（IoV）市場網絡',
-    bodyEn: 'Supported by BUD Fund, WTIA organised a series of events, including business networking event, public awareness seminar, study mission, to help Hong Kong enterprises capture opportunities to penetrate or expand business network across China.',
-    bodyZh: '在BUD專項基金支持下，WTIA舉辦一系列活動，包括商業配對活動、公眾教育講座及考察團，協助香港企業把握機會打入或拓展在中國內地的業務網絡。',
+    bodyEn: 'In 2018, again with BUD Fund support, WTIA continued programmes — networking events, seminars and study missions — to help Hong Kong enterprises expand Internet of Vehicles (IoV) business networks in Mainland China, sustaining cross-border wireless ICT collaboration for members.',
+    bodyZh: '2018 年，WTIA 在 BUD 專項基金支持下繼續舉辦商業配對、講座及考察團，協助香港企業拓展中國內地車聯網（IoV）業務網絡，延續會員的跨境無線資訊科技合作。',
     images: [
       {src: '/images/history/2018-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China.png', altEn: '2018 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China (photo 1)', altZh: '2018年－拓展中國內地車聯網（IoV）市場網絡（相片 1）'}
     ],
@@ -589,8 +588,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2018 – Meeting with YC Partner – Eric Migicovsky: “How to apply successfully for Y Combinator?”',
     titleZh: '2018年－與YC合夥人Eric Migicovsky會面：「如何成功申請加入Y Combinator？」',
-    bodyEn: 'In partnership with ZEROZONE, the Hong Kong’s startup base, WTIA and Zerozone have invited Eric Migicovsky, partner of Y Combinator to talk about how to get into YC. Y Combinator, also known as the “Fixed Point Combinator”, is the most prominent accelerator in Silicon Valley. Eric Migicovsky is the Founder and CEO of Pebble Technology (YC W11), which was acquired by Fitbit in 2016. In April 2012, Eric and his team launched Pebble on Kickstarter, where it became the most successful crowdfunded project in Kickstarter’s history. Pebble sold over 2,000,000 watches.',
-    bodyZh: 'WTIA與香港初創基地ZEROZONE合作，邀請Y Combinator合夥人Eric Migicovsky主講如何成功加入YC。Y Combinator又稱「不動點孵化器」（Fixed Point Combinator），是矽谷最負盛名的加速器。Eric Migicovsky是Pebble Technology（YC W11）的創辦人兼行政總裁，該公司於2016年被Fitbit收購。2012年4月，Eric與其團隊於Kickstarter推出Pebble，成為Kickstarter史上最成功的眾籌項目，Pebble累積售出超過200萬隻手錶。',
+    bodyEn: 'In partnership with ZEROZONE, WTIA invited Y Combinator partner Eric Migicovsky — founder of Pebble Technology — to speak in Hong Kong on how startups can apply successfully to YC. The session connected local founders with Silicon Valley accelerator insight, supporting WTIA’s role in nurturing wireless and ICT entrepreneurship.',
+    bodyZh: 'WTIA 與初創基地 ZEROZONE 合作，邀請 Y Combinator 合夥人、Pebble Technology 創辦人 Eric Migicovsky 來港主講如何成功申請加入 YC，將矽谷加速器經驗帶給本地創業者，體現 WTIA 培育無線及資訊科技創業的角色。',
     images: [
       {src: '/images/history/2018-Meet-with-Y-Combinator.png', altEn: '2018 – Meeting with YC Partner – Eric Migicovsky: “How to apply successfully for Y Combinator?” (photo 1)', altZh: '2018年－與YC合夥人Eric Migicovsky會面：「如何成功申請加入Y Combinator？」（相片 1）'}
     ],
@@ -602,10 +601,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2018,
     month: '01',
-    titleEn: '2018 - Taipei IOT Business Delegation Tour',
+    titleEn: '2018 – Taipei IOT Business Delegation Tour',
     titleZh: '2018年－台北物聯網商貿考察團',
-    bodyEn: 'Supported by Taipei Economic and Cultural Office, WTIA organised the Taipei IoT Business Delegation Tour, with the aim to expand the cross-border networking and exchange IoT knowledge between Hong Kong and Taiwan, as well as providing a better understanding of Taiwan outstanding development on Smart City sector. Learning the latest solutions on 5G, IoT and IoV is the key session of the trip, industry experts were invited to share the knowledge and experiences to delegates. The visiting delegates from Hong Kong consisted of web hosting providers, software vendors, hardware vendors, E-Commerce companies and Telecommunications Companies.',
-    bodyZh: '在台北經濟文化辦事處支持下，WTIA舉辦「台北物聯網商貿考察團」，旨在促進香港與台灣之間的跨境交流及物聯網知識互通，並加深了解台灣在智慧城市領域的卓越發展。行程重點包括學習5G、物聯網及車聯網的最新方案，並邀請業界專才向團員分享知識與經驗。是次香港訪問團成員包括網站託管服務商、軟件供應商、硬件供應商、電子商務公司及電訊公司。',
+    bodyEn: 'Supported by the Taipei Economic and Cultural Office, WTIA organised a Taipei IoT Business Delegation Tour in 2018. Hong Kong delegates from web hosting, software, hardware, e-commerce and telecoms learned about 5G, IoT and IoV solutions and Taiwan’s smart-city progress, expanding cross-strait wireless industry exchange under WTIA.',
+    bodyZh: '在台北經濟文化辦事處支持下，WTIA 於 2018 年舉辦「台北物聯網商貿考察團」。香港團員來自網站託管、軟件、硬件、電子商務及電訊等界別，學習 5G、物聯網及車聯網方案，並了解台灣智慧城市發展，擴展 WTIA 主導的兩岸無線業界交流。',
     images: [
       {src: '/images/history/2018-Taipei-Delegation-Tour-1.png', altEn: '2018 - Taipei IOT Business Delegation Tour (photo 1)', altZh: '2018年－台北物聯網商貿考察團（相片 1）'}
     ],
@@ -619,8 +618,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2019 – A 5G Revolution: What does it mean for me?',
     titleZh: '2019年－5G革命：對我有何意義？',
-    bodyEn: 'Hong Kong is actively deploying 5G Application in all areas. How will it affect the quality of life and improve the social efficiency in the near future? WTIA joined hands with The Hong Kong Productivity Council (HKPC), invited industry export to share and exchange views on 5G application, the latest global trends, 5G systems for new application and the new business models of 5G Era.',
-    bodyZh: '香港正積極於各領域部署5G應用。5G將如何影響生活質素，並在不久將來提升社會效率？WTIA與香港生產力促進局（HKPC）攜手，邀請業界專才分享及交流對5G應用、最新全球趨勢、5G新應用系統，以及5G時代新商業模式的看法。',
+    bodyEn: 'As Hong Kong prepared for wider 5G deployment, WTIA and HKPC invited industry experts in 2019 to share views on 5G applications, global trends, new systems and business models. The exchange helped local enterprises understand what the 5G era would mean for quality of life, social efficiency and wireless ICT opportunities.',
+    bodyZh: '隨著香港積極部署 5G，WTIA 與香港生產力促進局（HKPC）於 2019 年邀請業界專才分享 5G 應用、全球趨勢、新系統及商業模式，協助本地企業理解 5G 時代對生活質素、社會效率及無線資訊科技機遇的意義。',
     images: [
       {src: '/images/history/2019-A-5G-Revolution-What-does-it-mean-for-me_-1.png', altEn: '2019 – A 5G Revolution: What does it mean for me? (photo 1)', altZh: '2019年－5G革命：對我有何意義？（相片 1）'}
     ],
@@ -634,8 +633,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2019 – Asia Smart App Awards 2018/ 2019',
     titleZh: '2019年－亞洲智能應用大獎2018/2019',
-    bodyEn: 'With funding support from Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards (formerly known as Asia Smartphone Apps Contest) aim to promote Hong Kong as a capital of Smart App in Asia by gathering the top industry experts across the region. A regional contest for Smart App, the Asia Smart App Awards successfully gather 13 participating countries/ regions in Asia, namely the Israel, Indonesia, Japan, Korea, Mainland, Malaysia, Myanmar, Philippines, Singapore, Sri Lanka ,Taiwan, Thailand, and Vietnam, etc. with the support from more than 20 industry organizations in Asia.',
-    bodyZh: '在香港特別行政區政府「創意香港」資助下，「亞洲智能應用大獎」（前稱「亞洲智能手機應用大賽」）旨在匯聚區內頂尖業界專才，建立香港作為亞洲智能應用之都的形象。作為區內智能應用程式的大型比賽，「亞洲智能應用大獎」成功匯聚13個亞洲參賽國家／地區，包括以色列、印尼、日本、韓國、中國內地、馬來西亞、緬甸、菲律賓、新加坡、斯里蘭卡、台灣、泰國及越南等，並獲區內超過20個業界組織支持。',
+    bodyEn: 'With Create Hong Kong support, WTIA’s Asia Smart App Awards 2018/2019 gathered 13 participating countries and regions — including Israel, Indonesia, Japan, Korea, Mainland China, Malaysia, Myanmar, the Philippines, Singapore, Sri Lanka, Taiwan, Thailand and Vietnam — backed by more than 20 Asian industry organisations, promoting Hong Kong as a regional capital of smart apps.',
+    bodyZh: '在「創意香港」資助下，WTIA「亞洲智能應用大獎 2018/2019」匯聚以色列、印尼、日本、韓國、中國內地、馬來西亞、緬甸、菲律賓、新加坡、斯里蘭卡、台灣、泰國及越南等 13 個參賽國家／地區，並獲區內超過 20 個業界組織支持，推動香港成為亞洲智能應用之都。',
     images: [
       {src: '/images/history/2019-Asia-Smart-App-Awards-2018_-2019-1-1.png', altEn: '2019 – Asia Smart App Awards 2018/ 2019 (photo 1)', altZh: '2019年－亞洲智能應用大獎2018/2019（相片 1）'}
     ],
@@ -649,8 +648,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2019 – Joint ICT Spring Dinner 2019',
     titleZh: '2019年－資訊及通訊科技界聯合春茗2019',
-    bodyEn: 'To welcome the New Year of The Pig, Hong Kong Wireless Technology Industry Association (WTIA) , Hong Kong Information Technology Federation (HKITF), Hong Kong Retail Technology Industry Association (RTIA) organised Joint ICT Spring Dinner. This event was also supported by some other ICT associations.',
-    bodyZh: '為迎接豬年新歲，香港無線科技商會（WTIA）、香港資訊科技聯會（HKITF）及香港零售科技商會（RTIA）合辦「資訊及通訊科技界聯合春茗」，活動亦獲其他資訊及通訊科技相關協會支持。',
+    bodyEn: 'To welcome the Year of the Pig, WTIA, HKITF and the Hong Kong Retail Technology Industry Association (RTIA) organised the Joint ICT Spring Dinner 2019, with support from fellow ICT associations. The dinner strengthened ties across Hong Kong’s information and communications technology community, including the wireless sector represented by WTIA.',
+    bodyZh: '為迎接豬年，WTIA、香港資訊科技聯會（HKITF）及香港零售科技商會（RTIA）合辦「資訊及通訊科技界聯合春茗 2019」，並獲其他 ICT 協會支持，加強香港資訊及通訊科技界（包括 WTIA 代表的無線業界）的聯繫。',
     images: [
       {src: '/images/history/2019-Joint-ICT-Spring-Dinner-2019-1.png', altEn: '2019 – Joint ICT Spring Dinner 2019 (photo 1)', altZh: '2019年－資訊及通訊科技界聯合春茗2019（相片 1）'}
     ],
@@ -664,8 +663,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2019 – TechConnect Conference & Festival',
     titleZh: '2019年－TechConnect研討會暨嘉年華',
-    bodyEn: 'With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development.\n\nTo assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies.',
-    bodyZh: '隨著5G時代來臨，物聯網成為全球最熱門的議題。物聯網是連結萬物的關鍵，是下一場工業革命，正以前所未見的方式改變生活質素。這項技術無疑是新時代及各行各業的經濟推動力，亦帶來全新的發展模式。\n\n為協助香港中小企與全球業界接軌，並提升它們在物聯網技術、網絡保安及相關標準與規管方面的能力，WTIA舉辦為期一天的研討會，並設有7個獨立工作坊，邀請網絡保安及物聯網業界最知名及具信譽的領袖，為香港中小企提供相關技術的解決方案知識。',
+    bodyEn: 'With IoT and 5G rising worldwide, WTIA organised a full-day TechConnect Conference & Festival in 2019 plus seven workshops. Industry leaders covered IoT technologies, cybersecurity, standards and regulation, helping Hong Kong SMEs connect with global practice and strengthen capabilities that underpin smart-city and wireless innovation.',
+    bodyZh: '隨著物聯網與 5G 成為全球焦點，WTIA 於 2019 年舉辦為期一天的 TechConnect 研討會暨嘉年華，並設七個工作坊。業界領袖講解物聯網技術、網絡保安、標準與規管，協助香港中小企接軌全球做法，提升智慧城市及無線創新所需能力。',
     images: [
       {src: '/images/history/2019-TechConnect-Conference-_-Festival.png', altEn: '2019 – TechConnect Conference & Festival (photo 1)', altZh: '2019年－TechConnect研討會暨嘉年華（相片 1）'}
     ],
@@ -679,8 +678,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '01',
     titleEn: '2020 – Asia Smart App Awards 2020',
     titleZh: '2020年－亞洲智能應用大獎2020',
-    bodyEn: 'With funding support from Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards (formerly known as Asia Smartphone Apps Contest) aim to promote Hong Kong as a capital of Smart App in Asia by gathering the top industry experts across the region. A regional contest for Smart App, the Asia Smart App Awards successfully gather 15 participating countries/ regions in Asia, namely the Cambodia, Israel, India, Indonesia, Japan, Korea, Mainland, Malaysia, Myanmar, Philippines, Singapore, Sri Lanka ,Taiwan, Thailand, and Vietnam, etc. with the support from more than 30 industry organizations in Asia.',
-    bodyZh: '在香港特別行政區政府「創意香港」資助下，「亞洲智能應用大獎」（前稱「亞洲智能手機應用大賽」）旨在匯聚區內頂尖業界專才，建立香港作為亞洲智能應用之都的形象。作為區內智能應用程式的大型比賽，「亞洲智能應用大獎」成功匯聚15個亞洲參賽國家／地區，包括柬埔寨、以色列、印度、印尼、日本、韓國、中國內地、馬來西亞、緬甸、菲律賓、新加坡、斯里蘭卡、台灣、泰國及越南等，並獲區內超過30個業界組織支持。',
+    bodyEn: 'Sponsored by Create Hong Kong and organised by WTIA, the Asia Smart App Awards 2020 brought together 15 Asian countries and regions — including Cambodia, Israel, India, Indonesia, Japan, Korea, Mainland China, Malaysia, Myanmar, the Philippines, Singapore, Sri Lanka, Taiwan, Thailand and Vietnam — with support from more than 30 industry organisations, keeping Hong Kong central to regional smart-app excellence.',
+    bodyZh: '「亞洲智能應用大獎 2020」由 WTIA 舉辦、「創意香港」資助，匯聚柬埔寨、以色列、印度、印尼、日本、韓國、中國內地、馬來西亞、緬甸、菲律賓、新加坡、斯里蘭卡、台灣、泰國及越南等 15 個亞洲國家／地區，並獲超過 30 個業界組織支持，令香港繼續位處區內智能應用卓越網絡的核心。',
     images: [
       {src: '/images/history/2020-ASA--scaled.jpg', altEn: '2020 – Asia Smart App Awards 2020 (photo 1)', altZh: '2020年－亞洲智能應用大獎2020（相片 1）'}
     ],
@@ -692,10 +691,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2020,
     month: '01',
-    titleEn: '2020 - Hong Kong ICT Awards – ICT Startup Award',
+    titleEn: '2020 – Hong Kong ICT Awards – ICT Startup Award',
     titleZh: '2020年－香港資訊及通訊科技獎：資訊科技初創企業獎',
-    bodyEn: 'Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, ICT Startup Award aims at discovering and recognising the outstanding local ICT startup companies which focus on software, hardware and social innovation areas and, reward their distinguished development based on its growth, innovation, creativity, functionality, market potential and performance.',
-    bodyZh: '「資訊科技初創企業獎」由政府資訊科技總監辦公室（OGCIO）支持、WTIA籌辦，旨在發掘及表揚專注軟件、硬件及社會創新領域的傑出本地資訊科技初創企業，並按其增長潛力、創新程度、創意、功能性、市場潛力及表現，嘉許它們的卓越發展。',
+    bodyEn: 'Supported by OGCIO and organised by WTIA, the Hong Kong ICT Awards 2020 – ICT Startup Award recognised outstanding local startups in software, hardware and social innovation. Judging considered growth, innovation, creativity, functionality, market potential and performance — continuing WTIA’s stewardship of a key Hong Kong ICT Awards category.',
+    bodyZh: '「香港資訊及通訊科技獎 2020：資訊科技初創企業獎」由政府資訊科技總監辦公室（OGCIO）支持、WTIA 籌辦，表揚軟件、硬件及社會創新領域的傑出本地初創，按增長、創新、創意、功能、市場潛力及表現評審，延續 WTIA 主辦香港 ICT 獎重要組別的工作。',
     images: [
       {src: '/images/history/2020-ICT-Awards-scaled.jpg', altEn: '2020 - Hong Kong ICT Awards – ICT Startup Award (photo 1)', altZh: '2020年－香港資訊及通訊科技獎：資訊科技初創企業獎（相片 1）'}
     ],
@@ -707,10 +706,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2020,
     month: '03',
-    titleEn: '[2nd Call for Applications] Asia Smart App Awards 2020',
-    titleZh: '【第二輪徵集參賽作品】亞洲智能應用大獎2020',
-    bodyEn: 'Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8).\n\nAll apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award!\n\nWhat are you waiting for? Please click the following webpage for application.\n\n?http://contest2020.bestasiaapp.hk/',
-    bodyZh: '「亞洲智能應用大獎2020」由香港無線科技商會舉辦，並獲香港特別行政區政府「創意香港」資助，現展開第二輪徵集參賽作品，邀請各界於網上提名為亞洲市場而設計及使用的優秀創新智能應用程式，角逐各項獎項。為讓有意參與者有充足時間準備參賽，截止日期已延長至2020年6月10日（格林尼治標準時間+8）23:59。\n\n不論是Web、Hybrid或Native App，各類應用程式均歡迎參賽！\n\n還在等甚麼？請即點擊以下網頁報名參加。\n\n?http://contest2020.bestasiaapp.hk/',
+    titleEn: 'Asia Smart App Awards 2020 – Second Call for Applications',
+    titleZh: '亞洲智能應用大獎2020－第二輪徵集參賽作品',
+    bodyEn: 'In March 2020, WTIA extended the Asia Smart App Awards 2020 application deadline to 10 June 2020 (23:59 GMT+8) and opened a second call for nominations. Sponsored by Create Hong Kong, the awards invited excellent smart apps designed for Asian markets — web, hybrid or native — reflecting WTIA’s flexibility for the industry during the early pandemic period.',
+    bodyZh: '2020 年 3 月，WTIA 將「亞洲智能應用大獎 2020」報名截止延至 6 月 10 日（GMT+8 23:59），並展開第二輪徵集。「創意香港」資助下，大獎歡迎為亞洲市場而設的優秀智能應用（Web、Hybrid 或 Native），體現疫情初期 WTIA 為業界彈性安排的做法。',
     images: [
       {src: '/images/history/ASA2020-banner_OP_02-scaled.jpg', altEn: '[2nd Call for Applications] Asia Smart App Awards 2020 (photo 1)', altZh: '【第二輪徵集參賽作品】亞洲智能應用大獎2020（相片 1）'}
     ],
@@ -722,10 +721,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2020,
     month: '03',
-    titleEn: '[POSTPONE] Hong Kong ICT Awards 2020 - ICT Startup Award',
-    titleZh: '【延期】香港資訊及通訊科技獎2020 – 資訊科技初創企業獎',
-    bodyEn: 'Dear Partners and Friends,\n\nWe regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 – ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed until further notice.\n\nLatest information of ICT Startup Award can be viewed at : https://www.ictstartup.org/\n\nIf there is any question, please contact Ms Kylie Li via (2989 9164, [email protected]).',
-    bodyZh: '各位夥伴及朋友：\n\n我們遺憾通知，原定於2020年4月3日舉行的「香港資訊及通訊科技獎2020 – 資訊科技初創企業獎」的所有評審工作及頒獎典禮已延期舉行，直至另行通知。\n\n「資訊科技初創企業獎」的最新資訊可瀏覽：https://www.ictstartup.org/\n\n如有任何查詢，請聯絡Kylie Li小姐（電話：2989 9164，電郵：[email protected]）。',
+    titleEn: 'Hong Kong ICT Awards 2020 – ICT Startup Award (Postponed)',
+    titleZh: '香港資訊及通訊科技獎2020 – 資訊科技初創企業獎（延期）',
+    bodyEn: 'In March 2020, WTIA announced that assessments, judging and the presentation ceremony for the Hong Kong ICT Awards 2020 – ICT Startup Award (originally set for 3 April 2020) were postponed until further notice, as the industry adapted to pandemic conditions while keeping the award pathway open for Hong Kong ICT startups.',
+    bodyZh: '2020 年 3 月，WTIA 公布原定 4 月 3 日舉行的「香港資訊及通訊科技獎 2020 – 資訊科技初創企業獎」評審及頒獎典禮延期至另行通知，在疫情下為香港 ICT 初創保留參賽途徑。',
     images: [
       {src: '/images/history/ICT-StartUp.png', altEn: '[POSTPONE] Hong Kong ICT Awards 2020 - ICT Startup Award (photo 1)', altZh: '【延期】香港資訊及通訊科技獎2020 – 資訊科技初創企業獎（相片 1）'}
     ],
@@ -737,10 +736,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2020,
     month: '03',
-    titleEn: '[POSTPONE] Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗)',
-    titleZh: '【延期】資訊及通訊科技界聯合春茗2020（香港資訊及通訊科技業界 庚子鼠年聯合春茗）',
-    bodyEn: 'Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗) which will be organized by Hong Kong Information Technology Federation (HKITF), Hong Kong Internet Service Providers Association (HKISPA) and Hong Kong Wireless Technology Industry Association (WTIA), has been postponed until further notice.',
-    bodyZh: '「資訊及通訊科技界聯合春茗2020」（香港資訊及通訊科技業界 庚子鼠年聯合春茗）原由香港資訊科技聯會（HKITF）、香港互聯網服務供應商協會（HKISPA）及香港無線科技商會（WTIA）合辦，現已宣佈延期舉行，直至另行通知。',
+    titleEn: 'Joint ICT Spring Dinner 2020 (Postponed)',
+    titleZh: '資訊及通訊科技界聯合春茗2020（延期）',
+    bodyEn: 'The Joint ICT Spring Dinner 2020, co-organised by HKITF, the Hong Kong Internet Service Providers Association (HKISPA) and WTIA, was postponed in March 2020 until further notice. The annual gathering normally brings Hong Kong’s ICT associations together; the delay reflected public-health constraints at the start of the pandemic.',
+    bodyZh: '由香港資訊科技聯會（HKITF）、香港互聯網服務供應商協會（HKISPA）及 WTIA 合辦的「資訊及通訊科技界聯合春茗 2020」於 2020 年 3 月宣布延期至另行通知。活動一向連繫本港各 ICT 協會；延期反映疫情初期的公共衛生限制。',
     images: [
       {src: '/images/history/SPRING-DINNER.png', altEn: '[POSTPONE] Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗) (photo 1)', altZh: '【延期】資訊及通訊科技界聯合春茗2020（香港資訊及通訊科技業界 庚子鼠年聯合春茗）（相片 1）'}
     ],
@@ -752,10 +751,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2020,
     month: '03',
-    titleEn: '[POSTPONE] ‘Tokyo ‘Industry 4.0’ Training Programme’',
-    titleZh: '【延期】東京「工業4.0」培訓計劃',
-    bodyEn: 'The ‘Tokyo ‘Industry 4.0’ Training Programme’ originally scheduled for 16-19 March 2020 has been postponed. We target to reschedule it to October 2020 and the exact rescheduling will be announced in March.',
-    bodyZh: '原定於2020年3月16至19日舉行的「東京『工業4.0』培訓計劃」已告延期，目標重新安排至2020年10月舉行，確實新日期將於3月公佈。',
+    titleEn: 'Tokyo Industry 4.0 Training Programme (Postponed)',
+    titleZh: '東京「工業4.0」培訓計劃（延期）',
+    bodyEn: 'WTIA postponed the Tokyo “Industry 4.0” Training Programme originally scheduled for 16–19 March 2020. Organisers targeted a reschedule around October 2020, with the exact date to be announced, so Hong Kong participants could still access overseas Industry 4.0 learning when travel conditions allowed.',
+    bodyZh: '原定 2020 年 3 月 16 至 19 日的東京「工業 4.0」培訓計劃由 WTIA 宣布延期，目標改於約 2020 年 10 月舉行（確實日期待公布），以便香港參加者在出行條件許可時仍可參與海外工業 4.0 學習。',
     images: [
       {src: '/images/history/TOKYO.png', altEn: '[POSTPONE] ‘Tokyo ‘Industry 4.0’ Training Programme’ (photo 1)', altZh: '【延期】東京「工業4.0」培訓計劃（相片 1）'}
     ],
@@ -767,10 +766,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'press-release',
     year: 2020,
     month: '03',
-    titleEn: '[SmarTone - Press Release] SmarTone Selects Ericsson’s 5G to Power Digitalization in Hong Kong',
-    titleZh: '[SmarTone - Press Release] SmarTone 選用愛立信5G 共同推動香港5G數碼化',
-    bodyEn: '[pdf-embedder url=”/wp-content/uploads/2020/05/SmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/06/SmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf”]',
-    bodyZh: '[pdf-embedder url=”/wp-content/uploads/2020/05/SmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/06/SmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf”]',
+    titleEn: 'SmarTone Selects Ericsson’s 5G to Power Digitalization in Hong Kong',
+    titleZh: 'SmarTone 選用愛立信5G 共同推動香港5G數碼化',
+    bodyEn: 'In 2020, WTIA’s history archive recorded a SmarTone press release on selecting Ericsson’s 5G technology to power digitalisation in Hong Kong. The item sits alongside other industry 5G milestones of the period; full bilingual PDFs were originally embedded on the legacy site. (Member / partner press note; not a WTIA-organised event.)',
+    bodyZh: '2020 年，WTIA 歷史存檔收錄 SmarTone 選用愛立信 5G 推動香港數碼化的新聞稿，與同期業界 5G 里程碑並列；舊站原以雙語 PDF 嵌入。（會員／夥伴新聞，非 WTIA 主辦活動。）',
     images: [],
     legacyPath: '/2020/03/smartones-press-release-smartone-%e9%81%b8%e7%94%a8%e6%84%9b%e7%ab%8b%e4%bf%a15g-%e5%85%b1%e5%90%8c%e6%8e%a8%e5%8b%95%e9%a6%99%e6%b8%af5g%e6%95%b8%e7%a2%bc%e5%8c%96/',
     featured: false,
@@ -780,10 +779,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2020,
     month: '04',
-    titleEn: '[Press Release] Pandemic Deals Heavy Blow to IT SMEs; Startups’ Cash-Flow Crisis Demands Urgent Rescue — Charles Mok and IT Sector Groups Call for Enhanced Anti-Epidemic Fund Support',
-    titleZh: '[新聞稿] 疫情重創IT中小企 初創資金鏈斷裂急須救亡 莫乃光及IT界團體促抗疫基金加碼援助',
-    bodyEn: '[PRESS RELEASE]\n\nPandemic Deals Heavy Blow to IT SMEs; Startups’ Cash-Flow Crisis Demands Urgent Rescue — Charles Mok and IT Sector Groups Call for Enhanced Anti-Epidemic Fund Support\n\n(9 April 2020, Hong Kong) The Government announced the second round of its Anti-epidemic Fund yesterday, involving HK$137.5 billion. The new measures include a 50% wage subsidy for eligible enterprises, capped at HK$9,000 per employee per month, and, to support the technology sector, a HK$500 million Distance Business (D-Biz) Programme to help enterprises adopt technology enabling staff to work from home.\n\nCharles Mok, Legislative Council member for the Information Technology functional constituency, held a press conference today together with representatives of industry groups, technology and startup founders, and esports organisations to respond to the new measures. They criticised the Government’s support for the sector as still insufficient, and urged the authorities to provide more immediate assistance to the technology sector — including a one-off HK$100,000 grant per eligible IT company, an additional HK$1 billion for rent and salary subsidies, and priority procurement of local technology solutions and products — to rescue SMEs and startups facing a financial cliff edge.\n\nMr Mok said: "The new measures do more to gild the lily than to provide help where it is truly needed. The new subsidies for wages and for procuring technology solutions will help the industry to some extent, but for the large number of technology SMEs and startups that were unable to benefit from the six-month rent waiver announced earlier, this new round of the Anti-epidemic Fund still offers no timely relief on rent. The crisis facing the IT sector is now imminent."\n\nEven before the new round of anti-epidemic measures was announced, Mr Mok and fellow members of the Professional Power caucus had jointly submitted proposals to the Government addressing the needs of the IT sector and startups, including a direct HK$100,000 subsidy for each eligible IT company and the introduction of fast-track loans. The day before yesterday, they further proposed to the Secretary for Innovation and Technology that HK$1 billion be allocated to help Hong Kong’s IT SMEs cover six months of rent and staff salary expenses, to help IT companies weather the storm, avoid a wave of large-scale closures and layoffs, and turn crisis into opportunity for the industry.\n\nFrancis Fong, Honorary President of the Hong Kong Information Technology Chamber, and Ip Yuk-fai, Chairman of the Hong Kong Internet Service Providers Association (HKISPA), said at the press conference that the second round of Anti-epidemic Fund measures offered limited help to the technology sector. Mr Fong said the new measures were too distant to address the immediate crisis, and that freelancers were left out — arguing that relief should not be limited to taxpayers alone.\n\nMr Ip said businesses such as data centres and cloud service providers had seen a sharp drop in revenue. Choi Kim-shing, Chairman of the Hong Kong Electronic Business Association, likewise said IT SMEs were facing a decline in business due to the pandemic, while Chow Chun-yin, Executive Director of the Hong Kong Retail Technology Industry Association, pointed out that the retail technology market had also deteriorated, with sharp drops in order volumes and transaction value. Mr Choi called on the Government to step up procurement of technology solutions and accelerate its own digital transformation, while Law Kwok-ming, Chairman of the Hong Kong Wireless Technology Industry Association, suggested the Government reassess its list of government contractors and give priority to procuring services and goods from local companies, to create more business opportunities for local enterprises. He further suggested that the Government relax, simplify and speed up the approval of various innovation-and-technology-related funding schemes.\n\nA large number of startups have suffered broken cash flow since the outbreak began and risk being overwhelmed. Mr Law said some startups’ investors had paused funding, leaving many startups facing immediate financing difficulties. Li Chi-wai, President of the Hong Kong Science Park Incu-Tech Alumni Network, said the Government’s wage subsidy would do little to help, since R&D staff salaries generally far exceed the subsidy cap; he suggested introducing fast-track approved loans for startups, and that the Government inject capital to provide more flexible funding and speed up the approval of grants, to address startups’ urgent needs.\n\nCheng Wai-hang, CEO of Ooosh Limited, which operates co-working spaces, pointed out that the Government’s wage subsidy came too late — one of his portfolio companies had already laid off most of its staff back in January, and startups were already seeing a wave of layoffs. He said the Government’s earlier six-month rent waiver had left the rest of the startup community without benefit, which was unfair, noting that rent accounts for a large share of a startup’s operating costs, making rent subsidies an urgent necessity.\n\nThe esports sector has also faced severe operating difficulties due to the pandemic. Kwong Kwan-yin, Vice-Chairman of the Hong Kong Esports Athletes Association, together with Law Yin, Co-founder and CEO of esports startup Godzpeed Autosport, and Lam Fung-yi, Operations Manager of the Kowloon Esports Arena, said that owing to the pandemic and the ban on group gatherings, the esports industry — from esports companies and team operators to amateur esports clubs, production companies and training providers — had been hit hard at every level, with an estimated 90% of freelance streamers and production staff already laid off. They hope the Government will provide more direct funding, including a one-off grant for the esports sector and support for its transition to online operations.\n\nMr Mok concluded: "The Government has invested substantial public funds over many years to drive innovation and technology. Now that a tsunami-like crisis has hit, the Government should take the lead in boosting demand for local technology services, and provide more direct and immediate support to IT sector enterprises. Otherwise, the pandemic will severely sap the industry’s vitality, wasting years of investment and driving away local talent." Mr Mok has written to request a meeting between the industry and Secretary for Innovation and Technology Nicholas W. Yang to discuss the assistance needed.',
-    bodyZh: '【新聞稿】\n\n疫情重創IT中小企 初創資金鏈斷裂急須救亡莫乃光及IT界團體促抗疫基金加碼援助\n\n（2020年4月9日，香港）政府昨日公布第二輪防疫抗疫基金，涉及1375億元。新措施包括向合資格企業提供五成工資補貼，資助上限為每月9,000元，另外就支援科技業，政府亦推出5億元的網上營商計劃，支援企業利用科技服務便利員工在家工作。\n\n立法會資訊科技界議員莫乃光今日聯同業界團體代表、科技企業及初創企業創辦人及電競業組織舉行記者會回應新措施，批評政府對業界支援仍然不足，促請當局為科技界提供更多即時援助，包括向IT公司提供一筆過10萬元資助、增撥10億元提供租金和薪金補貼，並優先採購本地科技方案和產品，拯救面臨財務懸崖的中小企和初創企業。\n\n莫乃光議員表示：『新措施錦上添花有餘，雪中送炭不足。薪金補貼及購買科技方案的新資助能對業界起有一定幫助，但對於大量未能受惠早前公佈半年租金寬免的科技界中小企和初創企業而言，新一輪抗疫基金仍然未提供租金方面的及時雨，IT業危機已逼在眉睫。』\n\n早於新一輪抗疫措施公布之前，莫乃光與專業議政其他議員共同向政府提交建議，針對IT界和初創的需要，提出包括直接每家合資格IT公司津貼10萬、設立特快貸款等建議，前日再向創科局局長提出建議，要求撥出10億助香港IT界中小企應付租金和員工薪金開支六個月，讓IT公司度過難關避免出現大規模倒閉和裁員潮，幫助業界化危為機。\n\n香港資訊科技商會榮譽會長方保僑及香港互聯網服務供應商協會主席葉旭輝在記者會上指出第二輪防疫基金措施對科技界幫助有限。方表示新措施遠水未能救近火，自由工作者未能受惠，認爲不應只救交稅人士。\n\n葉旭輝表示數據中心及雲端服務供應商等等生意一落千丈，而受疫情影響，香港電子科技商會主席蔡劍誠同樣表示IT中小企正面對生意下滑，香港零售科技商會執行總監周俊賢亦一併指出零售科技市道轉差，訂單量和成交額急跌。蔡劍誠呼籲政府加大採購科技方案，加速政府數碼轉型，而香港無線科技商會主席羅國明則建議政府重新評估政府承辦商名單，優先採購本地公司提供的服務及商品，為本地企業創造更多商機。他續建議政府放寬、簡化及加快批核各項創科相關的資助項目。\n\n大量初創企業疫情以來現金流斷裂，恐面對沒頂之災。羅國明表示有初創企業投資者暫停投資，令不少初企面對即時融資困難。科學園科培網絡會長李治緯認爲政府工資補貼作用不大，因爲研發人員普遍薪資遠超補貼上限，建議為初企開設特快批核貸款、政府亦應提注資為初企業提供更有彈性的，並加快批出資助，為初企解決燃眉之急。\n\n經營共享工作空間的Ooosh Limited行政總裁鄭煒恆指出政府工資補貼來得太遲，有旗下企業一月已解僱大部份員工，初創企業已出現裁員潮。而政府早前的6個月免租令其餘初創公司未能受惠，做法不公平。他指出租金佔初創企業營運一大部分，租金補貼絕對有逼切性。\n\n電競界同樣受疫情影響出現嚴重經營困難。香港電子競技體育總會副主席鄺君賢、電競初創公司Godzpeed Autosport聯合創辦人及行政總裁羅賢及九龍電競館營運經理林鳳儀表示受疫情及禁聚令影響，電競業由電競公司、電競隊營運公司、業餘電競戰隊俱樂部到電競製作公司及培訓公司等各階層均大受打擊，估計九成以自由身形式工作的直播主及製作公司從業員已被裁減。他們期望政府提供更多直接資助，向電競業界提供一筆過撥款並協助轉型網上業務。\n\n莫乃光總結指：『政府多年為推動創新科技投入大量公帑，目前出現海嘯式危機，政府應帶頭增加對本地科技服務的需求，並為IT界企業提供更直接的即時援助，否則疫情令業界元氣大傷，將浪費多年投資和流失本地人才。』莫議員已去信要求安排業界與創新及科技局局長楊偉雄會面商討所需援助。',
+    titleEn: 'IT Sector Groups Call for Enhanced Anti-Epidemic Fund Support for IT SMEs',
+    titleZh: '莫乃光及IT界團體促抗疫基金加碼援助IT中小企及初創',
+    bodyEn: 'On 9 April 2020, Legislative Council IT member Charles Mok and Hong Kong ICT industry groups — including then-WTIA Chairman Law Kwok-ming — held a press conference calling for stronger Anti-epidemic Fund support for IT SMEs and startups. WTIA urged priority procurement of local technology and faster innovation-funding approvals, documenting the wireless and ICT sector’s pandemic advocacy.',
+    bodyZh: '2020 年 4 月 9 日，立法會資訊科技界議員莫乃光聯同本港 ICT 業界團體（包括時任 WTIA 主席羅國明）舉行記者會，促請抗疫基金加強支援 IT 中小企及初創。WTIA 建議優先採購本地科技方案、加快創科資助批核，紀錄無線及資訊科技界在疫情下的倡議。',
     images: [
       {src: '/images/history/20200409-it-sme-relief-press-conference-05.jpg', altEn: '[Press Release] Pandemic Deals Heavy Blow to IT SMEs; Startups’ Cash-Flow Crisis Demands Urgent Rescue — Charles Mok and IT Sector Groups Call for Enhanced Anti-Epidemic Fund Support (photo 1)', altZh: '[新聞稿] 疫情重創IT中小企 初創資金鏈斷裂急須救亡 莫乃光及IT界團體促抗疫基金加碼援助（相片 1）'},
       {src: '/images/history/20200409-it-sme-relief-press-conference-01.jpg', altEn: '[Press Release] Pandemic Deals Heavy Blow to IT SMEs; Startups’ Cash-Flow Crisis Demands Urgent Rescue — Charles Mok and IT Sector Groups Call for Enhanced Anti-Epidemic Fund Support (photo 2)', altZh: '[新聞稿] 疫情重創IT中小企 初創資金鏈斷裂急須救亡 莫乃光及IT界團體促抗疫基金加碼援助（相片 2）'},
@@ -797,10 +796,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'press-release',
     year: 2020,
     month: '05',
-    titleEn: '[SmarTone - Press Release] SmarTone Launches 5G Service with the City’s Widest Network Coverage to Spearhead Smart City Development in Hong Kong',
-    titleZh: '[SmarTone - Press Release] SmarTone 5G 服務啟動 網絡覆蓋全港至廣 帶動香港智慧城市發展',
-    bodyEn: 'SmarTone has officially launched 5G service in Hong Kong, delivering ultra-fast 5G connectivity with extensive coverage both indoors and outdoors. SmarTone 5G also introduces a range of innovative 5G services and applications for different customer segments and enterprises. Backed by highly competitive and flexible 5G service plans, SmarTone is committed to delivering customers the best overall 5G network experience city-wide.\n\n[pdf-embedder url=”/wp-content/uploads/2020/05/SmarTone-5G-服務啟動-網絡覆蓋全港至廣-帶動香港智慧城市發展.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/06/SmarTone-launches-5G-service-with-the-citys-widest-network-coverage-to-spearhead-smart-city-development-in-Hong-Kong.pdf”]',
-    bodyZh: 'SmarTone 正式在香港推出 5G 服務，帶來極速 5G 網 絡，於室內室外提供至廣覆蓋。SmarTone 5G 亦為不同客戶群及企業推出一系列創新 5G 服務及應用。配合高競爭力及具彈性的 5G 服務計劃，SmarTone 致力為客戶提供 全城最佳的整體 5G 網絡體驗。\n\n[pdf-embedder url=”/wp-content/uploads/2020/05/SmarTone-5G-服務啟動-網絡覆蓋全港至廣-帶動香港智慧城市發展.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/06/SmarTone-launches-5G-service-with-the-citys-widest-network-coverage-to-spearhead-smart-city-development-in-Hong-Kong.pdf”]',
+    titleEn: 'SmarTone Launches 5G Service with the City’s Widest Network Coverage',
+    titleZh: 'SmarTone 5G 服務啟動 網絡覆蓋全港至廣 帶動香港智慧城市發展',
+    bodyEn: 'In May 2020, SmarTone launched 5G service in Hong Kong with extensive indoor and outdoor coverage and new 5G applications for consumers and enterprises. WTIA’s archive kept the bilingual press materials as a marker of Hong Kong’s commercial 5G rollout — a backdrop to WTIA programmes on IoT, smart city and wireless innovation. (Partner press note.)',
+    bodyZh: '2020 年 5 月，SmarTone 在香港推出 5G 服務，提供廣泛室內外覆蓋及面向客戶與企業的 5G 應用。WTIA 存檔保留雙語新聞資料，標誌本港商用 5G 啟動，亦是 WTIA 物聯網、智慧城市及無線創新活動的時代背景。（夥伴新聞。）',
     images: [
       {src: '/images/history/Photo-1-scaled.jpg', altEn: '[SmarTone - Press Release] SmarTone Launches 5G Service with the City’s Widest Network Coverage to Spearhead Smart City Development in Hong Kong (photo 1)', altZh: '[SmarTone - Press Release] SmarTone 5G 服務啟動 網絡覆蓋全港至廣 帶動香港智慧城市發展（相片 1）'},
       {src: '/images/history/Photo-2-scaled.jpg', altEn: '[SmarTone - Press Release] SmarTone Launches 5G Service with the City’s Widest Network Coverage to Spearhead Smart City Development in Hong Kong (photo 2)', altZh: '[SmarTone - Press Release] SmarTone 5G 服務啟動 網絡覆蓋全港至廣 帶動香港智慧城市發展（相片 2）'},
@@ -817,14 +816,29 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     featured: false,
   },
   {
+    slug: '2020-smart-business-with-iot-webinar',
+    kind: 'milestone',
+    year: 2020,
+    month: '09',
+    titleEn: 'Smart Business with IoT webinar with Cyberport',
+    titleZh: '與數碼港合辦「物聯智創商機」網上研討會',
+    bodyEn: 'On 30 September 2020, WTIA co-organised a “Smart Business with IoT” webinar with Cyberport Community Connect, exploring how Internet of Things applications support business in Hong Kong’s wireless and ICT landscape.',
+    bodyZh: '2020 年 9 月 30 日，WTIA 與數碼港 Community Connect 合辦「Smart Business with IoT／物聯智創商機」網上研討會，探討物聯網應用如何支援香港無線及資訊科技業務。',
+    images: [
+      {src: '/images/history/2020-smart-business-with-iot-webinar-1.jpg', altEn: 'Promotional graphic for the \'Smart Business with IoT\' webinar with Cyberport Community Connect, 30 Sep 2020', altZh: '2020 年 9 月 30 日與數碼港 Community Connect 合辦「Smart Business with IoT」網上研討會宣傳圖'}
+    ],
+    legacyPath: null,
+    featured: false,
+  },
+  {
     slug: 'asia-smart-app-workshop-ux-ui-more-than-you-think',
     kind: 'milestone',
     year: 2020,
     month: '10',
     titleEn: 'Asia Smart App Workshop - UX/UI More Than You Think',
     titleZh: '亞洲智能應用工作坊－UX/UI遠不止於此',
-    bodyEn: 'User Experience and User Interface (UX/UI) design is more than creating good looking products. You will explore the valuable insights and experience with which design techniques that can help developer to make better apps, with more human-centred, innovative and funny elements.\n\nIf you are planning to have your own mobile application, website, or custom web app or have any type of query or concern regarding its concept, technical know-how, the best way to get it done then don’t hesitate to join the Workshop.\n\nDate: 8th September 2020 (Tuesday) Time: 3:00 – 5:00pm (GMT+8) Format: Live Webinar Language: English',
-    bodyZh: '用戶體驗及用戶介面（UX/UI）設計，不止於製作外觀吸引的產品。你將探索到有價值的心得與經驗，了解有助開發者製作更佳應用程式的設計技巧，並加入更多以人為本、富創意及趣味的元素。\n\n如你正計劃開發自己的手機應用程式、網站或度身訂造的網頁應用程式，或對其概念、技術知識、最佳實踐方式有任何疑問，歡迎踴躍參加是次工作坊。\n\n日期：2020年9月8日（星期二）　時間：下午3:00 – 5:00（格林尼治標準時間+8）　形式：網上直播講座　語言：英語',
+    bodyEn: 'On 8 September 2020, WTIA held the Asia Smart App Workshop “UX/UI More Than You Think” as a live English webinar (15:00–17:00 GMT+8) from the HKPC studio. The session explored human-centred UX/UI techniques for better mobile apps and websites, supporting developers in Hong Kong’s smart-app ecosystem under the Asia Smart App programme.',
+    bodyZh: '2020 年 9 月 8 日，WTIA 於生產力局錄影室以英語網上直播舉辦亞洲智能應用工作坊「UX/UI More Than You Think」（15:00–17:00 GMT+8），探討以人為本的 UX/UI 技巧，協助開發更佳流動應用及網站，支援香港智能應用生態。',
     images: [
       {src: '/images/history/asia-smart-app-workshop-ux-ui-more-than-you-think-1.jpg', altEn: 'Speakers and WTIA team at the Asia Smart App Workshop \'UX/UI More Than You Think\', HKPC studio, 8 Sep 2020', altZh: '2020 年 9 月 8 日，亞洲智能應用程式工作坊「UX/UI More Than You Think」講者與 WTIA 團隊於生產力局錄影室合照'}
     ],
@@ -838,11 +852,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '10',
     titleEn: 'The Strategies for Expanding Global Internet of Things (IoT) Markets',
     titleZh: '拓展全球物聯網（IoT）市場策略',
-    bodyEn: 'Internet of things (IoT) is the key enabler to connect all things, it is next industrial revolution which is now changing our living in many ways that we never imagined before. Also, the 5G service in parts of Hong Kong was launched on 1 April 2020. This helps to enable most internet of things (IoT) and as smart city is essentially relied on IoT to function, 5G and smart city is inextricably linked.\n\nTo develop IoT locally, it is beneficial to capitalise on the global technological infrastructure, such as the rapidly developing 5G mobile network that enables a faster data processing time and a connection of more IoT devices. It is also imperative to make alignments with the current standards regarding the IoT technologies and cyber security.\n\nHong Kong has many talents enterprises in the information & communication technology (ICT) and electronic industries; however, the development of IoT products is affected by the inadequate connections between electronic and ICT industries. In addition, both industries are lacking in the resources to interpret the standards regarding to the IoT technologies and cyber security.\n\nTo improve this situation, Hong Kong Wireless Technology Industry Association (WTIA) consigned Hong Kong Productivity Council (HKPC) to obtain the approval on SME Development Fund from Trade and Industry Department to launch two seminars, standards studies, ten technical workshops and a one-day TechConnect conference, supporting the enterprise to gain the first hand information about the latest standards and IoT technologies. This could help to tighter the connections between the enterprises and their counterparts worldwide, and ultimately augment their competitiveness.\n\nGuide Book:\n\n*For any comments of the Guide Book, please feel free to fill in and submit the survey to [email protected].\n\n[pdf-embedder url=”/wp-content/uploads/2020/11/The-Strategies-for-Expanding-Global-IoT-Markets1.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/10/Survey-for-guidebook.pdf”]\n\n*Any opinions, findings, conclusions or recommendations expressed in this material / event (or by members of the Project team) do not reflect the views of the Government of the Hong Kong Special Administrative Region, Trade and Industry Department or the Vetting Committee of the SME Development Fund and the Dedicated Fund on Branding, Upgrading and Domestic Sales (Organisation Support Programme).',
-    bodyZh: '物聯網（IoT）是連結萬物的關鍵，是下一場工業革命，正以前所未見的方式改變我們的生活。此外，香港部分地區的5G服務已於2020年4月1日啟用，有助推動大部分物聯網應用；而智慧城市本質上有賴物聯網才能運作，故5G與智慧城市密不可分。\n\n要在本地發展物聯網，善用全球科技基建將大有裨益，例如急速發展的5G流動網絡，可加快數據處理速度並連接更多物聯網裝置。同時，配合現行有關物聯網技術及網絡保安的標準亦屬必要。\n\n香港在資訊及通訊科技（ICT）及電子行業擁有大量人才企業；然而，電子業與資訊及通訊科技業之間聯繫不足，影響了物聯網產品的發展。此外，兩個行業均缺乏足夠資源去理解有關物聯網技術及網絡保安的標準。\n\n為改善此情況，香港無線科技商會（WTIA）委託香港生產力促進局（HKPC），向工業貿易署申請「中小企業發展支援基金」批核，舉辦兩場講座、標準研究、十個技術工作坊及一場為期一天的TechConnect研討會，協助企業掌握有關最新標準及物聯網技術的第一手資訊，藉此加強企業與全球同業之間的聯繫，並最終提升其競爭力。\n\n指南手冊：\n\n[pdf-embedder url=”/wp-content/uploads/2020/11/The-Strategies-for-Expanding-Global-IoT-Markets1.pdf”]\n\n[pdf-embedder url=”/wp-content/uploads/2020/10/Survey-for-guidebook.pdf”]\n\n*Any opinions, findings, conclusions or recommendations expressed in this material / event (or by members of the Project team) do not reflect the views of the Government of the Hong Kong Special Administrative Region, Trade and Industry Department or the Vetting Committee of the SME Development Fund and the Dedicated Fund on Branding, Upgrading and Domestic Sales (Organisation Support Programme).',
+    bodyEn: 'After Hong Kong’s partial 5G launch on 1 April 2020, WTIA — with HKPC and SME Development Fund support from the Trade and Industry Department — ran seminars, standards studies, ten technical workshops and a TechConnect conference on expanding global IoT markets. The programme helped Hong Kong ICT and electronics SMEs align with IoT and cybersecurity standards and connect with international counterparts.',
+    bodyZh: '香港部分地區於 2020 年 4 月 1 日啟用 5G 後，WTIA 委託香港生產力促進局，並獲工業貿易署「中小企業發展支援基金」支持，舉辦講座、標準研究、十個技術工作坊及 TechConnect 研討會，主題為拓展全球物聯網市場，協助香港 ICT 及電子業中小企掌握物聯網與網絡保安標準，並與國際同業接軌。',
     images: [],
     legacyPath: '/2020/10/the-strategies-for-expanding-global-internet-of-things-iot-markets/',
-    // Willy 2026-10-30: IoT markets is not a highlight. No cleared photo, so it stays text-only.
     featured: false,
   },
   {
@@ -850,10 +863,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     kind: 'milestone',
     year: 2021,
     month: '03',
-    titleEn: '[Immediate Release] Hong Kong Wireless Technology Industry Association’s Submission on the Real-name Registration System for Mobile SIM Cards',
-    titleZh: '[即時發布] 香港無線科技商會就電話智能卡實名登記制度之意見書',
-    bodyEn: 'Immediate Release\n\nHong Kong Wireless Technology Industry Association’s Submission on the Real-name Registration System for Mobile SIM Cards\n\nThe Government is proposing to introduce a real-name registration system for mobile SIM cards, aimed at combating unlawful activities carried out anonymously through prepaid SIM cards. Under the new measures, a corporate entity registered as a holder of prepaid SIM cards would only be allowed to register up to three SIM cards with each licensee, and licensees such as mobile network operators or telecommunications operators would be required to bear responsibility for registering user information, establishing relevant systems or databases to verify and store users’ personal data. The Hong Kong Wireless Technology Industry Association (the Association) understands the rationale for regulating prepaid SIM cards, but the proposed new measures may create obstacles to the industry’s business development and technological innovation. As the Government has launched a public consultation on the arrangements for introducing a real-name registration system for mobile SIM cards, the Association hereby sets out its views for careful consideration.\n\nI. Lack of Detail in the Proposed Measures and an Overly Short Consultation Period\n\n1. Unclear guidance on which types of SIM cards would be regulated\n\nThe proposed new measures do not clearly define the types of SIM cards that would be regulated. Prepaid SIM cards come in many forms, such as local cards, international cards and roaming cards, and the proposal does not clearly specify which type(s) of SIM card should be subject to the new measures. Nor does the proposal state whether the regulation would be limited to SIM cards used for person-to-person transmission, leaving the arrangements for SIM cards used purely for machine-type connections or machine-to-person transmission undefined. Yet these latter two types of SIM card are very commonly used in technical research, development and testing. This lack of clarity inevitably leaves the industry doubtful about the new measures.\n\n2. The new measures carry major implications, yet the consultation period is under two months\n\nSmart SIM cards are used very broadly, and their application is by no means limited to the information technology industry. For the industry, SIM cards play an indispensable role in developing advanced technologies such as the Internet of Things, and are commonly used in system testing, among other things. However, by regulating the number of SIM cards a company may hold, the new measures would inevitably compress enterprises’ room for innovation and technology development, undermining Hong Kong’s competitiveness as an innovation and technology hub in Asia. The Association is pleased that the Government has extended the original consultation period by twenty days to 20 March; however, given the far-reaching impact of the measures on the long-term development of innovation and technology in Hong Kong, all sectors hope for more time and space to understand the details of the new measures.\n\n1. No clear guidance to help telecommunications operators verify user information\n\nUnder the proposed regulation, telecommunications operators would be responsible for verifying, clarifying and confirming the information provided by users; however, the proposal does not provide detailed guidance on the relevant implementation details and procedures. For example, it is unclear how, or through what means, an operator should verify that the personal information submitted by a user is accurate, rather than someone else’s information being used for registration. Where a customer uploads personal information online after purchasing a SIM card, it would also be difficult for a virtual network operator to verify the authenticity of that information. Nor does the proposal give clear instructions on how operators should respond in cases where a customer’s personal information has been stolen and used to register a SIM card.\n\n2. The cost of setting up a registration and verification system may add to operating difficulties\n\nThe Association understands that licensees are responsible for verifying and clarifying users’ registration information; however, the cost of setting up the relevant database and verification system would be considerable, and this additional cost would be an especially heavy burden for smaller telecommunications operators. Moreover, operators would be given only a short time to prepare, as they would need to establish and have ready a complete registration system and database within the first phase of implementation (that is, within 120 days of the regulation taking effect). Operators would have no choice but to incur additional operating costs to comply with the regulation, adding further strain to their businesses.\n\nIII. Impact on the Business Development of Innovation and Technology Companies\n\n1. The new measures may delay the development of local Internet of Things technology\n\nInnovation and technology enterprises engaged in developing Internet of Things technology mostly use prepaid SIM cards as a tool for various forms of software research and development. In addition, SIM cards, as a convenient medium, are frequently used in testing low-power wide-area networks, and to save time and cost, the industry commonly uses large numbers of SIM cards simultaneously during testing. Innovation and technology enterprises therefore rely heavily on SIM cards for their R&D work, and restricting the number of SIM cards a company may hold could delay the progress of technology development.\n\n2. The cap on the number of SIM cards affects company business operations\n\nMany innovation and technology companies in the industry provide data collection services for clients, using the Short Message Service (SMS) to help clients build customer relationship management (CRM) systems. To ensure the independence and accuracy of client data, enterprises commonly adopt a "one SIM card per customer" model. However, the new measures’ cap on the number of SIM cards could create confusion in managing customer data, causing a degree of disruption to companies’ business operations.\n\nIV. The New Measures Would Have Far-Reaching Impact\n\n1. SIM cards are widely used, and their impact would cut across many sectors\n\nThe use of SIM cards is not limited to the information technology industry, and the proposal should carefully consider its potential impact on other sectors. Taking the transport and tourism sectors as an example, many professional drivers, due to the needs of their work, carry multiple mobile devices fitted with multi-number ("space cards") SIM cards in order to communicate with customers; large transport companies also embed SIM cards in their vehicle fleets for business purposes. In addition, at the level of personal safety, many car products already have embedded SIM cards that allow users to send a distress signal promptly in the event of an accident.\n\nV. The Association’s Recommendations\n\n1. Extend the consultation period to give all sectors sufficient time and space to prepare for and understand the new measures\n\nThe Association fully understands the importance of combating the unlawful abuse of telecommunications services, while also recognising that, without a sufficiently thorough and precise understanding, various sectors may harbour doubts about the implementation of the new measures. Moreover, given the far-reaching impact of the new regulation across sectors, more room for discussion, and sufficient time for preparatory arrangements to align with the implementation of the new measures, may be needed. The Association therefore recommends extending the consultation period, to give all sectors a better opportunity to refine the measures.\n\n2. Hope for an exemption from, or relaxation of, SIM card quantity restrictions for innovation and technology enterprises\n\nEnterprises and individual users have different needs when it comes to using SIM cards, and innovation and technology companies mostly use SIM cards for innovative research and development purposes. The new regulation, which limits companies to applying for a maximum of three SIM cards per telecommunications operator, would undoubtedly restrict companies’ research and development innovation, and a limited number of SIM cards would inevitably curb enterprises’ otherwise unlimited capacity for innovation. The Association therefore sincerely hopes that the authorities can exempt innovation and technology enterprises from, or relax for them, the regulation on the number of SIM cards, so that local innovation and technology companies may proceed unimpeded on their path of innovation.\n\n3. Hope to provide subsidies to help telecommunications operators fulfil their responsibilities\n\nThe registration and verification system that operators would need to set up under the new measures would add extra costs to their operations, and smaller telecommunications operators would find it especially difficult to shoulder alone the heavy cost of establishing such a new system. The Association therefore hopes that the authorities can provide subsidies or preferential policies to the telecommunications industry, to help operators fulfil their responsibilities.\n\nHong Kong Wireless Technology Industry Association',
-    bodyZh: '即時發布\n\n香港無線科技商會就電話智能卡實名登記制度之意見書\n\n政府擬制定電話智能卡實名登記制度，用以打擊不法之徒透過儲值電話卡的匿名手段從事的違法行為。新措施下規管作為儲值卡用戶的公司個體只可向每個持牌人登記不多於三張儲值卡，措施亦規定持牌人如流動網絡商或電訊商須肩負登記用戶資料的責任，建立相關系統或數據庫以核對並貯存用戶個人資料。香港無線科技商會明白規管儲值卡之緣由，惟擬定的新措施或有機會對業界於業務發展及技術開發上造成阻礙。政府就引入電話智能卡實名登記制度的安排展開公眾諮詢，本會謹此反映意見，冀予以慎重考慮。\n\n一、措施條例細節欠奉及諮詢期過短\n\n1. 受規管的電話卡類型指引欠清晰\n\n擬議的新措施並未為受規管的電話卡類型作出清晰明確的定義。預付儲值電話卡種類繁多如本地卡﹑國際卡及漫遊卡，建議中並未清楚列明當中哪一類電話卡應受新措施的監管。另外，建議中並未有提及規管措施是否只局限於人對人傳輸的電話卡，而對於純機器類型連接及機器對人傳輸的電話卡類型的安排則尚未有清楚確切的界定及相關建議，然而，後者這兩類電話卡在進行技術研發及測試上十分普遍，故細節上的不明瞭難免使業界對於新措施抱有存疑。\n\n2. 新措施茲事體大，諮詢期不足兩月\n\n智能電話卡應用層面相當廣泛，並非僅局限資訊科技業界。而於對業界而言，電話卡的應用在開發物聯網等先進技術有著不可或缺的重要性，並多見於系統測試等方面，然而，新措施下對於公司可擁有的電話卡數量進行規管，無疑是壓縮企業創科空間，削減香港作為亞洲創科樞紐的競爭力。本會樂見政府將原定諮詢期延長二十天至三月二十日，然而，措施對於香港創科長遠發展有深遠影響，故各界亦冀盼有更多的時間和空間以了解新措施細則。\n\n1. 未有明確指引協助電訊商核對用戶資料\n\n規例下闡明電訊商有責任核對、釐清及核實用戶所提供的資料，然而，建議未有就相關的執行細節及程序作出仔細而詳盡的指引。例如，電訊商該如何，或從何途徑得以核實用戶所提交的個人資料是確切無誤，而非挪取他人資料作登記。顧客買卡後於網上上載個人資料，虛擬網絡供應商亦難以核實資料真偽。建議亦未有清楚指示電訊商該如何應對客戶的個人資料被盜用作登記電話卡等情況。\n\n2. 登記核對系統的設立成本或加重經營困難\n\n本會明白持牌人有責任核實釐清用戶登記資料，然而，設立相關的數據庫和核對系統所需成本所費不貲，附加的成本對於小型電訊商在經營上更是沉重的負擔，而且，規定給予電訊商準備時間倉卒，須於計劃第一階段（即規例生效一百二十天內）建立並預備一個完整的登記系統及數據庫。電訊商為配合規例不得不額外增加營運成本，使經營業務百上加斤。\n\n三、對於創科公司業務發展的影響\n\n1. 新措施或耽誤本地物聯網技術發展\n\n從事物聯網技術開發的創科企業大多使用儲值電話卡作為工具以進行各種軟件研發。此外，電話卡作為合適的媒介經常用於低功率廣域網路測試，為節省時間成本，普遍業界在進行測試期間會同一時間運用大量電話卡。故此，創科企業十分依靠電話卡以進行研發的工作，限制電話卡持有數量或延誤開發技術進程。\n\n2. 電話卡數量限制影響公司業務運作\n\n業界不少為客戶提供數據收集服務的創科公司，會透過短信息服務(SMS)替服務對象建構客戶關係管理系統(CRM)。企業為確保客戶數據的獨立性及準確性，多採用「一客戶一獨立電話卡」的形式。然而，新措施在電話卡數量上的規定，或對管理客戶數據上造成混亂，對公司業務運作上存在一定的困擾。\n\n四、新措施影響廣遠\n\n1. 電話卡應用廣泛，影響觸及跨界別\n\n電話卡的應用層面並不局限於資訊科技業界，建議須慎重思慮對各界別的潛在影響。以運輸及旅遊業界為例，因應工作上的需要，不少的職業司機均持有多部備有「太空卡」的電話裝置，以便與客人溝通聯絡；大型運輸公司的車隊亦植入電話卡作業務上的用途。除此之外，在個人安全層面上，現有不少汽車產品均有內嵌電話卡供使用者於意外發生時可適時撥打求救信號。\n\n五、商會建議\n\n1. 延長諮詢期， 給予各界足夠時間空間準備並了解新措施\n\n本會非常理解打擊濫用電訊服務非法行為的重要性，同時間亦體會各界於尚未有充分且精確的了解下，或對於新措施的實行抱有存疑。再言，新規管下對各界影響廣遠，或需更充分的空間予以討論，充足的時間進行前期安排以配合執行落實的新措施。故本會建議延長諮詢期，讓各界獲更多機會以整改措施。\n\n2. 盼獲豁免或放寬創科企業電話卡數量規管\n\n企業與個人用戶對於電話卡的應用需求不同，創科公司多以電話卡作創新研發之用途。而新規例限企業向每間電訊商申請最多3張電話卡，無疑給予公司在研發創新上的限制，有限的電話卡持有數量亦難免壓抑了企業無限的創新，故本會謹此冀盼當局能豁免或放寬創科企業電話卡數量規管，使本地創科公司在創新路途上順利無阻。\n\n3. 冀能為電訊商提供津貼協助其履行責任\n\n電訊商架設新措施所須求的登記核實系統為謍運上添加額外成本，小型電訊商更難以獨力負擔起新設系統所帶來的沉重成本。故本會冀望當局能為電訊商業界提供補貼或優惠政策，協助電訊商履行其責任。\n\n香港無線科技商會',
+    titleEn: 'WTIA Submission on the Real-name Registration System for Mobile SIM Cards',
+    titleZh: '香港無線科技商會就電話智能卡實名登記制度之意見書',
+    bodyEn: 'In March 2021, WTIA / Wireless (香港無線科技商會) submitted views on the HKSAR Government’s proposed real-name registration system for mobile SIM cards. WTIA supported tackling anonymous abuse of prepaid SIMs, while urging clearer rules for IoT and machine-type SIMs, a longer consultation, and relief for innovation firms that need many SIMs for R&D and testing in Hong Kong’s wireless sector.',
+    bodyZh: '2021 年 3 月，香港無線科技商會（WTIA）就政府擬議的電話智能卡實名登記制度提交意見。WTIA 理解打擊匿名濫用儲值卡的需要，同時促請釐清物聯網及機器類型 SIM 的規管、延長諮詢期，並為需大量 SIM 作研發測試的創科企業提供豁免或放寬，保障香港無線業界創新空間。',
     images: [
       {src: '/images/history/simcardregistration-1.jpg', altEn: 'WTIA\'s ClubHouse room \'Night Talk: How will SIM card real-name registration affect business?\'', altZh: 'WTIA 於 ClubHouse 舉辦「【Night噏】SIM Card實名制對盤生意有咩影響?!」線上論壇'}
     ],
@@ -861,17 +874,30 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     featured: false,
   },
   {
-    // Ceremony year 2022, edition title 2021. Dora 2026-10-31: the timeline groups by
-    // `year`, so the card sits under 2022 (ceremony 23 June 2022) while the title
-    // keeps the 2021 edition. Body is Alice's Milestone.docx copy plus the ceremony sentence.
+    slug: '2021-5g-future-application-forum',
+    kind: 'milestone',
+    year: 2021,
+    month: '04',
+    titleEn: '5G Future Application Forum with HKPC',
+    titleZh: '與生產力局合辦「5G未來應用研討會」',
+    bodyEn: 'On 28 April 2021, WTIA co-organised a 5G Future Application Forum with the Hong Kong Productivity Council (HKPC), bringing industry voices together on next-generation wireless applications for Hong Kong.',
+    bodyZh: '2021 年 4 月 28 日，WTIA 與香港生產力促進局（HKPC）合辦「5G 未來應用研討會」，匯聚業界探討新一代無線應用在香港的發展。',
+    images: [
+      {src: '/images/history/2021-5g-future-application-forum-1.jpg', altEn: 'Panel discussion at the 5G Future Application Forum co-organised with HKPC, 28 Apr 2021', altZh: '2021 年 4 月 28 日與生產力局合辦「5G 未來應用研討會」小組討論'}
+    ],
+    legacyPath: null,
+    featured: false,
+  },
+    // Ceremony year 2022 (23 June, Cyberport 3). The title keeps the 2021 edition.
+  {
     slug: '2021-asia-smart-app-awards-8th',
     kind: 'milestone',
     year: 2022,
     month: '06',
     titleEn: 'Asia Smart App Awards 2021',
     titleZh: '亞洲智能應用程式大獎 2021',
-    bodyEn: 'Organised the 8th edition of Asia Smart App Awards. Co-organised with over 16 regional partners, attracted over 100 applications. The award ceremony was held on 23 June 2022.',
-    bodyZh: '舉辦第8屆「亞洲智能應用程式大獎」，與來自16個不同亞洲地區的機構合作，成功吸引過百份報名申請。頒獎典禮於 2022 年 6 月 23 日舉行。',
+    bodyEn: 'WTIA organised the 8th edition of the Asia Smart App Awards (2021 programme). Co-organised with over 16 regional partners, the awards attracted over 100 applications. The presentation ceremony was held on 23 June 2022 at Cyberport 3 Function Room 1–3.',
+    bodyZh: 'WTIA 舉辦第 8 屆「亞洲智能應用程式大獎」（2021 年度計劃），與來自 16 個不同亞洲地區的機構合作，吸引過百份報名申請。頒獎典禮於 2022 年 6 月 23 日在數碼港 3 期 Function Room 1–3 舉行。',
     images: [
       {src: '/images/history/2021-asia-smart-app-awards-8th-1.jpg', altEn: 'Guests on stage at the Asia Smart App Awards 2021 presentation ceremony', altZh: '亞洲智能應用程式大獎 2021 頒獎典禮台上嘉賓合照'}
     ],
@@ -885,11 +911,10 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '09',
     titleEn: 'New Term of Executive Committee (2022 - 2024)',
     titleZh: '2022-2024年度新一屆執行委員會',
-    bodyEn: 'then-Chairman (now Honorary Chairman) Mr Keith Li was elected as Chairman of Hong Kong Wireless Technology Industry Association in the term of 2022-2024\n\nThe 19th term of Annual General Meeting of Hong Kong Wireless Technology Industry Association (WTIA) was held on 1 September 2022. Mr. Li King Wah (Keith Li), Co-founder and CEO, Innopage Limited was elected to be the Chairman in the term of 2022-2024, with 2 September 2022 as the commencement date.\n\nMr. Li expressed appreciation to WTIA members and members of cabinet for their trust and support, and said he was very honoured to be elected as the Chairman of WTIA in the term of 2022-2024. He stated WTIA will organise various activities to create business opportunities, attract talent for members and the industry.\n\nMr. Li said that he will strive to lead the new Executive Committees and WTIA members to face challenges and difficulties in the new term.\n\nThe following is the list of WTIA committees in 2022-2024:\n\nChairman: then-Chairman (now Honorary Chairman) Mr Keith Li\n\nVice-Chairman Mr. Donald Chan, Dr. Lawrence Cheung, Mr. Sunny Kok\n\nTreasurer Mr. Nelson Tse\n\nExecutive Committee Mr. Alex Kun, Mr. Antony Ma, Mr. Ivan So (New), Mr. Jimmy Chan, Dr. Lawrence Poon, Mr. Leo To, Ms. Ping Wong, Mr. Vincent Tsui (New)\n\nAbout WTIA\n\nHong Kong Wireless Technology Industry Association (WTIA), established in 2001, is a not-for-profit, politically-neutral trade association dedicated to the wireless and mobile industry.',
-    bodyZh: '時任主席（現任榮譽主席）李勁華先生當選2022-2024年度香港無線科技商會主席\n\n香港無線科技商會（WTIA）第十九屆週年大會於2022年9月1日舉行。Innopage Limited聯合創辦人兼行政總裁Keith Li（Li King Wah）先生當選為2022-2024年度主席，任期由2022年9月2日起生效。\n\nKeith Li先生感謝WTIA會員及理事會成員的信任與支持，並表示能夠當選2022-2024年度WTIA主席深感榮幸。他表示WTIA將舉辦各類活動，為會員及業界創造商機、吸納人才。\n\nKeith Li先生表示，將竭力帶領新一屆執行委員會及WTIA會員，共同面對新任期內的挑戰與困難。\n\n以下為2022-2024年度WTIA執行委員會名單：\n\n主席：時任主席（現任榮譽主席）李勁華先生\n\n副主席：Donald Chan先生、Lawrence Cheung博士、Sunny Kok先生\n\n司庫：Nelson Tse先生\n\n執行委員：Alex Kun先生、Antony Ma先生、Ivan So先生（新任）、Jimmy Chan先生、Lawrence Poon博士、Leo To先生、Ping Wong女士、Vincent Tsui先生（新任）\n\n關於WTIA\n\n香港無線科技商會（WTIA）成立於2001年，是一個非牟利、政治中立的貿易協會，致力服務無線及流動通訊行業。',
+    bodyEn: 'At WTIA’s 19th Annual General Meeting on 1 September 2022, Mr Keith Li (Li King Wah), Co-founder and CEO of Innopage Limited, was elected Chairman for 2022–2024 (effective 2 September 2022). He is now WTIA Honorary Chairman. The new Executive Committee pledged to create business opportunities and attract talent for Hong Kong’s wireless and mobile industry.',
+    bodyZh: 'WTIA 第十九屆週年大會於 2022 年 9 月 1 日舉行，Innopage Limited 聯合創辦人兼行政總裁李勁華先生（Keith Li）當選 2022–2024 年度主席（2022 年 9 月 2 日起生效）；李先生現為 WTIA 榮譽主席。新一屆執行委員會表明將為香港無線及流動業界創造商機、吸納人才。',
     images: [],
     legacyPath: '/2022/09/new-term-of-executive-committee-2022-2024/',
-    // Willy 2026-10-30: the 2022–24 Executive Committee is not a highlight. No cleared photo.
     featured: false,
   },
   {
@@ -899,13 +924,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '09',
     titleEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner',
     titleZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮',
-    // Rewritten from the 2022 announcement's own words into the past tense. The
-    // migrated copy was a verbatim scrape of an open invitation -- future tense,
-    // "*Seats Limited", ticket prices and a live registration URL -- and while it
-    // was featured it was still selling seats to a 2022 dinner from the homepage
-    // archive card and its own /about/history page. Willy 2026-10-31: not a highlight.
-    bodyEn: 'WTIA marked its 20+1st anniversary with a celebration and inauguration gala dinner at The Mira Hong Kong on Thursday, 29 September 2022, where the new Executive Committee was inaugurated.\n\nThe anniversary recognised two decades in which WTIA has taken the role of a super-connector in the wireless communication industry, bridging government, enterprises, service providers and associations.',
-    bodyZh: '香港無線科技商會（WTIA）於 2022 年 9 月 29 日假尖沙咀美麗華酒店舉行〈20 + 1 週年慶祝晚宴〉暨新一屆執行委員會就職典禮。\n\n晚宴標誌著本會跨越二十載的里程碑，見證 WTIA 多年來擔當業界「超級聯繫人」的角色，連繫政府、企業、服務供應商及各友會。',
+    bodyEn: 'On 29 September 2022, WTIA held its “20+1st” anniversary celebration and inauguration gala dinner at The Mira Hong Kong, inaugurating the new Executive Committee. The evening marked more than two decades of WTIA connecting government, enterprises, service providers and associations across Hong Kong’s wireless communications industry.',
+    bodyZh: '2022 年 9 月 29 日，WTIA 於尖沙咀美麗華酒店舉行「20+1 週年」慶祝晚宴暨新一屆執行委員會就職典禮，標誌商會跨越二十載，持續連繫政府、企業、服務供應商及友會，服務香港無線通訊業界。',
     images: [
       {src: '/images/history/21.jpg', altEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner (photo 1)', altZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮（相片 1）'},
       {src: '/images/history/304987776_4955423924557594_1709697925414704627_n-1-770x1024.jpg', altEn: 'WTIA "20+1st" Anniversary celebration and Inauguration Gala Dinner (photo 2)', altZh: 'WTIA「20+1週年」慶祝晚宴暨就職典禮（相片 2）'}
@@ -920,8 +940,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '10',
     titleEn: 'WTIA 20+1st Anniversary Commemorative Book',
     titleZh: '香港無線科技商會20＋1週年紀念特刊',
-    bodyEn: 'WTIA 20+1st Anniversary Commemorative Book is Now Available Online!\n\nThis commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was over 100 industrial events has been held last year.\n\nIn the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong.',
-    bodyZh: '香港無線科技商會20＋1週年紀念特刊現供閱覽\n\n香港無線科技商會20＋1週年紀念特刊盛載著每位合作夥伴及各方友會送上的美好祝福。多年來，商會在各界鼎力相助下發展蓬勃，單單在過去一年，商會就舉辦了超過100場不同形式的行業活動。\n\n未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。',
+    bodyEn: 'In October 2022, WTIA published its 20+1st Anniversary Commemorative Book online, gathering messages from partners and supporting organisations. The volume looked back on a year with over 100 industry events and reaffirmed WTIA’s commitment to a tech-friendly ecosystem for Hong Kong’s wireless and ICT community.',
+    bodyZh: '2022 年 10 月，WTIA 推出《20＋1 週年紀念特刊》網上版，收錄合作夥伴及友會祝福，回顧過去一年超過 100 場行業活動，並重申繼續推動香港無線及資訊科技界的創科友善生態。',
     images: [
       {src: '/images/history/Screenshot-2022-10-11-at-12.21.19-PM-2.png', altEn: 'WTIA 20+1st Anniversary Commemorative Book (photo 1)', altZh: '香港無線科技商會20＋1週年紀念特刊（相片 1）'},
       {src: '/images/history/Screenshot-2022-10-11-at-12.21.19-PM-2.png', altEn: 'WTIA 20+1st Anniversary Commemorative Book (photo 2)', altZh: '香港無線科技商會20＋1週年紀念特刊（相片 2）'}
@@ -930,16 +950,27 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     featured: false,
   },
   {
-    // Ceremony 29 June 2023. Finalist-count wording is Alice's, including the Chinese
-    // 待核實 note: the English draft, the post-event note, and the invitation disagree.
+    slug: '2023-tech-to-connect-4-0',
+    kind: 'milestone',
+    year: 2023,
+    month: '04',
+    titleEn: 'Tech to Connect 4.0 Series',
+    titleZh: '「智創互聯 4.0」系列活動',
+    bodyEn: 'In 2023, WTIA / Wireless (香港無線科技商會) ran the Tech to Connect 4.0 (智創互聯 4.0) series in Hong Kong, including workshops in March and May and a Leaders Summit on 20 April 2023. The series continued WTIA’s multi-year Tech to Connect programme linking industry leaders on wireless, ICT and emerging technology themes.',
+    bodyZh: '2023 年，WTIA / Wireless（香港無線科技商會）舉辦「智創互聯 4.0」系列，包括 3 月及 5 月工作坊，以及 2023 年 4 月 20 日領袖峰會，延續多年 Tech to Connect 計劃，連繫無線、資訊科技及新興科技主題的業界領袖。',
+    images: [],
+    legacyPath: null,
+    featured: false,
+  },
+  {
     slug: '2023-asia-smart-app-awards-2022-23',
     kind: 'milestone',
     year: 2023,
     month: '06',
     titleEn: '9th Asia Smart App Awards 2022/23',
     titleZh: '第九屆亞洲智能應用程式大獎 2022/23',
-    bodyEn: 'WTIA held the 9th Asia Smart App Awards ceremony, welcoming overseas winners and regional delegates back to Hong Kong in person after three years of the pandemic, with representatives from Cambodia, Israel, India, Japan, Korea, Malaysia, Myanmar, the Philippines, Singapore, Sri Lanka, Taiwan, Thailand and Vietnam. The Assistant Head of Create Hong Kong officiated, and the Hon Duncan Chiu, Legislative Council Member (Technology and Innovation), presented awards. Eight teams reached the final, three from Hong Kong. The Grand Award went to Photo Scan by Photomyne (Israel), which also won Gold in Lifestyle and Entertainment. The Asia App Summit was held on the same day.',
-    bodyZh: 'WTIA 舉行第九屆亞洲智能應用程式大獎頒獎典禮。經歷三年疫情之後，大會再次邀請海外得獎者同亞洲各地代表親臨香港，包括柬埔寨、以色列、印度、日本、韓國、馬來西亞、緬甸、菲律賓、新加坡、斯里蘭卡、台灣、泰國及越南。典禮由「創意香港」助理總監曹黎淑霞女士主禮，立法會科技創新界議員邱達根先生擔任頒獎嘉賓。入圍名單包括香港隊伍（決賽隊數待核實：先前稿寫 8 隊、post-event 寫 Nine Finalists、邀請函寫 10）。榮譽大獎由以色列 Photomyne 嘅 Photo Scan 奪得，同時獲 Lifestyle and Entertainment 金獎。同日亦舉行亞洲應用程式峰會。',
+    bodyEn: 'On 29 June 2023 at Cyberport, WTIA held the 9th Asia Smart App Awards 2022/23 ceremony, welcoming overseas winners and regional delegates back to Hong Kong in person after three years of the pandemic, with representatives from Cambodia, Israel, India, Japan, Korea, Malaysia, Myanmar, the Philippines, Singapore, Sri Lanka, Taiwan, Thailand and Vietnam. The Assistant Head of Create Hong Kong officiated, and the Hon Duncan Chiu, Legislative Council Member (Technology and Innovation), presented awards. The Grand Award went to Photo Scan by Photomyne (Israel), which also won Gold in Lifestyle and Entertainment. The Asia App Summit was held on the same day.',
+    bodyZh: 'WTIA 於 2023 年 6 月 29 日在數碼港舉行第九屆亞洲智能應用程式大獎 2022/23 頒獎典禮。經歷三年疫情後，海外得獎者及亞洲各地代表再次親臨香港，包括柬埔寨、以色列、印度、日本、韓國、馬來西亞、緬甸、菲律賓、新加坡、斯里蘭卡、台灣、泰國及越南。典禮由「創意香港」助理總監主禮，立法會科技創新界議員邱達根先生頒獎。榮譽大獎由以色列 Photomyne 的 Photo Scan 奪得，同時獲 Lifestyle and Entertainment 金獎。同日舉行亞洲應用程式峰會。',
     images: [
       {src: '/images/history/2023-asia-smart-app-awards-2022-23-1.jpg', altEn: 'Grand Award presentation at the 9th Asia Smart App Awards 2022/23', altZh: '第九屆亞洲智能應用程式大獎 2022/23 頒發榮譽大獎'},
       {src: '/images/history/2023-asia-smart-app-awards-2022-23-2.jpg', altEn: 'Award winners of the Asia Smart App Awards 2022/23 on stage', altZh: '亞洲智能應用程式大獎 2022/23 得獎者台上合照'},
@@ -949,14 +980,29 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     featured: true,
   },
   {
+    slug: '2024-hong-kong-ict-awards-ict-startup-award',
+    kind: 'milestone',
+    year: 2024,
+    month: '11',
+    titleEn: '2024 Hong Kong ICT Awards: ICT Startup Award Ceremony',
+    titleZh: '2024 香港資訊及通訊科技獎：資訊科技初創企業獎頒獎典禮',
+    bodyEn: 'As organiser of the ICT Startup Award of the Hong Kong ICT Awards 2024, WTIA held the award ceremony and congratulated the winners. The category continues WTIA’s long role under the Hong Kong ICT Awards in recognising innovative local startups in software, hardware and related ICT fields.',
+    bodyZh: 'WTIA 作為 2024 香港資訊及通訊科技獎「資訊科技初創企業獎」主辦機構，舉行頒獎典禮並祝賀得獎單位，延續商會在香港 ICT 獎表揚本地資訊科技初創的角色。',
+    images: [
+      {src: '/images/history/2024-hong-kong-ict-awards-ict-startup-award-1.jpg', altEn: 'Hong Kong ICT Awards 2024 Presentation Ceremony', altZh: '2024 香港 ICT 大獎頒獎禮'}
+    ],
+    legacyPath: null,
+    featured: false,
+  },
+  {
     slug: 'tech-connect-ai-leaders-seminar-series',
     kind: 'milestone',
     year: 2025,
     month: '05',
     titleEn: '"Tech Connect" AI Leaders Seminar Series',
     titleZh: '「Tech Connect 智創互聯」AI 領袖系列研討會',
-    bodyEn: 'WTIA continues to drive digital transformation within the industry through the highly successful “Tech Connect” event series. The “AI Leaders Summit” featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC. The summit focused on how Generative AI is reshaping business models, providing local SMEs with the insights needed to master cutting-edge AI tools and enhance operational efficiency.',
-    bodyZh: 'WTIA 積極推動業界數位轉型，本年度舉行的「Tech Connect 智創互聯」系列活動取得熱烈迴響。其中「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家，圍繞「生成式 AI 如何重塑商業模式」展開深度討論，協助本地中小企掌握最新 AI 工具並提升運營效率。',
+    bodyEn: 'In 2025, WTIA’s “Tech Connect” (智創互聯) series continued to drive digital transformation. The AI Leaders Summit brought together more than 15 technology experts from organisations including Huawei, Microsoft and HKPC to discuss how generative AI is reshaping business models, helping Hong Kong SMEs adopt AI tools and improve efficiency.',
+    bodyZh: '2025 年，WTIA「Tech Connect 智創互聯」系列繼續推動業界數碼轉型。「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等機構的技術專家，探討生成式 AI 如何重塑商業模式，協助香港中小企掌握 AI 工具並提升效率。',
     images: [
       {src: '/images/history/DSC08503-1-scaled.jpg', altEn: '"Tech Connect" AI Leaders Seminar Series (photo 1)', altZh: '「Tech Connect 智創互聯」AI 領袖系列研討會（相片 1）'}
     ],
@@ -970,8 +1016,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '10',
     titleEn: '2025 Hong Kong ICT Awards: ICT Startup Award',
     titleZh: '2025 香港資訊及通訊科技獎：資訊科技初創企業獎',
-    bodyEn: 'Steered by the Digital Policy Office and organized by the Hong Kong Wireless Technology Industry Association (WTIA), the “2025 Hong Kong ICT Awards: ICT Startup Award” has concluded successfully. The awards aim to recognize local startups with exceptional innovation and market potential. This year’s “ICT Startup Grand Award” was presented to Entoptica Limited for their groundbreaking SLOPE device. The jury highly commended the project’s breakthrough in medical technology and its significant social contribution.',
-    bodyZh: '由數字政策辦公室主辦、香港無線科技商會（WTIA）籌辦的「2025 香港資訊及通訊科技獎：資訊科技初創企業獎」圓滿落幕。本屆賽事競爭激烈，旨在發掘具備創新潛力與市場影響力的本地初創。本屆「資訊科技初創企業大獎」由 Entoptica Limited 憑藉其創新技術 SLOPE device 奪得。評審團一致讚揚該項目在醫療科技上的突破及社會貢獻。',
+    bodyEn: 'Steered by the Digital Policy Office and organised by WTIA, the 2025 Hong Kong ICT Awards: ICT Startup Award recognised local startups with strong innovation and market potential. The ICT Startup Grand Award went to Entoptica Limited for its SLOPE device, praised for medical-technology breakthrough and social contribution — continuing WTIA’s role as organiser of this Hong Kong ICT Awards category.',
+    bodyZh: '由數字政策辦公室主辦、WTIA 籌辦的「2025 香港資訊及通訊科技獎：資訊科技初創企業獎」表揚具創新及市場潛力的本地初創。資訊科技初創企業大獎由 Entoptica Limited 憑 SLOPE device 奪得，評審肯定其醫療科技突破及社會貢獻，延續 WTIA 主辦此香港 ICT 獎組別的角色。',
     images: [
       {src: '/images/history/1.jpg', altEn: '2025 Hong Kong ICT Awards: ICT Startup Award (photo 1)', altZh: '2025 香港資訊及通訊科技獎：資訊科技初創企業獎（相片 1）'}
     ],
@@ -985,11 +1031,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '11',
     titleEn: 'Asia Smart Innovation Awards 2025',
     titleZh: '2025 亞洲智慧創新大獎',
-    // Alice v5, from the EN/TC press releases. Month stays 11 to match the existing
-    // legacy path (the ceremony itself was 16 October). The unsourced "historic high"
-    // line and the Facebook download are gone. Keith's title is Willy's formula.
-    bodyEn: 'WTIA held the Asia Smart Innovation Awards 2025 ceremony on 16 October 2025 at Cordis, Hong Kong, alongside the Asia Smart Innovation Summit on the same day. Formerly the Asia Smart App Awards, first held in 2013, the awards were renamed this year and widened to cover IoT, AI, blockchain, big data, cloud and AR/VR. Sponsored by the Cultural and Creative Industries Development Agency (CCIDA) and co-organised with partners from 17 Asian countries and regions, the awards had three categories: Public Sector & Social Innovation, Business & Commercial, and Lifestyle & Culture. Three of the nine finalists came from Hong Kong. The Grand Award went to RIFFAI (Thailand), which also took Gold in Business & Commercial. Hong Kong winners included ASTRI (Silver, Public Sector & Social Innovation), 417 Technology (Silver, Lifestyle & Culture) and SMART IGNITE (Bronze, Lifestyle & Culture; Special Mention – Best Startup). The ceremony was officiated by Dr Lawrence Cheung, Chief Technology Officer of HKPC, and WTIA then-Chairman (now Honorary Chairman) Mr Keith Li.',
-    bodyZh: 'WTIA 於 2025 年 10 月 16 日在香港康得思酒店舉行「2025 亞洲智慧創新大獎」頒獎典禮，同日舉行亞洲智慧創新高峰會。大獎前身係 2013 年首辦嘅「亞洲智能應用程式大獎」，今屆起易名，範疇擴展至物聯網、人工智能、區塊鏈、大數據、雲端運算及 AR/VR。大獎由文創產業發展處贊助，聯同 17 個亞洲國家及地區嘅夥伴合辦，設公共事務及社會企業獎、商業應用獎、生活社交及文化獎三大類別。九支決賽隊伍之中有三支來自香港。榮譽大獎由泰國 RIFFAI 奪得，佢同時獲商業應用獎金獎。香港得獎者包括應科院（公共事務及社會企業獎銀獎）、417 Technology（生活社交及文化獎銀獎），以及 SMART IGNITE（生活社交及文化獎銅獎，兼獲特別嘉許－最佳初創企業）。頒獎典禮由香港生產力促進局首席技術總監張梓昌先生及 WTIA 時任主席（現任榮譽主席）李勁華先生主禮。',
+    bodyEn: 'WTIA held the Asia Smart Innovation Awards 2025 ceremony on 16 October 2025 at Cordis, Hong Kong, alongside the Asia Smart Innovation Summit. Formerly the Asia Smart App Awards (first held in 2013), the awards were renamed and widened to cover IoT, AI, blockchain, big data, cloud and AR/VR. Sponsored by CCIDA and co-organised with partners from 17 Asian countries and regions, the programme had three categories. Three of nine finalists came from Hong Kong. The Grand Award went to RIFFAI (Thailand). Hong Kong winners included ASTRI, 417 Technology and SMART IGNITE. Officiating guests included Dr Lawrence Cheung of HKPC and WTIA then-Chairman (now Honorary Chairman) Mr Keith Li.',
+    bodyZh: 'WTIA 於 2025 年 10 月 16 日在香港康得思酒店舉行「2025 亞洲智慧創新大獎」頒獎典禮，同日舉行亞洲智慧創新高峰會。大獎前身是 2013 年首辦的「亞洲智能應用程式大獎」，今屆易名並擴展至物聯網、人工智能、區塊鏈、大數據、雲端及 AR/VR。由文創產業發展處贊助，聯同 17 個亞洲國家及地區夥伴合辦，設三大類別。九支決賽隊伍中有三支來自香港。榮譽大獎由泰國 RIFFAI 奪得；香港得獎者包括應科院、417 Technology 及 SMART IGNITE。主禮嘉賓包括香港生產力促進局張梓昌先生及 WTIA 時任主席（現任榮譽主席）李勁華先生。',
     images: [
       {src: '/images/history/asia-smart-innovation-awards-2025-1.jpg', altEn: 'Group photo on stage at the Asia Smart Innovation Awards 2025 ceremony', altZh: '2025 亞洲智慧創新大獎頒獎典禮台上大合照'},
       {src: '/images/history/asia-smart-innovation-awards-2025-2.jpg', altEn: 'Officiating guests raising a toast on stage at the Asia Smart Innovation Awards 2025 ceremony', altZh: '2025 亞洲智慧創新大獎頒獎典禮：主禮嘉賓台上祝酒'},
@@ -999,15 +1042,14 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     featured: true,
   },
   {
-    // No 2026 chairman milestone: Willy's handover stays background, not a history card.
     slug: '2026-tech-to-connect-2026-kick-off',
     kind: 'milestone',
     year: 2026,
     month: '05',
     titleEn: 'Tech to Connect 2026 Kick-off and Robotics & Automation Seminar',
     titleZh: '「智創互聯 2026」啟動儀式暨機器人與自動化賦能啟動研討會',
-    bodyEn: 'On 15 May 2026, WTIA launched Tech to Connect 2026 with a kick-off ceremony and seminar on robotics and automation, this year\'s theme. Speakers from Trio AI, Konica Minolta, CARRYAI and HKBN Enterprise Solutions covered 5G and drones, robots in the workplace, visual language models for industrial safety, and hyperautomation. A panel on Hong Kong\'s automation landscape followed, and a robot dog demonstration closed the session. The series continues through the year with a leaders\' summit, technology seminar and workshops.',
-    bodyZh: 'WTIA 於 2026 年 5 月 15 日舉行「智創互聯 2026」啟動儀式暨機器人與自動化賦能啟動研討會，為今年以「機器人與自動化」為主題嘅系列活動揭開序幕。來自 Trio AI、Konica Minolta、CARRYAI 及香港寬頻企業方案嘅講者，分享 5G 與無人機、職場機械人、視覺語言模型應用於工業安全，以及超自動化等題目。之後有小組討論，探討香港自動化產業嘅機遇同挑戰，現場仲有機器狗示範。系列全年陸續舉辦產業領袖峰會、技術推廣研討會及技術工作坊。',
+    bodyEn: 'On 15 May 2026, WTIA / Wireless (香港無線科技商會) launched Tech to Connect 2026 (智創互聯 2026) with a kick-off ceremony and seminar on robotics and automation. Speakers from Trio AI, Konica Minolta, CARRYAI and HKBN Enterprise Solutions covered 5G and drones, workplace robots, visual language models for industrial safety, and hyperautomation, followed by a panel on Hong Kong’s automation landscape and a robot-dog demonstration. The year-long series continues with a leaders’ summit, technology seminar and workshops.',
+    bodyZh: '2026 年 5 月 15 日，WTIA / Wireless（香港無線科技商會）舉行「智創互聯 2026」啟動儀式暨機器人與自動化賦能啟動研討會。Trio AI、Konica Minolta、CARRYAI 及香港寬頻企業方案講者分享 5G 與無人機、職場機械人、工業安全視覺語言模型及超自動化，並有香港自動化產業小組討論及機器狗示範。系列全年續有產業領袖峰會、技術研討會及工作坊。',
     images: [
       {src: '/images/history/2026-tech-to-connect-2026-kick-off-1.jpg', altEn: 'Officiating guests holding kick-off props on stage to launch Tech to Connect 2026', altZh: '主禮嘉賓手持道具，於台上為「智創互聯 2026」主持啟動儀式'},
       {src: '/images/history/2026-tech-to-connect-2026-kick-off-2.jpg', altEn: 'Panel discussion on Hong Kong\'s automation landscape at the Tech to Connect 2026 kick-off seminar', altZh: '「智創互聯 2026」啟動研討會：香港自動化產業小組討論'},
@@ -1023,8 +1065,8 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     month: '10',
     titleEn: 'Tech to Connect 2026 Technology Workshops',
     titleZh: '「智創互聯 2026」技術工作坊系列',
-    bodyEn: 'From August to October 2026, WTIA held three Tech to Connect 2026 technology workshops at KOHO, Kwun Tong, on 27 August, 15 September and 22 October, bringing robotics, automation and AI use cases to industries including logistics, retail and construction.',
-    bodyZh: '2026 年 8 月至 10 月，WTIA 喺觀塘 KOHO 舉辦三場「智創互聯 2026」技術工作坊（8 月 27 日、9 月 15 日及 10 月 22 日），將機器人、自動化同人工智能應用帶入物流、零售及建造等行業。',
+    bodyEn: 'From August to October 2026, WTIA held three Tech to Connect 2026 technology workshops at KOHO, Kwun Tong (27 August, 15 September and 22 October), bringing robotics, automation and AI use cases to industries including logistics, retail and construction. The workshops extend the May 2026 kick-off theme for Hong Kong’s wireless and ICT practitioners.',
+    bodyZh: '2026 年 8 月至 10 月，WTIA 於觀塘 KOHO 舉辦三場「智創互聯 2026」技術工作坊（8 月 27 日、9 月 15 日及 10 月 22 日），將機器人、自動化與人工智能應用帶入物流、零售及建造等行業，延續 5 月啟動禮主題。',
     images: [
       {src: '/images/history/2026-tech-to-connect-2026-workshop-series-1.jpg', altEn: 'Panel discussion on next-generation smart construction sites at the Tech to Connect 2026 workshop, 22 Oct 2026', altZh: '2026 年 10 月 22 日「智創互聯 2026」工作坊：「下一代智慧工地」小組討論'},
       {src: '/images/history/2026-tech-to-connect-2026-workshop-series-2.jpg', altEn: 'Panel discussion at the first Tech to Connect 2026 workshop, 27 Aug 2026', altZh: '2026 年 8 月 27 日第一場「智創互聯 2026」工作坊小組討論'},
