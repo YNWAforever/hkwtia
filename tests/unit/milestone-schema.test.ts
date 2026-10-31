@@ -43,6 +43,18 @@ describe("milestone schema", () => {
     }
   });
 
+  // Records added after the WordPress archive have no permalink to redirect.
+  // Null is that absence. A missing field is still an unfinished entry.
+  it("accepts a record with no WordPress legacy path", () => {
+    expect(milestoneSchema.parse({...valid, legacyPath: null}).legacyPath).toBeNull();
+  });
+
+  it("rejects a missing legacy path", () => {
+    const withoutPath: Record<string, unknown> = {...valid};
+    delete withoutPath.legacyPath;
+    expect(() => milestoneSchema.parse(withoutPath)).toThrow();
+  });
+
   // WordPress falls back to a percent-encoded slug when a post's title is
   // Chinese and no manual slug was set -- true for 12 of the 61 real posts,
   // confirmed against content/legacy-urls.json which stores the identical

@@ -59,7 +59,9 @@ export const milestoneSchema = z.object({
   // manual slug set (12 of the 61 real posts) -- confirmed against the actual
   // capture and against content/legacy-urls.json, which stores the same
   // encoded form as the redirect source Task 10 matches against verbatim.
-  legacyPath: z.string().regex(/^\/\d{4}\/\d{2}\/[a-z0-9%-]+\/$/),
+  // Null is a record added after the archive: it has a detail page, and no
+  // captured WordPress URL to put in the redirect map.
+  legacyPath: z.string().regex(/^\/\d{4}\/\d{2}\/[a-z0-9%-]+\/$/).nullable(),
   // Frozen at extraction from the word-count threshold, never recomputed at
   // render time — otherwise a copy edit could move an entry between layouts and
   // change its URL.

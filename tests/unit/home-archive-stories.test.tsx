@@ -78,11 +78,20 @@ describe("ArchiveStories", () => {
     const {ArchiveStories} = await import("@/components/home/archive-stories");
     render(await ArchiveStories({locale: "en"}));
 
-    const multiParagraph = featuredOnly(milestones)
+    const shown = featuredOnly(milestones)
       .filter((milestone) => milestone.images.length > 0)
-      .slice(0, 4)
-      .filter((milestone) => milestone.bodyEn.includes("\n\n"));
-    expect(multiParagraph.length).toBeGreaterThan(0);
+      .slice(0, 4);
+    const multiParagraph = shown.filter((milestone) => milestone.bodyEn.includes("\n\n"));
+    // Willy's three highlights are single paragraphs. The lead-only split is still
+    // the card's rule whenever a featured body has a break; with none, each card
+    // shows that single paragraph and nothing is left to spill.
+    if (multiParagraph.length === 0) {
+      expect(shown.length).toBeGreaterThan(0);
+      for (const milestone of shown) {
+        expect(screen.getByText(milestone.bodyEn), milestone.slug).toBeInTheDocument();
+      }
+      return;
+    }
 
     for (const milestone of multiParagraph) {
       const [lead, ...rest] = milestone.bodyEn.split("\n\n");
