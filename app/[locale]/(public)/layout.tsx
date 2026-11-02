@@ -27,6 +27,9 @@ import "../../styles/wisetech-shell.css";
 // The 2026-10 experience layer (route finder, signal heroes, bilingual typography). Last, so
 // it wins over both files above; reverting the pass is removing this line and the file.
 import "../../styles/wisetech-experience.css";
+// Catherine Phase 3 chrome (Willy Approve t341s1501). Last, so logo, contrast, and
+// empty-state rules win over the donor port. Q6b heading fonts and Q8 favicon stay put.
+import "../../styles/wisetech-chrome.css";
 
 type PublicLayoutProps = {
   children: ReactNode;

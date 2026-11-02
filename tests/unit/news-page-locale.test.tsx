@@ -1,4 +1,5 @@
 import type {ReactNode} from "react";
+import {brandedTitle} from "@/lib/metadata";
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -129,7 +130,7 @@ describe("localized public News pages", () => {
     expect(publicPosts.getPublishedNewsBySlug).toHaveBeenCalledWith("zh-HK", chineseNews.slug);
     expect(html).toContain("繁體內容");
     // D-1: record titles are branded at runtime with the fullwidth bar in zh-HK.
-    expect(metadata.title).toBe("繁體消息｜WTIA");
+    expect(metadata.title).toBe(brandedTitle("zh-HK", "繁體消息"));
   });
 
   it("returns a Chinese 404 when the News row has no eligible Chinese body", async () => {

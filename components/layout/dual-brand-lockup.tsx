@@ -15,6 +15,12 @@ type DualBrandLockupProps = {
   labels: DualBrandLockupLabels;
   priority?: boolean;
   className?: string;
+  /**
+   * Light header: full-colour black-text lockup.
+   * Navy footer: mono-white lockup. Full-colour on #6686BD is forbidden (C2);
+   * the link-heavy footer uses navy #0F4C81 instead, which still takes mono-white.
+   */
+  surface?: "light" | "navy";
 };
 
 // Donor commit f91ecc5 :208-220 — a white 108x48 logo tile beside the wordmark and the
@@ -25,7 +31,7 @@ type DualBrandLockupProps = {
 // tile is ever dropped, and because no `min-w-0` is passed alongside it — tailwind-merge would
 // resolve that conflict by discarding `min-w-11` from the class string entirely. The PNG is
 // byte-pinned by tests/unit/wisetech-asset-provenance.test.ts — restyle the tile, never the file.
-export function DualBrandLockup({labels, priority = false, className}: DualBrandLockupProps) {
+export function DualBrandLockup({labels, priority = false, className, surface = "light"}: DualBrandLockupProps) {
   return (
     <Link
       className={cn("brand min-h-11 min-w-11 max-w-full", className)}
@@ -33,15 +39,15 @@ export function DualBrandLockup({labels, priority = false, className}: DualBrand
       aria-label={labels.homeLabel}
       prefetch={false}
     >
-      <span className="brand-logo-wrap">
+      <span className={cn("brand-logo-wrap", surface === "navy" ? "brand-logo-navy" : "brand-logo-light")}>
         <Image
-          src="/images/wtia-logo.png"
+          src={surface === "navy" ? "/images/wtia-logo-mono-white.png" : "/images/wtia-logo.png"}
           alt={labels.logoAlt}
           width={2001}
           height={721}
-          sizes="(max-width: 520px) 66px, 88px"
+          sizes="(max-width: 820px) 96px, 135px"
           priority={priority}
-          className="h-full w-full object-contain"
+          className="h-auto w-full object-contain"
         />
       </span>
       <span className="brand-copy">

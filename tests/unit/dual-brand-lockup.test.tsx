@@ -34,7 +34,7 @@ describe("DualBrandLockup", () => {
 
   it("requests a logo sized for the mobile and desktop tile", () => {
     render(<DualBrandLockup labels={labels} priority />);
-    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("sizes", "(max-width: 520px) 66px, 88px");
+    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("sizes", "(max-width: 820px) 96px, 135px");
   });
 
   // The anchor's rendered width floor is the 108px `.brand-logo-wrap` tile, not `min-w-11`:
@@ -52,5 +52,13 @@ describe("DualBrandLockup", () => {
     const link = screen.getByRole("link", {name: longLabels.homeLabel});
     expect(link).toHaveClass("min-h-11", "min-w-11", "max-w-full");
     expect(screen.getByRole("img", {name: longLabels.logoAlt})).toHaveClass("object-contain");
+  });
+
+  it("uses the mono-white lockup on the navy footer and keeps full-colour on light chrome", () => {
+    const {unmount} = render(<DualBrandLockup labels={labels} surface="navy" />);
+    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("src", "/images/wtia-logo-mono-white.png");
+    unmount();
+    render(<DualBrandLockup labels={labels} />);
+    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("src", "/images/wtia-logo.png");
   });
 });

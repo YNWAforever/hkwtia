@@ -1,0 +1,158 @@
+/*
+ * Catherine Phase 3 public chrome (Willy Approve t341s1501).
+ * Loaded last in the public layout so these rules win over the donor port.
+ *
+ * Q6b is still open: heading font-family stays the current serif stack.
+ * Q7 is out of scope: this file does not reassign the site palette to #6686BD.
+ * Q8 favicon is not touched.
+ * Full-colour lockup stays on white. Navy footer (#0F4C81) uses the mono-white
+ * file because a link-heavy footer needs white type at 8.86:1. Full-colour on
+ * #6686BD is not used.
+ */
+
+.site-root { color: #000; }
+.site-root h2,
+.site-root h3 { color: #0f4c81; }
+.site-root a:not(.button) { color: #0f4c81; }
+
+/* Dark bands keep their own light type. A global heading colour would paint navy
+   onto photographic heroes and the navy footer. */
+.site-root :is(
+  .hero,
+  .page-hero,
+  .inner-page-hero,
+  .manifesto,
+  .gba-section,
+  .site-footer,
+  .mobile-menu,
+  .mega-menu,
+  .conversion-section,
+  .inner-closing,
+  .event-interest,
+  .outcome-visual,
+  .opportunity-section,
+  .announcement,
+  .honest-empty:not(.light-empty)
+) :is(h1, h2, h3, p, a, li, strong, small, span) {
+  color: inherit;
+}
+
+/* Light header: white bar, navy navigation, white-on-navy primary CTA. */
+.site-header,
+.site-header[data-variant="solid"],
+.site-header[data-variant="solid"].scrolled,
+.site-header[data-variant="overlay"],
+.site-header[data-variant="overlay"].scrolled {
+  color: #0f4c81;
+  background: #fff;
+}
+.site-header .header-actions .button,
+.site-header .header-actions .button-small {
+  background: #0f4c81;
+  border-color: #0f4c81;
+  color: #fff;
+}
+
+/* Horizontal lockup. Desktop width 135px (clear space ≥ 45px, one third of that
+   width) sits in the brand column via padding-inline-end. Mobile stays ≥ 72px,
+   above the 45px C3 floor, with 24px of inline clear space where the row allows. */
+.site-header .brand-logo-wrap {
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  flex-basis: auto;
+  padding: 16px 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.site-header .brand { padding-inline-end: 45px; }
+.site-header .brand-logo-wrap img {
+  width: 135px;
+  height: auto;
+  min-width: 90px;
+}
+@media (max-width: 820px) {
+  .site-header .brand { padding-inline-end: 24px; }
+  .site-header .brand-logo-wrap,
+  .site-header .brand-logo-wrap img {
+    width: 96px;
+    min-width: 72px;
+    height: auto;
+    flex-basis: auto;
+  }
+}
+
+/* Link-heavy footer: navy band, mono-white logo, white meta. */
+.site-footer {
+  background: #0f4c81;
+  color: #fff;
+}
+.site-footer .brand-logo-wrap {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.site-root .site-footer :is(p, small, a, address, strong, h2, h3, li, span) { color: #fff; }
+.site-footer .footer-newsletter button { color: #fff; }
+.site-footer .footer-newsletter input { color: #fff; }
+
+/* Honest directory empty (SPECS §6). Dashed slots are labels only. */
+.directory-empty {
+  border: 1px dashed rgba(15, 76, 129, 0.45);
+  border-radius: 16px;
+  background: #fff;
+  color: #000;
+  padding: 48px 28px;
+  text-align: center;
+}
+.directory-empty h3 {
+  margin: 0 0 12px;
+  color: #0f4c81;
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+}
+.directory-empty > p {
+  max-width: 40rem;
+  margin: 0 auto 24px;
+  color: #000;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.directory-empty-frames {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+}
+.directory-empty-frames li {
+  display: grid;
+  width: min(160px, 100%);
+  min-height: 92px;
+  place-items: center;
+  border: 1px dashed rgba(15, 76, 129, 0.4);
+  border-radius: 12px;
+  color: #0f4c81;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 12px;
+}
+.directory-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+.directory-empty-actions .button-dark {
+  background: #0f4c81;
+  border-color: #0f4c81;
+  color: #fff;
+}
+.directory-empty-actions .directory-empty-secondary {
+  background: #fff;
+  border-color: #0f4c81;
+  color: #0f4c81;
+}

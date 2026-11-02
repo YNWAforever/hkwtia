@@ -6,13 +6,13 @@ import zh from "@/messages/zh-HK.json";
 const approvedFacts = {
   en: {
     foundedTitle: "Established 2001",
-    foundedBody: "WTIA is a not-for-profit trade association founded in 2001 for Hong Kong's wireless, mobile and emerging technology community.",
+    foundedBody: "Established in 2001, WTIA / Wireless（香港無線科技商會） is a not-for-profit trade association serving Hong Kong's wireless, mobile and emerging technology community.",
     missionTitle: "Our mission",
     missionBody: "To advance wireless, mobile and emerging technologies, accelerate their real-world adoption, and help shape Hong Kong into a top-class innovation and technology hub.",
   },
   "zh-HK": {
     foundedTitle: "成立於2001年",
-    foundedBody: "香港無線科技商會（WTIA）成立於2001年，是一個非牟利貿易協會，服務香港無線、流動及新興科技社群。",
+    foundedBody: "香港無線科技商會（WTIA／Wireless）成立於2001年，是一個非牟利商會，服務香港無線、流動及新興科技社群。",
     missionTitle: "我們的使命",
     missionBody: "推動無線、流動及新興科技發展，加速其實際應用，協助香港發展成為頂尖創科樞紐。",
   },

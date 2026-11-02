@@ -6,6 +6,7 @@ import {NewsCard} from "@/components/marketing/news-card";
 import {NewsQualityPanel} from "@/components/marketing/news-quality-panel";
 import {FooterNewsletter} from "@/components/layout/footer-newsletter";
 import {StructuredData} from "@/components/seo/structured-data";
+import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
@@ -81,7 +82,12 @@ export default async function NewsPage({params}: Props) {
             ))}
           </div>
         ) : unavailable ? null : (
-          <HonestEmpty variant="inner" title={t("emptyTitle")} copy={t("emptyDescription")} />
+          <HonestDirectoryEmpty
+            next={t("emptyDescription")}
+            primary={{href: "/", label: t("emptyPrimary")}}
+            secondary={{href: "/contact", label: t("emptySecondary")}}
+            status={t("emptyTitle")}
+          />
         )}
         <NewsQualityPanel labels={{eyebrow: t("quality.eyebrow"), title: t("quality.title"), body: t("quality.body")}} />
       </Section>

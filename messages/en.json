@@ -17,8 +17,8 @@
     "closeMenu": "Close menu"
   },
   "Metadata": {
-    "title": "WTIA",
-    "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
+    "title": "Home｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "description": "WTIA connects Hong Kong's wireless and AI+ community—members, events, programmes and GBA opportunities."
   },
   "Navigation": {
     "brand": {
@@ -116,7 +116,7 @@
     "switchToEnglish": "Switch to English",
     "switchToChinese": "Switch to Chinese",
     "homeLabel": "WTIA home",
-    "logoAlt": "WTIA",
+    "logoAlt": "WTIA 香港無線科技商會",
     "primaryLabel": "Primary navigation"
   },
   "Announcement": {
@@ -129,7 +129,7 @@
       "publicName": "WTIA",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
       "homeLabel": "WTIA home",
-      "logoAlt": "WTIA"
+      "logoAlt": "WTIA 香港無線科技商會"
     },
     "legalLine": "Hong Kong Wireless Technology Industry Association (WTIA).",
     "columns": {
@@ -434,7 +434,7 @@
     }
   },
   "Unsubscribe": {
-    "metaTitle": "Email preferences | WTIA",
+    "metaTitle": "Email preferences｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "Update your WTIA marketing email preference.",
     "eyebrow": "Email preferences",
     "confirmTitle": "Stop WTIA marketing email?",
@@ -454,8 +454,8 @@
     }
   },
   "Home": {
-    "metaTitle": "WTIA",
-    "metaDescription": "WTIA connects Hong Kong's wireless technology community through events, members, solutions, programmes and Greater Bay Area opportunities.",
+    "metaTitle": "Home｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "WTIA connects Hong Kong's wireless and AI+ community—members, events, programmes and GBA opportunities.",
     "hero": {
       "eyebrow": "Hong Kong wireless technology",
       "title": "How can Hong Kong lead the AI+ era?",
@@ -751,11 +751,11 @@
     }
   },
   "About": {
-    "metaTitle": "About | WTIA",
-    "metaDescription": "Learn about WTIA's role in Hong Kong's wireless technology community.",
+    "metaTitle": "About｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "About WTIA / Wireless（香港無線科技商會）— Hong Kong's not-for-profit wireless and emerging technology association since 2001.",
     "eyebrow": "About WTIA",
     "title": "A connected voice for wireless technology.",
-    "summary": "WTIA convenes members, partners and public stakeholders to advance Hong Kong's technology ecosystem.",
+    "summary": "WTIA / Wireless（香港無線科技商會） convenes members, partners and public stakeholders to advance Hong Kong's technology ecosystem.",
     "imageAlt": "Industry guests and organisers at the Asia Smart Innovation Awards Summit 2025 in Hong Kong",
     "historyTitle": "Our role",
     "historyIntro": "We connect the industry with opportunities that strengthen innovation, talent and regional reach.",
@@ -772,24 +772,24 @@
       "description": "Bring sector experience into constructive public and industry dialogue."
     },
     "foundedTitle": "Established 2001",
-    "foundedBody": "WTIA is a not-for-profit trade association founded in 2001 for Hong Kong's wireless, mobile and emerging technology community.",
+    "foundedBody": "Established in 2001, WTIA / Wireless（香港無線科技商會） is a not-for-profit trade association serving Hong Kong's wireless, mobile and emerging technology community.",
     "missionTitle": "Our mission",
     "missionBody": "To advance wireless, mobile and emerging technologies, accelerate their real-world adoption, and help shape Hong Kong into a top-class innovation and technology hub.",
     "historyLink": "Read our history"
   },
   "Chairman": {
-    "metaTitle": "Chairman's Message | WTIA",
-    "metaDescription": "A message from the WTIA chairman.",
+    "metaTitle": "Chairman's Message｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "A message from Willy Lai, Chairman of WTIA / Wireless（香港無線科技商會）.",
     "eyebrow": "Leadership",
     "title": "Chairman's message",
     "summary": "Working together to keep Hong Kong connected to emerging technology opportunities.",
     "messageTitle": "A shared commitment",
-    "message": "Our association is strongest when members contribute experience, curiosity and a willingness to collaborate. WTIA will continue creating practical bridges between innovation and opportunity.",
-    "signature": "Chairman, WTIA"
+    "message": "Our association is strongest when members contribute experience, curiosity and a willingness to collaborate. WTIA / Wireless（香港無線科技商會） will continue building practical bridges between innovation and opportunity.",
+    "signature": "Willy Lai, Chairman, WTIA"
   },
   "Committees": {
-    "metaTitle": "Committees | WTIA",
-    "metaDescription": "How WTIA committees support governance, programmes and members.",
+    "metaTitle": "Committees｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "WTIA committees that turn member participation into focused industry action.",
     "eyebrow": "Governance",
     "title": "Committees that turn participation into action.",
     "summary": "Member-led committees provide oversight and focused expertise across WTIA priorities.",
@@ -808,8 +808,8 @@
     }
   },
   "History": {
-    "metaTitle": "History | WTIA",
-    "metaDescription": "Twenty-six years of the Hong Kong Wireless Technology Industry Association, 2001 to 2026.",
+    "metaTitle": "History｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
     "eyebrow": "Since 2001",
     "title": "Our history",
     "intro": "Milestones from twenty-six years of building Hong Kong's wireless and technology industry.",
@@ -827,8 +827,8 @@
   "Membership": {
     "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "What you can do", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
     "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
-    "metaTitle": "Membership | WTIA",
-    "metaDescription": "Compare WTIA membership tiers and benefits.",
+    "metaTitle": "Membership｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "Explore WTIA membership options for individuals and organisations. Join at hkwtia.org.",
     "eyebrow": "Membership",
     "breadcrumbCurrent": "Membership",
     "title": "Choose the membership that fits your needs",
@@ -1030,7 +1030,7 @@
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
     "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "invite": {
-      "metaTitle": "Your personal invitation | WTIA",
+      "metaTitle": "Your personal invitation｜Hong Kong Wireless Technology Industry Association (WTIA)",
       "welcomeNamed": "Welcome, {name}",
       "welcome": "Welcome to WTIA",
       "invitedBy": "{inviter} has invited you to join WTIA as a {plan} member.",
@@ -1050,7 +1050,7 @@
     },
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
-    "metaTitle": "Membership application | WTIA",
+    "metaTitle": "Membership application｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "Apply for WTIA membership online. Choose a tier, create your account and join Hong Kong's technology community.",
     "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
     "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
@@ -1331,7 +1331,7 @@
     }
   },
   "Programmes": {
-    "metaTitle": "Programmes | WTIA",
+    "metaTitle": "Programmes｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions and where each leads next.",
     "hero": {
       "eyebrow": "Programmes",
@@ -1378,7 +1378,7 @@
     }
   },
   "Partners": {
-    "metaTitle": "Partners | WTIA",
+    "metaTitle": "Partners｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "WTIA's published partner records: supporting organisations, regional, media, programme and sponsor partners, each with a confirmed relationship and confirmed logo rights.",
     "hero": {
       "eyebrow": "Partner ecosystem",
@@ -1430,7 +1430,7 @@
     }
   },
   "LaunchPad": {
-    "metaTitle": "Launch Pad | WTIA",
+    "metaTitle": "Launch Pad｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
@@ -1588,19 +1588,22 @@
     "clinicCta": "Book a clinic"
   },
   "Showcase": {
-    "metaTitle": "Showcase | WTIA",
-    "metaDescription": "Discover WTIA member companies, products, and practical technology solutions.",
+    "metaTitle": "Member showcase｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "Browse published technology solutions from WTIA member companies.",
     "detailFallbackDescription": "WTIA member showcase",
     "eyebrow": "AI Showcase",
-    "title": "Find the right WTIA member partner",
+    "title": "Member showcase",
     "description": "Explore practical products and services from Hong Kong technology companies.",
     "introTitle": "Technology solutions for practical business needs",
     "introDescription": "Compare published WTIA member solutions by use case, deployment, language, and integration fit.",
     "ownerCta": "Manage your showcase listing",
     "resultsTitle": "Explore member solutions",
     "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
-    "noPublishedTitle": "No public solutions yet",
-    "noPublishedDescription": "No solutions are published yet.",
+    "noPublishedTitle": "No published solutions yet.",
+    "noPublishedDescription": "Cases go live after consent and review — we do not invent listings.",
+    "emptyPrimary": "Contact",
+    "emptySecondary": "Join to submit",
+    "emptyFrame": "reserved slot · 待確認",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "unavailableTitle": "Showcase listings are temporarily unavailable",
@@ -1705,12 +1708,12 @@
     }
   },
   "Members": {
-    "metaTitle": "Members | WTIA",
-    "metaDescription": "Hong Kong wireless and AI+ technology companies in the WTIA member directory.",
+    "metaTitle": "Member directory｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "WTIA member directory—published profiles of Hong Kong wireless and technology companies.",
     "eyebrow": "Member directory",
-    "title": "WTIA members",
+    "title": "Member directory",
     "description": "Organisations shaping Hong Kong's wireless, mobile and AI+ industry. Each page is maintained by the member and reviewed by WTIA.",
-    "breadcrumbCurrent": "Members",
+    "breadcrumbCurrent": "Member directory",
     "filters": {
       "search": "Search members",
       "tag": "Industry",
@@ -1733,8 +1736,11 @@
     "resultsHeading": "Member directory",
     "loadMore": "View more members",
     "paginationLabel": "Member directory pages",
-    "noPublishedTitle": "No public member profiles yet",
-    "noPublishedDescription": "No member profiles are published yet.",
+    "noPublishedTitle": "No member profiles are published yet.",
+    "noPublishedDescription": "Profiles appear only after written consent.",
+    "emptyPrimary": "Join WTIA",
+    "emptySecondary": "Membership",
+    "emptyFrame": "awaiting consent",
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
     "unavailableTitle": "Member pages are temporarily unavailable",
@@ -1751,7 +1757,7 @@
     }
   },
   "AiOps": {
-    "metaTitle": "AI-Ops in public | WTIA",
+    "metaTitle": "AI-Ops in public｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",
     "eyebrow": "AI-Ops in public",
     "title": "Operational AI, measured in public",
@@ -1812,7 +1818,7 @@
     "operationsMethodology": "Include bot outcomes, human handoffs and reopened cases. Measure human work, review and rework separately; waiting is not staff work. Fix a comparison group before the pilot."
   },
   "Events": {
-    "metaTitle": "Events | WTIA",
+    "metaTitle": "Events｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "Discover WTIA events and community gatherings.",
     "eyebrow": "Events",
     "title": "Events",
@@ -2039,16 +2045,18 @@
     }
   },
   "News": {
-    "metaTitle": "News | WTIA",
-    "metaDescription": "Read the latest news from WTIA.",
+    "metaTitle": "News & media｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "News and updates from the Hong Kong Wireless Technology Industry Association (WTIA).",
     "eyebrow": "News",
-    "title": "WTIA news",
+    "title": "News & media",
     "description": "Browse WTIA announcements and community news.",
-    "emptyTitle": "No news is published yet",
-    "emptyDescription": "News will appear here when content is confirmed.",
+    "emptyTitle": "No published news items yet.",
+    "emptyDescription": "Only sourced, cleared items will appear here.",
+    "emptyPrimary": "Home",
+    "emptySecondary": "Press contact",
     "unavailableTitle": "News could not be fully loaded",
     "unavailableDescription": "Some items may be missing. Please try again shortly.",
-    "breadcrumbCurrent": "News",
+    "breadcrumbCurrent": "News & media",
     "statusNews": "News",
     "resultsHeading": "News and build logs",
     "statusBuildLog": "Build Log",
@@ -2070,11 +2078,11 @@
     }
   },
   "Contact": {
-    "metaTitle": "Contact | WTIA",
-    "metaDescription": "Contact the Hong Kong Wireless Technology Industry Association.",
+    "metaTitle": "Contact｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "Contact WTIA / Wireless（香港無線科技商會）. Email contact@hkwtia.org. Visit hkwtia.org.",
     "eyebrow": "Contact",
     "title": "Let's connect",
-    "description": "Reach WTIA at the office or by email.",
+    "description": "Reach WTIA / Wireless（香港無線科技商會） by email, or via the options below.",
     "breadcrumbCurrent": "Contact",
     "channelsTitle": "Contact WTIA directly",
     "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
@@ -2151,7 +2159,7 @@
     "conciergeLauncher": "Ask WTIA"
   },
   "Privacy": {
-    "metaTitle": "Privacy | WTIA",
+    "metaTitle": "Privacy｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "How the WTIA platform collects, uses and retains your information.",
     "eyebrow": "Privacy",
     "title": "How we handle your information",
@@ -2262,7 +2270,7 @@
     ]
   },
   "RefundPolicy": {
-    "metaTitle": "Refund policy | WTIA",
+    "metaTitle": "Refund policy｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "How and when WTIA refunds a paid ticket order, and what happens if we cancel an event.",
     "eyebrow": "Policy",
     "title": "Refund policy",
@@ -2301,7 +2309,7 @@
     ]
   },
   "AiTransparency": {
-    "metaTitle": "AI Transparency | WTIA",
+    "metaTitle": "AI Transparency｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "How the WTIA Concierge works, what it can do, and when a person takes over.",
     "eyebrow": "AI transparency",
     "title": "How the WTIA Concierge works",

@@ -1,4 +1,5 @@
 import {renderToStaticMarkup} from "react-dom/server";
+import {brandedTitle} from "@/lib/metadata";
 import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -70,8 +71,8 @@ describe("public Showcase detail metadata", () => {
   // D-1: a listing's name is a record title, so the page brands it at runtime with the locale's
   // separator -- never the retired "<name> | WTIA Showcase" shape, and never a bare name.
   it.each([
-    ["en", "Harbour Vision AI | WTIA", "Public description"],
-    ["zh-HK", "港灣視野 AI｜WTIA", "公開描述"],
+    ["en", brandedTitle("en", "Harbour Vision AI"), "Public description"],
+    ["zh-HK", brandedTitle("zh-HK", "港灣視野 AI"), "公開描述"],
   ] as const)("brands the %s listing title and keeps the listing's own description", async (locale, title, description) => {
     showcase.getPublishedBySlug.mockResolvedValue(row);
 

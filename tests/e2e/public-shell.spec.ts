@@ -168,7 +168,7 @@ for (const [path, group] of [
   });
 }
 
-test("the header floats over the hero, then goes solid past 56px", async ({page}) => {
+test("the header is a light bar on the homepage and on inner pages", async ({page}) => {
   await page.setViewportSize({width: 1360, height: 900});
   await page.goto("/");
   const header = page.locator("header.site-header");
@@ -179,8 +179,9 @@ test("the header floats over the hero, then goes solid past 56px", async ({page}
   // Playwright manages a dev server with no database, so getActive rejects and the layout
   // renders no announcement: the header carries the donor's `.no-announcement` modifier and
   // sits at top: 0. An announcement is covered by tests/unit/announcement.test.tsx instead.
+  // Willy Approve t341s1501: the public header stays the light (solid) bar, including home.
   await expect(header).toHaveClass(/no-announcement/);
-  await expect(header).toHaveAttribute("data-variant", "overlay");
+  await expect(header).toHaveAttribute("data-variant", "solid");
   await expect(header).not.toHaveClass(/scrolled/);
 
   await page.mouse.wheel(0, 400);

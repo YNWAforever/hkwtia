@@ -19,8 +19,9 @@ describe("buildOrganizationData", () => {
     // production return type, so callers still get the honest, broader schema-dts type.
     const data = buildOrganizationData() as WithContext<Exclude<Organization, string>>;
 
-    expect(data.alternateName).toEqual(["HKWTA", "WTIA"]);
+    expect(data.alternateName).toEqual(["WTIA", "香港無線科技商會", "HKWTIA"]);
     expect(data.alternateName).not.toContain("WiseTech Hong Kong");
+    expect(JSON.stringify(data)).not.toMatch(/\bHKWTA\b/);
     expect(data.email).toBe(siteConfig.contact.email);
     expect(data.telephone).toBe(siteConfig.contact.phone);
     expect(data.address).toMatchObject({

@@ -9,6 +9,7 @@ import {SolutionPathways} from "@/components/marketing/solution-pathways";
 import {SolutionVerification} from "@/components/marketing/solution-verification";
 import {StructuredData} from "@/components/seo/structured-data";
 import {ActionLink} from "@/components/wt/action-link";
+import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {InterestBand} from "@/components/wt/interest-band";
 import {PageHero} from "@/components/wt/page-hero";
@@ -89,7 +90,15 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         ? <HonestEmpty copy={t("unavailableDescription")} title={t("unavailableTitle")} variant="inner" />
         : listings.length > 0
         ? <div className="partner-record-grid">{listings.map((listing) => <ShowcaseCard key={listing.slug} labels={cardLabels} listing={listing} locale={locale} />)}</div>
-        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t(hasFilters ? "emptyDescription" : "noPublishedDescription")} title={t(hasFilters ? "emptyTitle" : "noPublishedTitle")} variant="inner" />}
+        : hasFilters
+        ? <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />
+        : <HonestDirectoryEmpty
+            frames={[t("emptyFrame")]}
+            next={t("noPublishedDescription")}
+            primary={{href: "/contact", label: t("emptyPrimary")}}
+            secondary={{href: "/join", label: t("emptySecondary")}}
+            status={t("noPublishedTitle")}
+          />}
     </Section>
     <SolutionVerification badges={badges} copy={t("verification.copy")} label={t("verification.label")} title={t("verification.title")} />
     <Section labelledBy="showcase-pathways-title">

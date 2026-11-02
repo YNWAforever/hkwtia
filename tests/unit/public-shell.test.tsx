@@ -67,19 +67,19 @@ describe("public shell server surfaces", () => {
     expect(screen.getAllByText(group).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", {name: join})).toHaveAttribute("href", "/join");
     expect(screen.getByRole("link", {name: search})).toHaveAttribute("href", "/showcase");
-    expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("src", "/images/wtia-logo.png");
+    expect(screen.getByRole("img", {name: "WTIA 香港無線科技商會"})).toHaveAttribute("src", "/images/wtia-logo.png");
     // priority preloads the logo ahead of the page hero. The homepage LCP is the
     // hero photograph, so the header mark stays on next/image's lazy default.
-    expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("data-priority", "false");
+    expect(screen.getByRole("img", {name: "WTIA 香港無線科技商會"})).toHaveAttribute("data-priority", "false");
     expect(imagePriorities).not.toContain(true);
     view.unmount();
   });
 
   it("carries the route's variant and the announcement modifier on the header element", async () => {
     pathnameState.current = "/";
-    const overlay = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
-    expect(overlay).toContain('data-variant="overlay"');
-    expect(overlay).toContain('class="site-header"');
+    const home = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
+    expect(home).toContain('data-variant="solid"');
+    expect(home).toContain('class="site-header"');
 
     pathnameState.current = "/events";
     const solid = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: false}));

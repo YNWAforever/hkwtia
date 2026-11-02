@@ -23,13 +23,13 @@ afterEach(() => {
 });
 
 describe("hero variant", () => {
-  it("keeps the overlay list to routes that open with a full-bleed hero", () => {
-    expect(heroVariantByRoute).toEqual({"/": "overlay"});
+  it("keeps every public route on the light header", () => {
+    expect(heroVariantByRoute).toEqual({});
     expect(DEFAULT_HEADER_VARIANT).toBe("solid");
   });
 
   it.each([
-    ["/", "overlay"],
+    ["/", "solid"],
     ["/events", "solid"],
     ["/about/history", "solid"],
     ["/unknown", "solid"],
@@ -42,9 +42,9 @@ describe("hero variant", () => {
 describe("HeaderShell", () => {
   it("puts the per-route variant in the server markup, before any effect can run", () => {
     pathnameState.current = "/";
-    const overlay = renderToStaticMarkup(<HeaderShell hasAnnouncement><span /></HeaderShell>);
-    expect(overlay).toContain('data-variant="overlay"');
-    expect(overlay).toContain('class="site-header"');
+    const home = renderToStaticMarkup(<HeaderShell hasAnnouncement><span /></HeaderShell>);
+    expect(home).toContain('data-variant="solid"');
+    expect(home).toContain('class="site-header"');
 
     pathnameState.current = "/events";
     const solid = renderToStaticMarkup(<HeaderShell hasAnnouncement={false}><span /></HeaderShell>);

@@ -100,7 +100,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
     <footer className="site-footer">
       <div className="shell footer-top">
         <div className="footer-brand">
-          <DualBrandLockup labels={{
+          <DualBrandLockup surface="navy" labels={{
             homeLabel: t("brand.homeLabel"),
             publicName: t("brand.publicName"),
             descriptor: t("brand.descriptor"),

@@ -16,15 +16,15 @@ type Locale = "en" | "zh-HK";
 
 const approvedHistory = {
   en: {
-    metaTitle: "History | WTIA",
-    metaDescription: "Twenty-six years of the Hong Kong Wireless Technology Industry Association, 2001 to 2026.",
+    metaTitle: "History｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    metaDescription: "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
     eyebrow: "Since 2001",
     title: "Our history",
     intro: "Milestones from twenty-six years of building Hong Kong's wireless and technology industry.",
   },
   "zh-HK": {
-    metaTitle: "歷史｜WTIA",
-    metaDescription: "香港無線科技商會二十六年歷程，由2001年至2026年。",
+    metaTitle: "歷史｜香港無線科技商會 WTIA",
+    metaDescription: "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
     eyebrow: "自2001年",
     title: "我們的歷史",
     intro: "回顧香港無線及科技產業二十六年來的發展里程碑。",
