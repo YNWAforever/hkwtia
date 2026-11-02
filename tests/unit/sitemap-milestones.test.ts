@@ -37,8 +37,8 @@ describe("milestone detail pages in the sitemap", () => {
     const urls = (await sitemap()).map((entry) => entry.url);
     const all = milestonesOnly(milestones);
 
-    // 51 milestones exist; only 6 were `featured`. The other 45 are real, bilingual,
-    // 25-year association history rescued from the WordPress archive.
+    // Every milestone-kind record has a page, including ones that are not highlights.
+    // The archive started at 51; later records are added the same way.
     expect(all.length).toBeGreaterThan(6);
     for (const {slug} of all) {
       expect(urls, slug).toContain(`http://localhost:3000/about/history/${slug}`);

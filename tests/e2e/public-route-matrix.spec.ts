@@ -3,9 +3,8 @@ import {expect, test} from '@playwright/test';
 const paths = [
   '/showcase', '/launchpad', '/ai-ops', '/events', '/news', '/programmes', '/partners',
   '/about', '/about/chairman', '/about/committees', '/about/history',
-  // Every featured milestone, which is exactly the set with a detail page. Keep in
-  // step with `featured: true` in content/milestones.ts — tests/unit/history-detail
-  // pins that list, and this matrix is the deployed-route check over the same set.
+  // Sample history detail pages that must keep rendering. Highlights are a separate
+  // set (tests/unit/history-page.test.tsx); every milestone-kind record has a page.
   '/about/history/2001-establishment-of-wtia',
   '/about/history/2014-wi-fi-hk',
   '/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets',

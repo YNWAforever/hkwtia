@@ -3,19 +3,18 @@ import {describe, expect, it} from "vitest";
 import legacyUrls from "@/content/legacy-urls.json";
 import {milestones} from "@/content/milestones";
 import {publicRoutes} from "@/config/public-routes";
-import {featuredOnly, milestonesOnly} from "@/lib/history/milestones";
+import {milestonesOnly} from "@/lib/history/milestones";
 
 const allowed = new Set<string>(publicRoutes);
 
-// Featured milestone detail pages (/about/history/<slug>) are typed content,
-// not a static route, so they can never appear in `publicRoutes` -- but their
-// slugs are still known at build time, from the same milestone record Task 10
-// redirects against. The guarantee this test exists to provide -- no redirect
-// pointing at a page that does not exist -- is preserved, not weakened: the
-// milestone record becomes the second source it checks a destination against,
-// alongside the static route allowlist.
+// Milestone detail pages (/about/history/<slug>) are typed content, not a static
+// route, so they can never appear in `publicRoutes` -- but their slugs are still
+// known at build time. Every milestone-kind record has a page now; `featured`
+// chooses the homepage highlights, it does not decide whether the page exists.
+// The guarantee this test exists to provide -- no redirect pointing at a page
+// that does not exist -- checks the milestone record as a second allowlist.
 const milestoneDetailPaths = new Set(
-  featuredOnly(milestonesOnly(milestones)).map(({slug}) => `/about/history/${slug}`),
+  milestonesOnly(milestones).map(({slug}) => `/about/history/${slug}`),
 );
 
 // Task 1's capture recorded 577 urls, 0 missed. `.legacy-capture/inventory.json`
@@ -46,21 +45,26 @@ describe("legacy url map", () => {
   // The allowlist test above only asks whether a destination exists, so flipping a
   // milestone to `featured` used to leave its legacy WordPress URL still falling back
   // to the timeline: the detail page was built and sitemapped, but every inbound link
-  // from 25 years of the old site landed one level up from it, silently. The coupling
-  // is the invariant (design spec §6 "Redirect upgrade"), so it is asserted directly.
-  // Scoped to kind `milestone`: member stories redirect to /showcase and press releases
-  // to /news, which is their own mapping and not this rule.
-  it("points every featured milestone at its detail page and every other one at the timeline", () => {
+  // from 25 years of the old site landed one level up from it, silently. A featured
+  // record that has a captured permalink must point at its detail page.
+  // Un-featuring must not retarget a URL that already resolves there: the page still
+  // exists. Records added after the archive have `legacyPath: null` and no redirect
+  // to invent. Scoped to kind `milestone`: member stories redirect to /showcase and
+  // press releases to /news, which is their own mapping and not this rule.
+  it("points every featured milestone that has a WordPress url at its detail page", () => {
     const byFrom = new Map(legacyUrls.entries.map((entry) => [entry.from, entry]));
 
     for (const milestone of milestonesOnly(milestones)) {
+      if (milestone.legacyPath == null) continue;
       const entry = byFrom.get(milestone.legacyPath);
       expect(entry, `${milestone.slug} has no legacy-urls entry`).toBeDefined();
-      expect({to: entry!.to, kind: entry!.kind}, milestone.slug).toEqual(
-        milestone.featured
-          ? {to: `/about/history/${milestone.slug}`, kind: "equivalent"}
-          : {to: "/about/history", kind: "section-fallback"},
-      );
+      const detail = {to: `/about/history/${milestone.slug}`, kind: "equivalent" as const};
+      const timeline = {to: "/about/history", kind: "section-fallback" as const};
+      if (milestone.featured) {
+        expect({to: entry!.to, kind: entry!.kind}, milestone.slug).toEqual(detail);
+      } else {
+        expect([detail, timeline], milestone.slug).toContainEqual({to: entry!.to, kind: entry!.kind});
+      }
     }
   });
 
