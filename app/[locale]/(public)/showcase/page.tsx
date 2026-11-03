@@ -8,10 +8,8 @@ import {SolutionNeeds} from "@/components/marketing/solution-needs";
 import {SolutionPathways} from "@/components/marketing/solution-pathways";
 import {SolutionVerification} from "@/components/marketing/solution-verification";
 import {StructuredData} from "@/components/seo/structured-data";
-import {ActionLink} from "@/components/wt/action-link";
 import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
-import {InterestBand} from "@/components/wt/interest-band";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
@@ -107,14 +105,6 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         provider={{label: t("pathways.provider.label"), title: t("pathways.provider.title"), copy: t("pathways.provider.copy"), action: t("ownerCta"), href: "/portal/company/listing"}}
       />
     </Section>
-    {listings.length > 0 ? (
-      <InterestBand
-        action={<ActionLink href="/events" variant="button-light">{t("interest.action")}</ActionLink>}
-        copy={t("interest.copy")}
-        eyebrow={t("interest.eyebrow")}
-        title={t("interest.title")}
-      />
-    ) : null}
     <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/showcase", tRoot))} />
   </>;
 }

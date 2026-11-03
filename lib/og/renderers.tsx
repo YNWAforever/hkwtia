@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactElement} from "react";
 
 import type {OgProps, OgRendererName} from "@/lib/og/resolve-renderer";
+import {WTIA_WORDMARK_DATA_URL} from "@/lib/og/wordmark";
 
 // Catherine Option A. Satori has no CSS variables, so the navy field and the
 // official-blue accent are literals. The sand rule and the old #1b4f7a field are gone.
@@ -9,7 +10,8 @@ const ACCENT = "#6686BD";
 const WHITE = "#ffffff";
 
 const FRAME = {width: 1200, height: 630, display: "flex" as const};
-const LOGO_SRC = "/images/wtia-logo-mono-white.png";
+// Data URL, not a site path. Satori fetches src over HTTP, and Preview SSO blocks that fetch.
+const LOGO_SRC = WTIA_WORDMARK_DATA_URL;
 const LOGO_RATIO = 721 / 2001;
 const DOMAIN = "hkwtia.org";
 

@@ -21,7 +21,8 @@ describe("GET /api/og image source", () => {
     const tree = await (await GET(card("/images/member.png"))).text();
     expect(tree).toContain("A member");
     expect(tree).not.toContain("https://hkwtia.test/images/member.png");
-    expect(tree).toContain("https://hkwtia.test/images/wtia-logo-mono-white.png");
+    expect(tree).toContain("data:image/png;base64,");
+    expect(tree).not.toContain("https://hkwtia.test/images/wtia-logo-mono-white.png");
     expect(tree).toContain("#0F4C81");
     expect(tree).not.toContain("#1b4f7a");
     expect(tree).not.toContain("#e8cf9a");
@@ -75,6 +76,7 @@ describe("renderOgCard", () => {
     expect(photo).not.toContain("cdn.example");
     expect(logo).not.toContain("cdn.example");
     expect(photo).toContain("#0F4C81");
-    expect(logo).toContain("/images/wtia-logo-mono-white.png");
+    expect(logo).toContain("data:image/png;base64,");
+    expect(logo).not.toContain("/images/wtia-logo-mono-white.png");
   });
 });

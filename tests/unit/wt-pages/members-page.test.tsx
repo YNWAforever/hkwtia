@@ -101,6 +101,9 @@ describe("/members directory (D-11)", () => {
 
     expect(html).toContain(bundles.en.Members.noPublishedTitle);
     expect(html).not.toContain('class="partner-record-grid"');
+    expect(html.match(/mailto:contact@hkwtia.org/g)).toHaveLength(1);
+    expect(html).toContain(bundles.en.Members.emptyPrimary);
+    expect(html).not.toContain(bundles.en.Members.detail.join);
   });
 
   it("distinguishes an empty published directory from filters with no matches", async () => {

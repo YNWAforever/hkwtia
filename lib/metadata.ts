@@ -61,7 +61,14 @@ export function buildPageMetadata({
   const canonical = absoluteUrl(localizedPath(locale, pathname));
   const englishUrl = absoluteUrl(localizedPath('en', pathname));
   const chineseUrl = absoluteUrl(localizedPath('zh-HK', pathname));
-  const imageUrl = absoluteUrl(image ?? defaultCardPath(title, locale));
+  const imagePath = image ?? defaultCardPath(title, locale);
+  const imageUrl = absoluteUrl(imagePath);
+  // Alt is the page title, which already carries the legal name on branded pages.
+  // Width and height describe the generated 1200×630 card, including pages that
+  // pass that card path themselves. A caller-supplied photograph is left unsized.
+  const shareImage = imagePath.startsWith('/api/og')
+    ? {url: imageUrl, width: 1200, height: 630, alt: title}
+    : {url: imageUrl, alt: title};
 
   return {
     title,
@@ -83,13 +90,13 @@ export function buildPageMetadata({
       siteName: siteConfig.shortName,
       title,
       description,
-      images: [{url: imageUrl}]
+      images: [shareImage]
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl]
+      images: [shareImage]
     }
   };
 }

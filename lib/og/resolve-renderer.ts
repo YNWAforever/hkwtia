@@ -18,7 +18,7 @@ export type OgProps = Readonly<{
   eyebrow: string;
   imageUrl?: string;
   locale?: OgLocale;
-  /** Absolute in the route so Satori can fetch it. The public file is the white wordmark. */
+  /** Inlined data URL. Do not pass an http(s) logo; Preview SSO blocks the edge fetch. */
   logoUrl?: string;
 }>;
 

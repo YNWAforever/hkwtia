@@ -515,7 +515,7 @@
         },
         "gba": {
           "title": "For GBA & Global Partners",
-          "copy": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed.",
+          "copy": "GBA and overseas connections through events and delegations.",
           "benefits": "Events and delegations",
           "cta": "Explore Launch Pad"
         }
@@ -539,7 +539,7 @@
         },
         "launchpad": {
           "label": "Launch Pad",
-          "copy": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed."
+          "copy": "GBA and overseas connections through events and delegations."
         },
         "partners": {
           "label": "Partner network",
@@ -677,7 +677,7 @@
     "gbaGateway": {
       "eyebrow": "GBA Gateway",
       "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
-      "copy": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed.",
+      "copy": "GBA and overseas connections through events and delegations.",
       "openCohortAction": "View open cohort",
       "exploreAction": "Explore Launch Pad"
     },
@@ -1429,15 +1429,15 @@
   },
   "LaunchPad": {
     "metaTitle": "Launch Pad｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed.",
+    "metaDescription": "GBA and overseas connections through events and delegations.",
     "eyebrow": "Launch Pad",
     "title": "Launch Pad",
-    "description": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed.",
+    "description": "GBA and overseas connections through events and delegations.",
     "breadcrumbCurrent": "Launch Pad",
     "gbaOpening": {
       "eyebrow": "GBA Gateway",
       "title": "Launch Pad",
-      "copy": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed.",
+      "copy": "GBA and overseas connections through events and delegations.",
       "map": {
         "hk": "HK",
         "gz": "GZ",
@@ -1447,27 +1447,27 @@
     "services": {
       "marketEntry": {
         "title": "Programme note",
-        "copy": "Programme details will be published when confirmed."
+        "copy": "GBA and overseas connections through events and delegations."
       },
       "softLanding": {
         "title": "Programme note",
-        "copy": "Programme details will be published when confirmed."
+        "copy": "GBA and overseas connections through events and delegations."
       },
       "buyerMatching": {
         "title": "Programme note",
-        "copy": "Programme details will be published when confirmed."
+        "copy": "GBA and overseas connections through events and delegations."
       },
       "delegations": {
         "title": "Programme note",
-        "copy": "Programme details will be published when confirmed."
+        "copy": "GBA and overseas connections through events and delegations."
       }
     },
     "program": {
       "eyebrow": "Programme",
       "title": "Overview",
-      "intro": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed.",
+      "intro": "GBA and overseas connections through events and delegations.",
       "outcomeTitle": "Programme details",
-      "outcomeDescription": "WTIA connects Hong Kong technology teams with GBA and overseas partners through events and delegations. Programme details will be published when confirmed."
+      "outcomeDescription": "GBA and overseas connections through events and delegations."
     },
     "calendar": {
       "eyebrow": "Schedule",
@@ -1891,13 +1891,13 @@
       "items": {
         "launchpad": {
           "title": "Launch Pad",
-          "copy": "Programme details will be published when confirmed.",
+          "copy": "GBA and overseas connections through events and delegations.",
           "cta": "Explore Launch Pad"
         },
         "showcase": {
           "title": "Member Showcase",
-          "copy": "Member showcases are coming soon.",
-          "cta": "Browse the Member Showcase"
+          "copy": "Member solutions, listed with each member's consent.",
+          "cta": "View the Member Showcase"
         },
         "membership": {
           "title": "Membership",

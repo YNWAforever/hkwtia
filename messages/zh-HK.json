@@ -516,7 +516,7 @@
         },
         "gba": {
           "title": "大灣區及國際夥伴",
-          "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+          "copy": "透過活動及考察團，連繫大灣區及海外夥伴。",
           "benefits": "活動及考察團",
           "cta": "探索創科起動"
         }
@@ -540,7 +540,7 @@
         },
         "launchpad": {
           "label": "創科起動",
-          "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。"
+          "copy": "透過活動及考察團，連繫大灣區及海外夥伴。"
         },
         "partners": {
           "label": "夥伴網絡",
@@ -678,7 +678,7 @@
     "gbaGateway": {
       "eyebrow": "大灣區通道",
       "title": "香港專長，大灣區機遇，全球視野。",
-      "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+      "copy": "透過活動及考察團，連繫大灣區及海外夥伴。",
       "openCohortAction": "查看現正招募的小組",
       "exploreAction": "探索創科起動"
     },
@@ -1430,15 +1430,15 @@
   },
   "LaunchPad": {
     "metaTitle": "創科起動｜香港無線科技商會 WTIA",
-    "metaDescription": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+    "metaDescription": "透過活動及考察團，連繫大灣區及海外夥伴。",
     "eyebrow": "創科起動",
     "title": "Launch Pad",
-    "description": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+    "description": "透過活動及考察團，連繫大灣區及海外夥伴。",
     "breadcrumbCurrent": "創科起動",
     "gbaOpening": {
       "eyebrow": "大灣區通道",
       "title": "Launch Pad",
-      "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+      "copy": "透過活動及考察團，連繫大灣區及海外夥伴。",
       "map": {
         "hk": "HK",
         "gz": "GZ",
@@ -1448,27 +1448,27 @@
     "services": {
       "marketEntry": {
         "title": "計劃備註",
-        "copy": "具體計劃確認後公布。"
+        "copy": "透過活動及考察團，連繫大灣區及海外夥伴。"
       },
       "softLanding": {
         "title": "計劃備註",
-        "copy": "具體計劃確認後公布。"
+        "copy": "透過活動及考察團，連繫大灣區及海外夥伴。"
       },
       "buyerMatching": {
         "title": "計劃備註",
-        "copy": "具體計劃確認後公布。"
+        "copy": "透過活動及考察團，連繫大灣區及海外夥伴。"
       },
       "delegations": {
         "title": "計劃備註",
-        "copy": "具體計劃確認後公布。"
+        "copy": "透過活動及考察團，連繫大灣區及海外夥伴。"
       }
     },
     "program": {
       "eyebrow": "計劃",
       "title": "計劃說明",
-      "intro": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+      "intro": "透過活動及考察團，連繫大灣區及海外夥伴。",
       "outcomeTitle": "計劃詳情",
-      "outcomeDescription": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。"
+      "outcomeDescription": "透過活動及考察團，連繫大灣區及海外夥伴。"
     },
     "calendar": {
       "eyebrow": "時間表",
@@ -1892,12 +1892,12 @@
       "items": {
         "launchpad": {
           "title": "創科起動",
-          "copy": "具體計劃確認後公布。",
+          "copy": "透過活動及考察團，連繫大灣區及海外夥伴。",
           "cta": "探索創科起動"
         },
         "showcase": {
           "title": "會員展示",
-          "copy": "會員展示即將推出。",
+          "copy": "經會員同意後刊登的方案。",
           "cta": "瀏覽會員展示"
         },
         "membership": {

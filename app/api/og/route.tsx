@@ -60,9 +60,10 @@ export async function GET(request: Request): Promise<Response> {
     : {kind: "page" as const, title: siteConfig.publicBrand, eyebrow: siteConfig.shortName, imageUrl: null};
 
   const {renderer, props} = resolveOgRenderer(entity);
-  const logoUrl = new URL("/images/wtia-logo-mono-white.png", url.origin).toString();
   const font = await notoSansTc();
-  return new ImageResponse(renderOgCard(renderer, {...props, logoUrl}), {
+  // The wordmark is a data URL inside the renderer. Fetching /images from this
+  // route fails on the SSO-protected Preview, so the card ships without a logo.
+  return new ImageResponse(renderOgCard(renderer, props), {
     width: 1200,
     height: 630,
     fonts: font ? [{name: "Noto Sans TC", data: font, weight: 700, style: "normal"}] : undefined,

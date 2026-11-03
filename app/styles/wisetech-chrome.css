@@ -15,6 +15,21 @@
 .site-root h3 { color: #0f4c81; }
 .site-root a:not(.button) { color: #0f4c81; }
 
+/* The sans heading token paints h2/h3 navy. On dark bands that loses to the
+   section's own white (equal specificity, this file loads last). These
+   exceptions restore light type. White on #0F4C81 is 8.86:1. Large GBA type
+   also needs the photo scrim below. */
+.site-root .route-panel :is(h2, h3, .route-eyebrow, .route-destination, .route-destination strong) {
+  color: #fff;
+}
+.site-root .route-panel .route-primary {
+  color: #0f4c81;
+  background: #fff;
+}
+.site-root .industry-focus :is(h2, h3) { color: #fff; }
+.site-root .industry-focus a:not(.button) { color: #fff; }
+.site-root .conversion-section .section-heading :is(h2, p, .eyebrow) { color: #fff; }
+
 /* Dark bands keep their own light type. A global heading colour would paint navy
    onto photographic heroes and the navy footer. */
 .site-root :is(
@@ -35,6 +50,15 @@
   .honest-empty:not(.light-empty)
 ) :is(h1, h2, h3, p, a, li, strong, small, span) {
   color: inherit;
+}
+
+/* The inherit list's :not(.light-empty) ties this selector at (0, 3, 1).
+   This rule has to follow that list, or the labels inherit black on navy. */
+.site-root a.button.button-dark,
+.site-root a.button.button-dark:hover {
+  color: #fff;
+  background: #0f4c81;
+  border-color: #0f4c81;
 }
 
 /* Light header: white bar, navy navigation, white-on-navy primary CTA. */
@@ -66,7 +90,20 @@
   border: 0;
   box-shadow: none;
 }
+.site-header .brand,
+.site-footer .brand { gap: 44px; }
 .site-header .brand { padding-inline-end: 45px; }
+.site-footer .brand-logo-wrap {
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  flex-basis: auto;
+  padding: 0;
+}
+.site-footer .brand-logo-wrap img {
+  width: 135px;
+  height: auto;
+}
 .site-header .brand-logo-wrap img {
   width: 135px;
   height: auto;
@@ -75,12 +112,16 @@
 @media (max-width: 820px) {
   .site-header .brand { padding-inline-end: 24px; }
   .site-header .brand-logo-wrap,
-  .site-header .brand-logo-wrap img {
+  .site-header .brand-logo-wrap img,
+  .site-footer .brand-logo-wrap img {
     width: 96px;
     min-width: 72px;
     height: auto;
     flex-basis: auto;
   }
+  /* Hiding only `small` left the "WTIA" strong beside the logo. */
+  .site-header .brand-copy,
+  .site-footer .brand-copy { display: none; }
 }
 
 /* Link-heavy footer: navy band, mono-white logo, white meta. */
@@ -88,6 +129,18 @@
   background: #0f4c81;
   color: #fff;
 }
+.site-root .gba-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(7, 34, 57, 0.78) 0%, rgba(7, 34, 57, 0.66) 42%, rgba(7, 34, 57, 0.84) 100%);
+}
+/* Beats `.site-root main section > .shell > h2:not([class])`, which paints
+   this heading navy (var(--wt-ink)) over the photograph. */
+.site-root .gba-section .shell.gba-copy > :is(h2, p) { color: #fff; }
+
 .site-footer .brand-logo-wrap {
   background: transparent;
   border-color: transparent;
@@ -99,7 +152,7 @@
 
 /* Honest directory empty (SPECS §6). Dashed slots are labels only. */
 .directory-empty {
-  border: 1px dashed rgba(15, 76, 129, 0.45);
+  border: 0;
   border-radius: 16px;
   background: #fff;
   color: #000;
