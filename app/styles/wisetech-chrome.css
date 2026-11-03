@@ -252,3 +252,18 @@
 .event-detail-page .event-detail-facts :is(strong, time, a) {
   color: #0f4c81;
 }
+
+/* Event detail hero (Catherine audit V5). The donor port is byte-pinned, so both
+   of its gradients stay in wisetech.css. This sheet loads last and replaces the
+   painted background-image: the live rule was .97 / .78 / .34, and the older
+   duplicate's right stop was .42. The overlay is at least 70% everywhere so
+   date, venue and other meta clear 4.5:1 on the photograph. */
+.event-detail-hero {
+  background-image: linear-gradient(90deg, rgba(7, 23, 32, .97), rgba(7, 23, 32, .85) 58%, rgba(7, 23, 32, .72)), var(--wt-event-photo);
+}
+.site-root .event-detail-hero .event-detail-meta,
+.site-root .event-detail-hero .event-detail-meta span,
+.site-root .event-detail-hero > .shell > p,
+.site-root .event-detail-hero :is(dt, dd, p, a, span) {
+  color: #fff;
+}

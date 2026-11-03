@@ -106,11 +106,8 @@ test("keeps the bilingual Membership catalog honest without repository credentia
     const response = await page.goto(membershipCase.path);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", {name: membershipCase.title})).toBeVisible();
-    // Scoped to the page's own landmark: the WP-2 footer newsletter island mounts a second,
-    // idle `role="status"` region on every public route and never unmounts it, deliberately --
-    // a live region the reader's software first meets when its text arrives may never announce
-    // that text (components/layout/footer-newsletter.tsx:86-94). The shell's region is not this
-    // case's subject; the catalog's own unavailable notice is.
+    // Scoped to the page's own landmark. The shell's region is not this case's subject;
+    // the catalog's own unavailable notice is.
     await expect(page.locator("main#main-content").getByRole("status")).toHaveText(membershipCase.unavailable);
     await expect(page.getByRole("heading", {name: membershipCase.faq})).toBeVisible();
   }

@@ -29,8 +29,7 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 vi.mock("@/lib/db/repos/public-posts", () => ({listPublishedNews, listPublishedBuildLogs}));
-// PageHero and FooterNewsletter both render real hooks/components from @/i18n/navigation
-// (Link, and FooterNewsletter's usePathname/useRouter) with no intl-context provider in this
+// PageHero renders Link from @/i18n/navigation with no intl-context provider in this
 // render tree -- the same situation Task 17 hit with m6-launchpad-page.test.tsx and
 // launchpad-partner-cutover.test.tsx. Mocked here with the repo's established plain-passthrough
 // pattern (tests/unit/wt-pages/launchpad-page.test.tsx and tests/unit/site-footer.test.tsx).
@@ -63,7 +62,7 @@ describe("News page — status labels, research quality, subscribe", () => {
     // hero's eyebrow and breadcrumb text. The test's actual intent -- one distinguishing status
     // label per card within the listing -- only needs the grid's own text scoped via `within`.
     expect(within(grid as HTMLElement).getAllByText(bundles.en.News.statusNews)).toHaveLength(1);
-    expect(within(grid as HTMLElement).queryByText(bundles.en.News.statusBuildLog)).toBeNull();
+    expect(within(grid as HTMLElement).queryByText("Build Log")).toBeNull();
     expect(document.querySelector(".news-quality-panel")).not.toBeNull();
     expect(screen.getByText(bundles.en.News.quality.title)).toBeInTheDocument();
     expect(document.querySelector(".news-subscribe-band")).toBeNull();

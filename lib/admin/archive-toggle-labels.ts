@@ -10,9 +10,9 @@
  * path for a message no formatted (plural/select/number/date) construct shares with this bare
  * argument, not a documented contract.
  *
- * This lives outside components/admin/archive-toggle.tsx deliberately, mirroring
- * lib/i18n/mail-body.ts: that module is "use client", and both admin detail pages that build this
- * label (app/[locale]/(admin)/admin/media/[id]/page.tsx, .../admin/news/[id]/page.tsx) are Server
+ * This lives outside components/admin/archive-toggle.tsx deliberately: that module is
+ * "use client", and both admin detail pages that build this label
+ * (app/[locale]/(admin)/admin/media/[id]/page.tsx, .../admin/news/[id]/page.tsx) are Server
  * Components that would fail at request time importing a function from it.
  */
 export const FALLBACK_ARCHIVE_IN_USE_MESSAGE = "{count}";

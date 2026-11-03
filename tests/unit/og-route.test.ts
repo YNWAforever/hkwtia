@@ -1,4 +1,9 @@
+import {createHash} from "node:crypto";
+import {readFileSync} from "node:fs";
+
 import {describe, expect, it, vi} from "vitest";
+
+import {WTIA_WORDMARK_DATA_URL} from "@/lib/og/wordmark";
 
 vi.mock("next/og", () => ({
   ImageResponse: class extends Response {
@@ -7,6 +12,17 @@ vi.mock("next/og", () => ({
 }));
 
 import {GET} from "@/app/api/og/route";
+
+describe("WTIA wordmark data URL", () => {
+  it("decodes to the same bytes as the mono-white SVG", () => {
+    const file = readFileSync("public/images/wtia-logo-mono-white.svg");
+    const prefix = "data:image/svg+xml;base64,";
+    expect(WTIA_WORDMARK_DATA_URL.startsWith(prefix)).toBe(true);
+    const decoded = Buffer.from(WTIA_WORDMARK_DATA_URL.slice(prefix.length), "base64");
+    expect(createHash("sha256").update(decoded).digest("hex")).toBe(createHash("sha256").update(file).digest("hex"));
+    expect(createHash("sha256").update(file).digest("hex")).toBe("ebe911f1b290381a571ea9298f163a4fbb72d9ccd11789d03c1589caf3150e90");
+  });
+});
 
 describe("GET /api/og image source", () => {
   const card = (image: string) => new Request("https://hkwtia.test/api/og?" + new URLSearchParams({kind: "member", title: "A member", eyebrow: "Member", image}));
@@ -21,8 +37,9 @@ describe("GET /api/og image source", () => {
     const tree = await (await GET(card("/images/member.png"))).text();
     expect(tree).toContain("A member");
     expect(tree).not.toContain("https://hkwtia.test/images/member.png");
-    expect(tree).toContain("data:image/png;base64,");
+    expect(tree).toContain("data:image/svg+xml;base64,");
     expect(tree).not.toContain("https://hkwtia.test/images/wtia-logo-mono-white.png");
+    expect(tree).not.toContain("https://hkwtia.test/images/wtia-logo-mono-white.svg");
     expect(tree).toContain("#0F4C81");
     expect(tree).not.toContain("#1b4f7a");
     expect(tree).not.toContain("#e8cf9a");
@@ -76,7 +93,8 @@ describe("renderOgCard", () => {
     expect(photo).not.toContain("cdn.example");
     expect(logo).not.toContain("cdn.example");
     expect(photo).toContain("#0F4C81");
-    expect(logo).toContain("data:image/png;base64,");
+    expect(logo).toContain("data:image/svg+xml;base64,");
     expect(logo).not.toContain("/images/wtia-logo-mono-white.png");
+    expect(logo).not.toContain("/images/wtia-logo-mono-white.svg");
   });
 });

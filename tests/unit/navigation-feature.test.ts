@@ -82,9 +82,7 @@ describe("navigation feature aside", () => {
       "Navigation.mobile.priority", "Navigation.mobile.utilities", "Navigation.mobile.exploreEcosystem",
       "MarketingExtras.footerTagline", "Footer.legalLine", "Footer.brand.descriptor",
       "Footer.columns.explore", "Footer.columns.membership", "Footer.columns.about", "Footer.columns.contact",
-      "Footer.newsletter.eyebrow", "Footer.newsletter.title", "Footer.newsletter.emailLabel",
-      "Footer.newsletter.placeholder", "Footer.newsletter.submit", "Footer.newsletter.success",
-      "Footer.newsletter.error", "Footer.newsletter.mailSubject", "Footer.newsletter.mailBody",
+      "Footer.newsletter.title",
       "Concierge.transparency",
     ]) {
       for (const [name, bundle] of [["en", en], ["zh-HK", zh]] as const) {
@@ -93,8 +91,8 @@ describe("navigation feature aside", () => {
     }
     expect(messageAt(en, "Concierge.launcher")).toBe("Ask WTIA");
     expect(messageAt(zh, "Concierge.launcher")).toBe("問 WTIA");
-    expect(messageAt(en, "Footer.newsletter.mailBody")).toContain("{email}");
-    expect(messageAt(zh, "Footer.newsletter.mailBody")).toContain("{email}");
+    expect(messageAt(en, "Footer.newsletter.title")).toBe("Questions? contact@hkwtia.org");
+    expect(messageAt(zh, "Footer.newsletter.title")).toBe("查詢：contact@hkwtia.org");
     // The operator line is replaced by the D-10 descriptor; leaving it behind would let a
     // component keep rendering "Operated by WTIA" and pass parity.
     expect(messageAt(en, "Navigation.brand.operator")).toBeUndefined();

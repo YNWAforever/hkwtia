@@ -23,9 +23,8 @@ vi.mock("next-intl/server", async () => {
       (bundles[locale] as Record<string, unknown>)[namespace],
     );
   return {
-    // `raw` as well as the callable: the footer reads `Footer.addressLines` (an array) and
-    // `Footer.newsletter.mailBody` (which carries a literal `{email}` the island interpolates),
-    // and next-intl resolves neither through `t()`.
+    // `raw` as well as the callable: the footer reads `Footer.addressLines` (an array),
+    // which next-intl does not resolve through `t()`.
     getTranslations: async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
       Object.assign(
         (key: string, values?: Record<string, string | number>) =>

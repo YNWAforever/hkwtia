@@ -3,8 +3,7 @@
  * notes before adding a consumer.
  *
  * `email` and `phone` are what the footer prints: components/layout/site-footer.tsx renders
- * both from here, and components/layout/footer-newsletter.tsx builds its `mailto:` from
- * `email`. `phone` is optional: as of 2026-09-02 it was left unset, because the donor prints
+ * both from here. `phone` is optional: as of 2026-09-02 it was left unset, because the donor prints
  * "+852 2989 9164" but hkwtia.org could not be read that day to confirm it — the site answered
  * with a bot challenge, which was not something to work around — and no message bundle carried
  * a number. An unverifiable number was omitted rather than repeated.

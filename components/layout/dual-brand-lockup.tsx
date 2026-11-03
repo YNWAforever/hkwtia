@@ -29,9 +29,17 @@ type DualBrandLockupProps = {
 // `.brand { min-width: 0 }` (app/styles/wisetech.css:55) lands after the Tailwind layers and
 // overrides it at runtime. The utility stays because it is the anchor's only width floor if the
 // tile is ever dropped, and because no `min-w-0` is passed alongside it — tailwind-merge would
-// resolve that conflict by discarding `min-w-11` from the class string entirely. The PNG is
-// byte-pinned by tests/unit/wisetech-asset-provenance.test.ts — restyle the tile, never the file.
+// resolve that conflict by discarding `min-w-11` from the class string entirely. The light
+// lockup PNG is byte-pinned by tests/unit/wisetech-asset-provenance.test.ts — restyle the
+// tile, never that file. The navy footer uses the mono-white SVG (transparent swoosh
+// cut-outs). Next is not allowed to rasterise SVG, so that surface skips the optimizer.
+const LOGO = {
+  light: {src: "/images/wtia-logo.png", width: 2001, height: 721},
+  navy: {src: "/images/wtia-logo-mono-white.svg", width: 780, height: 251},
+} as const;
+
 export function DualBrandLockup({labels, priority = false, className, surface = "light"}: DualBrandLockupProps) {
+  const logo = LOGO[surface];
   return (
     <Link
       className={cn("brand min-h-11 min-w-11 max-w-full", className)}
@@ -41,12 +49,13 @@ export function DualBrandLockup({labels, priority = false, className, surface = 
     >
       <span className={cn("brand-logo-wrap", surface === "navy" ? "brand-logo-navy" : "brand-logo-light")}>
         <Image
-          src={surface === "navy" ? "/images/wtia-logo-mono-white.png" : "/images/wtia-logo.png"}
+          src={logo.src}
           alt={labels.logoAlt}
-          width={2001}
-          height={721}
+          width={logo.width}
+          height={logo.height}
           sizes="(max-width: 820px) 96px, 135px"
           priority={priority}
+          unoptimized={surface === "navy"}
           className="h-auto w-full object-contain"
         />
       </span>

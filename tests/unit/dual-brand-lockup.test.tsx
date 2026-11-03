@@ -56,7 +56,7 @@ describe("DualBrandLockup", () => {
 
   it("uses the mono-white lockup on the navy footer and keeps full-colour on light chrome", () => {
     const {unmount} = render(<DualBrandLockup labels={labels} surface="navy" />);
-    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("src", "/images/wtia-logo-mono-white.png");
+    expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("src", "/images/wtia-logo-mono-white.svg");
     unmount();
     render(<DualBrandLockup labels={labels} />);
     expect(screen.getByRole("img", {name: labels.logoAlt})).toHaveAttribute("src", "/images/wtia-logo.png");

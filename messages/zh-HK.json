@@ -140,15 +140,7 @@
       "contact": "聯絡"
     },
     "newsletter": {
-      "eyebrow": "聯絡",
-      "title": "查詢：contact@hkwtia.org",
-      "emailLabel": "工作電郵",
-      "placeholder": "工作電郵",
-      "submit": "準備活動通知電郵",
-      "success": "你的電郵程式應會開啟並備妥查詢；本頁不會自動建立訂閱。",
-      "error": "請輸入有效工作電郵。",
-      "mailSubject": "WTIA 活動通知",
-      "mailBody": "請將 {email} 加入 WTIA 活動通知名單。"
+      "title": "查詢：contact@hkwtia.org"
     },
     "summary": "WTIA 連繫香港無線科技社群的科技企業、專業人士及計劃。",
     "addressLines": [],
@@ -1697,12 +1689,6 @@
         "title": "管理你自己的展示頁。",
         "copy": "WTIA 會員公司可直接提交及管理自己的展示頁。如你尚未登入，系統將先要求你登入。"
       }
-    },
-    "interest": {
-      "eyebrow": "保持參與",
-      "title": "親身認識這些方案。",
-      "copy": "WTIA 活動經常展示會員方案及其團隊。",
-      "action": "瀏覽活動"
     }
   },
   "Members": {
@@ -2056,22 +2042,10 @@
     "breadcrumbCurrent": "消息與傳媒",
     "statusNews": "新聞",
     "resultsHeading": "消息",
-    "statusBuildLog": "開發日誌",
     "quality": {
       "eyebrow": "編採標準",
       "title": "WTIA 的報道方式",
       "body": "每篇文章均由職員撰寫、註明日期及作者。只刊登已核實來源的稿件。"
-    },
-    "subscribe": {
-      "eyebrow": "掌握動態",
-      "title": "以電郵接收 WTIA 新聞",
-      "emailLabel": "電郵地址",
-      "placeholder": "you@example.com",
-      "submit": "訂閱",
-      "success": "多謝！請查看我們為你開啟的電郵草稿。",
-      "error": "請輸入有效的電郵地址。",
-      "mailSubject": "訂閱 WTIA 新聞",
-      "mailBody": "請將 {email} 加入 WTIA 新聞訂閱名單。"
     }
   },
   "Contact": {
