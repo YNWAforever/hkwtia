@@ -119,14 +119,14 @@ const corporate: PersistedMembershipPlan = {
   stripePriceReference: "price_corporate",
 };
 
-async function renderMembership(rows: readonly PersistedMembershipPlan[]) {
+async function renderMembership(rows: readonly PersistedMembershipPlan[], locale: "en" | "zh-HK" = "en") {
   membershipPlans.list.mockResolvedValue(rows);
   const originalEnv = { ...process.env };
   process.env.STRIPE_STARTUP_PRICE_ID = "price_startup";
   process.env.STRIPE_CORPORATE_PRICE_ID = "price_corporate";
   const html = renderToStaticMarkup(
     await resolveReadModelTree(
-      await MembershipPage({ params: Promise.resolve({ locale: "en" }) }),
+      await MembershipPage({ params: Promise.resolve({ locale }) }),
     ),
   );
   process.env = originalEnv;
@@ -166,9 +166,20 @@ describe("/membership rewrite", () => {
     expect(html).toContain(bundles.en.Membership.actions.payOnline);
     expect(html).not.toContain("25 seats");
     expect(html).not.toContain("HK$1,200");
-    expect(html).toContain(bundles.en.Membership.tierBenefits.individual[1]);
-    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[0]);
     expect(html).not.toMatch(/WhatsApp updates|Priority WhatsApp|Dedicated WhatsApp/);
+    for (const locale of ["en", "zh-HK"] as const) {
+      const page = locale === "en" ? html : await renderMembership([community, startup, patron], locale);
+      const planGrid = page.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
+      expect(planGrid).not.toContain("<ul");
+      expect(page).toContain(bundles[locale].Membership.actions.payOnline);
+      for (const [code, lines] of Object.entries(bundles[locale].Membership.tierBenefits as Record<string, readonly string[]>)) {
+        const description = bundles[locale].Membership.tiers[code as keyof typeof bundles.en.Membership.tiers]?.description ?? "";
+        for (const line of lines) {
+          if (description.includes(line)) continue;
+          expect(page, `${locale} ${code}: ${line}`).not.toContain(line);
+        }
+      }
+    }
   });
 
   it("shows the published pricing note with the ops fees", async () => {

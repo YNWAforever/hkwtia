@@ -27,8 +27,8 @@ export function PlanGrid({tiers, sme, labels}: Readonly<{tiers: readonly PlanGri
           {tier.priceLines.map((line) => <p key={line}>{line}</p>)}
         </> : null}
         {tier.seatLabel ? <p>{tier.seatLabel}</p> : null}
-        {labels ? <p className="plan-field-label">{labels.uses}</p> : null}
-        <ul>{tier.benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+        {/* Membership.tierBenefits stays in the bundles and off the card. Those lines
+            (showcase counts, logo wall, quarterly event submissions) are not confirmed. */}
         {labels ? <p className="sr-only">{labels.next}</p> : null}
         <ActionLink href={tier.href} variant="text-link">{tier.action}</ActionLink>
       </article>

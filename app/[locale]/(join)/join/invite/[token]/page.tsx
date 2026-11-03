@@ -64,7 +64,6 @@ export default async function JoinInvitePage({params}: Props) {
   const fees = tier?.price.kind === "paid"
     ? tier.price.options.map((option) => `${option.amount} ${tMembership(`cadenceLabels.${option.cadence}`)}`)
     : tier?.price.kind === "free" ? [t("invite.free")] : [];
-  const benefits = tMembership.raw(`tierBenefits.${invite.planCode}`) as string[];
   const expires = new Intl.DateTimeFormat(locale, {dateStyle: "long", timeZone: "Asia/Hong_Kong"}).format(invite.expiresAt);
 
   return (
@@ -87,12 +86,6 @@ export default async function JoinInvitePage({params}: Props) {
           </>
         ) : null}
       </dl>
-      {benefits.length > 0 ? (
-        <div>
-          <h2 className="text-lg font-semibold">{t("invite.benefitsLabel")}</h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5">{benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
-        </div>
-      ) : null}
       {/* A plain anchor to the handler, not a next/link: a prefetch of it would open the invite and set the cookie. */}
       <a className="inline-flex min-h-11 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground" href={localizedPath(locale, `/join/invite/${token}/continue`)}>{t("invite.continue")}</a>
       <p className="text-sm text-muted-foreground">{t("invite.expires", {date: expires})}</p>

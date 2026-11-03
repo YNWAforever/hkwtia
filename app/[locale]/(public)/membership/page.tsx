@@ -96,7 +96,8 @@ export default async function MembershipPage({ params }: Props) {
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
       priceLines: [tier.annualPriceHkd === null ? t("priceLabels.free") : `${money.format(tier.annualPriceHkd)} ${annual}`],
-      benefits: t.raw(`tierBenefits.${tier.code}`) as string[],
+      // Keys remain in Membership.tierBenefits. PlanGrid does not print them.
+      benefits: [],
       action: tier.annualPriceHkd === null ? t("actions.join") : t("actions.payOnline"),
       href: `/join?plan=${tier.code}`,
     }));

@@ -28,6 +28,9 @@
 }
 .site-root .industry-focus :is(h2, h3) { color: #fff; }
 .site-root .industry-focus a:not(.button) { color: #fff; }
+.site-root .programme-card.feature :is(h2, h3, a),
+.site-root .programme-card.feature a:hover,
+.site-root .programme-card.feature a:focus-visible { color: #fff; }
 .site-root .conversion-section .section-heading :is(h2, p, .eyebrow) { color: #fff; }
 
 /* Dark bands keep their own light type. A global heading colour would paint navy
@@ -59,6 +62,17 @@
   color: #fff;
   background: #0f4c81;
   border-color: #0f4c81;
+}
+
+/* Dark page heroes. #1A80B6 at 12px on #071822 is 4.1:1. #A8D4EC is about 5.6:1
+   on #0F4C81 and about 11:1 on #071822. Hover and focus go to white. */
+.site-root :is(.page-hero, .inner-page-hero) .breadcrumb,
+.site-root :is(.page-hero, .inner-page-hero) .breadcrumb :is(a, span, b) {
+  color: #a8d4ec;
+}
+.site-root :is(.page-hero, .inner-page-hero) .breadcrumb a:hover,
+.site-root :is(.page-hero, .inner-page-hero) .breadcrumb a:focus-visible {
+  color: #fff;
 }
 
 /* Light header: white bar, navy navigation, white-on-navy primary CTA. */
