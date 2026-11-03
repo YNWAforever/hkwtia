@@ -9,6 +9,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 import {programs} from "@/content/programs";
+import {brandedTitle} from "@/lib/metadata";
 import {cpai} from "@/content/programs/cpai";
 
 type Locale = "en" | "zh-HK";
@@ -90,7 +91,7 @@ describe("/programs/cpai", () => {
       const expected = {
         locale,
         pathname: "/programs/cpai",
-        title: `${bundles[locale].programs.cpai.title}${locale === "zh-HK" ? "｜" : " | "}WTIA`,
+        title: brandedTitle(locale, bundles[locale].programs.cpai.title),
         description: bundles[locale].programs.cpai.description,
         image: programs.find((item) => item.id === "cpai")!.image,
       };

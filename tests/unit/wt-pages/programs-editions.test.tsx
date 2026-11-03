@@ -10,6 +10,7 @@ import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 import {asa} from "@/content/programs/asa";
 import {summarizeProgrammes} from "@/lib/home/programme-summaries";
+import {brandedTitle} from "@/lib/metadata";
 
 type Locale = "en" | "zh-HK";
 
@@ -120,7 +121,7 @@ describe("/programs/asa (representative of asa/hkict/tct)", () => {
       expect(metadata).toMatchObject({
         locale,
         pathname: `/programs/${id}`,
-        title: `${programme.title}${locale === "zh-HK" ? "｜" : " | "}WTIA`,
+        title: brandedTitle(locale, programme.title),
         description: programme.description,
       });
       expect(metadata.title).not.toBe(programme.title);

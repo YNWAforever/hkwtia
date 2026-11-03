@@ -19,7 +19,8 @@ export function buildOrganizationData(): WithContext<Organization> {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: siteConfig.name,
-    alternateName: ['HKWTA', 'WTIA'],
+    // Willy Approve t341s1501: drop WiseTech, correct HKWTA → HKWTIA, this order only.
+    alternateName: ['WTIA', '香港無線科技商會', 'HKWTIA'],
     description: siteConfig.defaultDescription,
     url: absoluteUrl('/'),
     logo: absoluteUrl(siteConfig.defaultImage),

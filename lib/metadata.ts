@@ -15,24 +15,28 @@ interface BuildPageMetadataInput {
   index?: boolean;
 }
 
-// Every public <title> is "<page> | WTIA" (fullwidth bar, no spaces, in zh-HK).
+// Every public <title> uses the Phase 0 legal suffix (fullwidth bar, both locales).
 // Pages whose title is a record name (events, news, showcase, history) or a lowercase-namespace
 // programme title cannot carry the suffix in the message bundle, so they brand here. Exhaustive
 // over AppLocale so adding a locale fails typecheck rather than silently falling into one branch.
 const brandTitle: Record<AppLocale, (title: string) => string> = {
-  en: (title) => `${title} | ${siteConfig.publicBrand}`,
-  'zh-HK': (title) => `${title}｜${siteConfig.publicBrand}`
+  en: (title) => `${title}｜${siteConfig.titleSuffix.en}`,
+  'zh-HK': (title) => `${title}｜${siteConfig.titleSuffix['zh-HK']}`
 };
 
 export function brandedTitle(locale: AppLocale, title: string): string {
   return brandTitle[locale](title);
 }
 
-// The card prints the brand in its own footer, so the title on it drops the D-1 brand suffix
-// (" | " in en, the fullwidth "｜" in zh-HK).
-const brandSuffix = new RegExp(`\\s*[|｜]\\s*${siteConfig.publicBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+// The card prints the short brand in its own footer, so the title on it drops the legal suffix.
 function cardTitle(title: string): string {
-  return title.replace(brandSuffix, '').trim() || siteConfig.publicBrand;
+  for (const suffix of [siteConfig.titleSuffix.en, siteConfig.titleSuffix['zh-HK']]) {
+    const marker = `｜${suffix}`;
+    if (title.endsWith(marker)) {
+      return title.slice(0, -marker.length).trim() || siteConfig.publicBrand;
+    }
+  }
+  return title.trim() || siteConfig.publicBrand;
 }
 
 /**

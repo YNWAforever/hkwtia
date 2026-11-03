@@ -1,4 +1,5 @@
 import {render, screen} from "@testing-library/react";
+import {brandedTitle} from "@/lib/metadata";
 import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -197,8 +198,8 @@ describe("published posts through news routes", () => {
 
   // D-1: the locale-specific record title, branded at runtime with that locale's separator.
   it.each([
-    ["en", "How we built the AI-Ops dashboard | WTIA"],
-    ["zh-HK", "我們如何建立 AI 營運儀表板｜WTIA"],
+    ["en", brandedTitle("en", "How we built the AI-Ops dashboard")],
+    ["zh-HK", brandedTitle("zh-HK", "我們如何建立 AI 營運儀表板")],
   ])("selects the %s build-log title for metadata", async (locale, title) => {
     const metadata = await generateMetadata({
       params: Promise.resolve({locale, slug: summary.slug}),

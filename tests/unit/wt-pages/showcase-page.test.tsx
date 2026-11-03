@@ -92,9 +92,9 @@ describe("/showcase rewrite", () => {
     showcase.listPublished.mockResolvedValue([]);
     const unfiltered = await renderShowcase();
     const filtered = await renderShowcase({q: "missing"});
-    expect(unfiltered).toContain("No solutions are published yet.");
+    expect(unfiltered).toContain(bundles.en.Showcase.noPublishedTitle);
     expect(filtered).toContain(bundles.en.Showcase.emptyDescription);
-    expect(filtered).not.toContain("No solutions are published yet.");
+    expect(filtered).not.toContain(bundles.en.Showcase.noPublishedTitle);
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {

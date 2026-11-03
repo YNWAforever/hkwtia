@@ -5,6 +5,7 @@ import {MemberCard} from "@/components/marketing/member-card";
 import {MemberFilters} from "@/components/marketing/member-filters";
 import {StructuredData} from "@/components/seo/structured-data";
 import {ClosingBand} from "@/components/wt/closing-band";
+import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
@@ -98,7 +99,15 @@ export default async function MembersPage({params, searchParams}: Props) {
         ? <div className="partner-record-grid">
           {members.map((member) => <MemberCard key={member.slug} labels={{plans, view: t("view")}} locale={locale} member={member} />)}
         </div>
-        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t(hasFilters ? "emptyDescription" : "noPublishedDescription")} title={t(hasFilters ? "emptyTitle" : "noPublishedTitle")} variant="inner" />}
+        : hasFilters
+        ? <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />
+        : <HonestDirectoryEmpty
+            frames={[t("emptyFrame"), t("emptyFrame"), t("emptyFrame")]}
+            next={t("noPublishedDescription")}
+            primary={{href: "/join", label: t("emptyPrimary")}}
+            secondary={{href: "/membership", label: t("emptySecondary")}}
+            status={t("noPublishedTitle")}
+          />}
       {directory.nextCursor && <nav aria-label={t("paginationLabel")} className="mt-8 text-center"><a className="button button-dark" href={nextHref}>{t("loadMore")}</a></nav>}
     </Section>
     <ClosingBand

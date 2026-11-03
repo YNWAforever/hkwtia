@@ -13,6 +13,7 @@ vi.mock("next-intl/server", () => ({
 vi.mock("@/lib/auth/actor", () => ({requireActor: vi.fn(), getActor: vi.fn()}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: vi.fn()}));
 
+import {brandedTitle} from "@/lib/metadata";
 import {generateMetadata as unsubscribeMetadata} from "@/app/[locale]/(public)/unsubscribe/page";
 import {generateMetadata as joinMetadata} from "@/app/[locale]/(join)/join/page";
 import {generateMetadata as joinProfileMetadata} from "@/app/[locale]/(join)/join/profile/page";
@@ -55,8 +56,8 @@ describe("page indexability", () => {
   it.each([
     ["join/checkout", joinCheckoutMetadata, "translated:metaTitle"],
     ["join/complete", joinCompleteMetadata, "translated:metaTitle"],
-    ["join/profile", joinProfileMetadata, "translated:profileTitle | WTIA"],
-    ["join/company", joinCompanyMetadata, "translated:companyTitle | WTIA"],
+    ["join/profile", joinProfileMetadata, brandedTitle("en", "translated:profileTitle")],
+    ["join/company", joinCompanyMetadata, brandedTitle("en", "translated:companyTitle")],
   ])("gives %s a branded tab title", async (_name, build, title) => {
     const metadata = await build({params, searchParams: Promise.resolve({})} as never);
     expect(metadata.title).toBe(title);
@@ -65,7 +66,7 @@ describe("page indexability", () => {
   it("brands the zh-HK join step titles with the fullwidth separator", async () => {
     const zhParams = Promise.resolve({locale: "zh-HK"});
     const metadata = await joinProfileMetadata({params: zhParams, searchParams: Promise.resolve({})} as never);
-    expect(metadata.title).toBe("translated:profileTitle｜WTIA");
+    expect(metadata.title).toBe(brandedTitle("zh-HK", "translated:profileTitle"));
   });
 
   it("lets the join entry page be indexed with full metadata", async () => {

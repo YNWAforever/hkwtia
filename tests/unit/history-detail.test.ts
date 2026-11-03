@@ -13,6 +13,7 @@ import {
 import {milestones} from "@/content/milestones";
 import {findBySlug, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle} from "@/lib/metadata";
+import {siteConfig} from "@/config/site";
 import {readableMilestoneBody} from "@/lib/history/readable-body";
 import {ogImagePath} from "@/lib/og/resolve-renderer";
 import en from "@/messages/en.json";
@@ -211,7 +212,7 @@ describe("history detail pages", () => {
 
       expect(await generateMetadata({params: Promise.resolve({locale, slug: gallerySlug})})).toEqual(expected);
       expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
-      expect(expected.title.endsWith(locale === "zh-HK" ? "｜WTIA" : " | WTIA")).toBe(true);
+      expect(expected.title.endsWith(`｜${siteConfig.titleSuffix[locale]}`)).toBe(true);
     }
   });
 

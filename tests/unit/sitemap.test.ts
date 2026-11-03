@@ -1,4 +1,8 @@
+import {readFileSync} from "node:fs";
+
 import {beforeEach, describe, expect, it, vi} from "vitest";
+
+import {fileMtime} from "@/lib/seo/sitemap-lastmod";
 
 const publicPosts = vi.hoisted(() => ({
   listPublishedBuildLogs: vi.fn(),
@@ -113,6 +117,22 @@ describe("published build logs in the sitemap", () => {
         expect(entry.alternates.languages["x-default"]).toBe(entry.alternates.languages.en);
       }
     }
+  });
+
+  it("sets lastmod from file mtime or a content timestamp, never a handwritten date", async () => {
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    publicPosts.listPublishedNews.mockResolvedValue([
+      {slug: "harbour-note", title: "Harbour note", publishedAt: new Date("2026-08-01T00:00:00.000Z"), author: "WTIA"},
+    ]);
+    const entries = await sitemap();
+    const home = entries.find((entry) => entry.url === "http://localhost:3000/")!;
+    const news = entries.find((entry) => entry.url === "http://localhost:3000/news/harbour-note")!;
+    expect(home.lastModified).toEqual(fileMtime("app/[locale]/(public)/page.tsx"));
+    expect(news.lastModified).toEqual(new Date("2026-08-01T00:00:00.000Z"));
+    expect(entries.every((entry) => entry.lastModified instanceof Date)).toBe(true);
+    const source = readFileSync("app/sitemap.ts", "utf8");
+    expect(source).not.toMatch(/lastModified:\s*["']20\d{2}-/);
+    expect(source).not.toMatch(/new Date\(\s*["']20/);
   });
 });
 

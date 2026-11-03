@@ -18,8 +18,8 @@
     "closeMenu": "關閉選單"
   },
   "Metadata": {
-    "title": "WTIA",
-    "description": "連繫香港及大灣區創新力量，接通全球市場。"
+    "title": "主頁｜香港無線科技商會 WTIA",
+    "description": "香港無線科技商會（WTIA）連繫會員、活動、計劃及大灣區創科機遇。"
   },
   "Navigation": {
     "brand": {
@@ -117,7 +117,7 @@
     "switchToEnglish": "Switch to English",
     "switchToChinese": "切換至中文",
     "homeLabel": "WTIA 首頁",
-    "logoAlt": "WTIA",
+    "logoAlt": "WTIA 香港無線科技商會",
     "primaryLabel": "主要導覽"
   },
   "Announcement": {
@@ -130,7 +130,7 @@
       "publicName": "WTIA",
       "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台",
       "homeLabel": "WTIA 首頁",
-      "logoAlt": "WTIA"
+      "logoAlt": "WTIA 香港無線科技商會"
     },
     "legalLine": "香港無線科技商會（WTIA）。",
     "columns": {
@@ -434,7 +434,7 @@
     }
   },
   "Unsubscribe": {
-    "metaTitle": "電郵偏好設定｜WTIA",
+    "metaTitle": "電郵偏好設定｜香港無線科技商會 WTIA",
     "metaDescription": "更新你的 WTIA 推廣電郵偏好。",
     "eyebrow": "電郵偏好設定",
     "confirmTitle": "停止接收 WTIA 推廣電郵？",
@@ -454,8 +454,8 @@
     }
   },
   "Home": {
-    "metaTitle": "WTIA",
-    "metaDescription": "WTIA 連結香港無線科技社群的活動、會員、方案、計劃及大灣區市場機遇。",
+    "metaTitle": "主頁｜香港無線科技商會 WTIA",
+    "metaDescription": "香港無線科技商會（WTIA）連繫會員、活動、計劃及大灣區創科機遇。",
     "hero": {
       "eyebrow": "香港無線科技",
       "title": "香港如何引領 AI+ 時代？",
@@ -751,11 +751,11 @@
     }
   },
   "About": {
-    "metaTitle": "關於我們｜WTIA",
-    "metaDescription": "了解 WTIA 在香港無線科技社群的角色。",
+    "metaTitle": "關於我們｜香港無線科技商會 WTIA",
+    "metaDescription": "關於香港無線科技商會（WTIA／Wireless）：自2001年起服務香港無線及新興科技業界的非牟利商會。",
     "eyebrow": "關於 WTIA",
     "title": "凝聚無線科技業界的共同力量。",
-    "summary": "WTIA 匯聚會員、夥伴及公共持份者，推動香港創科生態發展。",
+    "summary": "香港無線科技商會（WTIA／Wireless）匯聚會員、夥伴及公共持份者，推動香港創科生態發展。",
     "imageAlt": "產業嘉賓及主辦團隊出席香港亞洲智慧創新大獎峰會 2025",
     "historyTitle": "我們的角色",
     "historyIntro": "我們以實際機遇連接業界，促進創新、人才及區域發展。",
@@ -772,24 +772,24 @@
       "description": "把業界經驗帶進具建設性的公共及產業對話。"
     },
     "foundedTitle": "成立於2001年",
-    "foundedBody": "香港無線科技商會（WTIA）成立於2001年，是一個非牟利貿易協會，服務香港無線、流動及新興科技社群。",
+    "foundedBody": "香港無線科技商會（WTIA／Wireless）成立於2001年，是一個非牟利商會，服務香港無線、流動及新興科技社群。",
     "missionTitle": "我們的使命",
     "missionBody": "推動無線、流動及新興科技發展，加速其實際應用，協助香港發展成為頂尖創科樞紐。",
     "historyLink": "閱讀我們的歷史"
   },
   "Chairman": {
-    "metaTitle": "主席的話｜WTIA",
-    "metaDescription": "WTIA 主席的話。",
+    "metaTitle": "主席的話｜香港無線科技商會 WTIA",
+    "metaDescription": "香港無線科技商會（WTIA）主席賴志偉的話。",
     "eyebrow": "領導",
     "title": "主席的話",
     "summary": "攜手讓香港持續連接新興科技機遇。",
     "messageTitle": "共同承諾",
-    "message": "會員分享經驗、保持好奇並積極合作，是本會最重要的力量。WTIA 將繼續在創新與機遇之間建立實際橋樑。",
-    "signature": "WTIA 主席"
+    "message": "會員分享經驗、保持好奇並積極合作，是本會最重要的力量。香港無線科技商會（WTIA／Wireless）將繼續在創新與機遇之間建立實際橋樑。",
+    "signature": "主席　賴志偉"
   },
   "Committees": {
-    "metaTitle": "委員會｜WTIA",
-    "metaDescription": "了解 WTIA 委員會如何支援管治、計劃及會員。",
+    "metaTitle": "委員會｜香港無線科技商會 WTIA",
+    "metaDescription": "WTIA 各委員會：將會員參與轉化為業界行動。",
     "eyebrow": "管治",
     "title": "把參與轉化為行動的委員會。",
     "summary": "由會員帶領的委員會為 WTIA 重點工作提供監督及專業意見。",
@@ -808,8 +808,8 @@
     }
   },
   "History": {
-    "metaTitle": "歷史｜WTIA",
-    "metaDescription": "香港無線科技商會二十六年歷程，由2001年至2026年。",
+    "metaTitle": "歷史｜香港無線科技商會 WTIA",
+    "metaDescription": "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
     "eyebrow": "自2001年",
     "title": "我們的歷史",
     "intro": "回顧香港無線及科技產業二十六年來的發展里程碑。",
@@ -827,8 +827,8 @@
   "Membership": {
     "compare": {"audience": "適合對象", "fee": "會費", "uses": "主要用途", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
-    "metaTitle": "會員計劃｜WTIA",
-    "metaDescription": "比較 WTIA 會員級別及權益。",
+    "metaTitle": "會員計劃｜香港無線科技商會 WTIA",
+    "metaDescription": "了解 WTIA 個人及機構會籍選項。歡迎於 hkwtia.org 查詢及申請。",
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
     "title": "選擇適合你的會籍",
@@ -1030,7 +1030,7 @@
     "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
     "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "invite": {
-      "metaTitle": "你的專屬邀請｜WTIA",
+      "metaTitle": "你的專屬邀請｜香港無線科技商會 WTIA",
       "welcomeNamed": "歡迎你，{name}",
       "welcome": "歡迎加入 WTIA",
       "invitedBy": "{inviter} 邀請你成為 WTIA {plan}會員。",
@@ -1050,7 +1050,7 @@
     },
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
-    "metaTitle": "會籍申請｜WTIA",
+    "metaTitle": "會籍申請｜香港無線科技商會 WTIA",
     "metaDescription": "網上申請 WTIA 會籍：選擇級別、建立帳戶，加入香港創科社群。",
     "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
     "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
@@ -1331,7 +1331,7 @@
     }
   },
   "Programmes": {
-    "metaTitle": "計劃總覽｜WTIA",
+    "metaTitle": "計劃總覽｜香港無線科技商會 WTIA",
     "metaDescription": "WTIA 計劃及獎項的正式紀錄：Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI，包括歷屆內容及下一步。",
     "hero": {
       "eyebrow": "計劃",
@@ -1378,7 +1378,7 @@
     }
   },
   "Partners": {
-    "metaTitle": "合作夥伴｜WTIA",
+    "metaTitle": "合作夥伴｜香港無線科技商會 WTIA",
     "metaDescription": "WTIA 已發布的夥伴紀錄：支持機構、區域夥伴、媒體夥伴、計劃夥伴及贊助機構，每項均已確認合作關係及標誌使用權。",
     "hero": {
       "eyebrow": "夥伴生態系統",
@@ -1430,7 +1430,7 @@
     }
   },
   "LaunchPad": {
-    "metaTitle": "創科起動｜WTIA",
+    "metaTitle": "創科起動｜香港無線科技商會 WTIA",
     "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",
     "eyebrow": "創科起動",
     "title": "協助科技團隊走向全球市場。",
@@ -1588,19 +1588,22 @@
     "clinicCta": "預約諮詢"
   },
   "Showcase": {
-    "metaTitle": "展示頁｜WTIA",
-    "metaDescription": "探索 WTIA 會員公司、產品及實用科技方案。",
+    "metaTitle": "會員方案｜香港無線科技商會 WTIA",
+    "metaDescription": "瀏覽 WTIA 會員企業已發布的科技方案。",
     "detailFallbackDescription": "WTIA 會員展示",
     "eyebrow": "AI 展示",
-    "title": "尋找合適的 WTIA 會員夥伴",
+    "title": "會員方案",
     "description": "探索香港科技公司的實用產品及服務。",
     "introTitle": "面向實際業務需要的科技方案",
     "introDescription": "按使用場景、部署方式、語言及整合需要，比較已發布的 WTIA 會員方案。",
     "ownerCta": "管理你的展示頁",
     "resultsTitle": "探索會員方案",
     "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
-    "noPublishedTitle": "尚未有公開方案",
-    "noPublishedDescription": "尚未有已發佈的方案。",
+    "noPublishedTitle": "尚未有已發佈的方案",
+    "noPublishedDescription": "方案內容將於會員同意並審核後陸續上架。",
+    "emptyPrimary": "聯絡秘書處",
+    "emptySecondary": "成為會員後可提交",
+    "emptyFrame": "方案位置 · 待確認",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
     "unavailableTitle": "展示名錄暫時無法顯示",
@@ -1705,12 +1708,12 @@
     }
   },
   "Members": {
-    "metaTitle": "會員｜WTIA",
-    "metaDescription": "WTIA 會員名錄中的香港無線及 AI+ 科技企業。",
+    "metaTitle": "會員目錄｜香港無線科技商會 WTIA",
+    "metaDescription": "WTIA 會員名錄：已發布的香港無線及科技企業簡介。",
     "eyebrow": "會員名錄",
-    "title": "WTIA 會員",
+    "title": "會員目錄",
     "description": "塑造香港無線、流動及 AI+ 產業的機構。每個專頁由會員維護並經 WTIA 審核。",
-    "breadcrumbCurrent": "會員",
+    "breadcrumbCurrent": "會員目錄",
     "filters": {
       "search": "搜尋會員",
       "tag": "行業",
@@ -1733,8 +1736,11 @@
     "resultsHeading": "會員名錄",
     "loadMore": "查看更多會員",
     "paginationLabel": "會員名錄分頁",
-    "noPublishedTitle": "尚未有公開會員專頁",
-    "noPublishedDescription": "尚未有已發佈的會員專頁。",
+    "noPublishedTitle": "現時公開目錄為 0 個會員",
+    "noPublishedDescription": "會員介紹須經書面同意後才上架。",
+    "emptyPrimary": "申請成為會員",
+    "emptySecondary": "了解會籍",
+    "emptyFrame": "待會員同意",
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
     "unavailableTitle": "會員頁面暫時無法顯示",
@@ -1751,7 +1757,7 @@
     }
   },
   "AiOps": {
-    "metaTitle": "公開 AI-Ops｜WTIA",
+    "metaTitle": "公開 AI-Ops｜香港無線科技商會 WTIA",
     "metaDescription": "公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。",
     "eyebrow": "公開 AI-Ops",
     "title": "公開量度 AI 營運",
@@ -1812,7 +1818,7 @@
     "operationsMethodology": "涵蓋智能助理結果、人工接手及重開案件。人手處理、覆核及返工分開計時；等候不計作職員工時。試點前須固定比較組。"
   },
   "Events": {
-    "metaTitle": "活動｜WTIA",
+    "metaTitle": "活動｜香港無線科技商會 WTIA",
     "metaDescription": "探索 WTIA 活動及社群聚會。",
     "eyebrow": "活動",
     "title": "活動",
@@ -2039,16 +2045,18 @@
     }
   },
   "News": {
-    "metaTitle": "消息｜WTIA",
-    "metaDescription": "閱讀 WTIA 最新消息。",
+    "metaTitle": "消息與傳媒｜香港無線科技商會 WTIA",
+    "metaDescription": "香港無線科技商會（WTIA）最新消息及公告。",
     "eyebrow": "消息",
-    "title": "WTIA 最新消息",
+    "title": "消息與傳媒",
     "description": "瀏覽 WTIA 的公告及社群消息。",
     "emptyTitle": "暫未有已發布消息",
-    "emptyDescription": "消息內容確認後，會在此顯示。",
+    "emptyDescription": "只上架已核實來源的稿件與新聞。",
+    "emptyPrimary": "返回首頁",
+    "emptySecondary": "傳媒查詢",
     "unavailableTitle": "消息未能完整載入",
     "unavailableDescription": "部分內容可能未有顯示，請稍後再試。",
-    "breadcrumbCurrent": "新聞",
+    "breadcrumbCurrent": "消息與傳媒",
     "statusNews": "新聞",
     "resultsHeading": "新聞及開發日誌",
     "statusBuildLog": "開發日誌",
@@ -2070,11 +2078,11 @@
     }
   },
   "Contact": {
-    "metaTitle": "聯絡我們｜WTIA",
-    "metaDescription": "聯絡香港無線科技商會。",
+    "metaTitle": "聯絡我們｜香港無線科技商會 WTIA",
+    "metaDescription": "聯絡香港無線科技商會（WTIA）。電郵 contact@hkwtia.org。網址 hkwtia.org。",
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
-    "description": "歡迎透過辦公室或電郵聯絡 WTIA。",
+    "description": "歡迎以電郵或下列途徑聯絡香港無線科技商會（WTIA／Wireless）。",
     "breadcrumbCurrent": "聯絡我們",
     "channelsTitle": "直接聯絡 WTIA",
     "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
@@ -2151,7 +2159,7 @@
     "conciergeLauncher": "問 WTIA"
   },
   "Privacy": {
-    "metaTitle": "私隱｜WTIA",
+    "metaTitle": "私隱｜香港無線科技商會 WTIA",
     "metaDescription": "WTIA 平台如何收集、使用及保存你的資料。",
     "eyebrow": "私隱",
     "title": "我們如何處理你的資料",
@@ -2262,7 +2270,7 @@
     ]
   },
   "RefundPolicy": {
-    "metaTitle": "退款政策｜WTIA",
+    "metaTitle": "退款政策｜香港無線科技商會 WTIA",
     "metaDescription": "WTIA 如何及何時就付費門票訂單退款，以及我們取消活動時的安排。",
     "eyebrow": "政策",
     "title": "退款政策",
@@ -2301,7 +2309,7 @@
     ]
   },
   "AiTransparency": {
-    "metaTitle": "AI 透明度｜WTIA",
+    "metaTitle": "AI 透明度｜香港無線科技商會 WTIA",
     "metaDescription": "WTIA Concierge 的運作方式、能力範圍，以及何時交由真人接手。",
     "eyebrow": "AI 透明度",
     "title": "WTIA Concierge 如何運作",

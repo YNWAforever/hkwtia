@@ -1,18 +1,17 @@
 import type {PublicRoute} from "@/config/public-routes";
 
 /**
- * The donor header is always transparent and absolutely positioned over a full-bleed photo
- * hero. hkwtia has public pages with no hero at all, where white-on-white chrome would be
- * invisible, so "solid" is the group default and "overlay" is opted into per route.
- * WP-3 and WP-4 extend the map as each page gains its donor hero.
+ * The donor header was transparent over a full-bleed photo hero. Willy Approve t341s1501
+ * (Catherine Phase 3) makes the public header a light bar on every route: white ground,
+ * navy navigation, full-colour black-text logo. Overlay (white type on the hero) is no
+ * longer opted in. The map stays so a later route can opt back in without rewriting the
+ * resolver. Q6b (serif vs sans headings) and Q8 (favicon) are unchanged here.
  */
 export type SiteHeaderVariant = "overlay" | "solid";
 
 export const DEFAULT_HEADER_VARIANT: SiteHeaderVariant = "solid";
 
-export const heroVariantByRoute = {
-  "/": "overlay",
-} as const satisfies Partial<Record<PublicRoute, SiteHeaderVariant>>;
+export const heroVariantByRoute = {} as const satisfies Partial<Record<PublicRoute, SiteHeaderVariant>>;
 
 /** `pathname` is the locale-stripped path from `usePathname` in `@/i18n/navigation`. */
 export function resolveHeaderVariant(pathname: string): SiteHeaderVariant {
