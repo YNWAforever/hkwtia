@@ -120,14 +120,13 @@ describe("/showcase rewrite", () => {
     expect(html).toContain(bundles.en.Showcase.premium);
   });
 
-  it("renders the solution-verification badge-definitions block with the honest label", async () => {
+  it("does not render the solution-verification block", async () => {
     showcase.listPublished.mockResolvedValue([]);
     const html = await renderShowcase();
 
-    expect(html).toContain('class="solution-verification"');
-    expect(html).toContain(bundles.en.Showcase.verification.label);
-    expect(html).toContain('class="badge-grid"');
-    expect((html.match(/<article>/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect(html).not.toContain('class="solution-verification"');
+    expect(html).not.toContain(bundles.en.Showcase.verification.label);
+    expect(html).not.toContain('class="badge-grid"');
   });
 
   it("renders the buyer/provider solution-pathways with the correct destinations", async () => {

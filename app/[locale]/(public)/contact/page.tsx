@@ -44,7 +44,6 @@ export default async function ContactPage({params, searchParams = Promise.resolv
     {href: '/events', title: t('routes.events.title'), copy: t('routes.events.description')},
     {href: '/membership', title: t('routes.membership.title'), copy: t('routes.membership.description')},
     {href: '/showcase', title: t('routes.showcase.title'), copy: t('routes.showcase.description')},
-    {href: '/launchpad', title: t('routes.launchpad.title'), copy: t('routes.launchpad.description')},
     {href: '/about', title: t('routes.about.title'), copy: t('routes.about.description')},
     {href: '/news', title: t('routes.news.title'), copy: t('routes.news.description')},
   ];
@@ -74,9 +73,6 @@ export default async function ContactPage({params, searchParams = Promise.resolv
           <address className="contact-channels">
             <h2>{t('channelsTitle')}</h2>
             <a className="contact-channel-primary" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
-            {siteConfig.contact.phone === undefined ? null : (
-              <a className="contact-channel-primary" href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}>{siteConfig.contact.phone}</a>
-            )}
             <WhatsAppLink className="text-link" label={tWhatsApp('chat')} locale={appLocale} prefill={tWhatsApp('prefill.contact')} source="contact" />
           </address>
 

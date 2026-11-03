@@ -70,7 +70,8 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
   // repeat /contact in two columns, breaking the every-leaf-appears-once property that
   // tests/unit/public-shell.test.tsx pins through its exact target count, or leave hkwtia's About
   // leaves with no column at all. hkwtia's fourth grouping is therefore About (errata
-  // E-21), and every one of the 18 navigation leaves appears exactly once.
+  // E-21), and every one of the 17 navigation leaves appears exactly once.
+  // /launchpad is not a leaf: the public route 404s.
   const columns: readonly FooterColumn[] = [
     {id: "explore", label: t("columns.explore"), links: leaves("events-programmes")},
     {

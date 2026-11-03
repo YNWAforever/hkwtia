@@ -121,7 +121,7 @@ describe("public shell server surfaces", () => {
     const footer = screen.getByRole("contentinfo");
     const hrefs = within(footer).getAllByRole("link").map((link) => link.getAttribute("href"));
     for (const href of [
-      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
+      "/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
     ]) expect(hrefs, href).toContain(href);
@@ -134,7 +134,7 @@ describe("public shell server surfaces", () => {
     render(await SiteFooter({locale: "en"}));
     const footer = screen.getByRole("contentinfo");
     const expectedHrefs = [
-      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
+      "/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
       // The Membership column carries Join and Member sign-in; Contact now carries staff

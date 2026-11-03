@@ -43,10 +43,11 @@ describe("M6 Launch Pad contracts", () => {
     expect(parseCohortStage("accepted")).toBe("accepted");
   });
 
-  it("uses the repository's public projection as the Launch Pad partner authority", () => {
+  it("hides the public Launch Pad page and keeps the partner repository", () => {
     const source = readFileSync("app/[locale]/(public)/launchpad/page.tsx", "utf8");
 
-    expect(source).toContain("landingPartnersRepository.listPublished({limit: 100})");
+    expect(source).toContain("notFound()");
+    expect(source).not.toContain("landingPartnersRepository");
     expect(source).not.toContain("config/landing-partners");
     expect(typeof listPublishedLandingPartners).toBe("function");
   });

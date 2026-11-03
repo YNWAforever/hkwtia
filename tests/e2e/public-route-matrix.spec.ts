@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test';
 
 const paths = [
-  '/showcase', '/launchpad', '/ai-ops', '/events', '/news', '/programmes', '/partners',
+  '/showcase', '/ai-ops', '/events', '/news', '/programmes', '/partners',
   '/about', '/about/chairman', '/about/committees', '/about/history',
   // Sample history detail pages that must keep rendering. Highlights are a separate
   // set (tests/unit/history-page.test.tsx); every milestone-kind record has a page.
@@ -14,6 +14,15 @@ const paths = [
   '/programs/cpai', '/programs/hkict', '/programs/tct', '/programs/asa',
   '/contact', '/privacy', '/ai-transparency'
 ];
+
+for (const path of ['/launchpad']) {
+  for (const prefix of ['', '/zh']) {
+    test(`${prefix}${path} is hidden`, async ({page}) => {
+      const response = await page.goto(`${prefix}${path}`);
+      expect(response?.status()).toBe(404);
+    });
+  }
+}
 
 for (const path of paths) {
   for (const prefix of ['', '/zh']) {

@@ -509,7 +509,7 @@
           "title": "For GBA & Global Partners",
           "copy": "GBA and overseas connections through events and delegations.",
           "benefits": "Events and delegations",
-          "cta": "Explore Launch Pad"
+          "cta": "Find an event"
         }
       },
       "legend": "Choose who you are",
@@ -1676,11 +1676,11 @@
       }
     },
     "pathways": {
-      "heading": "Two ways to engage the showcase",
+      "heading": "Two ways to take part in the Member Showcase",
       "buyer": {
         "label": "Looking for a solution",
         "title": "Tell WTIA what you need.",
-        "copy": "Describe the business problem you are solving and WTIA staff will help connect you to a fitting member solution.",
+        "copy": "Looking for a solution? Email contact@hkwtia.org.",
         "action": "Talk to WTIA"
       },
       "provider": {
@@ -1731,7 +1731,7 @@
     "view": "View member page",
     "detail": {
       "website": "Website",
-      "showcase": "Solution in the WTIA Showcase",
+      "showcase": "Solution in the WTIA Member Showcase",
       "events": "Upcoming events by this member",
       "noEvents": "No upcoming events.",
       "joinCta": "Your organisation could be listed here",
@@ -1879,6 +1879,11 @@
           "title": "Launch Pad",
           "copy": "GBA and overseas connections through events and delegations.",
           "cta": "Explore Launch Pad"
+        },
+        "contact": {
+          "title": "Contact us",
+          "copy": "Questions about events or membership? Email contact@hkwtia.org.",
+          "cta": "Get in touch"
         },
         "showcase": {
           "title": "Member Showcase",

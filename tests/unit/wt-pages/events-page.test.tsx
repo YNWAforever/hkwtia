@@ -182,10 +182,10 @@ describe("Events page donor markup", () => {
       name: bundles.en.Events.activityStrip.label,
     });
     expect(
-      within(strip).getByRole("link", {
+      within(strip).queryByRole("link", {
         name: bundles.en.Events.activityStrip.launchpadLabel,
       }),
-    ).toHaveAttribute("href", "/launchpad");
+    ).toBeNull();
     expect(
       within(strip).getByRole("link", {
         name: bundles.en.Events.activityStrip.showcaseLabel,
@@ -211,10 +211,10 @@ describe("Events page donor markup", () => {
       screen
         .getByRole("heading", {
           level: 3,
-          name: bundles.en.Events.recommendations.items.launchpad.title,
+          name: bundles.en.Events.recommendations.items.contact.title,
         })
         .closest("a"),
-    ).toHaveAttribute("href", "/launchpad");
+    ).toHaveAttribute("href", "/contact");
     expect(
       screen
         .getByRole("heading", {
@@ -231,7 +231,9 @@ describe("Events page donor markup", () => {
         })
         .closest("a"),
     ).toHaveAttribute("href", "/membership");
-    expect(screen.getByText("GBA and overseas connections through events and delegations.")).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Events.recommendations.items.contact.copy)).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Events.recommendations.items.contact.cta)).toBeInTheDocument();
+    expect(screen.queryByRole("link", {name: bundles.en.Events.activityStrip.launchpadLabel})).toBeNull();
     expect(screen.getByText("Member solutions, listed with each member's consent.")).toBeInTheDocument();
     expect(screen.getByText("View the Member Showcase")).toBeInTheDocument();
     expect(screen.getByText("Find the pathway that matches your organisation.")).toBeInTheDocument();

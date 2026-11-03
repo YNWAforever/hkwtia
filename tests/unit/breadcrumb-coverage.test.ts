@@ -26,7 +26,9 @@ function pageFileFor(route: string): string {
 }
 
 describe("breadcrumb coverage", () => {
-  it.each(publicRoutes.filter((route) => route !== "/" && route !== "/ai-ops"))(
+  // /ai-ops and /launchpad 404. They stay in publicRoutes for announcement href checks
+  // and have no trail to render.
+  it.each(publicRoutes.filter((route) => route !== "/" && route !== "/ai-ops" && route !== "/launchpad"))(
     "%s renders the shared breadcrumb",
     (route) => {
       // Per page because a server layout cannot read the pathname. That makes drift the

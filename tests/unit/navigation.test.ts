@@ -19,7 +19,7 @@ const groupShape = navigationGroups.map((group) => ({
 describe("public shell navigation", () => {
   it("uses the approved group order, landing routes, and unique leaf ownership", () => {
     expect(groupShape).toEqual([
-      {id: "events-programmes", landingHref: "/events", eventFirst: true, links: ["/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai"]},
+      {id: "events-programmes", landingHref: "/events", eventFirst: true, links: ["/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai"]},
       {id: "membership-ecosystem", landingHref: "/membership", eventFirst: false, links: ["/membership", "/members", "/showcase"]},
       {id: "impact-insights", landingHref: "/news", eventFirst: false, links: ["/news", "/ai-transparency"]},
       {id: "about-wtia", landingHref: "/about", eventFirst: false, links: ["/about", "/about/history", "/about/chairman", "/about/committees", "/contact", "/partners"]},
