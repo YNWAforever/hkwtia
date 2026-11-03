@@ -5,7 +5,6 @@ import {milestones} from "@/content/milestones";
 import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {
-  listPublishedBuildLogs,
   listPublishedNews,
   type PublishedNewsSummary,
 } from "@/lib/db/repos/public-posts";
@@ -69,8 +68,7 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const asOf = new Date();
-  const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs, memberSlugs] = await Promise.all([
-    listPublishedBuildLogs(),
+  const [eventSlugs, englishNews, chineseNews, showcaseSlugs, memberSlugs] = await Promise.all([
     eventsRepository.listPublicSlugs(),
     listPublishedNews("en", asOf),
     listPublishedNews("zh-HK", asOf),
@@ -83,9 +81,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // the content file's mtime. None of these are invented calendar dates.
   const built = buildLastmod();
   const milestoneModified = contentFileLastmod("content/milestones.ts");
-  const staticEntries = publicRoutes.flatMap((pathname) => localizedEntries(pathname, staticRouteLastmod(pathname)));
+  // /ai-ops stays in publicRoutes for the announcements href check, and 404s.
+  const staticEntries = publicRoutes
+    .filter((pathname) => pathname !== "/ai-ops")
+    .flatMap((pathname) => localizedEntries(pathname, staticRouteLastmod(pathname)));
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`, built));
-  const buildLogEntries = buildLogs.flatMap((post) => localizedEntries(`/news/${post.slug}`, post.publishedAt));
   const newsEntries = localizedNewsEntries(englishNews, chineseNews);
   // Every milestone, not only the featured six: these are 25 years of association
   // history, already bilingual, and they are the largest body of indexable content the
@@ -99,7 +99,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticEntries,
     ...eventEntries,
     ...newsEntries,
-    ...buildLogEntries,
     ...showcaseEntries,
     ...memberEntries,
     ...milestoneEntries,

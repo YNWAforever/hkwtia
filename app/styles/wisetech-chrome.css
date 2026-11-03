@@ -156,3 +156,32 @@
   border-color: #0f4c81;
   color: #0f4c81;
 }
+
+/* Catherine V4: a dark-band `color: inherit` rule painted .button-light labels white
+   on the white pill (members closing CTA, ZH home events card). Navy on white is 8.86:1. */
+.site-root a.button.button-light {
+  color: #0f4c81;
+  background: #fff;
+  border-color: #fff;
+}
+.site-root a.button.button-light:hover {
+  color: #fff;
+  background: #0f4c81;
+  border-color: #0f4c81;
+}
+
+/* Catherine V3: "Practical information" sits on --wt-paper (#F6F6F6), below the hero.
+   The donor paints these values white for a photo overlay. */
+.event-detail-page .event-detail-layout {
+  padding-top: 48px;
+}
+.event-detail-page .event-detail-facts,
+.event-detail-page .event-detail-facts > div {
+  border-color: rgba(51, 51, 51, 0.16);
+}
+.event-detail-page .event-detail-facts span {
+  color: #315f82;
+}
+.event-detail-page .event-detail-facts :is(strong, time, a) {
+  color: #0f4c81;
+}

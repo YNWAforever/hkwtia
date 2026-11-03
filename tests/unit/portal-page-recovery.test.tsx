@@ -35,7 +35,6 @@ import DirectoryPage from "@/app/[locale]/(member)/portal/directory/page";
 import EventsPage from "@/app/[locale]/(member)/portal/events/page";
 import DocumentsPage from "@/app/[locale]/(member)/portal/documents/page";
 import ToolsPage from "@/app/[locale]/(member)/portal/tools/page";
-import ToolPage from "@/app/[locale]/(member)/portal/tools/[key]/page";
 import CompanyPage from "@/app/[locale]/(member)/portal/company/page";
 import ListingPage from "@/app/[locale]/(member)/portal/company/listing/page";
 import SeatsPage from "@/app/[locale]/(member)/portal/company/seats/page";
@@ -47,7 +46,6 @@ const benefits: [string, Page][] = [
   ["events", (locale) => EventsPage({params: Promise.resolve({locale})})],
   ["documents", (locale) => DocumentsPage({params: Promise.resolve({locale})})],
   ["tools", (locale) => ToolsPage({params: Promise.resolve({locale})})],
-  ["tool detail", (locale) => ToolPage({params: Promise.resolve({locale, key: "content-calendar"})})],
 ];
 const companyPages: [string, Page][] = [
   ["company", (locale) => CompanyPage({params: Promise.resolve({locale})})],

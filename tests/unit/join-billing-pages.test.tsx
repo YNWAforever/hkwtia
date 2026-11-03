@@ -46,29 +46,16 @@ describe("join billing pages", () => {
     process.env.STRIPE_STARTUP_PRICE_ID = "price_startup_test";
   });
 
-  it("renders a local checkout summary without creating a Stripe session on GET", async () => {
+  it("keeps checkout closed and does not read a fee or start Stripe", async () => {
     const markup = renderToStaticMarkup(await CheckoutPage(props("zh-HK")));
-    expect(state.membershipCalls).toEqual([[actor, "membership-a"]]);
-    expect(state.applicationCalls).toEqual([[actor, "application-a"]]);
+    expect(state.membershipCalls).toEqual([]);
+    expect(state.applicationCalls).toEqual([]);
     expect(state.checkoutCalls).toHaveLength(0);
     expect(state.redirectUrl).toBeNull();
-    expect(markup).toContain('name="membershipId"');
-    expect(markup).toContain('type="submit"');
-  });
-
-  it("uses the validated catalog amount only when a resumed attempt has the same price", async () => {
-    let markup = renderToStaticMarkup(await CheckoutPage(props()));
-    expect(markup).toContain("HK$1,200");
-    state.activeAttemptPrice = "price_old_attempt";
-    markup = renderToStaticMarkup(await CheckoutPage(props()));
-    expect(markup).not.toContain("HK$1,200");
-    expect(markup).toContain("localized:checkoutSummary.feeAtProvider");
-  });
-
-  it("fails closed when the scoped application does not match the membership", async () => {
-    state.application = {...state.application, planCode: "corporate"};
-    await expect(CheckoutPage(props())).rejects.toThrow("NEXT_NOT_FOUND");
-    expect(state.checkoutCalls).toHaveLength(0);
+    expect(markup).toContain("localized:freezeNotice");
+    expect(markup).toContain("mailto:contact@hkwtia.org");
+    expect(markup).not.toContain("HK$");
+    expect(markup).not.toContain('type="submit"');
   });
 
   it("renders only a processing state after Stripe returns while payment is pending", async () => {

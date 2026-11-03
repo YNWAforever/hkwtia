@@ -37,7 +37,7 @@ describe("Launch Pad page — GBA opening", () => {
     listPublishedPartners.mockReset().mockResolvedValue([]);
   });
 
-  it("renders the page hero, the 3-node route board, and 4 descriptive service cards with no CTA", async () => {
+  it("renders the held Launch Pad copy without the route board, service cards, or funding picker", async () => {
     const {default: LaunchPadPage} = await import("@/app/[locale]/(public)/launchpad/page");
     render(await LaunchPadPage({
       params: Promise.resolve({locale: "en"}),
@@ -46,18 +46,11 @@ describe("Launch Pad page — GBA opening", () => {
 
     expect(screen.getByRole("heading", {level: 1, name: bundles.en.LaunchPad.title})).toBeInTheDocument();
     expect(screen.getByRole("navigation", {name: /breadcrumb/i})).toBeInTheDocument();
-
-    const board = document.querySelector(".gba-route-board");
-    expect(board).not.toBeNull();
-    expect(board?.querySelectorAll(".route-map span")).toHaveLength(3);
-
-    const cards = document.querySelectorAll(".service-grid > article");
-    expect(cards).toHaveLength(4);
-    expect(document.querySelectorAll(".service-grid > a")).toHaveLength(0);
-    expect(screen.getByText(bundles.en.LaunchPad.services.marketEntry.title)).toBeInTheDocument();
-    expect(screen.getByText(bundles.en.LaunchPad.services.softLanding.title)).toBeInTheDocument();
-    expect(screen.getByText(bundles.en.LaunchPad.services.buyerMatching.title)).toBeInTheDocument();
-    expect(screen.getByText(bundles.en.LaunchPad.services.delegations.title)).toBeInTheDocument();
+    expect(document.querySelector(".gba-route-board")).toBeNull();
+    expect(document.querySelector(".service-grid")).toBeNull();
+    expect(document.querySelector("form")).toBeNull();
+    expect(screen.getAllByText(bundles.en.LaunchPad.description).length).toBeGreaterThan(0);
+    expect(screen.queryByText(bundles.en.LaunchPad.services.softLanding.title)).toBeNull();
   });
 
   it("gives each SectionHeading its own eyebrow, distinct from the section title", async () => {
@@ -67,7 +60,7 @@ describe("Launch Pad page — GBA opening", () => {
       searchParams: Promise.resolve({}),
     }));
 
-    for (const section of ["program", "calendar", "partners", "funding"] as const) {
+    for (const section of ["program", "calendar", "partners"] as const) {
       const eyebrow = bundles.en.LaunchPad[section].eyebrow as string;
       const title = bundles.en.LaunchPad[section].title as string;
       expect(eyebrow).not.toBe(title);

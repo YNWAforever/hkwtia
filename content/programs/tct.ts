@@ -228,8 +228,10 @@ export const tct: TctProgram = tctProgramSchema.parse({
       // and flagship programmes are coming your way as part of Tech To Connect
       // 2026!" One event had happened when the site was captured; the sentence
       // says so rather than implying a finished programme.
-      shapeEn: 'A Robotics & Automation kick-off seminar on 15 May 2026, with further technology workshops, industry networking events and flagship programmes announced to follow.',
-      shapeZh: '2026 年 5 月 15 日的「機器人與自動化賦能啟動研討會」，其後預告將舉行更多技術工作坊、產業對接及旗艦活動。', // DRAFTED.
+      // No calendar date and no venue: 8 Dec is not public, and this summary must not
+      // carry a 2026 date. Ruby 2026-11-03: keep the summary, swap 產業對接 only.
+      shapeEn: 'A Robotics & Automation kick-off seminar, with further technology workshops, industry networking events and flagship programmes announced to follow.',
+      shapeZh: '「機器人與自動化賦能啟動研討會」，其後預告將舉行更多技術工作坊、業界交流活動及旗艦活動。', // DRAFTED.
       // The page names four speakers' companies and no funder.
       funder: {kind: 'none-recorded'},
       images: []

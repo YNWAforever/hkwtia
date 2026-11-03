@@ -93,11 +93,9 @@ describe("published posts through news routes", () => {
     expect(
       screen.getByRole("link", {name: "WTIA 歡迎新會員"}),
     ).toHaveAttribute("href", "/zh/news/wtia-welcomes-new-members");
-    expect(
-      screen.getByRole("link", {name: "我們如何建立 AI 營運儀表板"}),
-    ).toHaveAttribute("href", "/zh/news/m4-ai-ops-dashboard");
+    expect(screen.queryByRole("link", {name: "我們如何建立 AI 營運儀表板"})).toBeNull();
     expect(publicPosts.listPublishedNews).toHaveBeenCalledWith("zh-HK");
-    expect(publicPosts.listPublishedBuildLogs).toHaveBeenCalledOnce();
+    expect(publicPosts.listPublishedBuildLogs).not.toHaveBeenCalled();
   });
 
   it("shows the empty state when nothing is published", async () => {
@@ -133,25 +131,11 @@ describe("published posts through news routes", () => {
     expect(publicPosts.getPublishedBuildLogBySlug).not.toHaveBeenCalled();
   });
 
-  it("renders a published build log with one page-owned h1", async () => {
-    render(await NewsPostPage({
+  it("does not publish a build log on the news URL", async () => {
+    publicPosts.getPublishedNewsBySlug.mockResolvedValueOnce(null);
+    await expect(NewsPostPage({
       params: Promise.resolve({locale: "en", slug: summary.slug}),
-    }));
-
-    expect(
-      screen.getAllByRole("heading", {
-        level: 1,
-        name: "How we built the AI-Ops dashboard",
-      }),
-    ).toHaveLength(1);
-    expect(
-      screen.getByRole("heading", {level: 2, name: "Build notes"}),
-    ).toBeInTheDocument();
-    expect(screen.getByText("evidence")).toBeInTheDocument();
-    expect(screen.getByRole("link", {name: "AI-Ops dashboard"})).toHaveAttribute(
-      "href",
-      "/en/ai-ops",
-    );
+    })).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
   it.each(["draft-post", "future-post", "unknown-post"])(
@@ -200,11 +184,9 @@ describe("published posts through news routes", () => {
   it.each([
     ["en", brandedTitle("en", "How we built the AI-Ops dashboard")],
     ["zh-HK", brandedTitle("zh-HK", "我們如何建立 AI 營運儀表板")],
-  ])("selects the %s build-log title for metadata", async (locale, title) => {
-    const metadata = await generateMetadata({
+  ])("does not publish %s build-log metadata", async (locale) => {
+    await expect(generateMetadata({
       params: Promise.resolve({locale, slug: summary.slug}),
-    });
-
-    expect(metadata.title).toBe(title);
+    })).rejects.toThrow("NEXT_NOT_FOUND");
   });
 });

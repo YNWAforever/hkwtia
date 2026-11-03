@@ -8,6 +8,8 @@ export const publicRoutes = [
   '/membership',
   '/showcase',
   '/launchpad',
+  // The page 404s and is omitted from the sitemap. It stays in this list so the
+  // site_announcements href check does not need a migration. A8.
   '/ai-ops',
   '/events',
   '/news',

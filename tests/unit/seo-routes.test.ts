@@ -24,7 +24,7 @@ describe('M0 indexability', () => {
   it('lists both locales for every public route', async () => {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
     const urls = (await sitemap()).map((entry) => entry.url);
-    for (const path of publicRoutes) {
+    for (const path of publicRoutes.filter((route) => route !== "/ai-ops")) {
       expect(urls).toContain(new URL(path, siteUrl).toString());
       expect(urls).toContain(
         new URL(path === '/' ? '/zh' : `/zh${path}`, siteUrl).toString(),

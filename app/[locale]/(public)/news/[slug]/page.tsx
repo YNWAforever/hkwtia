@@ -2,15 +2,12 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
-import {BuildLogDetail} from "@/components/marketing/build-log-detail";
 import {NewsDetail} from "@/components/marketing/news-detail";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {
-  getPublishedBuildLogBySlug,
   getPublishedNewsBySlug,
   parsePublishedBuildLogSlug,
-  type PublishedBuildLogDetail,
   type PublishedNewsDetail,
 } from "@/lib/db/repos/public-posts";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
@@ -40,10 +37,6 @@ function articleExcerpt(body: string): string {
 
 
 type Props = {params: Promise<{locale: string; slug: string}>};
-type PublishedPost =
-  | Readonly<{kind: "news"; post: PublishedNewsDetail}>
-  | Readonly<{kind: "buildlog"; post: PublishedBuildLogDetail}>;
-
 function postSlugOrNotFound(slug: string): string {
   try {
     return parsePublishedBuildLogSlug(slug);
@@ -52,24 +45,19 @@ function postSlugOrNotFound(slug: string): string {
   }
 }
 
-async function publishedPost(locale: AppLocale, slug: string): Promise<PublishedPost> {
+async function publishedNews(locale: AppLocale, slug: string): Promise<PublishedNewsDetail> {
   const parsed = postSlugOrNotFound(slug);
   const news = await getPublishedNewsBySlug(locale, parsed);
-  if (news) return {kind: "news", post: news};
-
-  const buildLog = await getPublishedBuildLogBySlug(parsed);
-  if (!buildLog) notFound();
-  return {kind: "buildlog", post: buildLog};
+  // Build logs are engineering notes. They are not public news. R3, 2026-11-03.
+  if (!news) notFound();
+  return news;
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
   const appLocale = locale as AppLocale;
-  const resolved = await publishedPost(appLocale, slug);
-  const title = resolved.kind === "news"
-    ? resolved.post.title
-    : appLocale === "zh-HK" ? resolved.post.titleZh : resolved.post.titleEn;
-  const post = resolved.post;
+  const post = await publishedNews(appLocale, slug);
+  const title = post.title;
   const t = await getTranslations({locale, namespace: "News"});
   return buildPageMetadata({
     locale: appLocale,
@@ -88,12 +76,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsPostPage({params}: Props) {
   const {locale, slug} = await params;
   const appLocale = locale as AppLocale;
-  const resolved = await publishedPost(appLocale, slug);
+  const post = await publishedNews(appLocale, slug);
   setRequestLocale(locale);
-  if (resolved.kind !== "news") {
-    return <BuildLogDetail locale={appLocale} post={resolved.post}/>;
-  }
-  const {post} = resolved;
   return (
     <>
       <NewsDetail locale={appLocale} post={post}/>

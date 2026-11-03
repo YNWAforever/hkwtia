@@ -1,18 +1,15 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
-import {BuildLogCard} from "@/components/marketing/build-log-card";
 import {NewsCard} from "@/components/marketing/news-card";
 import {NewsQualityPanel} from "@/components/marketing/news-quality-panel";
-import {FooterNewsletter} from "@/components/layout/footer-newsletter";
 import {StructuredData} from "@/components/seo/structured-data";
 import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
-import {listPublishedBuildLogs, listPublishedNews} from "@/lib/db/repos/public-posts";
-import {toMailBody} from "@/lib/i18n/mail-body";
+import {listPublishedNews} from "@/lib/db/repos/public-posts";
 import {buildPageMetadata} from "@/lib/metadata";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {buildBreadcrumbData} from "@/lib/structured-data";
@@ -43,13 +40,9 @@ export default async function NewsPage({params}: Props) {
   ]);
   const appLocale = locale as AppLocale;
   // Each feed can fail independently. Keep available posts and name an outage honestly.
-  const [news, buildLogs] = await Promise.all([
-    listPublishedNews(appLocale).catch(() => null),
-    listPublishedBuildLogs().catch(() => null),
-  ]);
-  const unavailable = news === null || buildLogs === null;
+  const news = await listPublishedNews(appLocale).catch(() => null);
+  const unavailable = news === null;
   const availableNews = news ?? [];
-  const availableBuildLogs = buildLogs ?? [];
 
   return (
     <>
@@ -64,7 +57,7 @@ export default async function NewsPage({params}: Props) {
         {/* Without it the outline jumped h1 -> h3 (the card or empty-state title). */}
         <h2 className="sr-only">{t("resultsHeading")}</h2>
         {unavailable ? <HonestEmpty variant="inner" title={t("unavailableTitle")} copy={t("unavailableDescription")} /> : null}
-        {availableNews.length > 0 || availableBuildLogs.length > 0 ? (
+        {availableNews.length > 0 ? (
           <div className="archive-grid">
             {availableNews.map((post) => (
               <NewsCard
@@ -77,9 +70,6 @@ export default async function NewsPage({params}: Props) {
                 title={post.title}
               />
             ))}
-            {availableBuildLogs.map((post) => (
-              <BuildLogCard key={post.slug} locale={appLocale} post={post} statusLabel={t("statusBuildLog")}/>
-            ))}
           </div>
         ) : unavailable ? null : (
           <HonestDirectoryEmpty
@@ -91,21 +81,6 @@ export default async function NewsPage({params}: Props) {
         )}
         <NewsQualityPanel labels={{eyebrow: t("quality.eyebrow"), title: t("quality.title"), body: t("quality.body")}} />
       </Section>
-      <div className="news-subscribe-band">
-        <div className="shell">
-          <FooterNewsletter labels={{
-            eyebrow: t("subscribe.eyebrow"),
-            title: t("subscribe.title"),
-            emailLabel: t("subscribe.emailLabel"),
-            placeholder: t("subscribe.placeholder"),
-            submit: t("subscribe.submit"),
-            success: t("subscribe.success"),
-            error: t("subscribe.error"),
-            mailSubject: t("subscribe.mailSubject"),
-            mailBody: toMailBody(t.raw("subscribe.mailBody")),
-          }} />
-        </div>
-      </div>
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(appLocale, "/news", tRoot))} />
     </>
   );

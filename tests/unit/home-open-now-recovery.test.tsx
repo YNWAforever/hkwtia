@@ -41,7 +41,7 @@ describe("public opening section read states", () => {
       screen.queryByRole("heading", { name: "No published events" }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Contact the team" }),
+      screen.getByRole("link", { name: "Get updates" }),
     ).toBeVisible();
   });
   it("reserves the honest empty state for a successful zero-row read", async () => {

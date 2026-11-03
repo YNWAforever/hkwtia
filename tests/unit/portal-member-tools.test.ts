@@ -1,9 +1,16 @@
 import {describe, expect, it} from "vitest";
 
-import {MEMBER_TOOLS} from "@/config/member-tools";
 import {isToolAvailable, toolFrameSrc} from "@/lib/portal/member-tools";
 
-const tool = MEMBER_TOOLS[0];
+const tool = {
+  key: "fixture-tool",
+  titleKey: "tools.fixture.title",
+  descriptionKey: "tools.fixture.description",
+  url: "https://tools.example.test/",
+  tokenParam: "token",
+  tokenField: "contentCalendarToken" as const,
+  tiers: ["startup", "corporate", "patron", "individual", "platinum"] as const,
+};
 
 describe("member tool availability", () => {
   it("locks a plan the tool does not name", () => {

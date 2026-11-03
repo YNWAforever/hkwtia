@@ -26,12 +26,14 @@ export function buildOrganizationData(): WithContext<Organization> {
     logo: absoluteUrl(siteConfig.defaultImage),
     email: contact.email,
     ...(contact.phone ? {telephone: contact.phone} : {}),
-    address: {
-      '@type': 'PostalAddress',
+    // Address stays out of JSON-LD while Q11 is unconfirmed. An empty list must not
+    // emit a postal address built from nothing.
+    ...(contact.addressLines.length > 0 ? {address: {
+      '@type': 'PostalAddress' as const,
       streetAddress: contact.addressLines.slice(0, -1).join(', '),
       addressLocality: contact.addressLines.at(-1),
       addressCountry: 'HK',
-    },
+    }} : {}),
   };
 }
 

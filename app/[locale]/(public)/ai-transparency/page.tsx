@@ -5,7 +5,6 @@ import {parsePolicySections, PolicySections} from '@/components/marketing/policy
 import {StructuredData} from '@/components/seo/structured-data';
 import {PageHero} from '@/components/wt/page-hero';
 import type {AppLocale} from '@/i18n/routing';
-import {Link} from '@/i18n/navigation';
 import {buildPageMetadata} from '@/lib/metadata';
 import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
 import {buildBreadcrumbData} from '@/lib/structured-data';
@@ -38,9 +37,6 @@ export default async function AiTransparencyPage({params}: Props) {
         breadcrumbLabel={common('breadcrumbLabel')}
       />
       <PolicySections sections={parsePolicySections(t.raw('sections'))} />
-      <section className="container mx-auto max-w-3xl px-6 pb-16">
-        <Link className="inline-flex min-h-6 items-center font-semibold text-primary" href="/ai-ops">{t('aiOpsLink')}</Link>
-      </section>
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/ai-transparency', tRoot))} />
     </>
   );

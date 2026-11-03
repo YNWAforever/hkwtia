@@ -115,7 +115,8 @@ describe("repository-backed Membership page", () => {
     async (locale, name) => {
       const html = await renderMembership([], locale);
       expect(html).toContain(name);
-      expect(html).toContain('href="/join?plan=individual"');
+      expect(html).toContain("mailto:contact@hkwtia.org");
+      expect(html).not.toContain('href="/join?plan=individual"');
       expect(html).not.toContain(locale === "en" ? "Membership is currently unavailable" : "會員計劃暫時未能提供");
     },
   );
@@ -132,7 +133,8 @@ describe("repository-backed Membership page", () => {
     );
 
     expect(html).toContain("Individual");
-    expect(html).toContain('href="/join?plan=corporate"');
+    expect(html).toContain("mailto:contact@hkwtia.org");
+    expect(html).not.toContain('href="/join?plan=corporate"');
     expect(html).not.toContain("database private payload");
   });
 
@@ -151,8 +153,9 @@ describe("repository-backed Membership page", () => {
 
     expect(membershipPlans.list).toHaveBeenCalledOnce();
     expect(html).toContain("Individual");
-    expect(html).toContain("HK$500");
-    expect(html).toContain('href="/join?plan=individual"');
+    expect(html).not.toContain("HK$500");
+    expect(html).toContain("mailto:contact@hkwtia.org");
+    expect(html).not.toContain('href="/join?plan=individual"');
     expect(html).not.toContain("Membership is currently unavailable");
   });
 });

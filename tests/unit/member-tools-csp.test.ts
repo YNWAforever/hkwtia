@@ -47,9 +47,9 @@ function turnstileOriginsInWidget(source: string): string[] {
 
 describe("member tools CSP", () => {
   it("permits framing of the configured tool origins", async () => {
-    expect(memberToolOrigins.length).toBeGreaterThan(0);
-    expect(frameSrcOrigins(await contentSecurityPolicy())).toEqual(
-      expect.arrayContaining([...memberToolOrigins]),
+    expect(memberToolOrigins).toEqual([]);
+    expect(frameSrcOrigins(await contentSecurityPolicy())).not.toContain(
+      "https://content-calendar-internal.vercel.app",
     );
   });
 

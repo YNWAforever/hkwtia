@@ -197,7 +197,6 @@ import NewMemberEventPage from "@/app/[locale]/(member)/portal/events/new/page";
 import EditMemberEventPage from "@/app/[locale]/(member)/portal/events/[id]/edit/page";
 import ProfilePage from "@/app/[locale]/(member)/portal/profile/page";
 import PortalToolsPage from "@/app/[locale]/(member)/portal/tools/page";
-import PortalToolPage from "@/app/[locale]/(member)/portal/tools/[key]/page";
 
 const outDir = resolve(process.cwd(), ".tmp/portal-fixtures");
 const params = Promise.resolve({locale: "en"});
@@ -297,7 +296,6 @@ describe("portal render fixtures", () => {
     ["events-new", "/portal/events/new", () => NewMemberEventPage({params, searchParams: Promise.resolve({})})],
     ["events-edit", `/portal/events/${memberEventRow.id}/edit`, () => EditMemberEventPage({params: Promise.resolve({locale: "en", id: memberEventRow.id}), searchParams: noQuery})],
     ["tools", "/portal/tools", () => PortalToolsPage({params})],
-    ["tools-detail", "/portal/tools/content-calendar", () => PortalToolPage({params: Promise.resolve({locale: "en", key: "content-calendar"})})],
     ["billing", "/portal/billing", () => BillingPage({params, searchParams: noQuery})],
   ];
 
@@ -401,7 +399,6 @@ describe("portal render fixtures", () => {
     ["documents-empty", "/portal/documents", (locale) => DocumentsPage({params: Promise.resolve({locale})}), () => { state.overrides.documents = []; }],
     ["tools-available", "/portal/tools", (locale) => PortalToolsPage({params: Promise.resolve({locale})}), () => undefined],
     ["tools-locked", "/portal/tools", (locale) => PortalToolsPage({params: Promise.resolve({locale})}), () => withMembership({planCode: "community"})],
-    ["tool-page", "/portal/tools/content-calendar", (locale) => PortalToolPage({params: Promise.resolve({locale, key: "content-calendar"})}), () => undefined],
     ["billing-active", "/portal/billing", (locale) => BillingPage({params: Promise.resolve({locale}), searchParams: noQuery}), () => undefined],
     ["billing-ending", "/portal/billing", (locale) => BillingPage({params: Promise.resolve({locale}), searchParams: noQuery}), () => withMembership({cancelAtPeriodEnd: true})],
     ["billing-past-due", "/portal/billing", (locale) => BillingPage({params: Promise.resolve({locale}), searchParams: noQuery}),

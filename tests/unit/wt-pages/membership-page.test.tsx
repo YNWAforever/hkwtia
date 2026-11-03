@@ -156,34 +156,31 @@ describe("/membership rewrite", () => {
       html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
     expect((planGridHtml.match(/<article/g) ?? []).length).toBe(4);
     expect(html).toContain(bundles.en.Membership.sme.title);
-    expect(html).toContain('href="/join?plan=community"');
-    expect(html).toContain("Free");
-    expect(html).toContain('href="/join?plan=individual"');
-    expect(html).toContain('href="/join?plan=corporate"');
-    expect(html).toContain('href="/join?plan=platinum"');
-    expect(html).toContain("HK$500");
-    expect(html).toContain("HK$1,800");
-    expect(html).toContain("HK$4,800");
-    expect(html).toContain(bundles.en.Membership.actions.join);
-    expect(html).toContain(bundles.en.Membership.tracks.sla);
+    expect(html).toContain("mailto:contact@hkwtia.org");
+    expect(html).not.toContain("HK$500");
+    expect(html).not.toContain("HK$1,800");
+    expect(html).not.toContain("HK$4,800");
+    expect(html).not.toContain('href="/join?plan=');
+    expect(html).toContain(bundles.en.Membership.actions.contact);
+    expect(html).toContain("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
     expect(html).toContain(bundles.en.Membership.tierBenefits.individual[1]);
-    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[2]);
+    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[1]);
   });
 
-  it("shows the confirmed-pricing note when both configured price ids resolve", async () => {
+  it("does not show a pricing note while membership sales are paused", async () => {
     const html = await renderMembership([community, startup, corporate]);
 
-    expect(html).toContain('class="pricing-note"');
-    expect(html).toContain(bundles.en.Membership.pricing.readyCopy);
-    expect(html).not.toContain(bundles.en.Membership.pricing.fallbackCopy);
+    expect(html).not.toContain('class="pricing-note"');
+    expect(html).not.toContain(bundles.en.Membership.pricing.readyCopy);
+    expect(html).toContain("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
   });
 
-  it("still shows the ops prices when the database catalog is empty", async () => {
+  it("still shows the plan names without fees when the database catalog is empty", async () => {
     const html = await renderMembership([]);
 
     expect(html).toContain('class="plan-grid"');
-    expect(html).toContain("HK$500");
-    expect(html).toContain(bundles.en.Membership.pricing.readyCopy);
+    expect(html).not.toContain("HK$500");
+    expect(html).not.toContain(bundles.en.Membership.pricing.readyCopy);
     expect(html).not.toContain("Membership is currently unavailable");
   });
 
@@ -207,7 +204,7 @@ describe("/membership rewrite", () => {
   it("closes with /join and mailto: actions", async () => {
     const html = await renderMembership([community]);
 
-    expect(html).toContain('href="/join"');
+    expect(html).not.toContain('href="/join"');
     expect(html).toMatch(/href="mailto:[^"]+"/);
   });
 });

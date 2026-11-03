@@ -15,6 +15,7 @@ import {InterestBand} from "@/components/wt/interest-band";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
+import {siteConfig} from "@/config/site";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {buildPageMetadata} from "@/lib/metadata";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
@@ -93,10 +94,8 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         : hasFilters
         ? <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />
         : <HonestDirectoryEmpty
-            frames={[t("emptyFrame")]}
             next={t("noPublishedDescription")}
-            primary={{href: "/contact", label: t("emptyPrimary")}}
-            secondary={{href: "/join", label: t("emptySecondary")}}
+            primary={{href: `mailto:${siteConfig.contact.email}`, label: t("emptyPrimary")}}
             status={t("noPublishedTitle")}
           />}
     </Section>

@@ -91,12 +91,10 @@ describe("/about/committees", () => {
     renderWithIntl("en", await CommitteesPage({params: Promise.resolve({locale: "en"})}));
 
     expect(screen.getByRole("heading", {level: 1, name: en.Committees.title})).toBeVisible();
-    const cardsGrid = document.querySelector(".rich-items-cards");
-    expect(cardsGrid).toBeInTheDocument();
-    expect(within(cardsGrid as HTMLElement).getAllByRole("article")).toHaveLength(3);
+    expect(screen.getByText(en.Committees.summary)).toBeVisible();
+    expect(document.querySelector(".rich-items-cards")).not.toBeInTheDocument();
     for (const committee of ["executive", "innovation", "membership"] as const) {
-      expect(screen.getByRole("heading", {level: 3, name: en.Committees[committee].title})).toBeVisible();
-      expect(screen.getByText(en.Committees[committee].description)).toBeVisible();
+      expect(screen.queryByRole("heading", {level: 3, name: en.Committees[committee].title})).toBeNull();
     }
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
     const related = document.querySelector(".rich-related-grid");
@@ -108,7 +106,7 @@ describe("/about/committees", () => {
   it("stays server-only on rich-items-cards, with no manufactured compass", () => {
     const source = readFileSync(resolve(process.cwd(), "app/[locale]/(public)/about/committees/page.tsx"), "utf8");
     expect(source).toContain("PageHero");
-    expect(source).toContain("rich-items-cards");
+    expect(source).not.toContain("rich-items-cards");
     expect(source).not.toContain("RichCompass");
     expect(source).not.toContain("InstitutionalPageIntro");
     expect(source).not.toMatch(/["']use client["']/);

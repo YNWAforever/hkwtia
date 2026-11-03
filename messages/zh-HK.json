@@ -24,7 +24,7 @@
   "Navigation": {
     "brand": {
       "publicName": "WTIA",
-      "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台"
+      "descriptor": "香港無線科技商會"
     },
     "groups": {
       "eventsProgrammes": {
@@ -49,9 +49,9 @@
       },
       "membershipEcosystem": {
         "label": "會員平台",
-        "title": "把真實業務需要帶進網絡。",
-        "copy": "在不公開機密資料或暗示保證配對下準備買家簡報。",
-        "cta": "提交挑戰"
+        "title": "聯絡 WTIA。",
+        "copy": "查詢請電郵 contact@hkwtia.org。",
+        "cta": "電郵查詢"
       },
       "impactInsights": {
         "label": "科技 + 智慧",
@@ -84,7 +84,7 @@
       "cpai": "CPAI",
       "membership": "會員計劃",
       "members": "會員名錄",
-      "showcase": "會員與方案展示",
+      "showcase": "會員展示",
       "news": "最新消息",
       "aiOps": "人工智能營運",
       "aiTransparency": "人工智能透明度",
@@ -128,7 +128,7 @@
     "staffSignIn": "職員登入",
     "brand": {
       "publicName": "WTIA",
-      "descriptor": "香港無線科技商會持續發展中的 AI+ 產業平台",
+      "descriptor": "香港無線科技商會",
       "homeLabel": "WTIA 首頁",
       "logoAlt": "WTIA 香港無線科技商會"
     },
@@ -140,8 +140,8 @@
       "contact": "聯絡"
     },
     "newsletter": {
-      "eyebrow": "活動通知",
-      "title": "香港下一步應建設甚麼？",
+      "eyebrow": "聯絡",
+      "title": "查詢：contact@hkwtia.org",
       "emailLabel": "工作電郵",
       "placeholder": "工作電郵",
       "submit": "準備活動通知電郵",
@@ -151,17 +151,14 @@
       "mailBody": "請將 {email} 加入 WTIA 活動通知名單。"
     },
     "summary": "WTIA 連繫香港無線科技社群的科技企業、專業人士及計劃。",
-    "addressLines": [
-      "香港觀塘鴻圖道 73-75 號",
-      "KOHO 4 樓"
-    ],
+    "addressLines": [],
     "privacy": "私隱聲明",
     "copyright": "© {year} WTIA。版權所有。"
   },
   "Email": {
     "brand": "WTIA",
     "footer": {
-      "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+      "address": "contact@hkwtia.org",
       "reason": "你收到這封推廣電郵，是因為你已選擇接收 WTIA 最新消息。",
       "unsubscribe": "取消訂閱推廣電郵"
     },
@@ -482,10 +479,10 @@
       },
       "empty": {
         "title": "目前未有活動開放報名。",
-        "copy": "登記接收活動通知，或向團隊提出明確業務挑戰，協助策劃實用的未來活動。"
+        "copy": "最新活動查詢請電郵 contact@hkwtia.org。"
       },
-      "updatesAction": "接收活動通知",
-      "challengeAction": "提交挑戰",
+      "updatesAction": "電郵查詢最新活動",
+      "challengeAction": "電郵查詢最新活動",
       "recordLabel": "最近一次活動紀錄"
     },
     "pathways": {
@@ -496,31 +493,31 @@
         "corporates": {
           "title": "企業",
           "copy": "尋找技術方案、人才及創新夥伴。",
-          "benefits": "企業挑戰 · 高層簡報 · 產業委員會",
+          "benefits": "獎項、業界活動、會員網絡",
           "cta": "探索會員"
         },
         "smes": {
           "title": "中小企",
           "copy": "把 AI 機遇轉化為實際業務改善。",
-          "benefits": "準備度評估 · 實務諮詢 · 可信供應商",
+          "benefits": "香港資訊及通訊科技獎・Tech to Connect・CPAI",
           "cta": "尋找活動"
         },
         "startups": {
           "title": "初創企業",
           "copy": "連繫買家、投資者及區域夥伴。",
-          "benefits": "結構化曝光 · 展示日 · 市場進入",
+          "benefits": "香港資訊及通訊科技獎：ICT 初創獎・Tech to Connect",
           "cta": "探索方案展示"
         },
         "professionals": {
           "title": "專業人士",
           "copy": "增進技能、參與產業發展並拓展網絡。",
-          "benefits": "委員會 · 專業認證 · 導師計劃",
+          "benefits": "CPAI 課程・活動・委員會",
           "cta": "探索會員"
         },
         "gba": {
           "title": "大灣區及國際夥伴",
-          "copy": "連接香港科技力量與市場機遇。",
-          "benefits": "落地支援 · 考察團 · 買家配對",
+          "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+          "benefits": "活動及考察團",
           "cta": "探索創科起動"
         }
       },
@@ -531,10 +528,10 @@
       "destinations": {
         "membership": {
           "label": "會籍",
-          "copy": "比較免費社群會籍，以及個人、企業及白金會籍。"
+          "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
         },
         "showcase": {
-          "label": "會員及方案展示",
+          "label": "會員展示",
           "copy": "按應用場景及部署方式，瀏覽已審核的會員方案。"
         },
         "events": {
@@ -543,7 +540,7 @@
         },
         "launchpad": {
           "label": "創科起動",
-          "copy": "全球市場小組計劃、落地夥伴及資助計劃配對工具。"
+          "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。"
         },
         "partners": {
           "label": "夥伴網絡",
@@ -551,11 +548,11 @@
         },
         "programmes": {
           "label": "計劃及獎項",
-          "copy": "Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI 的歷屆紀錄。"
+          "copy": "香港資訊及通訊科技獎、Tech to Connect 及 CPAI。"
         },
         "cpai": {
           "label": "CPAI",
-          "copy": "由 WTIA 直接頒發、支援應用創新的專題計劃。"
+          "copy": "證書安排以課程條款為準。"
         },
         "committees": {
           "label": "委員會",
@@ -570,7 +567,7 @@
       "stages": {
         "before": {
           "title": "活動前",
-          "copy": "推薦、票價、名額及配對。"
+          "copy": "報名前清楚列明活動詳情、費用及名額。"
         },
         "during": {
           "title": "活動中",
@@ -597,11 +594,11 @@
         "action": "探索會員"
       },
       "marketplace": {
-        "label": "AI 解決方案市場",
-        "title": "尋找可在真實環境落地的 AI。",
-        "copyEmpty": "按用途及部署方式瀏覽方案展示，查看已獲批准公開的方案。",
-        "copyUnavailable": "方案展示暫時無法顯示。",
-        "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
+        "label": "會員展示",
+        "title": "會員展示",
+        "copyEmpty": "會員展示 — 經會員同意後刊登的方案。",
+        "copyUnavailable": "會員展示 — 經會員同意後刊登的方案。",
+        "copyAvailable": "會員展示 — 經會員同意後刊登的方案。",
         "action": "探索解決方案"
       }
     },
@@ -657,7 +654,7 @@
       "eventSeriesLabel": "活動系列",
       "credentialLabel": "專業資格",
       "editionsFact": "自 {year} 年起共 {count} 屆",
-      "credentialFact": "由 WTIA 直接頒發",
+      "credentialFact": "證書安排以課程條款為準。",
       "action": "查看計劃",
       "items": {
         "cpai": {
@@ -681,7 +678,7 @@
     "gbaGateway": {
       "eyebrow": "大灣區通道",
       "title": "香港專長，大灣區機遇，全球視野。",
-      "copy": "提供市場進入、落地支援、考察團、買家配對及長期區域合作的實務路徑。",
+      "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
       "openCohortAction": "查看現正招募的小組",
       "exploreAction": "探索創科起動"
     },
@@ -718,7 +715,7 @@
     "legacyNetwork": {
       "eyebrow": "承接真實合作網絡",
       "title": "有歷史根基，也有未來方向的網絡。",
-      "note": "此處展示的每間機構均為 WTIA 已發布的紀錄，並已確認合作關係及標誌使用權；完整紀錄請見合作夥伴頁面。",
+      "note": "已刊登的 WTIA 夥伴紀錄見夥伴頁。在取得書面同意前，不會展示標誌。",
       "viewAllAction": "查看所有夥伴",
       "previewNote": "顯示此分類 {total} 個紀錄中的 {shown} 個。",
       "tabs": {
@@ -735,8 +732,8 @@
         "catalogPricesLabel": "現行網上計劃會費",
         "label": "會員計劃",
         "title": "建立持續參與生態系統的路徑。",
-        "copy": "請在會籍頁比較現時可用的計劃及會費。如需確認資格或公布目錄以外的安排，請聯絡 WTIA。",
-        "points": ["相關活動及知識", "專頁及可見度選擇", "實用的首 90 天旅程"],
+        "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
+        "points": ["相關活動及知識", "專頁及可見度選擇"],
         "primaryAction": "比較會員計劃",
         "secondaryAction": "準備會員查詢"
       },
@@ -785,14 +782,14 @@
     "summary": "攜手讓香港持續連接新興科技機遇。",
     "messageTitle": "共同承諾",
     "message": "會員分享經驗、保持好奇並積極合作，是本會最重要的力量。香港無線科技商會（WTIA／Wireless）將繼續在創新與機遇之間建立實際橋樑。",
-    "signature": "主席　賴志偉"
+    "signature": "WTIA 主席　賴志偉"
   },
   "Committees": {
     "metaTitle": "委員會｜香港無線科技商會 WTIA",
-    "metaDescription": "WTIA 各委員會：將會員參與轉化為業界行動。",
+    "metaDescription": "2026–2028 年度委員會資料稍後公布。",
     "eyebrow": "管治",
-    "title": "把參與轉化為行動的委員會。",
-    "summary": "由會員帶領的委員會為 WTIA 重點工作提供監督及專業意見。",
+    "title": "委員會",
+    "summary": "2026–2028 年度委員會資料稍後公布。",
     "structureTitle": "委員會架構",
     "executive": {
       "title": "執行委員會",
@@ -832,46 +829,46 @@
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
     "title": "選擇適合你的會籍",
-    "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
+    "summary": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "現行會費及付款週期以目前會員目錄為準。",
+    "tiersIntro": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
     "benefits": {
       "network": "社群及交流機會",
       "programs": "參與計劃",
       "visibility": "WTIA 展示機會"
     },
     "tierBenefits": {
-      "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "不包括提交活動", "不包括會員工具"],
+      "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "不包括提交活動"],
       "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
-      "corporate": ["精選會員專頁及商標牆", "無限次提交活動（經審核）", "3 個方案展示頁", "WhatsApp 優先支援通道", "包含會員工具"],
-      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"],
+      "corporate": ["精選會員專頁及商標牆", "3 個方案展示頁", "WhatsApp 優先支援通道"],
+      "patron": ["包含企業會員所有權益", "專屬 WhatsApp 支援"],
       "individual": ["會員專頁", "每季最多提交 2 個活動供 WTIA 審核", "1 個方案展示", "WhatsApp 更新"],
-      "platinum": ["包括企業會籍的全部", "精選展示位置", "與 WTIA 合辦活動", "專屬 WhatsApp 支援"]
+      "platinum": ["包括企業會籍的全部", "專屬 WhatsApp 支援"]
     },
     "tiers": {
       "community": {
         "name": "社群",
-        "description": "免費。會員名片，以及報名公開活動。不包括提交活動，亦不包括會員工具。"
+        "description": "適合一個人。"
       },
       "startup": {
         "name": "個人",
-        "description": "舊有計劃。新申請請選擇個人會籍並網上付款。"
+        "description": "舊有計劃代碼。不接受新申請。"
       },
       "corporate": {
         "name": "企業",
-        "description": "適合機構。網上付款。"
+        "description": "適合機構。"
       },
       "patron": {
         "name": "白金",
-        "description": "舊有計劃。新申請請選擇白金會籍並網上付款。"
+        "description": "舊有計劃代碼。不接受新申請。"
       },
       "individual": {
         "name": "個人",
-        "description": "適合個人。網上付款。付款成功後會籍生效。"
+        "description": "適合一個人。"
       },
       "platinum": {
         "name": "白金",
-        "description": "機構的最高會籍。網上付款。"
+        "description": "適合機構。"
       }
     },
     "dimensionsTitle": "會籍內容",
@@ -879,27 +876,27 @@
     "faq": {
       "0": {
         "question": "誰可以申請？",
-        "answer": "社群會籍免費，適合一個人。個人會籍每年 HK$500，適合一個人。企業及白金會籍適合機構，並於網上付款。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "1": {
         "question": "在哪裡查看現行會費？",
-        "answer": "可用的會費及帳單週期來自現行會籍目錄，見上方計劃卡片。付款前請以付款服務顯示的最終金額為準。"
+        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "2": {
         "question": "付費計劃會自動續費嗎？",
-        "answer": "網上付費流程使用 Stripe 訂閱結帳。付款前請向 WTIA 確認適用於你會籍的續費及取消條款。"
+        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "3": {
         "question": "如何付款或取消？",
-        "answer": "選擇可用的網上計劃後，可前往安全結帳頁。如需取消或其他安排，請聯絡 WTIA；本頁不會更改現有訂閱。"
+        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "4": {
         "question": "公司會籍包含多少席位？",
-        "answer": "社群及個人會籍各為一席。企業及白金會籍為二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
+        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "5": {
         "question": "審批需時多久？",
-        "answer": "社群會籍免費，提交後即時生效。個人、企業及白金會籍均於網上付款，付款成功後確認。如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "6": {
         "question": "可以退款嗎？",
@@ -933,13 +930,13 @@
       "title": "兩種加入方式",
       "individual": {
         "title": "個人",
-        "copy": "社群會籍免費。個人會籍每年 HK$500，網上付款，付款成功後生效。"
+        "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
       "organisation": {
         "title": "公司",
-        "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者與個人會籍一樣，先付款。"
+        "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
       },
-      "sla": "如有查詢或特殊情況，我們會盡量在 5 個工作天內回覆。"
+      "sla": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
     },
     "renew": {
       "title": "續會或重新加入",
@@ -961,7 +958,7 @@
     },
     "dimensions": {
       "network": {"title": "網絡", "copy": "遍及生態系統的社群及聯繫網絡。"},
-      "programmes": {"title": "計劃參與", "copy": "參與 WTIA 計劃（ASA、TCT、HKICT、CPAI）。"},
+      "programmes": {"title": "計劃參與", "copy": "參與 WTIA 項目（TCT、香港資訊及通訊科技獎、CPAI）。"},
       "visibility": {"title": "曝光機會", "copy": "讓其他會員及夥伴認識你的機會。"},
       "events": {"title": "活動", "copy": "參與 WTIA 活動，由公開場次至會員專屬場次。"},
       "showcase": {"title": "展示頁", "copy": "符合資格於公開展示頁刊登方案。"},
@@ -977,8 +974,8 @@
       "eyebrow": "首 90 天",
       "heading": "加入後的安排",
       "steps": {
-        "0": {"title": "加入", "copy": "選擇級別並完成付款或審批。"},
-        "1": {"title": "入會導引", "copy": "認識 WTIA 團隊，取得會員工具的使用權。"},
+        "0": {"title": "加入", "copy": "會籍查詢請電郵 contact@hkwtia.org。"},
+        "1": {"title": "入會導引", "copy": "與 WTIA 團隊會面。"},
         "2": {"title": "首次活動", "copy": "以會員身份出席首個 WTIA 活動。"},
         "3": {"title": "首次引薦", "copy": "透過網絡建立第一個聯繫。"},
         "4": {"title": "檢視", "copy": "WTIA 跟進了解會籍對你的實際幫助。"}
@@ -987,8 +984,8 @@
     "closing": {
       "eyebrow": "隨時歡迎你",
       "title": "選擇級別，或先向我們查詢。",
-      "copy": "社群會籍免費。個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。我們會盡量在 5 個工作天內回覆。",
-      "join": "立即加入",
+      "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
+      "join": "電郵 contact@hkwtia.org",
       "contact": "電郵會員團隊"
     }
   },
@@ -1062,23 +1059,25 @@
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
     "choosePlanTitle": "選擇會員計劃",
-    "choosePlanDescription": "社群會籍免費。個人、企業及白金會籍均於網上付款。選擇級別後繼續。",
-    "choosePlanCompare": "比較計劃及費用",
+    "choosePlanDescription": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
+    "freezeTitle": "會籍",
+    "freezeNotice": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
+    "choosePlanCompare": "電郵 contact@hkwtia.org",
     "choosePlan": {
-      "community": "免費。會員名片及公開活動報名。不包括提交活動，亦不包括會員工具。",
-      "startup": "新申請請選擇個人會籍。",
-      "corporate": "機構每年 HK$1,800。現在網上付款。",
-      "patron": "新申請請選擇白金會籍。",
-      "individual": "個人每年 HK$500。現在網上付款。",
-      "platinum": "每年 HK$4,800。現在網上付款。"
+      "community": "適合一個人。",
+      "startup": "不接受新申請。",
+      "corporate": "適合機構。",
+      "patron": "不接受新申請。",
+      "individual": "適合一個人。",
+      "platinum": "適合機構。"
     },
     "choosePlanFree": "免費",
     "choosePlanAction": "以{plan}繼續",
     "choosePlanPrice": "每年 {amount}",
     "choosePlanContact": "聯絡 WTIA",
     "tracks": {
-      "individual": {"title": "個人", "copy": "社群會籍免費。個人會籍每年 HK$500。網上付款。付款成功後會籍生效。"},
-      "organisation": {"title": "公司", "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者均先付款。"}
+      "individual": {"title": "個人", "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"},
+      "organisation": {"title": "公司", "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"}
     },
     "organisation": {
       "intro": "公司資料會與申請一併儲存。商業登記證可在付款後補交，並非必須。",
@@ -1101,7 +1100,7 @@
       "title": "下一步",
       "individualLead": "你的會籍已生效。請下載資料冊、登入，並選擇第一個活動。",
       "processingLead": "付款正在確認。會籍生效後即可使用這些連結。",
-      "organisationLead": "如這宗申請需要人工例外處理，Willy 會在 5 個工作天內回覆。",
+      "organisationLead": "如這宗申請需要人工例外處理，請電郵 contact@hkwtia.org。",
       "noPayment": "現時尚未收款。WTIA 會在審核後與你聯絡。",
       "welcomeKit": "下載迎新資料冊",
       "associationKit": "下載協會資料冊",
@@ -1178,7 +1177,7 @@
       },
       "review": {
         "title": "審核中",
-        "description": "如需人工例外處理，Willy 會在 5 個工作天內回覆。"
+        "description": "如需人工例外處理，請電郵 contact@hkwtia.org。"
       }
     },
     "whatsapp": {
@@ -1326,7 +1325,7 @@
       "compassActionLabel": "聯絡方式",
       "askProgrammeTeam": "聯絡計劃團隊",
       "editionsFact": "自 {year} 年起共 {count} 屆",
-      "credentialFact": "由 WTIA 直接頒發",
+      "credentialFact": "證書安排以課程條款為準。",
       "mailSubject": "查詢「{programme}」計劃"
     }
   },
@@ -1372,24 +1371,24 @@
       "intro": "WTIA 檔案所記錄的每一屆，由首屆到最新一屆；新計劃資訊將陸續加入。",
       "span": "{first}–{latest}",
       "editions": "{count} 屆紀錄",
-      "credential": "由 WTIA 直接頒發的專業資格，沒有屆數紀錄。",
+      "credential": "證書安排以課程條款為準。",
       "events": "查看相關活動",
       "partner": "成為計劃夥伴"
     }
   },
   "Partners": {
     "metaTitle": "合作夥伴｜香港無線科技商會 WTIA",
-    "metaDescription": "WTIA 已發布的夥伴紀錄：支持機構、區域夥伴、媒體夥伴、計劃夥伴及贊助機構，每項均已確認合作關係及標誌使用權。",
+    "metaDescription": "WTIA 夥伴紀錄：支持機構、地區、媒體、項目及贊助夥伴。",
     "hero": {
       "eyebrow": "夥伴生態系統",
       "title": "與 WTIA 合作的機構，有紀錄可依。",
-      "lead": "此處每項紀錄均由 WTIA 發布，並已確認合作關係及標誌使用權；不會單憑過往標誌而列入名單。",
+      "lead": "已刊登的 WTIA 夥伴紀錄。在逐一取得書面同意前，不會展示標誌。",
       "breadcrumbCurrent": "合作夥伴"
     },
     "sourceNote": {
       "eyebrow": "關係脈絡",
       "title": "認識合作夥伴",
-      "copy": "紀錄只會在 WTIA 同時確認合作關係及標誌使用權後出現，並只在合作期內顯示。",
+      "copy": "每項紀錄為 WTIA 已刊登的夥伴名單。在取得該機構書面同意前，本頁不展示標誌。",
       "count": "{count} 項已發布夥伴紀錄"
     },
     "categories": {
@@ -1419,7 +1418,7 @@
     "empty": {
       "label": "已發布紀錄",
       "title": "目前尚未有已發布的夥伴紀錄。",
-      "copy": "當 WTIA 逐項確認合作關係及標誌使用權後，夥伴紀錄便會在此顯示。",
+      "copy": "暫未刊登夥伴紀錄。",
       "action": "聯絡團隊"
     },
     "update": {
@@ -1431,15 +1430,15 @@
   },
   "LaunchPad": {
     "metaTitle": "創科起動｜香港無線科技商會 WTIA",
-    "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",
+    "metaDescription": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
     "eyebrow": "創科起動",
-    "title": "協助科技團隊走向全球市場。",
-    "description": "以專題小組、實用市場連接及清晰下一步，支援香港科技團隊拓展國際市場。",
+    "title": "Launch Pad",
+    "description": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
     "breadcrumbCurrent": "創科起動",
     "gbaOpening": {
       "eyebrow": "大灣區通道",
-      "title": "香港專長，大灣區機遇，全球視野。",
-      "copy": "提供市場進入、落地支援、考察團、買家配對及長期區域合作的實務路徑。",
+      "title": "Launch Pad",
+      "copy": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
       "map": {
         "hk": "HK",
         "gz": "GZ",
@@ -1466,10 +1465,10 @@
     },
     "program": {
       "eyebrow": "計劃",
-      "title": "通往新市場的實務路徑",
-      "intro": "創科起動聚集獲選團隊，提供有系統的市場準備、落地夥伴連接及同儕學習。",
-      "outcomeTitle": "由準備走向市場落地",
-      "outcomeDescription": "每個小組均循清晰路徑推進：準備、夥伴配對、落地及擴展。"
+      "title": "計劃說明",
+      "intro": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。",
+      "outcomeTitle": "計劃詳情",
+      "outcomeDescription": "WTIA 透過活動及考察團，連繫香港科技團隊與大灣區及海外夥伴。具體計劃確認後公布。"
     },
     "calendar": {
       "eyebrow": "時間表",
@@ -1493,7 +1492,7 @@
     "partners": {
       "eyebrow": "落地夥伴",
       "title": "落地夥伴地圖",
-      "intro": "認識協助小組探索優先市場的公開夥伴機構。",
+      "intro": "WTIA 刊登後，才會在此列出落地夥伴。",
       "empty": "落地夥伴將於稍後公布。",
       "unavailable": "落地夥伴資料暫時無法載入，請稍後再試。",
       "market": "市場",
@@ -1568,8 +1567,8 @@
     },
     "clinic": {
       "label": "需要協助？",
-      "title": "需要資助或市場落地諮詢？",
-      "description": "與 WTIA 討論下一個實務步驟。"
+      "title": "查詢",
+      "description": "查詢請電郵 contact@hkwtia.org。"
     },
     "application": {
       "title": "申請參與開放小組",
@@ -1585,23 +1584,23 @@
       "signIn": "登入",
       "error": "未能提交申請，請再試一次。"
     },
-    "clinicCta": "預約諮詢"
+    "clinicCta": "電郵查詢"
   },
   "Showcase": {
-    "metaTitle": "會員方案｜香港無線科技商會 WTIA",
+    "metaTitle": "會員展示｜香港無線科技商會 WTIA",
     "metaDescription": "瀏覽 WTIA 會員企業已發布的科技方案。",
     "detailFallbackDescription": "WTIA 會員展示",
-    "eyebrow": "AI 展示",
-    "title": "會員方案",
+    "eyebrow": "會員展示",
+    "title": "會員展示",
     "description": "探索香港科技公司的實用產品及服務。",
     "introTitle": "面向實際業務需要的科技方案",
     "introDescription": "按使用場景、部署方式、語言及整合需要，比較已發布的 WTIA 會員方案。",
     "ownerCta": "管理你的展示頁",
     "resultsTitle": "探索會員方案",
     "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
-    "noPublishedTitle": "尚未有已發佈的方案",
+    "noPublishedTitle": "會員展示即將推出。",
     "noPublishedDescription": "方案內容將於會員同意並審核後陸續上架。",
-    "emptyPrimary": "聯絡秘書處",
+    "emptyPrimary": "如有意參與會員展示，請電郵 contact@hkwtia.org。",
     "emptySecondary": "成為會員後可提交",
     "emptyFrame": "方案位置 · 待確認",
     "emptyTitle": "沒有符合的已發布展示頁",
@@ -1736,9 +1735,9 @@
     "resultsHeading": "會員名錄",
     "loadMore": "查看更多會員",
     "paginationLabel": "會員名錄分頁",
-    "noPublishedTitle": "現時公開目錄為 0 個會員",
+    "noPublishedTitle": "會員同意後，將於此列出。",
     "noPublishedDescription": "會員介紹須經書面同意後才上架。",
-    "emptyPrimary": "申請成為會員",
+    "emptyPrimary": "如有意參與會員展示，請電郵 contact@hkwtia.org。",
     "emptySecondary": "了解會籍",
     "emptyFrame": "待會員同意",
     "emptyTitle": "暫時沒有相符的會員專頁",
@@ -1753,7 +1752,7 @@
       "events": "此會員即將舉行的活動",
       "noEvents": "暫無即將舉行的活動。",
       "joinCta": "貴機構也可在此列出",
-      "join": "查看會員計劃"
+      "join": "如有意參與會員展示，請電郵 contact@hkwtia.org。"
     }
   },
   "AiOps": {
@@ -2058,12 +2057,12 @@
     "unavailableDescription": "部分內容可能未有顯示，請稍後再試。",
     "breadcrumbCurrent": "消息與傳媒",
     "statusNews": "新聞",
-    "resultsHeading": "新聞及開發日誌",
+    "resultsHeading": "消息",
     "statusBuildLog": "開發日誌",
     "quality": {
       "eyebrow": "編採標準",
       "title": "WTIA 的報道方式",
-      "body": "每篇文章均由職員撰寫、註明日期及作者。開發日誌記錄本平台已實際推出的工程工作，並連結至 AI-Ops 頁面上相應的公開實證。"
+      "body": "每篇文章均由職員撰寫、註明日期及作者。只刊登已核實來源的稿件。"
     },
     "subscribe": {
       "eyebrow": "掌握動態",
@@ -2085,7 +2084,7 @@
     "description": "歡迎以電郵或下列途徑聯絡香港無線科技商會（WTIA／Wireless）。",
     "breadcrumbCurrent": "聯絡我們",
     "channelsTitle": "直接聯絡 WTIA",
-    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+    "address": "contact@hkwtia.org",
     "routesTitle": "選擇合適的下一步",
     "routesDescription": "前往現有的 WTIA 服務頁面，查閱最新資料或採取行動。",
     "viewLabel": "查看",
@@ -2263,7 +2262,7 @@
       {
         "heading": "聯絡我們",
         "body": [
-          "有關個人資料的查詢、要求及投訴，可電郵至 contact@hkwtia.org，或郵寄至香港觀塘鴻圖道 73-75 號 KOHO 4 樓 WTIA。"
+          "有關個人資料的查詢、要求及投訴，可電郵至 contact@hkwtia.org。"
         ],
         "items": []
       }
@@ -2506,7 +2505,7 @@
       },
       "under_review": {
         "title": "你的會籍正待審批",
-        "body": "這是人工例外處理。Willy 會在 5 個工作天內回覆。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
+        "body": "這是人工例外處理。查詢請電郵 contact@hkwtia.org。等候期間，你仍可更新本人的個人資料及查看帳單記錄。"
       },
       "inactive": {
         "title": "目前未能使用會員權益",
@@ -2586,7 +2585,7 @@
       "label": "下一步",
       "past_due": {"title": "請更新付款資料", "body": "上次付款未能完成。請更新付款資料，以保持會籍有效。", "action": "前往帳單"},
       "pending_payment": {"title": "完成付款", "body": "完成付款後，會籍即會生效。", "action": "前往帳單"},
-      "pending_review": {"title": "你的申請正在審核", "body": "Willy 會在 5 個工作天內回覆。", "action": "查看申請詳情"},
+      "pending_review": {"title": "你的申請正在審核", "body": "你的申請正在審核。查詢請電郵 contact@hkwtia.org。", "action": "查看申請詳情"},
       "profile": {"title": "完善個人資料", "body": "加上職銜及聯絡偏好，方便 WTIA 與你聯絡。", "action": "前往個人資料"},
       "company": {"title": "填寫公司資料", "body": "公司資料會用於會籍、名額及展示頁。", "action": "前往公司資料"}
     },
@@ -2650,7 +2649,7 @@
       "pending_review": {
         "label": "審核中",
         "title": "申請審核中",
-        "description": "Willy 會在 5 個工作天內回覆。"
+        "description": "查詢請電郵 contact@hkwtia.org。"
       }
     },
     "profileTitle": "我的個人資料",
@@ -2679,7 +2678,7 @@
     },
     "showcaseListing": {
       "nav": "展示頁資料",
-      "eyebrow": "AI 展示",
+      "eyebrow": "會員展示",
       "title": "發布你的公司故事",
       "description": "向 WTIA 網絡分享清晰、方便買家了解的產品資料。",
       "formTitle": "展示頁資料",

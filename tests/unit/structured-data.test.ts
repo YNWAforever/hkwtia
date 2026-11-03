@@ -23,13 +23,8 @@ describe("buildOrganizationData", () => {
     expect(data.alternateName).not.toContain("WiseTech Hong Kong");
     expect(JSON.stringify(data)).not.toMatch(/\bHKWTA\b/);
     expect(data.email).toBe(siteConfig.contact.email);
-    expect(data.telephone).toBe(siteConfig.contact.phone);
-    expect(data.address).toMatchObject({
-      "@type": "PostalAddress",
-      streetAddress: siteConfig.contact.addressLines.slice(0, -1).join(", "),
-      addressLocality: siteConfig.contact.addressLines.at(-1),
-      addressCountry: "HK",
-    });
+    expect(data.telephone).toBeUndefined();
+    expect(data.address).toBeUndefined();
   });
 });
 

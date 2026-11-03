@@ -1,7 +1,5 @@
-import {render, screen, within} from "@testing-library/react";
+import {render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-
-import {MEMBER_TOOLS} from "@/config/member-tools";
 
 const state = vi.hoisted(() => ({plans: ["community"] as string[], statuses: ["active"] as string[]}));
 
@@ -26,16 +24,6 @@ import PortalToolsPage from "@/app/[locale]/(member)/portal/tools/page";
 
 // The registry is built for N tools, so queries are scoped to one card rather than the whole
 // page: a singular `getByText`/`getByRole` would throw the moment a second tool is added.
-const tool = MEMBER_TOOLS[0];
-
-function toolCard(): HTMLElement {
-  const card = screen
-    .getByRole("heading", {level: 2, name: tool.titleKey})
-    .closest("li");
-  if (!card) throw new Error(`No card rendered for ${tool.key}`);
-  return card as HTMLElement;
-}
-
 describe("/portal/tools", () => {
   beforeEach(() => {
     state.plans = ["community"];
@@ -48,32 +36,9 @@ describe("/portal/tools", () => {
     expect(screen.getByRole("heading", {level: 1, name: "tools.title"})).toBeVisible();
   });
 
-  it("shows a locked card naming the plans, with a path to membership", async () => {
+  it("does not link to an internal member tool", async () => {
     render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
-
-    const card = within(toolCard());
-    expect(card.getByText(`tools.includedWith|plans.individual, plans.corporate and plans.platinum`)).toBeVisible();
-    expect(card.queryByRole("link", {name: "tools.open"})).not.toBeInTheDocument();
-    expect(card.getByRole("link", {name: "tools.viewPlans"})).toHaveAttribute("href", "/membership");
-  });
-
-  it("keeps a pending paid plan locked even when an active Community plan exists", async () => {
-    state.plans = ["corporate", "community"];
-    state.statuses = ["pending_payment", "active"];
-    render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
-    const card = within(toolCard());
-    expect(card.queryByRole("link", {name: "tools.open"})).not.toBeInTheDocument();
-    expect(card.getByText(/^tools\.includedWith/)).toBeVisible();
-  });
-  it("links an entitled member through to the tool", async () => {
-    state.plans = ["startup"];
-    render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
-
-    const card = within(toolCard());
-    expect(card.getByRole("link", {name: "tools.open"})).toHaveAttribute("href", `/portal/tools/${tool.key}`);
-    expect(card.queryByText(/^tools\.includedWith/)).not.toBeInTheDocument();
-    expect(card.getByText(tool.descriptionKey)).toBeVisible();
-    expect(card.getAllByRole("link")).toHaveLength(1);
-    expect(card.getByRole("link", {name: "tools.open"})).toHaveClass("button");
+    expect(screen.queryByRole("heading", {level: 2})).toBeNull();
+    expect(screen.queryByRole("link", {name: "tools.open"})).toBeNull();
   });
 });

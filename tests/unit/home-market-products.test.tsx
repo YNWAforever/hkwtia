@@ -87,7 +87,7 @@ describe("MarketProducts", () => {
     render(await MarketProducts({locale: "en"}));
 
     expect(screen.getByText(bundles.en.Home.marketProducts.directory.copyEmpty)).toBeInTheDocument();
-    expect(screen.getByText("Solution listings are temporarily unavailable.")).toBeInTheDocument();
+    expect(screen.getByText(bundles.en.Home.marketProducts.marketplace.copyUnavailable)).toBeInTheDocument();
   });
 
   it("keeps the showcase available when only the directory read fails", async () => {

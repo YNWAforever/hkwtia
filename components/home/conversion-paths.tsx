@@ -1,11 +1,9 @@
-import {getTranslations} from 'next-intl/server';
 import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {ActionLink} from '@/components/wt/action-link';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
-import {OPS_MEMBERSHIP_TIERS} from '@/config/membership-journey';
 
 // D-7: the donor's /partner-with-us and /partners are not ported PublicRoute members yet,
 // so partnership points at hkwtia's real /contact and /about destinations instead.
@@ -17,16 +15,7 @@ const panels = [
 // Section 13 of 13 -- the last homepage section. app/styles/wisetech.css:774 .conversion-section
 // (gradient background); :775 .conversion-grid (bordered 2-column panel layout).
 export async function ConversionPaths({locale, copyOverrides}: HomeCopyProps) {
-  const [t, tMembership] = await Promise.all([
-    getHomeTranslations({locale, copyOverrides, namespace: 'Home.conversionPaths'}),
-    getTranslations({locale, namespace: 'Membership'}),
-  ]);
-  const money = new Intl.NumberFormat(locale, {style: 'currency', currency: 'HKD', minimumFractionDigits: 0, maximumFractionDigits: 0});
-  const prices = OPS_MEMBERSHIP_TIERS.map((tier) => ({
-    key: tier.code,
-    plan: tMembership(`tiers.${tier.code}.name`),
-    fee: `${money.format(tier.annualPriceHkd)} ${tMembership('cadenceLabels.annual')}`,
-  }));
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.conversionPaths'});
 
   return (
     <Section labelledBy="conversion-paths-title" id="conversion-paths" className="conversion-section">
@@ -41,9 +30,6 @@ export async function ConversionPaths({locale, copyOverrides}: HomeCopyProps) {
               <p>{t(`${panel.key}.copy`)}</p>
               {/* A <dl>, not a <div>: `.conversion-grid article>div` is the action row's flex
                   wrapper (22px gap, a column on phones), which spaced two one-line fees 50px apart. */}
-              {panel.key === "membership" && prices.length > 0 ? <dl aria-label={t("membership.catalogPricesLabel")} className="conversion-fees">
-                {prices.map((price) => <div key={price.key}><dt>{price.plan}</dt><dd>{price.fee}</dd></div>)}
-              </dl> : null}
               <ul>{points.map((point) => <li key={point}>{point}</li>)}</ul>
               <div>
                 <ActionLink href={panel.primaryHref} variant="button-dark">{t(`${panel.key}.primaryAction`)}</ActionLink>

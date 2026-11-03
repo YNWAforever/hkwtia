@@ -58,8 +58,8 @@ import {localizeNavigation} from "@/config/navigation";
 
 describe("public shell server surfaces", () => {
   it.each([
-    ["en", "Events & Programmes", "Join WTIA", "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association", "Search solutions"],
-    ["zh-HK", "活動及計劃", "加入 WTIA", "香港無線科技商會持續發展中的 AI+ 產業平台", "搜尋方案"],
+    ["en", "Events & Programmes", "Join WTIA", "Hong Kong Wireless Technology Industry Association", "Search solutions"],
+    ["zh-HK", "活動及計劃", "加入 WTIA", "香港無線科技商會", "搜尋方案"],
   ] as const)("renders complete %s header copy", async (locale, group, join, descriptor, search) => {
     const view = render(await SiteHeader({locale, hasAnnouncement: true}));
     expect(view.container.querySelector(".brand-copy strong")?.textContent).toBe("WTIA");
@@ -123,10 +123,11 @@ describe("public shell server surfaces", () => {
     const hrefs = within(footer).getAllByRole("link").map((link) => link.getAttribute("href"));
     for (const href of [
       "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
-      "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
+      "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
     ]) expect(hrefs, href).toContain(href);
-    expect(within(footer).getByRole("heading", {level: 2, name: "What should Hong Kong build next?"}))
+    expect(hrefs).not.toContain("/ai-ops");
+    expect(within(footer).getByRole("heading", {level: 2, name: "Questions? contact@hkwtia.org"}))
       .toBeInTheDocument();
   });
 
@@ -135,7 +136,7 @@ describe("public shell server surfaces", () => {
     const footer = screen.getByRole("contentinfo");
     const expectedHrefs = [
       "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
-      "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
+      "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
       // The Membership column carries Join and Member sign-in; Contact now carries staff
       // sign-in. Keep all three in the exact route inventory.
@@ -176,7 +177,7 @@ describe("public shell server surfaces", () => {
 
   it.each([
     ["events-programmes", "See what is open before you plan.", "Browse what is open", "/events", true],
-    ["membership-ecosystem", "Bring a real business need into the network.", "Submit a challenge", "/contact", false],
+    ["membership-ecosystem", "Contact WTIA.", "Email us", "/contact", false],
     ["impact-insights", "Practical progress needs responsible choices.", "AI transparency", "/ai-transparency", false],
     ["about-wtia", "Read the association's own record.", "Read the history", "/about/history", false],
   ] as const)("gives %s a heading, titled columns and a feature aside", (groupId, title, cta, href, eventFirst) => {

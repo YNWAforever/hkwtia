@@ -5,7 +5,7 @@ type HonestDirectoryEmptyProps = Readonly<{
   status: string;
   next: string;
   primary: WtAction;
-  secondary: WtAction;
+  secondary?: WtAction;
   /** Dashed consent/reserved slots. Labels only — never a face, logo, or invented name. */
   frames?: readonly string[];
 }>;
@@ -29,7 +29,7 @@ export function HonestDirectoryEmpty({status, next, primary, secondary, frames =
       ) : null}
       <div className="directory-empty-actions">
         <ActionLink href={primary.href} variant="button-dark">{primary.label}</ActionLink>
-        <ActionLink className="directory-empty-secondary" href={secondary.href} variant="button">{secondary.label}</ActionLink>
+        {secondary ? <ActionLink className="directory-empty-secondary" href={secondary.href} variant="button">{secondary.label}</ActionLink> : null}
       </div>
     </div>
   );

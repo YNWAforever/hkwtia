@@ -107,9 +107,9 @@ describe("/members directory (D-11)", () => {
     profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
     const unfiltered = await renderDirectory();
     const filtered = await renderDirectory({q: "missing"});
-    expect(unfiltered).toContain("No member profiles are published yet.");
+    expect(unfiltered).toContain("Members will be listed here once they agree to be featured.");
     expect(filtered).toContain(bundles.en.Members.emptyDescription);
-    expect(filtered).not.toContain("No member profiles are published yet.");
+    expect(filtered).not.toContain("Members will be listed here once they agree to be featured.");
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {

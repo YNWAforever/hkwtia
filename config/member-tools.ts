@@ -2,11 +2,13 @@ import type {MemberToolsEnv} from "../lib/config/env";
 import type {MembershipPlanCode} from "../lib/membership/constants";
 
 /**
- * One external member tool, embedded in the portal (programme D-2).
+ * External member tools embedded in the portal.
  *
  * `url` is the tool's origin only. The access token is NOT here: it comes from the
  * environment through `tokenField`, and `toolFrameSrc` appends it at render time, so no
  * secret is stored in this file, in git, or in a client bundle.
+ *
+ * The list is empty on purpose. The only previous entry was an internal content calendar.
  */
 export type MemberTool = Readonly<{
   key: string;
@@ -25,17 +27,9 @@ export type MemberTool = Readonly<{
  * importable outside the Next runtime: relative imports only, and type-only imports for
  * anything from `lib/config/env.ts` (which begins with `import "server-only"`).
  */
-export const MEMBER_TOOLS: readonly MemberTool[] = Object.freeze([
-  Object.freeze({
-    key: "content-calendar",
-    titleKey: "tools.contentCalendar.title",
-    descriptionKey: "tools.contentCalendar.description",
-    url: "https://content-calendar-internal.vercel.app/",
-    tokenParam: "token",
-    tokenField: "contentCalendarToken",
-    tiers: Object.freeze(["startup", "corporate", "patron", "individual", "platinum"] as const),
-  }),
-]);
+// The content-calendar link pointed at an internal tool (content-calendar-internal.vercel.app).
+// It is not offered to members. P7, 2026-11-03. Do not restore the URL here.
+export const MEMBER_TOOLS: readonly MemberTool[] = Object.freeze([]);
 
 /**
  * The distinct origins of the configured tools, for `next.config.ts`'s `frame-src`.

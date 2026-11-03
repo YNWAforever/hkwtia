@@ -15,7 +15,7 @@ const EN_META = {
   About: "About WTIA / Wireless（香港無線科技商會）— Hong Kong's not-for-profit wireless and emerging technology association since 2001.",
   History: "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
   Chairman: "A message from Willy Lai, Chairman of WTIA / Wireless（香港無線科技商會）.",
-  Committees: "WTIA committees that turn member participation into focused industry action.",
+  Committees: "Committee details for the 2026–2028 term will be published shortly.",
   Membership: "Explore WTIA membership options for individuals and organisations. Join at hkwtia.org.",
   Contact: "Contact WTIA / Wireless（香港無線科技商會）. Email contact@hkwtia.org. Visit hkwtia.org.",
   Members: "WTIA member directory—published profiles of Hong Kong wireless and technology companies.",
@@ -28,7 +28,7 @@ const ZH_META = {
   About: "關於香港無線科技商會（WTIA／Wireless）：自2001年起服務香港無線及新興科技業界的非牟利商會。",
   History: "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
   Chairman: "香港無線科技商會（WTIA）主席賴志偉的話。",
-  Committees: "WTIA 各委員會：將會員參與轉化為業界行動。",
+  Committees: "2026–2028 年度委員會資料稍後公布。",
   Membership: "了解 WTIA 個人及機構會籍選項。歡迎於 hkwtia.org 查詢及申請。",
   Contact: "聯絡香港無線科技商會（WTIA）。電郵 contact@hkwtia.org。網址 hkwtia.org。",
   Members: "WTIA 會員名錄：已發布的香港無線及科技企業簡介。",
@@ -79,7 +79,8 @@ describe("Willy Approve t341s1501", () => {
     const data = buildOrganizationData() as WithContext<Exclude<Organization, string>>;
     expect(data.alternateName).toEqual(["WTIA", "香港無線科技商會", "HKWTIA"]);
     expect(data.email).toBe("contact@hkwtia.org");
-    expect(data.telephone).toBe("+852 2989 9164");
+    expect(data.telephone).toBeUndefined();
+    expect(data.address).toBeUndefined();
   });
 
   it("shows the approved public fees and no startup HK$1,200 tier", () => {
@@ -97,9 +98,9 @@ describe("Willy Approve t341s1501", () => {
       en.Membership.tracks.organisation.copy,
     ].join("\n");
     expect(publicCopy).not.toMatch(/1,200|HK\$1200|初創/);
-    expect(en.Membership.tracks.individual.copy).toContain("HK$500");
-    expect(en.Membership.tracks.organisation.copy).toContain("HK$1,800");
-    expect(en.Membership.tracks.organisation.copy).toContain("HK$4,800");
+    expect(en.Membership.tracks.individual.copy).toBe("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
+    expect(en.Membership.tracks.organisation.copy).toBe("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
+    expect(publicCopy).not.toMatch(/HK\$\d/);
   });
 
   it("does not put a handwritten lastmod date in the sitemap source", () => {
