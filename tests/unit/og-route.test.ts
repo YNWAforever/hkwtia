@@ -17,10 +17,14 @@ describe("GET /api/og image source", () => {
     expect(tree).not.toContain("127.0.0.1");
   });
 
-  it("keeps a same-origin media image on the member card", async () => {
+  it("does not paint a member photograph or logo onto the navy card", async () => {
     const tree = await (await GET(card("/images/member.png"))).text();
     expect(tree).toContain("A member");
-    expect(tree).toContain("https://hkwtia.test/images/member.png");
+    expect(tree).not.toContain("https://hkwtia.test/images/member.png");
+    expect(tree).toContain("https://hkwtia.test/images/wtia-logo-mono-white.png");
+    expect(tree).toContain("#0F4C81");
+    expect(tree).not.toContain("#1b4f7a");
+    expect(tree).not.toContain("#e8cf9a");
   });
 });
 
@@ -47,23 +51,30 @@ describe("renderOgCard", () => {
     const tree = JSON.stringify(element);
 
     expect(tree).toContain("A distinctive headline");
-    expect(tree).toContain("WTIA");
-    expect(tree).not.toMatch(/WiseTech/i);
+    expect(tree).toContain("Hong Kong Wireless Technology Industry Association");
+    expect(tree).toContain("#0F4C81");
+    expect(tree).toContain("#6686BD");
+    expect(tree).not.toContain("#1b4f7a");
+    expect(tree).not.toContain("#e8cf9a");
+    expect(tree).not.toMatch(/WiseTech|WISE/);
   });
 
   it("falls back to the WTIA brand when the query is incomplete", async () => {
     const tree = await (await GET(new Request("https://hkwtia.test/api/og"))).text();
 
-    expect(tree).toContain("WTIA");
+    expect(tree).toContain("Hong Kong Wireless Technology Industry Association");
+    expect(tree).toContain("香港無線科技商會");
     expect(tree).not.toMatch(/WiseTech/i);
   });
 
-  it("never darkens a logo, unlike the photo treatment", () => {
-    const logo = JSON.stringify(renderOgCard("logo", {title: "Acme", eyebrow: "Member", imageUrl: "u"}));
-    const photo = JSON.stringify(renderOgCard("photo", {title: "Acme", eyebrow: "Event", imageUrl: "u"}));
+  it("keeps photographs and member marks off every card", () => {
+    const logo = JSON.stringify(renderOgCard("logo", {title: "Acme", eyebrow: "Member", imageUrl: "https://cdn.example/logo.svg"}));
+    const photo = JSON.stringify(renderOgCard("photo", {title: "Acme", eyebrow: "Event", imageUrl: "https://cdn.example/hero.jpg"}));
 
-    // The scrim is what would mangle a member's mark.
-    expect(photo).toContain("linear-gradient");
-    expect(logo).not.toContain("linear-gradient");
+    expect(photo).not.toContain("linear-gradient");
+    expect(photo).not.toContain("cdn.example");
+    expect(logo).not.toContain("cdn.example");
+    expect(photo).toContain("#0F4C81");
+    expect(logo).toContain("/images/wtia-logo-mono-white.png");
   });
 });

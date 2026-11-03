@@ -2,9 +2,9 @@
  * Catherine Phase 3 public chrome (Willy Approve t341s1501).
  * Loaded last in the public layout so these rules win over the donor port.
  *
- * Q6b is still open: heading font-family stays the current serif stack.
+ * Headings follow --font-serif (Avenir, Avenir Next, Noto Sans TC, Noto Sans).
  * Q7 is out of scope: this file does not reassign the site palette to #6686BD.
- * Q8 favicon is not touched.
+ * The globe favicon is wired from metadata icons, not from this stylesheet.
  * Full-colour lockup stays on white. Navy footer (#0F4C81) uses the mono-white
  * file because a link-heavy footer needs white type at 8.86:1. Full-colour on
  * #6686BD is not used.

@@ -69,7 +69,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     }).format(post.publishedAt)}`,
     // Build logs share this route and are editorial too, so both post kinds get the
     // editorial card (neither carries an image column).
-    image: ogImagePath({kind: "news", title, eyebrow: t("eyebrow"), imageUrl: null}),
+    image: ogImagePath({kind: "news", title, eyebrow: t("eyebrow"), imageUrl: null, locale: appLocale}),
   });
 }
 

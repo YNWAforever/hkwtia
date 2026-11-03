@@ -71,9 +71,10 @@
   --wt-heading-section: clamp(44px, 5.2vw, 78px);
   --wt-heading-card: clamp(29px, 3vw, 44px);
 
-  /* D-2: the donor's stacks verbatim; Chinese fallbacks appended to the sans stack so
-     zh-HK keeps PingFang / Noto / JhengHei. next/font no longer sets these. */
-  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  /* Headings use this one token so the stack can be reverted in a single place.
+     Avenir is not embedded. Noto Sans TC and Noto Sans are loaded with next/font
+     under those exact family names. */
+  --font-serif: "Avenir", "Avenir Next", "Noto Sans TC", "Noto Sans", sans-serif;
   --font-sans: "Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
 }
 

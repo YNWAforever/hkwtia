@@ -46,8 +46,8 @@ function cardTitle(title: string): string {
  * measured 2026-10-06, the shared membership, events, showcase, launchpad and news links
  * previewed as half a globe with the dark "WTIA" lettering lost on black.
  */
-function defaultCardPath(title: string): string {
-  return ogImagePath({kind: 'page', title: cardTitle(title), eyebrow: 'WTIA', imageUrl: null});
+function defaultCardPath(title: string, locale: AppLocale): string {
+  return ogImagePath({kind: 'page', title: cardTitle(title), eyebrow: 'WTIA', imageUrl: null, locale});
 }
 
 export function buildPageMetadata({
@@ -61,7 +61,7 @@ export function buildPageMetadata({
   const canonical = absoluteUrl(localizedPath(locale, pathname));
   const englishUrl = absoluteUrl(localizedPath('en', pathname));
   const chineseUrl = absoluteUrl(localizedPath('zh-HK', pathname));
-  const imageUrl = absoluteUrl(image ?? defaultCardPath(title));
+  const imageUrl = absoluteUrl(image ?? defaultCardPath(title, locale));
 
   return {
     title,

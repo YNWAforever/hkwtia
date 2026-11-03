@@ -58,7 +58,8 @@ describe("/about/chairman", () => {
 
     expect(screen.getByRole("heading", {level: 1, name: en.Chairman.title})).toBeVisible();
     const quote = screen.getByRole("blockquote");
-    expect(within(quote).getByText(en.Chairman.message)).toBeVisible();
+    expect(within(quote).getByText("Dear Members and Friends,")).toBeVisible();
+    expect(quote.textContent).toContain("I am honoured to take on the role of Chairman of WTIA.");
     expect(within(quote).getByText(en.Chairman.signature).tagName).toBe("CITE");
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
     expect(document.querySelector(".rich-items-cards")).not.toBeInTheDocument();
