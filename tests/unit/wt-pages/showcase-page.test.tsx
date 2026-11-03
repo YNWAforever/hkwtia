@@ -140,13 +140,13 @@ describe("/showcase rewrite", () => {
     expect(html).toContain(bundles.en.Showcase.ownerCta);
   });
 
-  it("renders the interest band pointing at /events", async () => {
+  it("hides the interest band while no listings are published", async () => {
     showcase.listPublished.mockResolvedValue([]);
     const html = await renderShowcase();
 
-    expect(html).toContain('class="event-interest"');
-    expect(html).toContain(`href="/events"`);
-    expect(html).toContain(bundles.en.Showcase.interest.action);
+    expect(html).not.toContain('class="event-interest"');
+    expect(html).not.toContain(bundles.en.Showcase.interest.action);
+    expect(html).toContain(bundles.en.Showcase.noPublishedDescription);
   });
 
   it("keeps bilingual parity for every new Showcase key", () => {

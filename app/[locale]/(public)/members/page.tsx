@@ -110,7 +110,7 @@ export default async function MembersPage({params, searchParams}: Props) {
       {directory.nextCursor && <nav aria-label={t("paginationLabel")} className="mt-8 text-center"><a className="button button-dark" href={nextHref}>{t("loadMore")}</a></nav>}
     </Section>
     <ClosingBand
-      actions={[{label: t("emptyPrimary"), href: `mailto:${siteConfig.contact.email}`}]}
+      actions={[]}
       copy={t("metaDescription")}
       eyebrow={t("eyebrow")}
       title={t("detail.joinCta")}

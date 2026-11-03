@@ -838,11 +838,11 @@
     },
     "tierBenefits": {
       "community": ["Directory card on /members", "RSVP to public WTIA events", "Event submissions are not included"],
-      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
-      "corporate": ["Featured member profile and logo wall", "3 showcase listings", "Priority WhatsApp support lane"],
-      "patron": ["Everything in Corporate", "Dedicated WhatsApp support"],
-      "individual": ["Member profile page", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates"],
-      "platinum": ["Everything in Corporate", "Dedicated WhatsApp support"]
+      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
+      "corporate": ["Featured member profile and logo wall", "3 showcase listings"],
+      "patron": ["Everything in Corporate"],
+      "individual": ["Member profile page", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
+      "platinum": ["Everything in Corporate"]
     },
     "tiers": {
       "community": {
@@ -1446,20 +1446,20 @@
     },
     "services": {
       "marketEntry": {
-        "title": "Market entry",
-        "copy": "Structured guidance on registration, distribution and first commercial contracts across the Greater Bay Area."
+        "title": "Programme note",
+        "copy": "Programme details will be published when confirmed."
       },
       "softLanding": {
-        "title": "Soft landing",
-        "copy": "Shared workspace introductions, local compliance orientation and practical first-90-day support for an incoming team."
+        "title": "Programme note",
+        "copy": "Programme details will be published when confirmed."
       },
       "buyerMatching": {
-        "title": "Buyer matching",
-        "copy": "Warm introductions to landing partners and public buyers actively sourcing Hong Kong technology."
+        "title": "Programme note",
+        "copy": "Programme details will be published when confirmed."
       },
       "delegations": {
-        "title": "Delegations",
-        "copy": "Organised study visits and delegation itineraries connecting cohorts with counterparts in Guangzhou and Shenzhen."
+        "title": "Programme note",
+        "copy": "Programme details will be published when confirmed."
       }
     },
     "program": {
@@ -1598,10 +1598,9 @@
     "resultsTitle": "Explore member solutions",
     "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
     "noPublishedTitle": "Member showcases are coming soon.",
-    "noPublishedDescription": "Cases go live after consent and review — we do not invent listings.",
+    "noPublishedDescription": "Listings appear after member consent and review.",
     "emptyPrimary": "Interested in joining the Member Showcase? Email contact@hkwtia.org.",
     "emptySecondary": "Join to submit",
-    "emptyFrame": "reserved slot · 待確認",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "unavailableTitle": "Showcase listings are temporarily unavailable",
@@ -1736,9 +1735,8 @@
     "paginationLabel": "Member directory pages",
     "noPublishedTitle": "Members will be listed here once they agree to be featured.",
     "noPublishedDescription": "Profiles appear only after written consent.",
-    "emptyPrimary": "Interested in joining the Member Showcase? Email contact@hkwtia.org.",
+    "emptyPrimary": "To be listed in the directory, email contact@hkwtia.org.",
     "emptySecondary": "Membership",
-    "emptyFrame": "awaiting consent",
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
     "unavailableTitle": "Member pages are temporarily unavailable",
@@ -1871,7 +1869,7 @@
       "label": "Related activities",
       "openLabel": "Open events",
       "launchpadLabel": "Launch Pad",
-      "showcaseLabel": "Showcase"
+      "showcaseLabel": "Member Showcase"
     },
     "resultsHead": {
       "label": "{count, plural, one {event found} other {events found}}"
@@ -1893,13 +1891,13 @@
       "items": {
         "launchpad": {
           "title": "Launch Pad",
-          "copy": "GBA market entry, soft landing and buyer matching for founders.",
+          "copy": "Programme details will be published when confirmed.",
           "cta": "Explore Launch Pad"
         },
         "showcase": {
-          "title": "Showcase",
-          "copy": "Browse verified member solutions and request an introduction.",
-          "cta": "Browse the showcase"
+          "title": "Member Showcase",
+          "copy": "Member showcases are coming soon.",
+          "cta": "Browse the Member Showcase"
         },
         "membership": {
           "title": "Membership",

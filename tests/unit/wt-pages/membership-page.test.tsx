@@ -167,7 +167,8 @@ describe("/membership rewrite", () => {
     expect(html).not.toContain("25 seats");
     expect(html).not.toContain("HK$1,200");
     expect(html).toContain(bundles.en.Membership.tierBenefits.individual[1]);
-    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[1]);
+    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[0]);
+    expect(html).not.toMatch(/WhatsApp updates|Priority WhatsApp|Dedicated WhatsApp/);
   });
 
   it("shows the published pricing note with the ops fees", async () => {

@@ -60,7 +60,9 @@ describe("/about/chairman", () => {
     const quote = screen.getByRole("blockquote");
     expect(within(quote).getByText("Dear Members and Friends,")).toBeVisible();
     expect(quote.textContent).toContain("I am honoured to take on the role of Chairman of WTIA.");
-    expect(within(quote).getByText(en.Chairman.signature).tagName).toBe("CITE");
+    expect(quote.textContent).toContain("Hong Kong Wireless Technology Industry Association (WTIA)");
+    expect(within(quote).queryByText(en.Chairman.signature)).not.toBeInTheDocument();
+    expect(quote.querySelector("cite")).toBeNull();
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
     expect(document.querySelector(".rich-items-cards")).not.toBeInTheDocument();
     const related = document.querySelector(".rich-related-grid");

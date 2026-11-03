@@ -839,11 +839,11 @@
     },
     "tierBenefits": {
       "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "不包括提交活動"],
-      "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
-      "corporate": ["精選會員專頁及商標牆", "3 個方案展示頁", "WhatsApp 優先支援通道"],
-      "patron": ["包含企業會員所有權益", "專屬 WhatsApp 支援"],
-      "individual": ["會員專頁", "每季最多提交 2 個活動供 WTIA 審核", "1 個方案展示", "WhatsApp 更新"],
-      "platinum": ["包括企業會籍的全部", "專屬 WhatsApp 支援"]
+      "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁"],
+      "corporate": ["精選會員專頁及商標牆", "3 個方案展示頁"],
+      "patron": ["包含企業會員所有權益"],
+      "individual": ["會員專頁", "每季最多提交 2 個活動供 WTIA 審核", "1 個方案展示"],
+      "platinum": ["包括企業會籍的全部"]
     },
     "tiers": {
       "community": {
@@ -1447,20 +1447,20 @@
     },
     "services": {
       "marketEntry": {
-        "title": "市場進入",
-        "copy": "就大灣區內的註冊、分銷及首批商業合約提供有系統的指引。"
+        "title": "計劃備註",
+        "copy": "具體計劃確認後公布。"
       },
       "softLanding": {
-        "title": "落地支援",
-        "copy": "為初到當地的團隊提供共用工作空間介紹、本地合規指導及實務的首 90 天支援。"
+        "title": "計劃備註",
+        "copy": "具體計劃確認後公布。"
       },
       "buyerMatching": {
-        "title": "買家配對",
-        "copy": "主動引薦落地夥伴及正在物色香港科技的公營買家。"
+        "title": "計劃備註",
+        "copy": "具體計劃確認後公布。"
       },
       "delegations": {
-        "title": "考察團",
-        "copy": "籌辦考察行程，讓學員與廣州、深圳的對口單位交流。"
+        "title": "計劃備註",
+        "copy": "具體計劃確認後公布。"
       }
     },
     "program": {
@@ -1602,7 +1602,6 @@
     "noPublishedDescription": "方案內容將於會員同意並審核後陸續上架。",
     "emptyPrimary": "如有意參與會員展示，請電郵 contact@hkwtia.org。",
     "emptySecondary": "成為會員後可提交",
-    "emptyFrame": "方案位置 · 待確認",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
     "unavailableTitle": "展示名錄暫時無法顯示",
@@ -1737,9 +1736,8 @@
     "paginationLabel": "會員名錄分頁",
     "noPublishedTitle": "會員同意後，將於此列出。",
     "noPublishedDescription": "會員介紹須經書面同意後才上架。",
-    "emptyPrimary": "如有意參與會員展示，請電郵 contact@hkwtia.org。",
+    "emptyPrimary": "如欲列入會員名錄，請電郵 contact@hkwtia.org。",
     "emptySecondary": "了解會籍",
-    "emptyFrame": "待會員同意",
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
     "unavailableTitle": "會員頁面暫時無法顯示",
@@ -1872,7 +1870,7 @@
       "label": "相關活動",
       "openLabel": "開放活動",
       "launchpadLabel": "創科起動",
-      "showcaseLabel": "方案展示"
+      "showcaseLabel": "會員展示"
     },
     "resultsHead": {
       "label": "{count, plural, other {個活動}}"
@@ -1894,13 +1892,13 @@
       "items": {
         "launchpad": {
           "title": "創科起動",
-          "copy": "為初創企業提供大灣區市場進入、落地支援及買家配對。",
+          "copy": "具體計劃確認後公布。",
           "cta": "探索創科起動"
         },
         "showcase": {
-          "title": "方案展示",
-          "copy": "瀏覽已驗證會員方案，並提出洽談請求。",
-          "cta": "瀏覽方案展示"
+          "title": "會員展示",
+          "copy": "會員展示即將推出。",
+          "cta": "瀏覽會員展示"
         },
         "membership": {
           "title": "會籍",

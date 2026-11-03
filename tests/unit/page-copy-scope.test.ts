@@ -172,7 +172,8 @@ describe("page copy scope", () => {
       // and member tools are not included replaced a single updates line, net +1) -- 136 + 1.
       // The published-fee restore put the homepage first-90 point back (Home 188)
       // and added Membership.actions.payOnline (131). P2 benefit bullets stay removed.
-      Membership: 131,
+      // WhatsApp support lines were removed from the five paid tier benefit lists (-5).
+      Membership: 126,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
@@ -200,7 +201,7 @@ describe("page copy scope", () => {
     // + 10 Membership onboarding leaves (actions.apply, tracks, renew) = 606,
     // + 12 ops-tier leaves (individual/platinum names, descriptions, benefits) = 618,
     // + 1 Community benefit line when the free tier was offered again = 619.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(613);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(608);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

@@ -107,12 +107,14 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         provider={{label: t("pathways.provider.label"), title: t("pathways.provider.title"), copy: t("pathways.provider.copy"), action: t("ownerCta"), href: "/portal/company/listing"}}
       />
     </Section>
-    <InterestBand
-      action={<ActionLink href="/events" variant="button-light">{t("interest.action")}</ActionLink>}
-      copy={t("interest.copy")}
-      eyebrow={t("interest.eyebrow")}
-      title={t("interest.title")}
-    />
+    {listings.length > 0 ? (
+      <InterestBand
+        action={<ActionLink href="/events" variant="button-light">{t("interest.action")}</ActionLink>}
+        copy={t("interest.copy")}
+        eyebrow={t("interest.eyebrow")}
+        title={t("interest.title")}
+      />
+    ) : null}
     <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/showcase", tRoot))} />
   </>;
 }

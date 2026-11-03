@@ -51,9 +51,6 @@ export default async function ChairmanPage({params}: Props) {
           {t("message").split("\n\n").map((paragraph) => (
             <p className="mt-4 whitespace-pre-line first:mt-0" key={paragraph}>{paragraph}</p>
           ))}
-          <footer className="mt-6 font-semibold">
-            <cite className="not-italic">{t("signature")}</cite>
-          </footer>
         </blockquote>
       </StorySection>
       <RichRelatedRoutes items={related} />
