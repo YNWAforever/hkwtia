@@ -1,5 +1,4 @@
 import type {Metadata} from 'next';
-import Image from 'next/image';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {StructuredData} from '@/components/seo/structured-data';
@@ -10,7 +9,6 @@ import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
 import type {AppLocale} from '@/i18n/routing';
 import {partnersRepository, type PartnerProjection} from '@/lib/db/repos/partners';
-import {isPrivateMediaDeliveryUrl, mediaDeliverySrc} from '@/lib/media/url';
 import {buildPageMetadata} from '@/lib/metadata';
 import {sentenceGap} from '@/lib/i18n/sentence-gap';
 import {groupPublishedPartners} from '@/lib/partners/public-groups';
@@ -111,11 +109,7 @@ export default async function PartnersPage({params}: Props) {
                     const years = start && end ? t('record.tileWindow', {start, end}) : start ? t('record.tileSince', {year: start}) : null;
                     return (
                       <article className="partner-record-card partner-tile" key={partner.id}>
-                        <div className="partner-record-logo">
-                          {partner.logoUrl && partner.logoAlt ? (
-                            <Image alt={partner.logoAlt} height={202} src={mediaDeliverySrc(partner.logoUrl, 640)} unoptimized={isPrivateMediaDeliveryUrl(partner.logoUrl)} width={320} />
-                          ) : null}
-                        </div>
+                        {/* Logos stay off until Daisy has written consent for that row. C4. */}
                         <div className="partner-record-body">
                           <h3>{partner.name}</h3>
                           {years ? <p className="partner-tile-meta">{years}</p> : null}

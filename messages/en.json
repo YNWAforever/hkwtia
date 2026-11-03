@@ -23,7 +23,7 @@
   "Navigation": {
     "brand": {
       "publicName": "WTIA",
-      "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association"
+      "descriptor": "Hong Kong Wireless Technology Industry Association"
     },
     "groups": {
       "eventsProgrammes": {
@@ -48,9 +48,9 @@
       },
       "membershipEcosystem": {
         "label": "Member platform",
-        "title": "Bring a real business need into the network.",
-        "copy": "Prepare a buyer brief without exposing confidential information or implying a guaranteed match.",
-        "cta": "Submit a challenge"
+        "title": "Contact WTIA.",
+        "copy": "Email contact@hkwtia.org.",
+        "cta": "Email us"
       },
       "impactInsights": {
         "label": "Technology + Wisdom",
@@ -83,7 +83,7 @@
       "cpai": "CPAI",
       "membership": "Membership",
       "members": "Member directory",
-      "showcase": "Member & solution showcase",
+      "showcase": "Member Showcase",
       "news": "News",
       "aiOps": "AI operations",
       "aiTransparency": "AI transparency",
@@ -127,7 +127,7 @@
     "staffSignIn": "Staff sign in",
     "brand": {
       "publicName": "WTIA",
-      "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
+      "descriptor": "Hong Kong Wireless Technology Industry Association",
       "homeLabel": "WTIA home",
       "logoAlt": "WTIA 香港無線科技商會"
     },
@@ -139,8 +139,8 @@
       "contact": "Contact"
     },
     "newsletter": {
-      "eyebrow": "Activity updates",
-      "title": "What should Hong Kong build next?",
+      "eyebrow": "Contact",
+      "title": "Questions? contact@hkwtia.org",
       "emailLabel": "Work email",
       "placeholder": "Work email",
       "submit": "Prepare activity-update email",
@@ -150,18 +150,14 @@
       "mailBody": "Please add {email} to the WTIA activity update list."
     },
     "summary": "WTIA connects technology businesses, practitioners and programmes across Hong Kong's wireless technology community.",
-    "addressLines": [
-      "4/F, KOHO",
-      "73-75 Hung To Road",
-      "Kwun Tong, Hong Kong"
-    ],
+    "addressLines": [],
     "privacy": "Privacy statement",
     "copyright": "© {year} WTIA. All rights reserved."
   },
   "Email": {
     "brand": "WTIA",
     "footer": {
-      "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+      "address": "contact@hkwtia.org",
       "reason": "You are receiving this marketing email because you opted in to WTIA updates.",
       "unsubscribe": "Unsubscribe from marketing email"
     },
@@ -482,10 +478,10 @@
       },
       "empty": {
         "title": "No activities are currently open.",
-        "copy": "Register for activity updates, or bring the team a defined business challenge to help shape a useful future session."
+        "copy": "Email contact@hkwtia.org about upcoming activities."
       },
-      "updatesAction": "Get activity updates",
-      "challengeAction": "Submit a challenge",
+      "updatesAction": "Email us about upcoming activities",
+      "challengeAction": "Email us about upcoming activities",
       "recordLabel": "Most recent on the record"
     },
     "pathways": {
@@ -496,31 +492,31 @@
         "corporates": {
           "title": "For Corporates",
           "copy": "Find solutions, talent and innovation partners.",
-          "benefits": "Buyer challenges · Executive briefings · Industry councils",
+          "benefits": "Awards, industry events, member network",
           "cta": "Explore membership"
         },
         "smes": {
           "title": "For SMEs",
           "copy": "Turn AI opportunities into practical improvements.",
-          "benefits": "Readiness · Clinics · Trusted providers",
+          "benefits": "HKICT Awards · Tech to Connect · CPAI",
           "cta": "Find an event"
         },
         "startups": {
           "title": "For Startups",
-          "copy": "Meet buyers, investors and regional partners.",
-          "benefits": "Structured visibility · Demo days · Market entry",
-          "cta": "Explore the showcase"
+          "copy": "Programmes and events for Hong Kong technology startups.",
+          "benefits": "HKICT Awards ICT Startup Award · Tech to Connect",
+          "cta": "View the Member Showcase"
         },
         "professionals": {
           "title": "For Professionals",
           "copy": "Build skills, influence industry and expand your network.",
-          "benefits": "Councils · Certification · Mentorship",
+          "benefits": "CPAI programme · events · committees",
           "cta": "Explore membership"
         },
         "gba": {
           "title": "For GBA & Global Partners",
-          "copy": "Connect with Hong Kong technology and market opportunities.",
-          "benefits": "Soft landing · Delegations · Buyer matching",
+          "copy": "GBA and overseas connections through events and delegations.",
+          "benefits": "Events and delegations",
           "cta": "Explore Launch Pad"
         }
       },
@@ -534,7 +530,7 @@
           "copy": "Compare free Community with Individual, Corporate, and Platinum."
         },
         "showcase": {
-          "label": "Member & solution showcase",
+          "label": "Member Showcase",
           "copy": "Browse reviewed member solutions by use case and deployment approach."
         },
         "events": {
@@ -543,7 +539,7 @@
         },
         "launchpad": {
           "label": "Launch Pad",
-          "copy": "Go-global cohorts, landing partners and a funding-scheme picker."
+          "copy": "GBA and overseas connections through events and delegations."
         },
         "partners": {
           "label": "Partner network",
@@ -551,11 +547,11 @@
         },
         "programmes": {
           "label": "Programmes & awards",
-          "copy": "Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, edition by edition."
+          "copy": "HKICT Awards, Tech to Connect and CPAI."
         },
         "cpai": {
           "label": "CPAI",
-          "copy": "A focused programme supporting applied innovation, issued directly by WTIA."
+          "copy": "Certificate details are set out in the programme terms."
         },
         "committees": {
           "label": "Committees",
@@ -570,7 +566,7 @@
       "stages": {
         "before": {
           "title": "Before",
-          "copy": "Recommendations, pricing, capacity and matchmaking."
+          "copy": "Event details, fees and capacity before you register."
         },
         "during": {
           "title": "During",
@@ -597,11 +593,11 @@
         "action": "Discover members"
       },
       "marketplace": {
-        "label": "AI Solutions Marketplace",
-        "title": "Find AI ready for the real world.",
-        "copyEmpty": "Browse the solution showcase by use case and deployment approach as approved listings become available.",
-        "copyUnavailable": "Solution listings are temporarily unavailable.",
-        "copyAvailable": "Published solutions are now live to compare, by use case, deployment and reviewed evidence.",
+        "label": "Member Showcase",
+        "title": "Member Showcase",
+        "copyEmpty": "Member Showcase — member solutions, listed with each member's consent.",
+        "copyUnavailable": "Member Showcase — member solutions, listed with each member's consent.",
+        "copyAvailable": "Member Showcase — member solutions, listed with each member's consent.",
         "action": "Explore solutions"
       }
     },
@@ -657,7 +653,7 @@
       "eventSeriesLabel": "Event series",
       "credentialLabel": "Credential",
       "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
-      "credentialFact": "Issued directly by WTIA",
+      "credentialFact": "Certificate details are set out in the programme terms.",
       "action": "View programme",
       "items": {
         "cpai": {
@@ -681,7 +677,7 @@
     "gbaGateway": {
       "eyebrow": "GBA Gateway",
       "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
-      "copy": "A practical route for market entry, soft landing, delegations, buyer matching and long-term regional partnerships.",
+      "copy": "GBA and overseas connections through events and delegations.",
       "openCohortAction": "View open cohort",
       "exploreAction": "Explore Launch Pad"
     },
@@ -718,7 +714,7 @@
     "legacyNetwork": {
       "eyebrow": "Built on real relationships",
       "title": "A network with history — and a future.",
-      "note": "Every organisation shown here is a published WTIA record with a confirmed relationship and confirmed logo rights; the full record is on the partners page.",
+      "note": "Published WTIA partner records are listed on the partners page. Logos are not shown until written consent is confirmed.",
       "viewAllAction": "View all partners",
       "previewNote": "Showing {shown} of {total} records in this category.",
       "tabs": {
@@ -784,15 +780,15 @@
     "title": "Chairman's message",
     "summary": "Working together to keep Hong Kong connected to emerging technology opportunities.",
     "messageTitle": "A shared commitment",
-    "message": "Our association is strongest when members contribute experience, curiosity and a willingness to collaborate. WTIA / Wireless（香港無線科技商會） will continue building practical bridges between innovation and opportunity.",
+    "message": "Dear Members and Friends,\n\nI am honoured to take on the role of Chairman of WTIA. Thank you for your trust and support, and to our outgoing leadership and committee for the strong foundation they have built.\n\nMy vision is for WTIA to connect advanced technology with practical needs — creating opportunities for our members and contributing to Hong Kong’s development as an international innovation and technology centre.\n\nIn line with the direction of the national 15th Five-Year Plan, I look forward to deepening our engagement in artificial intelligence, robotics, advanced manufacturing, microelectronics and next-generation communications. Emerging fields such as embodied intelligence and 6G also offer opportunities for our community to explore. Our focus should be on translating technological advances into commercially viable products, better services and meaningful benefits across industries.\n\nWTIA can bring businesses, universities, research institutions and entrepreneurs closer together. By connecting Hong Kong’s research strengths and international networks with the Greater Bay Area’s industrial capabilities, we can help promising ideas find practical applications and wider markets.\n\nMaking innovation accessible is equally important. I want to help SMEs identify relevant technologies, connect with capable partners and build the skills needed to improve productivity and competitiveness. Responsible adoption, cybersecurity and trust must accompany this progress.\n\nOur community is central to this ambition. Welcoming members from different disciplines and connecting experienced professionals with emerging talent will bring fresh perspectives and stronger collaboration.\n\nI welcome your ideas and participation as we shape WTIA’s next chapter together. I look forward to working with our members, committee and partners to turn innovation into lasting value for Hong Kong.\n\nWilly Lai\nChairman\nHong Kong Wireless Technology Industry Association (WTIA)",
     "signature": "Willy Lai, Chairman, WTIA"
   },
   "Committees": {
     "metaTitle": "Committees｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "WTIA committees that turn member participation into focused industry action.",
+    "metaDescription": "Committee details for the 2026–2028 term will be published shortly.",
     "eyebrow": "Governance",
-    "title": "Committees that turn participation into action.",
-    "summary": "Member-led committees provide oversight and focused expertise across WTIA priorities.",
+    "title": "Committees",
+    "summary": "Committee details for the 2026–2028 term will be published shortly.",
     "structureTitle": "Committee structure",
     "executive": {
       "title": "Executive Committee",
@@ -841,12 +837,12 @@
       "visibility": "WTIA visibility opportunities"
     },
     "tierBenefits": {
-      "community": ["Directory card on /members", "RSVP to public WTIA events", "Event submissions are not included", "Member tools are not included"],
-      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
-      "corporate": ["Featured member profile and logo wall", "Unlimited reviewed event publishing", "3 showcase listings", "Priority WhatsApp support lane", "Member tools included"],
-      "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"],
-      "individual": ["Member profile page", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates"],
-      "platinum": ["Everything in Corporate", "Featured placement", "Co-branded WTIA events", "Dedicated WhatsApp support"]
+      "community": ["Directory card on /members", "RSVP to public WTIA events", "Event submissions are not included"],
+      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
+      "corporate": ["Featured member profile and logo wall", "3 showcase listings"],
+      "patron": ["Everything in Corporate"],
+      "individual": ["Member profile page", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
+      "platinum": ["Everything in Corporate"]
     },
     "tiers": {
       "community": {
@@ -879,7 +875,7 @@
     "faq": {
       "0": {
         "question": "Who can apply?",
-        "answer": "Community is free for one person. Individual is HK$500 a year for one person. Corporate and Platinum are for organisations and are paid online. For a question or a special case, we aim to reply within 5 working days."
+        "answer": "Community is free for one person. Individual is HK$500 a year for one person. Corporate is HK$1,800 a year and Platinum is HK$4,800 a year. Corporate and Platinum are for organisations and are paid online."
       },
       "1": {
         "question": "Where are current fees?",
@@ -895,11 +891,11 @@
       },
       "4": {
         "question": "How many company seats are included?",
-        "answer": "Community and Individual include one seat. Corporate and Platinum include 25 seats. Company owners or administrators manage invitations in the portal; your agreement controls the confirmed allowance."
+        "answer": "Company owners or administrators manage invitations in the portal. Seat arrangements are set out in the membership terms."
       },
       "5": {
         "question": "How long does approval take?",
-        "answer": "Community is free and becomes active when you submit. Individual, Corporate, and Platinum are paid online and are confirmed when payment succeeds. For a question or a special case, we aim to reply within 5 working days."
+        "answer": "Community is free and becomes active when you submit. Individual, Corporate, and Platinum are paid online and are confirmed when payment succeeds. For a question or a special case, email contact@hkwtia.org."
       },
       "6": {
         "question": "Can I get a refund?",
@@ -925,6 +921,7 @@
     },
     "actions": {
       "join": "Choose this plan",
+      "payOnline": "Pay online now",
       "apply": "Apply for this plan",
       "contact": "Contact us",
       "discuss": "Discuss this pathway"
@@ -939,7 +936,7 @@
         "title": "Company",
         "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online the same way as Individual."
       },
-      "sla": "For a question or a special case, we aim to reply within 5 working days."
+      "sla": "For a question or a special case, email contact@hkwtia.org."
     },
     "renew": {
       "title": "Renew or rejoin",
@@ -961,7 +958,7 @@
     },
     "dimensions": {
       "network": {"title": "Network", "copy": "Community and networking access across the ecosystem."},
-      "programmes": {"title": "Programmes", "copy": "Participation in WTIA programmes (ASA, TCT, HKICT, CPAI)."},
+      "programmes": {"title": "Programmes", "copy": "Participation in WTIA programmes (TCT, HKICT, CPAI)."},
       "visibility": {"title": "Visibility", "copy": "Opportunities to be seen by other members and partners."},
       "events": {"title": "Events", "copy": "Access to WTIA events, from open sessions to member-only sessions."},
       "showcase": {"title": "Showcase", "copy": "Eligibility to list a solution on the public Showcase."},
@@ -978,7 +975,7 @@
       "heading": "What happens after you join",
       "steps": {
         "0": {"title": "Join", "copy": "Choose a tier and complete payment or review."},
-        "1": {"title": "Orientation", "copy": "Meet the WTIA team and get access to your member tools."},
+        "1": {"title": "Orientation", "copy": "Meet the WTIA team."},
         "2": {"title": "First event", "copy": "Attend your first WTIA event as a member."},
         "3": {"title": "First introduction", "copy": "Make your first connection through the network."},
         "4": {"title": "Review", "copy": "WTIA checks in on how membership is working for you."}
@@ -987,7 +984,7 @@
     "closing": {
       "eyebrow": "Ready when you are",
       "title": "Choose your tier, or ask us first.",
-      "copy": "Community is free. Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message. We aim to reply within 5 working days.",
+      "copy": "Community is free. Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message.",
       "join": "Join now",
       "contact": "Email the membership team"
     }
@@ -1028,7 +1025,7 @@
       "stale": "The membership terms have changed. Reload this page and review the current version."
     },
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
-    "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
+    "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "priceUnavailable": "Online payment for this plan is not available yet. Email contact@hkwtia.org and we will help you complete joining.", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "invite": {
       "metaTitle": "Your personal invitation｜Hong Kong Wireless Technology Industry Association (WTIA)",
       "welcomeNamed": "Welcome, {name}",
@@ -1101,7 +1098,7 @@
       "title": "What to do next",
       "individualLead": "Your membership is active. Download the kits, sign in, and pick a first event.",
       "processingLead": "Payment is being confirmed. These links are ready for when your membership is active.",
-      "organisationLead": "If this application needs a manual exception, Willy will reply within 5 working days.",
+      "organisationLead": "If this application needs a manual exception, email contact@hkwtia.org.",
       "noPayment": "No payment has been taken yet.",
       "welcomeKit": "Download the Welcome Kit",
       "associationKit": "Download the Association Kit",
@@ -1164,7 +1161,8 @@
       "brSize": "That file is larger than 8 MB.",
       "brStorage": "We could not store the Business Registration. Please try again.",
       "whatsappNumber": "Enter a valid WhatsApp number with country code",
-      "heardAbout": "Use 200 characters or fewer."
+      "heardAbout": "Use 200 characters or fewer.",
+      "priceUnavailable": "Online payment for this plan is not available yet. Email contact@hkwtia.org and we will help you complete joining."
     },
     "status": {
       "failed": {"title": "Payment needs attention", "description": "We could not confirm an active membership. Please check your billing status or contact WTIA."},
@@ -1178,7 +1176,7 @@
       },
       "review": {
         "title": "Under review",
-        "description": "If this needs a manual exception, Willy will reply within 5 working days."
+        "description": "If this needs a manual exception, email contact@hkwtia.org."
       }
     },
     "whatsapp": {
@@ -1326,7 +1324,7 @@
       "compassActionLabel": "Get in touch",
       "askProgrammeTeam": "Ask the programme team",
       "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
-      "credentialFact": "Issued directly by WTIA",
+      "credentialFact": "Certificate details are set out in the programme terms.",
       "mailSubject": "{programme} programme enquiry"
     }
   },
@@ -1372,24 +1370,24 @@
       "intro": "Every edition WTIA's archive records, from the first to the latest, with new programme information added as it becomes available.",
       "span": "{first}–{latest}",
       "editions": "{count, plural, one {# recorded edition} other {# recorded editions}}",
-      "credential": "Credential issued directly by WTIA; no editions to record.",
+      "credential": "Certificate details are set out in the programme terms.",
       "events": "View related activities",
       "partner": "Become a programme partner"
     }
   },
   "Partners": {
     "metaTitle": "Partners｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "WTIA's published partner records: supporting organisations, regional, media, programme and sponsor partners, each with a confirmed relationship and confirmed logo rights.",
+    "metaDescription": "WTIA partner records: supporting organisations, regional, media, programme and sponsor partners.",
     "hero": {
       "eyebrow": "Partner ecosystem",
       "title": "The organisations WTIA works with, on the record.",
-      "lead": "Every record here is published by WTIA with a confirmed relationship and confirmed logo rights. Nothing is listed on the strength of a historical logo alone.",
+      "lead": "Published WTIA partner records. Logos are not shown until written consent is confirmed for each organisation.",
       "breadcrumbCurrent": "Partners"
     },
     "sourceNote": {
       "eyebrow": "Relationship context",
       "title": "Meet our partners",
-      "copy": "A record appears only after WTIA confirms both the relationship and the right to show the logo, and only while the relationship window is current.",
+      "copy": "A record is a published WTIA partner listing. Logos stay off this page until written consent is confirmed for that organisation.",
       "count": "{count, plural, one {# published partner record} other {# published partner records}}"
     },
     "categories": {
@@ -1419,7 +1417,7 @@
     "empty": {
       "label": "Published records",
       "title": "No published partner records yet.",
-      "copy": "Partner records appear here once WTIA confirms the relationship and the logo rights for each one.",
+      "copy": "No partner records are published yet.",
       "action": "Contact the team"
     },
     "update": {
@@ -1431,15 +1429,15 @@
   },
   "LaunchPad": {
     "metaTitle": "Launch Pad｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
+    "metaDescription": "GBA and overseas connections through events and delegations.",
     "eyebrow": "Launch Pad",
-    "title": "Go-global cohorts for technology teams.",
-    "description": "Focused cohorts, practical market access, and clear next steps for Hong Kong technology teams expanding internationally.",
+    "title": "Launch Pad",
+    "description": "GBA and overseas connections through events and delegations.",
     "breadcrumbCurrent": "Launch Pad",
     "gbaOpening": {
       "eyebrow": "GBA Gateway",
-      "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
-      "copy": "A practical route for market entry, soft landing, delegations, buyer matching and long-term regional partnerships.",
+      "title": "Launch Pad",
+      "copy": "GBA and overseas connections through events and delegations.",
       "map": {
         "hk": "HK",
         "gz": "GZ",
@@ -1448,28 +1446,28 @@
     },
     "services": {
       "marketEntry": {
-        "title": "Market entry",
-        "copy": "Structured guidance on registration, distribution and first commercial contracts across the Greater Bay Area."
+        "title": "Programme note",
+        "copy": "GBA and overseas connections through events and delegations."
       },
       "softLanding": {
-        "title": "Soft landing",
-        "copy": "Shared workspace introductions, local compliance orientation and practical first-90-day support for an incoming team."
+        "title": "Programme note",
+        "copy": "GBA and overseas connections through events and delegations."
       },
       "buyerMatching": {
-        "title": "Buyer matching",
-        "copy": "Warm introductions to landing partners and public buyers actively sourcing Hong Kong technology."
+        "title": "Programme note",
+        "copy": "GBA and overseas connections through events and delegations."
       },
       "delegations": {
-        "title": "Delegations",
-        "copy": "Organised study visits and delegation itineraries connecting cohorts with counterparts in Guangzhou and Shenzhen."
+        "title": "Programme note",
+        "copy": "GBA and overseas connections through events and delegations."
       }
     },
     "program": {
       "eyebrow": "Programme",
-      "title": "A practical route to new markets",
-      "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.",
-      "outcomeTitle": "From readiness to market entry",
-      "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."
+      "title": "Overview",
+      "intro": "GBA and overseas connections through events and delegations.",
+      "outcomeTitle": "Programme details",
+      "outcomeDescription": "GBA and overseas connections through events and delegations."
     },
     "calendar": {
       "eyebrow": "Schedule",
@@ -1493,7 +1491,7 @@
     "partners": {
       "eyebrow": "Landing partners",
       "title": "Landing partner map",
-      "intro": "Meet the public organisations that help cohorts navigate priority markets.",
+      "intro": "Landing partners are listed here when WTIA publishes them.",
       "empty": "Landing partners will be announced shortly.",
       "unavailable": "Landing partners could not be loaded. Please try again shortly.",
       "market": "Market",
@@ -1568,8 +1566,8 @@
     },
     "clinic": {
       "label": "Need help?",
-      "title": "Need a funding or market-entry clinic?",
-      "description": "Speak with WTIA about your next practical step."
+      "title": "Questions",
+      "description": "Email contact@hkwtia.org."
     },
     "application": {
       "title": "Apply to an open cohort",
@@ -1585,25 +1583,24 @@
       "signIn": "Sign in",
       "error": "We could not submit your application. Please try again."
     },
-    "clinicCta": "Book a clinic"
+    "clinicCta": "Email us"
   },
   "Showcase": {
-    "metaTitle": "Member showcase｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaTitle": "Member Showcase｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "Browse published technology solutions from WTIA member companies.",
     "detailFallbackDescription": "WTIA member showcase",
-    "eyebrow": "AI Showcase",
-    "title": "Member showcase",
+    "eyebrow": "Member Showcase",
+    "title": "Member Showcase",
     "description": "Explore practical products and services from Hong Kong technology companies.",
     "introTitle": "Technology solutions for practical business needs",
     "introDescription": "Compare published WTIA member solutions by use case, deployment, language, and integration fit.",
     "ownerCta": "Manage your showcase listing",
     "resultsTitle": "Explore member solutions",
     "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
-    "noPublishedTitle": "No published solutions yet.",
-    "noPublishedDescription": "Cases go live after consent and review — we do not invent listings.",
-    "emptyPrimary": "Contact",
+    "noPublishedTitle": "Member showcases are coming soon.",
+    "noPublishedDescription": "Listings appear after member consent and review.",
+    "emptyPrimary": "Interested in joining the Member Showcase? Email contact@hkwtia.org.",
     "emptySecondary": "Join to submit",
-    "emptyFrame": "reserved slot · 待確認",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "unavailableTitle": "Showcase listings are temporarily unavailable",
@@ -1736,11 +1733,10 @@
     "resultsHeading": "Member directory",
     "loadMore": "View more members",
     "paginationLabel": "Member directory pages",
-    "noPublishedTitle": "No member profiles are published yet.",
+    "noPublishedTitle": "Members will be listed here once they agree to be featured.",
     "noPublishedDescription": "Profiles appear only after written consent.",
-    "emptyPrimary": "Join WTIA",
+    "emptyPrimary": "To be listed in the directory, email contact@hkwtia.org.",
     "emptySecondary": "Membership",
-    "emptyFrame": "awaiting consent",
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
     "unavailableTitle": "Member pages are temporarily unavailable",
@@ -1753,7 +1749,7 @@
       "events": "Upcoming events by this member",
       "noEvents": "No upcoming events.",
       "joinCta": "Your organisation could be listed here",
-      "join": "See membership plans"
+      "join": "Interested in joining the Member Showcase? Email contact@hkwtia.org."
     }
   },
   "AiOps": {
@@ -1873,7 +1869,7 @@
       "label": "Related activities",
       "openLabel": "Open events",
       "launchpadLabel": "Launch Pad",
-      "showcaseLabel": "Showcase"
+      "showcaseLabel": "Member Showcase"
     },
     "resultsHead": {
       "label": "{count, plural, one {event found} other {events found}}"
@@ -1895,13 +1891,13 @@
       "items": {
         "launchpad": {
           "title": "Launch Pad",
-          "copy": "GBA market entry, soft landing and buyer matching for founders.",
+          "copy": "GBA and overseas connections through events and delegations.",
           "cta": "Explore Launch Pad"
         },
         "showcase": {
-          "title": "Showcase",
-          "copy": "Browse verified member solutions and request an introduction.",
-          "cta": "Browse the showcase"
+          "title": "Member Showcase",
+          "copy": "Member solutions, listed with each member's consent.",
+          "cta": "View the Member Showcase"
         },
         "membership": {
           "title": "Membership",
@@ -2058,12 +2054,12 @@
     "unavailableDescription": "Some items may be missing. Please try again shortly.",
     "breadcrumbCurrent": "News & media",
     "statusNews": "News",
-    "resultsHeading": "News and build logs",
+    "resultsHeading": "News",
     "statusBuildLog": "Build Log",
     "quality": {
       "eyebrow": "Editorial standards",
       "title": "How WTIA reports",
-      "body": "Every article is staff-authored, dated and attributed. Build Log entries describe engineering work actually shipped to this platform, each linked to its own published evidence on the AI-Ops page."
+      "body": "Every article is staff-authored, dated and attributed. Only sourced, cleared items are published here."
     },
     "subscribe": {
       "eyebrow": "Stay informed",
@@ -2085,7 +2081,7 @@
     "description": "Reach WTIA / Wireless（香港無線科技商會） by email, or via the options below.",
     "breadcrumbCurrent": "Contact",
     "channelsTitle": "Contact WTIA directly",
-    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+    "address": "contact@hkwtia.org",
     "routesTitle": "Choose the right next step",
     "routesDescription": "Use an established WTIA journey to find current information or take action.",
     "viewLabel": "View",
@@ -2263,7 +2259,7 @@
       {
         "heading": "Contact",
         "body": [
-          "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org, or by post to WTIA at 4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong."
+          "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org."
         ],
         "items": []
       }
@@ -2506,7 +2502,7 @@
       },
       "under_review": {
         "title": "Your membership is under review",
-        "body": "This is a manual exception. Willy will reply within 5 working days. You can update your own profile and view your billing history while you wait."
+        "body": "This is a manual exception. For enquiries, email contact@hkwtia.org. You can update your own profile and view your billing history while you wait."
       },
       "inactive": {
         "title": "Your member benefits are unavailable",
@@ -2586,7 +2582,7 @@
       "label": "Your next step",
       "past_due": {"title": "Update your payment details", "body": "Your last payment did not go through. Update billing to keep your membership active.", "action": "Go to billing"},
       "pending_payment": {"title": "Complete your payment", "body": "Your membership activates once payment is complete.", "action": "Go to billing"},
-      "pending_review": {"title": "Your application is under review", "body": "Willy will reply within 5 working days.", "action": "View application details"},
+      "pending_review": {"title": "Your application is under review", "body": "Your application is under review. For enquiries, email contact@hkwtia.org.", "action": "View application details"},
       "profile": {"title": "Complete your profile", "body": "Add your role and contact preferences so WTIA can reach you.", "action": "Open profile"},
       "company": {"title": "Add your company details", "body": "Your company details are used for your membership, seats and showcase listing.", "action": "Open company"}
     },
@@ -2650,7 +2646,7 @@
       "pending_review": {
         "label": "Under review",
         "title": "Application under review",
-        "description": "Willy will reply within 5 working days."
+        "description": "For enquiries, email contact@hkwtia.org."
       }
     },
     "profileTitle": "My profile",
@@ -2679,7 +2675,7 @@
     },
     "showcaseListing": {
       "nav": "Showcase listing",
-      "eyebrow": "AI Showcase",
+      "eyebrow": "Member Showcase",
       "title": "Publish your company story",
       "description": "Share a clear, buyer-friendly view of your product with the WTIA network.",
       "formTitle": "Listing details",

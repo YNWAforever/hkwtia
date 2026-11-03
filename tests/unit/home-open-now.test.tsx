@@ -35,8 +35,9 @@ describe("OpenNow", () => {
     expect(document.querySelector("#home-discover")).not.toBeNull();
     const heading = screen.getByRole("heading", {level: 3, name: bundles.en.Home.openNow.empty.title});
     expect(heading.closest(".honest-empty")).not.toBeNull();
-    expect(screen.getByRole("link", {name: bundles.en.Home.openNow.updatesAction})).toHaveAttribute("href", "/events#events-interest");
-    expect(screen.getByRole("link", {name: bundles.en.Home.openNow.challengeAction})).toHaveAttribute("href", "/contact");
+    const updates = screen.getAllByRole("link", {name: bundles.en.Home.openNow.updatesAction});
+    expect(updates).toHaveLength(1);
+    expect(updates[0]).toHaveAttribute("href", "mailto:contact@hkwtia.org");
   });
 
   it("renders up to 3 open events as cards linking to their own event page when available", async () => {

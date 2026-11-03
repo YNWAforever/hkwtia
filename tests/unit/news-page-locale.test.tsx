@@ -110,13 +110,13 @@ describe("localized public News pages", () => {
     expect(html).not.toContain("emptyTitle");
   });
 
-  it("shows available build logs alongside a partial news outage notice", async () => {
+  it("does not publish build logs when news is unavailable", async () => {
     publicPosts.listPublishedNews.mockRejectedValue(new Error("NEWS_UNAVAILABLE"));
     publicPosts.listPublishedBuildLogs.mockResolvedValue([buildLog]);
 
     const html = await renderNewsIndex("en");
 
-    expect(html).toContain("Build log");
+    expect(html).not.toContain("Build log");
     expect(html).toContain("unavailableTitle");
     expect(html).not.toContain("emptyTitle");
   });
@@ -140,11 +140,11 @@ describe("localized public News pages", () => {
     expect(publicPosts.getPublishedNewsBySlug).toHaveBeenCalledWith("zh-HK", "english-only");
   });
 
-  it("keeps the single-body Build Log renderer in the shared slug namespace", async () => {
+  it("does not publish a build log at its old news URL", async () => {
     publicPosts.getPublishedNewsBySlug.mockResolvedValue(null);
     publicPosts.getPublishedBuildLogBySlug.mockResolvedValue(buildLog);
 
-    await expect(renderNewsDetail("zh-HK", "build-log")).resolves.toContain("Operational evidence");
+    await expect(renderNewsDetail("zh-HK", "build-log")).rejects.toThrow("NOT_FOUND");
   });
 
   it.each(["en", "zh-HK"] as const)("fails the sitemap if %s News cannot be read", async (failedLocale) => {
@@ -166,14 +166,12 @@ describe("localized public News pages", () => {
     expect(entries.find((entry) => entry.url === englishUrl)?.alternates).toBeUndefined();
   });
 
-  it("keeps Build Logs in both locales with mutual alternates", async () => {
+  it("does not list build logs in the sitemap", async () => {
     publicPosts.listPublishedNews.mockResolvedValue([]);
     publicPosts.listPublishedBuildLogs.mockResolvedValue([buildLog]);
 
     const entries = (await sitemap()).filter((entry) => entry.url.endsWith("/news/build-log"));
 
-    expect(entries).toHaveLength(2);
-    expect(entries.every((entry) => entry.alternates?.languages?.en && entry.alternates.languages?.["zh-HK"]))
-      .toBe(true);
+    expect(entries).toHaveLength(0);
   });
 });

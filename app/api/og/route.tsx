@@ -16,7 +16,21 @@ const paramsSchema = z.object({
   kind: z.enum(KINDS),
   title: z.string().trim().min(1).max(300),
   eyebrow: z.string().trim().min(1).max(60),
+  locale: z.enum(["en", "zh-HK"]).optional(),
 }).strict();
+
+const NOTO_SANS_TC_BOLD = "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-tc@5.2.8/chinese-traditional-700-normal.woff";
+
+async function notoSansTc(): Promise<ArrayBuffer | null> {
+  if (process.env.VITEST) return null;
+  try {
+    const response = await fetch(NOTO_SANS_TC_BOLD, {signal: AbortSignal.timeout(4000)});
+    if (!response.ok) return null;
+    return await response.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
 
 function safeImageUrl(value: string | null, requestUrl: URL): string | null {
   if (!value || value.length > 500 || value !== value.trim() || hasUrlObfuscation(value)) return null;
@@ -37,13 +51,21 @@ export async function GET(request: Request): Promise<Response> {
     kind: url.searchParams.get("kind") ?? undefined,
     title: url.searchParams.get("title") ?? undefined,
     eyebrow: url.searchParams.get("eyebrow") ?? undefined,
+    locale: url.searchParams.get("locale") ?? undefined,
   });
   // A bad request must not 500: a crawler that gets an error here drops the card for the
   // page entirely, so fall through to the card that needs nothing.
   const entity = parsed.success
-    ? {kind: parsed.data.kind as OgEntityKind, title: parsed.data.title, eyebrow: parsed.data.eyebrow, imageUrl: safeImageUrl(url.searchParams.get("image"), url)}
+    ? {kind: parsed.data.kind as OgEntityKind, title: parsed.data.title, eyebrow: parsed.data.eyebrow, locale: parsed.data.locale, imageUrl: safeImageUrl(url.searchParams.get("image"), url)}
     : {kind: "page" as const, title: siteConfig.publicBrand, eyebrow: siteConfig.shortName, imageUrl: null};
 
   const {renderer, props} = resolveOgRenderer(entity);
-  return new ImageResponse(renderOgCard(renderer, props), {width: 1200, height: 630});
+  const font = await notoSansTc();
+  // The wordmark is a data URL inside the renderer. Fetching /images from this
+  // route fails on the SSO-protected Preview, so the card ships without a logo.
+  return new ImageResponse(renderOgCard(renderer, props), {
+    width: 1200,
+    height: 630,
+    fonts: font ? [{name: "Noto Sans TC", data: font, weight: 700, style: "normal"}] : undefined,
+  });
 }

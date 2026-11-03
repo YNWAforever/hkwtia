@@ -92,7 +92,8 @@ describe("renderEmail", () => {
       variables: fixtureVars,
     });
 
-    expect(marketing.html).toContain("4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong");
+    expect(marketing.html).not.toContain("4/F, KOHO");
+    expect(marketing.html).toContain("contact@hkwtia.org");
     expect(marketing.html).toContain("Unsubscribe from marketing email");
     expect(marketing.headers).toEqual({
       // RFC 8058: the header names the POST-capable route handler, not the
@@ -101,7 +102,7 @@ describe("renderEmail", () => {
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
     });
 
-    expect(transactional.html).not.toContain("4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong");
+    expect(transactional.html).not.toContain("4/F, KOHO");
     expect(transactional.html).not.toContain("Unsubscribe from marketing email");
     expect(transactional.headers).toEqual({});
   });

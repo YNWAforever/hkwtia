@@ -207,7 +207,7 @@ describe("history detail pages", () => {
         // migrated records, `[pdf-embedder …]` shortcodes into the meta description.
         description: readableMilestoneBody(body).join(" ").slice(0, 160),
         // Phase D: every detail page now points its metadata at its own share card.
-        image: ogImagePath({kind: "milestone", title, eyebrow, imageUrl: null}),
+        image: ogImagePath({kind: "milestone", title, eyebrow, imageUrl: null, locale}),
       };
 
       expect(await generateMetadata({params: Promise.resolve({locale, slug: gallerySlug})})).toEqual(expected);
@@ -228,7 +228,7 @@ describe("history detail pages", () => {
       pathname: `/about/history/${unfeaturedSlug}`,
       title: brandedTitle("en", milestone.titleEn),
       description: milestone.bodyEn.slice(0, 160),
-      image: ogImagePath({kind: "milestone", title: milestone.titleEn, eyebrow: en.History.eyebrow, imageUrl: null}),
+      image: ogImagePath({kind: "milestone", title: milestone.titleEn, eyebrow: en.History.eyebrow, imageUrl: null, locale: "en"}),
     };
 
     expect(await generateMetadata({

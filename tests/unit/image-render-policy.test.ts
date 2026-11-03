@@ -21,7 +21,6 @@ const revocationAwareConsumers = new Set([
   // uploaded, which is the same private-delivery reference — the optimizer cannot fetch a signed,
   // short-lived asset, and going through it would also outlive an archived row.
   "app/[locale]/(public)/members/[slug]/page.tsx",
-  "app/[locale]/(public)/partners/page.tsx",
   "components/admin/media-form.tsx",
   // The searchable event picker retains the same exact private-delivery guard.
   "components/admin/media-picker.tsx",
@@ -29,7 +28,6 @@ const revocationAwareConsumers = new Set([
   // which is the same private-delivery reference the showcase queue renders.
   "components/admin/profile-review-table.tsx",
   "components/admin/showcase-review-table.tsx",
-  "components/home/legacy-network.tsx",
   // The portal logo field previews the member's own upload from the same private-delivery route.
   "components/portal/forms/image-field.tsx",
   "components/marketing/event-card.tsx",

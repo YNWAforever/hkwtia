@@ -16,7 +16,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   // /images/projects-hero.jpg, the pre-donor placeholder the hero itself dropped (hero.tsx):
   // a generated stage scene whose signage reads as gibberish, so every shared homepage link
   // previewed an event WTIA never held.
-  return buildPageMetadata({locale: locale as AppLocale, pathname: '/', title: t('metaTitle'), description: t('metaDescription'), image: ogImagePath({kind: 'page', title: t('hero.title'), eyebrow: 'WTIA', imageUrl: null})});
+  return buildPageMetadata({locale: locale as AppLocale, pathname: '/', title: t('metaTitle'), description: t('metaDescription'), image: ogImagePath({kind: 'page', title: t('hero.title'), eyebrow: 'WTIA', imageUrl: null, locale: locale as AppLocale})});
 }
 
 export default async function HomePage({params}: Props) {

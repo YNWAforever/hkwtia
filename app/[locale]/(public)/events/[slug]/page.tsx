@@ -64,7 +64,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   // Match the page body: only a registered own-origin image or a private delivery
   // image can appear in og:image. A donor URL is excluded.
   const heroImageUrl = row.hero && (isPrivateMediaDeliveryUrl(row.hero.url) || isRegistrableMediaUrl(row.hero.url)) ? row.hero.url : null;
-  const base = buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl})});
+  const base = buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl, locale: locale as AppLocale})});
   return {
     ...base,
     robots: row.cancelled ? {index: false, follow: false} : undefined,

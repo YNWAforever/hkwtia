@@ -45,7 +45,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     description: readableMilestoneBody(locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).join(" ").slice(0, 160),
     // Milestone records carry images, but the card is editorial: the archive photographs are
     // not a consistent 1200x630 hero, so the unadorned editorial treatment is the honest one.
-    image: ogImagePath({kind: "milestone", title, eyebrow: t("eyebrow"), imageUrl: null}),
+    image: ogImagePath({kind: "milestone", title, eyebrow: t("eyebrow"), imageUrl: null, locale: locale as AppLocale}),
   });
 }
 

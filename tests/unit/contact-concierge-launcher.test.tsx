@@ -38,12 +38,10 @@ describe("Contact durable journeys and Concierge launcher", () => {
     const zh = await renderContact("zh-HK");
 
     expect(en).toContain('href="mailto:contact@hkwtia.org"');
-    expect(siteConfig.contact.phone).toBeDefined();
-    expect(en).toContain(`href="tel:${siteConfig.contact.phone!.replace(/\s/g, "")}"`);
-    expect(en).toContain(siteConfig.contact.phone!);
-    // Config-derived assertions above would still pass if config/site.ts itself carried a typo
-    // (e.g. a transposed digit) — this literal is the one check that would catch that.
-    expect(en).toContain('+852 2989 9164');
+    expect(siteConfig.contact.phone).toBeUndefined();
+    expect(en).not.toContain('href="tel:');
+    expect(en).not.toContain("+852 2989 9164");
+    expect(en).not.toContain("KOHO");
     expect(en).toContain('href="/events"');
     expect(en).toContain('href="/membership"');
     expect(en).toContain('href="/showcase"');
@@ -133,7 +131,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
     const zh = JSON.parse(readFileSync("messages/zh-HK.json", "utf8")).Contact;
 
     expect(en).toMatchObject({
-      address: "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+      address: "contact@hkwtia.org",
       routesTitle: "Choose the right next step",
       routes: {
         events: {title: "Events and activities"},
@@ -144,7 +142,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
       conciergeLauncher: "Ask WTIA",
     });
     expect(zh).toMatchObject({
-      address: "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+      address: "contact@hkwtia.org",
       routesTitle: "選擇合適的下一步",
       routes: {
         events: {title: "活動及交流"},

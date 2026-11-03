@@ -10,4 +10,6 @@ it("keeps the unnumbered assistant outside the four-plan comparison", () => {
   expect(root.querySelector(".plan-grid")?.textContent).not.toContain("Assistant");
   expect(root.querySelector(".membership-plan-assistant .card-index")).toBeNull();
   expect(root.querySelector(".membership-plan-assistant")?.textContent).toContain("Assistant");
+  expect(html).not.toContain("one");
+  expect(html).not.toContain("<ul");
 });

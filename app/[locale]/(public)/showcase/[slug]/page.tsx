@@ -27,7 +27,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   if (!row) {
     // Unknown or unpublished slug: the page 404s, but the metadata still renders, so it reads
     // from the Showcase bundle (already branded there) instead of a hard-coded English pair.
-    return buildPageMetadata({locale, pathname: `/showcase/${slug}`, title: t("metaTitle"), description: t("detailFallbackDescription"), image: ogImagePath({kind: "showcase", title: t("metaTitle"), eyebrow: t("eyebrow"), imageUrl: null})});
+    return buildPageMetadata({locale, pathname: `/showcase/${slug}`, title: t("metaTitle"), description: t("detailFallbackDescription"), image: ogImagePath({kind: "showcase", title: t("metaTitle"), eyebrow: t("eyebrow"), imageUrl: null, locale})});
   }
   const listing = toPublicListing(row, locale);
   return buildPageMetadata({
@@ -35,8 +35,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     pathname: `/showcase/${listing.slug}`,
     title: brandedTitle(locale, listing.name),
     description: listing.description,
-    // The listing's logo, contained on a light ground rather than cropped under a scrim.
-    image: ogImagePath({kind: "showcase", title: listing.name, eyebrow: t("eyebrow"), imageUrl: listing.logo?.url ?? null}),
+    // Share cards are the navy wordmark. The listing logo is not painted on them.
+    image: ogImagePath({kind: "showcase", title: listing.name, eyebrow: t("eyebrow"), imageUrl: listing.logo?.url ?? null, locale}),
   });
 }
 

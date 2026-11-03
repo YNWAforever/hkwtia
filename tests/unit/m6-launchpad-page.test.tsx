@@ -87,8 +87,8 @@ describe("M6 Launch Pad public experience", () => {
     expect(markup).toContain("program.title");
     expect(markup).toContain("calendar.title");
     expect(markup).toContain("partners.title");
-    expect(markup).toContain("funding.formLabel");
-    expect(markup).toContain("funding.results.heading");
+    expect(markup).not.toContain("funding.formLabel");
+    expect(markup).not.toContain("funding.results.heading");
     expect(markup).toContain("clinicCta");
   });
 

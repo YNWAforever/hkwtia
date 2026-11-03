@@ -4,8 +4,6 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
-import {Section} from "@/components/wt/section";
-import {SectionHeading} from "@/components/wt/section-heading";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
@@ -32,9 +30,7 @@ export default async function CommitteesPage({params}: Props) {
   const common = await getTranslations({locale, namespace: "Common"});
   // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
   const tRoot = await getTranslations({locale});
-  const committees = ["executive", "innovation", "membership"] as const;
-  // No compass grid here: three fixed committees with no roster or cadence to count or
-  // link to (restraint, the same instinct HonestEmpty applies elsewhere).
+  // The 2026–2028 roster is not confirmed. Do not list committees that were not supplied.
   const related = await buildOtherAboutRoutes(locale as AppLocale, "committees");
 
   return (
@@ -47,18 +43,6 @@ export default async function CommitteesPage({params}: Props) {
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
         breadcrumbLabel={common("breadcrumbLabel")}
       />
-      <Section labelledBy="committees-structure-title">
-        <SectionHeading eyebrow={t("eyebrow")} title={t("structureTitle")} headingId="committees-structure-title" variant="stacked" />
-        <div className="rich-items rich-items-cards">
-          {committees.map((committee, index) => (
-            <article key={committee}>
-              <span className="rich-item-number">{String(index + 1).padStart(2, "0")}</span>
-              <h3>{t(`${committee}.title`)}</h3>
-              <p>{t(`${committee}.description`)}</p>
-            </article>
-          ))}
-        </div>
-      </Section>
       <RichRelatedRoutes items={related} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/committees", tRoot))} />
     </>

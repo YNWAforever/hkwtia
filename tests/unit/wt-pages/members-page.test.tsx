@@ -101,15 +101,18 @@ describe("/members directory (D-11)", () => {
 
     expect(html).toContain(bundles.en.Members.noPublishedTitle);
     expect(html).not.toContain('class="partner-record-grid"');
+    expect(html.match(/mailto:contact@hkwtia.org/g)).toHaveLength(1);
+    expect(html).toContain(bundles.en.Members.emptyPrimary);
+    expect(html).not.toContain(bundles.en.Members.detail.join);
   });
 
   it("distinguishes an empty published directory from filters with no matches", async () => {
     profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
     const unfiltered = await renderDirectory();
     const filtered = await renderDirectory({q: "missing"});
-    expect(unfiltered).toContain("No member profiles are published yet.");
+    expect(unfiltered).toContain("Members will be listed here once they agree to be featured.");
     expect(filtered).toContain(bundles.en.Members.emptyDescription);
-    expect(filtered).not.toContain("No member profiles are published yet.");
+    expect(filtered).not.toContain("Members will be listed here once they agree to be featured.");
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {

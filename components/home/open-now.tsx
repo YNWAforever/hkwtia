@@ -57,10 +57,7 @@ export async function OpenNow({locale, copyOverrides}: HomeCopyProps) {
           title={t(result.kind === 'unavailable' ? 'unavailable.title' : 'empty.title')}
           copy={t(result.kind === 'unavailable' ? 'unavailable.copy' : 'empty.copy')}
           actions={[
-            // Deep-links to the interest form on /events (Phase A, audit F7) instead of
-            // the open-events list, which is empty whenever this band is shown.
-            {label: t('updatesAction'), href: '/events#events-interest'},
-            {label: t('challengeAction'), href: '/contact'},
+            {label: t('updatesAction'), href: 'mailto:contact@hkwtia.org'},
           ]}
         />
       )}

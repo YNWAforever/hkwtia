@@ -9,8 +9,11 @@ import type {AppLocale} from "@/i18n/routing";
 import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
 import {beginMembershipCheckoutAction} from "@/app/[locale]/(join)/join/actions";
+import {OPS_MEMBERSHIP_TIERS} from "@/config/membership-journey";
+import {siteConfig} from "@/config/site";
 import {membershipPlansRepository} from "@/lib/db/repos/membership-plans";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
+import {configuredCheckoutPriceId} from "@/lib/membership/catalog";
 import {buildPublicMembershipCatalog, publicPriceIds} from "@/lib/membership/public-catalog";
 import {localizedPath} from "@/lib/urls";
 import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
@@ -47,24 +50,26 @@ export default async function CheckoutPage({params, searchParams}: Props) {
   const state = await loadPendingJoinBillingState(actor, queryValue(query.membership_id));
   if (!state) notFound();
 
-  // The fee comes from the same validated catalog as the public pricing page. A
-  // missing or inconsistent catalog never produces a made-up amount.
+  // Published Individual / Corporate / Platinum fees come from the ops list.
+  // The legacy catalog still supplies other paid rows, and never invents an amount.
   const tiers = await membershipPlansRepository.list()
     .then((rows) => buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()}))
     .catch(() => []);
   const tier = tiers.find((item) => item.code === state.membership.planCode);
   const attempt = await billingAttemptsRepository.getActive(state.actor, state.membership.id).catch(() => undefined);
-  const currentPriceId = state.membership.planCode === "startup"
-    ? publicPriceIds().startup
-    : state.membership.planCode === "corporate" ? publicPriceIds().corporate : "";
-  // A resumable session can retain an older provider price after catalog changes.
-  // In that case the provider is the only trustworthy display of the exact amount.
-  const annualFee = attempt !== undefined && (!attempt || attempt.priceReference === currentPriceId)
+  const currentPriceId = configuredCheckoutPriceId(state.membership.planCode);
+  const catalogFee = attempt !== undefined && (!attempt || attempt.priceReference === currentPriceId)
     && tier?.price.kind === "paid"
     ? tier.price.options.find((option) => option.cadence === "annual")?.amount
     : undefined;
+  const opsTier = OPS_MEMBERSHIP_TIERS.find((item) => item.code === state.membership.planCode);
+  const money = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
+  const annualFee = opsTier ? `${money.format(opsTier.annualPriceHkd)}` : catalogFee;
+  // An unset Individual or Platinum price id is a contact message. The redirect query
+  // only records why we came back; the env var is what decides whether Stripe can run.
+  const priceUnavailable = currentPriceId === "";
   const t = await getTranslations("Join");
-  const policyView=await getPolicyConfirmation(state.actor,state.application.id,locale);
+  const policyView = await getPolicyConfirmation(state.actor, state.application.id, locale);
   const resume = `${localizedPath(locale, "/join")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`;
   const details = `${localizedPath(locale, "/join/company")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`;
   return (
@@ -76,18 +81,27 @@ export default async function CheckoutPage({params, searchParams}: Props) {
         <div><dt className="inline font-medium">{t("checkoutSummary.fee")}: </dt><dd className="inline">{annualFee ?? t("checkoutSummary.feeAtProvider")}</dd></div>
         <div><dt className="inline font-medium">{t("checkoutSummary.status")}: </dt><dd className="inline">{t("checkoutSummary.pending")}</dd></div>
       </dl>
-      {queryValue(query.policyError)?<p className="mt-4 text-destructive" role="alert">{t(queryValue(query.policyError)==="stale"?"policy.stale":"policy.required")}</p>:null}
-      <form action={beginMembershipCheckoutAction} className="mt-8">
-        <input name="membershipId" type="hidden" value={state.membership.id}/>
-        <input name="locale" type="hidden" value={locale}/>
-        <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
-        <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 text-primary-foreground disabled:opacity-60" disabled={!policyView.canProceed} type="submit">{t("checkoutSummary.continuePayment")}</button>
-      </form>
+      {priceUnavailable ? (
+        <div className="mt-8">
+          <p role="alert">{t("checkoutSummary.priceUnavailable")}</p>
+          <a className="mt-4 inline-flex text-primary underline" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
+        </div>
+      ) : (
+        <>
+          {queryValue(query.policyError) ? <p className="mt-4 text-destructive" role="alert">{t(queryValue(query.policyError) === "stale" ? "policy.stale" : "policy.required")}</p> : null}
+          <form action={beginMembershipCheckoutAction} className="mt-8">
+            <input name="membershipId" type="hidden" value={state.membership.id}/>
+            <input name="locale" type="hidden" value={locale}/>
+            <PolicyConfirmation view={policyView} supportHref={localizedPath(locale, "/contact")} labels={{title: t("policy.title"), version: t("policy.version"), accept: t("policy.accept"), accepted: t("policy.accepted"), unavailable: t("policy.unavailable"), ownerRequired: t("policy.ownerRequired"), support: t("policy.support")}}/>
+            <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 text-primary-foreground disabled:opacity-60" disabled={!policyView.canProceed} type="submit">{t("checkoutSummary.continuePayment")}</button>
+          </form>
+          <p className="mt-4 text-sm text-muted-foreground">{t("checkoutSummary.sameAttempt")}</p>
+        </>
+      )}
       <div className="mt-5 flex flex-wrap gap-5 text-sm">
         <Link className="text-primary underline" href={resume}>{t("checkoutSummary.later")}</Link>
-        {state.application.applicantUserId===state.actor.profileId?<Link className="text-primary underline" href={details}>{t("checkoutSummary.changeDetails")}</Link>:null}
+        {state.application.applicantUserId === state.actor.profileId ? <Link className="text-primary underline" href={details}>{t("checkoutSummary.changeDetails")}</Link> : null}
       </div>
-      <p className="mt-4 text-sm text-muted-foreground">{t("checkoutSummary.sameAttempt")}</p>
     </section>
   );
 }

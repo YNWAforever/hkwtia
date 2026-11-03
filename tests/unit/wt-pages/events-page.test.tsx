@@ -231,6 +231,10 @@ describe("Events page donor markup", () => {
         })
         .closest("a"),
     ).toHaveAttribute("href", "/membership");
+    expect(screen.getByText("GBA and overseas connections through events and delegations.")).toBeInTheDocument();
+    expect(screen.getByText("Member solutions, listed with each member's consent.")).toBeInTheDocument();
+    expect(screen.getByText("View the Member Showcase")).toBeInTheDocument();
+    expect(screen.getByText("Find the pathway that matches your organisation.")).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: bundles.en.Interest.submit }),

@@ -23,10 +23,10 @@ function messageAt(bundle: unknown, path: string): string | undefined {
 }
 
 describe("member tool registry", () => {
-  it("is not empty and declares unique keys", () => {
-    expect(MEMBER_TOOLS.length).toBeGreaterThan(0);
-    const keys = MEMBER_TOOLS.map(({key}) => key);
-    expect(new Set(keys).size).toBe(keys.length);
+  it("does not offer the internal content calendar", () => {
+    expect(MEMBER_TOOLS).toEqual([]);
+    expect(memberToolOrigins).toEqual([]);
+    expect(JSON.stringify(MEMBER_TOOLS)).not.toContain("content-calendar-internal.vercel.app");
   });
 
   it.each(MEMBER_TOOLS)("declares a URL-safe key for $key", (tool) => {

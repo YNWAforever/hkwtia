@@ -77,7 +77,7 @@ describe("WiseTech design tokens", () => {
   });
 
   it("adopts the donor type stacks with the Chinese fallbacks appended", () => {
-    expect(declaration("--font-serif")).toBe('"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif');
+    expect(declaration("--font-serif")).toBe('"Avenir", "Avenir Next", "Noto Sans TC", "Noto Sans", sans-serif');
     expect(declaration("--font-sans")).toBe(
       '"Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif',
     );
@@ -86,10 +86,13 @@ describe("WiseTech design tokens", () => {
     expect(globals).not.toContain("h1, h2, h3 { font-family");
   });
 
-  it("no longer loads Google fonts through next/font", () => {
-    expect(rootLayout).not.toContain("next/font");
+  it("loads Noto through next/font and does not embed Avenir", () => {
+    expect(rootLayout).toContain("next/font/google");
+    expect(rootLayout).toContain("Noto_Sans");
+    expect(rootLayout).toContain("Noto_Sans_TC");
     expect(rootLayout).not.toContain("Playfair");
-    expect(rootLayout).toContain("<html lang={locale}>");
+    expect(rootLayout).not.toMatch(/Avenir.*\.woff/i);
+    expect(rootLayout).toContain("<html className={`${notoSans.variable} ${notoSansTC.variable}`} lang={locale}>");
   });
 
   it("exposes the tokens, breakpoints and families through Tailwind", () => {

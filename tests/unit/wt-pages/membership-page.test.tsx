@@ -119,14 +119,14 @@ const corporate: PersistedMembershipPlan = {
   stripePriceReference: "price_corporate",
 };
 
-async function renderMembership(rows: readonly PersistedMembershipPlan[]) {
+async function renderMembership(rows: readonly PersistedMembershipPlan[], locale: "en" | "zh-HK" = "en") {
   membershipPlans.list.mockResolvedValue(rows);
   const originalEnv = { ...process.env };
   process.env.STRIPE_STARTUP_PRICE_ID = "price_startup";
   process.env.STRIPE_CORPORATE_PRICE_ID = "price_corporate";
   const html = renderToStaticMarkup(
     await resolveReadModelTree(
-      await MembershipPage({ params: Promise.resolve({ locale: "en" }) }),
+      await MembershipPage({ params: Promise.resolve({ locale }) }),
     ),
   );
   process.env = originalEnv;
@@ -156,29 +156,42 @@ describe("/membership rewrite", () => {
       html.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
     expect((planGridHtml.match(/<article/g) ?? []).length).toBe(4);
     expect(html).toContain(bundles.en.Membership.sme.title);
-    expect(html).toContain('href="/join?plan=community"');
-    expect(html).toContain("Free");
-    expect(html).toContain('href="/join?plan=individual"');
-    expect(html).toContain('href="/join?plan=corporate"');
-    expect(html).toContain('href="/join?plan=platinum"');
+    expect(html).toContain("mailto:contact@hkwtia.org");
     expect(html).toContain("HK$500");
     expect(html).toContain("HK$1,800");
     expect(html).toContain("HK$4,800");
-    expect(html).toContain(bundles.en.Membership.actions.join);
-    expect(html).toContain(bundles.en.Membership.tracks.sla);
-    expect(html).toContain(bundles.en.Membership.tierBenefits.individual[1]);
-    expect(html).toContain(bundles.en.Membership.tierBenefits.platinum[2]);
+    expect(html).toContain('href="/join?plan=individual"');
+    expect(html).toContain('href="/join?plan=corporate"');
+    expect(html).toContain('href="/join?plan=platinum"');
+    expect(html).toContain(bundles.en.Membership.actions.payOnline);
+    expect(html).not.toContain("25 seats");
+    expect(html).not.toContain("HK$1,200");
+    expect(html).not.toMatch(/WhatsApp updates|Priority WhatsApp|Dedicated WhatsApp/);
+    for (const locale of ["en", "zh-HK"] as const) {
+      const page = locale === "en" ? html : await renderMembership([community, startup, patron], locale);
+      const planGrid = page.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
+      expect(planGrid).not.toContain("<ul");
+      expect(page).toContain(bundles[locale].Membership.actions.payOnline);
+      for (const [code, lines] of Object.entries(bundles[locale].Membership.tierBenefits as Record<string, readonly string[]>)) {
+        const description = bundles[locale].Membership.tiers[code as keyof typeof bundles.en.Membership.tiers]?.description ?? "";
+        for (const line of lines) {
+          if (description.includes(line)) continue;
+          expect(page, `${locale} ${code}: ${line}`).not.toContain(line);
+        }
+      }
+    }
   });
 
-  it("shows the confirmed-pricing note when both configured price ids resolve", async () => {
+  it("shows the published pricing note with the ops fees", async () => {
     const html = await renderMembership([community, startup, corporate]);
 
     expect(html).toContain('class="pricing-note"');
     expect(html).toContain(bundles.en.Membership.pricing.readyCopy);
-    expect(html).not.toContain(bundles.en.Membership.pricing.fallbackCopy);
+    expect(html).toContain("HK$4,800");
+    expect(html).not.toContain("HK$1,200");
   });
 
-  it("still shows the ops prices when the database catalog is empty", async () => {
+  it("still shows the ops fees when the database catalog is empty", async () => {
     const html = await renderMembership([]);
 
     expect(html).toContain('class="plan-grid"');

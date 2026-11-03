@@ -24,5 +24,6 @@ describe("TierComparison membership actions", () => {
     expect(links.map((link) => link.getAttribute("href"))).toEqual(
       [`${pathname}?plan=community`, `${pathname}?plan=startup`, `${pathname}?plan=corporate`, locale === "en" ? "/contact" : "/zh/contact"],
     );
+    expect(screen.queryByText("benefit")).toBeNull();
   });
 });

@@ -43,14 +43,16 @@ describe("ConversionPaths", () => {
     expect(within(partnership).getByRole("link", {name: bundles.en.Home.conversionPaths.partnership.primaryAction})).toHaveAttribute("href", "/contact");
     expect(within(partnership).getByRole("link", {name: bundles.en.Home.conversionPaths.partnership.secondaryAction})).toHaveAttribute("href", "/about");
   });
-  it("shows the ops list fees for Individual, Corporate, and Platinum", async () => {
+  it("shows Individual, Corporate, and Platinum fees, and not the startup fee", async () => {
     plans.list.mockResolvedValueOnce([]);
     const {ConversionPaths} = await import("@/components/home/conversion-paths");
     render(await ConversionPaths({locale: "en"}));
     const membership = screen.getByText(bundles.en.Home.conversionPaths.membership.title).closest("article")!;
-    const fees = membership.querySelector("dl")!;
-    expect(fees).toHaveAttribute("aria-label", bundles.en.Home.conversionPaths.membership.catalogPricesLabel);
-    expect([...fees.querySelectorAll("dt")].map((n) => n.textContent)).toEqual(["Individual", "Corporate", "Platinum"]);
-    expect([...fees.querySelectorAll("dd")].map((n) => n.textContent)).toEqual(["HK$500 per year", "HK$1,800 per year", "HK$4,800 per year"]);
+    const fees = membership.querySelector("dl");
+    expect(fees).not.toBeNull();
+    expect(fees?.textContent).toContain("HK$500");
+    expect(fees?.textContent).toContain("HK$1,800");
+    expect(fees?.textContent).toContain("HK$4,800");
+    expect(fees?.textContent).not.toContain("1,200");
   });
 });

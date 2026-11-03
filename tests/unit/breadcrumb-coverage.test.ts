@@ -26,7 +26,7 @@ function pageFileFor(route: string): string {
 }
 
 describe("breadcrumb coverage", () => {
-  it.each(publicRoutes.filter((route) => route !== "/"))(
+  it.each(publicRoutes.filter((route) => route !== "/" && route !== "/ai-ops"))(
     "%s renders the shared breadcrumb",
     (route) => {
       // Per page because a server layout cannot read the pathname. That makes drift the

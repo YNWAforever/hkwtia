@@ -58,8 +58,11 @@ describe("/about/chairman", () => {
 
     expect(screen.getByRole("heading", {level: 1, name: en.Chairman.title})).toBeVisible();
     const quote = screen.getByRole("blockquote");
-    expect(within(quote).getByText(en.Chairman.message)).toBeVisible();
-    expect(within(quote).getByText(en.Chairman.signature).tagName).toBe("CITE");
+    expect(within(quote).getByText("Dear Members and Friends,")).toBeVisible();
+    expect(quote.textContent).toContain("I am honoured to take on the role of Chairman of WTIA.");
+    expect(quote.textContent).toContain("Hong Kong Wireless Technology Industry Association (WTIA)");
+    expect(within(quote).queryByText(en.Chairman.signature)).not.toBeInTheDocument();
+    expect(quote.querySelector("cite")).toBeNull();
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
     expect(document.querySelector(".rich-items-cards")).not.toBeInTheDocument();
     const related = document.querySelector(".rich-related-grid");
@@ -91,12 +94,10 @@ describe("/about/committees", () => {
     renderWithIntl("en", await CommitteesPage({params: Promise.resolve({locale: "en"})}));
 
     expect(screen.getByRole("heading", {level: 1, name: en.Committees.title})).toBeVisible();
-    const cardsGrid = document.querySelector(".rich-items-cards");
-    expect(cardsGrid).toBeInTheDocument();
-    expect(within(cardsGrid as HTMLElement).getAllByRole("article")).toHaveLength(3);
+    expect(screen.getByText(en.Committees.summary)).toBeVisible();
+    expect(document.querySelector(".rich-items-cards")).not.toBeInTheDocument();
     for (const committee of ["executive", "innovation", "membership"] as const) {
-      expect(screen.getByRole("heading", {level: 3, name: en.Committees[committee].title})).toBeVisible();
-      expect(screen.getByText(en.Committees[committee].description)).toBeVisible();
+      expect(screen.queryByRole("heading", {level: 3, name: en.Committees[committee].title})).toBeNull();
     }
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
     const related = document.querySelector(".rich-related-grid");
@@ -108,7 +109,7 @@ describe("/about/committees", () => {
   it("stays server-only on rich-items-cards, with no manufactured compass", () => {
     const source = readFileSync(resolve(process.cwd(), "app/[locale]/(public)/about/committees/page.tsx"), "utf8");
     expect(source).toContain("PageHero");
-    expect(source).toContain("rich-items-cards");
+    expect(source).not.toContain("rich-items-cards");
     expect(source).not.toContain("RichCompass");
     expect(source).not.toContain("InstitutionalPageIntro");
     expect(source).not.toMatch(/["']use client["']/);

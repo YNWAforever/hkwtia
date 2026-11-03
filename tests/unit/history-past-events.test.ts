@@ -116,8 +116,9 @@ describe("past-event history milestones", () => {
     expect(record.images).toHaveLength(1);
   });
 
-  it("ships a file for every image a milestone names", () => {
-    for (const {slug, images} of milestones) {
+  it("ships a file for every image a published milestone names", () => {
+    // Member interviews are unpublished until written consent. Their files are not served.
+    for (const {slug, images} of milestonesOnly(milestones)) {
       for (const {src} of images) {
         expect(existsSync(join("public", src)), `${slug}: ${src}`).toBe(true);
       }

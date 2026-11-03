@@ -22,8 +22,17 @@ type ActionLinkProps = Readonly<{href: string; variant?: ActionLinkVariant; clas
 export function ActionLink({href, variant = 'button', className, prefetch, children}: ActionLinkProps) {
   // Donor spacing: the literal space between the label and <Arrow /> is the port's own
   // layout, not a stray character for the string audit to flag.
+  const classNameValue = cn(variantClasses[variant], className);
+  // mailto and absolute URLs must not go through the locale Link, which would prefix them.
+  if (/^(mailto:|https?:)/.test(href)) {
+    return (
+      <a className={classNameValue} href={href}>
+        {children} <Arrow />
+      </a>
+    );
+  }
   return (
-    <Link className={cn(variantClasses[variant], className)} href={href} {...(prefetch === undefined ? {} : {prefetch})}>
+    <Link className={classNameValue} href={href} {...(prefetch === undefined ? {} : {prefetch})}>
       {children} <Arrow />
     </Link>
   );

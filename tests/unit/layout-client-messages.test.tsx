@@ -24,6 +24,10 @@ vi.mock("@/components/admin/admin-app-shell", () => ({AdminAppShell: ({children}
 vi.mock("@/components/portal/portal-shell", () => ({PortalShell: ({children}: {children: ReactNode}) => <main>{children}</main>}));
 vi.mock("@/components/portal/portal-navigation", () => ({PortalNavigation: () => null}));
 vi.mock("@/components/ai/deferred-concierge-widget", () => ({DeferredConciergeWidget: () => null}));
+vi.mock("next/font/google", () => ({
+  Noto_Sans: () => ({variable: "noto-sans", className: "noto-sans"}),
+  Noto_Sans_TC: () => ({variable: "noto-sans-tc", className: "noto-sans-tc"}),
+}));
 
 import LocaleLayout from "@/app/[locale]/layout";
 import AdminLayout from "@/app/[locale]/(admin)/admin/layout";

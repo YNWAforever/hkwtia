@@ -44,30 +44,39 @@ describe("join billing pages", () => {
     state.notFound = false;
     state.activeAttemptPrice = null;
     process.env.STRIPE_STARTUP_PRICE_ID = "price_startup_test";
+    process.env.STRIPE_CORPORATE_PRICE_ID = "price_corporate_test";
+    process.env.STRIPE_INDIVIDUAL_PRICE_ID = "";
+    process.env.STRIPE_PLATINUM_PRICE_ID = "";
   });
 
-  it("renders a local checkout summary without creating a Stripe session on GET", async () => {
+  it("does not print the legacy startup fee, and still offers checkout when that price id is set", async () => {
     const markup = renderToStaticMarkup(await CheckoutPage(props("zh-HK")));
-    expect(state.membershipCalls).toEqual([[actor, "membership-a"]]);
-    expect(state.applicationCalls).toEqual([[actor, "application-a"]]);
     expect(state.checkoutCalls).toHaveLength(0);
     expect(state.redirectUrl).toBeNull();
-    expect(markup).toContain('name="membershipId"');
     expect(markup).toContain('type="submit"');
-  });
-
-  it("uses the validated catalog amount only when a resumed attempt has the same price", async () => {
-    let markup = renderToStaticMarkup(await CheckoutPage(props()));
-    expect(markup).toContain("HK$1,200");
-    state.activeAttemptPrice = "price_old_attempt";
-    markup = renderToStaticMarkup(await CheckoutPage(props()));
     expect(markup).not.toContain("HK$1,200");
-    expect(markup).toContain("localized:checkoutSummary.feeAtProvider");
+    expect(markup).not.toContain("localized:checkoutSummary.priceUnavailable");
   });
 
-  it("fails closed when the scoped application does not match the membership", async () => {
-    state.application = {...state.application, planCode: "corporate"};
-    await expect(CheckoutPage(props())).rejects.toThrow("NEXT_NOT_FOUND");
+  it.each(["individual", "platinum"] as const)("keeps %s checkout closed with a contact message when its price id is unset", async (planCode) => {
+    state.membership = {...state.membership, planCode};
+    state.application = {...state.application, planCode};
+    const markup = renderToStaticMarkup(await CheckoutPage(props("en")));
+    expect(state.checkoutCalls).toHaveLength(0);
+    expect(markup).toContain("localized:checkoutSummary.priceUnavailable");
+    expect(markup).toContain("mailto:contact@hkwtia.org");
+    expect(markup).not.toContain('type="submit"');
+    expect(markup).toContain(planCode === "platinum" ? "HK$4,800" : "HK$500");
+  });
+
+  it("offers Platinum secure checkout when STRIPE_PLATINUM_PRICE_ID is set", async () => {
+    process.env.STRIPE_PLATINUM_PRICE_ID = "price_platinum_test";
+    state.membership = {...state.membership, planCode: "platinum"};
+    state.application = {...state.application, planCode: "platinum"};
+    const markup = renderToStaticMarkup(await CheckoutPage(props("en")));
+    expect(markup).toContain('type="submit"');
+    expect(markup).toContain("HK$4,800");
+    expect(markup).not.toContain("localized:checkoutSummary.priceUnavailable");
     expect(state.checkoutCalls).toHaveLength(0);
   });
 

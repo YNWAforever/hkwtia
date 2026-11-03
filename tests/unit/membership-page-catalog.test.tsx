@@ -37,7 +37,10 @@ function lookup(key: string): string {
       "cadenceLabels.annual": "per year",
       "cadenceLabels.monthly": "per month",
       "actions.join": "Choose this plan",
+      "actions.payOnline": "Pay online now",
       "actions.contact": "Contact us",
+      "pricing.readyLabel": "Current pricing",
+      "pricing.readyCopy": "Review the total and subscription terms at secure checkout before confirming payment.",
     },
     "zh-HK": {
       unavailable: "會員計劃暫時未能提供",
@@ -50,7 +53,10 @@ function lookup(key: string): string {
       "cadenceLabels.annual": "每年",
       "cadenceLabels.monthly": "每月",
       "actions.join": "選擇此計劃",
+      "actions.payOnline": "立即網上付款",
       "actions.contact": "聯絡我們",
+      "pricing.readyLabel": "現行收費",
+      "pricing.readyCopy": "請在安全結帳頁核對總額及訂閱條款，再確認付款。",
     },
   };
   return messages[localeState.locale]?.[key] ?? key;
@@ -116,6 +122,8 @@ describe("repository-backed Membership page", () => {
       const html = await renderMembership([], locale);
       expect(html).toContain(name);
       expect(html).toContain('href="/join?plan=individual"');
+      expect(html).toContain('href="/join?plan=platinum"');
+      expect(html).toContain(locale === "en" ? "Pay online now" : "立即網上付款");
       expect(html).not.toContain(locale === "en" ? "Membership is currently unavailable" : "會員計劃暫時未能提供");
     },
   );
@@ -133,6 +141,7 @@ describe("repository-backed Membership page", () => {
 
     expect(html).toContain("Individual");
     expect(html).toContain('href="/join?plan=corporate"');
+    expect(html).toContain("Pay online now");
     expect(html).not.toContain("database private payload");
   });
 
@@ -152,7 +161,9 @@ describe("repository-backed Membership page", () => {
     expect(membershipPlans.list).toHaveBeenCalledOnce();
     expect(html).toContain("Individual");
     expect(html).toContain("HK$500");
-    expect(html).toContain('href="/join?plan=individual"');
+    expect(html).toContain("HK$4,800");
+    expect(html).toContain('href="/join?plan=platinum"');
+    expect(html).toContain("Pay online now");
     expect(html).not.toContain("Membership is currently unavailable");
   });
 });

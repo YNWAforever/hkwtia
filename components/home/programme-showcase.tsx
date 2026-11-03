@@ -9,7 +9,8 @@ import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 // shared with /programmes.
 export async function ProgrammeShowcase({locale, copyOverrides}: HomeCopyProps) {
   const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.programmeShowcase'});
-  const summaries = summarizeProgrammes();
+  // ASA stays on the archive pages only. Home pathways are HKICT, Tech to Connect and CPAI.
+  const summaries = summarizeProgrammes().filter((item) => item.id !== 'asa');
 
   return (
     <Section labelledBy="programme-showcase-title" id="programmes">

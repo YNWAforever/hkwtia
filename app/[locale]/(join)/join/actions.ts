@@ -32,10 +32,19 @@ import {policyAcceptanceEnabled,requireCurrentMembershipPolicy} from "@/lib/memb
 import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {recordPolicyAcceptance} from "@/lib/db/repos/membership-policy-acceptances";
 import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
-import {type BillingInterval} from "@/lib/membership/catalog";
+import {configuredCheckoutPriceId, type BillingInterval} from "@/lib/membership/catalog";
 import {localizedPath} from "@/lib/urls";
 
 const emailSchema = z.string().trim().email();
+
+/**
+ * Individual and Platinum stay on the pay path. Their price ids are optional, so an
+ * empty value is a contact message rather than a Stripe call or a generic save error.
+ * Corporate and the legacy startup code keep the existing billing-env contract.
+ */
+function optionalCheckoutPriceMissing(plan: PlanCode): boolean {
+  return (plan === "individual" || plan === "platinum") && configuredCheckoutPriceId(plan) === "";
+}
 
 function nextUrl(locale: AppLocale, pathname: string, values: Record<string, string | null | undefined>) {
   const search = new URLSearchParams();
@@ -209,6 +218,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // completeApplication() used to make internally, now explicit at the caller since
     // billingInterval is a real, validated input rather than something the server derives alone.
     const billingInterval = defaultBillingInterval(plan);
+    if (optionalCheckoutPriceMissing(plan)) return {message: t("errors.priceUnavailable")};
     const result = await completeApplication(actor, {plan, applicationId: id, billingInterval, profile: parsed.data, company: null});
     // After the application is saved and before the redirect throws; never throws itself.
     await attributeJoinInvite(actor, result.applicationId);
@@ -216,6 +226,9 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))return {message:t(error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"policy.stale":"policy.required")};
+    if (error instanceof Error && error.message === "UNSUPPORTED_BILLING_INTERVAL" && optionalCheckoutPriceMissing(plan)) {
+      return {message: t("errors.priceUnavailable")};
+    }
     return {message: t("errors.save")};
   }
 }
@@ -255,6 +268,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     const profile = await profilesRepository.getById(actor, actor.profileId);
     if (!profile) return {message: t("errors.profile")};
     const billingInterval = defaultBillingInterval(plan);
+    if (optionalCheckoutPriceMissing(plan)) return {message: t("errors.priceUnavailable")};
     const result = await completeApplication(actor, {plan, applicationId, billingInterval, profile: {
       displayName: profile.displayName,
       phone: profile.phone,
@@ -267,6 +281,9 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))return {message:t(error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"policy.stale":"policy.required")};
+    if (error instanceof Error && error.message === "UNSUPPORTED_BILLING_INTERVAL" && optionalCheckoutPriceMissing(plan)) {
+      return {message: t("errors.priceUnavailable")};
+    }
     return {message: t("errors.save")};
   }
 }
@@ -285,6 +302,9 @@ export async function beginMembershipCheckoutAction(formData: FormData): Promise
     session=await createCheckoutSession(state.actor,state.membership.id,locale.data);
   }catch(error){
     if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))redirect(localizedPath(locale.data,"/join/checkout")+"?"+new URLSearchParams({membership_id:state.membership.id,policyError:error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"stale":"required"}));
+    if (error instanceof Error && error.message === "STRIPE_PRICE_NOT_CONFIGURED") {
+      redirect(localizedPath(locale.data, "/join/checkout") + "?" + new URLSearchParams({membership_id: state.membership.id, price: "unavailable"}));
+    }
     throw error;
   }
   redirect(session.url);

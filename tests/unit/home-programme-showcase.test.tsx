@@ -52,7 +52,8 @@ describe("ProgrammeShowcase", () => {
     render(await ProgrammeShowcase({locale: "en"}));
 
     const cards = document.querySelectorAll(".programme-card");
-    expect(cards).toHaveLength(4);
+    expect(cards).toHaveLength(3);
+    expect(screen.queryByRole("heading", {name: bundles.en.Home.programmeShowcase.items.asa.name})).toBeNull();
     expect(cards[0]).toHaveClass("feature");
 
     const cpaiCard = screen.getByRole("heading", {name: bundles.en.Home.programmeShowcase.items.cpai.name}).closest("article")!;

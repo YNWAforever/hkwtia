@@ -113,8 +113,9 @@ export function buildPublicMembershipCatalog(input: Readonly<{
       continue;
     }
 
+    // Startup is a legacy plan code. A persisted HK$1,200 row must not become a public tier.
     // Individual and Platinum are priced from the ops list, not this legacy catalog.
-    if (code === "individual" || code === "platinum") continue;
+    if (code === "startup" || code === "individual" || code === "platinum") continue;
 
     const tier = paidTier(code, row, input.priceIds[code], money);
     if (tier) tiers.push(tier);

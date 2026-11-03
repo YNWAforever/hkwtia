@@ -1,16 +1,26 @@
 /** Every entity the og route can draw a card for. */
 export type OgEntityKind = "event" | "member" | "showcase" | "news" | "programme" | "milestone" | "page";
 
+export type OgLocale = "en" | "zh-HK";
+
 export type OgEntity = Readonly<{
   kind: OgEntityKind;
   title: string;
   eyebrow: string;
   imageUrl: string | null;
+  locale?: OgLocale;
 }>;
 
 export type OgRendererName = "photo" | "logo" | "editorial";
 
-export type OgProps = Readonly<{title: string; eyebrow: string; imageUrl?: string}>;
+export type OgProps = Readonly<{
+  title: string;
+  eyebrow: string;
+  imageUrl?: string;
+  locale?: OgLocale;
+  /** Inlined data URL. Do not pass an http(s) logo; Preview SSO blocks the edge fetch. */
+  logoUrl?: string;
+}>;
 
 export type ResolvedOgRenderer = Readonly<{renderer: OgRendererName; props: OgProps}>;
 
@@ -60,6 +70,7 @@ export function resolveOgRenderer(entity: OgEntity): ResolvedOgRenderer {
  */
 export function ogImagePath(entity: OgEntity): string {
   const params = new URLSearchParams({kind: entity.kind, title: entity.title, eyebrow: entity.eyebrow});
+  if (entity.locale) params.set("locale", entity.locale);
   if (entity.imageUrl) params.set("image", entity.imageUrl);
   return `/api/og?${params.toString()}`;
 }

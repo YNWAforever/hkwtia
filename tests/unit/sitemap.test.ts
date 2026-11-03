@@ -44,7 +44,7 @@ describe("published build logs in the sitemap", () => {
     companyProfiles.listPublishedSlugs.mockResolvedValue([]);
   });
 
-  it("adds both localized URLs for each published build-log slug", async () => {
+  it("does not add build-log slugs to the sitemap", async () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([
       {
         slug: "static-update",
@@ -64,23 +64,18 @@ describe("published build logs in the sitemap", () => {
 
     const urls = (await sitemap()).map((entry) => entry.url);
 
-    expect(urls).toEqual(expect.arrayContaining([
+    expect(urls).not.toEqual(expect.arrayContaining([
       "http://localhost:3000/news/m4-ai-ops-dashboard",
       "http://localhost:3000/zh/news/m4-ai-ops-dashboard",
     ]));
-    expect(
-      urls.filter((url) => url === "http://localhost:3000/news/static-update"),
-    ).toHaveLength(1);
-    expect(
-      urls.filter(
-        (url) => url === "http://localhost:3000/zh/news/static-update",
-      ),
-    ).toHaveLength(1);
+    expect(urls.filter((url) => url.includes("static-update"))).toHaveLength(0);
   });
 
-  it("reports a dynamic-source outage instead of publishing a partial 200 sitemap", async () => {
+  it("does not publish build logs, and a build-log read failure cannot blank the sitemap", async () => {
     publicPosts.listPublishedBuildLogs.mockRejectedValue(new Error("TRANSIENT_DATABASE_READ"));
-    await expect(sitemap()).rejects.toThrow("TRANSIENT_DATABASE_READ");
+    const urls = (await sitemap()).map((entry) => entry.url);
+    expect(urls.some((url) => url.includes("/news/m4-ai-ops-dashboard"))).toBe(false);
+    expect(publicPosts.listPublishedBuildLogs).not.toHaveBeenCalled();
   });
 
   it("adds both localized URLs for each published showcase slug", async () => {

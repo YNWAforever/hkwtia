@@ -69,8 +69,8 @@ describe("join invite page", () => {
     expect(html).toContain(`href="/join/invite/${TOKEN}/continue"`);
     // The id is a bearer credential: it must never reach the HTML.
     expect(html).not.toContain(INVITE_ID);
-    expect(html).toContain("benefit-one-tierBenefits.startup");
-    expect(html).toContain("benefit-two");
+    expect(html).not.toContain("benefit-one-tierBenefits.startup");
+    expect(html).not.toContain("benefit-two");
     // The page is read-only: only the continue route may stamp.
     expect(state.open).not.toHaveBeenCalled();
   });

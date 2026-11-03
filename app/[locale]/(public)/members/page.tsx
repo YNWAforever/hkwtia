@@ -10,6 +10,7 @@ import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
+import {siteConfig} from "@/config/site";
 import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {buildPageMetadata} from "@/lib/metadata";
 import {recordDirectoryReadFailure} from "@/lib/members/directory-availability";
@@ -102,16 +103,14 @@ export default async function MembersPage({params, searchParams}: Props) {
         : hasFilters
         ? <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />
         : <HonestDirectoryEmpty
-            frames={[t("emptyFrame"), t("emptyFrame"), t("emptyFrame")]}
             next={t("noPublishedDescription")}
-            primary={{href: "/join", label: t("emptyPrimary")}}
-            secondary={{href: "/membership", label: t("emptySecondary")}}
+            primary={{href: `mailto:${siteConfig.contact.email}`, label: t("emptyPrimary")}}
             status={t("noPublishedTitle")}
           />}
       {directory.nextCursor && <nav aria-label={t("paginationLabel")} className="mt-8 text-center"><a className="button button-dark" href={nextHref}>{t("loadMore")}</a></nav>}
     </Section>
     <ClosingBand
-      actions={[{label: t("detail.join"), href: "/membership"}]}
+      actions={[]}
       copy={t("metaDescription")}
       eyebrow={t("eyebrow")}
       title={t("detail.joinCta")}

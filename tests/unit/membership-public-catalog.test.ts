@@ -55,6 +55,10 @@ function startup(overrides: Partial<PersistedMembershipPlan> = {}): PersistedMem
   return {...validRows[1], ...overrides};
 }
 
+function corporate(overrides: Partial<PersistedMembershipPlan> = {}): PersistedMembershipPlan {
+  return {...validRows[2], ...overrides};
+}
+
 function catalog(rows: readonly PersistedMembershipPlan[], locale: "en" | "zh-HK" = "en") {
   return buildPublicMembershipCatalog({locale, rows, priceIds});
 }
@@ -64,14 +68,14 @@ describe("public Membership catalog", () => {
     const unknown = {...validRows[0], code: "legacy"};
 
     expect(catalog([...validRows].reverse().concat(unknown)).map((tier) => tier.code))
-      .toEqual(["community", "startup", "corporate", "patron"]);
+      .toEqual(["community", "corporate", "patron"]);
   });
 
   it("omits duplicated, inactive, malformed, and structurally mismatched canonical rows", () => {
     const rows = [
       validRows[0],
-      startup(),
-      startup(),
+      corporate(),
+      corporate(),
       {...validRows[2], active: false},
       {...validRows[3], annualPriceHkd: Number.NaN},
       {...validRows[0], code: "unknown"},
@@ -83,18 +87,18 @@ describe("public Membership catalog", () => {
   it.each([
     ["audience", {audience: "individual"}],
     ["billing behavior", {billingBehavior: "review"}],
-    ["seat allowance", {seatAllowance: 25}],
+    ["seat allowance", {seatAllowance: 5}],
     ["active flag", {active: false}],
   ] as const)("requires exact PLAN_CATALOG %s matching", (_label, mismatch) => {
-    expect(catalog([startup(mismatch)])).toEqual([]);
+    expect(catalog([corporate(mismatch)])).toEqual([]);
   });
 
   it.each([-1, 2147483648, 1.5])("rejects non-Postgres-integer annual value %s", (annualPriceHkd) => {
-    expect(catalog([startup({annualPriceHkd})])).toEqual([]);
+    expect(catalog([corporate({annualPriceHkd})])).toEqual([]);
   });
 
   it.each([-1, 2147483648, 1.5, 0])("rejects invalid paid monthly value %s", (monthlyPriceHkd) => {
-    expect(catalog([startup({monthlyPriceHkd})])).toEqual([]);
+    expect(catalog([corporate({monthlyPriceHkd})])).toEqual([]);
   });
 
   it("enforces the semantic Community and Patron price and CTA rules", () => {
@@ -107,29 +111,28 @@ describe("public Membership catalog", () => {
   });
 
   it("derives annual then monthly paid options from their persisted fields", () => {
-    const [tier] = catalog([startup()]);
+    const [tier] = catalog([corporate({monthlyPriceHkd: 180})]);
 
-    // Round 27: whole-dollar fees read "HK$1,200", not "HK$1,200.00".
     expect(tier).toEqual({
-      code: "startup",
+      code: "corporate",
       price: {
         kind: "paid",
         options: [
-          {amount: "HK$1,200", cadence: "annual"},
-          {amount: "HK$120", cadence: "monthly"},
+          {amount: "HK$1,800", cadence: "annual"},
+          {amount: "HK$180", cadence: "monthly"},
         ],
       },
-      cta: {href: "/join?plan=startup", kind: "join"},
+      cta: {href: "/join?plan=corporate", kind: "join"},
     });
   });
 
   it("uses the requested locale to format persisted paid values", () => {
-    const [tier] = catalog([startup({monthlyPriceHkd: null})], "zh-HK");
+    const [tier] = catalog([corporate({monthlyPriceHkd: null})], "zh-HK");
     const money = new Intl.NumberFormat("zh-HK", {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
 
     expect(tier.price).toEqual({
       kind: "paid",
-      options: [{amount: money.format(1200), cadence: "annual"}],
+      options: [{amount: money.format(1800), cadence: "annual"}],
     });
   });
 
@@ -139,9 +142,8 @@ describe("public Membership catalog", () => {
       {...validRows[2], stripePriceReference: null},
     ]);
 
-    expect(result.map((tier) => tier.code)).toEqual(["startup", "corporate"]);
+    expect(result.map((tier) => tier.code)).toEqual(["corporate"]);
     expect(result).toMatchObject([
-      {code: "startup", price: {kind: "paid"}, cta: {href: "/join?plan=startup"}},
       {code: "corporate", price: {kind: "paid"}, cta: {href: "/join?plan=corporate"}},
     ]);
     const serialized = JSON.stringify(result);
@@ -151,15 +153,21 @@ describe("public Membership catalog", () => {
   });
 
   it.each([
-    ["missing configured ID", {startup: "", corporate: priceIds.corporate}, priceIds.startup],
-    ["similar row reference", priceIds, `${priceIds.startup}_other`],
-    ["different configured ID", {startup: "price_other", corporate: priceIds.corporate}, priceIds.startup],
+    ["missing configured ID", {startup: priceIds.startup, corporate: ""}, priceIds.corporate],
+    ["similar row reference", priceIds, `${priceIds.corporate}_other`],
+    ["different configured ID", {startup: priceIds.startup, corporate: "price_other"}, priceIds.corporate],
   ] as const)("omits a paid plan for %s", (_label, configured, stripePriceReference) => {
     expect(buildPublicMembershipCatalog({
       locale: "en",
-      rows: [startup({stripePriceReference})],
+      rows: [corporate({stripePriceReference})],
       priceIds: configured,
     })).toEqual([]);
+  });
+
+  it("omits the legacy startup tier even when its HK$1,200 row and price id are present", () => {
+    const result = catalog(validRows);
+    expect(result.map((tier) => tier.code)).not.toContain("startup");
+    expect(JSON.stringify(result)).not.toContain("1,200");
   });
 
   it("reads, trims, and returns only the two public eligibility price IDs", () => {

@@ -9,21 +9,14 @@
  * with a bot challenge, which was not something to work around — and no message bundle carried
  * a number. An unverifiable number was omitted rather than repeated.
  *
- * On 2026-09-03 the product owner confirmed `+852 2989 9164` (errata E-20's owner action), and
- * it is set below. The footer renders its `tel:` line unconditionally now that this field is
- * set; `app/[locale]/(public)/contact/page.tsx` reads the same field — behind the same
- * `phone === undefined` check, since the type keeps `phone` optional for a future unset state —
- * rather than its own literal, so the two surfaces cannot disagree again.
+ * On 2026-09-03 the product owner confirmed `+852 2989 9164` (errata E-20's owner action).
+ * Claire's gate on 2026-11-03 put both the phone and the KOHO address back to 待核實.
+ * `phone` is unset and `addressLines` is empty until that confirmation. The footer and
+ * contact page already skip a missing phone. Do not fill either from this file.
  *
- * `addressLines` is NOT what the footer prints. The footer reads `Footer.addressLines` from
- * the message bundle, because the address is genuinely different per locale rather than a
- * translation of one list: English is three lines ("4/F, KOHO" / "73-75 Hung To Road" /
- * "Kwun Tong, Hong Kong") and Chinese is two, in Chinese address order. This list is the
- * English machine-readable record kept for WP-3's Organization structured data, and it has no
- * product consumer today. tests/unit/site-footer.test.tsx pins the rendered address against
- * each bundle and pins this list against the English bundle, so the two cannot drift apart
- * without a named failure; before this branch the only assertion looked like a config-to-UI
- * pin and passed solely because the two happened to agree (errata E-68).
+ * `addressLines` is the English machine-readable record for Organization structured data.
+ * It is empty while the postal address is unconfirmed, and structured data omits `address`
+ * in that case. The footer reads `Footer.addressLines`, which is also empty.
  */
 type SiteContact = Readonly<{
   email: string;
@@ -34,12 +27,14 @@ type SiteContact = Readonly<{
 
 export const siteContact: SiteContact = {
   email: 'contact@hkwtia.org',
-  phone: '+852 2989 9164',
+  // Claire gate 2026-11-03: address and phone stay unpublished until confirmed.
+  // Do not restore +852 2989 9164 or 4/F KOHO from memory. Email only.
+  phone: undefined,
   // WhatsApp Business number for click-to-chat (programme §8). Unset until the
   // Woztell channel is provisioned; every WhatsAppLink renders nothing until then.
   // When it exists, set it as '+852 XXXX XXXX'; clickToChatUrl strips formatting.
   whatsapp: undefined,
-  addressLines: ['4/F, KOHO', '73-75 Hung To Road', 'Kwun Tong, Hong Kong']
+  addressLines: []
 };
 
 export const siteConfig = {

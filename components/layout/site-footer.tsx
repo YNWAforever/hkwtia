@@ -1,7 +1,6 @@
 import {getTranslations} from "next-intl/server";
 
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
-import {FooterNewsletter} from "@/components/layout/footer-newsletter";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {
@@ -14,7 +13,6 @@ import {
 import {siteConfig} from "@/config/site";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
-import {toMailBody} from "@/lib/i18n/mail-body";
 
 // hkwtia's own 44px tap-target floor (spec §2.9); the donor's .footer-links a sets type only.
 const footerTargetClassName = "inline-flex min-h-11 min-w-11 max-w-full items-center break-words";
@@ -109,17 +107,9 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
           <p>{t("summary")}</p>
           <small>{t("legalLine")}</small>
         </div>
-        <FooterNewsletter labels={{
-          eyebrow: t("newsletter.eyebrow"),
-          title: t("newsletter.title"),
-          emailLabel: t("newsletter.emailLabel"),
-          placeholder: t("newsletter.placeholder"),
-          submit: t("newsletter.submit"),
-          success: t("newsletter.success"),
-          error: t("newsletter.error"),
-          mailSubject: t("newsletter.mailSubject"),
-          mailBody: toMailBody(t.raw("newsletter.mailBody")),
-        }} />
+        <div className="footer-newsletter">
+          <h2>{t("newsletter.title")}</h2>
+        </div>
       </div>
 
       <div className="shell footer-links">

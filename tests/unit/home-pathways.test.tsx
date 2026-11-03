@@ -46,6 +46,10 @@ describe("Pathways route finder", () => {
     for (const [index, key] of audiences.entries()) {
       expect(radios[index]).toHaveAccessibleName(new RegExp(bundles[locale].Home.pathways.items[key].title));
     }
+    const startups = bundles[locale].Home.pathways.items.startups;
+    expect(screen.getByText(startups.copy)).toBeInTheDocument();
+    expect(screen.getByText(startups.cta)).toBeInTheDocument();
+    expect(screen.getByText(startups.benefits)).toBeInTheDocument();
   });
 
   it("keeps the D-7 canonical primary destination for each audience, in order", async () => {

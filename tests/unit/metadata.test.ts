@@ -38,11 +38,16 @@ describe('share image', () => {
 
   it('defaults to a generated card titled with the page, not the transparent logo', () => {
     // The logo default (a 2001x721 transparent PNG) previewed as half a globe on black.
-    const url = imageOf(buildPageMetadata({locale: 'en', pathname: '/membership', title: 'Membership｜Hong Kong Wireless Technology Industry Association (WTIA)', description: 'd'}));
+    const title = 'Membership｜Hong Kong Wireless Technology Industry Association (WTIA)';
+    const metadata = buildPageMetadata({locale: 'en', pathname: '/membership', title, description: 'd'});
+    const url = imageOf(metadata);
+    const image = Array.isArray(metadata.openGraph?.images) ? metadata.openGraph?.images[0] : metadata.openGraph?.images;
 
     expect(url.pathname).toBe('/api/og');
     expect(url.searchParams.get('kind')).toBe('page');
     expect(url.searchParams.get('title')).toBe('Membership');
+    expect(image).toMatchObject({width: 1200, height: 630, alt: title});
+    expect(metadata.twitter).toMatchObject({images: [{url: url.toString(), width: 1200, height: 630, alt: title}]});
   });
 
   it('drops the zh-HK fullwidth brand suffix from the card title', () => {
@@ -61,6 +66,25 @@ describe('share image', () => {
     const metadata = buildPageMetadata({locale: 'en', pathname: '/x', title: 'X', description: 'd', image: '/images/about-hero.jpg'});
 
     expect(imageOf(metadata).pathname).toBe('/images/about-hero.jpg');
-    expect(metadata.twitter).toMatchObject({images: ['http://localhost:3000/images/about-hero.jpg']});
+    expect(metadata.twitter).toMatchObject({images: [{url: 'http://localhost:3000/images/about-hero.jpg', alt: 'X'}]});
+    expect(metadata.openGraph?.images).toEqual([{url: 'http://localhost:3000/images/about-hero.jpg', alt: 'X'}]);
+  });
+
+  it('sizes a caller-supplied generated card at 1200 by 630', () => {
+    const title = 'Home｜Hong Kong Wireless Technology Industry Association (WTIA)';
+    const metadata = buildPageMetadata({
+      locale: 'en',
+      pathname: '/',
+      title,
+      description: 'd',
+      image: '/api/og?kind=page&title=How&eyebrow=WTIA'
+    });
+
+    expect(metadata.openGraph?.images).toEqual([{
+      url: 'http://localhost:3000/api/og?kind=page&title=How&eyebrow=WTIA',
+      width: 1200,
+      height: 630,
+      alt: title
+    }]);
   });
 });

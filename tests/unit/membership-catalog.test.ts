@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {resolveMembershipOption} from "@/lib/membership/catalog";
+import {configuredCheckoutPriceId, resolveMembershipOption} from "@/lib/membership/catalog";
 
 const env = {stripeStartupPriceId: "price_startup_annual", stripeCorporatePriceId: "price_corporate_annual"};
 
@@ -44,6 +44,13 @@ describe("resolveMembershipOption", () => {
   it("fails closed when a paid plan's price env var is missing", () => {
     const option = resolveMembershipOption("startup", "annual", {stripeStartupPriceId: "", stripeCorporatePriceId: "price_corporate_annual"});
     expect(option.available).toBe(false);
+  });
+
+  it("reads STRIPE_PLATINUM_PRICE_ID the same way as Individual and returns empty when unset", () => {
+    expect(configuredCheckoutPriceId("individual", {STRIPE_INDIVIDUAL_PRICE_ID: " price_individual "})).toBe("price_individual");
+    expect(configuredCheckoutPriceId("platinum", {STRIPE_PLATINUM_PRICE_ID: " price_platinum "})).toBe("price_platinum");
+    expect(configuredCheckoutPriceId("platinum", {})).toBe("");
+    expect(configuredCheckoutPriceId("individual", {STRIPE_INDIVIDUAL_PRICE_ID: "   "})).toBe("");
   });
 
   it("never serializes the price reference alongside a display-safe projection", () => {

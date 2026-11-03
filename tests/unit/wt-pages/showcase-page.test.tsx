@@ -140,13 +140,23 @@ describe("/showcase rewrite", () => {
     expect(html).toContain(bundles.en.Showcase.ownerCta);
   });
 
-  it("renders the interest band pointing at /events", async () => {
+  it("does not render the extra Browse events interest band", async () => {
     showcase.listPublished.mockResolvedValue([]);
-    const html = await renderShowcase();
+    const empty = await renderShowcase();
+    showcase.listPublished.mockResolvedValue([{
+      slug: "harbour-vision-ai", premium: false, goneGlobal: false, views: 1, memberSince: "2020-01-01",
+      nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence", taglineZhHk: "貿易智能",
+      descriptionEn: "Public description", descriptionZhHk: "公開描述", category: "software", useCases: ["logistics"],
+      deploymentOptions: ["cloud"], supportedLanguages: ["en"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null,
+      caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
+    }]);
+    const published = await renderShowcase();
 
-    expect(html).toContain('class="event-interest"');
-    expect(html).toContain(`href="/events"`);
-    expect(html).toContain(bundles.en.Showcase.interest.action);
+    expect(empty).not.toContain('class="event-interest"');
+    expect(empty).not.toContain(bundles.en.Showcase.interest.action);
+    expect(empty).toContain(bundles.en.Showcase.noPublishedDescription);
+    expect(published).not.toContain('class="event-interest"');
+    expect(published).not.toContain(bundles.en.Showcase.interest.action);
   });
 
   it("keeps bilingual parity for every new Showcase key", () => {

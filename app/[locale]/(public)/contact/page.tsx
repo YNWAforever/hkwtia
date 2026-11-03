@@ -78,7 +78,6 @@ export default async function ContactPage({params, searchParams = Promise.resolv
               <a className="contact-channel-primary" href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}>{siteConfig.contact.phone}</a>
             )}
             <WhatsAppLink className="text-link" label={tWhatsApp('chat')} locale={appLocale} prefill={tWhatsApp('prefill.contact')} source="contact" />
-            <p>{t('address')}</p>
           </address>
 
           <div className="contact-compose">

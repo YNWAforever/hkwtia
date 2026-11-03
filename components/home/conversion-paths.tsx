@@ -1,11 +1,11 @@
 import {getTranslations} from 'next-intl/server';
 import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
+import {OPS_MEMBERSHIP_TIERS} from '@/config/membership-journey';
 
 import {ActionLink} from '@/components/wt/action-link';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
-import {OPS_MEMBERSHIP_TIERS} from '@/config/membership-journey';
 
 // D-7: the donor's /partner-with-us and /partners are not ported PublicRoute members yet,
 // so partnership points at hkwtia's real /contact and /about destinations instead.
