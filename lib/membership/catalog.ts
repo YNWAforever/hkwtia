@@ -29,10 +29,10 @@ function paidPriceReference(planCode: PlanCode, environment: CatalogEnvironment)
     case "corporate":
       return environment.stripeCorporatePriceId.trim() || null;
     case "individual":
-      // TODO: no live Stripe price is created here. Checkout stays closed until this env var is set.
+      // No Stripe price is created here. An empty STRIPE_INDIVIDUAL_PRICE_ID stays unavailable.
       return environment.stripeIndividualPriceId?.trim() || null;
     case "platinum":
-      // TODO: no live Stripe price is created here. Checkout stays closed until this env var is set.
+      // No Stripe price is created here. An empty STRIPE_PLATINUM_PRICE_ID stays unavailable.
       return environment.stripePlatinumPriceId?.trim() || null;
     case "community":
     case "patron":
@@ -69,4 +69,25 @@ export function resolveMembershipOption(
 
   const priceReference = paidPriceReference(planCode, environment);
   return {planCode, billingInterval, priceReference, available: priceReference !== null};
+}
+
+type CheckoutPriceEnv = Readonly<{
+  STRIPE_STARTUP_PRICE_ID?: string;
+  STRIPE_CORPORATE_PRICE_ID?: string;
+  STRIPE_INDIVIDUAL_PRICE_ID?: string;
+  STRIPE_PLATINUM_PRICE_ID?: string;
+}>;
+
+/**
+ * The configured Stripe price id for a plan, or "" when that env var is unset.
+ * Does not create a price. `process.env` is asserted because Node's ProcessEnv
+ * type does not overlap this narrow price map.
+ */
+export function configuredCheckoutPriceId(planCode: PlanCode, environment: CheckoutPriceEnv = process.env as CheckoutPriceEnv): string {
+  return paidPriceReference(planCode, {
+    stripeStartupPriceId: environment.STRIPE_STARTUP_PRICE_ID ?? "",
+    stripeCorporatePriceId: environment.STRIPE_CORPORATE_PRICE_ID ?? "",
+    stripeIndividualPriceId: environment.STRIPE_INDIVIDUAL_PRICE_ID ?? "",
+    stripePlatinumPriceId: environment.STRIPE_PLATINUM_PRICE_ID ?? "",
+  }) ?? "";
 }

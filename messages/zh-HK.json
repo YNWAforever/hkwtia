@@ -528,7 +528,7 @@
       "destinations": {
         "membership": {
           "label": "會籍",
-          "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+          "copy": "比較免費社群會籍，以及個人、企業及白金會籍。"
         },
         "showcase": {
           "label": "會員展示",
@@ -732,8 +732,8 @@
         "catalogPricesLabel": "現行網上計劃會費",
         "label": "會員計劃",
         "title": "建立持續參與生態系統的路徑。",
-        "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
-        "points": ["相關活動及知識", "專頁及可見度選擇"],
+        "copy": "請在會籍頁比較現時可用的計劃及會費。如需確認資格或公布目錄以外的安排，請聯絡 WTIA。",
+        "points": ["相關活動及知識", "專頁及可見度選擇", "實用的首 90 天旅程"],
         "primaryAction": "比較會員計劃",
         "secondaryAction": "準備會員查詢"
       },
@@ -829,9 +829,9 @@
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
     "title": "選擇適合你的會籍",
-    "summary": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
+    "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
+    "tiersIntro": "現行會費及付款週期以目前會員目錄為準。",
     "benefits": {
       "network": "社群及交流機會",
       "programs": "參與計劃",
@@ -848,27 +848,27 @@
     "tiers": {
       "community": {
         "name": "社群",
-        "description": "適合一個人。"
+        "description": "免費。會員名片，以及報名公開活動。不包括提交活動，亦不包括會員工具。"
       },
       "startup": {
         "name": "個人",
-        "description": "舊有計劃代碼。不接受新申請。"
+        "description": "舊有計劃。新申請請選擇個人會籍並網上付款。"
       },
       "corporate": {
         "name": "企業",
-        "description": "適合機構。"
+        "description": "適合機構。網上付款。"
       },
       "patron": {
         "name": "白金",
-        "description": "舊有計劃代碼。不接受新申請。"
+        "description": "舊有計劃。新申請請選擇白金會籍並網上付款。"
       },
       "individual": {
         "name": "個人",
-        "description": "適合一個人。"
+        "description": "適合個人。網上付款。付款成功後會籍生效。"
       },
       "platinum": {
         "name": "白金",
-        "description": "適合機構。"
+        "description": "機構的最高會籍。網上付款。"
       }
     },
     "dimensionsTitle": "會籍內容",
@@ -876,27 +876,27 @@
     "faq": {
       "0": {
         "question": "誰可以申請？",
-        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "answer": "社群會籍免費，適合一個人。個人會籍每年 HK$500，適合一個人。企業會籍每年 HK$1,800，白金會籍每年 HK$4,800。企業及白金會籍適合機構，並於網上付款。"
       },
       "1": {
         "question": "在哪裡查看現行會費？",
-        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "answer": "可用的會費及帳單週期來自現行會籍目錄，見上方計劃卡片。付款前請以付款服務顯示的最終金額為準。"
       },
       "2": {
         "question": "付費計劃會自動續費嗎？",
-        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "answer": "網上付費流程使用 Stripe 訂閱結帳。付款前請向 WTIA 確認適用於你會籍的續費及取消條款。"
       },
       "3": {
         "question": "如何付款或取消？",
-        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "answer": "選擇可用的網上計劃後，可前往安全結帳頁。如需取消或其他安排，請聯絡 WTIA；本頁不會更改現有訂閱。"
       },
       "4": {
         "question": "公司會籍包含多少席位？",
-        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "answer": "公司負責人或管理員可在專區管理邀請。席位安排以會籍條款為準。"
       },
       "5": {
         "question": "審批需時多久？",
-        "answer": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "answer": "社群會籍免費，提交後即時生效。個人、企業及白金會籍均於網上付款，付款成功後確認。如有查詢或特殊情況，請電郵 contact@hkwtia.org。"
       },
       "6": {
         "question": "可以退款嗎？",
@@ -922,6 +922,7 @@
     },
     "actions": {
       "join": "選擇此計劃",
+      "payOnline": "立即網上付款",
       "apply": "申請此計劃",
       "contact": "聯絡我們",
       "discuss": "討論此參與路徑"
@@ -930,13 +931,13 @@
       "title": "兩種加入方式",
       "individual": {
         "title": "個人",
-        "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "copy": "社群會籍免費。個人會籍每年 HK$500，網上付款，付款成功後生效。"
       },
       "organisation": {
         "title": "公司",
-        "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+        "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者與個人會籍一樣，先付款。"
       },
-      "sla": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"
+      "sla": "如有查詢或特殊情況，請電郵 contact@hkwtia.org。"
     },
     "renew": {
       "title": "續會或重新加入",
@@ -974,7 +975,7 @@
       "eyebrow": "首 90 天",
       "heading": "加入後的安排",
       "steps": {
-        "0": {"title": "加入", "copy": "會籍查詢請電郵 contact@hkwtia.org。"},
+        "0": {"title": "加入", "copy": "選擇級別並完成付款或審批。"},
         "1": {"title": "入會導引", "copy": "與 WTIA 團隊會面。"},
         "2": {"title": "首次活動", "copy": "以會員身份出席首個 WTIA 活動。"},
         "3": {"title": "首次引薦", "copy": "透過網絡建立第一個聯繫。"},
@@ -984,8 +985,8 @@
     "closing": {
       "eyebrow": "隨時歡迎你",
       "title": "選擇級別，或先向我們查詢。",
-      "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
-      "join": "電郵 contact@hkwtia.org",
+      "copy": "社群會籍免費。個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。",
+      "join": "立即加入",
       "contact": "電郵會員團隊"
     }
   },
@@ -1025,7 +1026,7 @@
       "stale": "會籍條款已有更新，請重新載入頁面並閱讀目前版本。"
     },
     "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
-    "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
+    "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "priceUnavailable": "此計劃的網上付款尚未開放。請電郵 contact@hkwtia.org，我們會協助你完成加入。", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "invite": {
       "metaTitle": "你的專屬邀請｜香港無線科技商會 WTIA",
       "welcomeNamed": "歡迎你，{name}",
@@ -1059,25 +1060,23 @@
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
     "choosePlanTitle": "選擇會員計劃",
-    "choosePlanDescription": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
-    "freezeTitle": "會籍",
-    "freezeNotice": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。",
-    "choosePlanCompare": "電郵 contact@hkwtia.org",
+    "choosePlanDescription": "社群會籍免費。個人、企業及白金會籍均於網上付款。選擇級別後繼續。",
+    "choosePlanCompare": "比較計劃及會費",
     "choosePlan": {
-      "community": "適合一個人。",
-      "startup": "不接受新申請。",
-      "corporate": "適合機構。",
-      "patron": "不接受新申請。",
-      "individual": "適合一個人。",
-      "platinum": "適合機構。"
+      "community": "免費。會員名片及公開活動報名。不包括提交活動，亦不包括會員工具。",
+      "startup": "新申請請選擇個人會籍。",
+      "corporate": "機構每年 HK$1,800。現在網上付款。",
+      "patron": "新申請請選擇白金會籍。",
+      "individual": "個人每年 HK$500。現在網上付款。",
+      "platinum": "每年 HK$4,800。現在網上付款。"
     },
     "choosePlanFree": "免費",
     "choosePlanAction": "以{plan}繼續",
     "choosePlanPrice": "每年 {amount}",
     "choosePlanContact": "聯絡 WTIA",
     "tracks": {
-      "individual": {"title": "個人", "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"},
-      "organisation": {"title": "公司", "copy": "會籍詳情更新中，查詢請電郵 contact@hkwtia.org。"}
+      "individual": {"title": "個人", "copy": "社群會籍免費。個人會籍每年 HK$500。網上付款。付款成功後會籍生效。"},
+      "organisation": {"title": "公司", "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者均先付款。"}
     },
     "organisation": {
       "intro": "公司資料會與申請一併儲存。商業登記證可在付款後補交，並非必須。",
@@ -1163,7 +1162,8 @@
       "brSize": "檔案超過 8 MB。",
       "brStorage": "未能儲存商業登記證，請再試一次。",
       "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼",
-      "heardAbout": "請以 200 字以內填寫。"
+      "heardAbout": "請以 200 字以內填寫。",
+      "priceUnavailable": "此計劃的網上付款尚未開放。請電郵 contact@hkwtia.org，我們會協助你完成加入。"
     },
     "status": {
       "failed": {"title": "付款狀態需查核", "description": "現時未能確認會籍已啟用。請查核付款狀態或聯絡 WTIA。"},

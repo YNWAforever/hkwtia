@@ -36,20 +36,23 @@ describe("ConversionPaths", () => {
     const membership = screen.getByText(bundles.en.Home.conversionPaths.membership.title).closest("article")!;
     expect(within(membership).getByRole("link", {name: bundles.en.Home.conversionPaths.membership.primaryAction})).toHaveAttribute("href", "/membership");
     expect(within(membership).getByRole("link", {name: bundles.en.Home.conversionPaths.membership.secondaryAction})).toHaveAttribute("href", "/join");
-    expect(within(membership).getAllByRole("listitem")).toHaveLength(2);
+    expect(within(membership).getAllByRole("listitem")).toHaveLength(3);
     expect(membership.closest("section")).toHaveClass("conversion-section");
 
     const partnership = screen.getByText(bundles.en.Home.conversionPaths.partnership.title).closest("article")!;
     expect(within(partnership).getByRole("link", {name: bundles.en.Home.conversionPaths.partnership.primaryAction})).toHaveAttribute("href", "/contact");
     expect(within(partnership).getByRole("link", {name: bundles.en.Home.conversionPaths.partnership.secondaryAction})).toHaveAttribute("href", "/about");
   });
-  it("does not show membership fees while the plan is paused", async () => {
+  it("shows Individual, Corporate, and Platinum fees, and not the startup fee", async () => {
     plans.list.mockResolvedValueOnce([]);
     const {ConversionPaths} = await import("@/components/home/conversion-paths");
     render(await ConversionPaths({locale: "en"}));
     const membership = screen.getByText(bundles.en.Home.conversionPaths.membership.title).closest("article")!;
-    expect(membership.querySelector("dl")).toBeNull();
-    expect(membership.textContent).toContain("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
-    expect(membership.textContent).not.toMatch(/HK\$/);
+    const fees = membership.querySelector("dl");
+    expect(fees).not.toBeNull();
+    expect(fees?.textContent).toContain("HK$500");
+    expect(fees?.textContent).toContain("HK$1,800");
+    expect(fees?.textContent).toContain("HK$4,800");
+    expect(fees?.textContent).not.toContain("1,200");
   });
 });

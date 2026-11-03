@@ -1,14 +1,31 @@
+import {PolicyConfirmation} from "@/components/join/policy-confirmation";
+import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {notFound} from "next/navigation";
+import Link from "next/link";
 
-import {siteConfig} from "@/config/site";
 import type {AppLocale} from "@/i18n/routing";
 import {buildPageMetadata} from "@/lib/metadata";
+import {getActor} from "@/lib/auth/actor";
+import {beginMembershipCheckoutAction} from "@/app/[locale]/(join)/join/actions";
+import {OPS_MEMBERSHIP_TIERS} from "@/config/membership-journey";
+import {siteConfig} from "@/config/site";
+import {membershipPlansRepository} from "@/lib/db/repos/membership-plans";
+import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
+import {configuredCheckoutPriceId} from "@/lib/membership/catalog";
+import {buildPublicMembershipCatalog, publicPriceIds} from "@/lib/membership/public-catalog";
+import {localizedPath} from "@/lib/urls";
+import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
+
+function queryValue(value: string | string[] | undefined): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
 
 // Mid-flow, member-specific step: keep it out of search results.
 export async function generateMetadata({params}: Props): Promise<Metadata> {
@@ -26,15 +43,65 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function CheckoutPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
-  void searchParams;
+  const query = await searchParams;
   setRequestLocale(locale);
+
+  const actor = await getActor().catch(() => null);
+  const state = await loadPendingJoinBillingState(actor, queryValue(query.membership_id));
+  if (!state) notFound();
+
+  // Published Individual / Corporate / Platinum fees come from the ops list.
+  // The legacy catalog still supplies other paid rows, and never invents an amount.
+  const tiers = await membershipPlansRepository.list()
+    .then((rows) => buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()}))
+    .catch(() => []);
+  const tier = tiers.find((item) => item.code === state.membership.planCode);
+  const attempt = await billingAttemptsRepository.getActive(state.actor, state.membership.id).catch(() => undefined);
+  const currentPriceId = configuredCheckoutPriceId(state.membership.planCode);
+  const catalogFee = attempt !== undefined && (!attempt || attempt.priceReference === currentPriceId)
+    && tier?.price.kind === "paid"
+    ? tier.price.options.find((option) => option.cadence === "annual")?.amount
+    : undefined;
+  const opsTier = OPS_MEMBERSHIP_TIERS.find((item) => item.code === state.membership.planCode);
+  const money = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
+  const annualFee = opsTier ? `${money.format(opsTier.annualPriceHkd)}` : catalogFee;
+  // An unset Individual or Platinum price id is a contact message. The redirect query
+  // only records why we came back; the env var is what decides whether Stripe can run.
+  const priceUnavailable = currentPriceId === "";
   const t = await getTranslations("Join");
-  // Checkout stays closed while membership is paused. No fee and no Stripe handoff.
+  const policyView = await getPolicyConfirmation(state.actor, state.application.id, locale);
+  const resume = `${localizedPath(locale, "/join")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`;
+  const details = `${localizedPath(locale, "/join/company")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`;
   return (
     <section className="glass-card p-6 sm:p-10">
-      <h1 className="font-serif text-4xl font-semibold">{t("freezeTitle")}</h1>
-      <p className="mt-4 text-muted-foreground">{t("freezeNotice")}</p>
-      <a className="mt-6 inline-flex text-primary underline" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
+      <h1 className="font-serif text-4xl font-semibold">{t("checkoutSummary.title")}</h1>
+      <p className="mt-4 text-muted-foreground">{t("checkoutSummary.description")}</p>
+      <dl className="mt-6 space-y-2">
+        <div><dt className="inline font-medium">{t("checkoutSummary.plan")}: </dt><dd className="inline">{t(`plans.${state.membership.planCode}`)}</dd></div>
+        <div><dt className="inline font-medium">{t("checkoutSummary.fee")}: </dt><dd className="inline">{annualFee ?? t("checkoutSummary.feeAtProvider")}</dd></div>
+        <div><dt className="inline font-medium">{t("checkoutSummary.status")}: </dt><dd className="inline">{t("checkoutSummary.pending")}</dd></div>
+      </dl>
+      {priceUnavailable ? (
+        <div className="mt-8">
+          <p role="alert">{t("checkoutSummary.priceUnavailable")}</p>
+          <a className="mt-4 inline-flex text-primary underline" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>
+        </div>
+      ) : (
+        <>
+          {queryValue(query.policyError) ? <p className="mt-4 text-destructive" role="alert">{t(queryValue(query.policyError) === "stale" ? "policy.stale" : "policy.required")}</p> : null}
+          <form action={beginMembershipCheckoutAction} className="mt-8">
+            <input name="membershipId" type="hidden" value={state.membership.id}/>
+            <input name="locale" type="hidden" value={locale}/>
+            <PolicyConfirmation view={policyView} supportHref={localizedPath(locale, "/contact")} labels={{title: t("policy.title"), version: t("policy.version"), accept: t("policy.accept"), accepted: t("policy.accepted"), unavailable: t("policy.unavailable"), ownerRequired: t("policy.ownerRequired"), support: t("policy.support")}}/>
+            <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 text-primary-foreground disabled:opacity-60" disabled={!policyView.canProceed} type="submit">{t("checkoutSummary.continuePayment")}</button>
+          </form>
+          <p className="mt-4 text-sm text-muted-foreground">{t("checkoutSummary.sameAttempt")}</p>
+        </>
+      )}
+      <div className="mt-5 flex flex-wrap gap-5 text-sm">
+        <Link className="text-primary underline" href={resume}>{t("checkoutSummary.later")}</Link>
+        {state.application.applicantUserId === state.actor.profileId ? <Link className="text-primary underline" href={details}>{t("checkoutSummary.changeDetails")}</Link> : null}
+      </div>
     </section>
   );
 }

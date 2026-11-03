@@ -98,9 +98,14 @@ describe("Willy Approve t341s1501", () => {
       en.Membership.tracks.organisation.copy,
     ].join("\n");
     expect(publicCopy).not.toMatch(/1,200|HK\$1200|初創/);
-    expect(en.Membership.tracks.individual.copy).toBe("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
-    expect(en.Membership.tracks.organisation.copy).toBe("Membership details are being updated. For enquiries, email contact@hkwtia.org.");
-    expect(publicCopy).not.toMatch(/HK\$\d/);
+    expect(en.Membership.tracks.individual.copy).toContain("HK$500");
+    expect(en.Membership.tracks.organisation.copy).toContain("HK$1,800");
+    expect(en.Membership.tracks.organisation.copy).toContain("HK$4,800");
+    expect(en.Membership.actions.payOnline).toBe("Pay online now");
+    expect(en.Join.choosePlan.platinum).toBe("HK$4,800 a year. Pay online now.");
+    expect(zh.Join.choosePlan.platinum).toBe("每年 HK$4,800。現在網上付款。");
+    expect(publicCopy).toMatch(/HK\$500/);
+    expect(publicCopy).not.toMatch(/5 working days|25 seats|二十五席/);
   });
 
   it("does not put a handwritten lastmod date in the sitemap source", () => {

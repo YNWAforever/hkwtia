@@ -135,7 +135,7 @@ describe("page copy scope", () => {
       // (pathways.legend/routeEyebrow/routeLead/primaryLabel = 4, plus label/copy for each of the
       // 8 destinations = 16), hero.actions.findRoute (1) and openNow.recordLabel (1) --
       // 166 + 22 = 188.
-      Home: 187,
+      Home: 188,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -170,7 +170,9 @@ describe("page copy scope", () => {
       // Ops tiers added individual and platinum name/description (4) and tierBenefits (8) -- 124 + 12.
       // Community was offered again with one extra benefit line (event submissions are not included
       // and member tools are not included replaced a single updates line, net +1) -- 136 + 1.
-      Membership: 130,
+      // The published-fee restore put the homepage first-90 point back (Home 188)
+      // and added Membership.actions.payOnline (131). P2 benefit bullets stay removed.
+      Membership: 131,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
@@ -198,7 +200,7 @@ describe("page copy scope", () => {
     // + 10 Membership onboarding leaves (actions.apply, tracks, renew) = 606,
     // + 12 ops-tier leaves (individual/platinum names, descriptions, benefits) = 618,
     // + 1 Community benefit line when the free tier was offered again = 619.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(611);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(613);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

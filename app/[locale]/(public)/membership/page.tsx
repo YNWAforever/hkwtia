@@ -6,6 +6,7 @@ import { AwaitReadModel } from "@/components/server/await-read-model";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { MembershipDimensions } from "@/components/marketing/membership-dimensions";
+import { PricingNote } from "@/components/marketing/pricing-note";
 import { ActionLink } from "@/components/wt/action-link";
 import { PlanGrid, type PlanGridTier } from "@/components/marketing/plan-grid";
 import { WhatsAppLink } from "@/components/marketing/whatsapp-link";
@@ -81,19 +82,23 @@ export default async function MembershipPage({ params }: Props) {
     rows: Awaited<ReturnType<typeof membershipPlansRepository.list>> | null,
   ) {
     void rows;
-    // Fees, seat counts and pay-online actions stay off this page while membership is paused.
+    const annual = t("cadenceLabels.annual");
+    // Paid prices are the ops list. Community is free and does not wait on Stripe.
+    // Individual reads STRIPE_INDIVIDUAL_PRICE_ID and Platinum reads STRIPE_PLATINUM_PRICE_ID
+    // at checkout. This page does not create either price.
+    const money = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0});
     const offer = [
-      {code: "community" as const},
+      {code: "community" as const, annualPriceHkd: null as number | null},
       ...OPS_MEMBERSHIP_TIERS,
     ];
     const tiers: PlanGridTier[] = offer.map((tier) => ({
       code: tier.code,
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
-      priceLines: [],
+      priceLines: [tier.annualPriceHkd === null ? t("priceLabels.free") : `${money.format(tier.annualPriceHkd)} ${annual}`],
       benefits: t.raw(`tierBenefits.${tier.code}`) as string[],
-      action: t("actions.contact"),
-      href: `mailto:${siteConfig.contact.email}`,
+      action: tier.annualPriceHkd === null ? t("actions.join") : t("actions.payOnline"),
+      href: `/join?plan=${tier.code}`,
     }));
     return (
       <Section id="plans" labelledBy="membership-plans-title">
@@ -113,6 +118,7 @@ export default async function MembershipPage({ params }: Props) {
               }}
               tiers={tiers}
             />
+            <PricingNote copy={t("pricing.readyCopy")} label={t("pricing.readyLabel")} />
           </>
         ) : (
           <HonestEmpty
@@ -212,7 +218,7 @@ export default async function MembershipPage({ params }: Props) {
               </Section>
               <ClosingBand
                 actions={[
-                  { label: t("closing.join"), href: `mailto:${siteConfig.contact.email}` },
+                  { label: t("closing.join"), href: "/join" },
                   {
                     label: t("closing.contact"),
                     href: `mailto:${siteConfig.contact.email}`,

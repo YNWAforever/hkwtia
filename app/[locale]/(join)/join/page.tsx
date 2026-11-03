@@ -106,6 +106,7 @@ export default async function JoinPage({params, searchParams}: Props) {
           {planChooserItems(locale).map((item) => (
             <li className="rounded-lg border border-border p-5" key={item.code}>
               <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>
+              <p className="mt-2 text-sm font-medium">{item.annualPriceHkd === null ? t("choosePlanFree") : t("choosePlanPrice", {amount: new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {style: "currency", currency: "HKD", minimumFractionDigits: 0, maximumFractionDigits: 0}).format(item.annualPriceHkd)})}</p>
               <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
               <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
                 {t("choosePlanAction", {plan: t(`plans.${item.code}`)})}

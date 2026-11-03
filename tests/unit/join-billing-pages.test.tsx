@@ -44,18 +44,40 @@ describe("join billing pages", () => {
     state.notFound = false;
     state.activeAttemptPrice = null;
     process.env.STRIPE_STARTUP_PRICE_ID = "price_startup_test";
+    process.env.STRIPE_CORPORATE_PRICE_ID = "price_corporate_test";
+    process.env.STRIPE_INDIVIDUAL_PRICE_ID = "";
+    process.env.STRIPE_PLATINUM_PRICE_ID = "";
   });
 
-  it("keeps checkout closed and does not read a fee or start Stripe", async () => {
+  it("does not print the legacy startup fee, and still offers checkout when that price id is set", async () => {
     const markup = renderToStaticMarkup(await CheckoutPage(props("zh-HK")));
-    expect(state.membershipCalls).toEqual([]);
-    expect(state.applicationCalls).toEqual([]);
     expect(state.checkoutCalls).toHaveLength(0);
     expect(state.redirectUrl).toBeNull();
-    expect(markup).toContain("localized:freezeNotice");
+    expect(markup).toContain('type="submit"');
+    expect(markup).not.toContain("HK$1,200");
+    expect(markup).not.toContain("localized:checkoutSummary.priceUnavailable");
+  });
+
+  it.each(["individual", "platinum"] as const)("keeps %s checkout closed with a contact message when its price id is unset", async (planCode) => {
+    state.membership = {...state.membership, planCode};
+    state.application = {...state.application, planCode};
+    const markup = renderToStaticMarkup(await CheckoutPage(props("en")));
+    expect(state.checkoutCalls).toHaveLength(0);
+    expect(markup).toContain("localized:checkoutSummary.priceUnavailable");
     expect(markup).toContain("mailto:contact@hkwtia.org");
-    expect(markup).not.toContain("HK$");
     expect(markup).not.toContain('type="submit"');
+    expect(markup).toContain(planCode === "platinum" ? "HK$4,800" : "HK$500");
+  });
+
+  it("offers Platinum secure checkout when STRIPE_PLATINUM_PRICE_ID is set", async () => {
+    process.env.STRIPE_PLATINUM_PRICE_ID = "price_platinum_test";
+    state.membership = {...state.membership, planCode: "platinum"};
+    state.application = {...state.application, planCode: "platinum"};
+    const markup = renderToStaticMarkup(await CheckoutPage(props("en")));
+    expect(markup).toContain('type="submit"');
+    expect(markup).toContain("HK$4,800");
+    expect(markup).not.toContain("localized:checkoutSummary.priceUnavailable");
+    expect(state.checkoutCalls).toHaveLength(0);
   });
 
   it("renders only a processing state after Stripe returns while payment is pending", async () => {

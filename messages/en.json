@@ -527,7 +527,7 @@
       "destinations": {
         "membership": {
           "label": "Membership",
-          "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+          "copy": "Compare free Community with Individual, Corporate, and Platinum."
         },
         "showcase": {
           "label": "Member Showcase",
@@ -731,8 +731,8 @@
         "catalogPricesLabel": "Current online plan fees",
         "label": "Membership",
         "title": "Build an active route into the ecosystem.",
-        "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org.",
-        "points": ["Relevant activities and knowledge", "Profile and visibility choices"],
+        "copy": "Compare currently available plans and fees on the membership page. Ask WTIA about eligibility and arrangements that differ from the published catalog.",
+        "points": ["Relevant activities and knowledge", "Profile and visibility choices", "A practical first-90-day journey"],
         "primaryAction": "Compare Membership",
         "secondaryAction": "Prepare a membership enquiry"
       },
@@ -828,9 +828,9 @@
     "eyebrow": "Membership",
     "breadcrumbCurrent": "Membership",
     "title": "Choose the membership that fits your needs",
-    "summary": "Membership details are being updated. For enquiries, email contact@hkwtia.org.",
+    "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Membership details are being updated. For enquiries, email contact@hkwtia.org.",
+    "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
     "benefits": {
       "network": "Community and networking access",
       "programs": "Programme participation",
@@ -847,27 +847,27 @@
     "tiers": {
       "community": {
         "name": "Community",
-        "description": "For one person."
+        "description": "Free. A directory card and RSVP to public events. No event submissions and no member tools."
       },
       "startup": {
         "name": "Individual",
-        "description": "Legacy plan code. Not offered for new joins."
+        "description": "Legacy plan. New joins use Individual and pay online."
       },
       "corporate": {
         "name": "Corporate",
-        "description": "For an organisation."
+        "description": "For an organisation. Pay online."
       },
       "patron": {
         "name": "Platinum",
-        "description": "Legacy plan code. Not offered for new joins."
+        "description": "Legacy plan. New joins use Platinum and pay online."
       },
       "individual": {
         "name": "Individual",
-        "description": "For one person."
+        "description": "For one person. Pay online. Membership starts when payment succeeds."
       },
       "platinum": {
         "name": "Platinum",
-        "description": "For an organisation."
+        "description": "The top WTIA membership for an organisation. Pay online."
       }
     },
     "dimensionsTitle": "Membership features",
@@ -875,27 +875,27 @@
     "faq": {
       "0": {
         "question": "Who can apply?",
-        "answer": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "answer": "Community is free for one person. Individual is HK$500 a year for one person. Corporate is HK$1,800 a year and Platinum is HK$4,800 a year. Corporate and Platinum are for organisations and are paid online."
       },
       "1": {
         "question": "Where are current fees?",
-        "answer": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "answer": "Available fees and billing options come from the current membership catalog and appear in the plan cards above. The payment provider confirms the final amount before payment."
       },
       "2": {
         "question": "Does a paid plan renew automatically?",
-        "answer": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "answer": "The online paid flow opens a Stripe subscription checkout. Ask WTIA to confirm renewal and cancellation terms for your membership before paying."
       },
       "3": {
         "question": "How do I pay or cancel?",
-        "answer": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "answer": "Choose an available online plan to continue to secure checkout. For a cancellation or a different arrangement, contact WTIA; this page does not change an existing subscription."
       },
       "4": {
         "question": "How many company seats are included?",
-        "answer": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "answer": "Company owners or administrators manage invitations in the portal. Seat arrangements are set out in the membership terms."
       },
       "5": {
         "question": "How long does approval take?",
-        "answer": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "answer": "Community is free and becomes active when you submit. Individual, Corporate, and Platinum are paid online and are confirmed when payment succeeds. For a question or a special case, email contact@hkwtia.org."
       },
       "6": {
         "question": "Can I get a refund?",
@@ -921,6 +921,7 @@
     },
     "actions": {
       "join": "Choose this plan",
+      "payOnline": "Pay online now",
       "apply": "Apply for this plan",
       "contact": "Contact us",
       "discuss": "Discuss this pathway"
@@ -929,13 +930,13 @@
       "title": "Two ways to join",
       "individual": {
         "title": "Individual",
-        "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "copy": "Community is free. Individual is HK$500 a year, paid online, and starts when payment succeeds."
       },
       "organisation": {
         "title": "Company",
-        "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+        "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online the same way as Individual."
       },
-      "sla": "Membership details are being updated. For enquiries, email contact@hkwtia.org."
+      "sla": "For a question or a special case, email contact@hkwtia.org."
     },
     "renew": {
       "title": "Renew or rejoin",
@@ -973,7 +974,7 @@
       "eyebrow": "First 90 days",
       "heading": "What happens after you join",
       "steps": {
-        "0": {"title": "Join", "copy": "Email contact@hkwtia.org about membership."},
+        "0": {"title": "Join", "copy": "Choose a tier and complete payment or review."},
         "1": {"title": "Orientation", "copy": "Meet the WTIA team."},
         "2": {"title": "First event", "copy": "Attend your first WTIA event as a member."},
         "3": {"title": "First introduction", "copy": "Make your first connection through the network."},
@@ -983,8 +984,8 @@
     "closing": {
       "eyebrow": "Ready when you are",
       "title": "Choose your tier, or ask us first.",
-      "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org.",
-      "join": "Email contact@hkwtia.org",
+      "copy": "Community is free. Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message.",
+      "join": "Join now",
       "contact": "Email the membership team"
     }
   },
@@ -1024,7 +1025,7 @@
       "stale": "The membership terms have changed. Reload this page and review the current version."
     },
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
-    "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
+    "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "priceUnavailable": "Online payment for this plan is not available yet. Email contact@hkwtia.org and we will help you complete joining.", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "invite": {
       "metaTitle": "Your personal invitation｜Hong Kong Wireless Technology Industry Association (WTIA)",
       "welcomeNamed": "Welcome, {name}",
@@ -1058,25 +1059,23 @@
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
     "choosePlanTitle": "Choose a membership plan",
-    "choosePlanDescription": "Membership details are being updated. For enquiries, email contact@hkwtia.org.",
-    "freezeTitle": "Membership",
-    "freezeNotice": "Membership details are being updated. For enquiries, email contact@hkwtia.org.",
-    "choosePlanCompare": "Email contact@hkwtia.org",
+    "choosePlanDescription": "Community is free. Individual, Corporate, and Platinum are paid online. Choose a tier to continue.",
+    "choosePlanCompare": "Compare plans and fees",
     "choosePlan": {
-      "community": "For one person.",
-      "startup": "Not offered for new joins.",
-      "corporate": "For an organisation.",
-      "patron": "Not offered for new joins.",
-      "individual": "For one person.",
-      "platinum": "For an organisation."
+      "community": "Free. A directory card and public event RSVP. No event submissions and no member tools.",
+      "startup": "New joins use Individual.",
+      "corporate": "HK$1,800 a year for an organisation. Pay online now.",
+      "patron": "New joins use Platinum.",
+      "individual": "HK$500 a year for one person. Pay online now.",
+      "platinum": "HK$4,800 a year. Pay online now."
     },
     "choosePlanFree": "Free",
     "choosePlanAction": "Continue with {plan}",
     "choosePlanPrice": "{amount} per year",
     "choosePlanContact": "Contact WTIA",
     "tracks": {
-      "individual": {"title": "Individual", "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org."},
-      "organisation": {"title": "Company", "copy": "Membership details are being updated. For enquiries, email contact@hkwtia.org."}
+      "individual": {"title": "Individual", "copy": "Community is free. Individual is HK$500 a year. Pay online. Membership starts when payment succeeds."},
+      "organisation": {"title": "Company", "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online."}
     },
     "organisation": {
       "intro": "Company details are saved with your application. Business Registration is optional and can be added after payment.",
@@ -1162,7 +1161,8 @@
       "brSize": "That file is larger than 8 MB.",
       "brStorage": "We could not store the Business Registration. Please try again.",
       "whatsappNumber": "Enter a valid WhatsApp number with country code",
-      "heardAbout": "Use 200 characters or fewer."
+      "heardAbout": "Use 200 characters or fewer.",
+      "priceUnavailable": "Online payment for this plan is not available yet. Email contact@hkwtia.org and we will help you complete joining."
     },
     "status": {
       "failed": {"title": "Payment needs attention", "description": "We could not confirm an active membership. Please check your billing status or contact WTIA."},
