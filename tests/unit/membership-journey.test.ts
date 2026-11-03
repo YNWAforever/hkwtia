@@ -6,6 +6,7 @@ import {
   OPS_MEMBERSHIP_TIERS,
   applicationOutcome,
   planCollectsCompany,
+  publishedMembershipKitHref,
   renewalPathForStatus,
 } from "@/config/membership-journey";
 import {deriveOnboardingChecklist} from "@/lib/portal/onboarding-checklist";
@@ -41,13 +42,63 @@ describe("membership onboarding journey", () => {
     expect(planCollectsCompany("patron")).toBe(true);
   });
 
-  it("keeps kit and WhatsApp placeholders in one object", () => {
-    expect(Object.values(MEMBERSHIP_KIT_LINKS).every((href) => href.startsWith("https://example.com/wtia/"))).toBe(true);
+  it("keeps kit links unset until real URLs exist", () => {
+    expect(MEMBERSHIP_KIT_LINKS).toEqual({
+      welcomeKit: null,
+      associationKit: null,
+      whatsappCommunity: null,
+    });
     const checklist = deriveOnboardingChecklist({profileComplete: true, whatsappOptIn: false});
-    expect(checklist.find((item) => item.id === "welcomeKit")?.href).toBe(MEMBERSHIP_KIT_LINKS.welcomeKit);
+    expect(checklist.map((item) => item.id)).toEqual(["profile", "whatsapp", "firstEvent"]);
+    expect(checklist.some((item) => item.href.includes("example.com"))).toBe(false);
     expect(checklist.find((item) => item.id === "profile")).toMatchObject({done: true, external: false});
     expect(checklist.find((item) => item.id === "whatsapp")).toMatchObject({done: false});
     expect(checklist.find((item) => item.id === "firstEvent")?.done).toBe(false);
+  });
+
+  it("detects placeholder kit hrefs and keeps a real https URL", () => {
+    expect(publishedMembershipKitHref(null)).toBeNull();
+    expect(publishedMembershipKitHref("")).toBeNull();
+    expect(publishedMembershipKitHref("   ")).toBeNull();
+    expect(publishedMembershipKitHref("https://example.com/wtia/welcome-kit")).toBeNull();
+    expect(publishedMembershipKitHref("https://EXAMPLE.COM/wtia/association-kit")).toBeNull();
+    expect(publishedMembershipKitHref("https://files.example.com/kit")).toBeNull();
+    expect(publishedMembershipKitHref("http://drive.google.com/file/d/abc")).toBeNull();
+    expect(publishedMembershipKitHref("not a url")).toBeNull();
+    expect(publishedMembershipKitHref("https://drive.google.com/file/d/abc")).toBe("https://drive.google.com/file/d/abc");
+    expect(publishedMembershipKitHref(" https://chat.whatsapp.com/invite ")).toBe("https://chat.whatsapp.com/invite");
+  });
+
+  it("omits placeholder kit rows and keeps a published https kit", () => {
+    const hidden = deriveOnboardingChecklist({
+      profileComplete: true,
+      whatsappOptIn: false,
+      kitLinks: {
+        welcomeKit: "https://example.com/wtia/welcome-kit",
+        associationKit: null,
+        whatsappCommunity: "https://example.com/wtia/whatsapp",
+      },
+    });
+    expect(hidden.map((item) => item.id)).toEqual(["profile", "whatsapp", "firstEvent"]);
+    expect(hidden.some((item) => item.href.includes("example.com"))).toBe(false);
+
+    const shown = deriveOnboardingChecklist({
+      profileComplete: false,
+      whatsappOptIn: true,
+      planCode: "corporate",
+      kitLinks: {
+        welcomeKit: "https://drive.google.com/file/d/welcome",
+        associationKit: "https://example.com/wtia/association-kit",
+        whatsappCommunity: "https://chat.whatsapp.com/invite",
+      },
+    });
+    expect(shown.map((item) => item.id)).toEqual(["profile", "welcomeKit", "whatsapp", "firstEvent", "registration"]);
+    expect(shown.find((item) => item.id === "welcomeKit")).toMatchObject({
+      done: false,
+      href: "https://drive.google.com/file/d/welcome",
+      external: true,
+    });
+    expect(shown.some((item) => item.id === "associationKit")).toBe(false);
   });
 
   it("routes lapsed and past-due members through the billing page", () => {
