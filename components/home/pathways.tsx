@@ -12,9 +12,9 @@ import {Link} from '@/i18n/navigation';
 const items = [
   {key: 'corporates', href: '/membership', accent: 'cyan', destinations: ['membership', 'showcase', 'partners']},
   {key: 'smes', href: '/events', accent: 'jade', destinations: ['events', 'showcase', 'membership']},
-  {key: 'startups', href: '/showcase', accent: 'amber', destinations: ['showcase', 'launchpad', 'programmes']},
+  {key: 'startups', href: '/showcase', accent: 'amber', destinations: ['showcase', 'contact', 'programmes']},
   {key: 'professionals', href: '/membership', accent: 'blue', destinations: ['membership', 'cpai', 'committees']},
-  {key: 'gba', href: '/launchpad', accent: 'violet', destinations: ['launchpad', 'partners', 'events']},
+  {key: 'gba', href: '/events', accent: 'violet', destinations: ['contact', 'partners', 'events']},
 ] as const;
 
 // Every destination is a live public route; the route finder never points at a page that
@@ -23,7 +23,7 @@ const destinationHrefs = {
   membership: '/membership',
   showcase: '/showcase',
   events: '/events',
-  launchpad: '/launchpad',
+  contact: '/contact',
   partners: '/partners',
   programmes: '/programmes',
   cpai: '/programs/cpai',
@@ -42,6 +42,13 @@ const destinationHrefs = {
 // A browser without `:has()` shows all five routes stacked, which is still complete.
 export async function Pathways({locale, copyOverrides}: HomeCopyProps) {
   const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.pathways'});
+  // Contact reuses shipped Contact / Navigation strings. No new pathway copy.
+  const contact = await getHomeTranslations({locale, copyOverrides, namespace: 'Contact'});
+  const navigation = await getHomeTranslations({locale, copyOverrides, namespace: 'Navigation'});
+  const destinationLabel = (destination: keyof typeof destinationHrefs) =>
+    destination === 'contact' ? navigation('links.contact') : t(`destinations.${destination}.label`);
+  const destinationCopy = (destination: keyof typeof destinationHrefs) =>
+    destination === 'contact' ? contact('metaDescription') : t(`destinations.${destination}.copy`);
 
   return (
     <Section labelledBy="pathways-title" id="pathways" className="route-section">
@@ -93,8 +100,8 @@ export async function Pathways({locale, copyOverrides}: HomeCopyProps) {
                     <li key={destination}>
                       <Link className="route-destination" href={destinationHrefs[destination]}>
                         <span className="route-node" aria-hidden="true" />
-                        <strong>{t(`destinations.${destination}.label`)}</strong>
-                        <span>{t(`destinations.${destination}.copy`)}</span>
+                        <strong>{destinationLabel(destination)}</strong>
+                        <span>{destinationCopy(destination)}</span>
                         <Arrow />
                       </Link>
                     </li>

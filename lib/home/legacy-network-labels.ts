@@ -22,9 +22,8 @@ export function buildLegacyNetworkLabels(t: Awaited<ReturnType<typeof getTransla
     note: t('note'),
     viewAllAction: t('viewAllAction'),
     // Raw, not translated: the {shown}/{total} placeholders are filled in client-side by
-    // LegacyNetwork itself (Task 13), the same pattern Footer.newsletter.mailBody uses for
-    // {email} -- a function cannot cross the server/client boundary as a prop, so the
-    // template string does instead.
+    // LegacyNetwork itself (Task 13). A function cannot cross the server/client boundary
+    // as a prop, so the template string does instead.
     previewNote: t.raw('previewNote') as string,
     tabs: {
       supporting: t('tabs.supporting'),

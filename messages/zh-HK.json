@@ -140,15 +140,7 @@
       "contact": "聯絡"
     },
     "newsletter": {
-      "eyebrow": "聯絡",
-      "title": "查詢：contact@hkwtia.org",
-      "emailLabel": "工作電郵",
-      "placeholder": "工作電郵",
-      "submit": "準備活動通知電郵",
-      "success": "你的電郵程式應會開啟並備妥查詢；本頁不會自動建立訂閱。",
-      "error": "請輸入有效工作電郵。",
-      "mailSubject": "WTIA 活動通知",
-      "mailBody": "請將 {email} 加入 WTIA 活動通知名單。"
+      "title": "查詢：contact@hkwtia.org"
     },
     "summary": "WTIA 連繫香港無線科技社群的科技企業、專業人士及計劃。",
     "addressLines": [],
@@ -518,7 +510,7 @@
           "title": "大灣區及國際夥伴",
           "copy": "透過活動及考察團，連繫大灣區及海外夥伴。",
           "benefits": "活動及考察團",
-          "cta": "探索創科起動"
+          "cta": "尋找活動"
         }
       },
       "legend": "選擇你的身份",
@@ -1347,7 +1339,7 @@
     "open": {
       "eyebrow": "計劃目錄",
       "title": "尋找推動你向前的計劃。",
-      "intro": "按目的、受眾及歷屆內容瀏覽。申請只會透過各計劃專頁或創科起動的開放小組進行，不會經由此總覽頁。",
+      "intro": "按目的、對象及歷屆內容瀏覽各項計劃。如欲申請，請前往各計劃專頁。",
       "statusLabel": "開放申請",
       "emptyTitle": "本網站目前沒有開放申請的計劃。",
       "emptyCopy": "歡迎向計劃團隊查詢新一屆內容、參加資格及重要日期。",
@@ -1668,7 +1660,7 @@
     "verification": {
       "label": "建議中的認證標誌定義－目前尚未頒發任何認證",
       "title": "WTIA 將如何驗證已展示的方案",
-      "copy": "WTIA 正在制訂方案展示的驗證框架。以下標誌說明框架落實後各項認證所代表的意思－目前尚未有任何方案獲頒發認證。",
+      "copy": "WTIA 正在制訂會員展示的驗證框架。以下標誌說明框架落實後各項認證所代表的意思－目前尚未有任何方案獲頒發認證。",
       "badges": {
         "verifiedDeployment": {
           "title": "已核實部署",
@@ -1685,11 +1677,11 @@
       }
     },
     "pathways": {
-      "heading": "兩種參與展示頁的方式",
+      "heading": "兩種參與會員展示的方式",
       "buyer": {
         "label": "尋找方案",
         "title": "告訴 WTIA 你的需要。",
-        "copy": "描述你要解決的業務問題，WTIA 職員將協助你聯繫合適的會員方案。",
+        "copy": "如欲尋找方案，請電郵 contact@hkwtia.org。",
         "action": "聯絡 WTIA"
       },
       "provider": {
@@ -1697,12 +1689,6 @@
         "title": "管理你自己的展示頁。",
         "copy": "WTIA 會員公司可直接提交及管理自己的展示頁。如你尚未登入，系統將先要求你登入。"
       }
-    },
-    "interest": {
-      "eyebrow": "保持參與",
-      "title": "親身認識這些方案。",
-      "copy": "WTIA 活動經常展示會員方案及其團隊。",
-      "action": "瀏覽活動"
     }
   },
   "Members": {
@@ -1746,7 +1732,7 @@
     "view": "查看會員專頁",
     "detail": {
       "website": "網站",
-      "showcase": "WTIA 方案展示中的方案",
+      "showcase": "WTIA 會員展示中的方案",
       "events": "此會員即將舉行的活動",
       "noEvents": "暫無即將舉行的活動。",
       "joinCta": "貴機構也可在此列出",
@@ -1894,6 +1880,11 @@
           "title": "創科起動",
           "copy": "透過活動及考察團，連繫大灣區及海外夥伴。",
           "cta": "探索創科起動"
+        },
+        "contact": {
+          "title": "聯絡我們",
+          "copy": "如對活動或會籍有任何查詢，請電郵 contact@hkwtia.org。",
+          "cta": "與我們聯繫"
         },
         "showcase": {
           "title": "會員展示",
@@ -2056,22 +2047,10 @@
     "breadcrumbCurrent": "消息與傳媒",
     "statusNews": "新聞",
     "resultsHeading": "消息",
-    "statusBuildLog": "開發日誌",
     "quality": {
       "eyebrow": "編採標準",
       "title": "WTIA 的報道方式",
       "body": "每篇文章均由職員撰寫、註明日期及作者。只刊登已核實來源的稿件。"
-    },
-    "subscribe": {
-      "eyebrow": "掌握動態",
-      "title": "以電郵接收 WTIA 新聞",
-      "emailLabel": "電郵地址",
-      "placeholder": "you@example.com",
-      "submit": "訂閱",
-      "success": "多謝！請查看我們為你開啟的電郵草稿。",
-      "error": "請輸入有效的電郵地址。",
-      "mailSubject": "訂閱 WTIA 新聞",
-      "mailBody": "請將 {email} 加入 WTIA 新聞訂閱名單。"
     }
   },
   "Contact": {

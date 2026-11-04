@@ -6,7 +6,6 @@ import {ShowcaseCard} from "@/components/marketing/showcase-card";
 import {ShowcaseFilters} from "@/components/marketing/showcase-filters";
 import {SolutionNeeds} from "@/components/marketing/solution-needs";
 import {SolutionPathways} from "@/components/marketing/solution-pathways";
-import {SolutionVerification} from "@/components/marketing/solution-verification";
 import {StructuredData} from "@/components/seo/structured-data";
 import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
@@ -42,8 +41,6 @@ const USE_CASE_SLUGS: Record<(typeof USE_CASES)[number], string> = {
   hrTalent: "hr-talent", marketingAutomation: "marketing-automation", legalCompliance: "legal-compliance",
   smartManufacturing: "smart-manufacturing", sustainabilityEsg: "sustainability-esg", crossBorderTrade: "cross-border-trade",
 };
-const BADGE_KEYS = ["verifiedDeployment", "reviewedEvidence", "dataHandling"] as const;
-
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: "Showcase"});
@@ -70,7 +67,6 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   const filterLabels = {search: t("filters.search"), category: t("filters.category"), useCase: t("filters.useCase"), deployment: t("filters.deployment"), language: t("filters.language"), worksWith: t("filters.worksWith"), submit: t("filters.submit"), clear: t("filters.clear")};
   const prompts = PROMPTS.map((prompt) => ({query: prompt.query, label: t(`prompts.${prompt.key}`)}));
   const chips = USE_CASES.map((key) => ({slug: USE_CASE_SLUGS[key], label: t(`needs.${key}`)}));
-  const badges = BADGE_KEYS.map((key) => ({title: t(`verification.badges.${key}.title`), copy: t(`verification.badges.${key}.copy`)}));
 
   return <>
     <PageHero
@@ -97,7 +93,6 @@ export default async function ShowcasePage({params, searchParams}: Props) {
             status={t("noPublishedTitle")}
           />}
     </Section>
-    <SolutionVerification badges={badges} copy={t("verification.copy")} label={t("verification.label")} title={t("verification.title")} />
     <Section labelledBy="showcase-pathways-title">
       <h2 className="sr-only" id="showcase-pathways-title">{t("pathways.heading")}</h2>
       <SolutionPathways

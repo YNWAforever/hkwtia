@@ -120,14 +120,13 @@ describe("/showcase rewrite", () => {
     expect(html).toContain(bundles.en.Showcase.premium);
   });
 
-  it("renders the solution-verification badge-definitions block with the honest label", async () => {
+  it("does not render the solution-verification block", async () => {
     showcase.listPublished.mockResolvedValue([]);
     const html = await renderShowcase();
 
-    expect(html).toContain('class="solution-verification"');
-    expect(html).toContain(bundles.en.Showcase.verification.label);
-    expect(html).toContain('class="badge-grid"');
-    expect((html.match(/<article>/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect(html).not.toContain('class="solution-verification"');
+    expect(html).not.toContain(bundles.en.Showcase.verification.label);
+    expect(html).not.toContain('class="badge-grid"');
   });
 
   it("renders the buyer/provider solution-pathways with the correct destinations", async () => {
@@ -153,10 +152,10 @@ describe("/showcase rewrite", () => {
     const published = await renderShowcase();
 
     expect(empty).not.toContain('class="event-interest"');
-    expect(empty).not.toContain(bundles.en.Showcase.interest.action);
+    expect(empty).not.toContain("Browse events");
     expect(empty).toContain(bundles.en.Showcase.noPublishedDescription);
     expect(published).not.toContain('class="event-interest"');
-    expect(published).not.toContain(bundles.en.Showcase.interest.action);
+    expect(published).not.toContain("Browse events");
   });
 
   it("keeps bilingual parity for every new Showcase key", () => {
@@ -171,7 +170,6 @@ describe("/showcase rewrite", () => {
       "verification.badges.dataHandling.title", "verification.badges.dataHandling.copy",
       "pathways.heading", "pathways.buyer.label", "pathways.buyer.title", "pathways.buyer.copy", "pathways.buyer.action",
       "pathways.provider.label", "pathways.provider.title", "pathways.provider.copy",
-      "interest.eyebrow", "interest.title", "interest.copy", "interest.action",
     ]) {
       expect(messageAt("en", "Showcase", key), key).toBeTruthy();
       expect(messageAt("zh-HK", "Showcase", key), key).toBeTruthy();

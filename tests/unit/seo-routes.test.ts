@@ -24,12 +24,15 @@ describe('M0 indexability', () => {
   it('lists both locales for every public route', async () => {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
     const urls = (await sitemap()).map((entry) => entry.url);
-    for (const path of publicRoutes.filter((route) => route !== "/ai-ops")) {
+    // /ai-ops and /launchpad stay in publicRoutes for announcement href checks and 404.
+    for (const path of publicRoutes.filter((route) => route !== "/ai-ops" && route !== "/launchpad")) {
       expect(urls).toContain(new URL(path, siteUrl).toString());
       expect(urls).toContain(
         new URL(path === '/' ? '/zh' : `/zh${path}`, siteUrl).toString(),
       );
     }
+    expect(urls).not.toContain(new URL("/launchpad", siteUrl).toString());
+    expect(urls).not.toContain(new URL("/zh/launchpad", siteUrl).toString());
   });
 
   it('allows required AI crawlers', () => {

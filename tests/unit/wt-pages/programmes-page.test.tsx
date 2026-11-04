@@ -52,17 +52,17 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 describe("ProgrammesPage", () => {
-  it("renders the hero, three groupings, the four typed programme cards and the honest applications state", async () => {
+  it("renders the hero, two groupings, the four typed programme cards and the honest applications state", async () => {
     const {default: ProgrammesPage} = await import("@/app/[locale]/(public)/programmes/page");
     render(await ProgrammesPage({params: Promise.resolve({locale: "en"})}));
 
     expect(screen.getByRole("heading", {level: 1, name: bundles.en.Programmes.hero.title})).toBeInTheDocument();
     const groupings = within(screen.getByRole("navigation", {name: bundles.en.Programmes.groupings.label})).getAllByRole("link");
-    expect(groupings.map((link) => link.getAttribute("href"))).toEqual(["#catalogue", "#launchpad", "#history"]);
+    expect(groupings.map((link) => link.getAttribute("href"))).toEqual(["#catalogue", "#history"]);
     expect(document.querySelectorAll(".programme-card")).toHaveLength(4);
     expect(screen.getByRole("status")).toHaveTextContent(bundles.en.Programmes.open.emptyTitle);
     expect(screen.getByRole("link", {name: new RegExp(bundles.en.Programmes.open.action)})).toHaveAttribute("href", `mailto:${siteConfig.contact.email}?subject=Programme%20enquiry`);
-    expect(screen.getByRole("link", {name: new RegExp(bundles.en.Programmes.launchpad.action)})).toHaveAttribute("href", "/launchpad");
+    expect(screen.queryByRole("link", {name: new RegExp(bundles.en.Programmes.launchpad.action)})).toBeNull();
   });
 
   it("lists each programme's recorded edition span in the history section", async () => {

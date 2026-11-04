@@ -17,7 +17,7 @@ const cases: readonly [string, string, number][] = [
   ["/why-wisetech", "/about", 200],
   ["/en/why-wisetech", "/about", 200],
   ["/zh/why-wisetech", "/zh/about", 200],
-  ["/programmes/launchpad", "/launchpad", 200],
+  ["/programmes/launchpad", "/launchpad", 404],
   ["/zh/join/success", "/zh/join/complete", 404],
   ["/request-introduction", "/showcase", 200],
   ["/zh/solutions/anything", "/zh/showcase/anything", 404],

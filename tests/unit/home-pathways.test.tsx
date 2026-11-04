@@ -59,7 +59,7 @@ describe("Pathways route finder", () => {
     const panels = [...container.querySelectorAll<HTMLElement>(".route-panel")];
     expect(panels.map((panel) => panel.dataset.route)).toEqual([...audiences]);
     expect(panels.map((panel) => panel.querySelector(".route-primary")?.getAttribute("href"))).toEqual([
-      "/membership", "/events", "/showcase", "/membership", "/launchpad",
+      "/membership", "/events", "/showcase", "/membership", "/events",
     ]);
     // Each radio's id is what the CSS :has() selector keys the panel on.
     for (const audience of audiences) expect(container.querySelector(`#route-${audience}`)).not.toBeNull();

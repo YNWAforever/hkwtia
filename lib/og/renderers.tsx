@@ -12,7 +12,7 @@ const WHITE = "#ffffff";
 const FRAME = {width: 1200, height: 630, display: "flex" as const};
 // Data URL, not a site path. Satori fetches src over HTTP, and Preview SSO blocks that fetch.
 const LOGO_SRC = WTIA_WORDMARK_DATA_URL;
-const LOGO_RATIO = 721 / 2001;
+const LOGO_RATIO = 250.875 / 780.125;
 const DOMAIN = "hkwtia.org";
 
 const LEGAL = {

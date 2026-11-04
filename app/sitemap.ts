@@ -81,9 +81,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // the content file's mtime. None of these are invented calendar dates.
   const built = buildLastmod();
   const milestoneModified = contentFileLastmod("content/milestones.ts");
-  // /ai-ops stays in publicRoutes for the announcements href check, and 404s.
+  // /ai-ops and /launchpad stay in publicRoutes for the announcements href check, and 404.
   const staticEntries = publicRoutes
-    .filter((pathname) => pathname !== "/ai-ops")
+    .filter((pathname) => pathname !== "/ai-ops" && pathname !== "/launchpad")
     .flatMap((pathname) => localizedEntries(pathname, staticRouteLastmod(pathname)));
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`, built));
   const newsEntries = localizedNewsEntries(englishNews, chineseNews);

@@ -7,6 +7,8 @@ export const publicRoutes = [
   '/about/history',
   '/membership',
   '/showcase',
+  // The page 404s and is omitted from the sitemap, nav, and footer. It stays in
+  // this list so the site_announcements href check does not need a migration.
   '/launchpad',
   // The page 404s and is omitted from the sitemap. It stays in this list so the
   // site_announcements href check does not need a migration. A8.

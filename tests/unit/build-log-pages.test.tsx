@@ -27,7 +27,7 @@ vi.mock("next-intl/server", () => ({
   )),
   setRequestLocale: vi.fn(),
 }));
-// The rewritten news index now renders PageHero and FooterNewsletter, both of which pull in
+// The news index renders PageHero, which pulls in
 // @/i18n/navigation's real createNavigation() output -- which needs the full next/navigation
 // export surface that the partial mock above (just `notFound`) doesn't carry. Mocked here with
 // the repo's established plain-passthrough pattern (same situation Task 17 hit with

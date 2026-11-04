@@ -92,7 +92,7 @@ a { transition: color 160ms ease; }
 .glass-card { border: 1px solid hsl(var(--glass-border) / 0.7); border-radius: var(--radius); background: hsl(var(--card) / 0.8); box-shadow: 0 4px 30px hsl(var(--glow-primary) / 0.08); backdrop-filter: blur(20px); }
 .gradient-text { color: transparent; background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary))); background-clip: text; }
 .gradient-text-warm { color: transparent; background-image: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--coral))); background-clip: text; }
-.editorial-serif { font-family: var(--font-serif), Georgia, serif; }
+.editorial-serif { font-family: var(--font-serif), sans-serif; }
 .editorial-sans { font-family: var(--font-sans), system-ui, sans-serif; }
 
 @media (prefers-reduced-motion: no-preference) {

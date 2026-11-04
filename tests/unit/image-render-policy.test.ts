@@ -60,6 +60,11 @@ describe("image render policy", () => {
       // independently cacheable. Do not extend this exception to uploaded media.
       expect(source).toContain("assertOwnOriginEditorialImage(HERO_IMAGE)");
       expect((source.match(/\bunoptimized\b/g) ?? []).length).toBe(1);
+    } else if (path === "components/layout/dual-brand-lockup.tsx") {
+      // The navy footer lockup is an SVG. next.config.ts forbids dangerouslyAllowSVG,
+      // so the optimizer cannot serve it. Only that surface opts out.
+      expect(source).toContain('unoptimized={surface === "navy"}');
+      expect((source.match(/\bunoptimized\b/g) ?? []).length).toBe(1);
     } else {
       expect(source).not.toContain("unoptimized");
     }

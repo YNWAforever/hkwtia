@@ -21,7 +21,6 @@ const implementationFiles = [
   "components/layout/announcement-bar.tsx",
   "components/layout/announcement-dismiss.tsx",
   "components/layout/header-shell.tsx",
-  "components/layout/footer-newsletter.tsx",
   "components/layout/dual-brand-lockup.tsx",
   "components/layout/locale-switcher.tsx",
   "components/ui/accordion.tsx",

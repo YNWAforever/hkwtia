@@ -23,9 +23,8 @@ vi.mock("next-intl/server", async () => {
       (bundles[locale] as Record<string, unknown>)[namespace],
     );
   return {
-    // `raw` as well as the callable: the footer reads `Footer.addressLines` (an array) and
-    // `Footer.newsletter.mailBody` (which carries a literal `{email}` the island interpolates),
-    // and next-intl resolves neither through `t()`.
+    // `raw` as well as the callable: the footer reads `Footer.addressLines` (an array),
+    // which next-intl does not resolve through `t()`.
     getTranslations: async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
       Object.assign(
         (key: string, values?: Record<string, string | number>) =>
@@ -122,7 +121,7 @@ describe("public shell server surfaces", () => {
     const footer = screen.getByRole("contentinfo");
     const hrefs = within(footer).getAllByRole("link").map((link) => link.getAttribute("href"));
     for (const href of [
-      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
+      "/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
     ]) expect(hrefs, href).toContain(href);
@@ -135,7 +134,7 @@ describe("public shell server surfaces", () => {
     render(await SiteFooter({locale: "en"}));
     const footer = screen.getByRole("contentinfo");
     const expectedHrefs = [
-      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
+      "/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
       // The Membership column carries Join and Member sign-in; Contact now carries staff

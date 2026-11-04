@@ -45,7 +45,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
     expect(en).toContain('href="/events"');
     expect(en).toContain('href="/membership"');
     expect(en).toContain('href="/showcase"');
-    expect(en).toContain('href="/launchpad"');
+    expect(en).not.toContain('href="/launchpad"');
     expect(en).not.toMatch(/<form\b/);
 
     // The Link is mocked to a plain <a>, so these are the hrefs handed to it. The real Link adds
@@ -53,7 +53,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
     expect(zh).toContain('href="/events"');
     expect(zh).toContain('href="/membership"');
     expect(zh).toContain('href="/showcase"');
-    expect(zh).toContain('href="/launchpad"');
+    expect(zh).not.toContain('href="/launchpad"');
     expect(zh).not.toContain('href="/zh/zh/');
     expect(zh).not.toMatch(/<form\b/);
   });

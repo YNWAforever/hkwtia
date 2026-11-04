@@ -42,7 +42,7 @@ vi.mock("@/i18n/navigation", () => ({
   Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
 }));
 
-import LaunchPadPage, {dynamic} from "@/app/[locale]/(public)/launchpad/page";
+import LaunchPadPage, {generateMetadata} from "@/app/[locale]/(public)/launchpad/page";
 import {CohortCalendar} from "@/components/marketing/cohort-calendar";
 import {FundingWizard} from "@/components/marketing/funding-wizard";
 
@@ -81,57 +81,10 @@ describe("M6 Launch Pad public experience", () => {
     partners.listPublished.mockResolvedValue([]);
   });
 
-  it.each(["en", "zh-HK"] as const)("renders the explainer, calendar, partner map, picker, results, and clinic CTA in %s", async (locale) => {
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps(locale)));
-
-    expect(markup).toContain("program.title");
-    expect(markup).toContain("calendar.title");
-    expect(markup).toContain("partners.title");
-    expect(markup).not.toContain("funding.formLabel");
-    expect(markup).not.toContain("funding.results.heading");
-    expect(markup).toContain("clinicCta");
-  });
-
-  it.each(["en", "zh-HK"] as const)("distinguishes a partner outage from no published partners in %s", async (locale) => {
-    partners.listPublished.mockRejectedValue(new Error("PARTNERS_UNAVAILABLE"));
-
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps(locale)));
-
-    expect(markup).toContain("partners.unavailable");
-    expect(markup).not.toContain("partners.empty");
-    expect(markup).not.toContain("PARTNERS_UNAVAILABLE");
-  });
-
-  it.each(["en", "zh-HK"] as const)("distinguishes a cohort outage from no scheduled cohorts in %s", async (locale) => {
-    state.listPublicCohorts.mockRejectedValue(new Error("COHORTS_UNAVAILABLE"));
-
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps(locale)));
-
-    expect(markup).toContain("calendar.unavailable");
-    expect(markup).not.toContain("calendar.empty");
-    expect(markup).not.toContain("cohort-application-title");
-    expect(markup).not.toContain("COHORTS_UNAVAILABLE");
-  });
-
-  it("keeps genuine empty cohort and partner states when both reads succeed", async () => {
-    state.listPublicCohorts.mockResolvedValue([]);
-
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("en")));
-
-    expect(markup).toContain("calendar.empty");
-    expect(markup).toContain("partners.empty");
-    expect(markup).not.toContain("calendar.unavailable");
-    expect(markup).not.toContain("partners.unavailable");
-  });
-
-  it("passes the explicit anonymous actor to the database-backed cohort projection", async () => {
-    await LaunchPadPage(pageProps("en"));
-
-    expect(state.listPublicCohorts).toHaveBeenCalledWith({kind: "anonymous", userId: null});
-  });
-
-  it("forces dynamic rendering because the cohort calendar is database-backed", () => {
-    expect(dynamic).toBe("force-dynamic");
+  it.each(["en", "zh-HK"] as const)("hides the public page in %s", async (locale) => {
+    await expect(LaunchPadPage(pageProps(locale))).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK|NEXT_NOT_FOUND/);
+    const metadata = await generateMetadata(pageProps(locale));
+    expect(metadata.robots).toEqual({index: false, follow: false});
   });
 
   it("renders a keyboard-accessible GET picker with all five stable answer controls", () => {

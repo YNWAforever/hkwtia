@@ -44,7 +44,7 @@ type PublicShellAction = Readonly<{id: "find-event" | "join-wisetech"; href: Pub
 export const navigationGroups = [
   {id: "events-programmes", landingHref: "/events", eventFirst: true, labelKey: "groups.eventsProgrammes.label",
     feature: {labelKey: "feature.eventsProgrammes.label", titleKey: "feature.eventsProgrammes.title", copyKey: "feature.eventsProgrammes.copy", ctaKey: "feature.eventsProgrammes.cta", href: "/events"}, columns: [
-    {id: "participate", labelKey: "columns.participate", links: [{id: "events", href: "/events", labelKey: "links.events"}, {id: "launchpad", href: "/launchpad", labelKey: "links.launchpad"}]},
+    {id: "participate", labelKey: "columns.participate", links: [{id: "events", href: "/events", labelKey: "links.events"}]},
     {id: "programmes", labelKey: "columns.programmes", links: [{id: "programmes", href: "/programmes", labelKey: "links.programmes"}, {id: "hkict", href: "/programs/hkict", labelKey: "links.hkict"}, {id: "asa", href: "/programs/asa", labelKey: "links.asa"}, {id: "tct", href: "/programs/tct", labelKey: "links.tct"}, {id: "cpai", href: "/programs/cpai", labelKey: "links.cpai"}]},
   ]},
   {id: "membership-ecosystem", landingHref: "/membership", eventFirst: false, labelKey: "groups.membershipEcosystem.label",

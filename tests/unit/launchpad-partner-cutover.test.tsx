@@ -1,7 +1,6 @@
 import {existsSync, readFileSync} from "node:fs";
 import {join} from "node:path";
 
-import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const state = vi.hoisted(() => ({
@@ -66,38 +65,23 @@ describe("Launch Pad landing-partner repository cutover", () => {
     state.listPublishedPartners.mockResolvedValue(state.partners);
   });
 
-  it("loads exactly the public repository projection and never imports static partners", async () => {
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps()));
+  it("hides the public page and never imports static partners", async () => {
     const pageSource = readFileSync(
       join(process.cwd(), "app", "[locale]", "(public)", "launchpad", "page.tsx"),
       "utf8",
     );
 
-    expect(state.listPublishedPartners).toHaveBeenCalledWith({limit: 100});
-    expect(markup).toContain("Repository Partner");
+    await expect(LaunchPadPage(pageProps())).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK|NEXT_NOT_FOUND/);
+    expect(state.listPublishedPartners).not.toHaveBeenCalled();
+    expect(pageSource).toContain("notFound()");
     expect(pageSource).not.toContain("config/landing-partners");
     expect(existsSync(join(process.cwd(), "config", "landing-partners.ts"))).toBe(false);
     expect(existsSync(join(process.cwd(), "config", "landing-partners.json"))).toBe(false);
   });
 
-  it("does not disclose contact or notes and distinguishes empty data from a read error", async () => {
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("zh-HK")));
-
-    expect(markup).toContain("資料庫夥伴");
-    expect(markup).not.toContain("private-contact@example.com");
-    expect(markup).not.toContain("private-negotiation-notes");
-    expect(markup).not.toContain("signed");
-
-    state.listPublishedPartners.mockResolvedValueOnce([]);
-    const emptyMarkup = renderToStaticMarkup(await LaunchPadPage(pageProps()));
-    expect(emptyMarkup.match(/partners\.empty/g)).toHaveLength(1);
-    expect(emptyMarkup).not.toContain("Repository Partner");
-
-    state.listPublishedPartners.mockRejectedValueOnce(new Error("database unavailable"));
-    const errorMarkup = renderToStaticMarkup(await LaunchPadPage(pageProps()));
-    expect(errorMarkup).toContain("partners.unavailable");
-    expect(errorMarkup).not.toContain("partners.empty");
-    expect(errorMarkup).not.toContain("Repository Partner");
+  it("does not render partner contact, notes, or negotiation state", async () => {
+    await expect(LaunchPadPage(pageProps("zh-HK"))).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK|NEXT_NOT_FOUND/);
+    expect(state.listPublishedPartners).not.toHaveBeenCalled();
   });
 
   it("hides only M6 partner rows by clearing published_at with a parameterized UUID array", () => {

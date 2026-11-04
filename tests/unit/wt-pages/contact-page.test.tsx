@@ -44,13 +44,17 @@ async function renderContact(topic?: string, locale: "en" | "zh-HK" = "en") {
   }));
 }
 
-describe("Contact page — six-card grid and prepared-email composer", () => {
-  it("renders six .inner-card links including /about and /news", async () => {
+describe("Contact page — route cards and prepared-email composer", () => {
+  it("renders five .inner-card links and no Launch Pad card", async () => {
     await renderContact();
     const cards = document.querySelectorAll("a.inner-card");
-    expect(cards).toHaveLength(6);
+    expect(cards).toHaveLength(5);
     const hrefs = [...cards].map((card) => card.getAttribute("href"));
-    expect(hrefs).toEqual(expect.arrayContaining(["/events", "/membership", "/showcase", "/launchpad", "/about", "/news"]));
+    expect(hrefs).toEqual(["/events", "/membership", "/showcase", "/about", "/news"]);
+    expect(document.body.innerHTML).toContain("contact@hkwtia.org");
+    expect(document.body.innerHTML).not.toContain("tel:");
+    expect(document.body.innerHTML).not.toContain("PostalAddress");
+    expect(document.body.innerHTML).not.toContain("+852");
   });
 
   // Round 27 found all six cards linking to /zh/zh/… on production: InnerCardGrid's Link adds
@@ -59,7 +63,7 @@ describe("Contact page — six-card grid and prepared-email composer", () => {
   it("hands the cards unprefixed paths in Chinese too, so the Link prefixes them once", async () => {
     await renderContact(undefined, "zh-HK");
     const hrefs = [...document.querySelectorAll("a.inner-card")].map((card) => card.getAttribute("href"));
-    expect(hrefs).toEqual(["/events", "/membership", "/showcase", "/launchpad", "/about", "/news"]);
+    expect(hrefs).toEqual(["/events", "/membership", "/showcase", "/about", "/news"]);
   });
 
   it("seeds the topic composer from ?topic= and defaults to 'portal'", async () => {

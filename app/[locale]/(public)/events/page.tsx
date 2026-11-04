@@ -39,7 +39,7 @@ type Props = Readonly<{
 const anonymous = { kind: "anonymous", userId: null } as const;
 // Group A / Decision (design spec §2): 3 static links, not the donor's unported `/activities/*`.
 const RECOMMENDATIONS = [
-  { key: "launchpad", href: "/launchpad" },
+  { key: "contact", href: "/contact" },
   { key: "showcase", href: "/showcase" },
   { key: "membership", href: "/membership" },
 ] as const;
@@ -212,7 +212,6 @@ export default async function EventsPage({ params, searchParams }: Props) {
           className="activity-type-strip"
         >
           <Link href="/events?status=open" prefetch={false}>{t("activityStrip.openLabel")}</Link>
-          <Link href="/launchpad" prefetch={false}>{t("activityStrip.launchpadLabel")}</Link>
           <Link href="/showcase" prefetch={false}>{t("activityStrip.showcaseLabel")}</Link>
         </nav>
         <EventFilterPanel

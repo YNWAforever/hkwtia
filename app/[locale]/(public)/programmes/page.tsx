@@ -42,7 +42,6 @@ export default async function ProgrammesPage({params}: Props) {
   const mailto = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(t('open.mailSubject'))}`;
   const groupings = [
     {id: 'catalogue', label: t('groupings.catalogue')},
-    {id: 'launchpad', label: t('groupings.launchpad')},
     {id: 'history', label: t('groupings.history')},
   ] as const;
   // The card copy is the home showcase's (Home.programmeShowcase) so the two grids never drift;
@@ -89,12 +88,6 @@ export default async function ProgrammesPage({params}: Props) {
       <Section id="catalogue" labelledBy="programmes-catalogue-title">
         <SectionHeading variant="split" eyebrow={t('catalogue.eyebrow')} title={t('catalogue.title')} headingId="programmes-catalogue-title" lead={t('catalogue.intro')} />
         <ProgrammeGrid summaries={summaries} labels={labels} />
-      </Section>
-      <Section id="launchpad" tone="bright" labelledBy="programmes-launchpad-title">
-        <SectionHeading variant="inner" eyebrow={t('launchpad.eyebrow')} title={t('launchpad.title')} headingId="programmes-launchpad-title" lead={t('launchpad.copy')} />
-        <div className="directory-actions">
-          <ActionLink href="/launchpad" variant="button-dark">{t('launchpad.action')}</ActionLink>
-        </div>
       </Section>
       <Section id="history" labelledBy="programmes-history-title">
         <SectionHeading variant="inner" eyebrow={t('history.eyebrow')} title={t('history.title')} headingId="programmes-history-title" lead={t('history.intro')} />

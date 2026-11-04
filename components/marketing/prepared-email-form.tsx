@@ -14,15 +14,14 @@ export type PreparedEmailFormLabels = Readonly<{
 }>;
 
 /**
- * D-6, matching the newsletter's own mailto pattern (components/layout/footer-newsletter.tsx):
+ * D-6, matching the contact page's mailto pattern:
  * no persistence, no server action. Deliberately no <form> element -- the compose action is a
  * plain link whose href is recomputed on every topic change, so there is nothing to submit and
  * nothing for next.config.ts's `form-action 'self'` CSP directive to block.
  *
  * Single-instance-per-page by construction (mounted exactly once, on /contact -- see
  * app/[locale]/(public)/contact/page.tsx), so the hardcoded `contact-topic-select` id is safe:
- * unlike FooterNewsletter (mounted from the persistent public layout, plus a second time on
- * /news), there is no second mount on the same page to collide with.
+ * there is no second mount on the same page to collide with.
  */
 export function PreparedEmailForm({labels, initialTopic}: Readonly<{labels: PreparedEmailFormLabels; initialTopic?: string}>) {
   const defaultTopic: ContactTopic = initialTopic && isContactTopic(initialTopic) ? initialTopic : "portal";
