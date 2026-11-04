@@ -1,0 +1,31 @@
+import {readFileSync} from "node:fs";
+
+import {describe, expect, it} from "vitest";
+
+// A9 / V21. The donor header inset is calc(100% - 48px). At a 135px lockup the
+// clear space is 44px, including the left edge from 1200px up. The 821–1199px
+// band was not measured and is not given a new rule here.
+describe("header clear space", () => {
+  const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
+
+  it("uses a 44px logo-to-name gap and the same inset from 1200px", () => {
+    expect(chrome).toContain("--brand-copy-gap: 44px");
+    expect(chrome).toContain("gap: var(--brand-copy-gap)");
+    expect(chrome).toMatch(/@media \(min-width: 1200px\) \{[^}]*calc\(100% - \(var\(--brand-copy-gap\) \* 2\)\)/);
+    expect(chrome).not.toMatch(/@media \(min-width: 821px\)/);
+  });
+});
+
+describe("membership plan grid", () => {
+  const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
+
+  it("drops the 480px card floor and draws a divider above each CTA", () => {
+    expect(chrome).toMatch(/\.plan-grid article \{ min-height: 0; \}/);
+    expect(chrome).toContain("border-top: 1px solid #e5e9f0");
+    expect(chrome).not.toMatch(/\.plan-grid\s*\{[^}]*align-items:\s*start/);
+  });
+
+  it("marks Individual benefits with a 6px navy dot", () => {
+    expect(chrome).toMatch(/\.plan-grid li::before \{[^}]*width: 6px;[^}]*height: 6px;[^}]*background: #0f4c81;/s);
+  });
+});

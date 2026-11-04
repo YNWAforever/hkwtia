@@ -37,9 +37,10 @@ vi.mock("next-intl/server", async () => {
   };
 });
 vi.mock("next/image", () => ({
-  default: ({priority, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {priority?: boolean}) => {
-    imagePriorities.push(Boolean(priority));
-    return <img {...props} data-priority={String(Boolean(priority))} />;
+  default: ({priority, preload, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {priority?: boolean; preload?: boolean}) => {
+    const eager = Boolean(priority || preload);
+    imagePriorities.push(eager);
+    return <img {...props} data-priority={String(eager)} />;
   },
 }));
 vi.mock("@/i18n/navigation", () => ({
@@ -67,10 +68,10 @@ describe("public shell server surfaces", () => {
     expect(screen.getByRole("link", {name: join})).toHaveAttribute("href", "/join");
     expect(screen.getByRole("link", {name: search})).toHaveAttribute("href", "/showcase");
     expect(screen.getByRole("img", {name: "WTIA 香港無線科技商會"})).toHaveAttribute("src", "/images/wtia-logo.png");
-    // priority preloads the logo ahead of the page hero. The homepage LCP is the
-    // hero photograph, so the header mark stays on next/image's lazy default.
-    expect(screen.getByRole("img", {name: "WTIA 香港無線科技商會"})).toHaveAttribute("data-priority", "false");
-    expect(imagePriorities).not.toContain(true);
+    // V20: the header lockup preloads. The homepage hero keeps its own
+    // fetchpriority; this assertion is only the header mark.
+    expect(screen.getByRole("img", {name: "WTIA 香港無線科技商會"})).toHaveAttribute("data-priority", "true");
+    expect(imagePriorities.at(-1)).toBe(true);
     view.unmount();
   });
 

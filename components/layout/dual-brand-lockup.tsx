@@ -54,7 +54,7 @@ export function DualBrandLockup({labels, priority = false, className, surface = 
           width={logo.width}
           height={logo.height}
           sizes="(max-width: 820px) 96px, 135px"
-          priority={priority}
+          preload={priority}
           unoptimized={surface === "navy"}
           className="h-auto w-full object-contain"
         />

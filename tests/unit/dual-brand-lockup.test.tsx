@@ -4,8 +4,11 @@ import {describe, expect, it, vi} from "vitest";
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 
 vi.mock("next/image", () => ({
-  default: ({priority: _priority, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {priority?: boolean}) =>
-    <img {...props} />,
+  default: ({priority, preload, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {priority?: boolean; preload?: boolean}) => {
+    void priority;
+    void preload;
+    return <img {...props} />;
+  },
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) =>
