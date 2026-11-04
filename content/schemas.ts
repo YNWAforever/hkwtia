@@ -32,8 +32,10 @@ const milestoneImageSchema = z.object({
   // Own-origin under a dedicated prefix. The CSP is `img-src 'self' data:` and
   // next.config.ts declares no remotePatterns, so a remote src renders nothing.
   src: z.string().regex(/^\/images\/history\/[A-Za-z0-9._-]+$/),
-  altEn: z.string().min(1),
-  altZh: z.string().min(1)
+  // Empty alt is decorative: a text graphic whose milestone title already
+  // says what it is, or a second copy of the previous image (C6 L706, L924).
+  altEn: z.string(),
+  altZh: z.string()
 });
 
 export const milestoneSchema = z.object({

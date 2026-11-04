@@ -91,9 +91,15 @@
   color: #fff;
 }
 
-/* Horizontal lockup. Desktop width 135px (clear space ≥ 45px, one third of that
-   width) sits in the brand column via padding-inline-end. Mobile stays ≥ 72px,
-   above the 45px C3 floor, with 24px of inline clear space where the row allows. */
+/* Horizontal lockup. Desktop width 135px, so side-by-side clear space is
+   one third of that width (G16 p.5 / A9). --brand-copy-gap is the logo-to-name
+   gap. At ≥1200px the header inset matches it: the donor row is
+   calc(100% - 48px), which left about 24px at the viewport edge. 821–1199px
+   was not measured (A9 待確認) and keeps the donor inset. Mobile stays ≥ 72px
+   wide, above the 45px C3 floor. Top and bottom band edges stay as they are:
+   a full third on those sides would need a taller header, and that call is open. */
+.site-header { --brand-copy-gap: 44px; }
+.site-footer { --brand-copy-gap: 44px; }
 .site-header .brand-logo-wrap {
   width: auto;
   height: auto;
@@ -105,8 +111,77 @@
   box-shadow: none;
 }
 .site-header .brand,
-.site-footer .brand { gap: 44px; }
+.site-footer .brand { gap: var(--brand-copy-gap); }
 .site-header .brand { padding-inline-end: 45px; }
+/* The donor lockup is min-width: 0, so at 1241 "WTIA" was squeezed to a few
+   pixels and the letters spilled out. Below 1440 the legal name is hidden,
+   so this box is only the wordmark and it keeps its width. From 1440 the
+   legal name is back and must still be able to wrap, or it paints over the nav. */
+@media (max-width: 1439.98px) {
+  html[lang="en"] .site-header .brand-copy { flex-shrink: 0; }
+}
+/* EN below 1440: the legal name plus this 44px gap left the four nav labels
+   overlapping (33–47px at 1280). Keep the globe and "WTIA". The 44px gap
+   stays only while the legal name is on screen. /zh is unchanged. */
+@media (max-width: 1439.98px) {
+  html[lang="en"] .site-header .brand-copy small { display: none; }
+  html[lang="en"] .site-header .brand { gap: 13px; }
+}
+/* The nav is a grid cell with shrinking items (min-width: 0 on the li), so
+   the labels drew on top of each other. From the desktop breakpoint it is a
+   flex row: the nav may shrink, the items may not, and the gap is 16px.
+   Scoped to EN so the zh header keeps its current spacing. */
+@media (min-width: 1241px) {
+  html[lang="en"] .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  html[lang="en"] .header-actions { flex: 0 0 auto; }
+  html[lang="en"] .site-header .brand {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  html[lang="en"] .site-header .brand-copy,
+  html[lang="en"] .site-header .brand-copy small {
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* min-width: max-content keeps the four labels from being crushed into the
+     lockup. The legal name, not the nav, gives up the extra width. */
+  html[lang="en"] .desktop-nav {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: max-content;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  html[lang="en"] .desktop-nav-list {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: max-content;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+  }
+  html[lang="en"] .desktop-nav-list > li {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: max-content;
+    max-width: none;
+  }
+  html[lang="en"] .nav-button {
+    width: auto;
+    max-width: none;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 1200px) {
+  .header-inner { width: min(1560px, calc(100% - (var(--brand-copy-gap) * 2))); }
+}
 .site-footer .brand-logo-wrap {
   width: auto;
   height: auto;
@@ -163,6 +238,46 @@
 .site-root .site-footer :is(p, small, a, address, strong, h2, h3, li, span) { color: #fff; }
 .site-footer .footer-newsletter button { color: #fff; }
 .site-footer .footer-newsletter input { color: #fff; }
+
+/* Donor `.plan-grid article` sets min-height: 480px (wisetech.css). That floor
+   is cleared only under 820px, so at 1024 the second row — two cards with no
+   benefit list — is still 480px tall. Rows size to their own content. Items in
+   one row still stretch, and the CTA keeps margin-top: auto, so the buttons
+   in a row stay level. The hairline sits on the CTA, under the spare space. */
+.plan-grid article { min-height: 0; }
+.plan-grid .text-link {
+  border-top: 1px solid #e5e9f0;
+  padding-top: 16px;
+}
+/* The list is display: grid, and Tailwind preflight sets list-style: none,
+   so the Individual benefits have no marker. A 6px navy dot is not text. */
+.plan-grid ul { padding-left: 0; }
+.plan-grid li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.plan-grid li::before {
+  content: "";
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  margin-top: calc((1.55em - 6px) / 2);
+  border-radius: 50%;
+  background: #0f4c81;
+}
+
+/* Ask WTIA is fixed 22px off the bottom and at least 54px tall. The extra
+   24px lets the last card scroll clear of it (membership at 820 and 1024).
+   The space belongs on main: the same padding on .site-root left a blank
+   band under the footer. */
+.site-root main { padding-bottom: calc(54px + 22px + 24px); }
+
+/* Donor `.site-root[lang^="zh"]` leads with PingFang and then the Latin stack.
+   Under /zh the order is Noto Sans TC, PingFang TC, Microsoft JhengHei. */
+.site-root[lang^="zh"] {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
 
 /* Honest directory empty (SPECS §6). Dashed slots are labels only. */
 .directory-empty {

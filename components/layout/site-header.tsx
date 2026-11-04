@@ -53,11 +53,11 @@ export async function SiteHeader({locale, hasAnnouncement = false, navigationPen
   return (
     <HeaderShell hasAnnouncement={hasAnnouncement}>
       <div className="header-inner" inert={navigationPending} aria-hidden={navigationPending || undefined}>
-        {/* Not priority. priority (and loading="eager") makes React 19 preload the
-            logo ahead of the hero. Run 40850403806's homepage LCP was that hero, with
-            an 841ms load delay. The mark is ~88px and is in the header, so a lazy
-            default still fetches it as soon as it is laid out. */}
-        <DualBrandLockup labels={brand} />
+        {/* V20: the header mark preloads. Next 16 uses `preload` (`priority` is
+            deprecated). An earlier homepage trace (run 40850403806) left this lazy
+            because the hero photograph was the LCP element. The hero still sets
+            its own fetchpriority. The footer and the closed mobile sheet stay lazy. */}
+        <DualBrandLockup labels={brand} priority />
         <Suspense fallback={<div aria-hidden="true" className="desktop-nav" />}>
           {navigationPending ? <div aria-hidden="true" className="desktop-nav" /> : <DesktopNavGate
             locale={locale}

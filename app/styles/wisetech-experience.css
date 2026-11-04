@@ -22,7 +22,7 @@
   /* Han glyphs come from a sans face at every size: the serif stack has no Traditional
      Chinese serif on Windows, so headings fell back to a thin, faux-bold PMingLiU next to
      Palatino Latin. A single CJK sans keeps the two scripts the same colour on the page. */
-  --font-display-zh: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-display-zh: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
 }
 
 /* ─── Bilingual typography ────────────────────────────────────────────────────────────────

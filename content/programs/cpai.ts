@@ -141,8 +141,8 @@ export const cpai: CpaiProgram = cpaiProgramSchema.parse({
       // Chairman and Honorary Chairman, with no CUSCS mark anywhere -- which
       // is the correction this record exists to make, in WTIA's own artwork.
       src: '/images/programs/CPAI-Certificate-F.jpg',
-      altEn: 'The CPAI certificate template, headed WTIA and signed by WTIA\'s Chairman and Honorary Chairman.',
-      altZh: 'CPAI 證書範本，以商會為抬頭，由商會主席及榮譽主席簽署。'
+      altEn: 'The CPAI certificate template, headed WTIA, with signature lines for WTIA\'s Chairman and Honorary Chairman.',
+      altZh: 'CPAI 證書範本，以 WTIA 為抬頭，設有 WTIA 主席及榮譽主席簽署欄。'
     }
   ]
 });

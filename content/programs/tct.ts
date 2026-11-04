@@ -167,7 +167,7 @@ export const tct: TctProgram = tctProgramSchema.parse({
           // Commission", beside "Organiser WTIA". See this file's docblock.
           src: '/images/programs/TTC_9.jpg',
           altEn: 'Speaker line-up for the Tech to Connect 4.0 Leaders Summit, 20 April 2023 at HKPC Building, showing thirteen speakers with their companies.',
-          altZh: '「智連 4.0」領袖峰會講者陣容，二零二三年四月二十日於生產力大樓舉行，列出十三位講者及其所屬機構。'
+          altZh: '「智連 4.0」領袖峰會講者陣容：2023年4月20日，生產力大樓，十三位講者及所屬機構。'
         }
       ]
     },

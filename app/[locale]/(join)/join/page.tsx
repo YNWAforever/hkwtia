@@ -102,7 +102,10 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active="plan" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* The join column is max-w-3xl, so four cards at xl (1280) were ~148px
+            and the CTA wrapped to three lines. Two columns keep it to one line,
+            or two for a longer label. */}
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2">
           {planChooserItems(locale).map((item) => (
             <li className="rounded-lg border border-border p-5" key={item.code}>
               <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>

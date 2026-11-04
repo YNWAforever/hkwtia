@@ -29,6 +29,15 @@ describe("milestone schema", () => {
 
   // The CSP is `img-src 'self' data:` and next.config.ts declares no remote
   // hosts, so a remote image would silently fail to render in the browser.
+  // C6: ICT-StartUp.png and the duplicate commemorative-book frame stay in
+  // the gallery with an empty alt. The title, or the previous image, describes them.
+  it("accepts a decorative history image with an empty alt", () => {
+    expect(milestoneSchema.parse({
+      ...valid,
+      images: [{src: "/images/history/ICT-StartUp.png", altEn: "", altZh: ""}],
+    }).images[0]).toMatchObject({altEn: "", altZh: ""});
+  });
+
   it("rejects an image that is not own-origin under /images/history/", () => {
     for (const src of ["https://hkwtia.org/a.jpg", "/images/a.jpg", "images/history/a.jpg"]) {
       expect(() => milestoneSchema.parse({
