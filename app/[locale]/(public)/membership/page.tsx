@@ -8,7 +8,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { MembershipDimensions } from "@/components/marketing/membership-dimensions";
 import { PricingNote } from "@/components/marketing/pricing-note";
 import { ActionLink } from "@/components/wt/action-link";
-import { PlanGrid, type PlanGridTier } from "@/components/marketing/plan-grid";
+import { BENEFIT_TIERS, PlanGrid, type PlanGridTier } from "@/components/marketing/plan-grid";
 import { WhatsAppLink } from "@/components/marketing/whatsapp-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { ClosingBand } from "@/components/wt/closing-band";
@@ -96,8 +96,8 @@ export default async function MembershipPage({ params }: Props) {
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
       priceLines: [tier.annualPriceHkd === null ? t("priceLabels.free") : `${money.format(tier.annualPriceHkd)} ${annual}`],
-      // Keys remain in Membership.tierBenefits. PlanGrid does not print them.
-      benefits: [],
+      // Other codes stay []. PlanGrid also refuses to print a tier outside BENEFIT_TIERS.
+      benefits: BENEFIT_TIERS.has(tier.code) ? t.raw(`tierBenefits.${tier.code}`) as string[] : [],
       action: tier.annualPriceHkd === null ? t("actions.join") : t("actions.payOnline"),
       href: `/join?plan=${tier.code}`,
     }));

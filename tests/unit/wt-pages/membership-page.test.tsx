@@ -8,6 +8,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PersistedMembershipPlan } from "@/lib/membership/public-catalog";
 
+const APPROVED_INDIVIDUAL_BENEFITS = {
+  en: [
+    "Free participation in networking events with industry experts and professionals",
+    "Exclusive networking and business-matching events with C-suite or director-level professionals in the wireless and mobile industries",
+    "WTIA event invitations and industry updates by email",
+  ],
+  "zh-HK": [
+    "免費參加業界交流活動，與業界專家及專業人士建立聯繫",
+    "專屬交流及商業配對活動，接觸無線及流動通訊業界的高級管理層／總監級專業人士",
+    "透過電郵接收 WTIA 活動邀請及業界資訊",
+  ],
+} as const;
+
 const bundles = {
   en: JSON.parse(
     readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8"),
@@ -170,9 +183,19 @@ describe("/membership rewrite", () => {
     for (const locale of ["en", "zh-HK"] as const) {
       const page = locale === "en" ? html : await renderMembership([community, startup, patron], locale);
       const planGrid = page.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
-      expect(planGrid).not.toContain("<ul");
       expect(page).toContain(bundles[locale].Membership.actions.payOnline);
+      const approved = APPROVED_INDIVIDUAL_BENEFITS[locale];
+      expect(bundles[locale].Membership.tierBenefits.individual).toEqual([...approved]);
+      const individual = planGrid.match(/<article id="individual">([\s\S]*?)<\/article>/)?.[1] ?? "";
+      expect([...individual.matchAll(/<li>([^<]*)<\/li>/g)].map((match) => match[1])).toEqual([...approved]);
+      expect(individual.match(/<ul/g) ?? []).toHaveLength(1);
+      for (const code of ["community", "corporate", "platinum"] as const) {
+        const card = planGrid.match(new RegExp(`<article id="${code}">([\\s\\S]*?)<\\/article>`))?.[1] ?? "";
+        expect(card, `${locale} ${code}`).not.toContain("<ul");
+        expect(card, `${locale} ${code}`).not.toContain("<li");
+      }
       for (const [code, lines] of Object.entries(bundles[locale].Membership.tierBenefits as Record<string, readonly string[]>)) {
+        if (code === "individual") continue;
         const description = bundles[locale].Membership.tiers[code as keyof typeof bundles.en.Membership.tiers]?.description ?? "";
         for (const line of lines) {
           if (description.includes(line)) continue;

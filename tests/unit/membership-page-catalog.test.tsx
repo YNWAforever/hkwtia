@@ -155,6 +155,17 @@ describe("repository-backed Membership page", () => {
     expect(html).toContain('href="/contact"');
   });
 
+  it.each(["en", "zh-HK"] as const)("prints only the individual benefit stub in %s", async (locale) => {
+    const html = await renderMembership([community], locale);
+    const individual = html.match(/<article id="individual">([\s\S]*?)<\/article>/)?.[1] ?? "";
+    expect([...individual.matchAll(/<li>([^<]*)<\/li>/g)].map((match) => match[1])).toEqual(["tierBenefits.individual benefit"]);
+    for (const code of ["community", "startup", "corporate", "patron", "platinum"]) {
+      expect(html, code).not.toContain(`tierBenefits.${code} benefit`);
+      const card = html.match(new RegExp(`<article id="${code}">([\\s\\S]*?)<\\/article>`))?.[1] ?? "";
+      if (card) expect(card, code).not.toContain("<ul");
+    }
+  });
+
   it("renders only reconciled tiers with localized labels and persisted CTAs", async () => {
     const html = await renderMembership([community]);
 
