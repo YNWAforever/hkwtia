@@ -2,11 +2,12 @@ import {readFileSync} from "node:fs";
 
 import {describe, expect, it} from "vitest";
 
+const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
+
 // A9 / V21. The donor header inset is calc(100% - 48px). At a 135px lockup the
 // clear space is 44px, including the left edge from 1200px up. The 821–1199px
 // band was not measured and is not given a new rule here.
 describe("header clear space", () => {
-  const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
 
   it("uses a 44px logo-to-name gap and the same inset from 1200px", () => {
     expect(chrome).toContain("--brand-copy-gap: 44px");
@@ -16,8 +17,17 @@ describe("header clear space", () => {
   });
 });
 
+describe("English desktop nav", () => {
+  it("hides the legal name below 1440 and keeps a 16px item gap", () => {
+    expect(chrome).toContain('html[lang="en"] .site-header .brand-copy small { display: none; }');
+    expect(chrome).toContain('html[lang="en"] .desktop-nav');
+    expect(chrome).toContain("gap: 16px;");
+    expect(chrome).toContain("min-width: max-content;");
+    expect(chrome).not.toMatch(/html\[lang="zh-HK"\] \.site-header \.brand-copy small \{ display: none/);
+  });
+});
+
 describe("membership plan grid", () => {
-  const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
 
   it("drops the 480px card floor and draws a divider above each CTA", () => {
     expect(chrome).toMatch(/\.plan-grid article \{ min-height: 0; \}/);
