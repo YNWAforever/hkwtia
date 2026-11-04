@@ -833,7 +833,7 @@
       "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
       "corporate": ["Featured member profile and logo wall", "3 showcase listings"],
       "patron": ["Everything in Corporate"],
-      "individual": ["Member profile page", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
+      "individual": ["Free participation in networking events with industry experts and professionals", "Exclusive networking and business-matching events with C-suite or director-level professionals in the wireless and mobile industries", "WTIA event invitations and industry updates by email"],
       "platinum": ["Everything in Corporate"]
     },
     "tiers": {

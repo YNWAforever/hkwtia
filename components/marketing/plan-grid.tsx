@@ -14,6 +14,9 @@ export type PlanGridTier = Readonly<{
 
 export type PlanGridSme = Readonly<{label: string; title: string; copy: string; action: string; href: string}>;
 
+// Other tiers stay hidden until the 主席 approves their lists.
+export const BENEFIT_TIERS: ReadonlySet<string> = new Set(["individual"]);
+
 export function PlanGrid({tiers, sme, labels}: Readonly<{tiers: readonly PlanGridTier[]; sme: PlanGridSme; labels?: Readonly<{audience: string; fee: string; uses: string; next: string}>}>) {
   return <><div className="plan-grid">
     {tiers.map((tier, index) => (
@@ -27,8 +30,10 @@ export function PlanGrid({tiers, sme, labels}: Readonly<{tiers: readonly PlanGri
           {tier.priceLines.map((line) => <p key={line}>{line}</p>)}
         </> : null}
         {tier.seatLabel ? <p>{tier.seatLabel}</p> : null}
-        {/* Membership.tierBenefits stays in the bundles and off the card. Those lines
-            (showcase counts, logo wall, quarterly event submissions) are not confirmed. */}
+        {BENEFIT_TIERS.has(tier.code) && tier.benefits.length > 0 ? <>
+          {labels ? <p className="plan-field-label">{labels.uses}</p> : null}
+          <ul>{tier.benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+        </> : null}
         {labels ? <p className="sr-only">{labels.next}</p> : null}
         <ActionLink href={tier.href} variant="text-link">{tier.action}</ActionLink>
       </article>
