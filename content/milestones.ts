@@ -85,7 +85,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyEn: 'WTIA partnered with the Professional Information Security Association (PISA) in 2003 to conduct a WLAN war-driving survey in Hong Kong, assessing how securely users configured wireless networks and raising public awareness of Wi-Fi security. The work later evolved into the SafeWiFi programme, shifting from war driving to testing the security of public Wi-Fi hotspots across Hong Kong.',
     bodyZh: '2003 年，WTIA 與專業資訊保安協會（PISA）合作，在香港進行 WLAN War Driving 調查，評估用戶無線網絡保安設定，並提升公眾對 Wi-Fi 保安的關注。項目其後發展為 SafeWiFi，由 War Driving 轉型為評測本港公共 Wi-Fi 熱點保安水平。',
     images: [
-      {src: '/images/history/wlan-wardriving-1024x620-1.jpg', altEn: 'Three men run a WLAN war-driving survey on a boat deck with laptops and a flat-panel antenna, Victoria Harbour behind.', altZh: '三名男士在船上甲板以手提電腦及平板天線進行 WLAN War Driving 調查，背景為維多利亞港。'}
+      {src: '/images/history/wlan-wardriving-1024x620-1.jpg', altEn: 'Three men run a WLAN war-driving survey on a boat deck with laptops and a flat-panel antenna.', altZh: '三名男士在船上甲板以手提電腦及平板天線進行 WLAN War Driving 調查。'}
     ],
     legacyPath: '/2003/01/2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong/',
     featured: false,
@@ -186,7 +186,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyEn: 'In 2007 WTIA organised the first Hong Kong Mobile Film Festival. With a production contest, seminars and workshops, the festival nurtured young people’s interest in making films on mobile devices and raised public appreciation of mobile film as a creative medium in Hong Kong’s wireless and digital content scene.',
     bodyZh: '2007 年，WTIA 舉辦首屆「香港手機電影節」，透過製作比賽、講座及工作坊，培養青年以流動裝置拍片的興趣，並提升大眾對手機電影作為創意媒介的認識，豐富香港無線及數碼內容生態。',
     images: [
-      {src: '/images/history/2nd-HKMFF-Launching01-1024x683-1.jpg', altEn: 'Five guests place their hands on a glowing orb to launch the 2nd Hong Kong Mobile Film Festival.', altZh: '五位主禮嘉賓手按發光球體，為第二屆香港手機電影節主持啟動儀式。'}
+      {src: '/images/history/2nd-HKMFF-Launching01-1024x683-1.jpg', altEn: 'Five guests place their hands on a glowing orb to launch the Hong Kong Mobile Film Festival.', altZh: '五位主禮嘉賓手按發光球體，為香港手機電影節主持啟動儀式。'}
     ],
     legacyPath: '/2007/01/2007-hong-kong-mobile-film-festival/',
     featured: false,
@@ -216,7 +216,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyEn: 'With Cyberport’s support, WTIA renovated the Wireless Development Centre into the Mobility Experience Centre (MEC) at Cyberport in 2013. MEC gave the public a place to try advanced mobile devices and highlighted award-winning applications and wireless products from Hong Kong IT companies, reinforcing WTIA’s work on local mobile technology showcase.',
     bodyZh: '在數碼港支持下，WTIA 於 2013 年將無線科技發展中心翻新為「流動科技體驗中心」（MEC），讓公眾體驗尖端流動裝置，並展示本地資訊科技公司的得獎應用及無線產品，延續 WTIA 推廣香港流動科技的工作。',
     images: [
-      {src: '/images/history/902576_358199000946799_1828693650_o-1024x684-1.jpg', altEn: 'An exhibitor demonstrates a smartphone app to a visiting official and guests at the Mobility Experience Centre, Cyberport.', altZh: '參展商向到訪官員及嘉賓示範智能手機應用程式，攝於數碼港流動科技體驗中心。'}
+      {src: '/images/history/902576_358199000946799_1828693650_o-1024x684-1.jpg', altEn: 'A man demonstrates a smartphone to a group of guests.', altZh: '一名男士向一群嘉賓示範智能手機。'}
     ],
     legacyPath: '/2013/01/2013-opening-of-mobility-experience-centre-at-cyberport/',
     featured: false,
@@ -336,7 +336,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyEn: 'On 30 March 2016, OGCIO and WTIA held the “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony. Public and private organisations pledged to expand free public Wi-Fi under the Wi-Fi.HK brand, making it easier for people in Hong Kong to get online and reinforcing WTIA’s partnership with government on city-wide wireless access.',
     bodyZh: '2016 年 3 月 30 日，政府資訊科技總監辦公室聯同 WTIA 舉行「協力推動 Wi-Fi.HK」承諾書簽署典禮，呼籲公私營機構透過 Wi-Fi.HK 計劃擴展免費公共 Wi-Fi，方便市民上網，並體現 WTIA 與政府在全港無線接達上的合作。',
     images: [
-      {src: '/images/history/2016-Wi-Fi.HK_.png', altEn: 'Guests line up behind a Wi-Fi.HK podium at the “Building Up Wi-Fi.HK Through Collaboration” pledging ceremony.', altZh: '嘉賓在 Wi-Fi.HK 講台後列隊，出席「攜手共建 Wi-Fi.HK」承諾書簽署典禮。'}
+      {src: '/images/history/2016-Wi-Fi.HK_.png', altEn: 'Guests line up behind a Wi-Fi.HK podium at the “Building Up Wi-Fi.HK Through Collaboration” ceremony.', altZh: '嘉賓在 Wi-Fi.HK 講台後列隊，出席「攜手共建 Wi-Fi.HK」典禮。'}
     ],
     legacyPath: '/2016/01/2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony/',
     featured: false,
@@ -763,7 +763,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     images: [
       {src: '/images/history/20200409-it-sme-relief-press-conference-05.jpg', altEn: 'A masked speaker talks into a microphone at a press conference, behind a placard urging immediate extra support for the epidemic-hit IT sector.', altZh: '戴口罩的講者在記者會發言，前方標語寫有「疫情嚴重影響 IT 界　立即加碼援助」。'},
       {src: '/images/history/20200409-it-sme-relief-press-conference-01.jpg', altEn: 'A speaker in a purple mask addresses the press conference into media microphones, beside the same placard.', altZh: '戴紫色口罩的講者在記者會上對著傳媒麥克風發言，旁邊為同一標語。'},
-      {src: '/images/history/20200409-it-sme-relief-press-conference.jpg', altEn: 'Masked speakers at a long press-conference table hold placards, behind a banner urging more Anti-Epidemic Fund support for the IT sector.', altZh: '戴口罩的講者在記者會長桌前手持標語，前方橫額寫有「要求防疫基金　增加對 IT 界援助」。'}
+      {src: '/images/history/20200409-it-sme-relief-press-conference.jpg', altEn: 'Masked speakers at a long press-conference table hold placards, behind a banner urging more Anti-Epidemic Fund support for the IT sector.', altZh: '戴口罩的講者在記者會上的長桌前手持標語，前方橫額寫有「要求防疫基金　增加對 IT 界援助」。'}
     ],
     legacyPath: '/2020/04/%e6%96%b0%e8%81%9e%e7%a8%bf-%e7%96%ab%e6%83%85%e9%87%8d%e5%89%b5it%e4%b8%ad%e5%b0%8f%e4%bc%81-%e5%88%9d%e5%89%b5%e8%b3%87%e9%87%91%e9%8f%88%e6%96%b7%e8%a3%82%e6%80%a5%e9%a0%88%e6%95%91%e4%ba%a1/',
     featured: false,
