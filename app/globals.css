@@ -78,6 +78,12 @@
   --font-sans: "Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
 }
 
+/* /zh only. EN keeps the Avenir-first stacks above; Avenir is not embedded. */
+html[lang="zh-HK"] {
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-serif: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+
 * { box-sizing: border-box; border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-sans); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }

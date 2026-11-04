@@ -105,6 +105,20 @@ describe("WiseTech design tokens", () => {
     expect(tailwind).toContain('sans: ["var(--font-sans)"]');
   });
 
+  it("puts Noto Sans TC first under zh-HK and leaves the English Avenir stack", () => {
+    const zh = '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
+    expect(globals).toContain(`html[lang="zh-HK"]`);
+    expect(globals).toContain(`--font-sans: ${zh}`);
+    expect(globals).toContain(`--font-serif: ${zh}`);
+    expect(declaration("--font-sans")).toContain('"Avenir Next", Avenir');
+    expect(rootLayout).toContain('subsets: ["latin"]');
+    expect(rootLayout).not.toMatch(/Avenir.*\.woff/i);
+    const experience = readFileSync(resolve(process.cwd(), "app/styles/wisetech-experience.css"), "utf8");
+    const chrome = readFileSync(resolve(process.cwd(), "app/styles/wisetech-chrome.css"), "utf8");
+    expect(experience).toContain(`--font-display-zh: ${zh}`);
+    expect(chrome).toContain(`.site-root[lang^="zh"] {\n  font-family: ${zh};`);
+  });
+
   it("marks the public wrapper with the design's Traditional Chinese language tag", () => {
     expect(publicLayout).toContain('className="site-root"');
     expect(publicLayout).toContain('"zh-Hant-HK"');

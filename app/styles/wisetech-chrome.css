@@ -201,6 +201,12 @@
   background: #0f4c81;
 }
 
+/* Donor `.site-root[lang^="zh"]` leads with PingFang and then the Latin stack.
+   Under /zh the order is Noto Sans TC, PingFang TC, Microsoft JhengHei. */
+.site-root[lang^="zh"] {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+
 /* Honest directory empty (SPECS §6). Dashed slots are labels only. */
 .directory-empty {
   border: 0;
