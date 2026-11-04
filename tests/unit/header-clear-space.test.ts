@@ -23,7 +23,15 @@ describe("English desktop nav", () => {
     expect(chrome).toContain('html[lang="en"] .desktop-nav');
     expect(chrome).toContain("gap: 16px;");
     expect(chrome).toContain("min-width: max-content;");
+    expect(chrome).toContain('html[lang="en"] .site-header .brand-copy { flex-shrink: 0; }');
     expect(chrome).not.toMatch(/html\[lang="zh-HK"\] \.site-header \.brand-copy small \{ display: none/);
+  });
+});
+
+describe("Ask WTIA clearance", () => {
+  it("pads main, not the shell, so the footer is not followed by a blank band", () => {
+    expect(chrome).toContain(".site-root main { padding-bottom: calc(54px + 22px + 24px); }");
+    expect(chrome).not.toMatch(/^\.site-root \{ padding-bottom:/m);
   });
 });
 

@@ -113,6 +113,13 @@
 .site-header .brand,
 .site-footer .brand { gap: var(--brand-copy-gap); }
 .site-header .brand { padding-inline-end: 45px; }
+/* The donor lockup is min-width: 0, so at 1241 "WTIA" was squeezed to a few
+   pixels and the letters spilled out. Below 1440 the legal name is hidden,
+   so this box is only the wordmark and it keeps its width. From 1440 the
+   legal name is back and must still be able to wrap, or it paints over the nav. */
+@media (max-width: 1439.98px) {
+  html[lang="en"] .site-header .brand-copy { flex-shrink: 0; }
+}
 /* EN below 1440: the legal name plus this 44px gap left the four nav labels
    overlapping (33–47px at 1280). Keep the globe and "WTIA". The 44px gap
    stays only while the legal name is on screen. /zh is unchanged. */
@@ -261,8 +268,10 @@
 }
 
 /* Ask WTIA is fixed 22px off the bottom and at least 54px tall. The extra
-   24px lets the last card scroll clear of it (membership at 820 and 1024). */
-.site-root { padding-bottom: calc(54px + 22px + 24px); }
+   24px lets the last card scroll clear of it (membership at 820 and 1024).
+   The space belongs on main: the same padding on .site-root left a blank
+   band under the footer. */
+.site-root main { padding-bottom: calc(54px + 22px + 24px); }
 
 /* Donor `.site-root[lang^="zh"]` leads with PingFang and then the Latin stack.
    Under /zh the order is Noto Sans TC, PingFang TC, Microsoft JhengHei. */
