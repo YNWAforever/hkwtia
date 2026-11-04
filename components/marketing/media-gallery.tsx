@@ -16,8 +16,9 @@ export function MediaGallery({images}: MediaGalleryProps) {
 
   return (
     <ul className="grid gap-6 md:grid-cols-2">
-      {validatedImages.map((image) => (
-        <li className="overflow-hidden rounded-shell-lg bg-muted" key={image.src}>
+      {validatedImages.map((image, index) => (
+        // src is not unique: the commemorative-book gallery lists one file twice (C6 L924).
+        <li className="overflow-hidden rounded-shell-lg bg-muted" key={`${image.src}-${index}`}>
           <Image
             alt={image.alt}
             className="h-auto w-full object-cover"
