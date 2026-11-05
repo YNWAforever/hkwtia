@@ -920,8 +920,7 @@ export const milestones: MilestoneRecord[] = milestoneSchema.array().parse([
     bodyEn: 'In October 2022, WTIA published its 20+1st Anniversary Commemorative Book online, gathering messages from partners and supporting organisations. The volume looked back on a year with over 100 industry events and reaffirmed WTIA’s commitment to a tech-friendly ecosystem for Hong Kong’s wireless and ICT community.',
     bodyZh: '2022 年 10 月，WTIA 推出《20＋1 週年紀念特刊》網上版，收錄合作夥伴及友會祝福，回顧過去一年超過 100 場行業活動，並重申繼續推動香港無線及資訊科技界的創科友善生態。',
     images: [
-      {src: '/images/history/Screenshot-2022-10-11-at-12.21.19-PM-2.png', altEn: 'Cover of WTIA\'s 20th Anniversary Commemorative Book, with stylised numerals and the word “PLUS” on a purple network background.', altZh: '香港無線科技商會 20 週年紀念特刊封面，紫色網絡背景上有大型數字及「PLUS」字樣。'},
-      {src: '/images/history/Screenshot-2022-10-11-at-12.21.19-PM-2.png', altEn: '', altZh: ''}
+      {src: '/images/history/Screenshot-2022-10-11-at-12.21.19-PM-2.png', altEn: 'Cover of WTIA\'s 20th Anniversary Commemorative Book, with stylised numerals and the word “PLUS” on a purple network background.', altZh: '香港無線科技商會 20 週年紀念特刊封面，紫色網絡背景上有大型數字及「PLUS」字樣。'}
     ],
     legacyPath: '/2022/10/wtia-201st-anniversary-commemorative-book-%e9%a6%99%e6%b8%af%e7%84%a1%e7%b7%9a%e7%a7%91%e6%8a%80%e5%95%86%e6%9c%8320%ef%bc%8b1%e9%80%b1%e5%b9%b4%e7%b4%80%e5%bf%b5%e7%89%b9%e5%88%8a/',
     featured: false,
