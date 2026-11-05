@@ -30,7 +30,7 @@ describe("GbaGateway", () => {
 
     const cta = screen.getByRole("link", {name: bundles.en.Contact.channelsTitle});
     expect(cta).toHaveAttribute("href", "/contact");
-    expect(screen.queryByRole("link", {name: bundles.en.Home.gbaGateway.exploreAction})).toBeNull();
-    expect(screen.queryByRole("link", {name: bundles.en.Home.gbaGateway.openCohortAction})).toBeNull();
+    expect(screen.getAllByRole("link")).toEqual([cta]);
+    expect(document.body.innerHTML).not.toContain("/launchpad");
   });
 });

@@ -62,7 +62,8 @@ describe("ProgrammesPage", () => {
     expect(document.querySelectorAll(".programme-card")).toHaveLength(4);
     expect(screen.getByRole("status")).toHaveTextContent(bundles.en.Programmes.open.emptyTitle);
     expect(screen.getByRole("link", {name: new RegExp(bundles.en.Programmes.open.action)})).toHaveAttribute("href", `mailto:${siteConfig.contact.email}?subject=Programme%20enquiry`);
-    expect(screen.queryByRole("link", {name: new RegExp(bundles.en.Programmes.launchpad.action)})).toBeNull();
+    expect(document.body.innerHTML).not.toContain('href="/launchpad"');
+    expect(document.body.innerHTML).not.toContain('href="#launchpad"');
   });
 
   it("lists each programme's recorded edition span in the history section", async () => {

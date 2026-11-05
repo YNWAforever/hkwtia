@@ -181,11 +181,7 @@ describe("Events page donor markup", () => {
     const strip = screen.getByRole("navigation", {
       name: bundles.en.Events.activityStrip.label,
     });
-    expect(
-      within(strip).queryByRole("link", {
-        name: bundles.en.Events.activityStrip.launchpadLabel,
-      }),
-    ).toBeNull();
+    expect(within(strip).getAllByRole("link")).toHaveLength(2);
     expect(
       within(strip).getByRole("link", {
         name: bundles.en.Events.activityStrip.showcaseLabel,
@@ -233,7 +229,7 @@ describe("Events page donor markup", () => {
     ).toHaveAttribute("href", "/membership");
     expect(screen.getByText(bundles.en.Events.recommendations.items.contact.copy)).toBeInTheDocument();
     expect(screen.getByText(bundles.en.Events.recommendations.items.contact.cta)).toBeInTheDocument();
-    expect(screen.queryByRole("link", {name: bundles.en.Events.activityStrip.launchpadLabel})).toBeNull();
+    expect(document.body.innerHTML).not.toContain('href="/launchpad"');
     expect(screen.getByText("Member solutions, listed with each member's consent.")).toBeInTheDocument();
     expect(screen.getByText("View the Member Showcase")).toBeInTheDocument();
     expect(screen.getByText("Find the pathway that matches your organisation.")).toBeInTheDocument();

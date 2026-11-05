@@ -8,7 +8,7 @@ export type NavigationMessageKey =
   | "feature.impactInsights.label" | "feature.impactInsights.title" | "feature.impactInsights.copy" | "feature.impactInsights.cta"
   | "feature.aboutWtia.label" | "feature.aboutWtia.title" | "feature.aboutWtia.copy" | "feature.aboutWtia.cta"
   | "columns.participate" | "columns.programmes" | "columns.membership" | "columns.insights" | "columns.organisation" | "columns.connect"
-  | "links.events" | "links.launchpad" | "links.programmes" | "links.hkict" | "links.asa" | "links.tct" | "links.cpai" | "links.membership" | "links.members" | "links.showcase" | "links.news" | "links.aiOps" | "links.aiTransparency" | "links.about" | "links.history" | "links.chairman" | "links.committees" | "links.contact" | "links.partners"
+  | "links.events" | "links.programmes" | "links.hkict" | "links.asa" | "links.tct" | "links.cpai" | "links.membership" | "links.members" | "links.showcase" | "links.news" | "links.aiOps" | "links.aiTransparency" | "links.about" | "links.history" | "links.chairman" | "links.committees" | "links.contact" | "links.partners"
   | "actions.findEvent" | "actions.join" | "actions.memberSignIn";
 
 export type NavigationLink = Readonly<{id: string; href: PublicRoute; labelKey: NavigationMessageKey}>;
