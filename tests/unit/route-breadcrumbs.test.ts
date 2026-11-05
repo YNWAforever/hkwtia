@@ -15,14 +15,22 @@ describe("routeBreadcrumbItems", () => {
   it("gives every public route a label that resolves in both bundles", () => {
     // A route with no label throws MISSING_MESSAGE at request time and takes the page
     // down -- the exact shape of the /admin/page-copy outage of 2026-09-13.
+    // /launchpad 404s and does not render a trail, so it has no label key.
+    const unlabeled = new Set<string>(["/launchpad"]);
     for (const route of publicRoutes) {
       const key = ROUTE_BREADCRUMB_LABEL_KEYS[route];
+      if (unlabeled.has(route)) {
+        expect(key, `${route} still has a breadcrumb label`).toBeUndefined();
+        continue;
+      }
       expect(key, `${route} has no breadcrumb label key`).toBeDefined();
       expect(() => translate(en)(key!), `en: ${key}`).not.toThrow();
       expect(() => translate(zhHK)(key!), `zh-HK: ${key}`).not.toThrow();
     }
     // Held equal, so a label left behind by a deleted route surfaces too.
-    expect(Object.keys(ROUTE_BREADCRUMB_LABEL_KEYS).sort()).toEqual([...publicRoutes].sort());
+    expect(Object.keys(ROUTE_BREADCRUMB_LABEL_KEYS).sort()).toEqual(
+      [...publicRoutes].filter((route) => !unlabeled.has(route)).sort(),
+    );
   });
 
   it("starts every trail at home and ends at the current page", () => {

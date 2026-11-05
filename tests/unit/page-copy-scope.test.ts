@@ -135,7 +135,11 @@ describe("page copy scope", () => {
       // (pathways.legend/routeEyebrow/routeLead/primaryLabel = 4, plus label/copy for each of the
       // 8 destinations = 16), hero.actions.findRoute (1) and openNow.recordLabel (1) --
       // 166 + 22 = 188.
-      Home: 188,
+      // Preview batch D removed four Home leaves no public route reads:
+      // pathways.destinations.launchpad label/copy (2) and gbaGateway
+      // openCohortAction/exploreAction (2). The gateway still reads eyebrow/title/copy.
+      // 188 - 4 = 184.
+      Home: 184,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -143,7 +147,9 @@ describe("page copy scope", () => {
       // more: breadcrumbCurrent, viewLabel, routes.about/routes.news (2 fields each, 4), and the
       // new PreparedEmailForm's emailTopics (topicLabel/composeAction, plus label/subject/body
       // for each of the 7 topics: 2 + 21 = 23) -- 8 + 21 = 29, so 20 + 29 = 49.
-      Contact: 49,
+      // Preview batch D removed Contact.routes.launchpad title/description. The contact
+      // page does not render that card. 49 - 2 = 47.
+      Contact: 47,
       // 12 for the four programmes' title/description/status, plus the 17
       // `programs.record` keys the programme records migration and PR3
       // presentation added, plus 3 more for the WP-4 Task 15 `audience` field
@@ -186,7 +192,10 @@ describe("page copy scope", () => {
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       AiTransparency: 31,
       // WP-7 Task 3: the /programmes index copy.
-      Programmes: 33,
+      // Preview batch D removed Programmes.groupings.launchpad and the four
+      // Programmes.launchpad leaves. The index renders catalogue and history only.
+      // 33 - 5 = 28.
+      Programmes: 28,
       // WP-7 Task 5: the /partners page copy. Round 18 (logo tiles) removed record.badge,
       // relationship, website, status, since and window and added tileSince/tileWindow:
       // 38 - 6 + 2 = 34. Production had no overrides on any Partners.record key.
@@ -201,7 +210,9 @@ describe("page copy scope", () => {
     // + 10 Membership onboarding leaves (actions.apply, tracks, renew) = 606,
     // + 12 ops-tier leaves (individual/platinum names, descriptions, benefits) = 618,
     // + 1 Community benefit line when the free tier was offered again = 619.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(608);
+    // Preview batch D removed 11 unused Launch Pad page-copy leaves (Home 4, Contact 2,
+    // Programmes 5). 608 - 11 = 597.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(597);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

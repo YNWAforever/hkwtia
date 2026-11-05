@@ -6,14 +6,19 @@ import {absoluteUrl, localizedPath} from "@/lib/urls";
 /**
  * The message key naming each public route in a breadcrumb trail.
  *
- * Eighteen of these point at `Navigation.links.*`, which already names the same pages in
+ * Seventeen of these point at `Navigation.links.*`, which already names the same pages in
  * the header: a second vocabulary for the same routes would be one more thing for staff
  * to keep in sync, and it would drift. Only the four routes the navigation does not list
  * carry their own key.
  *
- * Held equal to `publicRoutes` by `tests/unit/route-breadcrumbs.test.ts`. A route without
- * a label throws MISSING_MESSAGE at request time and takes the page down -- exactly how
- * /admin/page-copy broke in both locales on 2026-09-13.
+ * `/launchpad` is intentionally absent. The route stays in `publicRoutes` so announcement
+ * href checks do not need a migration, and the page 404s without rendering a trail
+ * (`tests/unit/breadcrumb-coverage.test.ts`). `Navigation.links.launchpad` was the only
+ * label, and it was not a header or footer link.
+ *
+ * Held equal to `publicRoutes` except `/launchpad` by `tests/unit/route-breadcrumbs.test.ts`.
+ * A route without a label throws MISSING_MESSAGE at request time and takes the page down --
+ * exactly how /admin/page-copy broke in both locales on 2026-09-13.
  */
 export const ROUTE_BREADCRUMB_LABEL_KEYS: Readonly<Partial<Record<PublicRoute, string>>> = {
   "/": "Common.breadcrumbHome",
@@ -27,7 +32,6 @@ export const ROUTE_BREADCRUMB_LABEL_KEYS: Readonly<Partial<Record<PublicRoute, s
   "/about/history": "Navigation.links.history",
   "/membership": "Navigation.links.membership",
   "/showcase": "Navigation.links.showcase",
-  "/launchpad": "Navigation.links.launchpad",
   "/ai-ops": "Navigation.links.aiOps",
   "/events": "Navigation.links.events",
   "/news": "Navigation.links.news",

@@ -79,8 +79,6 @@ const publicJourneyKeys = [
   'Contact.routes.membership.description',
   'Contact.routes.showcase.title',
   'Contact.routes.showcase.description',
-  'Contact.routes.launchpad.title',
-  'Contact.routes.launchpad.description',
   'Contact.conciergeTitle',
   'Contact.conciergeDescription',
   'Contact.conciergeLauncher',
