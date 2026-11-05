@@ -143,6 +143,13 @@
     },
     "summary": "WTIA 連繫香港無線科技社群的科技企業、專業人士及計劃。",
     "addressLines": [],
+    "social": {
+      "label": "WTIA 社交媒體",
+      "facebook": "WTIA Facebook",
+      "linkedin": "WTIA LinkedIn",
+      "youtube": "WTIA YouTube",
+      "instagram": "WTIA Instagram"
+    },
     "privacy": "私隱聲明",
     "copyright": "© {year} WTIA。版權所有。"
   },
@@ -659,6 +666,40 @@
         "asa": {
           "name": "亞洲智能應用程式大獎",
           "description": "嘉許亞洲優秀智能應用程式。"
+        }
+      }
+    },
+    "flagships": {
+      "eyebrow": "重點計劃",
+      "title": "計劃與平台",
+      "intro": "WTIA 的重點計劃與平台。",
+      "items": {
+        "cpai": {
+          "label": "CPAI",
+          "blurb": "了解 CPAI 計劃。",
+          "primaryLabel": "查看計劃"
+        },
+        "hkict": {
+          "label": "資訊科技初創企業獎",
+          "blurb": "香港資訊及通訊科技獎 — 資訊科技初創企業獎。",
+          "primaryLabel": "獎項網站",
+          "secondaryLabel": "本會專頁"
+        },
+        "tct": {
+          "label": "Tech to Connect",
+          "blurb": "WTIA 連結科技與實踐的業界系列。",
+          "primaryLabel": "系列網站",
+          "secondaryLabel": "本會專頁"
+        },
+        "asa": {
+          "label": "亞洲智能應用程式／智慧創新大獎",
+          "blurb": "WTIA 亞洲智能應用與創新大獎。",
+          "primaryLabel": "查看計劃"
+        },
+        "insidw": {
+          "label": "InsidW",
+          "blurb": "WTIA 社群雜誌與內容平台。",
+          "primaryLabel": "前往 InsidW"
         }
       }
     },
@@ -1852,6 +1893,18 @@
       "heading": "此活動已取消",
       "body": "此活動將不會舉行。任何已付款的訂單將獲全額退款。",
       "refundPolicy": "查閱退款政策"
+    }
+  },
+  "Media": {
+    "metaTitle": "傳媒及新聞報道｜香港無線科技商會 WTIA",
+    "metaDescription": "WTIA 計劃與調查的傳媒報道，以及傳媒查詢聯絡。",
+    "h1": "傳媒及新聞報道",
+    "intro": "節錄有關 WTIA 計劃、獎項及業界調查的報道。",
+    "contact": "傳媒查詢，請聯絡傳媒組：contact@hkwtia.org",
+    "table": {
+      "date": "日期",
+      "outlet": "媒體",
+      "article": "報道"
     }
   },
   "News": {

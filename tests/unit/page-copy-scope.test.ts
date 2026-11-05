@@ -139,7 +139,10 @@ describe("page copy scope", () => {
       // pathways.destinations.launchpad label/copy (2) and gbaGateway
       // openCohortAction/exploreAction (2). The gateway still reads eyebrow/title/copy.
       // 188 - 4 = 184.
-      Home: 184,
+      // P0 trust flagship strip added 20 Home.flagships leaves: eyebrow/title/intro,
+      // plus label/blurb/primaryLabel on five cards, and secondaryLabel on HKICT and TCT.
+      // 184 + 20 = 204.
+      Home: 204,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -212,7 +215,8 @@ describe("page copy scope", () => {
     // + 1 Community benefit line when the free tier was offered again = 619.
     // Preview batch D removed 11 unused Launch Pad page-copy leaves (Home 4, Contact 2,
     // Programmes 5). 608 - 11 = 597.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(597);
+    // P0 trust flagship strip added 20 Home.flagships leaves. 597 + 20 = 617.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(617);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

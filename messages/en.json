@@ -142,6 +142,13 @@
     },
     "summary": "WTIA connects technology businesses, practitioners and programmes across Hong Kong's wireless technology community.",
     "addressLines": [],
+    "social": {
+      "label": "WTIA on social media",
+      "facebook": "WTIA on Facebook",
+      "linkedin": "WTIA on LinkedIn",
+      "youtube": "WTIA on YouTube",
+      "instagram": "WTIA on Instagram"
+    },
     "privacy": "Privacy statement",
     "copyright": "© {year} WTIA. All rights reserved."
   },
@@ -658,6 +665,40 @@
         "asa": {
           "name": "Asia Smart App Awards",
           "description": "Celebrating outstanding smart applications across Asia."
+        }
+      }
+    },
+    "flagships": {
+      "eyebrow": "Flagship programmes",
+      "title": "Programmes and platforms",
+      "intro": "WTIA’s flagship programmes and platforms.",
+      "items": {
+        "cpai": {
+          "label": "CPAI",
+          "blurb": "Explore the CPAI programme.",
+          "primaryLabel": "View programme"
+        },
+        "hkict": {
+          "label": "Startup Award",
+          "blurb": "Hong Kong ICT Awards — ICT Startup Award stream.",
+          "primaryLabel": "Award site",
+          "secondaryLabel": "On WTIA"
+        },
+        "tct": {
+          "label": "Tech to Connect",
+          "blurb": "WTIA industry series connecting technology and practice.",
+          "primaryLabel": "Series site",
+          "secondaryLabel": "On WTIA"
+        },
+        "asa": {
+          "label": "Asia Smart App / Innovation Awards",
+          "blurb": "WTIA’s Asia-wide smart app and innovation awards.",
+          "primaryLabel": "View programme"
+        },
+        "insidw": {
+          "label": "InsidW",
+          "blurb": "WTIA community magazine and content platform.",
+          "primaryLabel": "Visit InsidW"
         }
       }
     },
@@ -1851,6 +1892,18 @@
       "heading": "This event has been cancelled",
       "body": "This event will not take place. Any paid order is refunded in full.",
       "refundPolicy": "Read our refund policy"
+    }
+  },
+  "Media": {
+    "metaTitle": "Media and Press Coverage｜Hong Kong Wireless Technology Industry Association (WTIA)",
+    "metaDescription": "Press coverage of WTIA programmes and surveys, with media contact details.",
+    "h1": "Media and Press Coverage",
+    "intro": "Selected coverage of WTIA programmes, awards and industry surveys.",
+    "contact": "For press and media enquiries, please contact our Media Team: contact@hkwtia.org",
+    "table": {
+      "date": "Date",
+      "outlet": "Outlet",
+      "article": "Article"
     }
   },
   "News": {
