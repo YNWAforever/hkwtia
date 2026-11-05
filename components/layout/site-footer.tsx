@@ -1,3 +1,4 @@
+import {Facebook, Instagram, Linkedin, Youtube, type LucideIcon} from "lucide-react";
 import {getTranslations} from "next-intl/server";
 
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
@@ -16,6 +17,13 @@ import type {AppLocale} from "@/i18n/routing";
 
 // hkwtia's own 44px tap-target floor (spec §2.9); the donor's .footer-links a sets type only.
 const footerTargetClassName = "inline-flex min-h-11 min-w-11 max-w-full items-center break-words";
+
+const footerSocial = [
+  {id: "facebook", href: "https://www.facebook.com/wtiawdc", icon: Facebook},
+  {id: "linkedin", href: "https://www.linkedin.com/company/hkwtia", icon: Linkedin},
+  {id: "youtube", href: "https://www.youtube.com/channel/UCEzOTl6KhFFeQQ8O09Y-ndA", icon: Youtube},
+  {id: "instagram", href: "https://www.instagram.com/hkwtia/", icon: Instagram},
+] as const satisfies readonly {id: "facebook" | "linkedin" | "youtube" | "instagram"; href: string; icon: LucideIcon}[];
 
 /**
  * A column entry is not a `LocalizedNavigationLink`: the Membership column also carries
@@ -36,6 +44,18 @@ type FooterColumn = Readonly<{id: string; label: string; links: readonly FooterL
  * partial postal address is not a better answer than none, and a silently shortened one hides
  * the bundle defect instead of showing it.
  */
+function socialLabel(
+  t: Awaited<ReturnType<typeof getTranslations>>,
+  id: (typeof footerSocial)[number]["id"],
+): string {
+  switch (id) {
+    case "facebook": return t("social.facebook");
+    case "linkedin": return t("social.linkedin");
+    case "youtube": return t("social.youtube");
+    case "instagram": return t("social.instagram");
+  }
+}
+
 function isAddressLines(value: unknown): value is readonly string[] {
   return Array.isArray(value)
     && value.length > 0
@@ -106,6 +126,26 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
             logoAlt: t("brand.logoAlt"),
           }} />
           <p>{t("summary")}</p>
+          <nav aria-label={t("social.label")}>
+            <ul className="footer-social">
+              {footerSocial.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.id}>
+                    <a
+                      aria-label={socialLabel(t, item.id)}
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center"
+                      href={item.href}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <Icon aria-hidden="true" size={20} strokeWidth={1.75} />
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
           <small>{t("legalLine")}</small>
         </div>
         <div className="footer-newsletter">

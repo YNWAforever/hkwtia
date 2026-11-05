@@ -12,7 +12,7 @@ const paths = [
   '/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner',
   '/about/history/asia-smart-innovation-awards-2025',
   '/programs/cpai', '/programs/hkict', '/programs/tct', '/programs/asa',
-  '/contact', '/privacy', '/ai-transparency'
+  '/contact', '/privacy', '/ai-transparency', '/media-and-press-coverage'
 ];
 
 for (const path of ['/launchpad']) {

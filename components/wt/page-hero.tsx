@@ -9,7 +9,8 @@ import {Link} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
 
 type PageHeroProps = Readonly<{
-  eyebrow: string;
+  /** Omitted when a page has no approved short label above the title. */
+  eyebrow?: string;
   title: string;
   lead: string;
   variant?: 'page' | 'inner';
@@ -98,7 +99,7 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
       ) : null}
       {!image && !artMark ? <SignalMark seed={title} /> : null}
       <Shell>
-        <Eyebrow light>{eyebrow}</Eyebrow>
+        {eyebrow ? <Eyebrow light>{eyebrow}</Eyebrow> : null}
         <h1>{title}</h1>
         <p>{lead}</p>
         {actions && actions.length > 0 ? (

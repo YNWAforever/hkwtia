@@ -93,6 +93,17 @@ describe("legacy redirects", () => {
     }
   });
 
+  it("does not 308 the live media and press page back to news", async () => {
+    const redirects = await getRedirects();
+    const matchers = redirects.map((redirect) => ({
+      source: redirect.source,
+      destination: redirect.destination,
+      matches: pathToRegexp(redirect.source),
+    }));
+    const shadowed = matchers.filter((redirect) => redirect.matches.test("/media-and-press-coverage"));
+    expect(shadowed).toEqual([]);
+  });
+
   it("does not shadow the live app's real /events/[slug] route with a wildcard", async () => {
     const redirects = await getRedirects();
     const matchers = redirects.map((redirect) => pathToRegexp(redirect.source));

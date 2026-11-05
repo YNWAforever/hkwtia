@@ -491,6 +491,13 @@
       "when": 1793480000000,
       "tag": "0070_signup_attribution",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1793908075729,
+      "tag": "0071_media_and_press_route",
+      "breakpoints": true
     }
   ]
 }

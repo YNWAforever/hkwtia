@@ -562,3 +562,63 @@ html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto;
 /* Actual populated news cards: donor accent text measured 3.73:1 on white. */
 .archive-grid > article > .status-label,
 .archive-grid > article > p > span { color: #4a6570; }
+
+/* P0 trust flagship strip. The donor `.programme-card:nth-child(4)` span is a four-card
+ * composition; this five-up grid opts out of it and keeps the programme-card chrome. */
+.flagship-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 40px;
+}
+.flagship-grid > .programme-card {
+  min-height: 280px;
+  grid-column: auto;
+  grid-row: auto;
+  padding: 24px;
+}
+.flagship-grid > .programme-card:nth-child(4) { grid-column: auto; }
+.flagship-grid > .programme-card h3 {
+  margin: 0 0 12px;
+  font-size: clamp(22px, 1.5vw, 32px);
+}
+.flagship-grid > .programme-card > p { margin: 0; }
+.flagship-grid > .programme-card > a + a { margin-top: 0; }
+@media (max-width: 1120px) {
+  .flagship-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .flagship-grid { grid-template-columns: 1fr; }
+}
+
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.footer-social a {
+  border: 1px solid rgba(255, 255, 255, .4);
+  border-radius: 999px;
+  color: #fff;
+}
+.footer-social a:hover,
+.footer-social a:focus-visible { color: #8fc4e0; border-color: #8fc4e0; }
+
+.press-contact { max-width: 720px; margin: 0 0 28px; font-size: 16px; line-height: 1.6; }
+.press-contact a { text-decoration: underline; text-underline-offset: 3px; }
+.press-coverage-scroll { overflow-x: auto; }
+.press-coverage { width: 100%; border-collapse: collapse; font-size: 14px; }
+.press-coverage th,
+.press-coverage td {
+  border-bottom: 1px solid var(--wt-line);
+  padding: 14px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.press-coverage th { font-size: 12px; font-weight: 800; }
+.press-coverage a { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
+.press-coverage .press-date,
+.press-coverage .press-outlet { white-space: nowrap; }

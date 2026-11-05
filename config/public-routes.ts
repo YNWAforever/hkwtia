@@ -15,6 +15,7 @@ export const publicRoutes = [
   '/ai-ops',
   '/events',
   '/news',
+  '/media-and-press-coverage',
   '/programs/cpai',
   '/programs/hkict',
   '/programs/tct',

@@ -156,7 +156,9 @@ const legacyLiteralRedirects: LegacyRedirect[] = legacyUrls.entries
   // stripping the slash makes source and destination identical — a rule that
   // redirects a page to itself, forever. Next's own normalisation already
   // takes `/news/` to `/news`, which is the real page, so the correct number
-  // of rules for these is zero.
+  // of rules for these is zero. `/media-and-press-coverage/` is the same case
+  // once the P0 press page exists: its old destination was `/news`, and leaving
+  // that rule in place 308s the live page away.
   .filter(({source, destination}) => source !== destination);
 
 const securityHeaders = [

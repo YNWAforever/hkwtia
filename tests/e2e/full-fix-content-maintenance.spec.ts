@@ -434,7 +434,7 @@ test.describe('isolated CMS history and tab storage',()=>{
 
 const publicEvidence='docs/audits/hkwtia-2026-10-03-full-fix/evidence/t17/';
 // Paths discovered from current graph Page symbols, not guessed URLs.
-const publicRoutes=['/','/about','/membership','/join','/events','/news','/programmes','/programs/asa','/programs/cpai','/programs/hkict','/programs/tct','/contact','/privacy','/partners'] as const;
+const publicRoutes=['/','/about','/membership','/join','/events','/news','/media-and-press-coverage','/programmes','/programs/asa','/programs/cpai','/programs/hkict','/programs/tct','/contact','/privacy','/partners'] as const;
 test.describe('bilingual public maintenance scope',()=>{
  test.skip(process.env.AUDIT_ISOLATED_ACCEPTANCE!=='1','Confirmed isolated actual Preview required');
  let pool:Pool;

@@ -21,6 +21,7 @@ const PAGE_FILE: Partial<Record<PublicRoute, string>> = {
   "/ai-ops": "app/[locale]/(public)/ai-ops/page.tsx",
   "/events": "app/[locale]/(public)/events/page.tsx",
   "/news": "app/[locale]/(public)/news/page.tsx",
+  "/media-and-press-coverage": "app/[locale]/(public)/media-and-press-coverage/page.tsx",
   "/programs/cpai": "app/[locale]/(public)/programs/cpai/page.tsx",
   "/programs/hkict": "app/[locale]/(public)/programs/hkict/page.tsx",
   "/programs/tct": "app/[locale]/(public)/programs/tct/page.tsx",

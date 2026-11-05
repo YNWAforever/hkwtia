@@ -8,8 +8,8 @@ import {absoluteUrl, localizedPath} from "@/lib/urls";
  *
  * Seventeen of these point at `Navigation.links.*`, which already names the same pages in
  * the header: a second vocabulary for the same routes would be one more thing for staff
- * to keep in sync, and it would drift. Only the four routes the navigation does not list
- * carry their own key.
+ * to keep in sync, and it would drift. Routes the navigation does not list carry their
+ * own key. `/media-and-press-coverage` uses `Media.h1`, the same string as the page title.
  *
  * `/launchpad` is intentionally absent. The route stays in `publicRoutes` so announcement
  * href checks do not need a migration, and the page 404s without rendering a trail
@@ -35,6 +35,7 @@ export const ROUTE_BREADCRUMB_LABEL_KEYS: Readonly<Partial<Record<PublicRoute, s
   "/ai-ops": "Navigation.links.aiOps",
   "/events": "Navigation.links.events",
   "/news": "Navigation.links.news",
+  "/media-and-press-coverage": "Media.h1",
   "/programs/cpai": "Navigation.links.cpai",
   "/programs/hkict": "Navigation.links.hkict",
   "/programs/tct": "Navigation.links.tct",

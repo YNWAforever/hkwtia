@@ -84,6 +84,16 @@ describe("SiteFooter", () => {
     expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
     expect(siteConfig.contact.phone).toBeUndefined();
 
+    expect(within(footer).getByRole("link", {name: "WTIA on Facebook"})).toHaveAttribute("href", "https://www.facebook.com/wtiawdc");
+    expect(within(footer).getByRole("link", {name: "WTIA on LinkedIn"})).toHaveAttribute("href", "https://www.linkedin.com/company/hkwtia");
+    expect(within(footer).getByRole("link", {name: "WTIA on YouTube"})).toHaveAttribute("href", "https://www.youtube.com/channel/UCEzOTl6KhFFeQQ8O09Y-ndA");
+    expect(within(footer).getByRole("link", {name: "WTIA on Instagram"})).toHaveAttribute("href", "https://www.instagram.com/hkwtia/");
+    for (const name of ["WTIA on Facebook", "WTIA on LinkedIn", "WTIA on YouTube", "WTIA on Instagram"]) {
+      const link = within(footer).getByRole("link", {name});
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+    expect(footer.querySelector("iframe")).toBeNull();
     expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
     expect(within(footer).getByRole("link", {name: "Privacy statement"})).toHaveAttribute("href", "/privacy");
     expect(within(footer).getByRole("button", {name: "Switch to Chinese"})).toBeInTheDocument();
@@ -137,6 +147,8 @@ describe("SiteFooter", () => {
   it("keeps the Chinese footer bilingual", async () => {
     render(await SiteFooter({locale: "zh-HK"}));
     const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByRole("link", {name: "WTIA Facebook"})).toHaveAttribute("href", "https://www.facebook.com/wtiawdc");
+    expect(within(footer).getByRole("link", {name: "WTIA Instagram"})).toHaveAttribute("href", "https://www.instagram.com/hkwtia/");
     expect(within(footer).getByText("探索")).toBeInTheDocument();
     expect(footer.querySelector("address")).toBeNull();
     expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
