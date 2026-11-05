@@ -807,7 +807,7 @@
     }
   },
   "Membership": {
-    "compare": {"audience": "適合對象", "fee": "會費", "uses": "主要用途", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
+    "compare": {"audience": "適合對象", "fee": "會費", "uses": "會員權益", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
     "metaTitle": "會員計劃｜香港無線科技商會 WTIA",
     "metaDescription": "了解 WTIA 個人及機構會籍選項。歡迎於 hkwtia.org 查詢及申請。",
@@ -1906,7 +1906,7 @@
       },
       "news": {
         "title": "新聞",
-        "description": "閱讀職員撰寫的新聞及工程開發日誌。"
+        "description": "閱讀職員撰寫的 WTIA 消息及公告。"
       }
     },
     "emailTopics": {

@@ -806,7 +806,7 @@
     }
   },
   "Membership": {
-    "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "What you can do", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
+    "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "Member benefits", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
     "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
     "metaTitle": "Membership｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "Explore WTIA membership options for individuals and organisations. Join at hkwtia.org.",
@@ -1905,7 +1905,7 @@
       },
       "news": {
         "title": "News",
-        "description": "Read staff-authored news and engineering build logs."
+        "description": "Read staff-authored WTIA news and notices."
       }
     },
     "emailTopics": {
