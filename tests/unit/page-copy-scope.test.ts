@@ -182,7 +182,9 @@ describe("page copy scope", () => {
       // The published-fee restore put the homepage first-90 point back (Home 188)
       // and added Membership.actions.payOnline (131). P2 benefit bullets stay removed.
       // WhatsApp support lines were removed from the five paid tier benefit lists (-5).
-      Membership: 126,
+      // Preview Corporate + Platinum lists grow corporate 2→6 and platinum 1→5 (+8).
+      // Individual, community, startup, and patron lists stay the same length.
+      Membership: 134,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
@@ -216,7 +218,8 @@ describe("page copy scope", () => {
     // Preview batch D removed 11 unused Launch Pad page-copy leaves (Home 4, Contact 2,
     // Programmes 5). 608 - 11 = 597.
     // P0 trust flagship strip added 20 Home.flagships leaves. 597 + 20 = 617.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(617);
+    // Corporate + Platinum benefit lists added 8 Membership leaves. 617 + 8 = 625.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(625);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
