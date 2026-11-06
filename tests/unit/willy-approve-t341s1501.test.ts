@@ -16,7 +16,8 @@ const EN_META = {
   History: "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
   Chairman: "A message from Willy Lai, Chairman of WTIA / Wireless（香港無線科技商會）.",
   Committees: "Committee details for the 2026–2028 term will be published shortly.",
-  Membership: "Explore WTIA membership options for individuals and organisations. Join at hkwtia.org.",
+  // t419u voice pass replaced the Phase 0 membership sentence with the approved fee line.
+  Membership: "WTIA membership: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Join online.",
   Contact: "Contact WTIA / Wireless（香港無線科技商會）. Email contact@hkwtia.org. Visit hkwtia.org.",
   Members: "WTIA member directory—published profiles of Hong Kong wireless and technology companies.",
   Showcase: "Browse published technology solutions from WTIA member companies.",
@@ -29,7 +30,8 @@ const ZH_META = {
   History: "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
   Chairman: "香港無線科技商會（WTIA）主席賴志偉的話。",
   Committees: "2026–2028 年度委員會資料稍後公布。",
-  Membership: "了解 WTIA 個人及機構會籍選項。歡迎於 hkwtia.org 查詢及申請。",
+  // Same t419u fee line. The 80-character cap below still applies.
+  Membership: "會費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。歡迎加入。",
   Contact: "聯絡香港無線科技商會（WTIA）。電郵 contact@hkwtia.org。網址 hkwtia.org。",
   Members: "WTIA 會員名錄：已發布的香港無線及科技企業簡介。",
   Showcase: "瀏覽 WTIA 會員企業已發布的科技方案。",
@@ -102,8 +104,8 @@ describe("Willy Approve t341s1501", () => {
     expect(en.Membership.tracks.organisation.copy).toContain("HK$1,800");
     expect(en.Membership.tracks.organisation.copy).toContain("HK$4,800");
     expect(en.Membership.actions.payOnline).toBe("Pay online now");
-    expect(en.Join.choosePlan.platinum).toBe("HK$4,800 a year. Pay online now.");
-    expect(zh.Join.choosePlan.platinum).toBe("每年 HK$4,800。現在網上付款。");
+    expect(en.Join.choosePlan.platinum).toBe("HK$4,800 a year. Pay online.");
+    expect(zh.Join.choosePlan.platinum).toBe("每年 HK$4,800。網上付款。");
     expect(publicCopy).toMatch(/HK\$500/);
     expect(publicCopy).not.toMatch(/5 working days|25 seats|二十五席/);
   });

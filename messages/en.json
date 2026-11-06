@@ -850,13 +850,13 @@
     "compare": {"audience": "Best for", "fee": "Membership fee", "uses": "Member benefits", "next": "Next step", "action": "Compare memberships", "seats": "{count} seats"},
     "selfService": {"title": "Already a member?", "copy": "Sign in to view your membership, available billing actions and invoice history. Contact WTIA if you need help with renewal or cancellation arrangements.", "billing": "Manage membership and billing", "support": "Contact membership support"},
     "metaTitle": "Membership｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "Explore WTIA membership options for individuals and organisations. Join at hkwtia.org.",
+    "metaDescription": "WTIA membership: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Join online.",
     "eyebrow": "Membership",
     "breadcrumbCurrent": "Membership",
-    "title": "Choose the membership that fits your needs",
-    "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
+    "title": "Pick your WTIA membership",
+    "summary": "Three paid tiers with clear annual fees. Compare plans below, then join online.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
+    "tiersIntro": "Annual fees: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800.",
     "benefits": {
       "network": "Community and networking access",
       "programs": "Programme participation",
@@ -901,11 +901,11 @@
     "faq": {
       "0": {
         "question": "Who can apply?",
-        "answer": "Community is free for one person. Individual is HK$500 a year for one person. Corporate is HK$1,800 a year and Platinum is HK$4,800 a year. Corporate and Platinum are for organisations and are paid online."
+        "answer": "Community is free for one person. Individual is HK$500 a year. Corporate (HK$1,800) and Platinum (HK$4,800) are for organisations and pay online."
       },
       "1": {
-        "question": "Where are current fees?",
-        "answer": "Available fees and billing options come from the current membership catalog and appear in the plan cards above. The payment provider confirms the final amount before payment."
+        "question": "Where are the fees?",
+        "answer": "Fees are on the plan cards above: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Confirm the amount at payment."
       },
       "2": {
         "question": "Does a paid plan renew automatically?",
@@ -1008,11 +1008,11 @@
       }
     },
     "closing": {
-      "eyebrow": "Ready when you are",
-      "title": "Choose your tier, or ask us first.",
-      "copy": "Community is free. Individual, Corporate, and Platinum are paid online. A question or a special case can start with a direct message.",
-      "join": "Join now",
-      "contact": "Email the membership team"
+      "eyebrow": "Next step",
+      "title": "Join online, or email us first.",
+      "copy": "Community is free. Individual, Corporate and Platinum pay online each year.",
+      "join": "Join WTIA",
+      "contact": "Email WTIA"
     }
   },
   "WhatsApp": {
@@ -1074,7 +1074,7 @@
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
     "metaTitle": "Membership application｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "Apply for WTIA membership online. Choose a tier, create your account and join Hong Kong's technology community.",
+    "metaDescription": "Join WTIA online. Choose a tier, create an account and pay the annual fee.",
     "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
     "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
     "sendMagicLink": "Send secure sign-in link",
@@ -1084,21 +1084,21 @@
     "submitApplication": "Submit application",
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
-    "choosePlanTitle": "Choose a membership plan",
-    "choosePlanDescription": "Community is free. Individual, Corporate, and Platinum are paid online. Choose a tier to continue.",
-    "choosePlanCompare": "Compare plans and fees",
+    "choosePlanTitle": "Choose a plan",
+    "choosePlanDescription": "Community is free. Paid tiers: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year.",
+    "choosePlanCompare": "Compare fees",
     "choosePlan": {
-      "community": "Free. A directory card and public event RSVP. No event submissions and no member tools.",
+      "community": "Free. Directory card and public event RSVP.",
       "startup": "New joins use Individual.",
-      "corporate": "HK$1,800 a year for an organisation. Pay online now.",
+      "corporate": "HK$1,800 a year for an organisation. Pay online.",
       "patron": "New joins use Platinum.",
-      "individual": "HK$500 a year for one person. Pay online now.",
-      "platinum": "HK$4,800 a year. Pay online now."
+      "individual": "HK$500 a year. Pay online.",
+      "platinum": "HK$4,800 a year. Pay online."
     },
     "choosePlanFree": "Free",
     "choosePlanAction": "Continue with {plan}",
     "choosePlanPrice": "{amount} per year",
-    "choosePlanContact": "Contact WTIA",
+    "choosePlanContact": "Email WTIA",
     "tracks": {
       "individual": {"title": "Individual", "copy": "Community is free. Individual is HK$500 a year. Pay online. Membership starts when payment succeeds."},
       "organisation": {"title": "Company", "copy": "Corporate is HK$1,800 a year. Platinum is HK$4,800 a year. Both pay online."}

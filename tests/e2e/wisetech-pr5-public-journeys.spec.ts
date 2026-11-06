@@ -93,13 +93,13 @@ test("keeps the bilingual Membership catalog honest without repository credentia
       // was a bare `<p role="status">{t("unavailable")}</p>` with no second sentence, which is
       // what this string used to assert; it now has to match the concatenated text content of
       // both nodes, in source order.
-      unavailable: "Membership is currently unavailableAvailable fees and billing options reflect the current membership catalog.",
+      unavailable: "Membership is currently unavailableAnnual fees: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800.",
       faq: "Membership FAQ",
     },
     {
       path: "/zh/membership",
       title: "會員級別",
-      unavailable: "會員計劃暫時未能提供現行會費及付款週期以目前會員目錄為準。",
+      unavailable: "會員計劃暫時未能提供年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
       faq: "會員常見問題",
     },
   ] as const) {
