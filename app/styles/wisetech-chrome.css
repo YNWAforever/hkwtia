@@ -270,8 +270,20 @@
 /* Ask WTIA is fixed 22px off the bottom and at least 54px tall. The extra
    24px lets the last card scroll clear of it (membership at 820 and 1024).
    The space belongs on main: the same padding on .site-root left a blank
-   band under the footer. */
+   band under the footer. That end padding does not stop a benefit line from
+   passing under the control while the page scrolls. The grid keeps an
+   inline-end gutter so its box stays left of the launcher at every scroll
+   position. Measured launcher: 56px mark at 375/390 (left edge 305/320) and
+   a 126px English pill at 1280 (left edge 1130). 64px and 112px clear those
+   edges after the shell inset, with a gap if the label wraps one word wider. */
 .site-root main { padding-bottom: calc(54px + 22px + 24px); }
+@media (max-width: 520px) {
+  .site-root { --ask-wtia-inline-clearance: 64px; }
+}
+@media (min-width: 521px) {
+  .site-root { --ask-wtia-inline-clearance: 112px; }
+}
+.plan-grid { margin-inline-end: var(--ask-wtia-inline-clearance); }
 
 /* Donor `.site-root[lang^="zh"]` leads with PingFang and then the Latin stack.
    Under /zh the order is Noto Sans TC, PingFang TC, Microsoft JhengHei. */
