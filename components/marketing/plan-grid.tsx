@@ -14,8 +14,9 @@ export type PlanGridTier = Readonly<{
 
 export type PlanGridSme = Readonly<{label: string; title: string; copy: string; action: string; href: string}>;
 
-// Other tiers stay hidden until the 主席 approves their lists.
-export const BENEFIT_TIERS: ReadonlySet<string> = new Set(["individual"]);
+// Community, startup, and patron stay hidden. Individual, Corporate, and Platinum
+// are the lists the 主席 approved for the public plan grid.
+export const BENEFIT_TIERS: ReadonlySet<string> = new Set(["individual", "corporate", "platinum"]);
 
 export function PlanGrid({tiers, sme, labels}: Readonly<{tiers: readonly PlanGridTier[]; sme: PlanGridSme; labels?: Readonly<{audience: string; fee: string; uses: string; next: string}>}>) {
   return <><div className="plan-grid">

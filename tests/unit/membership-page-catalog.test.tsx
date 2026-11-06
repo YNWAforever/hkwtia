@@ -155,11 +155,14 @@ describe("repository-backed Membership page", () => {
     expect(html).toContain('href="/contact"');
   });
 
-  it.each(["en", "zh-HK"] as const)("prints only the individual benefit stub in %s", async (locale) => {
+  it.each(["en", "zh-HK"] as const)("prints individual, corporate, and platinum benefit stubs in %s", async (locale) => {
     const html = await renderMembership([community], locale);
-    const individual = html.match(/<article id="individual">([\s\S]*?)<\/article>/)?.[1] ?? "";
-    expect([...individual.matchAll(/<li>([^<]*)<\/li>/g)].map((match) => match[1])).toEqual(["tierBenefits.individual benefit"]);
-    for (const code of ["community", "startup", "corporate", "patron", "platinum"]) {
+    for (const code of ["individual", "corporate", "platinum"] as const) {
+      const card = html.match(new RegExp(`<article id="${code}">([\\s\\S]*?)<\\/article>`))?.[1] ?? "";
+      expect([...card.matchAll(/<li>([^<]*)<\/li>/g)].map((match) => match[1]), code).toEqual([`tierBenefits.${code} benefit`]);
+      expect(card.match(/<ul/g) ?? [], code).toHaveLength(1);
+    }
+    for (const code of ["community", "startup", "patron"]) {
       expect(html, code).not.toContain(`tierBenefits.${code} benefit`);
       const card = html.match(new RegExp(`<article id="${code}">([\\s\\S]*?)<\\/article>`))?.[1] ?? "";
       if (card) expect(card, code).not.toContain("<ul");

@@ -96,7 +96,7 @@ export default async function MembershipPage({ params }: Props) {
       name: t(`tiers.${tier.code}.name`),
       description: t(`tiers.${tier.code}.description`),
       priceLines: [tier.annualPriceHkd === null ? t("priceLabels.free") : `${money.format(tier.annualPriceHkd)} ${annual}`],
-      // Other codes stay []. PlanGrid also refuses to print a tier outside BENEFIT_TIERS.
+      // Community stays []. PlanGrid also refuses to print a tier outside BENEFIT_TIERS.
       benefits: BENEFIT_TIERS.has(tier.code) ? t.raw(`tierBenefits.${tier.code}`) as string[] : [],
       action: tier.annualPriceHkd === null ? t("actions.join") : t("actions.payOnline"),
       href: `/join?plan=${tier.code}`,

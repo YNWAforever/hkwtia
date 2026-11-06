@@ -865,10 +865,10 @@
     "tierBenefits": {
       "community": ["Directory card on /members", "RSVP to public WTIA events", "Event submissions are not included"],
       "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing"],
-      "corporate": ["Featured member profile and logo wall", "3 showcase listings"],
+      "corporate": ["Free participation in networking events with industry experts and professionals", "Exclusive networking and business-matching events with C-suite / director-level professionals in wireless & mobile industries", "Marketing your in-house events on WTIA social networks", "Speaking opportunities in WTIA-organised events and career fairs at higher education institutions", "Free posting of job ads and career talks on WTIA website and social networks", "Priority invitations to flagship events (e.g. Hong Kong ICT Awards, Tech To Connect)"],
       "patron": ["Everything in Corporate"],
       "individual": ["Free participation in networking events with industry experts and professionals", "Exclusive networking and business-matching events with C-suite or director-level professionals in the wireless and mobile industries", "WTIA event invitations and industry updates by email"],
-      "platinum": ["Everything in Corporate"]
+      "platinum": ["Everything in Corporate", "Opportunities to join Sub-Committee or Advisory Board", "Eligible to vote at WTIA AGM / EGM (General Meetings)", "Your first representative is eligible for election to the Executive Committee", "Option of a Bespoke Partnership Contract (customised partnership & membership agreement)"]
     },
     "tiers": {
       "community": {

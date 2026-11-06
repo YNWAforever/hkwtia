@@ -21,6 +21,42 @@ const APPROVED_INDIVIDUAL_BENEFITS = {
   ],
 } as const;
 
+const APPROVED_CORPORATE_BENEFITS = {
+  en: [
+    "Free participation in networking events with industry experts and professionals",
+    "Exclusive networking and business-matching events with C-suite / director-level professionals in wireless & mobile industries",
+    "Marketing your in-house events on WTIA social networks",
+    "Speaking opportunities in WTIA-organised events and career fairs at higher education institutions",
+    "Free posting of job ads and career talks on WTIA website and social networks",
+    "Priority invitations to flagship events (e.g. Hong Kong ICT Awards, Tech To Connect)",
+  ],
+  "zh-HK": [
+    "免費參加與業界專家及專業人士的交流活動",
+    "與無線及流動通訊業高級管理層／總監級人士的專屬交流及商業配對活動",
+    "於 WTIA 社交平台宣傳公司活動",
+    "WTIA 活動及大專院校職業博覽的演講機會",
+    "免費於 WTIA 網站及社交平台刊登招聘廣告及職業講座",
+    "旗艦活動優先邀請（例如香港資訊及通訊科技獎、Tech To Connect）",
+  ],
+} as const;
+
+const APPROVED_PLATINUM_BENEFITS = {
+  en: [
+    "Everything in Corporate",
+    "Opportunities to join Sub-Committee or Advisory Board",
+    "Eligible to vote at WTIA AGM / EGM (General Meetings)",
+    "Your first representative is eligible for election to the Executive Committee",
+    "Option of a Bespoke Partnership Contract (customised partnership & membership agreement)",
+  ],
+  "zh-HK": [
+    "包括企業會員全部權益",
+    "有機會加入小組委員會或顧問委員會",
+    "可於 WTIA 週年大會（AGM）／特別大會（EGM）投票",
+    "第一代表有權被選為執行委員會成員",
+    "可選擇度身訂造的合作及會籍協議（Bespoke Partnership Contract）",
+  ],
+} as const;
+
 const bundles = {
   en: JSON.parse(
     readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8"),
@@ -184,21 +220,42 @@ describe("/membership rewrite", () => {
       const page = locale === "en" ? html : await renderMembership([community, startup, patron], locale);
       const planGrid = page.match(/<div class="plan-grid">([\s\S]*?)<\/div>/)?.[1] ?? "";
       expect(page).toContain(bundles[locale].Membership.actions.payOnline);
-      const approved = APPROVED_INDIVIDUAL_BENEFITS[locale];
-      expect(bundles[locale].Membership.tierBenefits.individual).toEqual([...approved]);
-      const individual = planGrid.match(/<article id="individual">([\s\S]*?)<\/article>/)?.[1] ?? "";
-      expect([...individual.matchAll(/<li>([^<]*)<\/li>/g)].map((match) => match[1])).toEqual([...approved]);
-      expect(individual.match(/<ul/g) ?? []).toHaveLength(1);
-      for (const code of ["community", "corporate", "platinum"] as const) {
+      const approvedIndividual = APPROVED_INDIVIDUAL_BENEFITS[locale];
+      const approvedCorporate = APPROVED_CORPORATE_BENEFITS[locale];
+      const approvedPlatinum = APPROVED_PLATINUM_BENEFITS[locale];
+      expect(approvedIndividual).toHaveLength(3);
+      expect(approvedCorporate).toHaveLength(6);
+      expect(approvedPlatinum).toHaveLength(5);
+      expect(bundles[locale].Membership.tierBenefits.individual).toEqual([...approvedIndividual]);
+      expect(bundles[locale].Membership.tierBenefits.corporate).toEqual([...approvedCorporate]);
+      expect(bundles[locale].Membership.tierBenefits.platinum).toEqual([...approvedPlatinum]);
+      const cardItems = (code: string) => {
         const card = planGrid.match(new RegExp(`<article id="${code}">([\\s\\S]*?)<\\/article>`))?.[1] ?? "";
-        expect(card, `${locale} ${code}`).not.toContain("<ul");
-        expect(card, `${locale} ${code}`).not.toContain("<li");
-      }
-      for (const [code, lines] of Object.entries(bundles[locale].Membership.tierBenefits as Record<string, readonly string[]>)) {
-        if (code === "individual") continue;
-        const description = bundles[locale].Membership.tiers[code as keyof typeof bundles.en.Membership.tiers]?.description ?? "";
+        return {
+          card,
+          items: [...card.matchAll(/<li>([^<]*)<\/li>/g)].map((match) =>
+            match[1].replaceAll("&amp;", "&").replaceAll("&#x27;", "'").replaceAll("&quot;", "\""),
+          ),
+        };
+      };
+      const individual = cardItems("individual");
+      const corporate = cardItems("corporate");
+      const platinum = cardItems("platinum");
+      expect(individual.items).toEqual([...approvedIndividual]);
+      expect(corporate.items).toEqual([...approvedCorporate]);
+      expect(platinum.items).toEqual([...approvedPlatinum]);
+      expect(individual.card.match(/<ul/g) ?? []).toHaveLength(1);
+      expect(corporate.card.match(/<ul/g) ?? []).toHaveLength(1);
+      expect(platinum.card.match(/<ul/g) ?? []).toHaveLength(1);
+      const communityCard = cardItems("community");
+      expect(communityCard.card, `${locale} community`).not.toContain("<ul");
+      expect(communityCard.card, `${locale} community`).not.toContain("<li");
+      const rendered = new Set<string>([...approvedIndividual, ...approvedCorporate, ...approvedPlatinum]);
+      for (const code of ["community", "startup", "patron"] as const) {
+        const lines = bundles[locale].Membership.tierBenefits[code];
+        const description = bundles[locale].Membership.tiers[code]?.description ?? "";
         for (const line of lines) {
-          if (description.includes(line)) continue;
+          if (description.includes(line) || rendered.has(line)) continue;
           expect(page, `${locale} ${code}: ${line}`).not.toContain(line);
         }
       }
