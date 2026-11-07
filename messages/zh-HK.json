@@ -851,13 +851,13 @@
     "compare": {"audience": "適合對象", "fee": "會費", "uses": "會員權益", "next": "下一步", "action": "比較會籍", "seats": "{count} 個席位"},
     "selfService": {"title": "已是會員？", "copy": "登入即可查看會籍、可用的帳單操作及帳單紀錄。如需續會或取消安排的協助，請聯絡 WTIA。", "billing": "管理會籍及帳單", "support": "聯絡會員支援"},
     "metaTitle": "會員計劃｜香港無線科技商會 WTIA",
-    "metaDescription": "了解 WTIA 個人及機構會籍選項。歡迎於 hkwtia.org 查詢及申請。",
+    "metaDescription": "會費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。歡迎加入。",
     "eyebrow": "會員計劃",
     "breadcrumbCurrent": "會員計劃",
-    "title": "選擇適合你的會籍",
-    "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
+    "title": "選擇你的 WTIA 會籍",
+    "summary": "三個收費級別，年費清楚列明。先比較計劃，再於網上加入。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "現行會費及付款週期以目前會員目錄為準。",
+    "tiersIntro": "年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
     "benefits": {
       "network": "社群及交流機會",
       "programs": "參與計劃",
@@ -902,11 +902,11 @@
     "faq": {
       "0": {
         "question": "誰可以申請？",
-        "answer": "社群會籍免費，適合一個人。個人會籍每年 HK$500，適合一個人。企業會籍每年 HK$1,800，白金會籍每年 HK$4,800。企業及白金會籍適合機構，並於網上付款。"
+        "answer": "社群會籍免費，適合一人。個人會籍每年 HK$500。企業（HK$1,800）及白金（HK$4,800）適合機構，並於網上付款。"
       },
       "1": {
-        "question": "在哪裡查看現行會費？",
-        "answer": "可用的會費及帳單週期來自現行會籍目錄，見上方計劃卡片。付款前請以付款服務顯示的最終金額為準。"
+        "question": "會費在哪裡？",
+        "answer": "會費見上方計劃卡：個人每年 HK$500、企業 HK$1,800、白金 HK$4,800。付款前以付款頁顯示金額為準。"
       },
       "2": {
         "question": "付費計劃會自動續費嗎？",
@@ -1009,11 +1009,11 @@
       }
     },
     "closing": {
-      "eyebrow": "隨時歡迎你",
-      "title": "選擇級別，或先向我們查詢。",
-      "copy": "社群會籍免費。個人、企業及白金會籍均於網上付款。如有查詢或特殊情況，可直接與我們聯絡。",
-      "join": "立即加入",
-      "contact": "電郵會員團隊"
+      "eyebrow": "下一步",
+      "title": "先網上加入，或先電郵查詢。",
+      "copy": "社群會籍免費。個人、企業及白金會籍每年於網上付款。",
+      "join": "加入 WTIA",
+      "contact": "電郵 WTIA"
     }
   },
   "WhatsApp": {
@@ -1075,7 +1075,7 @@
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
     "metaTitle": "會籍申請｜香港無線科技商會 WTIA",
-    "metaDescription": "網上申請 WTIA 會籍：選擇級別、建立帳戶，加入香港創科社群。",
+    "metaDescription": "網上加入 WTIA：選級別、建帳戶、繳年費。",
     "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
     "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
     "sendMagicLink": "傳送安全登入連結",
@@ -1085,21 +1085,21 @@
     "submitApplication": "提交申請",
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
-    "choosePlanTitle": "選擇會員計劃",
-    "choosePlanDescription": "社群會籍免費。個人、企業及白金會籍均於網上付款。選擇級別後繼續。",
-    "choosePlanCompare": "比較計劃及會費",
+    "choosePlanTitle": "選擇計劃",
+    "choosePlanDescription": "社群免費。年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
+    "choosePlanCompare": "比較會費",
     "choosePlan": {
-      "community": "免費。會員名片及公開活動報名。不包括提交活動，亦不包括會員工具。",
+      "community": "免費。會員名片及公開活動報名。",
       "startup": "新申請請選擇個人會籍。",
-      "corporate": "機構每年 HK$1,800。現在網上付款。",
+      "corporate": "機構每年 HK$1,800。網上付款。",
       "patron": "新申請請選擇白金會籍。",
-      "individual": "個人每年 HK$500。現在網上付款。",
-      "platinum": "每年 HK$4,800。現在網上付款。"
+      "individual": "每年 HK$500。網上付款。",
+      "platinum": "每年 HK$4,800。網上付款。"
     },
     "choosePlanFree": "免費",
     "choosePlanAction": "以{plan}繼續",
     "choosePlanPrice": "每年 {amount}",
-    "choosePlanContact": "聯絡 WTIA",
+    "choosePlanContact": "電郵 WTIA",
     "tracks": {
       "individual": {"title": "個人", "copy": "社群會籍免費。個人會籍每年 HK$500。網上付款。付款成功後會籍生效。"},
       "organisation": {"title": "公司", "copy": "企業每年 HK$1,800。白金每年 HK$4,800。兩者均先付款。"}

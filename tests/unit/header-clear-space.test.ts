@@ -33,6 +33,14 @@ describe("Ask WTIA clearance", () => {
     expect(chrome).toContain(".site-root main { padding-bottom: calc(54px + 22px + 24px); }");
     expect(chrome).not.toMatch(/^\.site-root \{ padding-bottom:/m);
   });
+
+  it("keeps plan-grid benefits out of the launcher's horizontal footprint while scrolling", () => {
+    // Bottom padding only clears the end of main. The live overlap is a benefit
+    // line passing through the fixed control, so the grid itself stops short of it.
+    expect(chrome).toContain("--ask-wtia-inline-clearance: 64px");
+    expect(chrome).toContain("--ask-wtia-inline-clearance: 112px");
+    expect(chrome).toContain(".plan-grid { margin-inline-end: var(--ask-wtia-inline-clearance); }");
+  });
 });
 
 describe("membership plan grid", () => {
