@@ -145,7 +145,10 @@ describe("page copy scope", () => {
       Home: 204,
       About: 19,
       Chairman: 8,
-      Committees: 12,
+      // The ExCo roster added Committees.roster: name and bio for 12 members (24),
+      // a title line for the 10 members whose source has one, and an organisation
+      // line for Alex, Jess, and Nelson. 12 + 24 + 10 + 3 = 49.
+      Committees: 49,
       // PR5 added 14 editable labels for the Contact concierge journeys. WP-4 Task 19 added 29
       // more: breadcrumbCurrent, viewLabel, routes.about/routes.news (2 fields each, 4), and the
       // new PreparedEmailForm's emailTopics (topicLabel/composeAction, plus label/subject/body
@@ -219,7 +222,8 @@ describe("page copy scope", () => {
     // Programmes 5). 608 - 11 = 597.
     // P0 trust flagship strip added 20 Home.flagships leaves. 597 + 20 = 617.
     // Corporate + Platinum benefit lists added 8 Membership leaves. 617 + 8 = 625.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(625);
+    // The ExCo roster added 37 Committees.roster leaves. 625 + 37 = 662.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(662);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

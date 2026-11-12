@@ -26,7 +26,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (input: string | {locale?: string; namespace?: string}) => {
     const namespace = typeof input === "string" ? input : input.namespace;
     const locale = typeof input === "string" ? translationState.locale : (input.locale ?? translationState.locale);
-    return (key: string) => {
+    const translate = (key: string) => {
       // An unscoped getTranslations({locale}) resolves fully-qualified keys from the
       // bundle root, so an absent namespace starts there rather than at [undefined].
       let value: unknown = namespace === undefined
@@ -36,6 +36,9 @@ vi.mock("next-intl/server", () => ({
       if (typeof value !== "string") throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
       return value;
     };
+    // t.raw returns the stored string without ICU parsing, which the roster uses
+    // so a biography apostrophe is not treated as a quote.
+    return Object.assign(translate, {raw: translate});
   }),
   setRequestLocale: setRequestLocaleSpy,
 }));
