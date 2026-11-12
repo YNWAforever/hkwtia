@@ -8,7 +8,9 @@ import zh from "@/messages/zh-HK.json";
 /**
  * Preview voice pass approved by Willy (t419u, 2026-11-06 22:07 HKT) after Claire's
  * PASS on the 2026-11-06 Membership/Join string table. Only these leaves may move.
- * The fingerprint is the rest of both bundles at 73ca3d2f, with these leaves omitted.
+ * The fingerprint is the rest of both bundles, with these leaves omitted. It was
+ * taken at 73ca3d2f and moved when the ExCo roster replaced Committees.summary
+ * and Committees.metaDescription in both locales.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -165,7 +167,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "d1324d3be180a0dc8765defbe5105440e7ca2e6e1133a9e208838a31736c6531";
+const NON_ALLOWLIST_FINGERPRINT = "915a465fa200978e3a55dd2994e3bff3d30146b526e5ba6b9e13798b2ffac882";
 
 type MessageTree = Record<string, unknown>;
 
@@ -244,7 +246,7 @@ describe("Membership and Join voice strings", () => {
     expect(zh.Membership.tierBenefits.individual).toHaveLength(3);
   });
 
-  it("keeps every other message value at the 73ca3d2 fingerprint", () => {
+  it("keeps every other message value at the locked fingerprint", () => {
     const payload = JSON.stringify({en: omitAllowed(en, allow), "zh-HK": omitAllowed(zh, allow)});
     expect(createHash("sha256").update(payload).digest("hex")).toBe(NON_ALLOWLIST_FINGERPRINT);
   });

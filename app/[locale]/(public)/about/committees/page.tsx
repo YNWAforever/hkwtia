@@ -2,8 +2,11 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {StructuredData} from "@/components/seo/structured-data";
+import {ExcoRoster} from "@/components/wt/exco-roster";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
+import {Section} from "@/components/wt/section";
+import {SectionHeading} from "@/components/wt/section-heading";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
@@ -30,7 +33,9 @@ export default async function CommitteesPage({params}: Props) {
   const common = await getTranslations({locale, namespace: "Common"});
   // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
   const tRoot = await getTranslations({locale});
-  // The 2026–2028 roster is not confirmed. Do not list committees that were not supplied.
+  // 2026–2028 Executive Committee. Order is provisional (Chairman, then surname).
+  // Wording and zhPending live on content/exco-roster.ts. Innovation and membership
+  // copy stays in messages and off this page; those committees were not supplied.
   const related = await buildOtherAboutRoutes(locale as AppLocale, "committees");
 
   return (
@@ -43,6 +48,10 @@ export default async function CommitteesPage({params}: Props) {
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
         breadcrumbLabel={common("breadcrumbLabel")}
       />
+      <Section labelledBy="exco-roster-title">
+        <SectionHeading eyebrow={t("eyebrow")} headingId="exco-roster-title" title={t("executive.title")} />
+        <ExcoRoster locale={locale as AppLocale} />
+      </Section>
       <RichRelatedRoutes items={related} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/committees", tRoot))} />
     </>

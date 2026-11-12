@@ -15,7 +15,7 @@ const EN_META = {
   About: "About WTIA / Wireless（香港無線科技商會）— Hong Kong's not-for-profit wireless and emerging technology association since 2001.",
   History: "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
   Chairman: "A message from Willy Lai, Chairman of WTIA / Wireless（香港無線科技商會）.",
-  Committees: "Committee details for the 2026–2028 term will be published shortly.",
+  Committees: "Executive Committee members for the 2026–2028 term.",
   // t419u voice pass replaced the Phase 0 membership sentence with the approved fee line.
   Membership: "WTIA membership: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Join online.",
   Contact: "Contact WTIA / Wireless（香港無線科技商會）. Email contact@hkwtia.org. Visit hkwtia.org.",
@@ -29,7 +29,7 @@ const ZH_META = {
   About: "關於香港無線科技商會（WTIA／Wireless）：自2001年起服務香港無線及新興科技業界的非牟利商會。",
   History: "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
   Chairman: "香港無線科技商會（WTIA）主席賴志偉的話。",
-  Committees: "2026–2028 年度委員會資料稍後公布。",
+  Committees: "2026–2028 年度執行委員會成員。",
   // Same t419u fee line. The 80-character cap below still applies.
   Membership: "會費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。歡迎加入。",
   Contact: "聯絡香港無線科技商會（WTIA）。電郵 contact@hkwtia.org。網址 hkwtia.org。",

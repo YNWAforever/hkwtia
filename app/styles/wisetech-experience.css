@@ -1374,3 +1374,28 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
 @media (max-width: 520px) { .plan-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .plan-grid article { transition: none; } .plan-grid article:hover { transform: none; } }
 .plan-grid .plan-field-label { margin-top: 16px; font-weight: 700; }
+
+/* Executive Committee roster on /about/committees. One column at phone width (390),
+   three from 1100px so 1280 is a card grid. Photos are not cropped in the file;
+   object-fit: cover frames them, and full-body / landscape shots (ricky-chan,
+   antony-ma) pin object-position to the top so the face stays in frame. */
+.exco-roster { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.exco-roster-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--wt-line); border-radius: 14px; background: #fff; }
+.exco-roster-media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--wt-stone); }
+.exco-roster-photo { object-fit: cover; object-position: center; }
+.exco-roster-photo-top { object-fit: cover; object-position: top; }
+.exco-roster-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--wt-ink); font-family: var(--font-serif); font-size: 42px; font-weight: 500; letter-spacing: 0.04em; }
+.exco-roster-body { display: flex; min-width: 0; flex: 1; flex-direction: column; padding: 22px 22px 28px; }
+.exco-roster-card h3 { margin: 0; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(26px, 2vw, 32px); font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.exco-roster-title { margin: 10px 0 0; color: var(--wt-ink); font-size: 14px; font-weight: 700; line-height: 1.45; }
+.exco-roster-org { margin: 4px 0 0; color: var(--xp-text-muted); font-size: 13px; line-height: 1.45; }
+.exco-roster-bio { margin-top: 14px; }
+.exco-roster-bio p { margin: 0 0 12px; color: var(--xp-text-muted); font-size: 14px; line-height: 1.7; overflow-wrap: break-word; }
+.exco-roster-bio p:last-child { margin-bottom: 0; }
+@media (min-width: 760px) { .exco-roster { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .exco-roster { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) {
+  .exco-roster { gap: 14px; }
+  .exco-roster-body { padding: 18px 16px 22px; }
+  .exco-roster-card h3 { font-size: 26px; }
+}
