@@ -94,6 +94,8 @@ describe("/about/chairman", () => {
 
 const rosterOrder = [
   "Willy Lai",
+  "Donald Chan",
+  "Jimmy Chan",
   "Ricky CHAN",
   "Burton Chau",
   "Lawrence Cheung",
@@ -114,7 +116,7 @@ describe("/about/committees", () => {
     translationState.messages = {en, "zh-HK": zh};
   });
 
-  it("renders the hero and twelve Executive Committee cards, with no compass", async () => {
+  it("renders the hero and fourteen Executive Committee cards, with no compass", async () => {
     const {default: CommitteesPage} = await import("@/app/[locale]/(public)/about/committees/page");
     renderWithIntl("en", await CommitteesPage({params: Promise.resolve({locale: "en"})}));
 
@@ -128,20 +130,35 @@ describe("/about/committees", () => {
     const roster = document.querySelector(".exco-roster");
     expect(roster).not.toBeNull();
     const cards = within(roster as HTMLElement).getAllByRole("article");
-    expect(cards).toHaveLength(12);
+    expect(cards).toHaveLength(14);
     expect(cards.map((card) => within(card).getByRole("heading", {level: 3}).textContent)).toEqual([...rosterOrder]);
-    const willy = cards[0];
-    const ricky = cards[1];
-    const lawrenceCheung = cards[3];
-    const alex = cards[5];
-    const antony = cards[7];
-    if (!willy || !ricky || !lawrenceCheung || !alex || !antony) throw new Error("missing roster card");
-    expect(willy.querySelector(".exco-roster-title")).toHaveTextContent("Chairman of WTIA");
-    expect(alex.querySelector("img")).toBeNull();
-    expect(alex.querySelector(".exco-roster-fallback")).toHaveTextContent("AK");
-    expect(lawrenceCheung.querySelector("img")).toHaveAttribute("src", "/images/exco/lawrence-cheung.jpg");
-    expect(ricky.querySelector("img")).toHaveClass("exco-roster-photo-top");
-    expect(antony.querySelector("img")).toHaveClass("exco-roster-photo-top");
+    const card = (slug: string) => {
+      const found = roster?.querySelector<HTMLElement>(`[data-slug="${slug}"]`);
+      if (!found) throw new Error(`missing roster card ${slug}`);
+      return found;
+    };
+    expect(card("willy-lai").querySelector(".exco-roster-role")).toHaveTextContent("Chairman");
+    expect(card("willy-lai").querySelector(".exco-roster-title")).toHaveTextContent("Chairman of WTIA");
+    expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
+    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer");
+    expect(card("eric-yung").querySelector(".exco-roster-role")).toHaveTextContent("Legal Advisor");
+    expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("ExCo Member");
+    expect(card("alex-kun").querySelector(".exco-roster-title")).toHaveTextContent("Principal Lead – Business Development & Innovation");
+    expect(card("alex-kun").querySelector(".exco-roster-role")).toBeNull();
+    expect(card("alex-kun").querySelector("img")).toBeNull();
+    expect(card("alex-kun").querySelector(".exco-roster-fallback")).toHaveTextContent("AK");
+    expect(card("donald-chan").querySelector(".exco-roster-role")).toBeNull();
+    expect(card("donald-chan").querySelector(".exco-roster-title")).toBeNull();
+    expect(card("donald-chan").querySelector("img")).toBeNull();
+    expect(card("donald-chan").querySelector(".exco-roster-fallback")).toHaveTextContent("DC");
+    expect(card("donald-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
+    expect(card("jimmy-chan").querySelector(".exco-roster-fallback")).toHaveTextContent("JC");
+    expect(card("jimmy-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
+    expect(card("jimmy-chan").querySelector(".exco-roster-bio")).toBeNull();
+    expect(card("lawrence-cheung").querySelector("img")).toHaveAttribute("src", "/images/exco/lawrence-cheung.jpg");
+    expect(card("ricky-chan").querySelector("img")).toHaveClass("exco-roster-photo-top");
+    expect(card("antony-ma").querySelector("img")).toHaveClass("exco-roster-photo-top");
+    expect(card("larry-lam").querySelector("img")).not.toHaveClass("exco-roster-photo-top");
     for (const card of cards) {
       const image = card.querySelector("img");
       if (!image) continue;
@@ -149,7 +166,9 @@ describe("/about/committees", () => {
       expect(image).toHaveAttribute("loading", "lazy");
       expect(image.getAttribute("sizes")).toBeTruthy();
     }
-    expect(document.body.textContent).not.toMatch(/Donald|Jimmy|會長|WiseTech|linkedin/i);
+    expect(document.body.textContent).not.toMatch(/會長|陳甘泉|WiseTech|linkedin/i);
+    expect(document.body.textContent).toMatch(/Donald Chan/);
+    expect(document.body.textContent).toMatch(/Jimmy Chan/);
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
     const related = document.querySelector(".rich-related-grid");
     expect(within(related as HTMLElement).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
@@ -163,23 +182,28 @@ describe("/about/committees", () => {
 
     const roster = document.querySelector(".exco-roster");
     const cards = within(roster as HTMLElement).getAllByRole("article");
-    expect(cards).toHaveLength(12);
-    const willy = cards[0];
-    const burton = cards[2];
-    const simon = cards[4];
-    const larry = cards[6];
-    const lawrencePoon = cards[9];
-    if (!willy || !burton || !simon || !larry || !lawrencePoon) throw new Error("missing roster card");
+    expect(cards).toHaveLength(14);
+    const card = (slug: string) => {
+      const found = roster?.querySelector<HTMLElement>(`[data-slug="${slug}"]`);
+      if (!found) throw new Error(`missing roster card ${slug}`);
+      return found;
+    };
+    const willy = card("willy-lai");
     expect(within(willy).getByRole("heading", {level: 3})).toHaveTextContent("賴志偉");
     expect(within(willy).getByText("主席")).toBeVisible();
+    expect(willy.querySelector(".exco-roster-role")).toHaveTextContent("Chairman");
     expect(within(willy).getByText(/Chairman of WTIA/)).toBeVisible();
-    expect(within(simon).getByRole("heading", {level: 3})).toHaveTextContent("夏羽");
-    expect(within(simon).getByText(/Simon Ha \(夏羽\)/)).toBeVisible();
-    expect(burton.querySelector(".exco-roster-title")).toHaveTextContent("General Manager, Sanuker Inc. Limited");
-    expect(larry.querySelector(".exco-roster-title")).toBeNull();
-    expect(lawrencePoon.querySelector(".exco-roster-title")).toBeNull();
-    expect(document.body.textContent).not.toMatch(/會長/);
-    expect(document.body.textContent).not.toMatch(/Donald|Jimmy/);
+    expect(within(card("simon-ha")).getByRole("heading", {level: 3})).toHaveTextContent("夏羽");
+    expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("ExCo Member");
+    expect(within(card("simon-ha")).getByText(/Simon Ha \(夏羽\)/)).toBeVisible();
+    expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
+    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer");
+    expect(card("eric-yung").querySelector(".exco-roster-role")).toHaveTextContent("Legal Advisor");
+    expect(card("burton-chau").querySelector(".exco-roster-title")).toHaveTextContent("General Manager, Sanuker Inc. Limited");
+    expect(card("larry-lam").querySelector(".exco-roster-title")).toBeNull();
+    expect(card("lawrence-poon").querySelector(".exco-roster-title")).toBeNull();
+    expect(card("donald-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
+    expect(document.body.textContent).not.toMatch(/會長|陳甘泉/);
   });
 
   it("stays server-only, with the roster in place of the unconfirmed-committee grid", () => {

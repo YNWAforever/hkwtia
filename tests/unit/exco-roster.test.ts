@@ -7,7 +7,13 @@ import {excoRoster} from "@/content/exco-roster";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
-type RosterCopy = Readonly<{name: string; title?: string; organization?: string; bio: string}>;
+type RosterCopy = Readonly<{name: string; wtiaRole?: string; title?: string; organization?: string; bio?: string}>;
+
+const allowedWordingEdits: Readonly<Record<string, readonly (readonly [string, string])[]>> = {
+  "alex-kun": [],
+  "lawrence-cheung": [["for of Research", "for Research"]],
+  "antony-ma": [["Hoplite Technology Ltd", "Hoplite Technology Limited"]],
+};
 
 // Lines that are a name, title label, or document label in the source fence,
 // not part of the biography. Removed before the whitespace comparison so a
@@ -47,10 +53,12 @@ function sourceFence(slug: string) {
 }
 
 describe("exco roster source", () => {
-  it("lists twelve members, Willy first, then surname, with zhPending on each", () => {
-    expect(excoRoster).toHaveLength(12);
+  it("lists fourteen members, Willy first, then surname, with zhPending on each", () => {
+    expect(excoRoster).toHaveLength(14);
     expect(excoRoster.map((member) => member.slug)).toEqual([
       "willy-lai",
+      "donald-chan",
+      "jimmy-chan",
       "ricky-chan",
       "burton-chau",
       "lawrence-cheung",
@@ -70,10 +78,21 @@ describe("exco roster source", () => {
     const zhRoster = zh.Committees.roster as Record<string, RosterCopy>;
     expect(zhRoster["willy-lai"]?.name).toBe("賴志偉");
     expect(zhRoster["willy-lai"]?.title).toBe("主席");
+    expect(zhRoster["willy-lai"]?.wtiaRole).toBe("Chairman");
     expect(zhRoster["simon-ha"]?.name).toBe("夏羽");
+    expect(zhRoster["simon-ha"]?.wtiaRole).toBe("ExCo Member");
     expect(Object.entries(zhRoster).filter(([, copy]) => /[\u4e00-\u9fff]/.test(copy.name)).map(([slug]) => slug).sort()).toEqual(["simon-ha", "willy-lai"]);
-    expect(JSON.stringify(excoRoster)).not.toMatch(/Donald|Jimmy|會長/);
-    expect(JSON.stringify(en.Committees.roster) + JSON.stringify(zh.Committees.roster)).not.toMatch(/Donald|Jimmy|會長/);
+    const roles = Object.fromEntries(excoRoster.filter((member) => member.wtiaRole).map((member) => [member.slug, (en.Committees.roster as Record<string, RosterCopy>)[member.slug]?.wtiaRole]));
+    expect(roles).toEqual({
+      "willy-lai": "Chairman",
+      "lawrence-cheung": "Vice Chairman",
+      "nelson-tse": "Treasurer",
+      "eric-yung": "Legal Advisor",
+      "simon-ha": "ExCo Member",
+    });
+    expect(JSON.stringify(zh.Committees.roster)).not.toMatch(/會長|陳甘泉/);
+    expect(en.Committees.roster["donald-chan"]).toEqual({name: "Donald Chan"});
+    expect(en.Committees.roster["jimmy-chan"]).toEqual({name: "Jimmy Chan"});
   });
 
   it("keeps each biography as the source text with only whitespace normalised", () => {
@@ -85,6 +104,19 @@ describe("exco roster source", () => {
       const copy = enRoster[member.slug];
       const zhCopy = zhRoster[member.slug];
       if (!copy || !zhCopy) throw new Error(`missing roster copy for ${member.slug}`);
+      expect(Boolean(copy.bio)).toBe(member.bio);
+      expect(Boolean(copy.title)).toBe(member.title);
+      expect(Boolean(copy.organization)).toBe(member.organization);
+      expect(Boolean(copy.wtiaRole)).toBe(member.wtiaRole);
+      if (copy.wtiaRole) expect(zhCopy.wtiaRole).toBe(copy.wtiaRole);
+      expect(member.photo?.includes("-alt") ?? false).toBe(false);
+      if (!member.bio) {
+        expect(copy.bio).toBeUndefined();
+        expect(copy.title).toBeUndefined();
+        expect(zhCopy.bio).toBeUndefined();
+        expect(member.photo).toBeNull();
+        continue;
+      }
       const raw = sourceFence(member.slug);
       let text = raw.replace(/\n*Linkedin:\nhttps?:\/\/\S+\s*$/i, "");
       for (const line of headerLines[member.slug] ?? []) {
@@ -92,13 +124,16 @@ describe("exco roster source", () => {
         expect(index, `${member.slug} header ${line}`).toBeGreaterThanOrEqual(0);
         text = text.slice(0, index) + text.slice(index + line.length);
       }
-      expect(collapse(copy.bio), member.slug).toBe(collapse(text));
+      for (const [from, to] of allowedWordingEdits[member.slug] ?? []) text = text.replace(from, to);
+      expect(collapse(copy.bio ?? ""), member.slug).toBe(collapse(text));
       expect(zhCopy.bio).toBe(copy.bio);
-      expect(Boolean(copy.title)).toBe(member.title);
-      expect(Boolean(copy.organization)).toBe(member.organization);
-      if (copy.title) expect(raw).toContain(copy.title);
+      if (member.slug === "alex-kun") {
+        expect(copy.title).toBe("Principal Lead – Business Development & Innovation");
+        expect(raw).toContain("Principle Lead – Business Development & Innovation");
+      } else if (copy.title) {
+        expect(raw).toContain(copy.title);
+      }
       if (copy.organization) expect(raw).toContain(copy.organization);
-      expect(member.photo?.includes("-alt") ?? false).toBe(false);
     }
     expect(enRoster["larry-lam"]?.title).toBeUndefined();
     expect(enRoster["lawrence-poon"]?.title).toBeUndefined();

@@ -10,8 +10,8 @@ import zh from "@/messages/zh-HK.json";
  * PASS on the 2026-11-06 Membership/Join string table. Only these leaves may move.
  * The fingerprint is the rest of both bundles, with these leaves omitted. It was
  * taken at 73ca3d2f and moved when the ExCo roster replaced Committees.summary
- * and Committees.metaDescription, then again when Committees.roster was added
- * in both locales.
+ * and Committees.metaDescription, then when Committees.roster was added,
+ * and again for the WTIA role lines, name-only placeholders, and typo fixes.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -168,7 +168,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "b689723ae0ab6919cc38d3b5651059d608f2e00543d375cea0b8833bfbeff216";
+const NON_ALLOWLIST_FINGERPRINT = "8aa353c3a4dc77140922e5729aad07cf43615091c1d011cdee5fd9fac616c44e";
 
 type MessageTree = Record<string, unknown>;
 

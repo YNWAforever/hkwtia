@@ -1,33 +1,43 @@
 // Executive Committee roster for /about/committees.
 //
-// Visible names, titles, organisation lines, and biographies live in
-// Committees.roster in messages/en.json and messages/zh-HK.json. This module
-// is the structural record: order, photos, and zhPending.
+// Visible names, titles, organisation lines, WTIA role labels, and biographies
+// live in Committees.roster in messages/en.json and messages/zh-HK.json. This
+// module is the structural record: order, photos, and zhPending.
 //
-// Source of record: docs/exco-update-20261113/<slug>.md. Message copy keeps
-// each member's wording, including original typos. The only normalisation is
-// whitespace: a line break that splits a sentence is joined, and a trailing
+// Source of record for the twelve supplied bios: docs/exco-update-20261113/<slug>.md.
+// Message copy keeps each member's wording. The only wording changes are three
+// owner-approved typo fixes (Principal, "for Research", Hoplite Technology Limited)
+// plus whitespace: a line break that splits a sentence is joined, and a trailing
 // profile URL in larry-lam.md is left out of the page.
 //
-// Order is provisional: Willy Lai first as Chairman, then the other members
-// by surname (Chan, Chau, Cheung, Ha, Kun, Lam, Ma, Mak, Poon, Tse, Yung).
-// It is not a confirmed precedence list.
+// Order: Willy Lai first, then surname A–Z, and given name A–Z when the surname
+// matches (Donald Chan, Jimmy Chan, Ricky CHAN). Provisional, not a precedence list.
 //
-// zhPending: no Traditional Chinese bio was supplied. The zh-HK bio strings
-// are the English text. Do not machine-translate. Chinese names exist only
-// where one was supplied: 賴志偉 (Willy) and 夏羽 (Simon), in messages/zh-HK.json.
-// Willy's Chinese title is 主席. Never 會長.
+// Donald Chan and Jimmy Chan are name-only placeholders. Their surname Chan comes
+// from existing WTIA Drive records (exco-tree / consent notes). The update folder
+// only has "Donald" and "Jimmy-Chan.jpeg"; neither photo nor any other-folder bio
+// is used, and 陳甘泉 is not displayed.
+//
+// zhPending: no Traditional Chinese bio was supplied. zh-HK bio strings are the
+// English text. Do not machine-translate. Chinese names exist only where one was
+// supplied: 賴志偉 (Willy) and 夏羽 (Simon). Willy's Chinese title is 主席.
+// Never 會長. WTIA role labels stay in English on zh-HK.
 //
 // Photos live at public/images/exco/<slug>.jpg. lawrence-cheung uses
-// lawrence-cheung.jpg (not lawrence-cheung-alt.jpg). Alex has no photo.
+// lawrence-cheung.jpg (not lawrence-cheung-alt.jpg). Alex, Donald, and Jimmy
+// have no photo.
 
 export type ExcoRosterMember = Readonly<{
   slug: string;
   surname: string;
+  /** messages Committees.roster.<slug>.wtiaRole exists. English label on both locales. */
+  wtiaRole: boolean;
   /** messages Committees.roster.<slug>.title exists. */
   title: boolean;
   /** messages Committees.roster.<slug>.organization exists. */
   organization: boolean;
+  /** messages Committees.roster.<slug>.bio exists. False renders the empty-biography label. */
+  bio: boolean;
   /** Null renders an initials placeholder. No stock image and no logo. */
   photo: string | null;
   /** `top` keeps full-body and landscape frames from cropping the face. */
@@ -40,112 +50,18 @@ export type ExcoRosterMember = Readonly<{
 }>;
 
 export const excoRoster: readonly ExcoRosterMember[] = [
-  {
-    "slug": "willy-lai",
-    "surname": "Lai",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/willy-lai.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "ricky-chan",
-    "surname": "Chan",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/ricky-chan.jpg",
-    "photoPosition": "top",
-    "zhPending": true
-  },
-  {
-    "slug": "burton-chau",
-    "surname": "Chau",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/burton-chau.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "lawrence-cheung",
-    "surname": "Cheung",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/lawrence-cheung.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "simon-ha",
-    "surname": "Ha",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/simon-ha.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "alex-kun",
-    "surname": "Kun",
-    "title": true,
-    "organization": true,
-    "photo": null,
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "larry-lam",
-    "surname": "Lam",
-    "title": false,
-    "organization": false,
-    "photo": "/images/exco/larry-lam.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "antony-ma",
-    "surname": "Ma",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/antony-ma.jpg",
-    "photoPosition": "top",
-    "zhPending": true
-  },
-  {
-    "slug": "jess-mak",
-    "surname": "Mak",
-    "title": true,
-    "organization": true,
-    "photo": "/images/exco/jess-mak.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "lawrence-poon",
-    "surname": "Poon",
-    "title": false,
-    "organization": false,
-    "photo": "/images/exco/lawrence-poon.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "nelson-tse",
-    "surname": "Tse",
-    "title": true,
-    "organization": true,
-    "photo": "/images/exco/nelson-tse.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  },
-  {
-    "slug": "eric-yung",
-    "surname": "Yung",
-    "title": true,
-    "organization": false,
-    "photo": "/images/exco/eric-yung.jpg",
-    "photoPosition": "center",
-    "zhPending": true
-  }
+  {slug: "willy-lai", surname: "Lai", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/willy-lai.jpg", photoPosition: "center", zhPending: true},
+  {slug: "donald-chan", surname: "Chan", wtiaRole: false, title: false, organization: false, bio: false, photo: null, photoPosition: "center", zhPending: true},
+  {slug: "jimmy-chan", surname: "Chan", wtiaRole: false, title: false, organization: false, bio: false, photo: null, photoPosition: "center", zhPending: true},
+  {slug: "ricky-chan", surname: "Chan", wtiaRole: false, title: true, organization: false, bio: true, photo: "/images/exco/ricky-chan.jpg", photoPosition: "top", zhPending: true},
+  {slug: "burton-chau", surname: "Chau", wtiaRole: false, title: true, organization: false, bio: true, photo: "/images/exco/burton-chau.jpg", photoPosition: "center", zhPending: true},
+  {slug: "lawrence-cheung", surname: "Cheung", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/lawrence-cheung.jpg", photoPosition: "center", zhPending: true},
+  {slug: "simon-ha", surname: "Ha", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/simon-ha.jpg", photoPosition: "center", zhPending: true},
+  {slug: "alex-kun", surname: "Kun", wtiaRole: false, title: true, organization: true, bio: true, photo: null, photoPosition: "center", zhPending: true},
+  {slug: "larry-lam", surname: "Lam", wtiaRole: false, title: false, organization: false, bio: true, photo: "/images/exco/larry-lam.jpg", photoPosition: "center", zhPending: true},
+  {slug: "antony-ma", surname: "Ma", wtiaRole: false, title: true, organization: false, bio: true, photo: "/images/exco/antony-ma.jpg", photoPosition: "top", zhPending: true},
+  {slug: "jess-mak", surname: "Mak", wtiaRole: false, title: true, organization: true, bio: true, photo: "/images/exco/jess-mak.jpg", photoPosition: "center", zhPending: true},
+  {slug: "lawrence-poon", surname: "Poon", wtiaRole: false, title: false, organization: false, bio: true, photo: "/images/exco/lawrence-poon.jpg", photoPosition: "center", zhPending: true},
+  {slug: "nelson-tse", surname: "Tse", wtiaRole: true, title: true, organization: true, bio: true, photo: "/images/exco/nelson-tse.jpg", photoPosition: "center", zhPending: true},
+  {slug: "eric-yung", surname: "Yung", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/eric-yung.jpg", photoPosition: "center", zhPending: true},
 ];

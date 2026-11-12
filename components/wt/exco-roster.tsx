@@ -3,9 +3,12 @@ import Image from 'next/image';
 export type ExcoRosterCard = Readonly<{
   slug: string;
   name: string;
+  wtiaRole: string | null;
   title: string | null;
   organization: string | null;
   paragraphs: readonly string[];
+  /** Chrome label when no biography was supplied. Not a biography. */
+  pendingBiography: string | null;
   photo: string | null;
   photoPosition: 'center' | 'top';
 }>;
@@ -42,13 +45,18 @@ export function ExcoRoster({members}: Readonly<{members: readonly ExcoRosterCard
           </div>
           <div className="exco-roster-body">
             <h3>{member.name}</h3>
+            {member.wtiaRole ? <p className="exco-roster-role">{member.wtiaRole}</p> : null}
             {member.title ? <p className="exco-roster-title">{member.title}</p> : null}
             {member.organization ? <p className="exco-roster-org">{member.organization}</p> : null}
-            <div className="exco-roster-bio">
-              {member.paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            {member.paragraphs.length > 0 ? (
+              <div className="exco-roster-bio">
+                {member.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            ) : (
+              <p className="exco-roster-pending">{member.pendingBiography}</p>
+            )}
           </div>
         </article>
       ))}

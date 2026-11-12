@@ -34,7 +34,7 @@ export default async function CommitteesPage({params}: Props) {
   const common = await getTranslations({locale, namespace: "Common"});
   // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
   const tRoot = await getTranslations({locale});
-  // 2026–2028 Executive Committee. Order is provisional (Chairman, then surname).
+  // 2026–2028 Executive Committee. Order is Willy Lai, then surname, then given name.
   // Wording is Committees.roster in both message bundles. zhPending on
   // content/exco-roster.ts marks bios that are still the supplied English.
   // Innovation and membership copy stays off this page; those committees were not supplied.
@@ -43,9 +43,11 @@ export default async function CommitteesPage({params}: Props) {
   const members = excoRoster.map((member) => ({
     slug: member.slug,
     name: text(`roster.${member.slug}.name`),
+    wtiaRole: member.wtiaRole ? text(`roster.${member.slug}.wtiaRole`) : null,
     title: member.title ? text(`roster.${member.slug}.title`) : null,
     organization: member.organization ? text(`roster.${member.slug}.organization`) : null,
-    paragraphs: text(`roster.${member.slug}.bio`).split("\n\n"),
+    paragraphs: member.bio ? text(`roster.${member.slug}.bio`).split("\n\n") : [],
+    pendingBiography: member.bio ? null : text("emptyBiography"),
     photo: member.photo,
     photoPosition: member.photoPosition,
   }));

@@ -1387,7 +1387,9 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
 .exco-roster-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--wt-ink); font-family: var(--font-serif); font-size: 42px; font-weight: 500; letter-spacing: 0.04em; }
 .exco-roster-body { display: flex; min-width: 0; flex: 1; flex-direction: column; padding: 22px 22px 28px; }
 .exco-roster-card h3 { margin: 0; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(26px, 2vw, 32px); font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
+.exco-roster-role { margin: 8px 0 0; color: var(--wt-ink); font-size: 13px; font-weight: 800; line-height: 1.4; }
 .exco-roster-title { margin: 10px 0 0; color: var(--wt-ink); font-size: 14px; font-weight: 700; line-height: 1.45; }
+.exco-roster-pending { margin: 14px 0 0; color: var(--xp-text-muted); font-size: 14px; line-height: 1.6; }
 .exco-roster-org { margin: 4px 0 0; color: var(--xp-text-muted); font-size: 13px; line-height: 1.45; }
 .exco-roster-bio { margin-top: 14px; }
 .exco-roster-bio p { margin: 0 0 12px; color: var(--xp-text-muted); font-size: 14px; line-height: 1.7; overflow-wrap: break-word; }
