@@ -48,6 +48,7 @@ export default async function CommitteesPage({params}: Props) {
     organization: member.organization ? text(`roster.${member.slug}.organization`) : null,
     paragraphs: member.bio ? text(`roster.${member.slug}.bio`).split("\n\n") : [],
     pendingBiography: member.bio ? null : text("emptyBiography"),
+    linkedIn: member.linkedIn ? {href: text(`roster.${member.slug}.linkedIn`), label: text("linkedInLabel")} : null,
     photo: member.photo,
     photoPosition: member.photoPosition,
   }));

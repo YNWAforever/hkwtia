@@ -829,6 +829,7 @@
       "description": "Strengthens member value, participation and community connections."
     },
     "emptyBiography": "Biography to follow",
+    "linkedInLabel": "LinkedIn",
     "roster": {
       "willy-lai": {
         "name": "Willy Lai",
@@ -872,6 +873,7 @@
       },
       "larry-lam": {
         "name": "Larry Lam",
+        "linkedIn": "https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false",
         "bio": "Larry Lam is the co-founder of KaChick and Gump, building travel photography and AI photo management platforms across Asia.\n\nKaChick connects travellers with local photographers through a network of approximately 5,000 photographers.\n\nGump is a leading AI photo management platform that has supported more than 1,000 events, including JUMPSTARTER, the HKUST Congregation, the Hong Kong ICT Awards, the Asia Economic Forum and Tech Week Singapore.\n\nGump is listed in Hong Kong’s Smart Government Innovation Lab AI Solution Catalogue.\n\nAcross both businesses, Larry combines commercial strategy with a belief that photography can inspire discovery, preserve memories and bring people closer together.\n\nBefore founding KaChick and Gump, Larry worked at Morgan Stanley, PwC and Deutsche Bank. He is a Certified Public Accountant and holds a Juris Doctor. He believes technology should strengthen human connection—not replace it."
       },
       "antony-ma": {
@@ -891,7 +893,7 @@
       },
       "nelson-tse": {
         "name": "Nelson Tse",
-        "wtiaRole": "Treasurer",
+        "wtiaRole": "Treasurer & Executive Committee Member",
         "title": "Founder & CEO",
         "organization": "Million Tech Development Limited",
         "bio": "Mr. Nelson Tse is the Founder & CEO of Million Tech Development Limited. Drawing on over 38 years of dedicated leadership in Hong Kong’s IT and IoT sectors, he has guided the company since its establishment in 1987 to become a premier provider of smart technology services and automated solutions.\n\nUnder his strategic vision, Million Tech focuses on empowering organizations and elevating operational efficiency through practical, high-impact innovation. The company delivers end-to-end expertise across six core domains: Smart Health, Smart Education, IoT, Vending & Kiosk Systems, Enterprise Solutions, and Robotics Labelling Solutions. Driven by a commitment to quality and technology integration, Nelson continues to lead Million Tech in shaping intelligent automation and digital transformation for commercial, institutional, and public sector clients throughout Hong Kong.\n\nMembers:\n\n▪ Honorary Chairman of Hong Kong Retail Technology Industry Association (HKRTIA)\n\n▪ Treasurer & Executive Committee Member of Hong Kong Wireless Technology Industry Association (WTIA)"

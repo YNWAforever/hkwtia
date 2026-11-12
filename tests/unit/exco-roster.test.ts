@@ -7,7 +7,7 @@ import {excoRoster} from "@/content/exco-roster";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
-type RosterCopy = Readonly<{name: string; wtiaRole?: string; title?: string; organization?: string; bio?: string}>;
+type RosterCopy = Readonly<{name: string; wtiaRole?: string; title?: string; organization?: string; bio?: string; linkedIn?: string}>;
 
 const allowedWordingEdits: Readonly<Record<string, readonly (readonly [string, string])[]>> = {
   "alex-kun": [],
@@ -86,11 +86,21 @@ describe("exco roster source", () => {
     expect(roles).toEqual({
       "willy-lai": "Chairman",
       "lawrence-cheung": "Vice Chairman",
-      "nelson-tse": "Treasurer",
+      "nelson-tse": "Treasurer & Executive Committee Member",
       "eric-yung": "Legal Advisor",
       "simon-ha": "ExCo Member",
     });
-    expect(JSON.stringify(zh.Committees.roster)).not.toMatch(/會長|陳甘泉/);
+    expect(JSON.stringify(en.Committees) + JSON.stringify(zh.Committees)).not.toMatch(/副主席|司庫|法律顧問|執行委員會委員|會長|陳甘泉/);
+    const rosterSource = readFileSync(resolve(process.cwd(), "content/exco-roster.ts"), "utf8");
+    expect(rosterSource).toContain("Vice Chairman = 副主席");
+    expect(rosterSource).toContain("Treasurer = 司庫");
+    expect(rosterSource).toContain("Legal Advisor = 法律顧問");
+    expect(rosterSource).toContain("ExCo Member = 執行委員會委員");
+    expect(rosterSource).toContain("司庫及執行委員會委員");
+    expect(en.Committees.roster["larry-lam"]?.linkedIn).toBe("https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
+    expect(zh.Committees.roster["larry-lam"]?.linkedIn).toBe(en.Committees.roster["larry-lam"]?.linkedIn);
+    expect(en.Committees.roster["larry-lam"]?.bio).not.toMatch(/linkedin/i);
+    expect(zh.Committees.roster["larry-lam"]?.bio).not.toMatch(/linkedin/i);
     expect(en.Committees.roster["donald-chan"]).toEqual({name: "Donald Chan"});
     expect(en.Committees.roster["jimmy-chan"]).toEqual({name: "Jimmy Chan"});
   });
@@ -108,6 +118,11 @@ describe("exco roster source", () => {
       expect(Boolean(copy.title)).toBe(member.title);
       expect(Boolean(copy.organization)).toBe(member.organization);
       expect(Boolean(copy.wtiaRole)).toBe(member.wtiaRole);
+      expect(Boolean(copy.linkedIn)).toBe(Boolean(member.linkedIn));
+      if (member.linkedIn) {
+        expect(copy.linkedIn).toBe("https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
+        expect(zhCopy.linkedIn).toBe(copy.linkedIn);
+      }
       if (copy.wtiaRole) expect(zhCopy.wtiaRole).toBe(copy.wtiaRole);
       expect(member.photo?.includes("-alt") ?? false).toBe(false);
       if (!member.bio) {

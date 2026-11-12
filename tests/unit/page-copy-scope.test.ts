@@ -150,7 +150,8 @@ describe("page copy scope", () => {
       // line for Alex, Jess, and Nelson. 12 + 24 + 10 + 3 = 49.
       // Owner pass added English wtiaRole for five members, name-only Donald and
       // Jimmy, and emptyBiography. 49 + 5 + 2 + 1 = 57.
-      Committees: 57,
+      // Larry's profile link adds linkedInLabel and roster.larry-lam.linkedIn. 57 + 2 = 59.
+      Committees: 59,
       // PR5 added 14 editable labels for the Contact concierge journeys. WP-4 Task 19 added 29
       // more: breadcrumbCurrent, viewLabel, routes.about/routes.news (2 fields each, 4), and the
       // new PreparedEmailForm's emailTopics (topicLabel/composeAction, plus label/subject/body
@@ -226,7 +227,8 @@ describe("page copy scope", () => {
     // Corporate + Platinum benefit lists added 8 Membership leaves. 617 + 8 = 625.
     // The ExCo roster added 37 Committees.roster leaves. 625 + 37 = 662.
     // Five WTIA roles, two placeholder names, and emptyBiography. 662 + 8 = 670.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(670);
+    // Larry's profile link adds two Committees leaves. 670 + 2 = 672.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(672);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

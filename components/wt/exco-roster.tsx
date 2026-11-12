@@ -9,6 +9,7 @@ export type ExcoRosterCard = Readonly<{
   paragraphs: readonly string[];
   /** Chrome label when no biography was supplied. Not a biography. */
   pendingBiography: string | null;
+  linkedIn: Readonly<{href: string; label: string}> | null;
   photo: string | null;
   photoPosition: 'center' | 'top';
 }>;
@@ -57,6 +58,9 @@ export function ExcoRoster({members}: Readonly<{members: readonly ExcoRosterCard
             ) : (
               <p className="exco-roster-pending">{member.pendingBiography}</p>
             )}
+            {member.linkedIn ? (
+              <a className="exco-roster-link" href={member.linkedIn.href} rel="noopener noreferrer" target="_blank">{member.linkedIn.label}</a>
+            ) : null}
           </div>
         </article>
       ))}

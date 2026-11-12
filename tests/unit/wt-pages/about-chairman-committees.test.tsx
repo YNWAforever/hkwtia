@@ -140,7 +140,7 @@ describe("/about/committees", () => {
     expect(card("willy-lai").querySelector(".exco-roster-role")).toHaveTextContent("Chairman");
     expect(card("willy-lai").querySelector(".exco-roster-title")).toHaveTextContent("Chairman of WTIA");
     expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
-    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer");
+    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer & Executive Committee Member");
     expect(card("eric-yung").querySelector(".exco-roster-role")).toHaveTextContent("Legal Advisor");
     expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("ExCo Member");
     expect(card("alex-kun").querySelector(".exco-roster-title")).toHaveTextContent("Principal Lead – Business Development & Innovation");
@@ -159,6 +159,12 @@ describe("/about/committees", () => {
     expect(card("ricky-chan").querySelector("img")).toHaveClass("exco-roster-photo-top");
     expect(card("antony-ma").querySelector("img")).toHaveClass("exco-roster-photo-top");
     expect(card("larry-lam").querySelector("img")).not.toHaveClass("exco-roster-photo-top");
+    const larryLink = within(card("larry-lam")).getByRole("link", {name: "LinkedIn"});
+    expect(larryLink).toHaveAttribute("href", "https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
+    expect(larryLink).toHaveAttribute("target", "_blank");
+    expect(larryLink).toHaveAttribute("rel", "noopener noreferrer");
+    expect(card("larry-lam").querySelector(".exco-roster-bio")?.textContent).not.toMatch(/linkedin/i);
+    expect([...(roster as HTMLElement).querySelectorAll("a")].map((link) => link.getAttribute("href")).filter((href) => href?.includes("linkedin"))).toEqual(["https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false"]);
     for (const card of cards) {
       const image = card.querySelector("img");
       if (!image) continue;
@@ -166,7 +172,8 @@ describe("/about/committees", () => {
       expect(image).toHaveAttribute("loading", "lazy");
       expect(image.getAttribute("sizes")).toBeTruthy();
     }
-    expect(document.body.textContent).not.toMatch(/會長|陳甘泉|WiseTech|linkedin/i);
+    expect(document.body.textContent).not.toMatch(/會長|陳甘泉|WiseTech/);
+    expect(document.body.textContent).not.toMatch(/副主席|司庫|法律顧問|執行委員會委員/);
     expect(document.body.textContent).toMatch(/Donald Chan/);
     expect(document.body.textContent).toMatch(/Jimmy Chan/);
     expect(document.querySelector(".rich-compass")).not.toBeInTheDocument();
@@ -197,13 +204,19 @@ describe("/about/committees", () => {
     expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("ExCo Member");
     expect(within(card("simon-ha")).getByText(/Simon Ha \(夏羽\)/)).toBeVisible();
     expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
-    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer");
+    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer & Executive Committee Member");
     expect(card("eric-yung").querySelector(".exco-roster-role")).toHaveTextContent("Legal Advisor");
     expect(card("burton-chau").querySelector(".exco-roster-title")).toHaveTextContent("General Manager, Sanuker Inc. Limited");
     expect(card("larry-lam").querySelector(".exco-roster-title")).toBeNull();
     expect(card("lawrence-poon").querySelector(".exco-roster-title")).toBeNull();
     expect(card("donald-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
-    expect(document.body.textContent).not.toMatch(/會長|陳甘泉/);
+    const larryLink = within(card("larry-lam")).getByRole("link", {name: "LinkedIn"});
+    expect(larryLink).toHaveAttribute("href", "https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
+    expect(card("larry-lam").querySelector(".exco-roster-bio")?.textContent).not.toMatch(/linkedin/i);
+    expect(card("willy-lai").querySelector(".exco-roster-role")).toHaveTextContent("Chairman");
+    expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
+    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer & Executive Committee Member");
+    expect(document.body.textContent).not.toMatch(/會長|陳甘泉|副主席|司庫|法律顧問|執行委員會委員/);
   });
 
   it("stays server-only, with the roster in place of the unconfirmed-committee grid", () => {
