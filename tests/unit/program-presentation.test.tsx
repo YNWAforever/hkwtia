@@ -31,6 +31,7 @@ const editionCopy = {
   winnersHeading: "Winners",
   categoryHeading: "Category",
   winnersOffSite: "The full winner list is published on the edition's own site.",
+  winnersOffSiteArchived: "2020 microsite (archived)",
   winnersOffSiteLink: "View the winners",
   winnersUnrecorded: "WTIA's archive does not record the winners for this edition.",
 } as const;
@@ -79,19 +80,20 @@ describe("programme editorial presentation", () => {
     expect(within(edition).getByRole("img", {name: expectedAlt})).toHaveAttribute("loading", "lazy");
   });
 
-  it("prints a retired off-site winner URL as text and does not link it", () => {
-    const url = "https://contest2020.bestasiaapp.hk/";
-    renderEditions([{
+  it("labels a retired off-site winner list in plain text and does not show its URL", () => {
+    const {container} = renderEditions([{
       heading: "Asia Smart App Awards 2020",
       lines: [],
-      winners: {kind: "off-site", url},
+      winners: {kind: "off-site", url: "https://contest2020.bestasiaapp.hk/"},
       images: [],
     }]);
 
-    expect(screen.getByText(url)).toBeVisible();
+    expect(screen.getByText("2020 microsite (archived)")).toBeVisible();
     expect(screen.getByText(/The full winner list is published/)).toBeVisible();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    expect(document.querySelector("a")).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.textContent).not.toContain("contest2020");
+    expect(container.textContent).not.toContain("bestasiaapp");
   });
 
   it("keeps TCT as an edition series with no winners heading or category", () => {

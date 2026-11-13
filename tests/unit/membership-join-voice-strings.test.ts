@@ -14,8 +14,9 @@ import zh from "@/messages/zh-HK.json";
  * Committees.roster was added, and again for the WTIA role lines, name-only
  * placeholders, typo fixes, Larry Lam's profile link, Nelson's English role
  * line, and the approved zh-HK ExCo biographies, then Willy's zh-HK job title.
- * It also moved when Navigation.links.media was added in both bundles and
- * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」.
+ * It also moved when Navigation.links.media was added in both bundles,
+ * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」, and
+ * programs.record.winnersOffSiteArchived was added in both bundles.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -172,7 +173,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "8131d8e5d06c791ba6603edf683a8ee01c0bb671ee4b6cdb9ef3bf6235b8ac5a";
+const NON_ALLOWLIST_FINGERPRINT = "879d25129c44e147e3a085c45821e00412e98dd83ce28db2608e5eefc54fdb97";
 
 type MessageTree = Record<string, unknown>;
 
