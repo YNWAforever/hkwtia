@@ -159,12 +159,14 @@ describe("page copy scope", () => {
       // added to asa/hkict/tct, plus 9 more `programs.record` keys (eyebrow
       // type labels, compass labels, the mailto ask, and the editions/
       // credential facts) that Task 15's ProgrammeRecordPage header reads,
-      // plus 1 more for the WP-4 Task 16 `audience` field added to cpai --
-      // 29 + 3 + 9 + 1 = 42. Those are page furniture -- headings, and
+      // plus 1 more for the WP-4 Task 16 `audience` field added to cpai,
+      // plus 1 for winnersOffSiteArchived, the plain-text label that
+      // replaces the retired 2020 microsite URL --
+      // 29 + 3 + 9 + 1 + 1 = 43. Those are page furniture -- headings, and
       // sentences with {agency}/{count}/{programme} placeholders -- so staff
       // can reword them. The facts they frame come from content/programs/*.ts
       // and lib/home/programme-summaries.ts, which /admin/page-copy cannot reach.
-      programs: 42,
+      programs: 43,
       // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
       // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
       // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
@@ -219,7 +221,8 @@ describe("page copy scope", () => {
     // Programmes 5). 608 - 11 = 597.
     // P0 trust flagship strip added 20 Home.flagships leaves. 597 + 20 = 617.
     // Corporate + Platinum benefit lists added 8 Membership leaves. 617 + 8 = 625.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(625);
+    // winnersOffSiteArchived added one programs.record leaf. 625 + 1 = 626.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(626);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

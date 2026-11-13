@@ -39,6 +39,8 @@ type ProgramEditionsProps = {
   categoryHeading: string;
   winnersOffSite: string;
   winnersOffSiteLink: string;
+  /** Plain-text stand-in for a retired microsite. Never a URL and never an anchor. */
+  winnersOffSiteArchived: string;
   winnersUnrecorded: string;
   editions: readonly EditionView[];
 };
@@ -68,6 +70,7 @@ export function ProgramEditions({
   categoryHeading,
   winnersOffSite,
   winnersOffSiteLink,
+  winnersOffSiteArchived,
   winnersUnrecorded,
   editions
 }: ProgramEditionsProps) {
@@ -88,6 +91,7 @@ export function ProgramEditions({
               <Winners
                 categoryHeading={categoryHeading}
                 offSite={winnersOffSite}
+                offSiteArchived={winnersOffSiteArchived}
                 offSiteLink={winnersOffSiteLink}
                 unrecorded={winnersUnrecorded}
                 winners={edition.winners}
@@ -110,9 +114,9 @@ export function ProgramEditions({
 /**
  * Absence is shown as absence.
  *
- * Where the archive cites a microsite the page prints that URL as text. The only
- * cited host (contest2020.bestasiaapp.hk) now 301-redirects to an unrelated site,
- * so it must not be an anchor. Where the archive records nothing the page says so.
+ * Where the archive cites a microsite the page prints a plain-text label.
+ * The cited host now 301-redirects to an unrelated site, so the URL is not
+ * shown and there is no anchor. Where the archive records nothing the page says so.
  * Neither case renders an empty table, which would read as
  * "nobody won" — and for six of ASA's ten editions and four of HKICT's six,
  * that would be a claim the archive does not support.
@@ -120,12 +124,14 @@ export function ProgramEditions({
 function Winners({
   categoryHeading,
   offSite,
+  offSiteArchived,
   unrecorded,
   winners,
   winnersHeading
 }: {
   categoryHeading: string;
   offSite: string;
+  offSiteArchived: string;
   /** Still accepted so programme pages keep a stable prop. Not rendered: a link label with no href would be a dead control. */
   offSiteLink: string;
   unrecorded: string;
@@ -140,7 +146,7 @@ function Winners({
     return (
       <p className="text-muted-foreground mt-4">
         {offSite}{sentenceGap(offSite)}
-        <span>{winners.url}</span>
+        <span>{offSiteArchived}</span>
       </p>
     );
   }

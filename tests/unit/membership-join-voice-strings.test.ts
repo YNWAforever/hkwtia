@@ -9,8 +9,9 @@ import zh from "@/messages/zh-HK.json";
  * Preview voice pass approved by Willy (t419u, 2026-11-06 22:07 HKT) after Claire's
  * PASS on the 2026-11-06 Membership/Join string table. Only these leaves may move
  * for that voice pass. The fingerprint is every other leaf. It moved once after
- * 73ca3d2f when Navigation.links.media was added in both bundles and
- * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」.
+ * 73ca3d2f when Navigation.links.media was added in both bundles,
+ * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」, and
+ * programs.record.winnersOffSiteArchived was added in both bundles.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -167,7 +168,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "981c6b34fb74bf48d4752f3483065d09f42dd33b0c7ef61ab3c206f7a8d9e72d";
+const NON_ALLOWLIST_FINGERPRINT = "cdf65ba1dfd56a9545f6bcca6361b7fb78ba08fe04507bd209b41e73273a904c";
 
 type MessageTree = Record<string, unknown>;
 
