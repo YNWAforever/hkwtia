@@ -79,6 +79,21 @@ describe("programme editorial presentation", () => {
     expect(within(edition).getByRole("img", {name: expectedAlt})).toHaveAttribute("loading", "lazy");
   });
 
+  it("prints a retired off-site winner URL as text and does not link it", () => {
+    const url = "https://contest2020.bestasiaapp.hk/";
+    renderEditions([{
+      heading: "Asia Smart App Awards 2020",
+      lines: [],
+      winners: {kind: "off-site", url},
+      images: [],
+    }]);
+
+    expect(screen.getByText(url)).toBeVisible();
+    expect(screen.getByText(/The full winner list is published/)).toBeVisible();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(document.querySelector("a")).toBeNull();
+  });
+
   it("keeps TCT as an edition series with no winners heading or category", () => {
     renderEditions([{
       heading: "Tech to Connect 4.0",

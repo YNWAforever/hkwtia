@@ -110,21 +110,23 @@ export function ProgramEditions({
 /**
  * Absence is shown as absence.
  *
- * Where the archive defers to a microsite the page links out; where it records
- * nothing it says so. Neither case renders an empty table, which would read as
+ * Where the archive cites a microsite the page prints that URL as text. The only
+ * cited host (contest2020.bestasiaapp.hk) now 301-redirects to an unrelated site,
+ * so it must not be an anchor. Where the archive records nothing the page says so.
+ * Neither case renders an empty table, which would read as
  * "nobody won" — and for six of ASA's ten editions and four of HKICT's six,
  * that would be a claim the archive does not support.
  */
 function Winners({
   categoryHeading,
   offSite,
-  offSiteLink,
   unrecorded,
   winners,
   winnersHeading
 }: {
   categoryHeading: string;
   offSite: string;
+  /** Still accepted so programme pages keep a stable prop. Not rendered: a link label with no href would be a dead control. */
   offSiteLink: string;
   unrecorded: string;
   winners: LocalisedWinners;
@@ -138,11 +140,7 @@ function Winners({
     return (
       <p className="text-muted-foreground mt-4">
         {offSite}{sentenceGap(offSite)}
-        {/* An external microsite, so a bare <a> is correct — localizedPath and
-            next-intl's Link are for our own routes only. */}
-        <a className="inline-flex min-h-6 items-center underline" href={winners.url} rel="noreferrer" target="_blank">
-          {offSiteLink}
-        </a>
+        <span>{winners.url}</span>
       </p>
     );
   }

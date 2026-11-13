@@ -285,6 +285,31 @@
 }
 .plan-grid { margin-inline-end: var(--ask-wtia-inline-clearance); }
 
+/* 375–430px: the fixed mark still covered the last body line and CTAs. A 44px
+   footprint and bottom padding that includes the safe area let that content
+   scroll clear. The unscoped rule above is what desktop keeps. */
+@media (max-width: 430px) {
+  .concierge {
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .site-root .concierge .concierge-trigger {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0;
+    gap: 0;
+  }
+  .site-root .concierge .concierge-trigger > span[aria-hidden="true"] {
+    width: 36px;
+    height: 36px;
+  }
+  .site-root main {
+    padding-bottom: calc(44px + 10px + env(safe-area-inset-bottom, 0px) + 28px);
+  }
+}
+
 /* Donor `.site-root[lang^="zh"]` leads with PingFang and then the Latin stack.
    Under /zh the order is Noto Sans TC, PingFang TC, Microsoft JhengHei. */
 .site-root[lang^="zh"] {

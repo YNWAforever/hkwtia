@@ -155,6 +155,7 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
   ["route-launchpad", "/launchpad", "Published cohorts and authenticated cohort applications."],
   ["route-news", "/news", "Published news repository and staff news CMS."],
   ["route-news-detail", "/news/[slug]", "Published news detail repository keyed by slug."],
+  ["route-media-and-press", "/media-and-press-coverage", "Published press clippings and the media contact on the media-and-press page."],
   ["route-ai-ops", "/ai-ops", "Materialised AI operations metrics and evidence links."],
   ["route-ai-transparency", "/ai-transparency", "Fixed trust structure plus page copy."],
   ["route-contact", "/contact", "Repository-owned contact details and page copy; no inquiry record is claimed."],

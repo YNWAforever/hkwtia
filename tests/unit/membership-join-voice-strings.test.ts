@@ -7,13 +7,15 @@ import zh from "@/messages/zh-HK.json";
 
 /**
  * Preview voice pass approved by Willy (t419u, 2026-11-06 22:07 HKT) after Claire's
- * PASS on the 2026-11-06 Membership/Join string table. Only these leaves may move.
- * The fingerprint is the rest of both bundles, with these leaves omitted. It was
- * taken at 73ca3d2f and moved when the ExCo roster replaced Committees.summary
- * and Committees.metaDescription, then when Committees.roster was added,
- * and again for the WTIA role lines, name-only placeholders, typo fixes,
- * Larry Lam's profile link, Nelson's English role line, and the approved
- * zh-HK ExCo biographies, then Willy's zh-HK job title.
+ * PASS on the 2026-11-06 Membership/Join string table. Only these leaves may move
+ * for that voice pass. The fingerprint is the rest of both bundles, with these
+ * leaves omitted. It was taken at 73ca3d2f and moved when the ExCo roster
+ * replaced Committees.summary and Committees.metaDescription, then when
+ * Committees.roster was added, and again for the WTIA role lines, name-only
+ * placeholders, typo fixes, Larry Lam's profile link, Nelson's English role
+ * line, and the approved zh-HK ExCo biographies, then Willy's zh-HK job title.
+ * It also moved when Navigation.links.media was added in both bundles and
+ * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -170,7 +172,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "25729da90f8796a49c56eb9a54675e219c5f2ff6b92017c234051e5312defea6";
+const NON_ALLOWLIST_FINGERPRINT = "8131d8e5d06c791ba6603edf683a8ee01c0bb671ee4b6cdb9ef3bf6235b8ac5a";
 
 type MessageTree = Record<string, unknown>;
 

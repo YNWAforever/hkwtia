@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {describe, expect, it} from "vitest";
 
 const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
+const experience = readFileSync("app/styles/wisetech-experience.css", "utf8");
 
 // A9 / V21. The donor header inset is calc(100% - 48px). At a 135px lockup the
 // clear space is 44px, including the left edge from 1200px up. The 821–1199px
@@ -40,6 +41,24 @@ describe("Ask WTIA clearance", () => {
     expect(chrome).toContain("--ask-wtia-inline-clearance: 64px");
     expect(chrome).toContain("--ask-wtia-inline-clearance: 112px");
     expect(chrome).toContain(".plan-grid { margin-inline-end: var(--ask-wtia-inline-clearance); }");
+  });
+
+  it("shrinks the launcher and clears the safe area only up to 430px", () => {
+    expect(chrome).toContain("@media (max-width: 430px)");
+    expect(chrome).toContain("bottom: calc(10px + env(safe-area-inset-bottom, 0px));");
+    expect(chrome).toContain("width: 44px;");
+    expect(chrome).toContain("padding-bottom: calc(44px + 10px + env(safe-area-inset-bottom, 0px) + 28px);");
+    expect(chrome).toContain(".site-root main { padding-bottom: calc(54px + 22px + 24px); }");
+  });
+});
+
+describe("zh-HK footer email", () => {
+  it("keeps the address on one full-width line at the phone footer", () => {
+    expect(experience).toContain(".footer-links > div:last-child { grid-column: 1 / -1; }");
+    expect(experience).toContain(".footer-links a.footer-email { white-space: nowrap; }");
+    const phone = experience.slice(experience.indexOf("@media (max-width: 520px)"));
+    expect(phone.indexOf(".footer-links > div:last-child")).toBeGreaterThan(-1);
+    expect(phone.indexOf(".footer-links > div:last-child")).toBeLessThan(phone.indexOf("@media (min-width: 821px)"));
   });
 });
 

@@ -108,7 +108,8 @@ const winnersSchema = z.discriminatedUnion('kind', [
   // Both checks, because each misses what the other catches: `.url()` alone
   // accepts `mailto:` and `javascript:`, while the scheme regex alone accepts
   // `https://` bare and `https://a b c`. Both known microsites are https
-  // (contest2020/contest2021.bestasiaapp.hk) and this renders as a link.
+  // (contest2020/contest2021.bestasiaapp.hk). The page prints the URL as text;
+  // contest2020.bestasiaapp.hk now 301-redirects elsewhere, so it is not a link.
   z.object({
     kind: z.literal('off-site'),
     url: z.string().url().regex(/^https:\/\//)
