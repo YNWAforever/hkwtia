@@ -123,7 +123,7 @@ describe("public shell server surfaces", () => {
     const hrefs = within(footer).getAllByRole("link").map((link) => link.getAttribute("href"));
     for (const href of [
       "/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
-      "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
+      "/membership", "/showcase", "/news", "/media-and-press-coverage", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
     ]) expect(hrefs, href).toContain(href);
     expect(hrefs).not.toContain("/ai-ops");
@@ -136,7 +136,7 @@ describe("public shell server surfaces", () => {
     const footer = screen.getByRole("contentinfo");
     const expectedHrefs = [
       "/events", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
-      "/membership", "/showcase", "/news", "/ai-transparency", "/about", "/about/history",
+      "/membership", "/showcase", "/news", "/media-and-press-coverage", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
       // The Membership column carries Join and Member sign-in; Contact now carries staff
       // sign-in. Keep all three in the exact route inventory.
@@ -154,7 +154,14 @@ describe("public shell server surfaces", () => {
     expect(targets.map((target) => target.getAttribute("href")).sort())
       .toEqual([...expectedHrefs].sort());
     for (const target of targets) {
-      expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "break-words");
+      const href = target.getAttribute("href") ?? "";
+      if (href.startsWith("mailto:")) {
+        expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "whitespace-nowrap", "footer-email");
+        expect(target).not.toHaveClass("break-words");
+        expect(target.closest("form")).toBeNull();
+      } else {
+        expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "break-words");
+      }
     }
   });
 

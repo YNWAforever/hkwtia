@@ -85,6 +85,7 @@
       "members": "會員名錄",
       "showcase": "會員展示",
       "news": "最新消息",
+      "media": "傳媒報道",
       "aiOps": "人工智能營運",
       "aiTransparency": "人工智能透明度",
       "about": "關於 WTIA",
@@ -4863,7 +4864,7 @@
     }
   },
   "MarketingExtras": {
-    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
+    "footerTagline": "科技 + 智慧。香港 + 世界。"
   },
   "OperationsTiming": {
     "heading": "行政工作計時",
