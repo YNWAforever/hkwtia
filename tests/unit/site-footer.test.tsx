@@ -96,7 +96,8 @@ describe("SiteFooter", () => {
     expect(footer.querySelector("iframe")).toBeNull();
     expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
     expect(within(footer).getByRole("link", {name: "Privacy statement"})).toHaveAttribute("href", "/privacy");
-    expect(within(footer).getByRole("button", {name: "Switch to Chinese"})).toBeInTheDocument();
+    expect(within(footer).getByRole("button", {name: "中文, Switch to Chinese"})).toBeInTheDocument();
+    expect(within(footer).getByRole("link", {name: "Media & Press"})).toHaveAttribute("href", "/media-and-press-coverage");
     expect(within(footer).queryByRole("link", {name: /terms|accessibility/i})).toBeNull();
     expect(footer.querySelector(".footer-bottom small")?.textContent)
       .toContain(`© ${new Date().getFullYear()} WTIA.`);
@@ -151,6 +152,7 @@ describe("SiteFooter", () => {
     expect(within(footer).getByRole("link", {name: "WTIA Instagram"})).toHaveAttribute("href", "https://www.instagram.com/hkwtia/");
     expect(within(footer).getByText("探索")).toBeInTheDocument();
     expect(footer.querySelector("address")).toBeNull();
-    expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
+    expect(within(footer).getByText("科技 + 智慧。香港 + 世界。")).toBeInTheDocument();
+    expect(within(footer).getByRole("link", {name: "傳媒報道"})).toHaveAttribute("href", "/media-and-press-coverage");
   });
 });

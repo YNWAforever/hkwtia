@@ -144,12 +144,14 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       regions: {kind: 'attended', count: 15},
       // The presentation ceremony page says, verbatim, "Full list of Award
       // Winners will be uploaded: https://contest2020.bestasiaapp.hk/" — a bare
-      // url the archive itself writes, and an explicit statement that the
-      // results live there. The microsite was not captured. The 2021-11-23
-      // kick-off page does name four ASA 2020 winners in prose (Visionaries
-      // 777, Pokeguide, SOCIF, InnoSpire Technology) as returning panellists,
-      // with no apps and no categories; `listed` would assert a completeness
-      // that partial set does not have, and the schema cannot qualify it.
+      // url the archive itself writes. The microsite was not captured, and that
+      // host now 301-redirects to an unrelated site, so the page prints the URL
+      // as text and does not link it. Do not substitute another URL. The
+      // 2021-11-23 kick-off page does name four ASA 2020 winners in prose
+      // (Visionaries 777, Pokeguide, SOCIF, InnoSpire Technology) as returning
+      // panellists, with no apps and no categories; `listed` would assert a
+      // completeness that partial set does not have, and the schema cannot
+      // qualify it.
       winners: {kind: 'off-site', url: 'https://contest2020.bestasiaapp.hk/'},
       images: []
     },

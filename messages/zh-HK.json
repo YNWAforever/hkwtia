@@ -85,6 +85,7 @@
       "members": "會員名錄",
       "showcase": "會員展示",
       "news": "最新消息",
+      "media": "傳媒報道",
       "aiOps": "人工智能營運",
       "aiTransparency": "人工智能透明度",
       "about": "關於 WTIA",
@@ -1339,6 +1340,7 @@
       "regionsCoOrganised": "由 {count} 個亞洲地區合辦",
       "winnersOffSite": "完整得獎名單刊於該屆的專題網站。",
       "winnersOffSiteLink": "查看得獎名單",
+      "winnersOffSiteArchived": "2020 年活動網站（已封存）",
       "winnersUnrecorded": "商會的存檔沒有記錄該屆得獎者。",
       "credentialIssuer": "頒發機構",
       "credentialCoursePartner": "課程合辦機構",
@@ -4863,7 +4865,7 @@
     }
   },
   "MarketingExtras": {
-    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
+    "footerTagline": "科技 + 智慧。香港 + 世界。"
   },
   "OperationsTiming": {
     "heading": "行政工作計時",

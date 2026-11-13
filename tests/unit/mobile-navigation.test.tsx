@@ -81,7 +81,7 @@ describe("MobileNavigation", () => {
     const utilities = within(dialog).getByRole("navigation", {name: labels.utilities});
     expect(within(utilities).getByRole("link", {name: labels.search})).toHaveAttribute("href", "/showcase");
     expect(within(utilities).getByRole("link", {name: "actions.memberSignIn"})).toHaveAttribute("href", "/member-login");
-    expect(within(utilities).getByRole("button", {name: labels.switchToChinese}).parentElement).toHaveClass("[&_button]:min-w-11");
+    expect(within(utilities).getByRole("button", {name: `${labels.chinese}, ${labels.switchToChinese}`}).parentElement).toHaveClass("[&_button]:min-w-11");
 
     expect(within(dialog).getByText(labels.exploreEcosystem)).toHaveClass("eyebrow");
     expect(within(dialog).getAllByRole("button", {expanded: false})).toHaveLength(4);
@@ -170,7 +170,7 @@ describe("MobileNavigation", () => {
     await openMenu();
     const group = screen.getByRole("button", {name: "groups.eventsProgrammes.label"});
     fireEvent.click(group);
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChinese}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chinese}, ${labels.switchToChinese}`}));
     expect(routerReplace).toHaveBeenCalledWith("/events?filter=member#schedule", {locale: "zh-HK"});
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(trigger).toHaveFocus();
