@@ -15,7 +15,7 @@ export type ExcoRosterCard = Readonly<{
 }>;
 
 // Copy is resolved from messages/en.json and messages/zh-HK.json by the page.
-// zhPending lives on content/exco-roster.ts: zh-HK bios are the English text.
+// zhPending lives on content/exco-roster.ts. Approved zh-HK bios are in messages.
 
 function initials(name: string) {
   const parts = name.split(/\s+/).filter((part) => part.length > 0);

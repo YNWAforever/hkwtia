@@ -36,7 +36,7 @@ export default async function CommitteesPage({params}: Props) {
   const tRoot = await getTranslations({locale});
   // 2026–2028 Executive Committee. Order is Willy Lai, then surname, then given name.
   // Wording is Committees.roster in both message bundles. zhPending on
-  // content/exco-roster.ts marks bios that are still the supplied English.
+  // content/exco-roster.ts is true only for Donald Chan and Jimmy Chan.
   // Innovation and membership copy stays off this page; those committees were not supplied.
   // t.raw skips ICU parsing so a biography apostrophe stays verbatim.
   const text = (key: string) => t.raw(key) as string;

@@ -74,14 +74,22 @@ describe("exco roster source", () => {
     expect(excoRoster[0]?.surname).toBe("Lai");
     const rest = excoRoster.slice(1).map((member) => member.surname);
     expect([...rest].sort((left, right) => left.localeCompare(right))).toEqual(rest);
-    expect(excoRoster.every((member) => member.zhPending)).toBe(true);
+    expect(excoRoster.filter((member) => member.zhPending).map((member) => member.slug)).toEqual(["donald-chan", "jimmy-chan"]);
     const zhRoster = zh.Committees.roster as Record<string, RosterCopy>;
-    expect(zhRoster["willy-lai"]?.name).toBe("賴志偉");
+    expect(zhRoster["willy-lai"]?.name).toBe("賴志偉（Willy Lai）");
     expect(zhRoster["willy-lai"]?.title).toBe("主席");
-    expect(zhRoster["willy-lai"]?.wtiaRole).toBe("Chairman");
-    expect(zhRoster["simon-ha"]?.name).toBe("夏羽");
-    expect(zhRoster["simon-ha"]?.wtiaRole).toBe("ExCo Member");
-    expect(Object.entries(zhRoster).filter(([, copy]) => /[\u4e00-\u9fff]/.test(copy.name)).map(([slug]) => slug).sort()).toEqual(["simon-ha", "willy-lai"]);
+    expect(zhRoster["willy-lai"]?.wtiaRole).toBe("主席");
+    expect(zhRoster["simon-ha"]?.name).toBe("夏羽（Simon Ha）");
+    expect(zhRoster["simon-ha"]?.wtiaRole).toBe("執行委員會委員");
+    expect(zhRoster["lawrence-cheung"]?.wtiaRole).toBe("副主席");
+    expect(zhRoster["nelson-tse"]?.wtiaRole).toBe("司庫及執行委員會委員");
+    expect(zhRoster["eric-yung"]?.wtiaRole).toBe("法律顧問");
+    expect(zhRoster["ricky-chan"]?.name).toBe("Ricky CHAN 先生");
+    expect(zhRoster["burton-chau"]?.name).toBe("Burton CHAU 先生");
+    expect(zhRoster["alex-kun"]?.name).toBe("Alex Kun 先生");
+    expect(zhRoster["jess-mak"]?.name).toBe("Jess Mak 小姐");
+    expect(zhRoster["larry-lam"]?.name).toBe("Larry Lam");
+    expect(zhRoster["lawrence-poon"]?.name).toBe("Ir Prof. Lawrence Poon");
     const roles = Object.fromEntries(excoRoster.filter((member) => member.wtiaRole).map((member) => [member.slug, (en.Committees.roster as Record<string, RosterCopy>)[member.slug]?.wtiaRole]));
     expect(roles).toEqual({
       "willy-lai": "Chairman",
@@ -90,13 +98,13 @@ describe("exco roster source", () => {
       "eric-yung": "Legal Advisor",
       "simon-ha": "ExCo Member",
     });
-    expect(JSON.stringify(en.Committees) + JSON.stringify(zh.Committees)).not.toMatch(/副主席|司庫|法律顧問|執行委員會委員|會長|陳甘泉/);
+    expect(JSON.stringify(en.Committees.roster)).not.toMatch(/副主席|司庫|法律顧問|執行委員會委員|會長|陳甘泉/);
+    expect(JSON.stringify(zh.Committees)).not.toMatch(/會長|陳甘泉|譯註|開放問題/);
     const rosterSource = readFileSync(resolve(process.cwd(), "content/exco-roster.ts"), "utf8");
     expect(rosterSource).toContain("Vice Chairman = 副主席");
-    expect(rosterSource).toContain("Treasurer = 司庫");
+    expect(rosterSource).toContain("Treasurer & Executive Committee Member = 司庫及執行委員會委員");
     expect(rosterSource).toContain("Legal Advisor = 法律顧問");
     expect(rosterSource).toContain("ExCo Member = 執行委員會委員");
-    expect(rosterSource).toContain("司庫及執行委員會委員");
     expect(en.Committees.roster["larry-lam"]?.linkedIn).toBe("https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
     expect(zh.Committees.roster["larry-lam"]?.linkedIn).toBe(en.Committees.roster["larry-lam"]?.linkedIn);
     expect(en.Committees.roster["larry-lam"]?.bio).not.toMatch(/linkedin/i);
@@ -123,7 +131,7 @@ describe("exco roster source", () => {
         expect(copy.linkedIn).toBe("https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
         expect(zhCopy.linkedIn).toBe(copy.linkedIn);
       }
-      if (copy.wtiaRole) expect(zhCopy.wtiaRole).toBe(copy.wtiaRole);
+      if (copy.wtiaRole) expect(zhCopy.wtiaRole).not.toBe(copy.wtiaRole);
       expect(member.photo?.includes("-alt") ?? false).toBe(false);
       if (!member.bio) {
         expect(copy.bio).toBeUndefined();
@@ -141,7 +149,8 @@ describe("exco roster source", () => {
       }
       for (const [from, to] of allowedWordingEdits[member.slug] ?? []) text = text.replace(from, to);
       expect(collapse(copy.bio ?? ""), member.slug).toBe(collapse(text));
-      expect(zhCopy.bio).toBe(copy.bio);
+      expect(zhCopy.bio).not.toBe(copy.bio);
+      expect(zhCopy.bio).not.toMatch(/會長|譯註|開放問題/);
       if (member.slug === "alex-kun") {
         expect(copy.title).toBe("Principal Lead – Business Development & Innovation");
         expect(raw).toContain("Principle Lead – Business Development & Innovation");

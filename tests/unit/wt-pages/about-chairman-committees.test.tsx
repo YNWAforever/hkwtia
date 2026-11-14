@@ -183,7 +183,7 @@ describe("/about/committees", () => {
     ]);
   });
 
-  it("renders Willy first as 主席 on zh-HK, with English bios and no 會長", async () => {
+  it("renders the approved zh-HK bios and role labels, with no 會長", async () => {
     const {default: CommitteesPage} = await import("@/app/[locale]/(public)/about/committees/page");
     renderWithIntl("zh-HK", await CommitteesPage({params: Promise.resolve({locale: "zh-HK"})}));
 
@@ -196,27 +196,25 @@ describe("/about/committees", () => {
       return found;
     };
     const willy = card("willy-lai");
-    expect(within(willy).getByRole("heading", {level: 3})).toHaveTextContent("賴志偉");
-    expect(within(willy).getByText("主席")).toBeVisible();
-    expect(willy.querySelector(".exco-roster-role")).toHaveTextContent("Chairman");
-    expect(within(willy).getByText(/Chairman of WTIA/)).toBeVisible();
-    expect(within(card("simon-ha")).getByRole("heading", {level: 3})).toHaveTextContent("夏羽");
-    expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("ExCo Member");
-    expect(within(card("simon-ha")).getByText(/Simon Ha \(夏羽\)/)).toBeVisible();
-    expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
-    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer & Executive Committee Member");
-    expect(card("eric-yung").querySelector(".exco-roster-role")).toHaveTextContent("Legal Advisor");
-    expect(card("burton-chau").querySelector(".exco-roster-title")).toHaveTextContent("General Manager, Sanuker Inc. Limited");
+    expect(within(willy).getByRole("heading", {level: 3})).toHaveTextContent("賴志偉（Willy Lai）");
+    expect(willy.querySelector(".exco-roster-role")).toHaveTextContent("主席");
+    expect(willy.querySelector(".exco-roster-title")).toHaveTextContent("主席");
+    expect(within(card("simon-ha")).getByRole("heading", {level: 3})).toHaveTextContent("夏羽（Simon Ha）");
+    expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("執行委員會委員");
+    expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("副主席");
+    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("司庫及執行委員會委員");
+    expect(card("eric-yung").querySelector(".exco-roster-role")).toHaveTextContent("法律顧問");
+    expect(card("burton-chau").querySelector(".exco-roster-title")).toHaveTextContent("總經理，Sanuker Inc. Limited");
     expect(card("larry-lam").querySelector(".exco-roster-title")).toBeNull();
     expect(card("lawrence-poon").querySelector(".exco-roster-title")).toBeNull();
     expect(card("donald-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
+    expect(within(card("donald-chan")).getByRole("heading", {level: 3})).toHaveTextContent("Donald Chan");
+    expect(within(card("jimmy-chan")).getByRole("heading", {level: 3})).toHaveTextContent("Jimmy Chan");
     const larryLink = within(card("larry-lam")).getByRole("link", {name: "LinkedIn"});
     expect(larryLink).toHaveAttribute("href", "https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
     expect(card("larry-lam").querySelector(".exco-roster-bio")?.textContent).not.toMatch(/linkedin/i);
-    expect(card("willy-lai").querySelector(".exco-roster-role")).toHaveTextContent("Chairman");
-    expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("Vice Chairman");
-    expect(card("nelson-tse").querySelector(".exco-roster-role")).toHaveTextContent("Treasurer & Executive Committee Member");
-    expect(document.body.textContent).not.toMatch(/會長|陳甘泉|副主席|司庫|法律顧問|執行委員會委員/);
+    expect(document.body.textContent).not.toMatch(/會長|陳甘泉|譯註|開放問題/);
+    expect(document.body.textContent).toMatch(/副主席/);
   });
 
   it("stays server-only, with the roster in place of the unconfirmed-committee grid", () => {

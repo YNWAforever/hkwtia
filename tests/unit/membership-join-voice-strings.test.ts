@@ -12,7 +12,8 @@ import zh from "@/messages/zh-HK.json";
  * taken at 73ca3d2f and moved when the ExCo roster replaced Committees.summary
  * and Committees.metaDescription, then when Committees.roster was added,
  * and again for the WTIA role lines, name-only placeholders, typo fixes,
- * Larry Lam's profile link, and Nelson's English role line.
+ * Larry Lam's profile link, Nelson's English role line, and the approved
+ * zh-HK ExCo biographies.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -169,7 +170,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "d01f55f0d044005e854b62a32ffb558a90137a30149d1ca99c6c310a59943b81";
+const NON_ALLOWLIST_FINGERPRINT = "f011bada9989f249a00dde805bd0652a25ce538e8bdec2e2c8e556ecb759e454";
 
 type MessageTree = Record<string, unknown>;
 
