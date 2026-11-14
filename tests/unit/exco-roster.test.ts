@@ -77,7 +77,7 @@ describe("exco roster source", () => {
     expect(excoRoster.filter((member) => member.zhPending).map((member) => member.slug)).toEqual(["donald-chan", "jimmy-chan"]);
     const zhRoster = zh.Committees.roster as Record<string, RosterCopy>;
     expect(zhRoster["willy-lai"]?.name).toBe("賴志偉（Willy Lai）");
-    expect(zhRoster["willy-lai"]?.title).toBe("主席");
+    expect(zhRoster["willy-lai"]?.title).toBe("FIMMICK 聯合創辦人及行政總裁");
     expect(zhRoster["willy-lai"]?.wtiaRole).toBe("主席");
     expect(zhRoster["simon-ha"]?.name).toBe("夏羽（Simon Ha）");
     expect(zhRoster["simon-ha"]?.wtiaRole).toBe("執行委員會委員");

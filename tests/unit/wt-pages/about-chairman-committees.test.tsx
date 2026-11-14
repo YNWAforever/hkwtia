@@ -198,7 +198,7 @@ describe("/about/committees", () => {
     const willy = card("willy-lai");
     expect(within(willy).getByRole("heading", {level: 3})).toHaveTextContent("賴志偉（Willy Lai）");
     expect(willy.querySelector(".exco-roster-role")).toHaveTextContent("主席");
-    expect(willy.querySelector(".exco-roster-title")).toHaveTextContent("主席");
+    expect(willy.querySelector(".exco-roster-title")).toHaveTextContent("FIMMICK 聯合創辦人及行政總裁");
     expect(within(card("simon-ha")).getByRole("heading", {level: 3})).toHaveTextContent("夏羽（Simon Ha）");
     expect(card("simon-ha").querySelector(".exco-roster-role")).toHaveTextContent("執行委員會委員");
     expect(card("lawrence-cheung").querySelector(".exco-roster-role")).toHaveTextContent("副主席");
