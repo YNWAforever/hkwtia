@@ -812,10 +812,10 @@
   },
   "Committees": {
     "metaTitle": "委員會｜香港無線科技商會 WTIA",
-    "metaDescription": "2026–2028 年度委員會資料稍後公布。",
+    "metaDescription": "2026–2028 年度執行委員會成員。",
     "eyebrow": "管治",
     "title": "委員會",
-    "summary": "2026–2028 年度委員會資料稍後公布。",
+    "summary": "2026–2028 年度執行委員會成員。",
     "structureTitle": "委員會架構",
     "executive": {
       "title": "執行委員會",
@@ -828,6 +828,83 @@
     "membership": {
       "title": "會員委員會",
       "description": "提升會員價值、參與及社群連繫。"
+    },
+    "emptyBiography": "Biography to follow",
+    "linkedInLabel": "LinkedIn",
+    "roster": {
+      "willy-lai": {
+        "name": "賴志偉（Willy Lai）",
+        "wtiaRole": "主席",
+        "title": "FIMMICK 聯合創辦人及行政總裁",
+        "bio": "賴志偉（Willy Lai）為 FIMMICK 聯合創辦人及行政總裁，並出任香港無線科技商會（WTIA）主席。他具備資訊科技及數碼市場推廣背景，工作聚焦於商業策略、數據與新興科技的交匯。\n\n在 FIMMICK，賴志偉領導公司在人工智能驅動的業務轉型方面的發展，協助機構把生成式人工智能、市場推廣科技及自動化應用於實際業務課題。其工作著重連結數據、人才與工作流程，以提升顧客參與、營運效率及業務增長，並特別關注中小企的需要。\n\n他亦活躍於香港的創新及創業社群。他於香港理工大學專業進修學院（PolyU SPEED）擔任創業課程客座講師超過十年。他又出任香港資訊及通訊科技獎「資訊科技初創企業獎」評審，包括軟件及應用程式組別的首席評審，並擔任 Cathay Hackathon 參與者的導師。他透過教學、業界講座及實務培訓，與企業領袖、初創創辦人及新進人才分享實用見解。\n\n作為 WTIA 主席，賴志偉推動跨行業協作，以及先進科技的務實應用，以加強企業競爭力，並支持香港的創新科技生態。"
+      },
+      "donald-chan": {
+        "name": "Donald Chan"
+      },
+      "jimmy-chan": {
+        "name": "Jimmy Chan"
+      },
+      "ricky-chan": {
+        "name": "Ricky CHAN 先生",
+        "title": "i-gen.ai 及 Reform Marketing Solutions 行政總裁兼聯合創辦人",
+        "bio": "Ricky CHAN 是 i-gen.ai 及 Reform Marketing Solutions 的行政總裁兼聯合創辦人。該公司是一間以香港為基地的 GEO、AI SEO 及數碼市場推廣公司，並在珠海設有分公司。i-gen.ai 獲數碼港培育計劃（CIP）支持，並曾參與前海一項創新計劃。\n\nRicky 領導開發人工智能驅動的市場推廣方案，協助中小企採用務實科技、加強數碼能力，並達致可衡量的業務增長。他主導建立 i-gen.ai 的專有人工智能市場推廣平台，整合市場分析、內容創作及績效優化，涵蓋網站、社交媒體、電郵及數碼廣告。該平台於香港零售管理協會（HKRMA）2025 智能零售大獎獲表彰。Ricky 致力推動負責任的人工智能應用、促進跨界別協作，並為香港的創新生態作出貢獻。"
+      },
+      "burton-chau": {
+        "name": "Burton CHAU 先生",
+        "title": "總經理，Sanuker Inc. Limited",
+        "bio": "Burton Chau 領導 Sanuker 提供開創性的商務訊息及人工智能聊天機械人方案，協助企業在對話式時代推動數碼轉型。憑藉他在對話式商務產業的專業與願景，他引導公司拓展至大中華區、新加坡、墨西哥、西班牙及東南亞，並在亞洲及西班牙語市場推出其對話管理平台 WOZTELL。Sanuker 不少項目獲 Meta 列為成功案例，公司亦為 Meta、AWS 及匯豐（HSBC）的認可合作夥伴。\n\nBurton 亦於西班牙巴倫西亞大學工程學院（ETSE）倡議開辦對話式商務課程（Conversational Business Programme）。"
+      },
+      "lawrence-cheung": {
+        "name": "Dr Lawrence CHEUNG Chi-chong",
+        "wtiaRole": "副主席",
+        "title": "首席技術總監（Chief Technology Officer）",
+        "bio": "CHEUNG Chi-chong 博士擁有逾 30 年管理研究發展及顧問業務組合的經驗。在香港生產力促進局，他目前負責管理廣泛的業務職能，涵蓋機械人及人工智能的技術研究發展與顧問服務、FutureSkills 培訓、中小企及初創支援，以及企業發展。他領導生產力局 Technology Game Plan 的制定與推行，範疇包括微電子、生命及健康、機械人及人工智能、智能製造及新能源。他於 2019 年出任香港工業人工智能及機械人研發中心（FLAIR）董事局成員，並於 2025 年 5 月出任該中心行政總裁。\n\n他分別擔任：環境保護署低碳綠色科研基金（Green Tech Fund）評審委員會成員；教育局「推廣職業專才教育和資歷架構督導委員會」成員；大學教育資助委員會 2025-28 三年期規劃工作轄下研究院研究課程工作小組成員；以及「產學研1+計劃」（RAISe+）同行評審專家小組（Peer Review Expert Panel）成員。\n\n他亦為香港電子科技商會名譽顧問；香港無線科技商會副主席；香港電子業商會執行委員會委員；香港工業總會創新及科技發展委員會委員；以及香港總商會工業及科技委員會（Industry & Technology Committee）委員。\n\n加入生產力局之前，CHEUNG 博士居於澳洲，在澳洲聯邦科學與工業研究組織（CSIRO）擔任高級研究職位。他於澳洲蒙納士大學取得一級榮譽工學學士及理學學士學位，其電腦成像研究博士學位亦來自蒙納士大學。CHEUNG 博士於 1996 年加入香港生產力促進局。"
+      },
+      "simon-ha": {
+        "name": "夏羽（Simon Ha）",
+        "wtiaRole": "執行委員會委員",
+        "title": "商務發展及市場推廣主管，富士膠片商業創新香港（FUJIFILM Business Innovation Hong Kong）",
+        "bio": "夏羽（Simon Ha）為富士膠片商業創新香港商務發展及市場推廣主管，負責領導策略性商務發展及市場推廣工作，以推動增長、市場拓展及顧客參與。\n\n他在科技業界擁有逾 20 年經驗，於人工智能、雲端運算、網絡安全、數據分析及數碼轉型等範疇，在創新方案的商品化與推廣方面具備深厚專業。其事業涵蓋商務發展、產品市場推廣，以及香港與亞洲的區域軟件及解決方案業務。\n\n他亦出任香港獨立非執行董事協會（HKiNEDA）市場及傳媒委員會副主席，推動專業發展及良好企業管治。他持有香港大學工商管理碩士（MBA）及文學士（BA）學位。\n\n作為 WTIA 執行委員會委員，夏羽期望以其業界經驗及商務網絡，促進香港的科技應用、業界協作與創新。"
+      },
+      "alex-kun": {
+        "name": "Alex Kun 先生",
+        "title": "商務發展及創新首席主管（Principal Lead – Business Development & Innovation）",
+        "organization": "和記電訊（香港）有限公司",
+        "bio": "Alex 在數碼領域擁有逾三十年經驗，事業橫跨媒體、互聯網服務、資訊科技、金融科技及電訊，建樹良多。其跨職能專長涵蓋硬件及配件商品化、產品及業務發展、策略市場推廣、企業科技方案，以及具重大影響的合作夥伴關係。作為注重執行的企業型領導者，Alex 運用對新興科技及不斷轉變的消費者行為的深入洞察，迅速推出切合本地市場需求的產品。他具備把創新構思由初始意念擴展為可盈利、高增長業務的往績，包括 Next Media Interactive、拍住賞（Tap & Go）及 Birdie Mobile 等。"
+      },
+      "larry-lam": {
+        "name": "Larry Lam",
+        "linkedIn": "https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false",
+        "bio": "Larry Lam 是 KaChick 及 Gump 的聯合創辦人，在亞洲建立旅遊攝影及人工智能相片管理平台。\n\nKaChick 透過約 5,000 名攝影師的網絡，連結旅客與本地攝影師。\n\nGump 是領先的人工智能相片管理平台，已支援超過 1,000 場活動，包括 JUMPSTARTER、香港科技大學學位頒授典禮（HKUST Congregation）、香港資訊及通訊科技獎、亞洲經濟論壇（Asia Economic Forum）及新加坡科技週（Tech Week Singapore）。\n\nGump 已列入香港智慧政府創新實驗室「人工智能方案目錄」。\n\n在兩項業務中，Larry 把商業策略，與「攝影能啟發探索、保存回憶並拉近人與人之間距離」的信念相結合。\n\n在創辦 KaChick 及 Gump 之前，Larry 曾任職於摩根士丹利（Morgan Stanley）、羅兵咸永道（PwC）及德意志銀行（Deutsche Bank）。他是會計師（Certified Public Accountant），並持有法律博士（Juris Doctor）學位。他深信科技應加強人與人之間的連結，而非取而代之。"
+      },
+      "antony-ma": {
+        "name": "Antony Ma",
+        "title": "行政總裁，Hoplite Technology Limited",
+        "bio": "Antony Ma 是網絡安全專業人士，擁有逾 20 年經驗，涵蓋資訊保安、資訊科技審計及軟件開發。他是 Hoplite Technology Limited 的創辦人及行政總裁，該公司運用雲端運算及人工智能開發網絡安全防護工具。他持有 CISSP 及 CCSP 認證，以及知識產權與資訊科技法法學碩士（LLM）。\n\nAntony 致力加強雲端安全，並協助企業採用有效的保安措施。他參與業界協會及標準倡議，包括香港無線科技商會、ISO/IEC JTC 1/SC 27，以及雲端安全聯盟（Cloud Security Alliance）。"
+      },
+      "jess-mak": {
+        "name": "Jess Mak 小姐",
+        "title": "企業市場高級副總裁",
+        "organization": "和記電訊（香港）有限公司",
+        "bio": "Jess Mak 小姐自 2021 年起出任和記電訊（香港）有限公司企業市場高級副總裁，負責監督 3香港在企業市場的發展。她在策略規劃中擔當關鍵角色，並以遠見把領先的企業方案帶給企業客戶。Jess 在電訊業及資訊及通訊科技（ICT）界別擁有逾 26 年經驗。她致力推動創新 5G 方案的應用，包括虛擬實境、人工智能及窄帶物聯網（NB-IoT），協助不同規模的企業客戶提升效率及生產力。"
+      },
+      "lawrence-poon": {
+        "name": "Ir Prof. Lawrence Poon",
+        "bio": "Ir Prof. Lawrence Poon 是資深的創新科技領導者，擁有逾 20 年在香港公共創新體系從零開始建立新業務的經驗。他在香港生產力促進局任職 18 年，期間建立並領導智慧城市部，將團隊擴展至 140 名專業人員，並推動業界及政府的數碼轉型。其後他獲應科院行政總裁 Denis Yip 邀請，加入香港應用科技研究院，出任行政總裁顧問兼創新科技主管。他在該處從零開始成立新的科技部門，建立超過 25 名專業人員的團隊，並在九個月內取得超過 8,000 萬港元的項目儲備。他以連繫政府、業界、學界及初創，把新興科技（包括人工智能、物聯網及智慧城市方案）轉化為商業及社會效益而獲認可。"
+      },
+      "nelson-tse": {
+        "name": "Nelson Tse",
+        "wtiaRole": "司庫及執行委員會委員",
+        "title": "創辦人及行政總裁",
+        "organization": "萬碧發展有限公司（Million Tech Development Limited）",
+        "bio": "Tse 先生為萬碧發展有限公司（Million Tech Development Limited）創辦人及行政總裁。憑藉逾 38 年在香港資訊科技及物聯網界別的專責領導經驗，他自公司 1987 年成立以來一直領導公司，使之成為智能科技服務及自動化解決方案的領先供應商。\n\n在其策略願景下，萬碧發展專注以務實而具高成效的創新，賦能機構並提升營運效率。公司提供六大核心範疇的端到端專業服務：智慧醫療、智慧教育、物聯網、自動售賣及自助服務亭系統、企業解決方案，以及機械人標籤解決方案。本著對品質與科技整合的承諾，他繼續領導萬碧發展，為香港的商業、機構及公營機構客戶塑造智能自動化及數碼轉型。\n\n所屬職務：\n\n- 香港零售科技商會（HKRTIA）名譽主席（Honorary Chairman）\n- 香港無線科技商會（WTIA）司庫及執行委員會委員"
+      },
+      "eric-yung": {
+        "name": "Eric Yung",
+        "wtiaRole": "法律顧問",
+        "title": "Playnote 創辦人及行政總裁",
+        "bio": "Eric Yung 是一名連續創業者，在科技創新、業務發展及企業管理方面擁有豐富經驗。他曾創辦及共同創辦多家在國際間營運的公司及業務集團，業務橫跨科技、教育、旅遊及跨境商業顧問。\n\n他是 Playnote 的創辦人及行政總裁。Playnote 是一間人工智能驅動的教育科技公司，專門從事人工智能音樂教育及其他與人工智能相關的音樂產品。在英國皇家音樂學院聯合委員會（ABRSM）授權下，Playnote 已開發人工智能方案，能按考試要求分析學生的音樂演奏，並提供自動化評核及個人化回饋。\n\n憑藉在國際市場建立並擴展業務的豐富經驗，Eric 以其創業、科技、商業及法律視角，出任 WTIA 法律顧問。\n\nEric 持有香港科技大學電子工程學工學學士（BEng）、哲學碩士（MPhil）及工商管理碩士（MBA），以及倫敦大學法學學士（LLB）。"
+      }
     }
   },
   "History": {
