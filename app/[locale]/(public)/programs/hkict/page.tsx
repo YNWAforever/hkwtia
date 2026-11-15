@@ -69,6 +69,7 @@ export default async function HkictPage({params}: Props) {
         editionsHeading={tr('editionsHeading')}
         winnersHeading={tr('winnersHeading')}
         winnersOffSite={tr('winnersOffSite')}
+        winnersOffSiteArchived={tr('winnersOffSiteArchived')}
         winnersOffSiteLink={tr('winnersOffSiteLink')}
         winnersUnrecorded={tr('winnersUnrecorded')}
         editions={hkict.editions.map((edition) => ({

@@ -84,6 +84,7 @@
       "members": "Member directory",
       "showcase": "Member Showcase",
       "news": "News",
+      "media": "Media & Press",
       "aiOps": "AI operations",
       "aiTransparency": "AI transparency",
       "about": "About WTIA",
@@ -1415,6 +1416,7 @@
       "regionsCoOrganised": "Co-organised with {count} Asia regions",
       "winnersOffSite": "The full winner list is published on the edition's own site.",
       "winnersOffSiteLink": "View the winners",
+      "winnersOffSiteArchived": "2020 microsite (archived)",
       "winnersUnrecorded": "WTIA's archive does not record the winners for this edition.",
       "credentialIssuer": "Issued by",
       "credentialCoursePartner": "Course delivered with",
@@ -4910,7 +4912,7 @@
     }
   },
   "MarketingExtras": {
-    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
+    "footerTagline": "Technology + Wisdom. Hong\u00a0Kong + The World."
   },
   "OperationsTiming": {
     "heading": "Administrative work timing",

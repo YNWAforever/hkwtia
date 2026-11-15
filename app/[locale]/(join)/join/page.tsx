@@ -98,7 +98,7 @@ export default async function JoinPage({params, searchParams}: Props) {
       </section>
     );
     return (
-      <section className="glass-card p-6 sm:p-10">
+      <section className="glass-card join-plan-chooser p-6 sm:p-10">
         <JoinProgress active="plan" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>

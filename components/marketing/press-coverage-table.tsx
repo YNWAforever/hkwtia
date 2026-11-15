@@ -25,7 +25,7 @@ export function PressCoverageTable({
             <tr key={row.articleUrl}>
               <td className="press-date">{dateCell(row)}</td>
               <td className="press-outlet">{row.outlet}</td>
-              <td>
+              <td className="press-title">
                 <a href={row.articleUrl} rel="noopener noreferrer" target="_blank">{row.title}</a>
               </td>
             </tr>

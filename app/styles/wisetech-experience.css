@@ -738,6 +738,10 @@
   .footer-links > div { min-height: 0; gap: 0; padding: 24px 16px 20px; }
   .footer-links strong { margin-bottom: 6px; }
   .footer-links address { margin-top: 8px; }
+  /* contact@hkwtia.org was breaking mid-address in the half-width zh-HK column
+     at 390px. The contact column takes the full row so nowrap stays on screen. */
+  .footer-links > div:last-child { grid-column: 1 / -1; }
+  .footer-links a.footer-email { white-space: nowrap; }
 }
 
 /* ─── Round 3 (2026-10-06): the homepage hero ─────────────────────────────────────────────

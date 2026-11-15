@@ -56,6 +56,24 @@ function socialLabel(
   }
 }
 
+/**
+ * The band is one message (`Questions? contact@hkwtia.org` / `查詢：contact@hkwtia.org`).
+ * The label stays on its own line and the address is a nowrap link, so a wide
+ * heading cannot break the mailbox mid-string.
+ */
+function EnquiryBand({title, email}: {title: string; email: string}) {
+  const at = title.indexOf(email);
+  const label = at < 0 ? title : title.slice(0, at).trimEnd();
+  return (
+    <h2 className="footer-enquiry">
+      <span className="footer-enquiry-label">{label}</span>
+      {at < 0 ? null : (
+        <a className="footer-enquiry-email" href={`mailto:${email}`}>{email}</a>
+      )}
+    </h2>
+  );
+}
+
 function isAddressLines(value: unknown): value is readonly string[] {
   return Array.isArray(value)
     && value.length > 0
@@ -90,7 +108,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
   // repeat /contact in two columns, breaking the every-leaf-appears-once property that
   // tests/unit/public-shell.test.tsx pins through its exact target count, or leave hkwtia's About
   // leaves with no column at all. hkwtia's fourth grouping is therefore About (errata
-  // E-21), and every one of the 17 navigation leaves appears exactly once.
+  // E-21), and every navigation leaf appears exactly once.
   // /launchpad is not a leaf: the public route 404s.
   const columns: readonly FooterColumn[] = [
     {id: "explore", label: t("columns.explore"), links: leaves("events-programmes")},
@@ -149,7 +167,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
           <small>{t("legalLine")}</small>
         </div>
         <div className="footer-newsletter">
-          <h2>{t("newsletter.title")}</h2>
+          <EnquiryBand email={siteConfig.contact.email} title={t("newsletter.title")} />
         </div>
       </div>
 
@@ -170,7 +188,10 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
             <Link className={footerTargetClassName} href={contactLink.href}>{contactLink.label}</Link>
           )}
           <Link className={footerTargetClassName} href="/admin-login">{t("staffSignIn")}</Link>
-          <a className={footerTargetClassName} href={`mailto:${siteConfig.contact.email}`}>
+          {/* An anchor, never a form action. Chrome logs an HTTPS mixed-content warning
+              for action="mailto:" (the old newsletter form); form-action 'self' then blocks
+              it. whitespace-nowrap keeps the address intact in the narrow zh-HK column. */}
+          <a className="footer-email inline-flex min-h-11 min-w-11 max-w-full items-center whitespace-nowrap" href={`mailto:${siteConfig.contact.email}`}>
             {siteConfig.contact.email}
           </a>
           {siteConfig.contact.phone === undefined ? null : (
@@ -193,7 +214,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
       </div>
 
       <div className="shell footer-bottom">
-        <strong>{marketingT("footerTagline")}</strong>
+        <strong className="footer-tagline">{marketingT("footerTagline")}</strong>
         <div>
           <Link className={footerTargetClassName} href="/privacy">{t("privacy")}</Link>
           {/* Terms and Accessibility are `retire` in the manifest until WP-7 reviews copy for
