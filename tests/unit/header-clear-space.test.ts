@@ -4,6 +4,7 @@ import {describe, expect, it} from "vitest";
 
 const chrome = readFileSync("app/styles/wisetech-chrome.css", "utf8");
 const experience = readFileSync("app/styles/wisetech-experience.css", "utf8");
+const shell = readFileSync("app/styles/wisetech-shell.css", "utf8");
 
 // A9 / V21. The donor header inset is calc(100% - 48px). At a 135px lockup the
 // clear space is 44px, including the left edge from 1200px up. The 821–1199px
@@ -49,6 +50,25 @@ describe("Ask WTIA clearance", () => {
     expect(chrome).toContain("width: 44px;");
     expect(chrome).toContain("padding-bottom: calc(44px + 10px + env(safe-area-inset-bottom, 0px) + 28px);");
     expect(chrome).toContain(".site-root main { padding-bottom: calc(54px + 22px + 24px); }");
+  });
+
+  it("keeps a scroll margin under the launcher up to 820px without changing main padding", () => {
+    expect(chrome).toContain("@media (max-width: 820px)");
+    expect(chrome).toContain("html { scroll-padding-bottom: 96px; }");
+    expect(chrome).toContain(".site-root main { padding-bottom: calc(54px + 22px + 24px); }");
+  });
+});
+
+describe("footer enquiry band and press rows", () => {
+  it("keeps the enquiry address on one line and stacks press titles on a phone", () => {
+    expect(chrome).toContain("font-size: clamp(1.5rem, 2.6vw, 2.5rem);");
+    expect(chrome).toContain(".footer-enquiry-email");
+    expect(chrome).toContain("white-space: nowrap;");
+    expect(chrome).toContain(".footer-bottom .footer-tagline { text-wrap: balance; }");
+    expect(chrome).toContain("@media (max-width: 480px)");
+    expect(shell).toContain("@media (max-width: 640px)");
+    expect(shell).toContain(".press-coverage .press-title {");
+    expect(shell).toContain("display: block;");
   });
 });
 

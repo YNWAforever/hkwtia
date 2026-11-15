@@ -15,8 +15,9 @@ import zh from "@/messages/zh-HK.json";
  * placeholders, typo fixes, Larry Lam's profile link, Nelson's English role
  * line, and the approved zh-HK ExCo biographies, then Willy's zh-HK job title.
  * It also moved when Navigation.links.media was added in both bundles,
- * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」, and
- * programs.record.winnersOffSiteArchived was added in both bundles.
+ * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」,
+ * programs.record.winnersOffSiteArchived was added in both bundles, and the
+ * English tagline joins Hong and Kong with a non-breaking space.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -173,7 +174,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "879d25129c44e147e3a085c45821e00412e98dd83ce28db2608e5eefc54fdb97";
+const NON_ALLOWLIST_FINGERPRINT = "f33062bcc8c3d0eec6dd851a6dc5449da3204cc6650df0ad5aeee66f6df6219a";
 
 type MessageTree = Record<string, unknown>;
 

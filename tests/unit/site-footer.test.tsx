@@ -79,8 +79,13 @@ describe("SiteFooter", () => {
     // shorter list, has a case of its own below (errata E-68).
     expect(footer.querySelector("address")).toBeNull();
     expect([...siteConfig.contact.addressLines]).toEqual([]);
-    expect(within(footer).getByRole("link", {name: siteConfig.contact.email}))
-      .toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
+    const mail = within(footer).getAllByRole("link", {name: siteConfig.contact.email});
+    expect(mail).toHaveLength(2);
+    for (const link of mail) {
+      expect(link).toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
+    }
+    expect(footer.querySelector(".footer-enquiry-label")?.textContent).toBe("Questions?");
+    expect(footer.querySelector(".footer-enquiry-email")).toHaveClass("footer-enquiry-email");
     expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
     expect(siteConfig.contact.phone).toBeUndefined();
 

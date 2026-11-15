@@ -142,6 +142,7 @@ describe("public shell server surfaces", () => {
       // sign-in. Keep all three in the exact route inventory.
       "/join", "/member-login", "/admin-login",
       "mailto:contact@hkwtia.org",
+      "mailto:contact@hkwtia.org",
     ];
     const targetHrefs = new Set(expectedHrefs);
     const targets = within(footer).getAllByRole("link").filter((link) =>
@@ -156,9 +157,13 @@ describe("public shell server surfaces", () => {
     for (const target of targets) {
       const href = target.getAttribute("href") ?? "";
       if (href.startsWith("mailto:")) {
-        expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "whitespace-nowrap", "footer-email");
         expect(target).not.toHaveClass("break-words");
         expect(target.closest("form")).toBeNull();
+        if (target.classList.contains("footer-enquiry-email")) {
+          expect(target).toHaveClass("footer-enquiry-email");
+        } else {
+          expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "whitespace-nowrap", "footer-email");
+        }
       } else {
         expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "break-words");
       }

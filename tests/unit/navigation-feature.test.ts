@@ -89,7 +89,7 @@ describe("navigation feature aside", () => {
         expect(typeof messageAt(bundle, key), `${name}:${key}`).toBe("string");
       }
     }
-    expect(messageAt(en, "MarketingExtras.footerTagline")).toBe("Technology + Wisdom. Hong Kong + The World.");
+    expect(messageAt(en, "MarketingExtras.footerTagline")).toBe("Technology + Wisdom. Hong\u00a0Kong + The World.");
     expect(messageAt(zh, "MarketingExtras.footerTagline")).toBe("科技 + 智慧。香港 + 世界。");
     expect(messageAt(en, "Navigation.links.media")).toBe("Media & Press");
     expect(messageAt(zh, "Navigation.links.media")).toBe("傳媒報道");
