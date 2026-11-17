@@ -100,9 +100,14 @@ describe("/members directory (D-11)", () => {
     const html = await renderDirectory();
 
     expect(html).toContain(bundles.en.Members.noPublishedTitle);
+    expect(html).toContain(bundles.en.Members.noPublishedDescription);
+    expect(html).toContain(bundles.en.Home.pathways.items.startups.cta);
+    expect(html).toContain('href="/programmes"');
     expect(html).not.toContain('class="partner-record-grid"');
-    expect(html.match(/mailto:contact@hkwtia.org/g)).toHaveLength(1);
-    expect(html).toContain(bundles.en.Members.emptyPrimary);
+    expect(html).not.toContain('id="q"');
+    expect(html).not.toMatch(/mailto:/);
+    expect(html).not.toContain("written consent");
+    expect(html).not.toContain("agree to be featured");
     expect(html).not.toContain(bundles.en.Members.detail.join);
   });
 
@@ -110,9 +115,9 @@ describe("/members directory (D-11)", () => {
     profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
     const unfiltered = await renderDirectory();
     const filtered = await renderDirectory({q: "missing"});
-    expect(unfiltered).toContain("Members will be listed here once they agree to be featured.");
+    expect(unfiltered).toContain(bundles.en.Members.noPublishedTitle);
     expect(filtered).toContain(bundles.en.Members.emptyDescription);
-    expect(filtered).not.toContain("Members will be listed here once they agree to be featured.");
+    expect(filtered).not.toContain(bundles.en.Members.noPublishedTitle);
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {
@@ -131,6 +136,18 @@ describe("/members directory (D-11)", () => {
     expect(html).toContain('href="/zh/members/harbour-vision-ai"');
     expect(html).toContain('href="/zh/members"');
     expect(html).not.toContain("/zh-HK/");
+  });
+
+  it("sends the zh-HK holding action to /zh/programmes", async () => {
+    profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
+
+    const html = await renderDirectory({}, "zh-HK");
+
+    expect(html).toContain(bundles["zh-HK"].Members.noPublishedTitle);
+    expect(html).toContain(bundles["zh-HK"].Members.noPublishedDescription);
+    expect(html).toContain('href="/zh/programmes"');
+    expect(html).not.toContain("/zh-HK/");
+    expect(html).not.toContain('id="q"');
   });
 });
 

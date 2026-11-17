@@ -3,6 +3,7 @@ import {getTranslations} from "next-intl/server";
 
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {OfficialName} from "@/components/marketing/official-name";
 import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {
   localizeNavigation,
@@ -177,7 +178,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
             <strong>{column.label}</strong>
             {column.links.map((link) => (
               <Link className={footerTargetClassName} key={link.id} href={link.href}>
-                {link.label}
+                <span className="official-name"><OfficialName name={link.label} /></span>
               </Link>
             ))}
           </div>

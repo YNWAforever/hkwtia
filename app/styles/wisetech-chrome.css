@@ -461,3 +461,46 @@
 .site-root .event-detail-hero :is(dt, dd, p, a, span) {
   color: #fff;
 }
+
+/* Official programme names wrap. They are never clipped with an ellipsis.
+   「企業」stays on one line; the preferred break in 資訊科技初創企業獎 is the wbr
+   before .official-name-keep. Line-height moves off the donor's .98 only where
+   a wrapped official name would otherwise collide with itself. */
+.official-name-keep { white-space: nowrap; }
+.official-name,
+.flagship-grid > .programme-card h3,
+.programme-grid > .programme-card h3,
+.rich-page-hero.official-title h1,
+.page-hero.directory-holding h1 {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: break-word;
+}
+.flagship-grid > .programme-card h3,
+.programme-grid > .programme-card h3 { line-height: 1.15; }
+.rich-page-hero.official-title h1 { line-height: 1.12; }
+.page-hero.directory-holding h1 {
+  max-width: 16em;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1.2;
+}
+.mega-column a .official-name,
+.mega-column a .official-name-keep,
+.footer-links a .official-name,
+.footer-links a .official-name-keep,
+.mobile-accordion a .official-name,
+.mobile-accordion a .official-name-keep {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: inherit;
+}
+.official-name-keep,
+.mega-column a .official-name-keep,
+.footer-links a .official-name-keep,
+.mobile-accordion a .official-name-keep {
+  display: inline;
+  flex: none;
+  white-space: nowrap;
+}

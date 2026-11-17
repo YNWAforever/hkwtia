@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
+import {OfficialName} from '@/components/marketing/official-name';
 import {ProgrammeGrid, type ProgrammeGridLabels} from '@/components/marketing/programme-grid';
 import {StructuredData} from '@/components/seo/structured-data';
 import {ActionLink} from '@/components/wt/action-link';
@@ -95,7 +96,7 @@ export default async function ProgrammesPage({params}: Props) {
           {summaries.map((programme, index) => (
             <li key={programme.id}>
               <span>{String(index + 1).padStart(2, '0')}</span>
-              <b>{labels.items[programme.id].name}</b>
+              <b><OfficialName name={labels.items[programme.id].name} /></b>
               {programme.type === 'credential' || programme.firstYear === null || programme.latestYear === null || programme.editionCount === null ? (
                 <span>{t('history.credential')}</span>
               ) : (

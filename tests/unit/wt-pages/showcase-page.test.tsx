@@ -32,6 +32,14 @@ vi.mock("@/i18n/navigation", () => ({
 
 import ShowcasePage from "@/app/[locale]/(public)/showcase/page";
 
+const publishedListing = {
+  slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 1, memberSince: "2020-01-01",
+  nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence", taglineZhHk: "貿易智能",
+  descriptionEn: "Public description", descriptionZhHk: "公開描述", category: "software", useCases: ["logistics"],
+  deploymentOptions: ["cloud"], supportedLanguages: ["en"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null,
+  caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
+};
+
 async function renderShowcase(searchParams: Record<string, string> = {}) {
   const html = renderToStaticMarkup(await ShowcasePage({
     params: Promise.resolve({locale: "en"}),
@@ -47,7 +55,7 @@ describe("/showcase rewrite", () => {
   }
 
   it("renders the six directory-prompt search shortcuts, each its own GET form to /showcase with only q set", async () => {
-    showcase.listPublished.mockResolvedValue([]);
+    showcase.listPublished.mockResolvedValue([publishedListing]);
     const html = await renderShowcase();
 
     expect(html).toContain('class="directory-prompts"');
@@ -58,7 +66,7 @@ describe("/showcase rewrite", () => {
   });
 
   it("gives the search input a real id so #q deep-links resolve (E-29)", async () => {
-    showcase.listPublished.mockResolvedValue([]);
+    showcase.listPublished.mockResolvedValue([publishedListing]);
     const html = await renderShowcase();
 
     expect(html).toMatch(/<label[^>]*for="q"[^>]*>/);
@@ -93,6 +101,12 @@ describe("/showcase rewrite", () => {
     const unfiltered = await renderShowcase();
     const filtered = await renderShowcase({q: "missing"});
     expect(unfiltered).toContain(bundles.en.Showcase.noPublishedTitle);
+    expect(unfiltered).toContain(bundles.en.Showcase.noPublishedDescription);
+    expect(unfiltered).toContain('href="/programmes"');
+    expect(unfiltered).not.toContain('class="directory-prompts"');
+    expect(unfiltered).not.toContain('class="solution-needs"');
+    expect(unfiltered).not.toContain('class="solution-pathways"');
+    expect(unfiltered).not.toContain("member consent");
     expect(filtered).toContain(bundles.en.Showcase.emptyDescription);
     expect(filtered).not.toContain(bundles.en.Showcase.noPublishedTitle);
   });
@@ -105,13 +119,7 @@ describe("/showcase rewrite", () => {
   });
 
   it("renders published listings inside .partner-record-grid using the restyled ShowcaseCard", async () => {
-    showcase.listPublished.mockResolvedValue([{
-      slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 1, memberSince: "2020-01-01",
-      nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence", taglineZhHk: "貿易智能",
-      descriptionEn: "Public description", descriptionZhHk: "公開描述", category: "software", useCases: ["logistics"],
-      deploymentOptions: ["cloud"], supportedLanguages: ["en"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null,
-      caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
-    }]);
+    showcase.listPublished.mockResolvedValue([publishedListing]);
     const html = await renderShowcase();
 
     expect(html).toContain('class="partner-record-grid"');
@@ -130,7 +138,7 @@ describe("/showcase rewrite", () => {
   });
 
   it("renders the buyer/provider solution-pathways with the correct destinations", async () => {
-    showcase.listPublished.mockResolvedValue([]);
+    showcase.listPublished.mockResolvedValue([publishedListing]);
     const html = await renderShowcase();
 
     expect(html).toContain('class="solution-pathways"');
@@ -142,13 +150,7 @@ describe("/showcase rewrite", () => {
   it("does not render the extra Browse events interest band", async () => {
     showcase.listPublished.mockResolvedValue([]);
     const empty = await renderShowcase();
-    showcase.listPublished.mockResolvedValue([{
-      slug: "harbour-vision-ai", premium: false, goneGlobal: false, views: 1, memberSince: "2020-01-01",
-      nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence", taglineZhHk: "貿易智能",
-      descriptionEn: "Public description", descriptionZhHk: "公開描述", category: "software", useCases: ["logistics"],
-      deploymentOptions: ["cloud"], supportedLanguages: ["en"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null,
-      caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
-    }]);
+    showcase.listPublished.mockResolvedValue([{...publishedListing, premium: false}]);
     const published = await renderShowcase();
 
     expect(empty).not.toContain('class="event-interest"');

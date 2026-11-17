@@ -1,3 +1,4 @@
+import {OfficialName} from '@/components/marketing/official-name';
 import {Arrow} from '@/components/wt/arrow';
 import {CardIndex} from '@/components/wt/card-index';
 import {StatusLabel} from '@/components/wt/status-label';
@@ -27,7 +28,7 @@ export function ProgrammeGrid({summaries, labels}: Readonly<{summaries: readonly
             <StatusLabel>{programme.type === 'credential' ? labels.credentialLabel : labels.eventSeriesLabel}</StatusLabel>
             <CardIndex index={index + 1} />
           </div>
-          <h3>{labels.items[programme.id].name}</h3>
+          <h3><OfficialName name={labels.items[programme.id].name} /></h3>
           <p>{labels.items[programme.id].description}</p>
           <small>
             {/* Cards count editions since the FIRST year, not the latest (a programme running

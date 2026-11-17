@@ -4,6 +4,7 @@ import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/co
 import {Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle} from "@/components/ui/sheet";
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {OfficialName} from "@/components/marketing/official-name";
 import {Arrow} from "@/components/wt/arrow";
 import type {LocalizedNavigationGroup, NavigationViewModel} from "@/config/navigation";
 import {Link, usePathname} from "@/i18n/navigation";
@@ -153,7 +154,7 @@ export function MobileNavPanel({
                           prefetch={false}
                           aria-current={pathname === link.href ? "page" : undefined}
                         >
-                          {link.label}
+                          <span className="official-name"><OfficialName name={link.label} /></span>
                           <Arrow />
                         </Link>
                       </SheetClose>

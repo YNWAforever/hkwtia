@@ -74,6 +74,8 @@ describe("ProgrammesPage", () => {
     expect(history.textContent).toContain("2020–2025");
     expect(history.textContent).toContain("6 recorded editions");
     expect(history.textContent).toContain(bundles.en.Programmes.history.credential);
+    expect(screen.getByRole("heading", {name: "Asia Smart Innovation Awards"}).closest("article")?.textContent).toContain("10 editions since 2013");
+    expect(screen.getByRole("status")).toHaveTextContent(bundles.en.Programmes.open.emptyTitle);
   });
 
   it("builds indexable bilingual metadata", async () => {

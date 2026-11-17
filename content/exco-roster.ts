@@ -48,7 +48,7 @@ export type ExcoRosterMember = Readonly<{
   bio: boolean;
   /** messages Committees.roster.<slug>.linkedIn exists. Only Larry Lam. */
   linkedIn?: boolean;
-  /** Null renders an initials placeholder. No stock image and no logo. */
+  /** Null renders a neutral empty portrait: no initials, monogram, or letters. */
   photo: string | null;
   /** `top` keeps full-body and landscape frames from cropping the face. */
   photoPosition: "center" | "top";

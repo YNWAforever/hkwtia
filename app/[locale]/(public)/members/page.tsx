@@ -5,12 +5,10 @@ import {MemberCard} from "@/components/marketing/member-card";
 import {MemberFilters} from "@/components/marketing/member-filters";
 import {StructuredData} from "@/components/seo/structured-data";
 import {ClosingBand} from "@/components/wt/closing-band";
-import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
-import {siteConfig} from "@/config/site";
 import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {buildPageMetadata} from "@/lib/metadata";
 import {recordDirectoryReadFailure} from "@/lib/members/directory-availability";
@@ -37,11 +35,12 @@ export default async function MembersPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const [t, tCommon, tRoot, query] = await Promise.all([
+  const [t, tCommon, tRoot, pathways, query] = await Promise.all([
     getTranslations({locale, namespace: "Members"}),
     getTranslations({locale, namespace: "Common"}),
     // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
     getTranslations({locale}),
+    getTranslations({locale, namespace: "Home.pathways"}),
     searchParams,
   ]);
   const filters = parseMemberFilters(query);
@@ -65,16 +64,27 @@ export default async function MembersPage({params, searchParams}: Props) {
   const plans = Object.fromEntries(
     MEMBERSHIP_PLAN_CODES.map((plan) => [plan, t(`plans.${plan}`)]),
   ) as Record<MembershipPlanCode, string>;
+  // Unpublished and unfiltered is the holding page: hero, one honest line, one
+  // programmes action. Filters, the closing band, and consent chrome stay off
+  // that state. A failed read and a filtered empty result keep their own states.
+  const holding = members !== null && members.length === 0 && !hasFilters;
+  const seeProgrammes = pathways("items.startups.cta");
 
-  return <>
+  const hero = (
     <PageHero
       breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("breadcrumbCurrent")}}
       breadcrumbLabel={tCommon("breadcrumbLabel")}
+      className={holding ? "directory-holding" : undefined}
       eyebrow={t("eyebrow")}
-      lead={t("description")}
-      title={t("title")}
+      lead={holding ? t("noPublishedDescription") : t("description")}
+      title={holding ? t("noPublishedTitle") : t("title")}
+      actions={holding ? [{href: localizedPath(locale, "/programmes"), label: seeProgrammes, plain: true}] : undefined}
     />
-    <Section id="results" labelledBy="members-results-title">
+  );
+
+  return <>
+    {holding ? <div role="status" aria-live="polite">{hero}</div> : hero}
+    {holding ? null : <Section id="results" labelledBy="members-results-title">
       {/* Without it the outline jumped h1 -> h3 (the card or empty-state title). */}
       <h2 className="sr-only">{t("resultsHeading")}</h2>
       {/* The count is the section's accessible name and a polite live region: a filter submit is a
@@ -100,21 +110,15 @@ export default async function MembersPage({params, searchParams}: Props) {
         ? <div className="partner-record-grid">
           {members.map((member) => <MemberCard key={member.slug} labels={{plans, view: t("view")}} locale={locale} member={member} />)}
         </div>
-        : hasFilters
-        ? <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />
-        : <HonestDirectoryEmpty
-            next={t("noPublishedDescription")}
-            primary={{href: `mailto:${siteConfig.contact.email}`, label: t("emptyPrimary")}}
-            status={t("noPublishedTitle")}
-          />}
+        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />}
       {directory.nextCursor && <nav aria-label={t("paginationLabel")} className="mt-8 text-center"><a className="button button-dark" href={nextHref}>{t("loadMore")}</a></nav>}
-    </Section>
-    <ClosingBand
+    </Section>}
+    {holding ? null : <ClosingBand
       actions={[]}
       copy={t("metaDescription")}
       eyebrow={t("eyebrow")}
       title={t("detail.joinCta")}
-    />
+    />}
     <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/members", tRoot))} />
   </>;
 }

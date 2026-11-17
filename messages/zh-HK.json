@@ -77,9 +77,9 @@
     "links": {
       "events": "活動",
       "programmes": "計劃總覽",
-      "hkict": "香港資訊及通訊科技獎",
-      "asa": "亞洲智能應用程式大獎",
-      "tct": "Tech to Connect",
+      "hkict": "資訊科技初創企業獎",
+      "asa": "亞洲智慧創新大獎",
+      "tct": "智創互聯",
       "cpai": "CPAI",
       "membership": "會員計劃",
       "members": "會員名錄",
@@ -505,7 +505,7 @@
           "title": "初創企業",
           "copy": "為香港科技初創而設的計劃及活動。",
           "benefits": "香港資訊及通訊科技獎：ICT 初創獎・Tech to Connect",
-          "cta": "瀏覽會員展示"
+          "cta": "瀏覽計劃"
         },
         "professionals": {
           "title": "專業人士",
@@ -594,7 +594,7 @@
         "copyEmpty": "會員展示 — 經會員同意後刊登的方案。",
         "copyUnavailable": "會員展示 — 經會員同意後刊登的方案。",
         "copyAvailable": "會員展示 — 經會員同意後刊登的方案。",
-        "action": "探索解決方案"
+        "action": "瀏覽計劃"
       }
     },
     "outcomes": {
@@ -657,15 +657,15 @@
           "description": "支援應用創新的專項計劃。"
         },
         "hkict": {
-          "name": "香港資訊及通訊科技獎",
+          "name": "資訊科技初創企業獎",
           "description": "表揚香港科技界的卓越成果。"
         },
         "tct": {
-          "name": "TCT",
+          "name": "智創互聯",
           "description": "連接科技、能力與人才。"
         },
         "asa": {
-          "name": "亞洲智能應用程式大獎",
+          "name": "亞洲智慧創新大獎",
           "description": "嘉許亞洲優秀智能應用程式。"
         }
       }
@@ -677,7 +677,7 @@
       "items": {
         "cpai": {
           "label": "CPAI",
-          "blurb": "了解 CPAI 計劃。",
+          "blurb": "Certified Practitioner in GenAI",
           "primaryLabel": "查看計劃"
         },
         "hkict": {
@@ -687,13 +687,13 @@
           "secondaryLabel": "本會專頁"
         },
         "tct": {
-          "label": "Tech to Connect",
+          "label": "智創互聯",
           "blurb": "WTIA 連結科技與實踐的業界系列。",
           "primaryLabel": "系列網站",
           "secondaryLabel": "本會專頁"
         },
         "asa": {
-          "label": "亞洲智能應用程式／智慧創新大獎",
+          "label": "亞洲智慧創新大獎",
           "blurb": "WTIA 亞洲智能應用與創新大獎。",
           "primaryLabel": "查看計劃"
         },
@@ -913,7 +913,7 @@
     "metaDescription": "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
     "eyebrow": "自2001年",
     "title": "我們的歷史",
-    "intro": "回顧香港無線及科技產業二十六年來的發展里程碑。",
+    "intro": "回顧自 2001 年起，香港無線及科技產業二十五年的發展里程碑。",
     "storyTitle": "里程碑故事",
     "readMore": "閱讀更多",
     "compass": {
@@ -1387,19 +1387,19 @@
       "audience": "修讀 WTIA 應用人工智能專業資格的在職人士。"
     },
     "hkict": {
-      "title": "香港資訊及通訊科技獎",
+      "title": "資訊科技初創企業獎",
       "description": "表揚香港科技界的卓越成果。",
       "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
       "audience": "香港科技企業及公共機構的創新團隊。"
     },
     "tct": {
-      "title": "TCT",
+      "title": "智創互聯（Tech to Connect）",
       "description": "連接科技、能力與人才。",
       "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
       "audience": "希望實踐科技應用的中小企領袖。"
     },
     "asa": {
-      "title": "亞洲智能應用程式大獎",
+      "title": "亞洲智慧創新大獎",
       "description": "嘉許亞洲優秀智能應用程式。",
       "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
       "audience": "參與亞洲賽事的智能應用程式開發團隊。"
@@ -1436,11 +1436,11 @@
   },
   "Programmes": {
     "metaTitle": "計劃總覽｜香港無線科技商會 WTIA",
-    "metaDescription": "WTIA 計劃及獎項的正式紀錄：Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI，包括歷屆內容及下一步。",
+    "metaDescription": "WTIA 計劃存檔：資訊科技初創企業獎、智創互聯（Tech to Connect）、亞洲智慧創新大獎及 CPAI。",
     "hero": {
       "eyebrow": "計劃",
-      "title": "把參與轉化為進步的計劃。",
-      "lead": "探索 WTIA 生態系統的獎項、學習、市場拓展及產業發展計劃，每項均以商會自身的結構化紀錄為依據。",
+      "title": "獎項、學習及業界計劃。",
+      "lead": "WTIA 為香港科技業界舉辦重點獎項與計劃。各專頁列出已存檔的歷屆紀錄，並說明查詢途徑。",
       "breadcrumbCurrent": "計劃總覽"
     },
     "groupings": {
@@ -1450,7 +1450,7 @@
     },
     "open": {
       "eyebrow": "計劃目錄",
-      "title": "尋找推動你向前的計劃。",
+      "title": "現正開放的計劃。",
       "intro": "按目的、對象及歷屆內容瀏覽各項計劃。如欲申請，請前往各計劃專頁。",
       "statusLabel": "開放申請",
       "emptyTitle": "本網站目前沒有開放申請的計劃。",
@@ -1460,12 +1460,12 @@
     },
     "catalogue": {
       "eyebrow": "目錄",
-      "title": "四項有紀錄可依的計劃。",
-      "intro": "每張卡片均讀取自結構化計劃紀錄；屆數由紀錄計算得出，並非人手輸入。"
+      "title": "計劃及歷屆紀錄。",
+      "intro": "按目的、對象及歷屆內容瀏覽各項計劃。"
     },
     "history": {
       "eyebrow": "計劃歷史",
-      "title": "承接具長遠價值的計劃經驗。",
+      "title": "歷屆紀錄。",
       "intro": "WTIA 檔案所記錄的每一屆，由首屆到最新一屆；新計劃資訊將陸續加入。",
       "span": "{first}–{latest}",
       "editions": "{count} 屆紀錄",
@@ -1528,7 +1528,7 @@
   },
   "Showcase": {
     "metaTitle": "會員展示｜香港無線科技商會 WTIA",
-    "metaDescription": "瀏覽 WTIA 會員企業已發布的科技方案。",
+    "metaDescription": "此頁將刊登 WTIA 會員企業的方案。",
     "detailFallbackDescription": "WTIA 會員展示",
     "eyebrow": "會員展示",
     "title": "會員展示",
@@ -1538,8 +1538,8 @@
     "ownerCta": "管理你的展示頁",
     "resultsTitle": "探索會員方案",
     "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
-    "noPublishedTitle": "會員展示即將推出。",
-    "noPublishedDescription": "方案內容將於會員同意並審核後陸續上架。",
+    "noPublishedTitle": "目前尚未刊登會員方案。",
+    "noPublishedDescription": "如欲刊登方案，請電郵 contact@hkwtia.org。",
     "emptyPrimary": "如有意參與會員展示，請電郵 contact@hkwtia.org。",
     "emptySecondary": "成為會員後可提交",
     "emptyTitle": "沒有符合的已發布展示頁",
@@ -1641,7 +1641,7 @@
   },
   "Members": {
     "metaTitle": "會員目錄｜香港無線科技商會 WTIA",
-    "metaDescription": "WTIA 會員名錄：已發布的香港無線及科技企業簡介。",
+    "metaDescription": "WTIA 會員名錄將於此刊登會員簡介。",
     "eyebrow": "會員名錄",
     "title": "會員目錄",
     "description": "塑造香港無線、流動及 AI+ 產業的機構。每個專頁由會員維護並經 WTIA 審核。",
@@ -1668,8 +1668,8 @@
     "resultsHeading": "會員名錄",
     "loadMore": "查看更多會員",
     "paginationLabel": "會員名錄分頁",
-    "noPublishedTitle": "會員同意後，將於此列出。",
-    "noPublishedDescription": "會員介紹須經書面同意後才上架。",
+    "noPublishedTitle": "目前尚未刊登會員簡介。",
+    "noPublishedDescription": "如欲列入名錄，請電郵 contact@hkwtia.org。",
     "emptyPrimary": "如欲列入會員名錄，請電郵 contact@hkwtia.org。",
     "emptySecondary": "了解會籍",
     "emptyTitle": "暫時沒有相符的會員專頁",

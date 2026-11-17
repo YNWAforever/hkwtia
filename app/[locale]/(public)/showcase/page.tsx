@@ -7,17 +7,16 @@ import {ShowcaseFilters} from "@/components/marketing/showcase-filters";
 import {SolutionNeeds} from "@/components/marketing/solution-needs";
 import {SolutionPathways} from "@/components/marketing/solution-pathways";
 import {StructuredData} from "@/components/seo/structured-data";
-import {HonestDirectoryEmpty} from "@/components/wt/honest-directory-empty";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
-import {siteConfig} from "@/config/site";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {buildPageMetadata} from "@/lib/metadata";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {parseShowcaseFilters, toPublicListing} from "@/lib/showcase/contracts";
 import {buildBreadcrumbData} from "@/lib/structured-data";
+import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -51,11 +50,12 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const [t, tCommon, tRoot, query] = await Promise.all([
+  const [t, tCommon, tRoot, pathways, query] = await Promise.all([
     getTranslations({locale, namespace: "Showcase"}),
     getTranslations({locale, namespace: "Common"}),
     // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
     getTranslations({locale}),
+    getTranslations({locale, namespace: "Home.pathways"}),
     searchParams,
   ]);
   const filters = parseShowcaseFilters(query);
@@ -67,16 +67,24 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   const filterLabels = {search: t("filters.search"), category: t("filters.category"), useCase: t("filters.useCase"), deployment: t("filters.deployment"), language: t("filters.language"), worksWith: t("filters.worksWith"), submit: t("filters.submit"), clear: t("filters.clear")};
   const prompts = PROMPTS.map((prompt) => ({query: prompt.query, label: t(`prompts.${prompt.key}`)}));
   const chips = USE_CASES.map((key) => ({slug: USE_CASE_SLUGS[key], label: t(`needs.${key}`)}));
-
-  return <>
+  // Same holding rule as /members: no prompt, filter, need, or pathway chrome
+  // until a listing is actually published. Consent workflow code is untouched.
+  const holding = rows !== null && listings.length === 0 && !hasFilters;
+  const hero = (
     <PageHero
       breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
       breadcrumbLabel={tCommon("breadcrumbLabel")}
+      className={holding ? "directory-holding" : undefined}
       eyebrow={t("eyebrow")}
-      lead={t("description")}
-      title={t("title")}
+      lead={holding ? t("noPublishedDescription") : t("description")}
+      title={holding ? t("noPublishedTitle") : t("title")}
+      actions={holding ? [{href: localizedPath(locale, "/programmes"), label: pathways("items.startups.cta"), plain: true}] : undefined}
     />
-    <Section id="results" labelledBy="showcase-results-title">
+  );
+
+  return <>
+    {holding ? <div role="status" aria-live="polite">{hero}</div> : hero}
+    {holding ? null : <Section id="results" labelledBy="showcase-results-title">
       <h2 className="sr-only" id="showcase-results-title">{t("resultsTitle")}</h2>
       <DirectoryPrompts locale={locale} prompts={prompts} />
       <ShowcaseFilters filters={filters} labels={filterLabels} locale={locale} />
@@ -85,21 +93,15 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         ? <HonestEmpty copy={t("unavailableDescription")} title={t("unavailableTitle")} variant="inner" />
         : listings.length > 0
         ? <div className="partner-record-grid">{listings.map((listing) => <ShowcaseCard key={listing.slug} labels={cardLabels} listing={listing} locale={locale} />)}</div>
-        : hasFilters
-        ? <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />
-        : <HonestDirectoryEmpty
-            next={t("noPublishedDescription")}
-            primary={{href: `mailto:${siteConfig.contact.email}`, label: t("emptyPrimary")}}
-            status={t("noPublishedTitle")}
-          />}
-    </Section>
-    <Section labelledBy="showcase-pathways-title">
+        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />}
+    </Section>}
+    {holding ? null : <Section labelledBy="showcase-pathways-title">
       <h2 className="sr-only" id="showcase-pathways-title">{t("pathways.heading")}</h2>
       <SolutionPathways
         buyer={{label: t("pathways.buyer.label"), title: t("pathways.buyer.title"), copy: t("pathways.buyer.copy"), action: t("pathways.buyer.action"), href: "/contact"}}
         provider={{label: t("pathways.provider.label"), title: t("pathways.provider.title"), copy: t("pathways.provider.copy"), action: t("ownerCta"), href: "/portal/company/listing"}}
       />
-    </Section>
+    </Section>}
     <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/showcase", tRoot))} />
   </>;
 }

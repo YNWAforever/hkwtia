@@ -19,8 +19,9 @@ const EN_META = {
   // t419u voice pass replaced the Phase 0 membership sentence with the approved fee line.
   Membership: "WTIA membership: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Join online.",
   Contact: "Contact WTIA / Wireless（香港無線科技商會）. Email contact@hkwtia.org. Visit hkwtia.org.",
-  Members: "WTIA member directory—published profiles of Hong Kong wireless and technology companies.",
-  Showcase: "Browse published technology solutions from WTIA member companies.",
+  // t484s2232 replaced the Phase 0 directory and showcase sentences. The length cap stays.
+  Members: "The WTIA member directory will list member profiles here.",
+  Showcase: "Member solutions from WTIA companies will be listed here.",
   News: "News and updates from the Hong Kong Wireless Technology Industry Association (WTIA).",
 } as const;
 
@@ -33,8 +34,8 @@ const ZH_META = {
   // Same t419u fee line. The 80-character cap below still applies.
   Membership: "會費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。歡迎加入。",
   Contact: "聯絡香港無線科技商會（WTIA）。電郵 contact@hkwtia.org。網址 hkwtia.org。",
-  Members: "WTIA 會員名錄：已發布的香港無線及科技企業簡介。",
-  Showcase: "瀏覽 WTIA 會員企業已發布的科技方案。",
+  Members: "WTIA 會員名錄將於此刊登會員簡介。",
+  Showcase: "此頁將刊登 WTIA 會員企業的方案。",
   News: "香港無線科技商會（WTIA）最新消息及公告。",
 } as const;
 

@@ -34,7 +34,7 @@ vi.mock("@/i18n/navigation", () => ({
 
 const expected = {
   en: {
-    labels: ["CPAI", "Startup Award", "Tech to Connect", "Asia Smart App / Innovation Awards", "InsidW"],
+    labels: ["CPAI", "ICT Startup Award", "Tech to Connect", "Asia Smart Innovation Awards", "InsidW"],
     cpai: "View programme",
     hkictPrimary: "Award site",
     hkictSecondary: "On WTIA",
@@ -44,7 +44,7 @@ const expected = {
     insidw: "Visit InsidW",
   },
   "zh-HK": {
-    labels: ["CPAI", "資訊科技初創企業獎", "Tech to Connect", "亞洲智能應用程式／智慧創新大獎", "InsidW"],
+    labels: ["CPAI", "資訊科技初創企業獎", "智創互聯", "亞洲智慧創新大獎", "InsidW"],
     cpai: "查看計劃",
     hkictPrimary: "獎項網站",
     hkictSecondary: "本會專頁",
@@ -64,6 +64,13 @@ describe("ProgrammeShowcase", () => {
     const cards = [...document.querySelectorAll(".programme-card")];
     expect(cards).toHaveLength(5);
     expect(cards.map((card) => card.querySelector("h3")?.textContent)).toEqual([...copy.labels]);
+    if (locale === "zh-HK") {
+      const hkictHeading = cards[1]?.querySelector("h3");
+      expect(hkictHeading?.textContent).toBe("資訊科技初創企業獎");
+      expect(hkictHeading?.querySelector(".official-name-keep")?.textContent).toBe("初創企業獎");
+      expect(hkictHeading?.innerHTML).toContain("<wbr");
+      expect(hkictHeading?.innerHTML).not.toContain("…");
+    }
     expect(screen.queryByRole("heading", {name: "HKICT Awards"})).toBeNull();
     expect(document.body.innerHTML).not.toContain("bestasiaapp");
 
@@ -72,7 +79,14 @@ describe("ProgrammeShowcase", () => {
     expect(onlyLink(cpai)).toHaveTextContent(copy.cpai);
     expect(onlyLink(cpai)).not.toHaveAttribute("target");
 
-    const hkict = cardNamed(copy.labels[1]);
+    // The preferred break is a <wbr>, which the accessibility tree may surface
+    // as a pause. The visible and accessible text still contain the whole name.
+    const hkict = locale === "zh-HK"
+      ? cards[1] as HTMLElement
+      : cardNamed(copy.labels[1]);
+    if (locale === "zh-HK") {
+      expect(screen.getByRole("heading", {name: /資訊科技\s*初創企業獎/})).toBeInTheDocument();
+    }
     const hkictLinks = within(hkict).getAllByRole("link");
     expect(hkictLinks).toHaveLength(2);
     expect(hkictLinks[0]).toHaveAttribute("href", "https://www.ictstartupaward.com/");

@@ -1,5 +1,6 @@
 "use client";
 
+import {OfficialName} from "@/components/marketing/official-name";
 import {Arrow} from "@/components/wt/arrow";
 import {StatusLabel} from "@/components/wt/status-label";
 import type {LocalizedNavigationGroup} from "@/config/navigation";
@@ -56,7 +57,7 @@ export function MegaMenuPanel({
                     aria-current={pathname === link.href ? "page" : undefined}
                     onClick={onNavigate}
                   >
-                    {link.label}
+                    <span className="official-name"><OfficialName name={link.label} /></span>
                     <Arrow />
                   </Link>
                 ))}

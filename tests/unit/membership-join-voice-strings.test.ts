@@ -18,6 +18,10 @@ import zh from "@/messages/zh-HK.json";
  * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」,
  * programs.record.winnersOffSiteArchived was added in both bundles, and the
  * English tagline joins Hong and Kong with a non-breaking space.
+ * t484s2232 (sections 1.1–1.4 only) moved the public programme names, Programmes
+ * meta/hero/catalogue/open/history titles, the Members and Showcase holding
+ * lines, History.intro, the startup and showcase CTAs, and the CPAI flagship
+ * blurb. Fees, tier benefits, and the voice-pass allowlist did not move.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -174,7 +178,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "f33062bcc8c3d0eec6dd851a6dc5449da3204cc6650df0ad5aeee66f6df6219a";
+const NON_ALLOWLIST_FINGERPRINT = "bdc753bcf4762cea4e4f6438f9dddbd810ec831d53db6d37c1ca664e884d2c07";
 
 type MessageTree = Record<string, unknown>;
 

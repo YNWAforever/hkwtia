@@ -12,7 +12,9 @@ import {Link} from '@/i18n/navigation';
 const items = [
   {key: 'corporates', href: '/membership', accent: 'cyan', destinations: ['membership', 'showcase', 'partners']},
   {key: 'smes', href: '/events', accent: 'jade', destinations: ['events', 'showcase', 'membership']},
-  {key: 'startups', href: '/showcase', accent: 'amber', destinations: ['showcase', 'contact', 'programmes']},
+  // t484s2232 retargets this primary CTA to programmes. The showcase leaf stays
+  // in the route list below; only the button destination changes.
+  {key: 'startups', href: '/programmes', accent: 'amber', destinations: ['showcase', 'contact', 'programmes']},
   {key: 'professionals', href: '/membership', accent: 'blue', destinations: ['membership', 'cpai', 'committees']},
   {key: 'gba', href: '/events', accent: 'violet', destinations: ['contact', 'partners', 'events']},
 ] as const;

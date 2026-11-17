@@ -2,8 +2,8 @@ import {AxeBuilder} from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 
 const locales = [
-  {prefix: "", memberLink: "Discover members", showcaseLink: "Explore solutions", faq: "Membership FAQ"},
-  {prefix: "/zh", memberLink: "探索會員", showcaseLink: "探索解決方案", faq: "會員常見問題"},
+  {prefix: "", memberLink: "Discover members", showcaseLink: "See programmes", faq: "Membership FAQ"},
+  {prefix: "/zh", memberLink: "探索會員", showcaseLink: "瀏覽計劃", faq: "會員常見問題"},
 ] as const;
 
 for (const {prefix, memberLink, showcaseLink, faq} of locales) {
@@ -11,7 +11,7 @@ for (const {prefix, memberLink, showcaseLink, faq} of locales) {
     const response = await page.goto(prefix || "/");
     expect(response?.status()).toBe(200);
     await expect(page.locator(".directory-panel").getByRole("link", {name: memberLink})).toHaveAttribute("href", `${prefix}/members`);
-    await expect(page.locator(".marketplace-panel").getByRole("link", {name: showcaseLink})).toHaveAttribute("href", `${prefix}/showcase`);
+    await expect(page.locator(".marketplace-panel").getByRole("link", {name: showcaseLink})).toHaveAttribute("href", `${prefix}/programmes`);
     await page.goto(`${prefix}/members`);
     await expect(page.getByRole("main").getByRole("heading", {level: 1})).toBeVisible();
     await page.goto(`${prefix}/showcase`);

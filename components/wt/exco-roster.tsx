@@ -17,14 +17,6 @@ export type ExcoRosterCard = Readonly<{
 // Copy is resolved from messages/en.json and messages/zh-HK.json by the page.
 // zhPending lives on content/exco-roster.ts. Approved zh-HK bios are in messages.
 
-function initials(name: string) {
-  const parts = name.split(/\s+/).filter((part) => part.length > 0);
-  const first = parts[0] ?? '';
-  const last = parts.length >= 2 ? (parts[parts.length - 1] ?? '') : '';
-  const letters = last ? `${first.slice(0, 1)}${last.slice(0, 1)}` : first.slice(0, 2);
-  return letters.toUpperCase();
-}
-
 export function ExcoRoster({members}: Readonly<{members: readonly ExcoRosterCard[]}>) {
   return (
     <div className="exco-roster">
@@ -41,7 +33,7 @@ export function ExcoRoster({members}: Readonly<{members: readonly ExcoRosterCard
                 src={member.photo}
               />
             ) : (
-              <span aria-hidden="true" className="exco-roster-fallback">{initials(member.name)}</span>
+              <span aria-hidden="true" className="exco-roster-fallback" />
             )}
           </div>
           <div className="exco-roster-body">

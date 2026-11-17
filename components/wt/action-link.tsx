@@ -17,14 +17,15 @@ const variantClasses: Record<ActionLinkVariant, string> = {
 // `prefetch` passes through to the locale-aware Link. Public callers leave it unset and keep
 // Next's default; a member-portal caller passes `false`, because prefetching a private route
 // costs an authenticated render per visible link (the PrivateLink rule, commit 42930d9a).
-type ActionLinkProps = Readonly<{href: string; variant?: ActionLinkVariant; className?: string; prefetch?: boolean; children: ReactNode}>;
+type ActionLinkProps = Readonly<{href: string; variant?: ActionLinkVariant; className?: string; prefetch?: boolean; plain?: boolean; children: ReactNode}>;
 
-export function ActionLink({href, variant = 'button', className, prefetch, children}: ActionLinkProps) {
+export function ActionLink({href, variant = 'button', className, prefetch, plain = false, children}: ActionLinkProps) {
   // Donor spacing: the literal space between the label and <Arrow /> is the port's own
   // layout, not a stray character for the string audit to flag.
   const classNameValue = cn(variantClasses[variant], className);
   // mailto and absolute URLs must not go through the locale Link, which would prefix them.
-  if (/^(mailto:|https?:)/.test(href)) {
+  // `plain` is the same escape for a href that `localizedPath` has already prefixed.
+  if (plain || /^(mailto:|https?:)/.test(href)) {
     return (
       <a className={classNameValue} href={href}>
         {children} <Arrow />

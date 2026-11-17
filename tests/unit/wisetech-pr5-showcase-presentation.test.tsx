@@ -102,6 +102,20 @@ describe("WiseTech PR5 Showcase presentation", () => {
   });
 
   it("links the authorized owner directly to the existing localized portal listing", async () => {
+    const holdingEn = await renderIndex("en");
+    const holdingZh = await renderIndex("zh-HK");
+    expect(holdingEn).not.toContain('href="/portal/company/listing"');
+    expect(holdingZh).not.toContain('href="/zh/portal/company/listing"');
+    expect(holdingEn).toContain('href="/programmes"');
+    expect(holdingZh).toContain('href="/zh/programmes"');
+
+    showcase.listPublished.mockResolvedValue([{
+      slug: "harbour-vision-ai", premium: false, goneGlobal: false, views: 1, memberSince: "2020-01-01",
+      nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence", taglineZhHk: "貿易智能",
+      descriptionEn: "Public description", descriptionZhHk: "公開描述", category: "software", useCases: ["logistics"],
+      deploymentOptions: ["cloud"], supportedLanguages: ["en"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null,
+      caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
+    }]);
     const en = await renderIndex("en");
     const zh = await renderIndex("zh-HK");
 
