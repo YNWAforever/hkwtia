@@ -44,7 +44,6 @@ export function DualBrandLockup({labels, priority = false, className, surface = 
     <Link
       className={cn("brand min-h-11 min-w-11 max-w-full", className)}
       href="/"
-      aria-label={labels.homeLabel}
       prefetch={false}
     >
       <span className={cn("brand-logo-wrap", surface === "navy" ? "brand-logo-navy" : "brand-logo-light")}>
@@ -63,6 +62,9 @@ export function DualBrandLockup({labels, priority = false, className, surface = 
         <strong>{labels.publicName}</strong>
         <small>{labels.descriptor}</small>
       </span>
+      {/* After the visible wordmark so the accessible name contains it (WCAG 2.5.3).
+          An aria-label of only "WTIA home" dropped the descriptor. */}
+      <span className="sr-only">{labels.homeLabel}</span>
     </Link>
   );
 }

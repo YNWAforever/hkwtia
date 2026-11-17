@@ -42,7 +42,7 @@ export default async function TctPage({params}: Props) {
   return (
     <>
       <PageHero
-        className="rich-page-hero"
+        className="rich-page-hero official-title"
         eyebrow={facts.typeLabel}
         title={t('title')}
         lead={t('description')}
@@ -64,6 +64,7 @@ export default async function TctPage({params}: Props) {
         editionsHeading={tr('editionsHeading')}
         winnersHeading={tr('winnersHeading')}
         winnersOffSite={tr('winnersOffSite')}
+        winnersOffSiteArchived={tr('winnersOffSiteArchived')}
         winnersOffSiteLink={tr('winnersOffSiteLink')}
         winnersUnrecorded={tr('winnersUnrecorded')}
         editions={tct.editions.map((edition) => {

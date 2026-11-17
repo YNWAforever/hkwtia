@@ -20,14 +20,14 @@ const approvedHistory = {
     metaDescription: "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
     eyebrow: "Since 2001",
     title: "Our history",
-    intro: "Milestones from twenty-six years of building Hong Kong's wireless and technology industry.",
+    intro: "Milestones from twenty-five years of Hong Kong's wireless and technology industry, starting in 2001.",
   },
   "zh-HK": {
     metaTitle: "歷史｜香港無線科技商會 WTIA",
     metaDescription: "香港無線科技商會二十五年歷程：自2001年成立至今的無線、流動及創科里程碑。",
     eyebrow: "自2001年",
     title: "我們的歷史",
-    intro: "回顧香港無線及科技產業二十六年來的發展里程碑。",
+    intro: "回顧自 2001 年起，香港無線及科技產業二十五年的發展里程碑。",
   },
 } as const;
 

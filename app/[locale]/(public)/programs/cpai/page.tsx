@@ -46,7 +46,7 @@ export default async function CpaiPage({params}: Props) {
   return (
     <>
       <PageHero
-        className="rich-page-hero"
+        className="rich-page-hero official-title"
         eyebrow={facts.typeLabel}
         title={t('title')}
         lead={t('description')}

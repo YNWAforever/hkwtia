@@ -1,3 +1,4 @@
+import {OfficialName} from '@/components/marketing/official-name';
 import {Arrow} from '@/components/wt/arrow';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
@@ -23,7 +24,7 @@ export async function ProgrammeShowcase({locale, copyOverrides}: HomeCopyProps) 
       <div className="flagship-grid">
         {flagships.map((item) => (
           <article className="programme-card" key={item.id}>
-            <h3>{labelFor(item.id, t)}</h3>
+            <h3><span className="official-name"><OfficialName name={labelFor(item.id, t)} /></span></h3>
             <p>{blurbFor(item.id, t)}</p>
             <FlagshipLinkView href={item.primaryHref} external={item.primaryExternal}>
               {primaryLabelFor(item.id, t)}

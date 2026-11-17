@@ -55,7 +55,7 @@ describe("MarketProducts", () => {
     expect(screen.getByText(bundles.en.Home.marketProducts.marketplace.copyAvailable)).toBeInTheDocument();
     expect(screen.queryByText(/^2$/)).not.toBeInTheDocument();
     expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.directory.action})).toHaveAttribute("href", "/members");
-    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/showcase");
+    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/programmes");
   });
 
   it("embedded, is a labelled group whose headings sit under the ecosystem h2 (h3, then h4)", async () => {
@@ -68,7 +68,7 @@ describe("MarketProducts", () => {
     expect(screen.getByRole("group", {name: bundles.en.Home.marketProducts.title})).toBeInTheDocument();
     expect(screen.getByRole("heading", {level: 3, name: bundles.en.Home.marketProducts.title})).toBeInTheDocument();
     expect(screen.getByRole("heading", {level: 4, name: bundles.en.Home.marketProducts.directory.title})).toBeInTheDocument();
-    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/showcase");
+    expect(screen.getByRole("link", {name: bundles.en.Home.marketProducts.marketplace.action})).toHaveAttribute("href", "/programmes");
   });
 
   it("shows member directory availability without implying showcase listings exist", async () => {

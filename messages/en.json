@@ -76,14 +76,15 @@
     "links": {
       "events": "Events",
       "programmes": "Programmes",
-      "hkict": "HKICT Awards",
-      "asa": "Asia Smart App Awards",
+      "hkict": "ICT Startup Award",
+      "asa": "Asia Smart Innovation Awards",
       "tct": "Tech to Connect",
       "cpai": "CPAI",
       "membership": "Membership",
       "members": "Member directory",
       "showcase": "Member Showcase",
       "news": "News",
+      "media": "Media & Press",
       "aiOps": "AI operations",
       "aiTransparency": "AI transparency",
       "about": "About WTIA",
@@ -503,7 +504,7 @@
           "title": "For Startups",
           "copy": "Programmes and events for Hong Kong technology startups.",
           "benefits": "HKICT Awards ICT Startup Award · Tech to Connect",
-          "cta": "View the Member Showcase"
+          "cta": "See programmes"
         },
         "professionals": {
           "title": "For Professionals",
@@ -592,7 +593,7 @@
         "copyEmpty": "Member Showcase — member solutions, listed with each member's consent.",
         "copyUnavailable": "Member Showcase — member solutions, listed with each member's consent.",
         "copyAvailable": "Member Showcase — member solutions, listed with each member's consent.",
-        "action": "Explore solutions"
+        "action": "See programmes"
       }
     },
     "outcomes": {
@@ -655,15 +656,15 @@
           "description": "A focused programme supporting applied innovation."
         },
         "hkict": {
-          "name": "HKICT Awards",
+          "name": "ICT Startup Award",
           "description": "Recognising excellence across Hong Kong's technology sector."
         },
         "tct": {
-          "name": "TCT",
+          "name": "Tech to Connect",
           "description": "Connecting technology, capability and talent."
         },
         "asa": {
-          "name": "Asia Smart App Awards",
+          "name": "Asia Smart Innovation Awards",
           "description": "Celebrating outstanding smart applications across Asia."
         }
       }
@@ -675,11 +676,11 @@
       "items": {
         "cpai": {
           "label": "CPAI",
-          "blurb": "Explore the CPAI programme.",
+          "blurb": "Certified Practitioner in GenAI",
           "primaryLabel": "View programme"
         },
         "hkict": {
-          "label": "Startup Award",
+          "label": "ICT Startup Award",
           "blurb": "Hong Kong ICT Awards — ICT Startup Award stream.",
           "primaryLabel": "Award site",
           "secondaryLabel": "On WTIA"
@@ -691,7 +692,7 @@
           "secondaryLabel": "On WTIA"
         },
         "asa": {
-          "label": "Asia Smart App / Innovation Awards",
+          "label": "Asia Smart Innovation Awards",
           "blurb": "WTIA’s Asia-wide smart app and innovation awards.",
           "primaryLabel": "View programme"
         },
@@ -911,7 +912,7 @@
     "metaDescription": "Twenty-five years of WTIA milestones—from 2001 founding through wireless, mobile and AI+ programmes.",
     "eyebrow": "Since 2001",
     "title": "Our history",
-    "intro": "Milestones from twenty-six years of building Hong Kong's wireless and technology industry.",
+    "intro": "Milestones from twenty-five years of Hong Kong's wireless and technology industry, starting in 2001.",
     "storyTitle": "Milestone story",
     "readMore": "Read more",
     "compass": {
@@ -1385,19 +1386,19 @@
       "audience": "Professionals completing WTIA's applied AI credential."
     },
     "hkict": {
-      "title": "HKICT Awards",
+      "title": "ICT Startup Award",
       "description": "Recognising excellence across Hong Kong's technology sector.",
       "status": "Contact WTIA for the current programme timetable and how to take part.",
       "audience": "Hong Kong technology companies and public-sector innovators."
     },
     "tct": {
-      "title": "TCT",
+      "title": "Tech to Connect",
       "description": "Connecting technology, capability and talent.",
       "status": "Contact WTIA for the current programme timetable and how to take part.",
       "audience": "SME leaders exploring practical, hands-on technology adoption."
     },
     "asa": {
-      "title": "Asia Smart App Awards",
+      "title": "Asia Smart Innovation Awards",
       "description": "Celebrating outstanding smart applications across Asia.",
       "status": "Contact WTIA for the current programme timetable and how to take part.",
       "audience": "Smart application teams and developers competing across Asia."
@@ -1415,6 +1416,7 @@
       "regionsCoOrganised": "Co-organised with {count} Asia regions",
       "winnersOffSite": "The full winner list is published on the edition's own site.",
       "winnersOffSiteLink": "View the winners",
+      "winnersOffSiteArchived": "2020 microsite (archived)",
       "winnersUnrecorded": "WTIA's archive does not record the winners for this edition.",
       "credentialIssuer": "Issued by",
       "credentialCoursePartner": "Course delivered with",
@@ -1433,11 +1435,11 @@
   },
   "Programmes": {
     "metaTitle": "Programmes｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions and where each leads next.",
+    "metaDescription": "WTIA programmes on the record: ICT Startup Award, Tech to Connect, Asia Smart Innovation Awards and CPAI.",
     "hero": {
       "eyebrow": "Programmes",
-      "title": "Programmes that turn participation into progress.",
-      "lead": "Explore awards, learning, market-access and industry-development programmes across WTIA's ecosystem, each one backed by the association's own typed record.",
+      "title": "Awards, learning and industry programmes.",
+      "lead": "WTIA organises flagship awards and programmes for Hong Kong’s technology community. Each page lists recorded editions and how to enquire.",
       "breadcrumbCurrent": "Programmes"
     },
     "groupings": {
@@ -1447,7 +1449,7 @@
     },
     "open": {
       "eyebrow": "Programme catalogue",
-      "title": "Find a programme that moves you forward.",
+      "title": "Current openings.",
       "intro": "Browse programmes by purpose, audience and previous editions. To apply, visit each programme's own page.",
       "statusLabel": "Open applications",
       "emptyTitle": "No programme applications are open on this site.",
@@ -1457,12 +1459,12 @@
     },
     "catalogue": {
       "eyebrow": "Catalogue",
-      "title": "Four programmes with a record behind them.",
-      "intro": "Each card is read from the typed programme record; the edition counts are computed from it, never typed in."
+      "title": "Programmes and their editions.",
+      "intro": "Browse each programme by purpose, audience and past editions."
     },
     "history": {
       "eyebrow": "Programme history",
-      "title": "Built on programmes with lasting value.",
+      "title": "Edition history.",
       "intro": "Every edition WTIA's archive records, from the first to the latest, with new programme information added as it becomes available.",
       "span": "{first}–{latest}",
       "editions": "{count, plural, one {# recorded edition} other {# recorded editions}}",
@@ -1525,7 +1527,7 @@
   },
   "Showcase": {
     "metaTitle": "Member Showcase｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "Browse published technology solutions from WTIA member companies.",
+    "metaDescription": "Member solutions from WTIA companies will be listed here.",
     "detailFallbackDescription": "WTIA member showcase",
     "eyebrow": "Member Showcase",
     "title": "Member Showcase",
@@ -1535,8 +1537,8 @@
     "ownerCta": "Manage your showcase listing",
     "resultsTitle": "Explore member solutions",
     "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
-    "noPublishedTitle": "Member showcases are coming soon.",
-    "noPublishedDescription": "Listings appear after member consent and review.",
+    "noPublishedTitle": "No member listings are published yet.",
+    "noPublishedDescription": "Email contact@hkwtia.org if you want to be listed.",
     "emptyPrimary": "Interested in joining the Member Showcase? Email contact@hkwtia.org.",
     "emptySecondary": "Join to submit",
     "emptyTitle": "No published listings match",
@@ -1638,7 +1640,7 @@
   },
   "Members": {
     "metaTitle": "Member directory｜Hong Kong Wireless Technology Industry Association (WTIA)",
-    "metaDescription": "WTIA member directory—published profiles of Hong Kong wireless and technology companies.",
+    "metaDescription": "The WTIA member directory will list member profiles here.",
     "eyebrow": "Member directory",
     "title": "Member directory",
     "description": "Organisations shaping Hong Kong's wireless, mobile and AI+ industry. Each page is maintained by the member and reviewed by WTIA.",
@@ -1665,8 +1667,8 @@
     "resultsHeading": "Member directory",
     "loadMore": "View more members",
     "paginationLabel": "Member directory pages",
-    "noPublishedTitle": "Members will be listed here once they agree to be featured.",
-    "noPublishedDescription": "Profiles appear only after written consent.",
+    "noPublishedTitle": "No member profiles are published yet.",
+    "noPublishedDescription": "Email contact@hkwtia.org if you want to be listed.",
     "emptyPrimary": "To be listed in the directory, email contact@hkwtia.org.",
     "emptySecondary": "Membership",
     "emptyTitle": "No member pages match yet",
@@ -4910,7 +4912,7 @@
     }
   },
   "MarketingExtras": {
-    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
+    "footerTagline": "Technology + Wisdom. Hong\u00a0Kong + The World."
   },
   "OperationsTiming": {
     "heading": "Administrative work timing",

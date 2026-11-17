@@ -11,7 +11,9 @@ import {cn} from '@/lib/utils';
 
 const panels = [
   {key: 'directory', index: '01', href: '/members'},
-  {key: 'marketplace', index: '02', href: '/showcase'},
+  // t484s2232: the showcase action follows the empty-directory CTA and goes to
+  // programmes. The card itself stays; its copy was not part of the locked lines.
+  {key: 'marketplace', index: '02', href: '/programmes'},
 ] as const;
 
 // app/styles/wisetech.css:198 .product-split; :199 .product-panel; :202 .product-panel-head.

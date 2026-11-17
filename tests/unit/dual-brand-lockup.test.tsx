@@ -26,7 +26,9 @@ describe("DualBrandLockup", () => {
   it("renders the donor tile with the WTIA logo and the D-10 descriptor", () => {
     const {container} = render(<DualBrandLockup labels={labels} priority />);
 
-    const link = screen.getByRole("link", {name: labels.homeLabel});
+    const link = screen.getByRole("link", {name: new RegExp(labels.publicName)});
+    expect(link).toHaveAccessibleName(`${labels.logoAlt} ${labels.publicName} ${labels.descriptor} ${labels.homeLabel}`);
+    expect(link).not.toHaveAttribute("aria-label");
     expect(link).toHaveAttribute("href", "/");
     expect(link).toHaveClass("brand");
     expect(container.querySelector(".brand-logo-wrap")).not.toBeNull();
@@ -52,7 +54,9 @@ describe("DualBrandLockup", () => {
 
     render(<DualBrandLockup labels={longLabels} />);
 
-    const link = screen.getByRole("link", {name: longLabels.homeLabel});
+    const link = screen.getByRole("link", {name: new RegExp(longLabels.publicName)});
+    expect(link).toHaveAccessibleName(expect.stringContaining(longLabels.descriptor));
+    expect(link).toHaveAccessibleName(expect.stringContaining(longLabels.homeLabel));
     expect(link).toHaveClass("min-h-11", "min-w-11", "max-w-full");
     expect(screen.getByRole("img", {name: longLabels.logoAlt})).toHaveClass("object-contain");
   });

@@ -738,6 +738,10 @@
   .footer-links > div { min-height: 0; gap: 0; padding: 24px 16px 20px; }
   .footer-links strong { margin-bottom: 6px; }
   .footer-links address { margin-top: 8px; }
+  /* contact@hkwtia.org was breaking mid-address in the half-width zh-HK column
+     at 390px. The contact column takes the full row so nowrap stays on screen. */
+  .footer-links > div:last-child { grid-column: 1 / -1; }
+  .footer-links a.footer-email { white-space: nowrap; }
 }
 
 /* ─── Round 3 (2026-10-06): the homepage hero ─────────────────────────────────────────────
@@ -1384,7 +1388,9 @@ ul.programme-groupings > li > span:last-child:not(:first-child) {
 .exco-roster-media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--wt-stone); }
 .exco-roster-photo { object-fit: cover; object-position: center; }
 .exco-roster-photo-top { object-fit: cover; object-position: top; }
-.exco-roster-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--wt-ink); font-family: var(--font-serif); font-size: 42px; font-weight: 500; letter-spacing: 0.04em; }
+/* Missing portrait: a neutral field and an empty ring. No initials, no 先生, no monogram. */
+.exco-roster-fallback { position: absolute; inset: 0; background: linear-gradient(165deg, rgba(255,255,255,.5), rgba(255,255,255,0) 48%), var(--wt-stone); }
+.exco-roster-fallback::before { content: ""; position: absolute; left: 50%; top: 46%; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%); border: 1px solid rgba(20, 40, 48, .18); border-radius: 50%; background: rgba(255,255,255,.35); }
 .exco-roster-body { display: flex; min-width: 0; flex: 1; flex-direction: column; padding: 22px 22px 28px; }
 .exco-roster-card h3 { margin: 0; color: var(--xp-ink-deep); font-family: var(--font-serif); font-size: clamp(26px, 2vw, 32px); font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
 .exco-roster-role { margin: 8px 0 0; color: var(--wt-ink); font-size: 13px; font-weight: 800; line-height: 1.4; }

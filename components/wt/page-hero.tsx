@@ -1,6 +1,7 @@
 import Image from 'next/image';
 
 import {assertOwnOriginEditorialImage} from '@/components/marketing/institutional-page-intro';
+import {OfficialName} from '@/components/marketing/official-name';
 import {ActionLink} from '@/components/wt/action-link';
 import {Eyebrow} from '@/components/wt/eyebrow';
 import {Shell} from '@/components/wt/shell';
@@ -100,12 +101,12 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
       {!image && !artMark ? <SignalMark seed={title} /> : null}
       <Shell>
         {eyebrow ? <Eyebrow light>{eyebrow}</Eyebrow> : null}
-        <h1>{title}</h1>
+        <h1><OfficialName name={title} /></h1>
         <p>{lead}</p>
         {actions && actions.length > 0 ? (
           <div className="inner-hero-actions">
             {actions.map((action, index) => (
-              <ActionLink key={`${index}-${action.href}`} href={action.href} variant={index === 0 ? 'button-light' : 'text-link-light'}>
+              <ActionLink key={`${index}-${action.href}`} href={action.href} plain={action.plain} variant={index === 0 ? 'button-light' : 'text-link-light'}>
                 {action.label}
               </ActionLink>
             ))}
@@ -115,7 +116,7 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
           <nav className="breadcrumb" aria-label={breadcrumbLabel ?? BREADCRUMB_LABEL_FALLBACK}>
             <Link href={breadcrumb.homeHref}>{breadcrumb.homeLabel}</Link>
             <span aria-hidden="true">/</span>
-            <b>{breadcrumb.current}</b>
+            <b><OfficialName name={breadcrumb.current} /></b>
           </nav>
         ) : null}
       </Shell>
