@@ -1,0 +1,44 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2018/01/2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
+  "sourceId": "4377",
+  "slug": "2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
+  "title": "2018 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China",
+  "publishedAt": "2018-01-10T08:03:33+00:00",
+  "modifiedAt": "2020-03-10T08:08:27+00:00",
+  "visibleDateText": "January 10th, 2018",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Supported by BUD Fund, WTIA organised a series of events, including business networking event, public awareness seminar, study mission, to help Hong Kong enterprises capture opportunities to penetrate or expand business network across China.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2018-%E2%80%93-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "download-failed"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Supported by BUD Fund, WTIA organised a series of events, including business networking event, public awareness seminar, study mission, to help Hong Kong enterprises capture opportunities to penetrate or expand business network across China."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2020/03/2018-%E2%80%93-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png: download-failed"
+  ],
+  "waybackTimestamp": "20240722042608",
+  "sourceSha256": "037270b51824049f303d2291689fdcbab52a5422528f1699bc5200a806951cfa"
+}

@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2003/01/2003-opening-of-hong-kong-wireless-development-centre-at-cyberport",
+  "sourceId": "3492",
+  "slug": "2003-opening-of-hong-kong-wireless-development-centre-at-cyberport",
+  "title": "2003 – Opening of Hong Kong Wireless Development Centre at Cyberport",
+  "publishedAt": "2003-01-01T03:05:56+00:00",
+  "modifiedAt": "2020-02-20T08:19:17+00:00",
+  "visibleDateText": "January 1st, 2003",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "With support of HKSAR Government, Cyberport and more than 30 corporations, WTIA established the Hong Kong Wireless Development Centre (WDC) to showcase Hong Kong’s latest development and advancement in mobile technology . Feature of the Centre included testing hubs and technical consultancy for mobile application developers, and also demonstration of mobile applications and wireless products that are established in Hong Kong. TD-SCDMA Application Development Centre also set up in WDC and served as the only testing hub for TD-SCDMA network outside Greater China Region.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2003/01/WDC-OPening03-1024x686-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/baca52ac07da75f1.jpg",
+      "originalPath": "/images/news-archive/original/baca52ac07da75f1.jpg",
+      "sha256": "baca52ac07da75f10ebd60397beaf46cb84503e6c840ca6bd6abb25fd74cbe80",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "With support of HKSAR Government, Cyberport and more than 30 corporations, WTIA established the Hong Kong Wireless Development Centre (WDC) to showcase Hong Kong’s latest development and advancement in mobile technology . Feature of the Centre included testing hubs and technical consultancy for mobile application developers, and also demonstration of mobile applications and wireless products that are established in Hong Kong. TD-SCDMA Application Development Centre also set up in WDC and served as the only testing hub for TD-SCDMA network outside Greater China Region."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20230327015459",
+  "sourceSha256": "e7176a383108c9f20e653202040568f7ee832c90078dd94fc3b1aea9fdcd2702"
+}

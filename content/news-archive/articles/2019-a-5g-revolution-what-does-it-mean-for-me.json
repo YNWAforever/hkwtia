@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2019/01/2019-a-5g-revolution-what-does-it-mean-for-me",
+  "sourceId": "4390",
+  "slug": "2019-a-5g-revolution-what-does-it-mean-for-me",
+  "title": "2019 – A 5G Revolution: What does it mean for me?",
+  "publishedAt": "2019-01-20T08:28:29+00:00",
+  "modifiedAt": "2020-03-10T08:31:06+00:00",
+  "visibleDateText": "January 20th, 2019",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Hong Kong is actively deploying 5G Application in all areas. How will it affect the quality of life and improve the social efficiency in the near future? WTIA joined hands with The Hong Kong Productivity Council (HKPC), invited industry export to share and exchange views on 5G application, the latest global trends, 5G systems for new application and the new business models of 5G Era.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-%E2%80%93-A-5G-Revolution-What-does-it-mean-for-me_-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/dec2110e266d1f11.jpg",
+      "originalPath": "/images/news-archive/original/dec2110e266d1f11.png",
+      "sha256": "dec2110e266d1f113b629ac21daf8c576752e2d02881d13e6c6671a5a39ed6f6",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Hong Kong is actively deploying 5G Application in all areas. How will it affect the quality of life and improve the social efficiency in the near future? WTIA joined hands with The Hong Kong Productivity Council (HKPC), invited industry export to share and exchange views on 5G application, the latest global trends, 5G systems for new application and the new business models of 5G Era."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240529075135",
+  "sourceSha256": "ec07d8016fa31f9060f5aa49bc9ef32dc355d87af73dada44d8be5f53e925e18"
+}

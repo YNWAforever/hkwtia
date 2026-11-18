@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2005/01/2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform",
+  "sourceId": "3520",
+  "slug": "2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform",
+  "title": "2005 – Launching of Wireless Services Value Chain Cooperation (WSVCC) platform",
+  "publishedAt": "2005-01-25T04:01:59+00:00",
+  "modifiedAt": "2020-02-20T08:21:50+00:00",
+  "visibleDateText": "January 25th, 2005",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "WTIA established the Wireless Services Value Chain Cooperation (WSVCC) platform in the Pearl River Delta of Mainland China in 2005. Content localization services equipped with hardware and technical support were provided in the platform to simplify the process of launching mobile applications in China.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2005/01/GZ-Centre-1024x768-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/cc8d6a5b23227033.jpg",
+      "originalPath": "/images/news-archive/original/cc8d6a5b23227033.jpg",
+      "sha256": "cc8d6a5b2322703306a8c064c0f9d675141c0f59987a1c5e7dad76584337fc2b",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA established the Wireless Services Value Chain Cooperation (WSVCC) platform in the Pearl River Delta of Mainland China in 2005. Content localization services equipped with hardware and technical support were provided in the platform to simplify the process of launching mobile applications in China."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240414134359",
+  "sourceSha256": "a323caa9c5e63890616c5dfa8f59942cd37d14c74a4d6131f07628e185f36fcd"
+}

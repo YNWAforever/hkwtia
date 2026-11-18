@@ -1,0 +1,44 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2017/01/2017-connected-city-conference",
+  "sourceId": "3863",
+  "slug": "2017-connected-city-conference",
+  "title": "2017 – Connected City Conference",
+  "publishedAt": "2017-01-30T02:10:59+00:00",
+  "modifiedAt": "2020-02-24T02:16:29+00:00",
+  "visibleDateText": "January 30th, 2017",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "WTIA organised the Connected City Conference and industry experts were invited to present their latest solutions on 5G, LoRaWAN, Sigfox and NB-IoT to build Hong Kong as a smart-city. This is the first Smart City event that centres on connectivity and the newest networks gathered in one setting to discuss IoT, data, security and all the essential ingredients for a truly empowering Smart Hong Kong.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-Connected-City-Conference-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "download-failed"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA organised the Connected City Conference and industry experts were invited to present their latest solutions on 5G, LoRaWAN, Sigfox and NB-IoT to build Hong Kong as a smart-city. This is the first Smart City event that centres on connectivity and the newest networks gathered in one setting to discuss IoT, data, security and all the essential ingredients for a truly empowering Smart Hong Kong."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-Connected-City-Conference-1.png: download-failed"
+  ],
+  "waybackTimestamp": "20240615181730",
+  "sourceSha256": "c4009433fdff8617a5e4bbc0a844286fa28446342c284f45c7c41dcc2f39101d"
+}

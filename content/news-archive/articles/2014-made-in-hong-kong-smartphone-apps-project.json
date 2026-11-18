@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2014/01/2014-made-in-hong-kong-smartphone-apps-project",
+  "sourceId": "3535",
+  "slug": "2014-made-in-hong-kong-smartphone-apps-project",
+  "title": "2014 – Made in Hong Kong Smartphone Apps Project",
+  "publishedAt": "2014-01-01T04:13:11+00:00",
+  "modifiedAt": "2020-02-20T08:27:56+00:00",
+  "visibleDateText": "January 1st, 2014",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "In order to assist the local application developers to expand their business in Mainland China market, “Made in Hong Kong” Smartphone Apps Project was organized by WTIA to initiate a series of events. “Made in Hong Kong” Smartphone Apps Gallery is a platform that is specifically designed to promote applications that are developed by local developers to users in Mainland China. Over 500 applications are featured in the Gallery. Moreover, Seminar, workshops and visit to China were also held to facilitate business networking opportunities between local mobile app companies and potential clients in China.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2014/01/10669026_572211736212190_588421535425640444_o-1024x683-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/877503a487ae93a2.jpg",
+      "originalPath": "/images/news-archive/original/877503a487ae93a2.jpg",
+      "sha256": "877503a487ae93a2bb98ec78bc355a3e4ce1e7ac1c5541c0afdb1a6d2f318501",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "In order to assist the local application developers to expand their business in Mainland China market, “Made in Hong Kong” Smartphone Apps Project was organized by WTIA to initiate a series of events. “Made in Hong Kong” Smartphone Apps Gallery is a platform that is specifically designed to promote applications that are developed by local developers to users in Mainland China. Over 500 applications are featured in the Gallery. Moreover, Seminar, workshops and visit to China were also held to facilitate business networking opportunities between local mobile app companies and potential clients in China."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240529100324",
+  "sourceSha256": "18ad181012faf803c98f6f89ffeef8d9be54fd0f133983b9df8f158ca1ce28aa"
+}

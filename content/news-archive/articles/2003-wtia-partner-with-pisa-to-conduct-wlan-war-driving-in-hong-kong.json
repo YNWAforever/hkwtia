@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2003/01/2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong",
+  "sourceId": "3497",
+  "slug": "2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong",
+  "title": "2003 – WTIA Partner with PISA to Conduct WLAN War Driving in Hong Kong",
+  "publishedAt": "2003-01-30T03:26:20+00:00",
+  "modifiedAt": "2020-02-20T08:34:56+00:00",
+  "visibleDateText": "January 30th, 2003",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "WTIA collaborated with Professional Information Security Association (PISA) to conduct War Driving survey for evaluating the strength of security measures performed by WLAN users in Hong Kong, and raise public awareness of the importance of WLAN security. The project later re-branded as SafeWiFi, and the War Driving transformed as a testing on the security level of Wi-Fi hotspot in Hong Kong.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2003/01/wlan-wardriving-1024x620-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/21895aedb241042d.jpg",
+      "originalPath": "/images/news-archive/original/21895aedb241042d.jpg",
+      "sha256": "21895aedb241042d9d6403c79d7ff2a67c4f6eb46f939cd5a4065e762486dd1f",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA collaborated with Professional Information Security Association (PISA) to conduct War Driving survey for evaluating the strength of security measures performed by WLAN users in Hong Kong, and raise public awareness of the importance of WLAN security. The project later re-branded as SafeWiFi, and the War Driving transformed as a testing on the security level of Wi-Fi hotspot in Hong Kong."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20250531032003",
+  "sourceSha256": "879eacb6db94786b2548c8edb6eafd715e86456175b1e1b09a53715cf6a4a4db"
+}

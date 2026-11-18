@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2006/01/2006-hong-kong-ict-awards-best-ubiquitous-award",
+  "sourceId": "3523",
+  "slug": "2006-hong-kong-ict-awards-best-ubiquitous-award",
+  "title": "2006 – Hong Kong ICT Awards: Best Ubiquitous Award",
+  "publishedAt": "2006-01-01T04:03:30+00:00",
+  "modifiedAt": "2020-02-20T08:33:01+00:00",
+  "visibleDateText": "January 1st, 2006",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Steered by the Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, Hong Kong ICT Awards: Best Ubiquitous Award established in 2006 to promote Hong Kong’s identity in providing quality mobile and wireless technology and application, and also honour the best local development in the field. The Award renamed as Hong Kong ICT Awards: Best Mobile Apps Award in 2013.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2006/01/ICTAwards01.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/e55f67b234268e35.jpg",
+      "originalPath": "/images/news-archive/original/e55f67b234268e35.jpg",
+      "sha256": "e55f67b234268e35e96556677ffb9b2fbed0b2e4eb149f1b6b2246899538684d",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Steered by the Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, Hong Kong ICT Awards: Best Ubiquitous Award established in 2006 to promote Hong Kong’s identity in providing quality mobile and wireless technology and application, and also honour the best local development in the field. The Award renamed as Hong Kong ICT Awards: Best Mobile Apps Award in 2013."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240414144317",
+  "sourceSha256": "544c14503641486985b39ed05f2dfe4aa9ae04608fcdceb4c4a0d264eac2a333"
+}

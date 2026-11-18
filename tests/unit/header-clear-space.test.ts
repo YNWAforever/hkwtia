@@ -67,7 +67,7 @@ describe("footer enquiry band and press rows", () => {
     expect(chrome).toContain(".footer-bottom .footer-tagline { text-wrap: balance; }");
     expect(chrome).toContain("@media (max-width: 480px)");
     expect(shell).toContain("@media (max-width: 640px)");
-    expect(shell).toContain(".press-coverage .press-title {");
+    expect(shell).toContain(".press-card .press-title {");
     expect(shell).toContain("display: block;");
   });
 });

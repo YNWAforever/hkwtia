@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
-import {render, screen, within} from "@testing-library/react";
+import {render, screen} from "@testing-library/react";
 import type {ReactNode} from "react";
 import {describe, expect, it, vi} from "vitest";
 
@@ -50,7 +50,7 @@ vi.mock("next/image", () => ({
 
 describe("Media and Press page", () => {
   it("publishes the live wall minus proven 404s, with email contact and no logos", async () => {
-    const {listPressClippings, pressClippingSourceCount} = await import("@/lib/media/press-clippings");
+    const {listPressClippings, listPressCards, pressClippingSourceCount, pressWallSummaryCounts} = await import("@/lib/media/press-clippings");
     expect(pressClippingSourceCount).toBe(87);
     expect(source).toHaveLength(87);
     expect(dropped).toHaveLength(6);
@@ -68,38 +68,70 @@ describe("Media and Press page", () => {
     expect(wall[0]?.dateTime).toBe("2025-11-01");
     expect(source.some((row) => row.article_url.includes("&amp;"))).toBe(false);
 
+    const counts = pressWallSummaryCounts();
+    expect(counts).toMatchObject({wall: 81, candidates: 64, integrated: 64, gaps: 17, verifiedAll: false});
+    expect(counts.integrated).toBe(counts.candidates);
+    expect(counts.integrated).not.toBe(counts.wall);
+    const cards = listPressCards("en");
+    expect(cards).toHaveLength(81);
+    expect(cards[0]?.dateTime).toBe("2025-11-01");
+    expect(cards.filter((row) => row.summaryStatus === "draft")).toHaveLength(64);
+    expect(cards.filter((row) => row.summaryStatus === "gap")).toHaveLength(17);
+    expect(cards.some((row) => row.summary?.includes("42%") || row.summary?.includes("47%"))).toBe(false);
+    const doubled = cards.find((row) => row.articleUrl.includes("https://hd.stheadline.com/news/realtime/hk/2340597/") && row.articleUrl.indexOf("https://", 8) > 0);
+    expect(doubled?.articleUrl).toBe(wall.find((row) => row.articleUrl.includes("2340597"))?.articleUrl);
+    expect(doubled?.summary).toBeNull();
+    expect(cards.find((row) => row.inclusionFlag === "topic_hub")?.articleUrl).toBe("https://www.capital-hk.com/topics/ai-2");
+    expect(cards.filter((row) => row.inclusionFlag === "no_wtia_mention")).toHaveLength(1);
+
     const {default: MediaAndPressPage} = await import("@/app/[locale]/(public)/media-and-press-coverage/page");
     render(await MediaAndPressPage({params: Promise.resolve({locale: "en"})}));
 
+    expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
     expect(screen.getByRole("heading", {level: 1, name: "Media and Press Coverage"})).toBeInTheDocument();
     expect(screen.getByText("Selected coverage of WTIA programmes, awards and industry surveys.")).toBeInTheDocument();
+    expect(screen.getByText("Links below lead to external sites.")).toBeInTheDocument();
     expect(screen.getByRole("link", {name: siteConfig.contact.email})).toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
     expect(document.body.textContent).toContain("For press and media enquiries, please contact our Media Team: contact@hkwtia.org");
     expect(document.body.textContent).not.toMatch(/2989|media@/i);
     expect(document.querySelector('a[href^="tel:"]')).toBeNull();
     expect(document.querySelector("img")).toBeNull();
+    expect(document.querySelector(".press-card-summary")).not.toHaveStyle({overflow: "hidden"});
     expect(document.body.textContent).not.toContain(bundles.en.News.emptyTitle);
-
-    const table = screen.getByRole("table", {name: "Media and Press Coverage"});
-    expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Date", "Outlet", "Article"]);
-    const articleLinks = within(table).getAllByRole("link");
-    expect(articleLinks).toHaveLength(81);
-    expect(articleLinks[0]).toHaveAttribute("href", wall[0]?.articleUrl);
-    expect(articleLinks[0]).toHaveAttribute("target", "_blank");
-    expect(articleLinks[0]).toHaveAttribute("rel", "noopener noreferrer");
-    expect(articleLinks[0]).toHaveTextContent(wall[0]?.title ?? "");
-    expect(within(table).getAllByRole("row")[1]?.textContent).toContain("TechRitual");
+    expect(screen.getAllByText("Wire distribution").length).toBeGreaterThan(0);
+    expect(screen.getByText("Editorial review: this link is a topic hub, not one article. It stays listed and is not presented as a WTIA endorsement.")).toBeInTheDocument();
+    const ctas = screen.getAllByRole("link", {name: "Read original article (opens in a new tab, external site)"});
+    expect(ctas).toHaveLength(81);
+    expect(ctas[0]).toHaveAttribute("href", cards[0]?.articleUrl);
+    expect(ctas[0]).toHaveAttribute("target", "_blank");
+    expect(ctas[0]).toHaveAttribute("rel", "noopener noreferrer");
+    expect(ctas[0]).toHaveTextContent("Read original article");
+    expect(screen.getByRole("heading", {level: 3, name: cards[0]?.title ?? ""})).toBeInTheDocument();
+    expect(document.querySelector(".press-card-summary")).not.toBeNull();
+    expect(document.body.textContent).not.toContain("longer than the length guide");
+    expect(document.body.textContent).toContain("WTIA presented the Asia Smart Innovation Awards 2025 at Cordis Hong Kong on 16 October 2025.");
+    const {pressSummarySource} = await import("@/lib/media/press-summaries");
+    expect(pressSummarySource.handoffId).toBe("ruby-copy-handoff-20261119T0042+08");
+    expect(pressSummarySource.canonical).toBe("ruby-copy.md");
+    expect(pressSummarySource.canonicalSha256).toBe("b3c5f1b62b675b713ab235fb132f34021cceb5a6c56fe124a6d8d6e412580dc8");
+    expect(pressSummarySource.rejected.some((path) => path.endsWith("extracts/ruby-copy-entries.json"))).toBe(true);
+    expect(cards.find((row) => row.auditRow === 26)?.summary).toContain("scheduled for 11–12 July 2024");
+    expect(document.body.textContent).not.toContain("Withheld");
   });
 
   it("renders the Chinese chrome and keeps staff news off this route", async () => {
     const {default: MediaAndPressPage} = await import("@/app/[locale]/(public)/media-and-press-coverage/page");
     render(await MediaAndPressPage({params: Promise.resolve({locale: "zh-HK"})}));
 
+    expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
     expect(screen.getByRole("heading", {level: 1, name: "傳媒及新聞報道"})).toBeInTheDocument();
     expect(screen.getByText("節錄有關 WTIA 計劃、獎項及業界調查的報道。")).toBeInTheDocument();
+    expect(screen.getByText("以下連結將前往外部網站。")).toBeInTheDocument();
     expect(document.body.textContent).toContain("傳媒查詢，請聯絡傳媒組：contact@hkwtia.org");
-    const table = screen.getByRole("table", {name: "傳媒及新聞報道"});
-    expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["日期", "媒體", "報道"]);
+    expect(screen.getAllByRole("link", {name: "閱讀原文（在新分頁開啟，外部網站）"})).toHaveLength(81);
+    expect(screen.getByText("2025年11月1日")).toBeInTheDocument();
+    expect(screen.getAllByText("新聞稿分發").length).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toContain("Withheld");
     expect([...publicRoutes]).toContain("/media-and-press-coverage");
     expect([...publicRoutes]).toContain("/news");
     expect(ROUTE_BREADCRUMB_LABEL_KEYS["/media-and-press-coverage"]).toBe("Media.h1");

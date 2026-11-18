@@ -1,0 +1,100 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2015/01/2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
+  "sourceId": "3820",
+  "slug": "2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
+  "title": "2015 – The 5th Hong Kong International Mobile Film Festival and Awards",
+  "publishedAt": "2015-01-01T08:38:55+00:00",
+  "modifiedAt": "2020-02-20T08:41:29+00:00",
+  "visibleDateText": "January 1st, 2015",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "The Project hosted since 2007, with the funding support from Create Hong Kong of HKSAR Government. With activities including production contest, seminar and workshops, the festival aims to contribute to the industry development through (1) Introducing local talents and their quality mobile videos to the international platforms to encourage mobile contents developments; (2) Broadening the horizons of local talents by facilitating the experience and culture exchanges among excellent filmmakers around the world; (3) Enhancing public awareness of using mobile devices for daily enjoyment",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2014HKMFF.png",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "download-failed"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The Project hosted since 2007, with the funding support from Create Hong Kong of HKSAR"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " Government. With activities including production contest, seminar and workshops, the"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " festival aims to contribute to the industry development through"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " (1) Introducing local talents and their quality mobile videos to the international platforms to"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " encourage mobile contents developments;"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " (2) Broadening the horizons of local talents by facilitating the experience and culture"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " exchanges among excellent filmmakers around the world;"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " (3) Enhancing public awareness of using mobile devices for daily enjoyment"
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2020/02/2014HKMFF.png: download-failed"
+  ],
+  "waybackTimestamp": "20240414152037",
+  "sourceSha256": "922999d4ad45278bad6bed29c531998f88767253d6aef8c8a9e36549b8fbde0d"
+}

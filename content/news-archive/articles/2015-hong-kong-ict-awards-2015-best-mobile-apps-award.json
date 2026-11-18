@@ -1,0 +1,76 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2015/01/2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
+  "sourceId": "3826",
+  "slug": "2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
+  "title": "2015 – Hong Kong ICT Awards 2015: Best Mobile Apps Award",
+  "publishedAt": "2015-01-15T08:50:30+00:00",
+  "modifiedAt": "2020-02-20T08:55:21+00:00",
+  "visibleDateText": "January 15th, 2015",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, The Best Mobile Apps Awards aims to honour the best local mobile and wireless technology and application development, also to encourage further mobile and wireless technology and application development with enhanced creativity, design and commercial value.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2015-ICT-Awards.png",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "download-failed"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Supported by Office of the Government Chief Information Officer (OGCIO) and organized by"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " WTIA, The Best Mobile Apps Awards aims to honour the best local mobile and wireless"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " technology and application development, also to encourage further mobile and wireless"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " technology and application development with enhanced creativity, design and commercial"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " value."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2020/02/2015-ICT-Awards.png: download-failed"
+  ],
+  "waybackTimestamp": "20240414142017",
+  "sourceSha256": "46e7cb421b4b52fd34de1655b6781590078fbf14e8b5432d34b3eb0c83a46052"
+}

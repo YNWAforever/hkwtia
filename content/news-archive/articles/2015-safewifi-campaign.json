@@ -1,0 +1,68 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2015/01/2015-safewifi-campaign",
+  "sourceId": "3829",
+  "slug": "2015-safewifi-campaign",
+  "title": "2015 – SafeWiFi Campaign",
+  "publishedAt": "2015-01-31T09:02:54+00:00",
+  "modifiedAt": "2020-02-20T09:19:13+00:00",
+  "visibleDateText": "January 31st, 2015",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "In order to raise public awareness in Wi-Fi security, WTIA started SafeWiFi.hk and set up the thematic website in 2001. SafeWiFi Campaign aim at investigating the WiFi usage, assessibility, security and the knowledge of it in Hong Kong, which conducted annual WiFi security survey and co-organize events to promote Wi-Fi security for the public.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "download-failed"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "In order to raise public awareness in Wi-Fi security, WTIA started SafeWiFi.hk and set up the"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " thematic website in 2001. SafeWiFi Campaign aim at investigating the WiFi usage,"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " assessibility, security and the knowledge of it in Hong Kong, which conducted annual WiFi"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " security survey and co-organize events to promote Wi-Fi security for the public."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png: download-failed"
+  ],
+  "waybackTimestamp": "20230327004351",
+  "sourceSha256": "7374d942d2bbc56a7e82d77d702aa12fed3bf70a13331b96e69364ba169ec778"
+}

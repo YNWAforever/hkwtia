@@ -11,6 +11,7 @@ import {
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {milestonesOnly} from "@/lib/history/milestones";
 import type {AppLocale} from "@/i18n/routing";
+import {archiveCards} from "@/lib/news/archive-catalog";
 import {buildLastmod, contentFileLastmod, staticRouteLastmod} from "@/lib/seo/sitemap-lastmod";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
@@ -87,6 +88,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .flatMap((pathname) => localizedEntries(pathname, staticRouteLastmod(pathname)));
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`, built));
   const newsEntries = localizedNewsEntries(englishNews, chineseNews);
+  const cmsSlugs = new Set([...englishNews, ...chineseNews].map((post) => post.slug));
+  const archiveEntries = localizedNewsEntries(
+    archiveCards("en").filter((post) => !cmsSlugs.has(post.slug)),
+    archiveCards("zh-HK").filter((post) => !cmsSlugs.has(post.slug)),
+  );
   // Every milestone, not only the featured six: these are 25 years of association
   // history, already bilingual, and they are the largest body of indexable content the
   // site has. Must stay in lockstep with generateStaticParams in the history route --
@@ -99,6 +105,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticEntries,
     ...eventEntries,
     ...newsEntries,
+    ...archiveEntries,
     ...showcaseEntries,
     ...memberEntries,
     ...milestoneEntries,

@@ -1,0 +1,82 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2016/01/2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony",
+  "sourceId": "3836",
+  "slug": "2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony",
+  "title": "2016 – “Building up Wi-Fi.HK through Collaboration” Pledging Ceremony”",
+  "publishedAt": "2016-01-01T09:12:05+00:00",
+  "modifiedAt": "2020-02-20T09:12:45+00:00",
+  "visibleDateText": "January 1st, 2016",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "The Office of the Government Chief Information Officer together with the Hong Kong Wireless Technology Industry Association (WTIA) held the &quot;Building Up Wi-Fi.HK Through Collaboration&quot; Pledging Ceremony on 30 March 2016. The event called for the active participation of public and private organisations in promoting free public Wi-Fi service with the Government through the Wi-Fi.HK scheme to facilitate easy access to the Internet by the public.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2016-Wi-Fi.HK_.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/aa109f1899b88382.jpg",
+      "originalPath": "/images/news-archive/original/aa109f1899b88382.png",
+      "sha256": "aa109f1899b88382ff3e6016a1f654a6e284387bf3146e39753b1f120f3c2d2d",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The Office of the Government Chief Information Officer together with the Hong Kong"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " Wireless Technology Industry Association (WTIA) held the &quot;Building Up Wi-Fi.HK"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " Through Collaboration&quot; Pledging Ceremony on 30 March 2016. The event called for the"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " active participation of public and private organisations in promoting free public Wi-Fi service"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " with the Government through the Wi-Fi.HK scheme to facilitate easy access to the Internet"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " by the public."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20230327015542",
+  "sourceSha256": "d6f58acaaeac321f3071ff41cb15a8a0dc75d00ce0468436fb148addf2249ed6"
+}

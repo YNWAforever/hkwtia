@@ -26,6 +26,7 @@ type PageHeroProps = Readonly<{
   breadcrumbLabel?: string;
   id?: string;
   className?: string;
+  titleLang?: "en" | "zh-Hant";
 }>;
 
 const BREADCRUMB_LABEL_FALLBACK = 'Breadcrumb';
@@ -76,7 +77,7 @@ function SignalMark({seed}: {seed: string}) {
   );
 }
 
-export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark, actions, priority = true, breadcrumb, breadcrumbLabel, id, className}: PageHeroProps) {
+export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark, actions, priority = true, breadcrumb, breadcrumbLabel, id, className, titleLang}: PageHeroProps) {
   // CSP is img-src 'self': the figure is own-origin or the render fails, never a remote fetch.
   const imageSrc = image ? assertOwnOriginEditorialImage(image.src) : undefined;
 
@@ -101,7 +102,7 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
       {!image && !artMark ? <SignalMark seed={title} /> : null}
       <Shell>
         {eyebrow ? <Eyebrow light>{eyebrow}</Eyebrow> : null}
-        <h1><OfficialName name={title} /></h1>
+        <h1 lang={titleLang}><OfficialName name={title} /></h1>
         <p>{lead}</p>
         {actions && actions.length > 0 ? (
           <div className="inner-hero-actions">

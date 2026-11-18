@@ -1979,6 +1979,14 @@
     "h1": "Media and Press Coverage",
     "intro": "Selected coverage of WTIA programmes, awards and industry surveys.",
     "contact": "For press and media enquiries, please contact our Media Team: contact@hkwtia.org",
+    "externalNote": "Links below lead to external sites.",
+    "wire": "Wire distribution",
+    "inclusionHub": "Editorial review: this link is a topic hub, not one article. It stays listed and is not presented as a WTIA endorsement.",
+    "inclusionNoWtia": "Editorial review: the retrieved text does not mention WTIA. It stays listed, and no WTIA role is added.",
+    "ctaExternal": "Read original article",
+    "ctaExternalA11y": "Read original article (opens in a new tab, external site)",
+    "ctaInternal": "Read WTIA news",
+    "ctaInternalA11y": "Read WTIA news on this site",
     "table": {
       "date": "Date",
       "outlet": "Outlet",
@@ -2003,8 +2011,22 @@
     "quality": {
       "eyebrow": "Editorial standards",
       "title": "How WTIA reports",
-      "body": "Every article is staff-authored, dated and attributed. Only sourced, cleared items are published here."
-    }
+      "body": "Historical items are the association's dated archive, kept in the original wording. Items written on this site are staff-authored, dated and attributed."
+    },
+    "searchLabel": "Search news",
+    "searchSubmit": "Search",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageStatus": "Page {page} of {pages}",
+    "noMatches": "No news items match this search.",
+    "archiveOriginal": "Archived original. The wording and date are unchanged.",
+    "archiveFallbackZh": "Archived original in Chinese. This is not an English translation.",
+    "archiveFallbackEn": "Archived original in English. A Chinese version was not in the source.",
+    "externalHint": " (opens in a new tab)",
+    "missingPhoto": "A photograph from this article could not be archived.",
+    "missingFile": "The original file could not be archived.",
+    "photoAlt": "Archived photograph. The source did not include a caption.",
+    "backToList": "All news"
   },
   "Contact": {
     "metaTitle": "Contact｜Hong Kong Wireless Technology Industry Association (WTIA)",

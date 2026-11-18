@@ -1,0 +1,55 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2020/03/postpone-tokyo-industry-4-0-training-programme",
+  "sourceId": "4713",
+  "slug": "postpone-tokyo-industry-4-0-training-programme",
+  "title": "[POSTPONE] ‘Tokyo ‘Industry 4.0’ Training Programme’",
+  "publishedAt": "2020-03-23T03:04:47+00:00",
+  "modifiedAt": "2020-03-23T03:05:30+00:00",
+  "visibleDateText": "March 23rd, 2020",
+  "author": "hkwtia",
+  "categories": [
+    "News"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "The ‘Tokyo ‘Industry 4.0’ Training Programme’ originally scheduled for 16-19 March 2020 has been postponed. We target to reschedule it to October 2020 and the exact rescheduling will be announced in March.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/TOKYO.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/8ad79e04a4f69207.jpg",
+      "originalPath": "/images/news-archive/original/8ad79e04a4f69207.png",
+      "sha256": "8ad79e04a4f69207d30cafa4fb8c25ea3353305c15c74a652353963b42951f1a",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The ‘Tokyo ‘Industry 4.0’ Training Programme’ originally scheduled for 16-19 March 2020 has been postponed. We target to reschedule it to "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "October 2020"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " and the exact rescheduling will be announced in March."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240414142620",
+  "sourceSha256": "33b138f35d0cf764abcc7331c7ebbf1e43c09dfe64034fd7b1c932c15703becd"
+}

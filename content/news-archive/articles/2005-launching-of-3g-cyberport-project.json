@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2005/01/2005-launching-of-3g-cyberport-project",
+  "sourceId": "3510",
+  "slug": "2005-launching-of-3g-cyberport-project",
+  "title": "2005 – Launching of 3G Cyberport Project",
+  "publishedAt": "2005-01-08T03:44:52+00:00",
+  "modifiedAt": "2020-02-13T03:56:32+00:00",
+  "visibleDateText": "January 8th, 2005",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Supported by Office of the Government Chief Information Officer (OGCIO), Cyberport and local 3G network operators, WTIA launched the 3G Cyberport Project. The Project consisted of awards, training, forum, and exhibition to promote the development and adoption of 3G applications and solutions in Hong Kong.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/3d-scaled.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/8f4089f0d1574ed7.jpg",
+      "originalPath": "/images/news-archive/original/8f4089f0d1574ed7.jpg",
+      "sha256": "8f4089f0d1574ed719b2e85e79fed3072cab88357de8d3b15fba112c03d58bcb",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Supported by Office of the Government Chief Information Officer (OGCIO), Cyberport and local 3G network operators, WTIA launched the 3G Cyberport Project. The Project consisted of awards, training, forum, and exhibition to promote the development and adoption of 3G applications and solutions in Hong Kong."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20230327002555",
+  "sourceSha256": "66b901241ab0d5ab9fb6959ed33a1cd5bea5e7bb0d73f70193c1b25ad3a5fe9b"
+}

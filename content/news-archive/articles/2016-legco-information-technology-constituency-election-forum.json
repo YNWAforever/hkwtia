@@ -1,0 +1,74 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2016/01/2016-legco-information-technology-constituency-election-forum",
+  "sourceId": "3847",
+  "slug": "2016-legco-information-technology-constituency-election-forum",
+  "title": "2016 – LegCo Information Technology Constituency Election Forum",
+  "publishedAt": "2016-01-20T10:27:57+00:00",
+  "modifiedAt": "2020-02-20T10:29:49+00:00",
+  "visibleDateText": "January 20th, 2016",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "To create a platform for IT voters to understand more about the candidates’ view for the upcoming LEGCO Election IT Functional Constituency, Hong Kong Wireless Technology Industry Association (WTIA), the Hong Kong Information Technology Federation (HKITF), and Professional Information Security Association (PISA) co-organized an Election Forum in 2016 before the legislative election.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/Picture1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/a5d455363173996a.jpg",
+      "originalPath": "/images/news-archive/original/a5d455363173996a.png",
+      "sha256": "a5d455363173996a6c493603e8fd9121541e9720e72fdc146a1876605af32c7d",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "To create a platform for IT voters to understand more about the candidates’ view for the"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " upcoming LEGCO Election IT Functional Constituency, Hong Kong Wireless Technology"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " Industry Association (WTIA), the Hong Kong Information Technology Federation (HKITF),"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " and Professional Information Security Association (PISA) co-organized an Election Forum in"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " 2016 before the legislative election."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240615155940",
+  "sourceSha256": "92441b8f2b77542a48bf108174b69c123caae6f28bd4d6600df1a0e1ab2a8c82"
+}

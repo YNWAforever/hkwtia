@@ -1,0 +1,42 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2014/01/2014-wi-fi-hk",
+  "sourceId": "3539",
+  "slug": "2014-wi-fi-hk",
+  "title": "2014 – Wi-Fi.HK",
+  "publishedAt": "2014-01-30T20:15:07+00:00",
+  "modifiedAt": "2020-02-20T09:18:20+00:00",
+  "visibleDateText": "January 31st, 2014",
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "WTIA and Office of the Government Chief Information Officer (OGCIO) launched Wi-Fi.HK, a common Wi-Fi brand established to facilitate the public and visitors in locating and accessing the free public Wi-Fi services in Hong Kong. With the support from both public and private sectors, there are over 12,000 hotspots under the brand to provide easy access of free Wi-Fi services to the public and visitors.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2014/01/10548114_546835835416447_7807130283769467394_o-1024x683-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/5c8e540834f9d3b1.jpg",
+      "originalPath": "/images/news-archive/original/5c8e540834f9d3b1.jpg",
+      "sha256": "5c8e540834f9d3b12d6b615efe167308a803145de751df085f03a6316ccb02a2",
+      "error": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA and Office of the Government Chief Information Officer (OGCIO) launched Wi-Fi.HK, a common Wi-Fi brand established to facilitate the public and visitors in locating and accessing the free public Wi-Fi services in Hong Kong. With the support from both public and private sectors, there are over 12,000 hotspots under the brand to provide easy access of free Wi-Fi services to the public and visitors."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": "20240722043534",
+  "sourceSha256": "16933b744381701c3c8154c2aca31f96e95340a5558f5cd34074dae83334f720"
+}
