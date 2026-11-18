@@ -281,6 +281,11 @@
       "localPath": "/images/news-archive/display/e407c2bb127b5fc6.jpg",
       "originalPath": "/images/news-archive/original/e407c2bb127b5fc6.png",
       "sha256": "e407c2bb127b5fc60cd2837e64004df869ba71fac3c70a487b24836ea45622ff"
+    },
+    "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf": {
+      "localPath": "/files/news-archive/19b58667b0f39029.pdf",
+      "originalPath": null,
+      "sha256": "19b58667b0f39029855cfeae27802580aba8590b749f446dc162ccd4c834e82f"
     }
   }
 }

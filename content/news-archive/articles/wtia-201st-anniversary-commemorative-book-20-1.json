@@ -42,11 +42,12 @@
       "type": "file",
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf",
       "label": "PDF",
-      "localPath": null,
+      "localPath": "/files/news-archive/19b58667b0f39029.pdf",
       "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "sha256": "19b58667b0f39029855cfeae27802580aba8590b749f446dc162ccd4c834e82f",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
     },
     {
       "type": "paragraph",
@@ -145,10 +146,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "7f36541adeff59766628870f5e2d68f1eb1fe5ee05f1246ce36a2eb07134bcb8"
 }
