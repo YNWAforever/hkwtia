@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {StorySection} from "@/components/marketing/story-section";
+import {CoreAnswer} from "@/components/seo/core-answer";
 import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
@@ -9,7 +10,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
-import {buildBreadcrumbData} from "@/lib/structured-data";
+import {buildBreadcrumbData, buildChairmanData} from "@/lib/structured-data";
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -46,6 +47,7 @@ export default async function ChairmanPage({params}: Props) {
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
         breadcrumbLabel={common("breadcrumbLabel")}
       />
+      <CoreAnswer id="chairman-term" question={t("termQuestion")} answer={t("term")} />
       <StorySection heading={t("messageTitle")} tone="warm">
         <blockquote className="max-w-3xl border-l-4 border-primary pl-6 text-xl leading-relaxed">
           {t("message").split("\n\n").map((paragraph) => (
@@ -54,6 +56,7 @@ export default async function ChairmanPage({params}: Props) {
         </blockquote>
       </StorySection>
       <RichRelatedRoutes items={related} />
+      <StructuredData data={buildChairmanData()} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/chairman", tRoot))} />
     </>
   );

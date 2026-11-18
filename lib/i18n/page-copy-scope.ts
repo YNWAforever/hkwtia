@@ -70,5 +70,12 @@ export function isPublicRoute(value: unknown): value is PublicRoute {
 /** Runtime loading/failure messages are product state, outside the agreed CMS copy surface. */
 export function isPageCopyKeyEditable(namespace: string, keyPath: string): boolean {
   if (namespace === "Membership" && (keyPath.startsWith("selfService.") || keyPath.startsWith("compare."))) return false;
+  // t578s2629: the verified identity, chairman, and CPAI-topic sentences stay in
+  // the bundles. Page-copy must not rewrite them.
+  const lockedVerifiedAnswer =
+    ((namespace === "Home" || namespace === "About") && (keyPath === "identity" || keyPath === "identityQuestion"))
+    || (namespace === "Chairman" && (keyPath === "term" || keyPath === "termQuestion"))
+    || (namespace === "programs" && (keyPath === "cpai.listedTopics" || keyPath === "cpai.listedTopicsQuestion"));
+  if (lockedVerifiedAnswer) return false;
   return namespace !== "Home" || (keyPath !== "openNow.loading" && !keyPath.startsWith("openNow.unavailable."));
 }

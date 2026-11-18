@@ -4,6 +4,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {ProgramCredential} from '@/components/marketing/program-credential';
 import {localiseImages} from '@/components/marketing/program-editions';
 import {StorySection} from '@/components/marketing/story-section';
+import {CoreAnswer} from '@/components/seo/core-answer';
 import {StructuredData} from '@/components/seo/structured-data';
 import {PageHero} from '@/components/wt/page-hero';
 import {RichCompass} from '@/components/wt/rich-compass';
@@ -77,6 +78,7 @@ export default async function CpaiPage({params}: Props) {
         syllabus={cpai.syllabus.map((module) => (zh ? module.titleZh : module.titleEn))}
         syllabusHeading={tr('credentialSyllabus')}
       />
+      <CoreAnswer id="cpai-topics" question={t('listedTopicsQuestion')} answer={t('listedTopics')} />
       <StructuredData data={buildEventSeriesData({key: 'cpai', name: t('title'), description: t('description')}, locale as AppLocale)} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/programs/cpai', tRoot))} />
     </>

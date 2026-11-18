@@ -20,6 +20,20 @@ describe("page copy scope", () => {
     expect(pageCopyCatalog("Membership").some(leaf => leaf.keyPath === keyPath)).toBe(false);
     expect(pageCopyEnglishRejection({namespace: "Membership", keyPath, value: "Unsupported account promise"})).toBe("KEY_PATH_UNKNOWN");
   });
+  it.each([
+    ["Home", "identity"],
+    ["Home", "identityQuestion"],
+    ["About", "identity"],
+    ["About", "identityQuestion"],
+    ["Chairman", "term"],
+    ["Chairman", "termQuestion"],
+    ["programs", "cpai.listedTopics"],
+    ["programs", "cpai.listedTopicsQuestion"],
+  ] as const)("keeps the t578s2629 verified answer out of CMS: %s.%s", (namespace, keyPath) => {
+    expect(pageCopyCatalog(namespace).some((leaf) => leaf.keyPath === keyPath)).toBe(false);
+    expect(pageCopyEnglishRejection({namespace, keyPath, value: "Rewritten."})).toBe("KEY_PATH_UNKNOWN");
+  });
+
   it.each(["openNow.loading", "openNow.unavailable.title", "openNow.unavailable.copy"])("keeps runtime recovery copy out of CMS: %s", (keyPath) => {
     expect(pageCopyCatalog("Home").some(leaf => leaf.keyPath === keyPath)).toBe(false);
     expect(pageCopyEnglishRejection({namespace:"Home",keyPath,value:"False success"})).toBe("KEY_PATH_UNKNOWN");
@@ -165,12 +179,14 @@ describe("page copy scope", () => {
       // added to asa/hkict/tct, plus 9 more `programs.record` keys (eyebrow
       // type labels, compass labels, the mailto ask, and the editions/
       // credential facts) that Task 15's ProgrammeRecordPage header reads,
-      // plus 1 more for the WP-4 Task 16 `audience` field added to cpai --
-      // 29 + 3 + 9 + 1 = 42. Those are page furniture -- headings, and
+      // plus 1 more for the WP-4 Task 16 `audience` field added to cpai,
+      // plus 1 for winnersOffSiteArchived, the plain-text label that
+      // replaces the retired 2020 microsite URL --
+      // 29 + 3 + 9 + 1 + 1 = 43. Those are page furniture -- headings, and
       // sentences with {agency}/{count}/{programme} placeholders -- so staff
       // can reword them. The facts they frame come from content/programs/*.ts
       // and lib/home/programme-summaries.ts, which /admin/page-copy cannot reach.
-      programs: 42,
+      programs: 43,
       // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
       // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
       // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
@@ -228,7 +244,8 @@ describe("page copy scope", () => {
     // The ExCo roster added 37 Committees.roster leaves. 625 + 37 = 662.
     // Five WTIA roles, two placeholder names, and emptyBiography. 662 + 8 = 670.
     // Larry's profile link adds two Committees leaves. 670 + 2 = 672.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(672);
+    // winnersOffSiteArchived added one programs.record leaf. 672 + 1 = 673.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(673);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {CoreAnswer} from "@/components/seo/core-answer";
 import {StructuredData} from "@/components/seo/structured-data";
 import {Arrow} from "@/components/wt/arrow";
 import {Eyebrow} from "@/components/wt/eyebrow";
@@ -54,6 +55,7 @@ export default async function AboutPage({params}: Props) {
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
         breadcrumbLabel={common("breadcrumbLabel")}
       />
+      <CoreAnswer id="about-identity" question={t("identityQuestion")} answer={t("identity")} />
       <RichCompass
         items={[
           {label: history("eyebrow"), value: history("title"), href: "/about/history"},

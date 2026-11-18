@@ -622,3 +622,31 @@ html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto;
 .press-coverage a { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
 .press-coverage .press-date,
 .press-coverage .press-outlet { white-space: nowrap; }
+/* Date and outlet stay nowrap, so on a phone the title column collapsed to
+   about 45px and Chinese titles broke every two characters. Stack the row:
+   date · outlet, then a full-width title. The desktop table is unchanged. */
+@media (max-width: 640px) {
+  .press-coverage thead { display: none; }
+  .press-coverage,
+  .press-coverage tbody,
+  .press-coverage tr { display: block; width: 100%; }
+  .press-coverage tr { padding: 14px 0; border-bottom: 1px solid var(--wt-line); }
+  .press-coverage td {
+    display: inline;
+    width: auto;
+    border: 0;
+    padding: 0;
+  }
+  .press-coverage .press-date,
+  .press-coverage .press-outlet {
+    color: #646464;
+    font-size: 12px;
+  }
+  .press-coverage .press-date:not(:empty)::after { content: " · "; }
+  .press-coverage .press-title {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .press-coverage .press-title a { overflow-wrap: break-word; }
+}

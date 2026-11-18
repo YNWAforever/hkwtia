@@ -84,6 +84,7 @@
       "members": "Member directory",
       "showcase": "Member Showcase",
       "news": "News",
+      "media": "Media & Press",
       "aiOps": "AI operations",
       "aiTransparency": "AI transparency",
       "about": "About WTIA",
@@ -450,6 +451,8 @@
   "Home": {
     "metaTitle": "Home｜Hong Kong Wireless Technology Industry Association (WTIA)",
     "metaDescription": "WTIA connects Hong Kong's wireless and AI+ community—members, events, programmes and GBA opportunities.",
+    "identityQuestion": "What is WTIA?",
+    "identity": "WTIA is the Hong Kong Wireless Technology Industry Association.",
     "hero": {
       "eyebrow": "Hong Kong wireless technology",
       "title": "How can Hong Kong lead the AI+ era?",
@@ -778,6 +781,8 @@
     "eyebrow": "About WTIA",
     "title": "A connected voice for wireless technology.",
     "summary": "WTIA / Wireless（香港無線科技商會） convenes members, partners and public stakeholders to advance Hong Kong's technology ecosystem.",
+    "identityQuestion": "What do the names WTIA and WIRELESS refer to here?",
+    "identity": "WTIA / WIRELESS refers here to the Hong Kong Wireless Technology Industry Association, 香港無線科技商會.",
     "imageAlt": "Industry guests and organisers in two rows before the Asia Smart Innovation Awards 2025 backdrop.",
     "historyTitle": "Our role",
     "historyIntro": "We connect the industry with opportunities that strengthen innovation, talent and regional reach.",
@@ -805,6 +810,8 @@
     "eyebrow": "Leadership",
     "title": "Chairman's message",
     "summary": "Working together to keep Hong Kong connected to emerging technology opportunities.",
+    "termQuestion": "Who is WTIA’s Chairman?",
+    "term": "Willy Lai (賴志偉) has served as WTIA Chairman since 7 October 2026. His term is 2026–2028.",
     "messageTitle": "A shared commitment",
     "message": "Dear Members and Friends,\n\nI am honoured to take on the role of Chairman of WTIA. Thank you for your trust and support, and to our outgoing leadership and committee for the strong foundation they have built.\n\nMy vision is for WTIA to connect advanced technology with practical needs — creating opportunities for our members and contributing to Hong Kong’s development as an international innovation and technology centre.\n\nIn line with the direction of the national 15th Five-Year Plan, I look forward to deepening our engagement in artificial intelligence, robotics, advanced manufacturing, microelectronics and next-generation communications. Emerging fields such as embodied intelligence and 6G also offer opportunities for our community to explore. Our focus should be on translating technological advances into commercially viable products, better services and meaningful benefits across industries.\n\nWTIA can bring businesses, universities, research institutions and entrepreneurs closer together. By connecting Hong Kong’s research strengths and international networks with the Greater Bay Area’s industrial capabilities, we can help promising ideas find practical applications and wider markets.\n\nMaking innovation accessible is equally important. I want to help SMEs identify relevant technologies, connect with capable partners and build the skills needed to improve productivity and competitiveness. Responsible adoption, cybersecurity and trust must accompany this progress.\n\nOur community is central to this ambition. Welcoming members from different disciplines and connecting experienced professionals with emerging talent will bring fresh perspectives and stronger collaboration.\n\nI welcome your ideas and participation as we shape WTIA’s next chapter together. I look forward to working with our members, committee and partners to turn innovation into lasting value for Hong Kong.\n\nWilly Lai\nChairman\nHong Kong Wireless Technology Industry Association (WTIA)",
     "signature": "Willy Lai, Chairman, WTIA"
@@ -912,6 +919,8 @@
     "eyebrow": "Since 2001",
     "title": "Our history",
     "intro": "Milestones from twenty-six years of building Hong Kong's wireless and technology industry.",
+    "announcementQuestion": "Are the historical summaries original announcements?",
+    "announcementNote": "The History page (/about/history) presents summaries of past programmes and activities. These summaries are distinct from the original WTIA news announcements; use the original announcement when you need its exact wording and publication context.",
     "storyTitle": "Milestone story",
     "readMore": "Read more",
     "compass": {
@@ -933,7 +942,7 @@
     "title": "Pick your WTIA membership",
     "summary": "Three paid tiers with clear annual fees. Compare plans below, then join online.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Annual fees: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800.",
+    "tiersIntro": "The 2026–27 annual fees are HK$500 for Individual membership, HK$1,800 for Corporate membership and HK$4,800 for Platinum membership.",
     "benefits": {
       "network": "Community and networking access",
       "programs": "Programme participation",
@@ -981,8 +990,8 @@
         "answer": "Community is free for one person. Individual is HK$500 a year. Corporate (HK$1,800) and Platinum (HK$4,800) are for organisations and pay online."
       },
       "1": {
-        "question": "Where are the fees?",
-        "answer": "Fees are on the plan cards above: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Confirm the amount at payment."
+        "question": "What are the annual membership fees for 2026–27?",
+        "answer": "The 2026–27 annual fees are HK$500 for Individual membership, HK$1,800 for Corporate membership and HK$4,800 for Platinum membership."
       },
       "2": {
         "question": "Does a paid plan renew automatically?",
@@ -1162,7 +1171,7 @@
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
     "choosePlanTitle": "Choose a plan",
-    "choosePlanDescription": "Community is free. Paid tiers: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year.",
+    "choosePlanDescription": "Community is free. The 2026–27 annual fees are HK$500 for Individual membership, HK$1,800 for Corporate membership and HK$4,800 for Platinum membership.",
     "choosePlanCompare": "Compare fees",
     "choosePlan": {
       "community": "Free. Directory card and public event RSVP.",
@@ -1382,7 +1391,9 @@
       "title": "CPAI",
       "description": "A focused WTIA programme supporting applied innovation.",
       "status": "Contact WTIA for the current programme timetable and how to take part.",
-      "audience": "Professionals completing WTIA's applied AI credential."
+      "audience": "Professionals completing WTIA's applied AI credential.",
+      "listedTopicsQuestion": "What topics does the published CPAI page list?",
+      "listedTopics": "The CPAI page (/programs/cpai) lists strategic frameworks for enterprise AI adoption, hands-on generative AI content creation, cybersecurity and compliance essentials, and AI case studies across industries. Confirm the applicable intake’s syllabus before enrolling."
     },
     "hkict": {
       "title": "HKICT Awards",
@@ -1415,6 +1426,7 @@
       "regionsCoOrganised": "Co-organised with {count} Asia regions",
       "winnersOffSite": "The full winner list is published on the edition's own site.",
       "winnersOffSiteLink": "View the winners",
+      "winnersOffSiteArchived": "2020 microsite (archived)",
       "winnersUnrecorded": "WTIA's archive does not record the winners for this edition.",
       "credentialIssuer": "Issued by",
       "credentialCoursePartner": "Course delivered with",
@@ -1751,6 +1763,8 @@
     "eyebrow": "Events",
     "title": "Events",
     "description": "Stay connected to upcoming WTIA gatherings and opportunities.",
+    "checkQuestion": "Where should I check event information?",
+    "checkAnswer": "Use the Events page as a starting point. Confirm an event’s date, location or format, language, eligibility, fee and registration status before making arrangements.",
     "heroImageAlt": "Audience attending an in-person WTIA Tech Connect community session in Hong Kong",
     "breadcrumbCurrent": "Events",
     "resultsHeading": "Event results",
@@ -4910,7 +4924,7 @@
     }
   },
   "MarketingExtras": {
-    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
+    "footerTagline": "Technology + Wisdom. Hong\u00a0Kong + The World."
   },
   "OperationsTiming": {
     "heading": "Administrative work timing",

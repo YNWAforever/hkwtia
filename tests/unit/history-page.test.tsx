@@ -334,7 +334,12 @@ describe("history page", () => {
       expect(screen.getByRole("heading", {level: 1, name: expected.title})).toBeVisible();
       expect(screen.getAllByText(expected.eyebrow).length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(expected.intro)).toBeVisible();
-      expect(screen.getAllByRole("heading", {level: 2}).map(({textContent}) => textContent)).toEqual(["2010"]);
+      const bundle = locale === "en" ? en.History : zh.History;
+      expect(screen.getByText(bundle.announcementNote)).toBeVisible();
+      expect(screen.getAllByRole("heading", {level: 2}).map(({textContent}) => textContent)).toEqual([
+        bundle.announcementQuestion,
+        "2010",
+      ]);
       expect(screen.getByText(locale === "en" ? "Body EN" : "正文")).toBeVisible();
       expect(document.querySelectorAll(".rich-compass-grid>div")).toHaveLength(3);
       expect(document.querySelector("main")).not.toBeInTheDocument();

@@ -79,8 +79,13 @@ describe("SiteFooter", () => {
     // shorter list, has a case of its own below (errata E-68).
     expect(footer.querySelector("address")).toBeNull();
     expect([...siteConfig.contact.addressLines]).toEqual([]);
-    expect(within(footer).getByRole("link", {name: siteConfig.contact.email}))
-      .toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
+    const mail = within(footer).getAllByRole("link", {name: siteConfig.contact.email});
+    expect(mail).toHaveLength(2);
+    for (const link of mail) {
+      expect(link).toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
+    }
+    expect(footer.querySelector(".footer-enquiry-label")?.textContent).toBe("Questions?");
+    expect(footer.querySelector(".footer-enquiry-email")).toHaveClass("footer-enquiry-email");
     expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
     expect(siteConfig.contact.phone).toBeUndefined();
 
@@ -96,7 +101,8 @@ describe("SiteFooter", () => {
     expect(footer.querySelector("iframe")).toBeNull();
     expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
     expect(within(footer).getByRole("link", {name: "Privacy statement"})).toHaveAttribute("href", "/privacy");
-    expect(within(footer).getByRole("button", {name: "Switch to Chinese"})).toBeInTheDocument();
+    expect(within(footer).getByRole("button", {name: "中文, Switch to Chinese"})).toBeInTheDocument();
+    expect(within(footer).getByRole("link", {name: "Media & Press"})).toHaveAttribute("href", "/media-and-press-coverage");
     expect(within(footer).queryByRole("link", {name: /terms|accessibility/i})).toBeNull();
     expect(footer.querySelector(".footer-bottom small")?.textContent)
       .toContain(`© ${new Date().getFullYear()} WTIA.`);
@@ -151,6 +157,7 @@ describe("SiteFooter", () => {
     expect(within(footer).getByRole("link", {name: "WTIA Instagram"})).toHaveAttribute("href", "https://www.instagram.com/hkwtia/");
     expect(within(footer).getByText("探索")).toBeInTheDocument();
     expect(footer.querySelector("address")).toBeNull();
-    expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
+    expect(within(footer).getByText("科技 + 智慧。香港 + 世界。")).toBeInTheDocument();
+    expect(within(footer).getByRole("link", {name: "傳媒報道"})).toHaveAttribute("href", "/media-and-press-coverage");
   });
 });

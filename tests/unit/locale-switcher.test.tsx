@@ -49,7 +49,7 @@ describe("LocaleSwitcher", () => {
   it("cannot consume a click in the pending search-state fallback", () => {
     searchState.suspended = true;
     render(<LocaleSwitcher locale="en" {...labels}/>);
-    const button = screen.getByRole("button", {name: labels.switchToChineseLabel});
+    const button = screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`});
     expect(button).toBeDisabled();
     fireEvent.click(button);
     expect(routerReplace).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe("LocaleSwitcher", () => {
     window.history.replaceState(null, "", "/showcase?q=ai&category=software#results");
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith(
       "/showcase?q=ai&category=software#results",
@@ -75,7 +75,7 @@ describe("LocaleSwitcher", () => {
     window.history.replaceState(null, "", "/events?status=past#results");
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith(
       "/events?status=past#results",
@@ -88,7 +88,7 @@ describe("LocaleSwitcher", () => {
     window.history.replaceState(null, "", "/events?filter=member#schedule");
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith(
       "/events?filter=member#schedule",
@@ -100,7 +100,7 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams("filter=member&filter=partner&topic=AI%20%26%20data");
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith(
       "/events?filter=member&filter=partner&topic=AI+%26+data",
@@ -112,7 +112,7 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams();
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith("/events", {locale: "zh-HK"});
   });
@@ -121,7 +121,7 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams("flag=");
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "zh-HK"});
   });
@@ -130,7 +130,7 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams("tag=cloud&tag=security&q=%E7%B6%B2%E7%B5%A1");
     render(<LocaleSwitcher locale="zh-HK" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToEnglishLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.englishLabel}, ${labels.switchToEnglishLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith(
       "/events?tag=cloud&tag=security&q=%E7%B6%B2%E7%B5%A1",
@@ -142,7 +142,7 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams();
     render(<LocaleSwitcher locale="zh-HK" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToEnglishLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.englishLabel}, ${labels.switchToEnglishLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith("/events", {locale: "en"});
   });
@@ -151,20 +151,20 @@ describe("LocaleSwitcher", () => {
     searchState.current = new URLSearchParams("flag=");
     render(<LocaleSwitcher locale="zh-HK" {...labels} />);
 
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToEnglishLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.englishLabel}, ${labels.switchToEnglishLabel}`}));
 
     expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "en"});
   });
   it("keeps the current locale when an unsaved editor rejects the switch", () => {
     const beforeSwitch = vi.fn(() => false);
     render(<LocaleSwitcher beforeSwitch={beforeSwitch} locale="en" {...labels}/>);
-    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    fireEvent.click(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`}));
     expect(beforeSwitch).toHaveBeenCalledTimes(1);
     expect(routerReplace).not.toHaveBeenCalled();
   });  it("renders a 44px locale target in each Suspense state", () => {
     render(<LocaleSwitcher locale="en" {...labels} />);
 
-    expect(screen.getByRole("button", {name: labels.switchToChineseLabel})).toHaveClass(
+    expect(screen.getByRole("button", {name: `${labels.chineseLabel}, ${labels.switchToChineseLabel}`})).toHaveClass(
       "inline-flex", "min-h-11", "min-w-11", "items-center", "justify-center",
     );
   });

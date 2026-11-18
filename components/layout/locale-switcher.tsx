@@ -112,7 +112,10 @@ function LocaleSwitcherButton({
         "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
-      aria-label={accessibleLabel}
+      // The visible label ("中文" / "EN") has to sit inside the accessible name.
+      // aria-label replaces the contents, so a description alone fails
+      // label-content-name-mismatch on the homepage footer.
+      aria-label={`${label}, ${accessibleLabel}`}
       disabled={!hydrated || !onClick}
       onClick={onClick}
     >

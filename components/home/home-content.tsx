@@ -16,6 +16,7 @@ import { MarketProducts } from "@/components/home/market-products";
 import { OpenNow } from "@/components/home/open-now";
 import { Pathways } from "@/components/home/pathways";
 import { ProgrammeShowcase } from "@/components/home/programme-showcase";
+import { CoreAnswer } from "@/components/seo/core-answer";
 import { StructuredData } from "@/components/seo/structured-data";
 import {
   buildEcosystemIndustries,
@@ -77,9 +78,10 @@ async function LegacyNetworkSection({ locale, copyOverrides }: HomeCopyProps) {
 }
 
 export async function HomeContent({ locale, copyOverrides }: HomeCopyProps) {
-  const [hero, t] = await Promise.all([
+  const [hero, t, identity] = await Promise.all([
     Hero({ locale, copyOverrides }),
     getHomeTranslations({ locale, copyOverrides, namespace: "Home.openNow" }),
+    getHomeTranslations({ locale, copyOverrides, namespace: "Home" }),
   ]);
 
   return (
@@ -87,6 +89,7 @@ export async function HomeContent({ locale, copyOverrides }: HomeCopyProps) {
       <StructuredData data={buildOrganizationData()} />
       <StructuredData data={buildWebSiteData()} />
       {hero}
+      <CoreAnswer id="home-identity" question={identity("identityQuestion")} answer={identity("identity")} />
       <Suspense
         fallback={
           <section

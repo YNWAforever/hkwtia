@@ -196,6 +196,8 @@ const nextConfig: NextConfig = {
     // would shadow them for every request.
     const explicitRedirects = [
       {source: "/projects", destination: "/programs/asa", permanent: true},
+      // T03 (t578s2629): keep this target. Moving /history to /about/history would
+      // assume the old path meant the milestone page. That equivalence is HOLD.
       {source: "/history", destination: "/about", permanent: true},
     ];
     // Copied, not spread as-is: the generator returns frozen rules so no consumer can mutate
