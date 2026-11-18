@@ -20,6 +20,20 @@ describe("page copy scope", () => {
     expect(pageCopyCatalog("Membership").some(leaf => leaf.keyPath === keyPath)).toBe(false);
     expect(pageCopyEnglishRejection({namespace: "Membership", keyPath, value: "Unsupported account promise"})).toBe("KEY_PATH_UNKNOWN");
   });
+  it.each([
+    ["Home", "identity"],
+    ["Home", "identityQuestion"],
+    ["About", "identity"],
+    ["About", "identityQuestion"],
+    ["Chairman", "term"],
+    ["Chairman", "termQuestion"],
+    ["programs", "cpai.listedTopics"],
+    ["programs", "cpai.listedTopicsQuestion"],
+  ] as const)("keeps the t578s2629 verified answer out of CMS: %s.%s", (namespace, keyPath) => {
+    expect(pageCopyCatalog(namespace).some((leaf) => leaf.keyPath === keyPath)).toBe(false);
+    expect(pageCopyEnglishRejection({namespace, keyPath, value: "Rewritten."})).toBe("KEY_PATH_UNKNOWN");
+  });
+
   it.each(["openNow.loading", "openNow.unavailable.title", "openNow.unavailable.copy"])("keeps runtime recovery copy out of CMS: %s", (keyPath) => {
     expect(pageCopyCatalog("Home").some(leaf => leaf.keyPath === keyPath)).toBe(false);
     expect(pageCopyEnglishRejection({namespace:"Home",keyPath,value:"False success"})).toBe("KEY_PATH_UNKNOWN");

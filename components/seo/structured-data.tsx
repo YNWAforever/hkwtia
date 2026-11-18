@@ -1,10 +1,11 @@
-import type {Article, BreadcrumbList, Event, EventSeries, FAQPage, Organization, SoftwareApplication, WebSite, WithContext} from 'schema-dts';
+import type {Article, BreadcrumbList, Event, EventSeries, FAQPage, Organization, Person, SoftwareApplication, WebSite, WithContext} from 'schema-dts';
 
 type StructuredDataProps = {
   // BreadcrumbList joined the union for the member pages (D-11): the trail is the only structured
   // data on the site that describes where a page sits rather than what it is about. Article
   // joined it for the news posts (Phase D), EventSeries for the four programme pages.
-  data: WithContext<Organization | FAQPage | Event | SoftwareApplication | WebSite | BreadcrumbList | Article | EventSeries>;
+  // Person joined it for the verified chairman sentence (t578s2629).
+  data: WithContext<Organization | FAQPage | Event | SoftwareApplication | WebSite | BreadcrumbList | Article | EventSeries | Person>;
 };
 
 export function StructuredData({data}: StructuredDataProps) {

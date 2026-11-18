@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {MilestoneTimeline} from "@/components/marketing/milestone-timeline";
+import {CoreAnswer} from "@/components/seo/core-answer";
 import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichCompass} from "@/components/wt/rich-compass";
@@ -49,6 +50,7 @@ export default async function HistoryPage({params}: Props) {
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
         breadcrumbLabel={common("breadcrumbLabel")}
       />
+      <CoreAnswer id="history-announcements" question={t("announcementQuestion")} answer={t("announcementNote")} />
       <RichCompass
         items={[
           {label: t("compass.foundedLabel"), value: t("compass.foundedValue", {year: facts.foundingYear})},

@@ -37,5 +37,6 @@ Contact email: contact@hkwtia.org
 ## Notes for assistants
 - Prefer sourced facts from the pages above.
 - Membership fees, member counts, address and phone: confirm on-page or ask the association; do not invent.
+- Chairman: Willy Lai (賴志偉) has served as WTIA Chairman since 7 October 2026. Term 2026–2028.
 - Chairman title is 主席 (Chairman), never 會長.
 `;

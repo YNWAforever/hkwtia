@@ -1,4 +1,4 @@
-import type {Article, BreadcrumbList, Event, EventAttendanceModeEnumeration, EventSeries, EventStatusType, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
+import type {Article, BreadcrumbList, Event, EventAttendanceModeEnumeration, EventSeries, EventStatusType, FAQPage, Organization, Person, WebSite, WithContext} from 'schema-dts';
 
 import {siteConfig} from '@/config/site';
 import type {EventRecord} from '@/content/schemas';
@@ -34,6 +34,26 @@ export function buildOrganizationData(): WithContext<Organization> {
       addressLocality: contact.addressLines.at(-1),
       addressCountry: 'HK',
     }} : {}),
+  };
+}
+
+// t578s2629: the visible chairman sentence. schema-dts types Occupation, not a
+// Role with startDate, so the approved date stays in the same sentence the
+// page shows. No end day — the term is 2026–2028, not a calendar end — and
+// no founding date.
+export function buildChairmanData(): WithContext<Person> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Willy Lai',
+    alternateName: '賴志偉',
+    jobTitle: 'Chairman',
+    description: 'Willy Lai (賴志偉) has served as WTIA Chairman since 7 October 2026. His term is 2026–2028.',
+    worksFor: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: absoluteUrl('/'),
+    },
   };
 }
 

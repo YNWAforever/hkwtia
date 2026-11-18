@@ -18,6 +18,7 @@ import zh from "@/messages/zh-HK.json";
  * MarketingExtras.footerTagline in zh-HK became「科技 + 智慧。香港 + 世界。」,
  * programs.record.winnersOffSiteArchived was added in both bundles, and the
  * English tagline joins Hong and Kong with a non-breaking space.
+ * t578s2629 added the verified core-answer keys and scoped the 2026–27 fees.
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -47,18 +48,18 @@ const PROPOSED = {
   en: {
     "Membership.title": "Pick your WTIA membership",
     "Membership.summary": "Three paid tiers with clear annual fees. Compare plans below, then join online.",
-    "Membership.tiersIntro": "Annual fees: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800.",
+    "Membership.tiersIntro": "The 2026–27 annual fees are HK$500 for Individual membership, HK$1,800 for Corporate membership and HK$4,800 for Platinum membership.",
     "Membership.closing.eyebrow": "Next step",
     "Membership.closing.title": "Join online, or email us first.",
     "Membership.closing.copy": "Community is free. Individual, Corporate and Platinum pay online each year.",
     "Membership.closing.join": "Join WTIA",
     "Membership.closing.contact": "Email WTIA",
     "Membership.faq.0.answer": "Community is free for one person. Individual is HK$500 a year. Corporate (HK$1,800) and Platinum (HK$4,800) are for organisations and pay online.",
-    "Membership.faq.1.question": "Where are the fees?",
-    "Membership.faq.1.answer": "Fees are on the plan cards above: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Confirm the amount at payment.",
+    "Membership.faq.1.question": "What are the annual membership fees for 2026–27?",
+    "Membership.faq.1.answer": "The 2026–27 annual fees are HK$500 for Individual membership, HK$1,800 for Corporate membership and HK$4,800 for Platinum membership.",
     "Membership.metaDescription": "WTIA membership: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year. Join online.",
     "Join.choosePlanTitle": "Choose a plan",
-    "Join.choosePlanDescription": "Community is free. Paid tiers: Individual HK$500, Corporate HK$1,800, Platinum HK$4,800 a year.",
+    "Join.choosePlanDescription": "Community is free. The 2026–27 annual fees are HK$500 for Individual membership, HK$1,800 for Corporate membership and HK$4,800 for Platinum membership.",
     "Join.choosePlanCompare": "Compare fees",
     "Join.choosePlanContact": "Email WTIA",
     "Join.choosePlan.individual": "HK$500 a year. Pay online.",
@@ -70,18 +71,18 @@ const PROPOSED = {
   "zh-HK": {
     "Membership.title": "選擇你的 WTIA 會籍",
     "Membership.summary": "三個收費級別，年費清楚列明。先比較計劃，再於網上加入。",
-    "Membership.tiersIntro": "年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
+    "Membership.tiersIntro": "2026–27年度年費為：個人會籍HK$500、企業會籍HK$1,800、白金會籍HK$4,800。",
     "Membership.closing.eyebrow": "下一步",
     "Membership.closing.title": "先網上加入，或先電郵查詢。",
     "Membership.closing.copy": "社群會籍免費。個人、企業及白金會籍每年於網上付款。",
     "Membership.closing.join": "加入 WTIA",
     "Membership.closing.contact": "電郵 WTIA",
     "Membership.faq.0.answer": "社群會籍免費，適合一人。個人會籍每年 HK$500。企業（HK$1,800）及白金（HK$4,800）適合機構，並於網上付款。",
-    "Membership.faq.1.question": "會費在哪裡？",
-    "Membership.faq.1.answer": "會費見上方計劃卡：個人每年 HK$500、企業 HK$1,800、白金 HK$4,800。付款前以付款頁顯示金額為準。",
+    "Membership.faq.1.question": "2026–27年度會籍年費是多少？",
+    "Membership.faq.1.answer": "2026–27年度年費為：個人會籍HK$500、企業會籍HK$1,800、白金會籍HK$4,800。",
     "Membership.metaDescription": "會費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。歡迎加入。",
     "Join.choosePlanTitle": "選擇計劃",
-    "Join.choosePlanDescription": "社群免費。年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
+    "Join.choosePlanDescription": "社群免費。2026–27年度年費為：個人會籍HK$500、企業會籍HK$1,800、白金會籍HK$4,800。",
     "Join.choosePlanCompare": "比較會費",
     "Join.choosePlanContact": "電郵 WTIA",
     "Join.choosePlan.individual": "每年 HK$500。網上付款。",
@@ -174,7 +175,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "f33062bcc8c3d0eec6dd851a6dc5449da3204cc6650df0ad5aeee66f6df6219a";
+const NON_ALLOWLIST_FINGERPRINT = "166d3d86dbe6b15b22bbe3bf9b779e4f09232dcdbd59f68399f4dfc076b6c52c";
 
 type MessageTree = Record<string, unknown>;
 

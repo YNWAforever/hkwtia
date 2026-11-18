@@ -452,6 +452,8 @@
   "Home": {
     "metaTitle": "主頁｜香港無線科技商會 WTIA",
     "metaDescription": "香港無線科技商會（WTIA）連繫會員、活動、計劃及大灣區創科機遇。",
+    "identityQuestion": "WTIA是甚麼？",
+    "identity": "WTIA是香港無線科技商會。",
     "hero": {
       "eyebrow": "香港無線科技",
       "title": "香港如何引領 AI+ 時代？",
@@ -780,6 +782,8 @@
     "eyebrow": "關於 WTIA",
     "title": "凝聚無線科技業界的共同力量。",
     "summary": "香港無線科技商會（WTIA／Wireless）匯聚會員、夥伴及公共持份者，推動香港創科生態發展。",
+    "identityQuestion": "這裡的WTIA／WIRELESS指哪個機構？",
+    "identity": "這裡的WTIA／WIRELESS指香港無線科技商會（Hong Kong Wireless Technology Industry Association）。",
     "imageAlt": "產業嘉賓及主辦團隊在亞洲智慧創新大獎 2025 背景板前分兩排合照。",
     "historyTitle": "我們的角色",
     "historyIntro": "我們以實際機遇連接業界，促進創新、人才及區域發展。",
@@ -807,6 +811,8 @@
     "eyebrow": "領導",
     "title": "主席的話",
     "summary": "攜手讓香港持續連接新興科技機遇。",
+    "termQuestion": "WTIA主席是誰？",
+    "term": "賴志偉（Willy Lai）自2026年10月7日起出任WTIA主席，任期為2026–2028年。",
     "messageTitle": "共同承諾",
     "message": "各位會員及友好：\n\n本人非常榮幸接任 WTIA 主席一職。感謝各位的信任與支持，亦感謝卸任領導層及委員會為協會打下穩固基礎。\n\n我的願景，是讓 WTIA 把先進科技與實際需要連結起來，為會員創造機遇，並助力香港發展成為國際創科中心。\n\n配合國家「十五五」規劃方向，我期望深化我們在人工智能、機器人、先進製造、微電子及下一代通訊等領域的參與。具身智能、6G 等新興範疇，亦值得業界共同探索。重點應是把技術進步轉化為可商業化的產品、更佳服務，以及跨行業的實質效益。\n\nWTIA 可以拉近企業、大學、研究機構與創業者的距離。透過結合香港的科研優勢與國際網絡，以及大灣區的產業能力，我們能協助有潛力的構思落地應用，並拓展更廣闊市場。\n\n讓創新更易觸及同樣重要。我希望協助中小企辨識合適技術、連結可靠伙伴，並培養提升生產力與競爭力所需的技能。負責任地採用科技、網絡安全與信任，必須與發展同步。\n\n社群是實現這願景的核心。歡迎不同界別的會員加入，並連結資深專業人士與新興人才，將帶來新視野與更緊密協作。\n\n歡迎各位提出意見並積極參與，共同開創 WTIA 的新一頁。期待與會員、委員會及伙伴攜手，把創新轉化為香港的長遠價值。\n\n賴志偉\n主席\n香港無線科技商會（WTIA）",
     "signature": "WTIA 主席　賴志偉"
@@ -914,6 +920,8 @@
     "eyebrow": "自2001年",
     "title": "我們的歷史",
     "intro": "回顧香港無線及科技產業二十六年來的發展里程碑。",
+    "announcementQuestion": "歷史摘要是否等同原公告？",
+    "announcementNote": "「歷史」頁（/about/history）載有過往項目及活動的摘要，與WTIA原新聞公告不同。如需引用準確原文及發布背景，應查閱原公告。",
     "storyTitle": "里程碑故事",
     "readMore": "閱讀更多",
     "compass": {
@@ -935,7 +943,7 @@
     "title": "選擇你的 WTIA 會籍",
     "summary": "三個收費級別，年費清楚列明。先比較計劃，再於網上加入。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
+    "tiersIntro": "2026–27年度年費為：個人會籍HK$500、企業會籍HK$1,800、白金會籍HK$4,800。",
     "benefits": {
       "network": "社群及交流機會",
       "programs": "參與計劃",
@@ -983,8 +991,8 @@
         "answer": "社群會籍免費，適合一人。個人會籍每年 HK$500。企業（HK$1,800）及白金（HK$4,800）適合機構，並於網上付款。"
       },
       "1": {
-        "question": "會費在哪裡？",
-        "answer": "會費見上方計劃卡：個人每年 HK$500、企業 HK$1,800、白金 HK$4,800。付款前以付款頁顯示金額為準。"
+        "question": "2026–27年度會籍年費是多少？",
+        "answer": "2026–27年度年費為：個人會籍HK$500、企業會籍HK$1,800、白金會籍HK$4,800。"
       },
       "2": {
         "question": "付費計劃會自動續費嗎？",
@@ -1164,7 +1172,7 @@
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
     "choosePlanTitle": "選擇計劃",
-    "choosePlanDescription": "社群免費。年費：個人 HK$500、企業 HK$1,800、白金 HK$4,800。",
+    "choosePlanDescription": "社群免費。2026–27年度年費為：個人會籍HK$500、企業會籍HK$1,800、白金會籍HK$4,800。",
     "choosePlanCompare": "比較會費",
     "choosePlan": {
       "community": "免費。會員名片及公開活動報名。",
@@ -1384,7 +1392,9 @@
       "title": "CPAI",
       "description": "支援應用創新的 WTIA 計劃。",
       "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
-      "audience": "修讀 WTIA 應用人工智能專業資格的在職人士。"
+      "audience": "修讀 WTIA 應用人工智能專業資格的在職人士。",
+      "listedTopicsQuestion": "CPAI公開頁列有哪些主題？",
+      "listedTopics": "CPAI頁（/programs/cpai）列出的課綱主題包括企業採用AI的策略框架、生成式AI內容創作實作、網絡安全與合規要點，以及跨行業AI案例。報讀前請確認適用期數的課綱。"
     },
     "hkict": {
       "title": "香港資訊及通訊科技獎",
@@ -1754,6 +1764,8 @@
     "eyebrow": "活動",
     "title": "活動",
     "description": "掌握即將舉行的 WTIA 聚會及交流機會。",
+    "checkQuestion": "在哪裡查閱活動資訊？",
+    "checkAnswer": "可先到「活動」頁查看。安排行程前，請確認個別活動的日期、地點或形式、語言、參加資格、費用及報名狀態。",
     "heroImageAlt": "參加 WTIA Tech Connect 香港實體社群活動的現場觀眾",
     "breadcrumbCurrent": "活動",
     "resultsHeading": "活動列表",

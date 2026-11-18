@@ -11,7 +11,7 @@ import {
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {milestonesOnly} from "@/lib/history/milestones";
 import type {AppLocale} from "@/i18n/routing";
-import {buildLastmod, contentFileLastmod, staticRouteLastmod} from "@/lib/seo/sitemap-lastmod";
+import {contentFileLastmod, staticRouteLastmod} from "@/lib/seo/sitemap-lastmod";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
 const locales: AppLocale[] = ["en", "zh-HK"];
@@ -27,11 +27,13 @@ function alternates(pathname: string) {
   };
 }
 
-function localizedEntries(pathname: string, lastModified: Date): MetadataRoute.Sitemap {
+function localizedEntries(pathname: string, lastModified?: Date): MetadataRoute.Sitemap {
   const languages = alternates(pathname);
   return locales.map((locale) => ({
     url: absoluteUrl(localizedPath(locale, pathname)),
-    lastModified,
+    // Omit lastmod when we have no substantive timestamp. A build stamp would
+    // advertise freshness the row does not have (T05, t578s2629).
+    ...(lastModified ? {lastModified} : {}),
     alternates: languages,
   }));
 }
@@ -76,16 +78,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // A transient read failure must not publish an apparently complete partial sitemap.
     companyProfilesRepository.listPublishedSlugs(),
   ]);
-  // Static pages use the page file's mtime. Database listings without a row timestamp
-  // use the build stamp. News and build logs use publishedAt. Milestone pages share
-  // the content file's mtime. None of these are invented calendar dates.
-  const built = buildLastmod();
+  // Static pages use the page file's mtime. News uses publishedAt. Milestone
+  // pages share the content file's mtime. Event, showcase, and member urls have
+  // no row timestamp on the slug list, so they omit lastmod rather than borrow
+  // the build clock. None of these are invented calendar dates.
   const milestoneModified = contentFileLastmod("content/milestones.ts");
   // /ai-ops and /launchpad stay in publicRoutes for the announcements href check, and 404.
   const staticEntries = publicRoutes
     .filter((pathname) => pathname !== "/ai-ops" && pathname !== "/launchpad")
     .flatMap((pathname) => localizedEntries(pathname, staticRouteLastmod(pathname)));
-  const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`, built));
+  const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`));
   const newsEntries = localizedNewsEntries(englishNews, chineseNews);
   // Every milestone, not only the featured six: these are 25 years of association
   // history, already bilingual, and they are the largest body of indexable content the
@@ -93,8 +95,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // a sitemap wider than the route publishes urls that 404.
   const milestoneEntries = milestonesOnly(milestones)
     .flatMap(({slug}) => localizedEntries(`/about/history/${slug}`, milestoneModified));
-  const showcaseEntries = showcaseSlugs.flatMap((slug) => localizedEntries(`/showcase/${slug}`, built));
-  const memberEntries = memberSlugs.flatMap((slug) => localizedEntries(`/members/${slug}`, built));
+  const showcaseEntries = showcaseSlugs.flatMap((slug) => localizedEntries(`/showcase/${slug}`));
+  const memberEntries = memberSlugs.flatMap((slug) => localizedEntries(`/members/${slug}`));
   return [
     ...staticEntries,
     ...eventEntries,

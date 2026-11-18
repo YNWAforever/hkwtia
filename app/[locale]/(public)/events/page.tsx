@@ -9,6 +9,7 @@ import { EventFilterPanel } from "@/components/marketing/event-filter-panel";
 import { EventViewSwitch } from "@/components/marketing/event-view-switch";
 import { InterestForm } from "@/components/marketing/interest-form";
 import { WhatsAppLink } from "@/components/marketing/whatsapp-link";
+import { CoreAnswer } from "@/components/seo/core-answer";
 import { StructuredData } from "@/components/seo/structured-data";
 import { Arrow } from "@/components/wt/arrow";
 import { ClosingBand } from "@/components/wt/closing-band";
@@ -166,6 +167,7 @@ export default async function EventsPage({ params, searchParams }: Props) {
         title={t("title")}
         variant="inner"
       />
+      <CoreAnswer id="events-check" question={t("checkQuestion")} answer={t("checkAnswer")} />
       <Section id="events-results" labelledBy="events-results-title">
         <h2 className="sr-only" id="events-results-title">
           {t("resultsHeading")}
