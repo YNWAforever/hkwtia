@@ -40,14 +40,18 @@ describe("official news reconciliation", () => {
   ];
   const openUrls = new Set(media.download_plan_required_news_public_assets_only.map((item) => item.source_url));
 
-  it("imports 49 archive and news posts, keeps 12 review items out, and is idempotent", () => {
+  it("imports 49 archive and news posts, keeps 12 review items in their source categories, and is idempotent", () => {
     const first = reconcileOfficialArchive({posts, storedAssets: new Map(), openUrls, previousPlainChars: new Map()});
     const second = reconcileOfficialArchive({posts, storedAssets: new Map(), openUrls, previousPlainChars: new Map()});
     expect(first.articles).toHaveLength(49);
+    expect(first.reviewArticles).toHaveLength(12);
     expect(first.review).toHaveLength(12);
     expect(first.articles.map((article) => article.canonicalUrl)).toEqual(second.articles.map((article) => article.canonicalUrl));
     expect(first.articles.map((article) => article.plainText)).toEqual(second.articles.map((article) => article.plainText));
+    expect(first.articles.every((article) => article.collection === "news-archive")).toBe(true);
     expect(first.articles.some((article) => article.categories.includes("Meet our Members"))).toBe(false);
+    expect(new Set(first.reviewArticles.flatMap((article) => article.categories))).toEqual(new Set(["Resources", "Members' Update", "Meet our Members"]));
+    expect(first.reviewArticles.filter((article) => article.categories.includes("Meet our Members")).every((article) => article.blocks.some((block) => block.type === "figure" && block.consent === "open-member-portrait"))).toBe(true);
     const asa = first.articles.find((article) => article.canonicalUrl.endsWith("/2020/01/2020-asia-smart-app-awards-2020"));
     expect(asa?.plainText).toContain("Create Hong Kong");
     expect(first.articles.some((article) => /\[fusion_/i.test(article.plainText))).toBe(false);

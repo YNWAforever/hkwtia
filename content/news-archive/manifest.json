@@ -16,303 +16,558 @@
     "imported": 49,
     "unresolvedArticles": 0,
     "mediaOpen": 1,
-    "mediaStored": 40
+    "mediaStored": 63
   },
-  "matrixSha256": "6ccf465767acb32f2ccabe745da8a53d84979427e6ce24dacbd6e5b8a7974da9",
+  "matrixSha256": "1518d175d4ed15934ff4a6d06daa01756339bac0adfd6574034325f957cd4bf8",
   "articles": [
     {
       "canonicalUrl": "https://hkwtia.org/2025/11/2025-%E4%BA%9E%E6%B4%B2%E6%99%BA%E6%85%A7%E5%89%B5%E6%96%B0%E5%A4%A7%E7%8D%8E-asia-smart-innovation-awards-2025",
       "slug": "2025-asia-smart-innovation-awards-2025",
       "publishedAt": "2025-11-21T08:00:21+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": "no-prior-html-extract"
     },
     {
       "canonicalUrl": "https://hkwtia.org/2025/10/2025-%E9%A6%99%E6%B8%AF%E8%B3%87%E8%A8%8A%E5%8F%8A%E9%80%9A%E8%A8%8A%E7%A7%91%E6%8A%80%E7%8D%8E%EF%BC%9A%E8%B3%87%E8%A8%8A%E7%A7%91%E6%8A%80%E5%88%9D%E5%89%B5%E4%BC%81%E6%A5%AD%E7%8D%8E",
       "slug": "archive-2025-2bb89aec6f",
       "publishedAt": "2025-10-16T08:37:37+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": "no-prior-html-extract"
     },
     {
       "canonicalUrl": "https://hkwtia.org/2025/05/%E3%80%8Ctech-connect-%E6%99%BA%E5%89%B5%E4%BA%92%E8%81%AF%E3%80%8Dai-%E9%A0%98%E8%A2%96%E7%B3%BB%E5%88%97%E7%A0%94%E8%A8%8E%E6%9C%83-tech-connect-ai-leaders-seminar-series",
       "slug": "tech-connect-ai-tech-connect-ai-leaders-seminar-series",
       "publishedAt": "2025-05-06T08:41:53+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": "no-prior-html-extract"
     },
     {
       "canonicalUrl": "https://hkwtia.org/2022/10/wtia-201st-anniversary-commemorative-book-%E9%A6%99%E6%B8%AF%E7%84%A1%E7%B7%9A%E7%A7%91%E6%8A%80%E5%95%86%E6%9C%8320%EF%BC%8B1%E9%80%B1%E5%B9%B4%E7%B4%80%E5%BF%B5%E7%89%B9%E5%88%8A",
       "slug": "wtia-201st-anniversary-commemorative-book-20-1",
       "publishedAt": "2022-10-11T05:06:59+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2022/09/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
       "slug": "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
       "publishedAt": "2022-09-05T06:21:04+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2022/09/new-term-of-executive-committee-2022-2024",
       "slug": "new-term-of-executive-committee-2022-2024",
       "publishedAt": "2022-09-02T14:46:13+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2021/03/simcardregistration",
       "slug": "simcardregistration",
       "publishedAt": "2021-03-18T07:30:34+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/04/%E6%96%B0%E8%81%9E%E7%A8%BF-%E7%96%AB%E6%83%85%E9%87%8D%E5%89%B5it%E4%B8%AD%E5%B0%8F%E4%BC%81-%E5%88%9D%E5%89%B5%E8%B3%87%E9%87%91%E9%8F%88%E6%96%B7%E8%A3%82%E6%80%A5%E9%A0%88%E6%95%91%E4%BA%A1",
       "slug": "archive-2020-f3f7910735",
       "publishedAt": "2020-04-14T09:07:12+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/03/postpone-joint-ict-spring-dinner-2020-%E9%A6%99%E6%B8%AF%E8%B3%87%E8%A8%8A%E5%8F%8A%E9%80%9A%E8%A8%8A%E7%A7%91%E6%8A%80%E6%A5%AD%E7%95%8C-%E5%BA%9A%E5%AD%90%E9%BC%A0%E5%B9%B4%E8%81%AF%E5%90%88",
       "slug": "postpone-joint-ict-spring-dinner-2020",
       "publishedAt": "2020-03-23T03:15:00+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/03/postpone-tokyo-industry-4-0-training-programme",
       "slug": "postpone-tokyo-industry-4-0-training-programme",
       "publishedAt": "2020-03-23T03:04:47+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/03/postpone-hong-kong-ict-awards-2020-ict-startup-award",
       "slug": "postpone-hong-kong-ict-awards-2020-ict-startup-award",
       "publishedAt": "2020-03-23T02:47:12+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/03/postpone-asia-smart-app-awards-2020",
       "slug": "postpone-asia-smart-app-awards-2020",
       "publishedAt": "2020-03-05T08:45:51+00:00",
+      "categories": [
+        "News"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/01/2020-asia-smart-app-awards-2020",
       "slug": "2020-asia-smart-app-awards-2020",
       "publishedAt": "2020-01-10T08:34:52+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": "no-prior-html-extract"
     },
     {
       "canonicalUrl": "https://hkwtia.org/2020/01/2020-hong-kong-ict-awards-ict-startup-award",
       "slug": "2020-hong-kong-ict-awards-ict-startup-award",
       "publishedAt": "2020-01-01T08:33:04+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2019/01/2019-techconnect-conference-festival",
       "slug": "2019-techconnect-conference-festival",
       "publishedAt": "2019-01-31T08:31:20+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2019/01/2019-a-5g-revolution-what-does-it-mean-for-me",
       "slug": "2019-a-5g-revolution-what-does-it-mean-for-me",
       "publishedAt": "2019-01-20T08:28:29+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2019/01/2019-asia-smart-app-awards-2018-2019",
       "slug": "2019-asia-smart-app-awards-2018-2019",
       "publishedAt": "2019-01-10T08:26:02+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2019/01/2019-joint-ict-spring-dinner-2019",
       "slug": "2019-joint-ict-spring-dinner-2019",
       "publishedAt": "2019-01-01T08:21:09+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2018/01/2018-taipei-iot-business-delegation-tour",
       "slug": "2018-taipei-iot-business-delegation-tour",
       "publishedAt": "2018-01-31T08:08:40+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2018/01/2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
       "slug": "2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
       "publishedAt": "2018-01-10T08:03:33+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2018/01/2018-meeting-with-yc-partner-eric-migicovsky-how-to-apply-successfully-for-y-combinator",
       "slug": "2018-meeting-with-yc-partner-eric-migicovsky-how-to-apply-successfully-for-y-com",
       "publishedAt": "2018-01-01T07:53:05+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2017/01/2017-connected-city-conference",
       "slug": "2017-connected-city-conference",
       "publishedAt": "2017-01-30T02:10:59+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2017/01/2017-asia-smart-app-summit-cum-award-presentation-ceremony",
       "slug": "2017-asia-smart-app-summit-cum-award-presentation-ceremony",
       "publishedAt": "2017-01-20T02:08:43+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2017/01/2017-hong-kong-ict-awards-best-mobile-app-award",
       "slug": "2017-hong-kong-ict-awards-best-mobile-app-award",
       "publishedAt": "2017-01-10T02:04:09+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2017/01/2017-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
       "slug": "2017-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
       "publishedAt": "2017-01-01T02:00:48+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2016/01/2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
       "slug": "2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
       "publishedAt": "2016-01-30T01:52:26+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2016/01/2016-legco-information-technology-constituency-election-forum",
       "slug": "2016-legco-information-technology-constituency-election-forum",
       "publishedAt": "2016-01-20T10:27:57+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2016/01/2016-safewifi-campaign",
       "slug": "2016-safewifi-campaign",
       "publishedAt": "2016-01-07T09:14:04+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2016/01/2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony",
       "slug": "2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony",
       "publishedAt": "2016-01-01T09:12:05+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2015/01/2015-safewifi-campaign",
       "slug": "2015-safewifi-campaign",
       "publishedAt": "2015-01-31T09:02:54+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2015/01/2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
       "slug": "2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
       "publishedAt": "2015-01-15T08:50:30+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2015/01/2015-asia-smartphone-apps-contest-summit-2015",
       "slug": "2015-asia-smartphone-apps-contest-summit-2015",
       "publishedAt": "2015-01-06T08:45:09+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2015/01/2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
       "slug": "2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
       "publishedAt": "2015-01-01T08:38:55+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2014/01/2014-wi-fi-hk",
       "slug": "2014-wi-fi-hk",
       "publishedAt": "2014-01-30T20:15:07+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2014/01/2014-made-in-hong-kong-smartphone-apps-project",
       "slug": "2014-made-in-hong-kong-smartphone-apps-project",
       "publishedAt": "2014-01-01T04:13:11+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2013/01/2013-asia-smartphone-contest",
       "slug": "2013-asia-smartphone-contest",
       "publishedAt": "2013-01-24T20:10:20+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2013/01/2013-opening-of-mobility-experience-centre-at-cyberport",
       "slug": "2013-opening-of-mobility-experience-centre-at-cyberport",
       "publishedAt": "2013-01-01T04:07:28+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2007/01/2007-hong-kong-mobile-film-festival",
       "slug": "2007-hong-kong-mobile-film-festival",
       "publishedAt": "2007-01-01T04:05:07+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2006/01/2006-hong-kong-ict-awards-best-ubiquitous-award",
       "slug": "2006-hong-kong-ict-awards-best-ubiquitous-award",
       "publishedAt": "2006-01-01T04:03:30+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2005/01/2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform",
       "slug": "2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform",
       "publishedAt": "2005-01-25T04:01:59+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2005/01/2005-1st-hong-kong-wireless-technology-excellence-awards",
       "slug": "2005-1st-hong-kong-wireless-technology-excellence-awards",
       "publishedAt": "2005-01-16T04:00:26+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2005/01/2005-hong-kong-international-wireless-conference-2005",
       "slug": "2005-hong-kong-international-wireless-conference-2005",
       "publishedAt": "2005-01-12T03:58:12+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2005/01/2005-launching-of-3g-cyberport-project",
       "slug": "2005-launching-of-3g-cyberport-project",
       "publishedAt": "2005-01-08T03:44:52+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2005/01/2005-the-1st-wtia-sms-donation-campaign",
       "slug": "2005-the-1st-wtia-sms-donation-campaign",
       "publishedAt": "2005-01-01T03:43:14+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2003/01/2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong",
       "slug": "2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong",
       "publishedAt": "2003-01-30T03:26:20+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2003/01/2003-the-1st-wtia-awards-j2me-open-2003",
       "slug": "2003-the-1st-wtia-awards-j2me-open-2003",
       "publishedAt": "2003-01-15T03:09:21+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2003/01/2003-opening-of-hong-kong-wireless-development-centre-at-cyberport",
       "slug": "2003-opening-of-hong-kong-wireless-development-centre-at-cyberport",
       "publishedAt": "2003-01-01T03:05:56+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2002/01/2002-the-1st-wtia-panel-discussion-inter-operator-sms",
       "slug": "2002-the-1st-wtia-panel-discussion-inter-operator-sms",
       "publishedAt": "2002-01-01T03:00:06+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
     },
     {
       "canonicalUrl": "https://hkwtia.org/2001/01/2001-establishment-of-wtia",
       "slug": "2001-establishment-of-wtia",
       "publishedAt": "2001-01-01T03:33:46+00:00",
+      "categories": [
+        "Archive"
+      ],
       "gap": null
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2020/10/the-strategies-for-expanding-global-internet-of-things-iot-markets",
+      "slug": "the-strategies-for-expanding-global-internet-of-things-iot-markets",
+      "publishedAt": "2020-10-21T06:46:49+00:00",
+      "categories": [
+        "Resources"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2020/10/asia-smart-app-workshop-ux-ui-more-than-you-think",
+      "slug": "asia-smart-app-workshop-ux-ui-more-than-you-think",
+      "publishedAt": "2020-10-21T06:46:17+00:00",
+      "categories": [
+        "Resources"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2020/05/smartone-press-release-smartone-5g-%E6%9C%8D%E5%8B%99%E5%95%9F%E5%8B%95-%E7%B6%B2%E7%B5%A1%E8%A6%86%E8%93%8B%E5%85%A8%E6%B8%AF%E8%87%B3%E5%BB%A3-%E5%B8%B6%E5%8B%95%E9%A6%99%E6%B8%AF%E6%99%BA",
+      "slug": "smartone-press-release-smartone-5g",
+      "publishedAt": "2020-05-25T16:00:28+00:00",
+      "categories": [
+        "Members' Update"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2020/03/smartones-press-release-smartone-%E9%81%B8%E7%94%A8%E6%84%9B%E7%AB%8B%E4%BF%A15g-%E5%85%B1%E5%90%8C%E6%8E%A8%E5%8B%95%E9%A6%99%E6%B8%AF5g%E6%95%B8%E7%A2%BC%E5%8C%96",
+      "slug": "smartones-press-release-smartone-5g-5g",
+      "publishedAt": "2020-03-18T16:00:58+00:00",
+      "categories": [
+        "Members' Update"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2017/10/wtia-meet-our-member-mtel-limited",
+      "slug": "wtia-meet-our-member-mtel-limited",
+      "publishedAt": "2017-10-30T03:19:59+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2017/09/wtia-meet-our-member-pixel-networks-limited",
+      "slug": "wtia-meet-our-member-pixel-networks-limited",
+      "publishedAt": "2017-09-28T03:43:05+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2017/08/wtia-meet-our-member-finfabrik",
+      "slug": "wtia-meet-our-member-finfabrik",
+      "publishedAt": "2017-08-08T03:55:26+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2017/06/wtia-meet-our-member-playnote",
+      "slug": "wtia-meet-our-member-playnote",
+      "publishedAt": "2017-06-02T04:22:22+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2017/04/wtia-meet-our-member-%E9%9B%85%E8%99%8E%E9%A6%99%E6%B8%AF-yahoo-hong-kong",
+      "slug": "wtia-meet-our-member-yahoo-hong-kong",
+      "publishedAt": "2017-04-26T04:35:52+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2016/12/wtia-meet-our-member-%E7%BE%85%E5%BE%B7%E8%88%87%E6%96%BD%E7%93%A6%E8%8C%A8%E9%A6%99%E6%B8%AF%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8-rohde-schwarz-hong-kong-ltd",
+      "slug": "wtia-meet-our-member-rohde-schwarz-hong-kong-ltd",
+      "publishedAt": "2016-12-28T06:12:34+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2016/09/wtia-meet-our-member-%E5%A8%81%E6%9C%8B%E5%A4%A7%E6%95%B8%E6%93%9A%E9%9B%86%E5%9C%98-vpon-big-data-group",
+      "slug": "wtia-meet-our-member-vpon-big-data-group",
+      "publishedAt": "2016-09-26T06:24:57+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
+    },
+    {
+      "canonicalUrl": "https://hkwtia.org/2016/08/wtia-meet-our-member-%E9%A6%AC%E7%94%B0%E9%9B%BB%E8%85%A6-cypher-martin",
+      "slug": "wtia-meet-our-member-cypher-martin",
+      "publishedAt": "2016-08-26T06:55:34+00:00",
+      "categories": [
+        "Meet our Members"
+      ],
+      "gap": "imported-with-source-category"
     }
   ]
 }

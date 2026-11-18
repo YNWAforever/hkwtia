@@ -1,0 +1,117 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2020/05/smartone-press-release-smartone-5g-%E6%9C%8D%E5%8B%99%E5%95%9F%E5%8B%95-%E7%B6%B2%E7%B5%A1%E8%A6%86%E8%93%8B%E5%85%A8%E6%B8%AF%E8%87%B3%E5%BB%A3-%E5%B8%B6%E5%8B%95%E9%A6%99%E6%B8%AF%E6%99%BA",
+  "sourceId": "5107",
+  "slug": "smartone-press-release-smartone-5g",
+  "title": "[SmarTone - Press Release] SmarTone 5G 服務啟動 網絡覆蓋全港至廣 帶動香港智慧城市發展",
+  "publishedAt": "2020-05-25T16:00:28+00:00",
+  "modifiedAt": "2020-06-19T02:02:45+00:00",
+  "visibleDateText": null,
+  "author": "Bella Lau",
+  "categories": [
+    "Members' Update"
+  ],
+  "collection": "review-candidate",
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "SmarTone 5G 服務啟動\n網絡覆蓋全港至廣 帶動香港智慧城市發展\nSmarTone 正式在香港推出 5G 服務，帶來極速 5G 網 絡，於室內室外提供至廣覆蓋。SmarTone 5G 亦為不同客戶群及企業推出一系列創新 5G 服務及應用。配合高競爭力及具彈性的 5G 服務計劃，SmarTone 致力為客戶提供 全城最佳的整體 5G 網絡體驗。\nDownload Here\nDownload Here\nDownload Here\nDownload Here",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/06/Photo-1-scaled.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/f7a3cf49dffa074c.jpg",
+      "originalPath": "/images/news-archive/original/f7a3cf49dffa074c.jpg",
+      "sha256": "f7a3cf49dffa074cc2a4b39e876ef24086695279f06ffb3451bfd83139c7d63b",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "children": [
+        {
+          "type": "text",
+          "text": "SmarTone 5G 服務啟動"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "children": [
+        {
+          "type": "text",
+          "text": "網絡覆蓋全港至廣 帶動香港智慧城市發展"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": " SmarTone 正式在香港推出 5G 服務，帶來極速 5G 網 絡，於室內室外提供至廣覆蓋。SmarTone 5G 亦為不同客戶群及企業推出一系列創新 5G 服務及應用。配合高競爭力及具彈性的 5G 服務計劃，SmarTone 致力為客戶提供 全城最佳的整體 5G 網絡體驗。 "
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-5G-%E6%9C%8D%E5%8B%99%E5%95%9F%E5%8B%95-%E7%B6%B2%E7%B5%A1%E8%A6%86%E8%93%8B%E5%85%A8%E6%B8%AF%E8%87%B3%E5%BB%A3-%E5%B8%B6%E5%8B%95%E9%A6%99%E6%B8%AF%E6%99%BA%E6%85%A7%E5%9F%8E%E5%B8%82%E7%99%BC%E5%B1%95.pdf",
+          "children": [
+            {
+              "type": "text",
+              "text": "Download Here"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-5G-%E6%9C%8D%E5%8B%99%E5%95%9F%E5%8B%95-%E7%B6%B2%E7%B5%A1%E8%A6%86%E8%93%8B%E5%85%A8%E6%B8%AF%E8%87%B3%E5%BB%A3-%E5%B8%B6%E5%8B%95%E9%A6%99%E6%B8%AF%E6%99%BA%E6%85%A7%E5%9F%8E%E5%B8%82%E7%99%BC%E5%B1%95.pdf",
+      "label": "Download Here",
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": null,
+      "assetStatus": "unresolved"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-launches-5G-service-with-the-citys-widest-network-coverage-to-spearhead-smart-city-development-in-Hong-Kong.pdf",
+          "children": [
+            {
+              "type": "text",
+              "text": "Download Here"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-launches-5G-service-with-the-citys-widest-network-coverage-to-spearhead-smart-city-development-in-Hong-Kong.pdf",
+      "label": "Download Here",
+      "localPath": "/files/news-archive/7dc16ad413c59b2c.pdf",
+      "originalPath": null,
+      "sha256": "7dc16ad413c59b2c19cda35d1da9f77c79f089776940d2cf91c17ef9bffa1e02",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "92759b301d3d7ead6922440f80b46433d33fb66290dc84d1acd01d52915de224"
+}

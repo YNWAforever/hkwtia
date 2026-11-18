@@ -46,6 +46,8 @@ export type ArchiveCard = Readonly<{
   author: string;
   searchText: string;
   notice: ArchiveNotice;
+  collection: "news-archive" | "review-candidate";
+  sourceCategory: string | null;
 }>;
 
 export function archiveCards(locale: AppLocale): readonly ArchiveCard[] {
@@ -59,6 +61,8 @@ export function archiveCards(locale: AppLocale): readonly ArchiveCard[] {
       author: article.author,
       searchText: `${article.title}\n${article.plainText}`,
       notice: archiveNotice(locale, article.sourceLanguages),
+      collection: article.collection,
+      sourceCategory: article.collection === "review-candidate" ? article.categories[0] ?? null : null,
     }))
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime() || a.slug.localeCompare(b.slug));
 }

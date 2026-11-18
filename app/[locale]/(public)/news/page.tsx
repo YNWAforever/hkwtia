@@ -49,7 +49,7 @@ export default async function NewsPage({params, searchParams}: Props) {
   const unavailable = news === null;
   const cmsSlugs = new Set((news ?? []).map((post) => post.slug));
   const merged = [
-    ...(news ?? []).map((post) => ({slug: post.slug, title: post.title, titleLang: undefined, publishedAt: post.publishedAt, author: post.author, searchText: post.title})),
+    ...(news ?? []).map((post) => ({slug: post.slug, title: post.title, titleLang: undefined, publishedAt: post.publishedAt, author: post.author, searchText: post.title, sourceCategory: null as string | null})),
     ...archiveCards(appLocale).filter((post) => !cmsSlugs.has(post.slug)),
   ].sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime() || a.slug.localeCompare(b.slug));
   const filtered = search
@@ -84,7 +84,7 @@ export default async function NewsPage({params, searchParams}: Props) {
                 locale={appLocale}
                 publishedAt={post.publishedAt}
                 slug={post.slug}
-                statusLabel={t("statusNews")}
+                statusLabel={post.sourceCategory ?? t("statusNews")}
                 title={post.title}
                 titleLang={post.titleLang}
               />

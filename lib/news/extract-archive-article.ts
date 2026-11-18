@@ -55,6 +55,7 @@ export function extractNewsArticle(html: string, sourceUrl: string): ArchiveArti
     visibleDateText: readVisibleDate(document),
     author,
     categories,
+    collection: "news-archive",
     sourceLanguages: languages,
     plainText: plain || title || slug,
     blocks: withFeatured,

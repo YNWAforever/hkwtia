@@ -129,6 +129,7 @@ export default async function NewsPostPage({params}: Props) {
       <section className="section">
         <div className="shell news-archive">
           <p className="news-archive-notice" role="note">{tNotice(noticeKey)}</p>
+          {article.collection === "review-candidate" ? <p>{article.categories.join(", ")}</p> : null}
           <p><a href={localizedPath(appLocale, "/news")}>{tNotice("backToList")}</a></p>
           <NewsArchiveBody
             blocks={article.blocks}
@@ -138,6 +139,7 @@ export default async function NewsPostPage({params}: Props) {
               missingPhoto: tNotice("missingPhoto"),
               openPhoto: tNotice("openPhoto"),
               photoAlt: tNotice("photoAlt"),
+              consentOpen: tNotice("consentOpen"),
             }}
           />
         </div>

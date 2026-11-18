@@ -9,7 +9,9 @@
       "categories": [
         "Resources"
       ],
-      "importedAsNews": false
+      "destinationSlug": "the-strategies-for-expanding-global-internet-of-things-iot-markets",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "5756",
@@ -19,7 +21,9 @@
       "categories": [
         "Resources"
       ],
-      "importedAsNews": false
+      "destinationSlug": "asia-smart-app-workshop-ux-ui-more-than-you-think",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "5107",
@@ -29,7 +33,9 @@
       "categories": [
         "Members' Update"
       ],
-      "importedAsNews": false
+      "destinationSlug": "smartone-press-release-smartone-5g",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "5010",
@@ -39,7 +45,9 @@
       "categories": [
         "Members' Update"
       ],
-      "importedAsNews": false
+      "destinationSlug": "smartones-press-release-smartone-5g-5g",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3676",
@@ -49,7 +57,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-mtel-limited",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3681",
@@ -59,7 +69,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-pixel-networks-limited",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3688",
@@ -69,7 +81,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-finfabrik",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3694",
@@ -79,7 +93,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-playnote",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3703",
@@ -89,7 +105,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-yahoo-hong-kong",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3709",
@@ -99,7 +117,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-rohde-schwarz-hong-kong-ltd",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3713",
@@ -109,7 +129,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-vpon-big-data-group",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     },
     {
       "id": "3724",
@@ -119,7 +141,9 @@
       "categories": [
         "Meet our Members"
       ],
-      "importedAsNews": false
+      "destinationSlug": "wtia-meet-our-member-cypher-martin",
+      "importedAsNews": false,
+      "importedWithSourceCategory": true
     }
   ]
 }

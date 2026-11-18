@@ -62,6 +62,12 @@ function renderTag(name: string, attrs: Readonly<Record<string, string>>, inner:
     const link = href ? `<p><a href="${escapeAttr(href)}">${escapeHtml(label)}</a></p>` : "";
     return `${heading}${inner}${link}`;
   }
+  if (tag === "fusion_imageframe") {
+    const src = inner.trim();
+    if (!/^https?:\/\//i.test(src)) return inner;
+    const alt = attrs.alt?.trim() ?? "";
+    return `<img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" />`;
+  }
   if (tag === "fusion_button") {
     const href = attrs.link?.trim() ?? "";
     const label = inner.trim() || attrs.title?.trim() || href;

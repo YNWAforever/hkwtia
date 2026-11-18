@@ -1,0 +1,18 @@
+{
+  "searchedAt": "2026-11-18",
+  "targetUrl": "https://hkwtia.org/wp-content/uploads/2022/09/301379874_4923078111125509_7909433195082011540_n-1-768x1024.jpg",
+  "known404Retried": false,
+  "officialSourcesChecked": [
+    "content/news-archive/official/sanitized-news.json news_archive and review_candidates",
+    "content/news-archive/official/required-media.json attachment records"
+  ],
+  "findings": [
+    "The published post New Term of Executive Committee (2022-2024), id 7551, has no featured_image_url.",
+    "Its body contains only the known 404 upload URL.",
+    "No other published post in the sanitized export references that attachment id.",
+    "required-media.json lists that URL as a body reference with no filesize and no alternate attachment URL.",
+    "A different file already on disk, 301379874_4923078111125509_7909433195082011540_n-e1663858227423.jpg, was not used. There is no official mapping from the 404 URL to that file."
+  ],
+  "officialReplacementFound": false,
+  "status": "open"
+}

@@ -1,0 +1,93 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2020/03/smartones-press-release-smartone-%E9%81%B8%E7%94%A8%E6%84%9B%E7%AB%8B%E4%BF%A15g-%E5%85%B1%E5%90%8C%E6%8E%A8%E5%8B%95%E9%A6%99%E6%B8%AF5g%E6%95%B8%E7%A2%BC%E5%8C%96",
+  "sourceId": "5010",
+  "slug": "smartones-press-release-smartone-5g-5g",
+  "title": "[SmarTone - Press Release] SmarTone 選用愛立信5G 共同推動香港5G數碼化",
+  "publishedAt": "2020-03-18T16:00:58+00:00",
+  "modifiedAt": "2020-06-12T09:23:37+00:00",
+  "visibleDateText": null,
+  "author": "Bella Lau",
+  "categories": [
+    "Members' Update"
+  ],
+  "collection": "review-candidate",
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "SmarTone 選用愛立信5G\n共同推動香港5G數碼化\n\n愛立信將為SmarTone建構無線接入網 (RAN) 及核心網\nSmarTone 將採用愛立信獨有的頻譜共享功能，靈活彈性及有效地運用頻譜\n合作涵蓋雙模5G雲端核網的應用，包括全面網路功能虛擬化、人工智能驅動的無線接入網與愛立信網絡及業務編排平台",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "SmarTone 選用愛立信5G"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "共同推動香港5G數碼化"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "children": [
+        {
+          "type": "text",
+          "text": " "
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          {
+            "type": "text",
+            "text": "愛立信將為SmarTone建構無線接入網 (RAN) 及核心網"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "SmarTone"
+          },
+          {
+            "type": "text",
+            "text": " 將採用愛立信獨有的頻譜共享功能，靈活彈性及有效地運用頻譜"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "合作涵蓋雙模5G雲端核網的應用，包括全面網路功能虛擬化、人工智能驅動的無線接入網與愛立信網絡及業務編排平台"
+          }
+        ]
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "01f4b6b098908de618ff460ed120b68cc04c5fd5114d651bcb3992ab14415978"
+}

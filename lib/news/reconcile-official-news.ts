@@ -56,13 +56,28 @@ export function reconcileOfficialArchive(input: Readonly<{
   openUrls: ReadonlySet<string>;
   previousPlainChars: ReadonlyMap<string, number>;
   byteClaims?: ReadonlyMap<string, ByteClaim>;
-}>): {articles: ArchiveArticle[]; rows: ReconciliationRow[]; review: OfficialPost[]} {
+}>): {articles: ArchiveArticle[]; reviewArticles: ArchiveArticle[]; rows: ReconciliationRow[]; review: OfficialPost[]} {
   const articles: ArchiveArticle[] = [];
+  const reviewArticles: ArchiveArticle[] = [];
   const rows: ReconciliationRow[] = [];
   const review = input.posts.filter((post) => post.scope === "review_candidate");
   const slugs = new Set<string>();
   for (const post of input.posts) {
-    if (post.scope !== "news_archive") continue;
+    if (post.scope !== "news_archive" && post.scope !== "review_candidate") continue;
+    const built = buildOfficialArticle(post, input, slugs);
+    if (post.scope === "review_candidate") reviewArticles.push(built.article);
+    else articles.push(built.article);
+    rows.push(built.row);
+  }
+  return {articles, reviewArticles, rows, review};
+}
+
+function buildOfficialArticle(post: OfficialPost, input: Readonly<{
+  storedAssets: ReadonlyMap<string, StoredAsset>;
+  openUrls: ReadonlySet<string>;
+  previousPlainChars: ReadonlyMap<string, number>;
+  byteClaims?: ReadonlyMap<string, ByteClaim>;
+}>, slugs: Set<string>): {article: ArchiveArticle; row: ReconciliationRow} {
     const canonical = canonicalNewsUrl(post.canonical_url);
     const html = unwrapFusionContent(post.content);
     const wrapped = syntheticPage(post, canonical, html);
@@ -72,17 +87,20 @@ export function reconcileOfficialArchive(input: Readonly<{
     extracted.modifiedAt = post.modified_at_utc;
     extracted.author = post.author_byline || extracted.author;
     extracted.categories = [...post.categories];
+    extracted.collection = post.scope === "review_candidate" ? "review-candidate" : "news-archive";
     extracted.title = post.title;
     if (post.featured_image_url) addFeatured(extracted, post.featured_image_url);
     extracted.blocks = extracted.blocks.map((block) => applyAsset(block, input.storedAssets, input.openUrls, input.byteClaims ?? new Map()));
+    if (post.categories.includes("Meet our Members")) {
+      extracted.blocks = extracted.blocks.map((block) => block.type === "figure" ? {...block, consent: "open-member-portrait"} : block);
+    }
     extracted.slug = uniqueSlug(slugFromCanonicalUrl(canonical), slugs);
     const openBlocks = extracted.blocks.some((block) => block.type === "figure" || block.type === "file" ? block.assetStatus === "open" : false);
     extracted.extractionStatus = openBlocks ? "partial" : "extracted";
     extracted.errors = extracted.blocks.flatMap((block) => block.type === "figure" || block.type === "file" ? block.error ? [`${block.sourceUrl}: ${block.error}`] : [] : []);
     extracted.sourceSha256 = sha256(post.content);
-    articles.push(extracted);
     const previous = input.previousPlainChars.get(canonical) ?? null;
-    rows.push({
+    const row: ReconciliationRow = {
       sourceId: post.id,
       canonicalUrl: canonical,
       destinationSlug: extracted.slug,
@@ -102,10 +120,11 @@ export function reconcileOfficialArchive(input: Readonly<{
       files: extracted.blocks.filter((block) => block.type === "file").length,
       filesOpen: extracted.blocks.filter((block) => block.type === "file" && block.assetStatus === "open").length,
       shortcodesRemainInPlainText: /\[fusion_/i.test(extracted.plainText),
-      gap: previous === null ? "no-prior-html-extract" : null,
-    });
-  }
-  return {articles, rows, review};
+      gap: post.scope === "review_candidate"
+        ? "imported-with-source-category"
+        : previous === null ? "no-prior-html-extract" : null,
+    };
+    return {article: extracted, row};
 }
 
 function syntheticPage(post: OfficialPost, canonical: string, html: string): string {

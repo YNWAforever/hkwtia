@@ -38,6 +38,8 @@ const blockSchema = z.discriminatedUnion("type", [
     assetStatus: z.enum(["stored", "open", "unresolved"]),
     /** What the stored bytes are allowed to claim. Absent on earlier Wayback files. */
     byteClaim: z.enum(["wxr-size-match", "current-url-not-wxr-proven", "wxr-size-unknown"]).nullable().optional(),
+    /** Old-site publication is not consent to show a member portrait. */
+    consent: z.enum(["open-member-portrait"]).nullable().optional(),
   }).strict(),
   z.object({
     type: z.literal("file"),
@@ -68,6 +70,7 @@ export const archiveArticleSchema = z.object({
   visibleDateText: z.string().nullable(),
   author: z.string().min(1).max(160),
   categories: z.array(z.string().min(1)).max(12),
+  collection: z.enum(["news-archive", "review-candidate"]),
   sourceLanguages: z.array(sourceLanguageSchema).min(1),
   plainText: z.string().min(1),
   blocks: z.array(blockSchema),

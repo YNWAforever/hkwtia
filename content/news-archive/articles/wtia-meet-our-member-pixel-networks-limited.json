@@ -1,0 +1,244 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2017/09/wtia-meet-our-member-pixel-networks-limited",
+  "sourceId": "3681",
+  "slug": "wtia-meet-our-member-pixel-networks-limited",
+  "title": "WTIA Meet Our Member – Pixel Networks Limited",
+  "publishedAt": "2017-09-28T03:43:05+00:00",
+  "modifiedAt": "2020-02-18T03:54:23+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Meet our Members"
+  ],
+  "collection": "review-candidate",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Interview with Pixel Network’s team: Kirill Nosov, CEO, Ralph Riley, CTO and David Turkington, Director of Technology\nhttp://www.pixel-networks.com/\nHi, can you please give us a bit of background of Pixel Networks and its current focus?\nDavid: Pixel Networks came to Hong Kong 2 years ago. In response to the smart city initiative that was proposed by the HKSAR Government, we decided to set up a business and transform Hong Kong into a smart city.\nThere are several different types of technology that can be applied to build a smart city. For Pixel, we have chosen LoRa as our focus. One of the main reasons we pick LoRa is because it is fully developed ecosystem already, and it has been globally developed in many regions, such as Europe and America. As an open standard, LoRa has also collaborated with many major companies in the field. We adopted this technology and brought its ecosystem to Hong Kong.\nRecently Pixel Networks has a collaboration with Actility to build the Hong Kong’s first LoRaWAN network, is it another step for Pixel to further develop the ecosystem in Hong Kong?\nDavid: That is correct. Actually, our partnership with Actility was lined up by Cisco, as we are a Cisco Preferred Solution Partner for providing equipment to build networks and Actility is one of the major network providers of LoRaWAN for Cisco too.\n\nWhat’s the field Pixel Networks is currently focusing on to develop its business?\nDavid: We are working with serval building management companies by constructing wireless networks and monitoring system in their buildings.\nRalph: For example, many of the buildings are already 10-20 years old so their infrastructure did not have in-built monitoring system. Therefore, we came along and provided IoT solutions for monitoring in different aspects; including temperature control and air conditioning. We also offered solutions for tracking too. After talking to many different people, we also came up with new ideas for components to help build smart city, such as smart trashcans, smart street lights and smart traffic signs.\nWhere do you find challenges when building the LoRaWAN network and developing business in Hong Kong?\nDavid: One of the challenges we found in Hong Kong is from regulatory standpoint. In these years, we have spent a significant amount of time to deal with HK Government. The good news is Government started to be more aware of IoT and will issue a new license called “Public Wireless Internet of Things Service Licence” (WIoT Licence) soon. The License will give us greenlight to operate and provide IoT services.\nRalph: We are also requested by the regulator to examine if there is any harmful interference existing between LoRa and Radio-frequency identification (RFID). We have completed the assessment in May and proved that no harmful interference will exist. The report is available in Office of the Communications Authority (OFCA) website too.\nDavid: We do find that there is more awareness in IoT in Hong Kong. I think in the beginning, it is a little bit awkward to present our business. After gaining experience from our first year, we started to adjust our presentation, including involving an introduction to IoT and providing more solutions about IoT that can be incorporated clients’ businesses.\nPixel Networks will speak in Connected City Conferenceat 9 November, 2017. Join us for the insightful conversation about 5G and IoT!",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/Pixel-Networks.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/c7dba5b96970cad1.jpg",
+      "originalPath": "/images/news-archive/original/c7dba5b96970cad1.jpg",
+      "sha256": "c7dba5b96970cad1d6d26ff044b37ae778f49762274dc349d690e7ff7f1428c3",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown",
+      "consent": "open-member-portrait"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Interview with Pixel Network’s team: Kirill Nosov, CEO, Ralph Riley, CTO and David Turkington, Director of Technology"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "http://www.pixel-networks.com/",
+          "children": [
+            {
+              "type": "text",
+              "text": "http://www.pixel-networks.com/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "Hi, can you please give us a bit of background of Pixel Networks and its current focus?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "David: Pixel Networks came to Hong Kong 2 years ago. In response to the smart city initiative that was proposed by the HKSAR Government, we decided to set up a business and transform Hong Kong into a smart city."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "There are several different types of technology that can be applied to build a smart city. For Pixel, we have chosen LoRa as our focus. One of the main reasons we pick LoRa is because it is fully developed ecosystem already, and it has been globally developed in many regions, such as Europe and America. As an open standard, LoRa has also collaborated with many major companies in the field. We adopted this technology and brought its ecosystem to Hong Kong."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "Recently Pixel Networks has a collaboration with Actility to build the Hong Kong’s first LoRaWAN network, is it another step for Pixel to further develop the ecosystem in Hong Kong?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "David: That is correct. Actually, our partnership with Actility was lined up by Cisco, as we are a Cisco Preferred Solution Partner for providing equipment to build networks and Actility is one of the major network providers of LoRaWAN for Cisco too."
+        }
+      ]
+    },
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/Screenshot_1-1-1024x413-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/d25cc67f59e3f520.jpg",
+      "originalPath": "/images/news-archive/original/d25cc67f59e3f520.jpg",
+      "sha256": "d25cc67f59e3f5203d8d730e0a378148f62d64fd1c3ef0948f4a630ee14701e4",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown",
+      "consent": "open-member-portrait"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "What’s the field Pixel Networks is currently focusing on to develop its business?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "David: We are working with serval building management companies by constructing wireless networks and monitoring system in their buildings."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Ralph: For example, many of the buildings are already 10-20 years old so their infrastructure did not have in-built monitoring system. Therefore, we came along and provided IoT solutions for monitoring in different aspects; including temperature control and air conditioning. We also offered solutions for tracking too. After talking to many different people, we also came up with new ideas for components to help build smart city, such as smart trashcans, smart street lights and smart traffic signs."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "Where do you find challenges when building the LoRaWAN network and developing business in Hong Kong?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "David: One of the challenges we found in Hong Kong is from regulatory standpoint. In these years, we have spent a significant amount of time to deal with HK Government. The good news is Government started to be more aware of IoT and will issue a new license called “Public Wireless Internet of Things Service Licence” (WIoT Licence) soon. The License will give us greenlight to operate and provide IoT services."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Ralph: We are also requested by the regulator to examine if there is any harmful interference existing between LoRa and Radio-frequency identification (RFID). We have completed the assessment in May and proved that no harmful interference will exist. The report is available in Office of the Communications Authority (OFCA) website too."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "David: We do find that there is more awareness in IoT in Hong Kong. I think in the beginning, it is a little bit awkward to present our business. After gaining experience from our first year, we started to adjust our presentation, including involving an introduction to IoT and providing more solutions about IoT that can be incorporated clients’ businesses."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "Pixel Networks will speak in "
+            },
+            {
+              "type": "link",
+              "href": "http://connectedcity.wtiahk.org/",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Connected City Conference "
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "at 9 November, 2017. "
+            },
+            {
+              "type": "link",
+              "href": "http://connectedcity.wtiahk.org/register/",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Join us"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " for the insightful conversation about 5G and IoT!"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "d8416dade0e6f84e57e4972e6c192167722da5e14272b8a071ee308b7f68305d"
+}

@@ -57,29 +57,34 @@ const result = reconcileOfficialArchive({
   byteClaims,
 });
 
-const keep = new Set(result.articles.map((article) => `${article.slug}.json`));
+const keep = new Set([...result.articles, ...result.reviewArticles].map((article) => `${article.slug}.json`));
 for (const name of readdirSync(join(ROOT, "articles"))) {
   if (name.endsWith(".json") && !keep.has(name)) unlinkSync(join(ROOT, "articles", name));
 }
-for (const article of result.articles) {
+for (const article of [...result.articles, ...result.reviewArticles]) {
   writeFileSync(join(ROOT, "articles", `${article.slug}.json`), `${JSON.stringify(article, null, 2)}\n`);
 }
-const review = result.review.map((post) => ({
-  id: post.id,
-  title: post.title,
-  canonicalUrl: canonicalNewsUrl(post.canonical_url),
-  publishedAt: post.published_at_utc,
-  categories: post.categories,
+const review = result.reviewArticles.map((article) => ({
+  id: article.sourceId,
+  title: article.title,
+  canonicalUrl: article.canonicalUrl,
+  publishedAt: article.publishedAt,
+  categories: article.categories,
+  destinationSlug: article.slug,
   importedAsNews: false,
+  importedWithSourceCategory: true,
 }));
 writeFileSync(join(ROOT, "review-candidates.json"), `${JSON.stringify({count: review.length, items: review}, null, 2)}\n`);
+const newsRows = result.rows.filter((row) => row.gap !== "imported-with-source-category");
+const reviewRows = result.rows.filter((row) => row.gap === "imported-with-source-category");
 const matrix = {
   source: "official-sanitized-wxr-news",
   databaseImportExecuted: false,
   newsArchive: result.articles.length,
   reviewCandidates: review.length,
-  previousHtmlExtracts: result.rows.filter((row) => row.inPreviousHtmlExtract).length,
-  rows: result.rows,
+  previousHtmlExtracts: newsRows.filter((row) => row.inPreviousHtmlExtract).length,
+  rows: newsRows,
+  reviewRows,
 };
 const matrixText = `${JSON.stringify(matrix, null, 2)}\n`;
 writeFileSync(join(ROOT, "reconciliation-matrix.json"), matrixText);
@@ -96,7 +101,7 @@ writeFileSync(join(ROOT, "manifest.json"), `${JSON.stringify({
     mediaStored: result.rows.reduce((sum, row) => sum + row.figuresStored, 0),
   },
   matrixSha256: createHash("sha256").update(matrixText).digest("hex"),
-  articles: result.rows.map((row) => ({canonicalUrl: row.canonicalUrl, slug: row.destinationSlug, publishedAt: row.publishedAt, gap: row.gap})),
+  articles: [...newsRows, ...reviewRows].map((row) => ({canonicalUrl: row.canonicalUrl, slug: row.destinationSlug, publishedAt: row.publishedAt, categories: row.categories, gap: row.gap})),
 }, null, 2)}\n`);
 const openAssets = result.articles.flatMap((article) => article.blocks.flatMap((block) => block.type === "figure" || block.type === "file" ? block.assetStatus === "open" ? [{slug: article.slug, sourceUrl: block.sourceUrl, error: block.error}] : [] : []));
 writeFileSync(join(ROOT, "failed-links.json"), `${JSON.stringify({articles: [], openAssets}, null, 2)}\n`);
