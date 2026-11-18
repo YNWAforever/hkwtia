@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2005/01/2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform",
   "sourceId": "3520",
   "slug": "2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform",
-  "title": "2005 – Launching of Wireless Services Value Chain Cooperation (WSVCC) platform",
+  "title": "2005 - Launching of Wireless Services Value Chain Cooperation (WSVCC) platform",
   "publishedAt": "2005-01-25T04:01:59+00:00",
   "modifiedAt": "2020-02-20T08:21:50+00:00",
-  "visibleDateText": "January 25th, 2005",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,7 +23,8 @@
       "localPath": "/images/news-archive/display/cc8d6a5b23227033.jpg",
       "originalPath": "/images/news-archive/original/cc8d6a5b23227033.jpg",
       "sha256": "cc8d6a5b2322703306a8c064c0f9d675141c0f59987a1c5e7dad76584337fc2b",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
@@ -37,6 +38,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20240414134359",
-  "sourceSha256": "a323caa9c5e63890616c5dfa8f59942cd37d14c74a4d6131f07628e185f36fcd"
+  "waybackTimestamp": null,
+  "sourceSha256": "5fe9a727cfccf60522700ed22ebb64d3d99aa4ce0ac324065a06fac29cb88da6"
 }

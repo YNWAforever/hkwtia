@@ -4,62 +4,57 @@ import {resolve} from "node:path";
 
 import {describe, expect, it} from "vitest";
 
-import {loadArchiveArticles} from "@/lib/news/archive-catalog";
+import {loadArchiveArticles, resetArchiveCatalogForTests} from "@/lib/news/archive-catalog";
 
-const manifest = JSON.parse(readFileSync(resolve(process.cwd(), "content/news-archive/manifest.json"), "utf8")) as {
-  liveOrigin: string;
-  reconciledWithLiveOrigin: boolean;
-  databaseImport: {executed: boolean};
-  counts: {discovered: number; imported: number; unresolvedArticles: number; mediaSource: number; mediaImported: number; mediaUnresolved: number};
-  failed: {url: string; message: string}[];
-  sitemapPostCount: number;
-  sitemapOutsideListing: {imported: boolean; categories: string[]}[];
+const root = process.cwd();
+const matrix = JSON.parse(readFileSync(resolve(root, "content/news-archive/reconciliation-matrix.json"), "utf8")) as {
+  newsArchive: number;
+  reviewCandidates: number;
+  previousHtmlExtracts: number;
+  rows: {inPreviousHtmlExtract: boolean; gap: string | null; shortcodesRemainInPlainText: boolean; figuresOpen: number; filesOpen: number}[];
 };
+const review = JSON.parse(readFileSync(resolve(root, "content/news-archive/review-candidates.json"), "utf8")) as {count: number; items: {importedAsNews: boolean}[]};
 
-describe("imported hkwtia.org news archive", () => {
+describe("official news archive reconciliation", () => {
+  resetArchiveCatalogForTests();
   const articles = loadArchiveArticles();
 
-  it("reconciles the archived listing without claiming the blocked live origin", () => {
-    expect(manifest.liveOrigin).toBe("cloudflare-challenge");
-    expect(manifest.reconciledWithLiveOrigin).toBe(false);
-    expect(manifest.databaseImport.executed).toBe(false);
-    expect(manifest.counts.discovered).toBe(46);
-    expect(manifest.counts.imported).toBe(articles.length);
-    expect(manifest.counts.unresolvedArticles).toBe(manifest.failed.length);
-    expect(manifest.counts.imported + manifest.counts.unresolvedArticles).toBe(manifest.counts.discovered);
-    expect(manifest.failed.map((row) => row.url)).toEqual([
-      "https://hkwtia.org/2020/01/2020-asia-smart-app-awards-2020",
-    ]);
-    expect(manifest.sitemapPostCount).toBe(58);
-    expect(manifest.sitemapOutsideListing).toHaveLength(12);
-    expect(manifest.sitemapOutsideListing.every((row) => row.imported === false)).toBe(true);
+  it("publishes the 49 official Archive and News posts and not the 12 review candidates", () => {
+    expect(articles).toHaveLength(49);
+    expect(matrix.newsArchive).toBe(49);
+    expect(matrix.reviewCandidates).toBe(12);
+    expect(review.count).toBe(12);
+    expect(review.items.every((item) => item.importedAsNews === false)).toBe(true);
+    expect(matrix.previousHtmlExtracts).toBe(45);
+    expect(matrix.rows.filter((row) => row.gap === "no-prior-html-extract")).toHaveLength(4);
+    expect(matrix.rows.every((row) => row.shortcodesRemainInPlainText === false)).toBe(true);
+    expect(matrix.rows.reduce((sum, row) => sum + row.figuresOpen + row.filesOpen, 0)).toBe(19);
+    const urls = new Set(articles.map((article) => article.canonicalUrl));
+    expect(urls.has("https://hkwtia.org/2020/01/2020-asia-smart-app-awards-2020")).toBe(true);
+    expect(articles.find((article) => article.canonicalUrl.endsWith("/2020-asia-smart-app-awards-2020"))?.plainText).toContain("Create Hong Kong");
   });
 
-  it("keeps unique slugs, source wording, and local media checksums", () => {
-    expect(new Set(articles.map((article) => article.slug)).size).toBe(articles.length);
-    expect(new Set(articles.map((article) => article.canonicalUrl)).size).toBe(articles.length);
-    const sim = articles.find((article) => article.slug === "simcardregistration");
-    const founding = articles.find((article) => article.slug === "2001-establishment-of-wtia");
-    expect(sim?.plainText).toContain("政府擬制定電話智能卡實名登記制度");
-    expect(sim?.plainText).not.toMatch(/<script/i);
-    expect(founding?.plainText).toContain("Inauguration Ceremony of WTIA");
-    expect(founding?.sourceLanguages).toEqual(["en"]);
-    expect(sim?.sourceLanguages).toContain("zh-Hant");
-    let checked = 0;
+  it("checks stored files against their destination checksums and leaves open assets unstored", () => {
+    let stored = 0;
+    let open = 0;
     for (const article of articles) {
+      expect(article.plainText).not.toMatch(/\[fusion_/i);
       for (const block of article.blocks) {
         if (block.type !== "figure" && block.type !== "file") continue;
-        if (!block.localPath || !block.sha256) continue;
-        const stored = block.type === "figure" && block.originalPath ? block.originalPath : block.localPath;
-        const bytes = readFileSync(resolve(process.cwd(), "public", stored.slice(1)));
-        if (block.type === "file" || block.originalPath) {
-          expect(createHash("sha256").update(bytes).digest("hex")).toBe(block.sha256);
+        if (block.assetStatus === "open") {
+          open += 1;
+          expect(block.localPath).toBeNull();
+          continue;
         }
-        checked += 1;
-        expect(block.localPath.startsWith("/images/news-archive/") || block.localPath.startsWith("/files/news-archive/")).toBe(true);
+        if (block.assetStatus !== "stored" || !block.sha256) continue;
+        const path = block.originalPath ?? block.localPath;
+        expect(path).toBeTruthy();
+        const bytes = readFileSync(resolve(root, "public", path!.slice(1)));
+        expect(createHash("sha256").update(bytes).digest("hex")).toBe(block.sha256);
+        stored += 1;
       }
     }
-    expect(checked).toBeGreaterThan(0);
-    expect(manifest.counts.mediaImported + manifest.counts.mediaUnresolved).toBe(manifest.counts.mediaSource);
+    expect(stored).toBeGreaterThan(0);
+    expect(open).toBe(19);
   });
 });

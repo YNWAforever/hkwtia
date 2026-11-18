@@ -5,7 +5,7 @@
   "title": "[2nd Call for Applications] Asia Smart App Awards 2020",
   "publishedAt": "2020-03-05T08:45:51+00:00",
   "modifiedAt": "2020-05-14T09:08:02+00:00",
-  "visibleDateText": "March 5th, 2020",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "News"
@@ -13,7 +13,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "Postponement Notice – Asia Smart App Awards 2020\nPostponement Notice – Asia Smart App Awards 2020\nDear Partners and Friends, Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8). All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award! What are you waiting for? Please click the following webpage for application. ?http://contest2020.bestasiaapp.hk/ If there is any question, please contact Ms Bergman Tse (852- 2788 5035, [email protected]) or Ms Bella Lau (852- 2989 9163, [email protected]).\nDear Partners and Friends, Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8). All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award! What are you waiting for? Please click the following webpage for application. ?http://contest2020.bestasiaapp.hk/\nDetails",
+  "plainText": "Postponement Notice - Asia Smart App Awards 2020\nPostponement Notice - Asia Smart App Awards 2020\nDear Partners and Friends, Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8). All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award! What are you waiting for? Please click the following webpage for application. ?http://contest2020.bestasiaapp.hk/ If there is any question, please contact Ms Bergman Tse (852- 2788 5035, AsiaSmartApp@hkwtia.org) or Ms Bella Lau (852- 2989 9163, bellalau@hkwtia.org).\nDear Partners and Friends, Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8). All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award! What are you waiting for? Please click the following webpage for application. ?http://contest2020.bestasiaapp.hk/ If there is any question, please contact Ms Bergman Tse (852- 2788 5035, AsiaSmartApp@hkwtia.org) or Ms Bella Lau (852- 2989 9163, bellalau@hkwtia.org).\nDetails",
   "blocks": [
     {
       "type": "figure",
@@ -23,7 +23,8 @@
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "table",
@@ -55,13 +56,9 @@
               "children": [
                 {
                   "type": "text",
-                  "text": "Postponement Notice – Asia Smart App Awards 2020"
+                  "text": "Postponement Notice - Asia Smart App Awards 2020"
                 }
               ]
-            },
-            {
-              "type": "text",
-              "text": " "
             },
             {
               "type": "text",
@@ -92,13 +89,9 @@
               "children": [
                 {
                   "type": "text",
-                  "text": "Postponement Notice – Asia Smart App Awards 2020"
+                  "text": "Postponement Notice - Asia Smart App Awards 2020"
                 }
               ]
-            },
-            {
-              "type": "text",
-              "text": " "
             }
           ]
         ]
@@ -127,39 +120,7 @@
             },
             {
               "type": "text",
-              "text": "Dear Partners and Friends,"
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8)."
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award!"
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "What are you waiting for? Please click the following webpage for application."
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "?"
+              "text": "Dear Partners and Friends, Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8). All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award! What are you waiting for? Please click the following webpage for application. ?"
             },
             {
               "type": "link",
@@ -173,35 +134,19 @@
             },
             {
               "type": "text",
-              "text": " "
+              "text": " If there is any question, please contact Ms Bergman Tse (852- 2788 5035, "
             },
             {
               "type": "text",
-              "text": "If there is any question, please contact Ms Bergman Tse (852- 2788 5035, "
-            },
-            {
-              "type": "link",
-              "href": "https://hkwtia.org/cdn-cgi/l/email-protection#83c2f0eae2d0eee2f1f7c2f3f3c3ebe8f4f7eae2adecf1e4",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "[email protected]"
-                }
-              ]
+              "text": "AsiaSmartApp@hkwtia.org"
             },
             {
               "type": "text",
               "text": ") or Ms Bella Lau (852- 2989 9163, "
             },
             {
-              "type": "link",
-              "href": "https://hkwtia.org/cdn-cgi/l/email-protection#5a383f36363b363b2f1a32312d2e333b7435283d",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "[email protected]"
-                }
-              ]
+              "type": "text",
+              "text": "bellalau@hkwtia.org"
             },
             {
               "type": "text",
@@ -229,39 +174,7 @@
           [
             {
               "type": "text",
-              "text": "Dear Partners and Friends,"
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8)."
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award!"
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "What are you waiting for? Please click the following webpage for application."
-            },
-            {
-              "type": "text",
-              "text": " "
-            },
-            {
-              "type": "text",
-              "text": "?"
+              "text": "Dear Partners and Friends, Organised by the Hong Kong Wireless Technology Industry Association and sponsored by Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards 2020 (the Award) has commenced its second round of calling for applications to invite online nomination of excellent and innovative smart apps designed for and used in Asian markets for various awards. In order to provide sufficient time for interested parties to prepare for their participation in the Awards, DEADLINE has been extended to 10 June 2020, 23:59 (GMT+8). All apps irrespective of Web, Hybrid or Native App are welcomed to participate in the Award! What are you waiting for? Please click the following webpage for application. ?"
             },
             {
               "type": "link",
@@ -275,7 +188,23 @@
             },
             {
               "type": "text",
-              "text": " "
+              "text": " If there is any question, please contact Ms Bergman Tse (852- 2788 5035, "
+            },
+            {
+              "type": "text",
+              "text": "AsiaSmartApp@hkwtia.org"
+            },
+            {
+              "type": "text",
+              "text": ") or Ms Bella Lau (852- 2989 9163, "
+            },
+            {
+              "type": "text",
+              "text": "bellalau@hkwtia.org"
+            },
+            {
+              "type": "text",
+              "text": ")."
             }
           ]
         ]
@@ -299,8 +228,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/ASA2020-banner_OP_02-scaled.jpg: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/02/ASA2020-banner_OP_02-scaled.jpg: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240414134727",
-  "sourceSha256": "45321e950a9bab4aa8de52509c2f5c38d6594890da2f91ccae623c311201dffd"
+  "waybackTimestamp": null,
+  "sourceSha256": "9f247c4f75b7a692946d4a1d5867740d045a5ecbd3fd5698c9c68e5aaeec06bc"
 }

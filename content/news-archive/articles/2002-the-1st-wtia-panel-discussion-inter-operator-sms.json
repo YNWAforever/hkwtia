@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2002/01/2002-the-1st-wtia-panel-discussion-inter-operator-sms",
   "sourceId": "3487",
   "slug": "2002-the-1st-wtia-panel-discussion-inter-operator-sms",
-  "title": "2002 – The 1st WTIA Panel Discussion: Inter-Operator SMS",
+  "title": "2002 - The 1st WTIA Panel Discussion: Inter-Operator SMS",
   "publishedAt": "2002-01-01T03:00:06+00:00",
   "modifiedAt": "2020-02-13T03:01:37+00:00",
-  "visibleDateText": "January 1st, 2002",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -15,16 +15,6 @@
   ],
   "plainText": "Representatives of mobile network operators discussed the feasibility of transmitting SMS between different operators in the panel discussion of Wireless Technology Forum organized by WTIA in 2002.",
   "blocks": [
-    {
-      "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/3d-scaled.jpg",
-      "alt": "",
-      "caption": [],
-      "localPath": "/images/news-archive/display/8f4089f0d1574ed7.jpg",
-      "originalPath": "/images/news-archive/original/8f4089f0d1574ed7.jpg",
-      "sha256": "8f4089f0d1574ed719b2e85e79fed3072cab88357de8d3b15fba112c03d58bcb",
-      "error": null
-    },
     {
       "type": "paragraph",
       "children": [
@@ -37,6 +27,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20230327002937",
-  "sourceSha256": "a6b0dac67507c3ebed47de9354d183e6af5b723473899aebc251a2c6b1752275"
+  "waybackTimestamp": null,
+  "sourceSha256": "969d60fda407bc35fc8715086f140c25e59398f082b0f3fe57e85382c196dc0a"
 }

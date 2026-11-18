@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2005/01/2005-hong-kong-international-wireless-conference-2005",
   "sourceId": "3514",
   "slug": "2005-hong-kong-international-wireless-conference-2005",
-  "title": "2005 – Hong Kong International Wireless Conference 2005",
+  "title": "2005 - Hong Kong International Wireless Conference 2005",
   "publishedAt": "2005-01-12T03:58:12+00:00",
   "modifiedAt": "2020-02-20T08:20:43+00:00",
-  "visibleDateText": "January 12th, 2005",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,7 +23,8 @@
       "localPath": "/images/news-archive/display/13587c583f666081.jpg",
       "originalPath": "/images/news-archive/original/13587c583f666081.jpg",
       "sha256": "13587c583f666081309a66a118c3b61b0e29a47e7ce55bf2702ada2bdd0f5757",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
@@ -37,6 +38,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20230327065345",
-  "sourceSha256": "a7c960592bda9298a0ce473186acd5d01f7af285ac8a170c60cc97822212be0d"
+  "waybackTimestamp": null,
+  "sourceSha256": "ab9a0233bdd4ffa1991e220db21395b2dff3eb153c49706e55bdc697eac48134"
 }

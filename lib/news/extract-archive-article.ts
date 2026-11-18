@@ -39,7 +39,7 @@ export function extractNewsArticle(html: string, sourceUrl: string): ArchiveArti
   const blocks = content ? blocksFrom(content.children, canonical) : [];
   const featured = readMeta(document, "og:image");
   const withFeatured = dedupeFiles(featured && !LOGO.test(featured) && !blocks.some((block) => block.type === "figure" && sameImage(block.sourceUrl, featured))
-    ? [{type: "figure" as const, sourceUrl: absoluteUrl(featured, canonical) ?? featured, alt: "", caption: [], localPath: null, originalPath: null, sha256: null, error: null}, ...blocks]
+    ? [{type: "figure" as const, sourceUrl: absoluteUrl(featured, canonical) ?? featured, alt: "", caption: [], localPath: null, originalPath: null, sha256: null, error: null, assetStatus: "unresolved" as const}, ...blocks]
     : blocks);
   const plain = plainText(withFeatured);
   if (!plain) errors.push("missing-body");
@@ -198,14 +198,14 @@ function figureFrom(image: HtmlNode, linkHref: string | null, pageUrl: string): 
   const source = bestImage(candidates.map((url) => absoluteUrl(url, pageUrl)).filter((url): url is string => Boolean(url)));
   if (!source || LOGO.test(source)) return null;
   const alt = attr(image, "alt").replace(/\s+/g, " ").trim();
-  return {type: "figure", sourceUrl: source, alt, caption: [], localPath: null, originalPath: null, sha256: null, error: null};
+  return {type: "figure", sourceUrl: source, alt, caption: [], localPath: null, originalPath: null, sha256: null, error: null, assetStatus: "unresolved"};
 }
 
 function fileFrom(link: HtmlNode, pageUrl: string): ArchiveBlock | null {
   const href = absoluteUrl(attr(link, "href"), pageUrl);
   if (!href || !/\.pdf($|\?)/i.test(href)) return null;
   const label = textContent(link.type === "element" ? link.children : []) || "PDF";
-  return {type: "file", sourceUrl: href.split("?")[0]!, label: label.slice(0, 180) || "PDF", localPath: null, originalPath: null, sha256: null, error: null};
+  return {type: "file", sourceUrl: href.split("?")[0]!, label: label.slice(0, 180) || "PDF", localPath: null, originalPath: null, sha256: null, error: null, assetStatus: "unresolved"};
 }
 
 function tableRows(table: HtmlNode, pageUrl: string): InlineNode[][][] {

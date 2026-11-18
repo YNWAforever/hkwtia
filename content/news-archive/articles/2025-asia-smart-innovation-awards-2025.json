@@ -1,0 +1,102 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2025/11/2025-%E4%BA%9E%E6%B4%B2%E6%99%BA%E6%85%A7%E5%89%B5%E6%96%B0%E5%A4%A7%E7%8D%8E-asia-smart-innovation-awards-2025",
+  "sourceId": "8527",
+  "slug": "2025-asia-smart-innovation-awards-2025",
+  "title": "2025 亞洲智慧創新大獎 Asia Smart Innovation Awards 2025",
+  "publishedAt": "2025-11-21T08:00:21+00:00",
+  "modifiedAt": "2026-03-20T08:37:05+00:00",
+  "visibleDateText": null,
+  "author": "iris",
+  "categories": [
+    "News"
+  ],
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "「亞洲智慧創新大獎 2025」（前身為亞洲智能應用大獎）於 10 月 16 日在香港康得思酒店舉行頒獎典禮。本屆賽事吸引了來自亞洲 17 個地區的頂尖團隊參與，規模創下歷年之最。本年度最高殊榮「亞洲智能創新大獎」由泰國團隊 RIFFAI 奪得。香港代表亦表現優異，其中 417 Technology Limited 奪得「生活與文化組別」銀獎。The \"Asia Smart Innovation Awards 2025\" (formerly Asia Smart App Awards) held its gala presentation ceremony at Cordis Hong Kong on October 16. Attracting top-tier teams from 17 Asian regions, this year's scale reached a historic high. The \"Asia Smart Innovation Grand Award\" was claimed by the Thai team RIFFAI. Hong Kong representatives also delivered outstanding performances, with 417 Technology Limited securing the Silver Award in the \"Living & Culture\" category.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2026/03/562333706_1252562953570355_3640544314971024985_n-3-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "「亞洲智慧創新大獎 2025」（前身為亞洲智能應用大獎）於 10 月 16 日在香港康得思酒店舉行頒獎典禮。本屆賽事吸引了來自亞洲 17 個地區的頂尖團隊參與，規模創下歷年之最。本年度最高殊榮「亞洲智能創新大獎」由泰國團隊 "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "RIFFAI"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " 奪得。香港代表亦表現優異，其中 "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "417 Technology Limited"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " 奪得「生活與文化組別」銀獎。"
+        },
+        {
+          "type": "text",
+          "text": "The \"Asia Smart Innovation Awards 2025\" (formerly Asia Smart App Awards) held its gala presentation ceremony at Cordis Hong Kong on October 16. Attracting top-tier teams from 17 Asian regions, this year's scale reached a historic high. The \"Asia Smart Innovation Grand Award\" was claimed by the Thai team "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "RIFFAI"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": ". Hong Kong representatives also delivered outstanding performances, with "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "417 Technology Limited"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " securing the Silver Award in the \"Living & Culture\" category."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2026/03/562333706_1252562953570355_3640544314971024985_n-3-1.jpg: open-awaiting-parent-file"
+  ],
+  "waybackTimestamp": null,
+  "sourceSha256": "3835e994223ef28f921e333c2696dd31bdb05c7c9547ea15ea2f6992f1e8f3c2"
+}

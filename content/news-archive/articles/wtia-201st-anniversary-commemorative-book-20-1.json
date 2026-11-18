@@ -4,8 +4,8 @@
   "slug": "wtia-201st-anniversary-commemorative-book-20-1",
   "title": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊",
   "publishedAt": "2022-10-11T05:06:59+00:00",
-  "modifiedAt": "2022-10-11T06:34:07+00:00",
-  "visibleDateText": "October 11th, 2022",
+  "modifiedAt": "2026-03-20T08:09:35+00:00",
+  "visibleDateText": null,
   "author": "Kane Chu",
   "categories": [
     "News"
@@ -14,35 +14,17 @@
     "en",
     "zh-Hant"
   ],
-  "plainText": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊\nWTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊\n\nWTIA 20+1st Anniversary Commemorative Book is Now Available Online!\nThis commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was over 100 industrial events has been held last year.\nIn the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong.\n香港無線科技商會20＋1週年紀念特刊現供閱覽\n香港無線科技商會20＋1週年紀念特刊盛載著每位合作夥伴及各方友會送上的美好祝福。多年來，商會在各界鼎力相助下發展蓬勃，單單在過去一年，商會就舉辦了超過100場不同形式的行業活動。\n未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。\nDownload Here!",
+  "plainText": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊\n\nPDF\nWTIA 20+1st Anniversary Commemorative Book is Now Available Online!\nThis commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was over 100 industrial events has been held last year. In the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong.\n香港無線科技商會20＋1週年紀念特刊現供閱覽\n香港無線科技商會20＋1週年紀念特刊盛載著每位合作夥伴及各方友會送上的美好祝福。多年來，商會在各界鼎力相助下發展蓬勃，單單在過去一年，商會就舉辦了超過100場不同形式的行業活動。\n未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。\nDownload Here!",
   "blocks": [
     {
-      "type": "paragraph",
+      "type": "heading",
+      "level": 2,
       "children": [
         {
-          "type": "link",
-          "href": "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf",
-          "children": [
-            {
-              "type": "em",
-              "children": []
-            },
-            {
-              "type": "text",
-              "text": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊"
-            }
-          ]
+          "type": "text",
+          "text": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊"
         }
       ]
-    },
-    {
-      "type": "file",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf",
-      "label": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊",
-      "localPath": null,
-      "sha256": "19b58667b0f39029855cfeae27802580aba8590b749f446dc162ccd4c834e82f",
-      "error": "pdf-58041483-bytes-not-committed",
-      "originalPath": null
     },
     {
       "type": "figure",
@@ -52,7 +34,18 @@
       "localPath": "/images/news-archive/display/50704031b382b1e6.jpg",
       "originalPath": "/images/news-archive/original/50704031b382b1e6.png",
       "sha256": "50704031b382b1e6e31930f37f811dee06c559fa4296a13bc96c627a5240e5bf",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
+    },
+    {
+      "type": "file",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf",
+      "label": "PDF",
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -73,7 +66,7 @@
       "children": [
         {
           "type": "text",
-          "text": "This commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was "
+          "text": " This commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was "
         },
         {
           "type": "strong",
@@ -86,16 +79,7 @@
         },
         {
           "type": "text",
-          "text": " has been held last year."
-        }
-      ]
-    },
-    {
-      "type": "paragraph",
-      "children": [
-        {
-          "type": "text",
-          "text": "In the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong."
+          "text": " has been held last year. In the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong. "
         }
       ]
     },
@@ -140,7 +124,7 @@
       "children": [
         {
           "type": "text",
-          "text": "未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。"
+          "text": " 未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。 "
         }
       ]
     },
@@ -162,8 +146,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf: pdf-58041483-bytes-not-committed"
+    "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf: open-awaiting-parent-file"
   ],
   "waybackTimestamp": null,
-  "sourceSha256": "7e7c9193e36a10420dd217e599ce358b7a30644fc849fc3def8887a3b439cef2"
+  "sourceSha256": "7f36541adeff59766628870f5e2d68f1eb1fe5ee05f1246ce36a2eb07134bcb8"
 }

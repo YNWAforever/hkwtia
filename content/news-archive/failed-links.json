@@ -1,6 +1,100 @@
-[
-  {
-    "url": "https://hkwtia.org/2020/01/2020-asia-smart-app-awards-2020",
-    "message": "live origin returned a Cloudflare challenge; the only Wayback capture is a captcha interstitial, not the article"
-  }
-]
+{
+  "articles": [],
+  "openAssets": [
+    {
+      "slug": "2025-asia-smart-innovation-awards-2025",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2026/03/562333706_1252562953570355_3640544314971024985_n-3-1.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "archive-2025-2bb89aec6f",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2024/09/1.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "tech-connect-ai-tech-connect-ai-leaders-seminar-series",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "wtia-201st-anniversary-commemorative-book-20-1",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "new-term-of-executive-committee-2022-2024",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2022/09/301379874_4923078111125509_7909433195082011540_n-1-768x1024.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "archive-2020-f3f7910735",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT界要求援助記招05_羅國明（香港無線科技商會主席）.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "postpone-hong-kong-ict-awards-2020-ict-startup-award",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/ICT-StartUp.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "postpone-asia-smart-app-awards-2020",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/ASA2020-banner_OP_02-scaled.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2020-asia-smart-app-awards-2020",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2020-ASA--scaled.jpg",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2019-joint-ict-spring-dinner-2019",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2017-connected-city-conference",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2017-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-IoV-Mission-Tour-to-Chongqing-1.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/Picture1-1.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2016-safewifi-campaign",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2016-SafeWiFi.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2015-safewifi-campaign",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2015-ICT-Awards.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2015-asia-smartphone-apps-contest-summit-2015",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/ASA-2014.png",
+      "error": "open-awaiting-parent-file"
+    },
+    {
+      "slug": "2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2014HKMFF.png",
+      "error": "open-awaiting-parent-file"
+    }
+  ]
+}

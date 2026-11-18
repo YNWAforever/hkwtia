@@ -136,6 +136,7 @@ export default async function NewsPostPage({params}: Props) {
               externalHint: tNotice("externalHint"),
               missingFile: tNotice("missingFile"),
               missingPhoto: tNotice("missingPhoto"),
+              openPhoto: tNotice("openPhoto"),
               photoAlt: tNotice("photoAlt"),
             }}
           />

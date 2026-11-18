@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2018/01/2018-taipei-iot-business-delegation-tour",
   "sourceId": "4380",
   "slug": "2018-taipei-iot-business-delegation-tour",
-  "title": "2018 – Taipei IOT Business Delegation Tour",
+  "title": "2018 - Taipei IOT Business Delegation Tour",
   "publishedAt": "2018-01-31T08:08:40+00:00",
   "modifiedAt": "2020-03-10T08:20:48+00:00",
-  "visibleDateText": "January 31st, 2018",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,7 +23,8 @@
       "localPath": "/images/news-archive/display/6f1edbd14df24dfa.jpg",
       "originalPath": "/images/news-archive/original/6f1edbd14df24dfa.png",
       "sha256": "6f1edbd14df24dfa2a008da4a62739aacb3b7bd17400a0309a9e23e85c78b731",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
@@ -37,6 +38,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20240414131740",
-  "sourceSha256": "b6416259662b7f1583678f49a9f91833af075dc1bd32111cda7922cf72893710"
+  "waybackTimestamp": null,
+  "sourceSha256": "52b15d70c0ac4441a2b6da8dfe2d45c3c94282da3870d691469afef2fbfc1acd"
 }

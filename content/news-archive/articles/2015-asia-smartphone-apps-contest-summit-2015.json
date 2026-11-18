@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2015/01/2015-asia-smartphone-apps-contest-summit-2015",
   "sourceId": "3823",
   "slug": "2015-asia-smartphone-apps-contest-summit-2015",
-  "title": "2015 – Asia Smartphone Apps Contest & Summit 2015",
+  "title": "2015 – Asia Smartphone Apps Contest &amp; Summit 2015",
   "publishedAt": "2015-01-06T08:45:09+00:00",
   "modifiedAt": "2020-02-20T08:49:32+00:00",
-  "visibleDateText": "January 6th, 2015",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,54 +23,23 @@
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
       "children": [
         {
           "type": "text",
-          "text": "To recognize the excellence of innovative smartphone applications development and"
-        },
-        {
-          "type": "text",
-          "text": " "
-        },
-        {
-          "type": "text",
-          "text": " provide a platform for top smartphone applications professions in the region to meet, share"
-        },
-        {
-          "type": "text",
-          "text": " "
-        },
-        {
-          "type": "text",
-          "text": " and learn from each other, WTIA started to organise Asia Smartphone Contest in 2013, 7"
-        },
-        {
-          "type": "text",
-          "text": " "
-        },
-        {
-          "type": "text",
-          "text": " Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan"
-        },
-        {
-          "type": "text",
-          "text": " "
-        },
-        {
-          "type": "text",
-          "text": " was the co-organiser of the Contest."
+          "text": "To recognize the excellence of innovative smartphone applications development and provide a platform for top smartphone applications professions in the region to meet, share and learn from each other, WTIA started to organise Asia Smartphone Contest in 2013, 7 Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan was the co-organiser of the Contest."
         }
       ]
     }
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/ASA-2014.png: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/02/ASA-2014.png: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240414142655",
-  "sourceSha256": "4ddffc8a2543d2a679eacae9e437bcc17697544ba3ac5740a0844bdebe0f441f"
+  "waybackTimestamp": null,
+  "sourceSha256": "b760fe564f241a249dd23301bf6183f4701941fcec70e78dd0b56ea96e6e13c8"
 }

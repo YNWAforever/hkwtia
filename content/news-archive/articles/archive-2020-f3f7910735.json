@@ -5,7 +5,7 @@
   "title": "[新聞稿] 疫情重創IT中小企 初創資金鏈斷裂急須救亡 莫乃光及IT界團體促抗疫基金加碼援助",
   "publishedAt": "2020-04-14T09:07:12+00:00",
   "modifiedAt": "2020-04-14T09:41:42+00:00",
-  "visibleDateText": "April 14th, 2020",
+  "visibleDateText": null,
   "author": "Kylie Li",
   "categories": [
     "News"
@@ -18,13 +18,14 @@
   "blocks": [
     {
       "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT%E7%95%8C%E8%A6%81%E6%B1%82%E6%8F%B4%E5%8A%A9%E8%A8%98%E6%8B%9B05_%E7%BE%85%E5%9C%8B%E6%98%8E%EF%BC%88%E9%A6%99%E6%B8%AF%E7%84%A1%E7%B7%9A%E7%A7%91%E6%8A%80%E5%95%86%E6%9C%83%E4%B8%BB%E5%B8%AD%EF%BC%89.jpg",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT界要求援助記招05_羅國明（香港無線科技商會主席）.jpg",
       "alt": "",
       "caption": [],
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -181,8 +182,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT%E7%95%8C%E8%A6%81%E6%B1%82%E6%8F%B4%E5%8A%A9%E8%A8%98%E6%8B%9B05_%E7%BE%85%E5%9C%8B%E6%98%8E%EF%BC%88%E9%A6%99%E6%B8%AF%E7%84%A1%E7%B7%9A%E7%A7%91%E6%8A%80%E5%95%86%E6%9C%83%E4%B8%BB%E5%B8%AD%EF%BC%89.jpg: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT界要求援助記招05_羅國明（香港無線科技商會主席）.jpg: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240414150400",
-  "sourceSha256": "545a254c5592d56357efcba59b1a116b19b90ba956c60f5b15cc8a7f0921fd0d"
+  "waybackTimestamp": null,
+  "sourceSha256": "df6d2711f94b8d1aeca71c80e0e5f5baa5cb313d29c15e1e72e382be7e08a0b5"
 }

@@ -5,7 +5,7 @@
   "title": "2018 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China",
   "publishedAt": "2018-01-10T08:03:33+00:00",
   "modifiedAt": "2020-03-10T08:08:27+00:00",
-  "visibleDateText": "January 10th, 2018",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -17,13 +17,14 @@
   "blocks": [
     {
       "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2018-%E2%80%93-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png",
       "alt": "",
       "caption": [],
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -37,8 +38,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/03/2018-%E2%80%93-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240722042608",
-  "sourceSha256": "037270b51824049f303d2291689fdcbab52a5422528f1699bc5200a806951cfa"
+  "waybackTimestamp": null,
+  "sourceSha256": "298bf233ccbf2b7034fe4ea4b9ed1809e6a7ecb8a318221fabf28bb33e4c5010"
 }

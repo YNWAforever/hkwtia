@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2007/01/2007-hong-kong-mobile-film-festival",
   "sourceId": "3526",
   "slug": "2007-hong-kong-mobile-film-festival",
-  "title": "2007 – Hong Kong Mobile Film Festival",
+  "title": "2007 - Hong Kong Mobile Film Festival",
   "publishedAt": "2007-01-01T04:05:07+00:00",
   "modifiedAt": "2020-02-20T08:14:06+00:00",
-  "visibleDateText": "January 1st, 2007",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,7 +23,8 @@
       "localPath": "/images/news-archive/display/6a35b5d31429a5b5.jpg",
       "originalPath": "/images/news-archive/original/6a35b5d31429a5b5.jpg",
       "sha256": "6a35b5d31429a5b513950f7615099a5b4c482568bea4c3a6a2529349b5f0f688",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
@@ -37,6 +38,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20240615171822",
-  "sourceSha256": "be3957a4a2356e9bbd42f6cc5ec1a3d181a05f37e3693698732fe4ce45a3ff7d"
+  "waybackTimestamp": null,
+  "sourceSha256": "60b7fbd1f69004e55c476c8622a1949bae5461b9a00472db19323e7005aef1de"
 }

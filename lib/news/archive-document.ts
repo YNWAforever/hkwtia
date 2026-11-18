@@ -35,6 +35,7 @@ const blockSchema = z.discriminatedUnion("type", [
     originalPath: localPathSchema.nullable(),
     sha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
     error: z.string().nullable(),
+    assetStatus: z.enum(["stored", "open", "unresolved"]),
   }).strict(),
   z.object({
     type: z.literal("file"),
@@ -44,6 +45,7 @@ const blockSchema = z.discriminatedUnion("type", [
     originalPath: localPathSchema.nullable(),
     sha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
     error: z.string().nullable(),
+    assetStatus: z.enum(["stored", "open", "unresolved"]),
   }).strict(),
   z.object({type: z.literal("embed"), sourceUrl: z.string().url(), label: z.string().min(1)}).strict(),
 ]);
@@ -119,7 +121,9 @@ export function slugFromCanonicalUrl(canonicalUrl: string): string {
   const path = decodeURIComponent(new URL(canonicalUrl).pathname);
   const last = path.split("/").filter(Boolean).pop() ?? "article";
   const ascii = last.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(ascii) && ascii.length >= 3) return ascii.slice(0, 80).replace(/-+$/g, "");
+  const words = ascii.split("-").filter((part) => part.length > 0 && !/^(?:19|20)\d{2}$/.test(part));
+  const asciiIdentifies = !/[^\u0000-\u007F]/.test(last) || words.join("").length >= 8;
+  if (asciiIdentifies && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(ascii) && ascii.length >= 3) return ascii.slice(0, 80).replace(/-+$/g, "");
   const year = path.match(/\/((?:19|20)\d{2})\//)?.[1] ?? "undated";
   const hash = createHash("sha256").update(canonicalUrl).digest("hex").slice(0, 10);
   return `archive-${year}-${hash}`;

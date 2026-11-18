@@ -5,7 +5,7 @@
   "title": "2019 – TechConnect Conference & Festival",
   "publishedAt": "2019-01-31T08:31:20+00:00",
   "modifiedAt": "2020-03-10T08:32:54+00:00",
-  "visibleDateText": "January 31st, 2019",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -13,7 +13,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development.\nTo assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies.",
+  "plainText": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development. To assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies.",
   "blocks": [
     {
       "type": "figure",
@@ -23,29 +23,21 @@
       "localPath": "/images/news-archive/display/0e8e2f8344647711.jpg",
       "originalPath": "/images/news-archive/original/0e8e2f8344647711.png",
       "sha256": "0e8e2f8344647711fe6fb1d75c382a4f3e39f13ca3fac638fc329d14187a06d6",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
       "children": [
         {
           "type": "text",
-          "text": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development."
-        }
-      ]
-    },
-    {
-      "type": "paragraph",
-      "children": [
-        {
-          "type": "text",
-          "text": "To assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies."
+          "text": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development. To assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies."
         }
       ]
     }
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20240529074506",
-  "sourceSha256": "c1336a51693c342b26636b2f733ec379de519451d41166e8f1ead803ce54e3bf"
+  "waybackTimestamp": null,
+  "sourceSha256": "196acfe668d6448b0adad1afcbbfcceab36b1184b2c124652401818027e65986"
 }

@@ -2024,6 +2024,7 @@
     "archiveFallbackEn": "Archived original in English. A Chinese version was not in the source.",
     "externalHint": " (opens in a new tab)",
     "missingPhoto": "A photograph from this article could not be archived.",
+    "openPhoto": "This photograph is listed in the official export. The file is not in this draft yet.",
     "missingFile": "The original file could not be archived.",
     "photoAlt": "Archived photograph. The source did not include a caption.",
     "backToList": "All news"

@@ -5,7 +5,7 @@
   "title": "2017 – Connected City Conference",
   "publishedAt": "2017-01-30T02:10:59+00:00",
   "modifiedAt": "2020-02-24T02:16:29+00:00",
-  "visibleDateText": "January 30th, 2017",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -17,13 +17,14 @@
   "blocks": [
     {
       "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-Connected-City-Conference-1.png",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png",
       "alt": "",
       "caption": [],
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -37,8 +38,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-Connected-City-Conference-1.png: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240615181730",
-  "sourceSha256": "c4009433fdff8617a5e4bbc0a844286fa28446342c284f45c7c41dcc2f39101d"
+  "waybackTimestamp": null,
+  "sourceSha256": "1da4576572fce1a2e9b7269ae86ef57abb9f0af62712d73b2e29a719b9a08eb4"
 }

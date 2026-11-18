@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2013/01/2013-asia-smartphone-contest",
   "sourceId": "3532",
   "slug": "2013-asia-smartphone-contest",
-  "title": "2013 – Asia Smartphone Contest",
+  "title": "2013 - Asia Smartphone Contest",
   "publishedAt": "2013-01-24T20:10:20+00:00",
   "modifiedAt": "2020-02-20T09:18:00+00:00",
-  "visibleDateText": "January 25th, 2013",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,7 +23,8 @@
       "localPath": "/images/news-archive/display/e43293717dfbc44b.jpg",
       "originalPath": "/images/news-archive/original/e43293717dfbc44b.jpg",
       "sha256": "e43293717dfbc44b81273cd9b1a027b0d28d18d53724ca176111448560e04c56",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
@@ -37,6 +38,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20230327014418",
-  "sourceSha256": "3d150438b118850cbe19f141d9aec27b1442d15f5c64b72dcc805caca07c86f3"
+  "waybackTimestamp": null,
+  "sourceSha256": "937c66833b33fa4b4cbeb39cf58ad55c4884377d03ad04f97da5d9debffc0b2c"
 }

@@ -5,7 +5,7 @@
   "title": "2019 – Joint ICT Spring Dinner 2019",
   "publishedAt": "2019-01-01T08:21:09+00:00",
   "modifiedAt": "2020-03-10T08:25:47+00:00",
-  "visibleDateText": "January 1st, 2019",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -17,13 +17,14 @@
   "blocks": [
     {
       "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-%E2%80%93-Joint-ICT-Spring-Dinner-2019-1.png",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png",
       "alt": "",
       "caption": [],
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -37,8 +38,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/03/2019-%E2%80%93-Joint-ICT-Spring-Dinner-2019-1.png: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240414140741",
-  "sourceSha256": "92056235c340a544b6aecb64f8471b06384708a77d760d0e28cbe4274a1fd58b"
+  "waybackTimestamp": null,
+  "sourceSha256": "784bb54b9fae46a1db977d912191d245be38b54368bd4e111694838569167068"
 }

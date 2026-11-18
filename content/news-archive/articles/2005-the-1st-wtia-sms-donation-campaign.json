@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2005/01/2005-the-1st-wtia-sms-donation-campaign",
   "sourceId": "3507",
   "slug": "2005-the-1st-wtia-sms-donation-campaign",
-  "title": "2005 – The 1st WTIA SMS Donation Campaign",
+  "title": "2005 - The 1st WTIA SMS Donation Campaign",
   "publishedAt": "2005-01-01T03:43:14+00:00",
   "modifiedAt": "2020-02-13T03:44:34+00:00",
-  "visibleDateText": "January 1st, 2005",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -15,16 +15,6 @@
   ],
   "plainText": "WTIA and Internet Professionals Association (iProA) partnered with mobile network operators in Hong Kong to launch an SMS Donation Campaign, and raised HK $2 million for the victims of 2004 Indian Ocean earthquake and tsunami.",
   "blocks": [
-    {
-      "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/3d-scaled.jpg",
-      "alt": "",
-      "caption": [],
-      "localPath": "/images/news-archive/display/8f4089f0d1574ed7.jpg",
-      "originalPath": "/images/news-archive/original/8f4089f0d1574ed7.jpg",
-      "sha256": "8f4089f0d1574ed719b2e85e79fed3072cab88357de8d3b15fba112c03d58bcb",
-      "error": null
-    },
     {
       "type": "paragraph",
       "children": [
@@ -37,6 +27,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20230327021944",
-  "sourceSha256": "98950439e057ad137eaec578dab85ed81d53be6ea0548c56839be5f5aa1c51ee"
+  "waybackTimestamp": null,
+  "sourceSha256": "83a11780730bc22c99c1192707c285eb758739add6244aca5e555a4a65edb4ee"
 }

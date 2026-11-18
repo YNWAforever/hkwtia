@@ -1,0 +1,50 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2025/05/%E3%80%8Ctech-connect-%E6%99%BA%E5%89%B5%E4%BA%92%E8%81%AF%E3%80%8Dai-%E9%A0%98%E8%A2%96%E7%B3%BB%E5%88%97%E7%A0%94%E8%A8%8E%E6%9C%83-tech-connect-ai-leaders-seminar-series",
+  "sourceId": "8542",
+  "slug": "tech-connect-ai-tech-connect-ai-leaders-seminar-series",
+  "title": "「Tech Connect 智創互聯」AI 領袖系列研討會 \"Tech Connect\" AI Leaders Seminar Series",
+  "publishedAt": "2025-05-06T08:41:53+00:00",
+  "modifiedAt": "2026-03-20T08:42:33+00:00",
+  "visibleDateText": null,
+  "author": "iris",
+  "categories": [
+    "News"
+  ],
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "WTIA 積極推動業界數位轉型，本年度舉行的「Tech Connect 智創互聯」系列活動取得熱烈迴響。其中「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家，圍繞「生成式 AI 如何重塑商業模式」展開深度討論，協助本地中小企掌握最新 AI 工具並提升運營效率。WTIA continues to drive digital transformation within the industry through the highly successful \"Tech Connect\" event series. The \"AI Leaders Summit\" featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC. The summit focused on how Generative AI is reshaping business models, providing local SMEs with the insights needed to master cutting-edge AI tools and enhance operational efficiency.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA 積極推動業界數位轉型，本年度舉行的「Tech Connect 智創互聯」系列活動取得熱烈迴響。其中「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家，圍繞「生成式 AI 如何重塑商業模式」展開深度討論，協助本地中小企掌握最新 AI 工具並提升運營效率。"
+        },
+        {
+          "type": "text",
+          "text": "WTIA continues to drive digital transformation within the industry through the highly successful \"Tech Connect\" event series. The \"AI Leaders Summit\" featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC. The summit focused on how Generative AI is reshaping business models, providing local SMEs with the insights needed to master cutting-edge AI tools and enhance operational efficiency."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg: open-awaiting-parent-file"
+  ],
+  "waybackTimestamp": null,
+  "sourceSha256": "46dc45ce968f908bdec011dbaabf07b3f12a656a325c42b1f208c3b3c28c9031"
+}

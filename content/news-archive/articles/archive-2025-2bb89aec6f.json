@@ -1,0 +1,102 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2025/10/2025-%E9%A6%99%E6%B8%AF%E8%B3%87%E8%A8%8A%E5%8F%8A%E9%80%9A%E8%A8%8A%E7%A7%91%E6%8A%80%E7%8D%8E%EF%BC%9A%E8%B3%87%E8%A8%8A%E7%A7%91%E6%8A%80%E5%88%9D%E5%89%B5%E4%BC%81%E6%A5%AD%E7%8D%8E",
+  "sourceId": "8531",
+  "slug": "archive-2025-2bb89aec6f",
+  "title": "2025 香港資訊及通訊科技獎：資訊科技初創企業獎 2025 Hong Kong ICT Awards: ICT Startup Award",
+  "publishedAt": "2025-10-16T08:37:37+00:00",
+  "modifiedAt": "2026-03-20T08:40:18+00:00",
+  "visibleDateText": null,
+  "author": "iris",
+  "categories": [
+    "News"
+  ],
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "由數字政策辦公室主辦、香港無線科技商會（WTIA）籌辦的「2025 香港資訊及通訊科技獎：資訊科技初創企業獎」圓滿落幕。本屆賽事競爭激烈，旨在發掘具備創新潛力與市場影響力的本地初創。本屆「資訊科技初創企業大獎」由 Entoptica Limited 憑藉其創新技術 SLOPE device 奪得。評審團一致讚揚該項目在醫療科技上的突破及社會貢獻。Steered by the Digital Policy Office and organized by the Hong Kong Wireless Technology Industry Association (WTIA), the \"2025 Hong Kong ICT Awards: ICT Startup Award\" has concluded successfully. The awards aim to recognize local startups with exceptional innovation and market potential. This year’s \"ICT Startup Grand Award\" was presented to Entoptica Limited for their groundbreaking SLOPE device. The jury highly commended the project’s breakthrough in medical technology and its significant social contribution.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2024/09/1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": null,
+      "originalPath": null,
+      "sha256": null,
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "由數字政策辦公室主辦、香港無線科技商會（WTIA）籌辦的「2025 香港資訊及通訊科技獎：資訊科技初創企業獎」圓滿落幕。本屆賽事競爭激烈，旨在發掘具備創新潛力與市場影響力的本地初創。本屆「資訊科技初創企業大獎」由 "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "Entoptica Limited"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " 憑藉其創新技術 "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "SLOPE device"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " 奪得。評審團一致讚揚該項目在醫療科技上的突破及社會貢獻。"
+        },
+        {
+          "type": "text",
+          "text": "Steered by the Digital Policy Office and organized by the Hong Kong Wireless Technology Industry Association (WTIA), the \"2025 Hong Kong ICT Awards: ICT Startup Award\" has concluded successfully. The awards aim to recognize local startups with exceptional innovation and market potential. This year’s \"ICT Startup Grand Award\" was presented to "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "Entoptica Limited"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " for their groundbreaking "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "SLOPE device"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": ". The jury highly commended the project’s breakthrough in medical technology and its significant social contribution."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "partial",
+  "errors": [
+    "https://hkwtia.org/wp-content/uploads/2024/09/1.jpg: open-awaiting-parent-file"
+  ],
+  "waybackTimestamp": null,
+  "sourceSha256": "7af3d766f32faa06edbbb19cf6a15a9119d4da467a3d7fba6d0698e3f2c1ee34"
+}

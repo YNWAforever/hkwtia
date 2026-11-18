@@ -5,7 +5,7 @@
   "title": "[POSTPONE] Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗)",
   "publishedAt": "2020-03-23T03:15:00+00:00",
   "modifiedAt": "2020-03-23T03:18:38+00:00",
-  "visibleDateText": "March 23rd, 2020",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "News"
@@ -24,7 +24,8 @@
       "localPath": "/images/news-archive/display/0161f09e3d0bc3fc.jpg",
       "originalPath": "/images/news-archive/original/0161f09e3d0bc3fc.png",
       "sha256": "0161f09e3d0bc3fc8268c74c34f8dfef87293427acf6dffa8c6f877fc301ae52",
-      "error": null
+      "error": null,
+      "assetStatus": "stored"
     },
     {
       "type": "paragraph",
@@ -51,6 +52,6 @@
   ],
   "extractionStatus": "extracted",
   "errors": [],
-  "waybackTimestamp": "20240414143653",
-  "sourceSha256": "beec3f2b78df73c538111efc683561141f299bbb736c2483002ff69864fcd44a"
+  "waybackTimestamp": null,
+  "sourceSha256": "6003fc6f4ef12145821cda8b8a4d12db445de1559e564f791950a6c2c8f73a90"
 }

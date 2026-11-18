@@ -2,10 +2,10 @@
   "canonicalUrl": "https://hkwtia.org/2016/01/2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
   "sourceId": "3851",
   "slug": "2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
-  "title": "2016 – Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016",
+  "title": "2016 - Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016",
   "publishedAt": "2016-01-30T01:52:26+00:00",
   "modifiedAt": "2020-02-24T01:59:09+00:00",
-  "visibleDateText": "January 30th, 2016",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -23,7 +23,8 @@
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -37,8 +38,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/Picture1-1.png: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/02/Picture1-1.png: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240615163327",
-  "sourceSha256": "ac959f05390308d7aa926cf6b4c5ab50cb910988e4c6ffbe58be74d1c6e1200c"
+  "waybackTimestamp": null,
+  "sourceSha256": "6730ea952710b0b5679266c0014eb61ef635e7376e9532333a2fe9172984a375"
 }

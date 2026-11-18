@@ -5,7 +5,7 @@
   "title": "2017 – Develop Market Network of Internet of Vehicles (IoV) in Mainland China",
   "publishedAt": "2017-01-01T02:00:48+00:00",
   "modifiedAt": "2020-02-24T02:03:46+00:00",
-  "visibleDateText": "January 1st, 2017",
+  "visibleDateText": null,
   "author": "hkwtia",
   "categories": [
     "Archive"
@@ -17,13 +17,14 @@
   "blocks": [
     {
       "type": "figure",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-IoV-Mission-Tour-to-Chongqing-1.png",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-IoV-Mission-Tour-to-Chongqing-1.png",
       "alt": "",
       "caption": [],
       "localPath": null,
       "originalPath": null,
       "sha256": null,
-      "error": "download-failed"
+      "error": "open-awaiting-parent-file",
+      "assetStatus": "open"
     },
     {
       "type": "paragraph",
@@ -37,8 +38,8 @@
   ],
   "extractionStatus": "partial",
   "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-IoV-Mission-Tour-to-Chongqing-1.png: download-failed"
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-IoV-Mission-Tour-to-Chongqing-1.png: open-awaiting-parent-file"
   ],
-  "waybackTimestamp": "20240615181133",
-  "sourceSha256": "8c54379b22a9b3752d38a5b4eb3521bda96b833e952744eab159a2306b5db672"
+  "waybackTimestamp": null,
+  "sourceSha256": "ce1b6f6400205575b6e927aae6acb2ab40616921d692659427884ef4cded6f19"
 }
