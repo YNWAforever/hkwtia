@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/ICT-StartUp.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/5c56f5444f826e93.jpg",
+      "originalPath": "/images/news-archive/original/5c56f5444f826e93.png",
+      "sha256": "5c56f5444f826e93e844ff2abb230f62de1a2c8ca7fc5dd7a954c4069c0212b4",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
     },
     {
       "type": "paragraph",
@@ -71,10 +72,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/03/ICT-StartUp.png: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "b5867a2728b96e58b22383fe2cf3a23a3abe214d10845dd6ba3cdab6fae628de"
 }

@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/92bf24b9f2a49e69.jpg",
+      "originalPath": "/images/news-archive/original/92bf24b9f2a49e69.png",
+      "sha256": "92bf24b9f2a49e69643bd5669f959d235e3f5c229cedc7bcd9188f016ad2fabe",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
     },
     {
       "type": "paragraph",
@@ -36,10 +37,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "784bb54b9fae46a1db977d912191d245be38b54368bd4e111694838569167068"
 }

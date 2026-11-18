@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/dd2f64486c94dc7d.jpg",
+      "originalPath": "/images/news-archive/original/dd2f64486c94dc7d.png",
+      "sha256": "dd2f64486c94dc7d62599eb71546d45ad9c50c561b102a9faaaad0bc75d3ae45",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "current-url-not-wxr-proven"
     },
     {
       "type": "paragraph",
@@ -36,10 +37,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "298bf233ccbf2b7034fe4ea4b9ed1809e6a7ecb8a318221fabf28bb33e4c5010"
 }

@@ -24,7 +24,8 @@
       "originalPath": "/images/news-archive/original/0e8e2f8344647711.png",
       "sha256": "0e8e2f8344647711fe6fb1d75c382a4f3e39f13ca3fac638fc329d14187a06d6",
       "error": null,
-      "assetStatus": "stored"
+      "assetStatus": "stored",
+      "byteClaim": null
     },
     {
       "type": "paragraph",

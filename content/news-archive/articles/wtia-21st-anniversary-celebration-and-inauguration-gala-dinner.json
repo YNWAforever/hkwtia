@@ -25,7 +25,8 @@
       "originalPath": "/images/news-archive/original/798edc50b1dacf38.jpg",
       "sha256": "798edc50b1dacf3896738b6021780e33e328cecff596f55509cf581c611126f2",
       "error": null,
-      "assetStatus": "stored"
+      "assetStatus": "stored",
+      "byteClaim": null
     },
     {
       "type": "figure",
@@ -36,7 +37,8 @@
       "originalPath": "/images/news-archive/original/546f9ee068816a41.jpg",
       "sha256": "546f9ee068816a41c7954127ffa21079a2990a3a376adccb849c1d8fd014e246",
       "error": null,
-      "assetStatus": "stored"
+      "assetStatus": "stored",
+      "byteClaim": null
     },
     {
       "type": "paragraph",

@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/31e4b15f9f75a146.jpg",
+      "originalPath": "/images/news-archive/original/31e4b15f9f75a146.png",
+      "sha256": "31e4b15f9f75a146a1dee87bae50196df22894f9c01aef8774b813483ab09058",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "current-url-not-wxr-proven"
     },
     {
       "type": "paragraph",
@@ -36,10 +37,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "70fec15e05540ba7842b94cfbd2488abf30e634de0c5c1618c1e285f75204546"
 }

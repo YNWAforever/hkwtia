@@ -28,7 +28,7 @@ describe("official news archive reconciliation", () => {
     expect(matrix.previousHtmlExtracts).toBe(45);
     expect(matrix.rows.filter((row) => row.gap === "no-prior-html-extract")).toHaveLength(4);
     expect(matrix.rows.every((row) => row.shortcodesRemainInPlainText === false)).toBe(true);
-    expect(matrix.rows.reduce((sum, row) => sum + row.figuresOpen + row.filesOpen, 0)).toBe(19);
+    expect(matrix.rows.reduce((sum, row) => sum + row.figuresOpen + row.filesOpen, 0)).toBe(2);
     const urls = new Set(articles.map((article) => article.canonicalUrl));
     expect(urls.has("https://hkwtia.org/2020/01/2020-asia-smart-app-awards-2020")).toBe(true);
     expect(articles.find((article) => article.canonicalUrl.endsWith("/2020-asia-smart-app-awards-2020"))?.plainText).toContain("Create Hong Kong");
@@ -55,6 +55,17 @@ describe("official news archive reconciliation", () => {
       }
     }
     expect(stored).toBeGreaterThan(0);
-    expect(open).toBe(19);
+    expect(open).toBe(2);
+    const claims = JSON.parse(readFileSync(resolve(root, "content/news-archive/asset-byte-claims.json"), "utf8")) as Record<string, string>;
+    expect(claims["https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg"]).toBe("current-url-not-wxr-proven");
+    expect(claims["https://hkwtia.org/wp-content/uploads/2020/03/2020-ASA--scaled.jpg"]).toBe("current-url-not-wxr-proven");
+    expect(claims["https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png"]).toBe("current-url-not-wxr-proven");
+    expect(claims["https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png"]).toBe("current-url-not-wxr-proven");
+    const iov = articles.flatMap((article) => article.blocks).find((block) => block.type === "figure" && block.sourceUrl.includes("2018-–-Develop-Market-Network"));
+    expect(iov && iov.type === "figure" ? iov.byteClaim : null).toBe("current-url-not-wxr-proven");
+    expect(iov && iov.type === "figure" ? iov.sha256 : "").toBe("dd2f64486c94dc7d62599eb71546d45ad9c50c561b102a9faaaad0bc75d3ae45");
+    const openUrls = articles.flatMap((article) => article.blocks).flatMap((block) => block.type === "figure" || block.type === "file" ? block.assetStatus === "open" ? [block.sourceUrl] : [] : []);
+    expect(openUrls.some((url) => url.includes("301379874_4923078111125509"))).toBe(true);
+    expect(openUrls.some((url) => url.endsWith("annualreport_preview.pdf"))).toBe(true);
   });
 });

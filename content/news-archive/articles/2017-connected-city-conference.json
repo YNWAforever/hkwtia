@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/09b4a711e1aae9d0.jpg",
+      "originalPath": "/images/news-archive/original/09b4a711e1aae9d0.png",
+      "sha256": "09b4a711e1aae9d0724361c56c101ab7ff93ae57956967de336c083184cfa127",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
     },
     {
       "type": "paragraph",
@@ -36,10 +37,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "1da4576572fce1a2e9b7269ae86ef57abb9f0af62712d73b2e29a719b9a08eb4"
 }

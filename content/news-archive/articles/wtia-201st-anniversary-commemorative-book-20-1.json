@@ -35,7 +35,8 @@
       "originalPath": "/images/news-archive/original/50704031b382b1e6.png",
       "sha256": "50704031b382b1e6e31930f37f811dee06c559fa4296a13bc96c627a5240e5bf",
       "error": null,
-      "assetStatus": "stored"
+      "assetStatus": "stored",
+      "byteClaim": null
     },
     {
       "type": "file",

@@ -36,6 +36,8 @@ const blockSchema = z.discriminatedUnion("type", [
     sha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
     error: z.string().nullable(),
     assetStatus: z.enum(["stored", "open", "unresolved"]),
+    /** What the stored bytes are allowed to claim. Absent on earlier Wayback files. */
+    byteClaim: z.enum(["wxr-size-match", "current-url-not-wxr-proven", "wxr-size-unknown"]).nullable().optional(),
   }).strict(),
   z.object({
     type: z.literal("file"),
@@ -46,6 +48,7 @@ const blockSchema = z.discriminatedUnion("type", [
     sha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
     error: z.string().nullable(),
     assetStatus: z.enum(["stored", "open", "unresolved"]),
+    byteClaim: z.enum(["wxr-size-match", "current-url-not-wxr-proven", "wxr-size-unknown"]).nullable().optional(),
   }).strict(),
   z.object({type: z.literal("embed"), sourceUrl: z.string().url(), label: z.string().min(1)}).strict(),
 ]);

@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2020-ASA--scaled.jpg",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/3bc5bf29673e1a3c.jpg",
+      "originalPath": "/images/news-archive/original/3bc5bf29673e1a3c.jpg",
+      "sha256": "3bc5bf29673e1a3c944547f6182ffa29451d353e4a191e16a542e4b5b36bc9fc",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "current-url-not-wxr-proven"
     },
     {
       "type": "paragraph",
@@ -36,10 +37,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/03/2020-ASA--scaled.jpg: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "18ea017a6f2bb4ef0fbee0d99a27e940745dcba4ce1e80ef03b26cbd0d1a954f"
 }

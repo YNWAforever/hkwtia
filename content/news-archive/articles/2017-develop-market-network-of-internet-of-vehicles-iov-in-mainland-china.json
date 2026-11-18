@@ -20,11 +20,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-IoV-Mission-Tour-to-Chongqing-1.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/f4ef37a4d64301a9.jpg",
+      "originalPath": "/images/news-archive/original/f4ef37a4d64301a9.png",
+      "sha256": "f4ef37a4d64301a9110565d6e7a49f6a4a8543b92c8f7c3215ec26570aaea399",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
     },
     {
       "type": "paragraph",
@@ -36,10 +37,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-IoV-Mission-Tour-to-Chongqing-1.png: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "ce1b6f6400205575b6e927aae6acb2ab40616921d692659427884ef4cded6f19"
 }

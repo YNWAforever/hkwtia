@@ -48,11 +48,14 @@ export type ReconciliationRow = Readonly<{
 
 const OPEN_ERROR = "open-awaiting-parent-file";
 
+export type ByteClaim = "wxr-size-match" | "current-url-not-wxr-proven" | "wxr-size-unknown";
+
 export function reconcileOfficialArchive(input: Readonly<{
   posts: readonly OfficialPost[];
   storedAssets: ReadonlyMap<string, StoredAsset>;
   openUrls: ReadonlySet<string>;
   previousPlainChars: ReadonlyMap<string, number>;
+  byteClaims?: ReadonlyMap<string, ByteClaim>;
 }>): {articles: ArchiveArticle[]; rows: ReconciliationRow[]; review: OfficialPost[]} {
   const articles: ArchiveArticle[] = [];
   const rows: ReconciliationRow[] = [];
@@ -71,7 +74,7 @@ export function reconcileOfficialArchive(input: Readonly<{
     extracted.categories = [...post.categories];
     extracted.title = post.title;
     if (post.featured_image_url) addFeatured(extracted, post.featured_image_url);
-    extracted.blocks = extracted.blocks.map((block) => applyAsset(block, input.storedAssets, input.openUrls));
+    extracted.blocks = extracted.blocks.map((block) => applyAsset(block, input.storedAssets, input.openUrls, input.byteClaims ?? new Map()));
     extracted.slug = uniqueSlug(slugFromCanonicalUrl(canonical), slugs);
     const openBlocks = extracted.blocks.some((block) => block.type === "figure" || block.type === "file" ? block.assetStatus === "open" : false);
     extracted.extractionStatus = openBlocks ? "partial" : "extracted";
@@ -132,12 +135,12 @@ function addFeatured(article: ArchiveArticle, url: string): void {
   }, ...article.blocks];
 }
 
-function applyAsset(block: ArchiveBlock, stored: ReadonlyMap<string, StoredAsset>, openUrls: ReadonlySet<string>): ArchiveBlock {
+function applyAsset(block: ArchiveBlock, stored: ReadonlyMap<string, StoredAsset>, openUrls: ReadonlySet<string>, byteClaims: ReadonlyMap<string, ByteClaim>): ArchiveBlock {
   if (block.type !== "figure" && block.type !== "file") return block;
   const key = block.sourceUrl.split("?")[0] ?? block.sourceUrl;
   const asset = stored.get(key) ?? stored.get(block.sourceUrl);
   if (asset) {
-    return {...block, localPath: asset.localPath, originalPath: asset.originalPath, sha256: asset.sha256, error: null, assetStatus: "stored"};
+    return {...block, localPath: asset.localPath, originalPath: asset.originalPath, sha256: asset.sha256, error: null, assetStatus: "stored", byteClaim: byteClaims.get(key) ?? byteClaims.get(block.sourceUrl) ?? null};
   }
   if (openUrls.has(key) || openUrls.has(block.sourceUrl)) {
     return {...block, localPath: null, originalPath: null, sha256: null, error: OPEN_ERROR, assetStatus: "open"};

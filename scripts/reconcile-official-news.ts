@@ -41,6 +41,10 @@ if (!existsSync(BASELINE)) {
 }
 
 const baseline = JSON.parse(readFileSync(BASELINE, "utf8")) as Baseline;
+const byteClaimPath = join(ROOT, "asset-byte-claims.json");
+const byteClaims = existsSync(byteClaimPath)
+  ? new Map(Object.entries(JSON.parse(readFileSync(byteClaimPath, "utf8")) as Record<string, "wxr-size-match" | "current-url-not-wxr-proven" | "wxr-size-unknown">))
+  : new Map();
 const posts: OfficialPost[] = [
   ...official.news_archive.map((post) => ({...post, scope: "news_archive" as const})),
   ...official.review_candidates.map((post) => ({...post, scope: "review_candidate" as const})),
@@ -50,6 +54,7 @@ const result = reconcileOfficialArchive({
   storedAssets: new Map(Object.entries(baseline.assets)),
   openUrls: new Set(media.download_plan_required_news_public_assets_only.map((item) => item.source_url.split("?")[0] ?? item.source_url)),
   previousPlainChars: new Map(Object.entries(baseline.plainChars).map(([url, chars]) => [canonicalNewsUrl(url), chars])),
+  byteClaims,
 });
 
 const keep = new Set(result.articles.map((article) => `${article.slug}.json`));

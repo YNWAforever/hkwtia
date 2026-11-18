@@ -21,11 +21,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/3b19bd2f2b80b42a.jpg",
+      "originalPath": "/images/news-archive/original/3b19bd2f2b80b42a.jpg",
+      "sha256": "3b19bd2f2b80b42a2ff7f6c07e6ac01033fe53977befe56e31adbcb44d92f131",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "current-url-not-wxr-proven"
     },
     {
       "type": "paragraph",
@@ -41,10 +42,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "46dc45ce968f908bdec011dbaabf07b3f12a656a325c42b1f208c3b3c28c9031"
 }

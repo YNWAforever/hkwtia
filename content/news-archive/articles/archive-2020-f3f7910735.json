@@ -21,11 +21,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT界要求援助記招05_羅國明（香港無線科技商會主席）.jpg",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
-      "error": "open-awaiting-parent-file",
-      "assetStatus": "open"
+      "localPath": "/images/news-archive/display/689a6aaa0161bc42.jpg",
+      "originalPath": "/images/news-archive/original/689a6aaa0161bc42.jpg",
+      "sha256": "689a6aaa0161bc42b83663d2a4a091c134010c0aabf632a935c2098a920dcea2",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
     },
     {
       "type": "paragraph",
@@ -180,10 +181,8 @@
       ]
     }
   ],
-  "extractionStatus": "partial",
-  "errors": [
-    "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT界要求援助記招05_羅國明（香港無線科技商會主席）.jpg: open-awaiting-parent-file"
-  ],
+  "extractionStatus": "extracted",
+  "errors": [],
   "waybackTimestamp": null,
   "sourceSha256": "df6d2711f94b8d1aeca71c80e0e5f5baa5cb313d29c15e1e72e382be7e08a0b5"
 }
