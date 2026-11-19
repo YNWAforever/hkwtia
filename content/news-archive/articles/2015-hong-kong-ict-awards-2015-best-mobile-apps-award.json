@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2015/01/2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
+  "sourceId": "3826",
+  "slug": "2015-hong-kong-ict-awards-2015-best-mobile-apps-award",
+  "title": "2015 – Hong Kong ICT Awards 2015: Best Mobile Apps Award",
+  "publishedAt": "2015-01-15T08:50:30+00:00",
+  "modifiedAt": "2020-02-20T08:55:21+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, The Best Mobile Apps Awards aims to honour the best local mobile and wireless technology and application development, also to encourage further mobile and wireless technology and application development with enhanced creativity, design and commercial value.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2015-ICT-Awards.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/92adbe5cc1459bb0.jpg",
+      "originalPath": "/images/news-archive/original/92adbe5cc1459bb0.png",
+      "sha256": "92adbe5cc1459bb04df031f50ea64243f7dd548fa3df8d12c2e54d2098254597",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, The Best Mobile Apps Awards aims to honour the best local mobile and wireless technology and application development, also to encourage further mobile and wireless technology and application development with enhanced creativity, design and commercial value."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "7230278add3d6d92492f156cf85e122aacb1205fc51d65d8b51fed9437a89f6a"
+}

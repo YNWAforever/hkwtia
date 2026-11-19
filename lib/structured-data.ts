@@ -154,6 +154,8 @@ export type ArticleRecord = Readonly<{
   publishedAt: Date;
   updatedAt: Date | null;
   author: string | null;
+  /** Set when the article body is not in the page locale, so the page is not labelled as a translation. */
+  inLanguage?: string;
 }>;
 
 // Programme D (Phase D public surface): a news post states what it is and when it moved.
@@ -172,7 +174,7 @@ export function buildArticleData(record: ArticleRecord, locale: AppLocale): With
     dateModified: (record.updatedAt ?? record.publishedAt).toISOString(),
     mainEntityOfPage: url,
     url,
-    inLanguage: locale === 'en' ? 'en-HK' : 'zh-HK',
+    inLanguage: record.inLanguage ?? (locale === 'en' ? 'en-HK' : 'zh-HK'),
     ...(record.author ? {author: {'@type': 'Person' as const, name: record.author}} : {}),
     publisher: buildOrganizationData(),
   };

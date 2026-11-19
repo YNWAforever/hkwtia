@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2018/01/2018-meeting-with-yc-partner-eric-migicovsky-how-to-apply-successfully-for-y-combinator",
+  "sourceId": "4369",
+  "slug": "2018-meeting-with-yc-partner-eric-migicovsky-how-to-apply-successfully-for-y-com",
+  "title": "2018 – Meeting with YC Partner – Eric Migicovsky: “How to apply successfully for Y Combinator?”",
+  "publishedAt": "2018-01-01T07:53:05+00:00",
+  "modifiedAt": "2020-03-10T08:03:20+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "In partnership with ZEROZONE, the Hong Kong’s startup base, WTIA and Zerozone have invited Eric Migicovsky, partner of Y Combinator to talk about how to get into YC. Y Combinator, also known as the \"Fixed Point Combinator\", is the most prominent accelerator in Silicon Valley. Eric Migicovsky is the Founder and CEO of Pebble Technology (YC W11), which was acquired by Fitbit in 2016. In April 2012, Eric and his team launched Pebble on Kickstarter, where it became the most successful crowdfunded project in Kickstarter's history. Pebble sold over 2,000,000 watches.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2018-Meet-with-Y-Combinator.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/cf7081e577505757.jpg",
+      "originalPath": "/images/news-archive/original/cf7081e577505757.png",
+      "sha256": "cf7081e5775057577031751657ad85f775aa00e4547b593c9e831be676c5bb8b",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "In partnership with ZEROZONE, the Hong Kong’s startup base, WTIA and Zerozone have invited Eric Migicovsky, partner of Y Combinator to talk about how to get into YC. Y Combinator, also known as the \"Fixed Point Combinator\", is the most prominent accelerator in Silicon Valley. Eric Migicovsky is the Founder and CEO of Pebble Technology (YC W11), which was acquired by Fitbit in 2016. In April 2012, Eric and his team launched Pebble on Kickstarter, where it became the most successful crowdfunded project in Kickstarter's history. Pebble sold over 2,000,000 watches."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "5af435c6e3986bfcabe62730264fcef40a978c8f4b4b21d1ab554ef506790ac2"
+}

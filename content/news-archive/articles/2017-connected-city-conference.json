@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2017/01/2017-connected-city-conference",
+  "sourceId": "3863",
+  "slug": "2017-connected-city-conference",
+  "title": "2017 – Connected City Conference",
+  "publishedAt": "2017-01-30T02:10:59+00:00",
+  "modifiedAt": "2020-02-24T02:16:29+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "WTIA organised the Connected City Conference and industry experts were invited to present their latest solutions on 5G, LoRaWAN, Sigfox and NB-IoT to build Hong Kong as a smart-city. This is the first Smart City event that centres on connectivity and the newest networks gathered in one setting to discuss IoT, data, security and all the essential ingredients for a truly empowering Smart Hong Kong.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/09b4a711e1aae9d0.jpg",
+      "originalPath": "/images/news-archive/original/09b4a711e1aae9d0.png",
+      "sha256": "09b4a711e1aae9d0724361c56c101ab7ff93ae57956967de336c083184cfa127",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA organised the Connected City Conference and industry experts were invited to present their latest solutions on 5G, LoRaWAN, Sigfox and NB-IoT to build Hong Kong as a smart-city. This is the first Smart City event that centres on connectivity and the newest networks gathered in one setting to discuss IoT, data, security and all the essential ingredients for a truly empowering Smart Hong Kong."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "1da4576572fce1a2e9b7269ae86ef57abb9f0af62712d73b2e29a719b9a08eb4"
+}

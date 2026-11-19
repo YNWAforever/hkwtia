@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2019/01/2019-joint-ict-spring-dinner-2019",
+  "sourceId": "4383",
+  "slug": "2019-joint-ict-spring-dinner-2019",
+  "title": "2019 – Joint ICT Spring Dinner 2019",
+  "publishedAt": "2019-01-01T08:21:09+00:00",
+  "modifiedAt": "2020-03-10T08:25:47+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "To welcome the New Year of The Pig, Hong Kong Wireless Technology Industry Association (WTIA) , Hong Kong Information Technology Federation (HKITF), Hong Kong Retail Technology Industry Association (RTIA) organised Joint ICT Spring Dinner. This event was also supported by some other ICT associations.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/92bf24b9f2a49e69.jpg",
+      "originalPath": "/images/news-archive/original/92bf24b9f2a49e69.png",
+      "sha256": "92bf24b9f2a49e69643bd5669f959d235e3f5c229cedc7bcd9188f016ad2fabe",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "To welcome the New Year of The Pig, Hong Kong Wireless Technology Industry Association (WTIA) , Hong Kong Information Technology Federation (HKITF), Hong Kong Retail Technology Industry Association (RTIA) organised Joint ICT Spring Dinner.  This event was also supported by some other ICT associations."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "784bb54b9fae46a1db977d912191d245be38b54368bd4e111694838569167068"
+}

@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2015/01/2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
+  "sourceId": "3820",
+  "slug": "2015-the-5th-hong-kong-international-mobile-film-festival-and-awards",
+  "title": "2015 - The 5th Hong Kong International Mobile Film Festival and Awards",
+  "publishedAt": "2015-01-01T08:38:55+00:00",
+  "modifiedAt": "2020-02-20T08:41:29+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "The Project hosted since 2007, with the funding support from Create Hong Kong of HKSAR Government. With activities including production contest, seminar and workshops, the festival aims to contribute to the industry development through (1) Introducing local talents and their quality mobile videos to the international platforms to encourage mobile contents developments; (2) Broadening the horizons of local talents by facilitating the experience and culture exchanges among excellent filmmakers around the world; (3) Enhancing public awareness of using mobile devices for daily enjoyment",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2014HKMFF.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/e407c2bb127b5fc6.jpg",
+      "originalPath": "/images/news-archive/original/e407c2bb127b5fc6.png",
+      "sha256": "e407c2bb127b5fc60cd2837e64004df869ba71fac3c70a487b24836ea45622ff",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The Project hosted since 2007, with the funding support from Create Hong Kong of HKSAR Government. With activities including production contest, seminar and workshops, the festival aims to contribute to the industry development through (1) Introducing local talents and their quality mobile videos to the international platforms to encourage mobile contents developments; (2) Broadening the horizons of local talents by facilitating the experience and culture exchanges among excellent filmmakers around the world; (3) Enhancing public awareness of using mobile devices for daily enjoyment"
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "617676d2c8ee5c040a69a6e0fb045a1da9cffb9c96e91823d1e0fdf78144559a"
+}

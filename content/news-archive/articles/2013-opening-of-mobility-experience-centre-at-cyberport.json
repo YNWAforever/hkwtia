@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2013/01/2013-opening-of-mobility-experience-centre-at-cyberport",
+  "sourceId": "3529",
+  "slug": "2013-opening-of-mobility-experience-centre-at-cyberport",
+  "title": "2013 - Opening of Mobility Experience Centre at Cyberport",
+  "publishedAt": "2013-01-01T04:07:28+00:00",
+  "modifiedAt": "2020-02-20T08:07:07+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "With the support of Cyberport, WDC is renovated as Mobility Experience Centre (MEC) in 2013. The establishment of MEC aims to provide a space for public to experience advanced mobile devices, and also highlights the illustrious accomplishments Hong Kong has achieved in mobile technology. Outstanding and award-winning applications and wireless technology-related products developed by local IT companies are showcasing in the Centre.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2013/01/902576_358199000946799_1828693650_o-1024x684-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/c4f9ab44b887e38b.jpg",
+      "originalPath": "/images/news-archive/original/c4f9ab44b887e38b.jpg",
+      "sha256": "c4f9ab44b887e38b03cf595edd1ba8e1c3dc2ac19bb1c149e45fccfc086e2654",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "With the support of Cyberport, WDC is renovated as Mobility Experience Centre (MEC) in 2013. The establishment of MEC aims to provide a space for public to experience advanced mobile devices, and also highlights the illustrious accomplishments Hong Kong has achieved in mobile technology. Outstanding and award-winning applications and wireless technology-related products developed by local IT companies are showcasing in the Centre."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "38a834b20e5e4496a115f9803a93efd99c52be75419f67746d3fa435a918503a"
+}

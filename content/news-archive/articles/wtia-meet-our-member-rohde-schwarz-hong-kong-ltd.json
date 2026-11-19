@@ -1,0 +1,201 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2016/12/wtia-meet-our-member-%E7%BE%85%E5%BE%B7%E8%88%87%E6%96%BD%E7%93%A6%E8%8C%A8%E9%A6%99%E6%B8%AF%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8-rohde-schwarz-hong-kong-ltd",
+  "sourceId": "3709",
+  "slug": "wtia-meet-our-member-rohde-schwarz-hong-kong-ltd",
+  "title": "WTIA Meet Our Member – 羅德與施瓦茨香港有限公司 Rohde & Schwarz (Hong Kong) Ltd.",
+  "publishedAt": "2016-12-28T06:12:34+00:00",
+  "modifiedAt": "2020-02-18T06:22:55+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Meet our Members"
+  ],
+  "collection": "review-candidate",
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "專訪：董事總經理 Frank Wong 王鴻 (Rohde & Schwarz Hong Kong Limited 羅德與施瓦茨香港有限公司)\nhttps://www.rohde-schwarz.com/hk/\nRohde & Schwarz Hong Kong Limited辦公室位於香港科學園無線電中心，單看其所在位置便能感覺與我們香港無線科技商有某種聯繫。\n「Rohde & Schwarz，很多人誤以為是賣藥的。」董事總經理Frank如是說。的而且確，Rohde & Schwarz這名字和某R字頭的藥廠有點相似。\nRohde和Schwarz其實是兩位創辦人的名字，公司1933年於德國創立，成立至今一直以來都以無線科技為主要業務，總部設在德國慕尼黑，業務分佈於全球超過70國家及地區，是全球最大的電子和無線流動通訊測試設備廠商之一。而香港的分公司則於2006年成立，Frank現在主要負責港、澳、台地區的業務。\n\n圖: Rohde & Schwarz Hong Kong Limited 董事總經理 Frank Wong\nRohde & Schwarz主要有五大業務範疇：\n測試與測量\n廣播與媒體\n安全通訊\n網絡安全\n無線電監測\n從以上幾點可看到Rohde & Schwarz的業務廣闊，我們試試從一些實際的例子了解他們的工作。香港業務方面，一些例子包括「香港電台電視31」慈雲山發射站內的發射機、有自己研發的LTE-Advanced檢測儀、香港生產力促進局有購買他們的頻譜分析儀、香港海事處亦有使用他們的船隻航行監察服務系統等等。其他產品包括電影後製壓縮打包系統，《阿凡達》、《哈比人》及Netflix某些節目亦有使用Rohde和Schwarz的產品進行製作。德國總公司則剛推出了新型的機場安檢儀器，開拓不同市場。\nFrank憶述，Rohde & Schwarz的起飛是在2G至3G及3G至4G兩個年代。在2G剛起步的年代，流動通訊在不同國家地區有不同標準。作為一家德國公司，Rohde & Schwarz理所當然地配合歐洲的標準，以歐洲國家制定的GSM制式作研發基礎，為手機廠製作GSM System Simulator作產品檢測，成為當時為數不多提供GSM檢測儀器的公司。隨著時代發展，GSM於芸芸制式中成為全球廣泛通用的標準，此機遇為公司帶來極大盈利，讓Rohde & Schwarz迎來第一個起飛點。同時，2G年代的經驗亦讓他們有更好準備，為日後3G及4G發展打好基礎。\n20多年過去，現今4G已經發展成熟，不少人甚至已經在提及5G的發展及可能性，Rohde和Schwarz在無線流動通訊測試設備有豐富經驗，他們又怎樣迎接5G年代的來臨呢？Frank認為5G是全新的技術，公司當然會著手準備5G的發展，在海外及國內亦簽訂一些合作計劃。但5G現在仍在發展測試及討論階段，相信要商業化仍有一段長時間。始終現階段4G網絡用量仍未飽和，中間應會經歷4.5G的年代，才有需要在大眾層面上應用到5G技術。\n在物聯網 (Internet of Things, IOT)等全新應用範疇的驅動下，無線通訊科技相信會經歷一場巨大的變革。但Rohde & Schwarz在這 80多年來累積的經驗及技術，相信能讓他們迎接無線通訊各種規新範所帶來的挑戰，我們亦衷心希望他們的研發能推動業界和科技的發展。",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/RS.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/1752f0ff85e495b3.jpg",
+      "originalPath": "/images/news-archive/original/1752f0ff85e495b3.jpg",
+      "sha256": "1752f0ff85e495b30bf2b2b3e06f5440a1462d5cb381657f6410263e8371f5df",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown",
+      "consent": "open-member-portrait"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "專訪：董事總經理 Frank Wong 王鴻 (Rohde & Schwarz Hong Kong Limited 羅德與施瓦茨香港有限公司)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://www.rohde-schwarz.com/hk/",
+          "children": [
+            {
+              "type": "text",
+              "text": "https://www.rohde-schwarz.com/hk/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Rohde & Schwarz Hong Kong Limited辦公室位於香港科學園無線電中心，單看其所在位置便能感覺與我們香港無線科技商有某種聯繫。"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "「Rohde & Schwarz，很多人誤以為是賣藥的。」董事總經理Frank如是說。的而且確，Rohde & Schwarz這名字和某R字頭的藥廠有點相似。"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Rohde和Schwarz其實是兩位創辦人的名字，公司1933年於德國創立，成立至今一直以來都以無線科技為主要業務，總部設在德國慕尼黑，業務分佈於全球超過70國家及地區，是全球最大的電子和無線流動通訊測試設備廠商之一。而香港的分公司則於2006年成立，Frank現在主要負責港、澳、台地區的業務。"
+        }
+      ]
+    },
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/RS-1024x769.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/7fd9fbaeb8aac496.jpg",
+      "originalPath": "/images/news-archive/original/7fd9fbaeb8aac496.jpg",
+      "sha256": "7fd9fbaeb8aac4963eeb48afbf1aa80e0bb079620d3248f3171bdba87c20b462",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown",
+      "consent": "open-member-portrait"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "em",
+          "children": [
+            {
+              "type": "text",
+              "text": "圖: Rohde & Schwarz Hong Kong Limited 董事總經理 Frank Wong"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Rohde & Schwarz主要有五大業務範疇："
+        },
+        {
+          "type": "text",
+          "text": " "
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          {
+            "type": "text",
+            "text": "測試與測量"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "廣播與媒體"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "安全通訊"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "網絡安全"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "無線電監測"
+          }
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "從以上幾點可看到Rohde & Schwarz的業務廣闊，我們試試從一些實際的例子了解他們的工作。香港業務方面，一些例子包括「香港電台電視31」慈雲山發射站內的發射機、有自己研發的LTE-Advanced檢測儀、香港生產力促進局有購買他們的頻譜分析儀、香港海事處亦有使用他們的船隻航行監察服務系統等等。其他產品包括電影後製壓縮打包系統，《阿凡達》、《哈比人》及Netflix某些節目亦有使用Rohde和Schwarz的產品進行製作。德國總公司則剛推出了新型的機場安檢儀器，開拓不同市場。"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Frank憶述，Rohde & Schwarz的起飛是在2G至3G及3G至4G兩個年代。在2G剛起步的年代，流動通訊在不同國家地區有不同標準。作為一家德國公司，Rohde & Schwarz理所當然地配合歐洲的標準，以歐洲國家制定的GSM制式作研發基礎，為手機廠製作GSM System Simulator作產品檢測，成為當時為數不多提供GSM檢測儀器的公司。隨著時代發展，GSM於芸芸制式中成為全球廣泛通用的標準，此機遇為公司帶來極大盈利，讓Rohde & Schwarz迎來第一個起飛點。同時，2G年代的經驗亦讓他們有更好準備，為日後3G及4G發展打好基礎。"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "20多年過去，現今4G已經發展成熟，不少人甚至已經在提及5G的發展及可能性，Rohde和Schwarz在無線流動通訊測試設備有豐富經驗，他們又怎樣迎接5G年代的來臨呢？Frank認為5G是全新的技術，公司當然會著手準備5G的發展，在海外及國內亦簽訂一些合作計劃。但5G現在仍在發展測試及討論階段，相信要商業化仍有一段長時間。始終現階段4G網絡用量仍未飽和，中間應會經歷4.5G的年代，才有需要在大眾層面上應用到5G技術。"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "在物聯網 (Internet of Things, IOT)等全新應用範疇的驅動下，無線通訊科技相信會經歷一場巨大的變革。但Rohde & Schwarz在這 80多年來累積的經驗及技術，相信能讓他們迎接無線通訊各種規新範所帶來的挑戰，我們亦衷心希望他們的研發能推動業界和科技的發展。"
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "71cf978c695ec1035f03d0d35d9cffb535ee642896912722c9e6b13c1c4171c3"
+}

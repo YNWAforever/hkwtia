@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2020/01/2020-hong-kong-ict-awards-ict-startup-award",
+  "sourceId": "4396",
+  "slug": "2020-hong-kong-ict-awards-ict-startup-award",
+  "title": "2020 - Hong Kong ICT Awards – ICT Startup Award",
+  "publishedAt": "2020-01-01T08:33:04+00:00",
+  "modifiedAt": "2020-03-10T08:34:41+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, ICT Startup Award aims at discovering and recognising the outstanding local ICT startup companies which focus on software, hardware and social innovation areas and, reward their distinguished development based on its growth, innovation, creativity, functionality, market potential and performance.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2020-ICT-Awards-scaled.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/325491b52694f463.jpg",
+      "originalPath": "/images/news-archive/original/325491b52694f463.jpg",
+      "sha256": "325491b52694f46319a8281b99216cd9a302f19806dfa1625557dbf9997a2a06",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Supported by Office of the Government Chief Information Officer (OGCIO) and organized by WTIA, ICT Startup Award aims at discovering and recognising the outstanding local ICT startup companies which focus on software, hardware and social innovation areas and, reward their distinguished development based on its growth, innovation, creativity, functionality, market potential and performance."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "57e9646219fdbfc2de9acd19ad605f191207bf2ddca2f2b04c38d739bf344658"
+}

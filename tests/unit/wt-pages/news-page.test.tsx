@@ -53,15 +53,18 @@ describe("News page — status labels, research quality, subscribe", () => {
     render(await NewsPage({params: Promise.resolve({locale: "en"})}));
 
     expect(screen.getByRole("navigation", {name: /breadcrumb/i})).toBeInTheDocument();
+    const {archiveCards} = await import("@/lib/news/archive-catalog");
+    const archiveCount = archiveCards("en").filter((post) => post.slug !== newsRow.slug).length;
     const grid = document.querySelector(".archive-grid");
     expect(grid).not.toBeNull();
-    expect(grid?.querySelectorAll(":scope > article")).toHaveLength(1);
+    expect(grid?.querySelectorAll(":scope > article")).toHaveLength(Math.min(12, 1 + archiveCount));
+    expect(within(grid as HTMLElement).getByRole("link", {name: "News item"})).toBeInTheDocument();
     // Scoped to the grid: News.eyebrow and News.breadcrumbCurrent are both "News" in the
     // English bundle (same literal collision the PageHero eyebrow and breadcrumb already share
     // elsewhere in this design programme), so an unscoped screen.getAllByText also picks up the
     // hero's eyebrow and breadcrumb text. The test's actual intent -- one distinguishing status
     // label per card within the listing -- only needs the grid's own text scoped via `within`.
-    expect(within(grid as HTMLElement).getAllByText(bundles.en.News.statusNews)).toHaveLength(1);
+    expect(within(grid as HTMLElement).getAllByText(bundles.en.News.statusNews).length).toBeGreaterThan(0);
     expect(within(grid as HTMLElement).queryByText("Build Log")).toBeNull();
     expect(document.querySelector(".news-quality-panel")).not.toBeNull();
     expect(screen.getByText(bundles.en.News.quality.title)).toBeInTheDocument();

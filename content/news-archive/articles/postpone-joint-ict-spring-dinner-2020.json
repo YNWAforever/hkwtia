@@ -1,0 +1,59 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2020/03/postpone-joint-ict-spring-dinner-2020-%E9%A6%99%E6%B8%AF%E8%B3%87%E8%A8%8A%E5%8F%8A%E9%80%9A%E8%A8%8A%E7%A7%91%E6%8A%80%E6%A5%AD%E7%95%8C-%E5%BA%9A%E5%AD%90%E9%BC%A0%E5%B9%B4%E8%81%AF%E5%90%88",
+  "sourceId": "4717",
+  "slug": "postpone-joint-ict-spring-dinner-2020",
+  "title": "[POSTPONE] Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗)",
+  "publishedAt": "2020-03-23T03:15:00+00:00",
+  "modifiedAt": "2020-03-23T03:18:38+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "News"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en",
+    "zh-Hant"
+  ],
+  "plainText": "Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗) which will be organized by Hong Kong Information Technology Federation (HKITF), Hong Kong Internet Service Providers Association (HKISPA) and Hong Kong Wireless Technology Industry Association (WTIA), has been postponed until further notice.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/SPRING-DINNER.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/0161f09e3d0bc3fc.jpg",
+      "originalPath": "/images/news-archive/original/0161f09e3d0bc3fc.png",
+      "sha256": "0161f09e3d0bc3fc8268c74c34f8dfef87293427acf6dffa8c6f877fc301ae52",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Joint ICT Spring Dinner 2020 (香港資訊及通訊科技業界 庚子鼠年聯合春茗) which will be organized by Hong Kong Information Technology Federation (HKITF), Hong Kong Internet Service Providers Association (HKISPA) and Hong Kong Wireless Technology Industry Association (WTIA), has been "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "postponed until further notice"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "6003fc6f4ef12145821cda8b8a4d12db445de1559e564f791950a6c2c8f73a90"
+}

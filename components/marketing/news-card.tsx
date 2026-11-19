@@ -12,6 +12,7 @@ export function NewsCard({
   publishedAt,
   author,
   statusLabel,
+  titleLang,
 }: Readonly<{
   locale: AppLocale;
   slug: string;
@@ -19,6 +20,7 @@ export function NewsCard({
   publishedAt: Date | string;
   author?: string;
   statusLabel: string;
+  titleLang?: "en" | "zh-Hant";
 }>) {
   const date = new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
@@ -29,7 +31,7 @@ export function NewsCard({
     <article>
       <StatusLabel>{statusLabel}</StatusLabel>
       <h2>
-        <Link href={localizedPath(locale, `/news/${slug}`)}>{title}</Link>
+        <Link href={localizedPath(locale, `/news/${slug}`)} lang={titleLang}>{title}</Link>
       </h2>
       <p>
         <span>{date}</span>

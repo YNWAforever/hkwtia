@@ -1,0 +1,466 @@
+{
+  "plainChars": {
+    "https://hkwtia.org/2001/01/2001-establishment-of-wtia": 213,
+    "https://hkwtia.org/2002/01/2002-the-1st-wtia-panel-discussion-inter-operator-sms": 197,
+    "https://hkwtia.org/2003/01/2003-opening-of-hong-kong-wireless-development-centre-at-cyberport": 574,
+    "https://hkwtia.org/2003/01/2003-the-1st-wtia-awards-j2me-open-2003": 177,
+    "https://hkwtia.org/2003/01/2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong": 395,
+    "https://hkwtia.org/2005/01/2005-1st-hong-kong-wireless-technology-excellence-awards": 197,
+    "https://hkwtia.org/2005/01/2005-hong-kong-international-wireless-conference-2005": 232,
+    "https://hkwtia.org/2005/01/2005-launching-of-3g-cyberport-project": 306,
+    "https://hkwtia.org/2005/01/2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform": 303,
+    "https://hkwtia.org/2005/01/2005-the-1st-wtia-sms-donation-campaign": 226,
+    "https://hkwtia.org/2006/01/2006-hong-kong-ict-awards-best-ubiquitous-award": 393,
+    "https://hkwtia.org/2007/01/2007-hong-kong-mobile-film-festival": 311,
+    "https://hkwtia.org/2013/01/2013-asia-smartphone-contest": 402,
+    "https://hkwtia.org/2013/01/2013-opening-of-mobility-experience-centre-at-cyberport": 434,
+    "https://hkwtia.org/2014/01/2014-made-in-hong-kong-smartphone-apps-project": 608,
+    "https://hkwtia.org/2014/01/2014-wi-fi-hk": 404,
+    "https://hkwtia.org/2015/01/2015-asia-smartphone-apps-contest-summit-2015": 387,
+    "https://hkwtia.org/2015/01/2015-hong-kong-ict-awards-2015-best-mobile-apps-award": 352,
+    "https://hkwtia.org/2015/01/2015-safewifi-campaign": 345,
+    "https://hkwtia.org/2015/01/2015-the-5th-hong-kong-international-mobile-film-festival-and-awards": 589,
+    "https://hkwtia.org/2016/01/2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016": 387,
+    "https://hkwtia.org/2016/01/2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony": 456,
+    "https://hkwtia.org/2016/01/2016-legco-information-technology-constituency-election-forum": 385,
+    "https://hkwtia.org/2016/01/2016-safewifi-campaign": 345,
+    "https://hkwtia.org/2017/01/2017-asia-smart-app-summit-cum-award-presentation-ceremony": 614,
+    "https://hkwtia.org/2017/01/2017-connected-city-conference": 399,
+    "https://hkwtia.org/2017/01/2017-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china": 241,
+    "https://hkwtia.org/2017/01/2017-hong-kong-ict-awards-best-mobile-app-award": 352,
+    "https://hkwtia.org/2018/01/2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china": 241,
+    "https://hkwtia.org/2018/01/2018-meeting-with-yc-partner-eric-migicovsky-how-to-apply-successfully-for-y-combinator": 567,
+    "https://hkwtia.org/2018/01/2018-taipei-iot-business-delegation-tour": 642,
+    "https://hkwtia.org/2019/01/2019-a-5g-revolution-what-does-it-mean-for-me": 386,
+    "https://hkwtia.org/2019/01/2019-asia-smart-app-awards-2018-2019": 635,
+    "https://hkwtia.org/2019/01/2019-joint-ict-spring-dinner-2019": 301,
+    "https://hkwtia.org/2019/01/2019-techconnect-conference-festival": 749,
+    "https://hkwtia.org/2020/01/2020-hong-kong-ict-awards-ict-startup-award": 392,
+    "https://hkwtia.org/2020/04/%E6%96%B0%E8%81%9E%E7%A8%BF-%E7%96%AB%E6%83%85%E9%87%8D%E5%89%B5it%E4%B8%AD%E5%B0%8F%E4%BC%81-%E5%88%9D%E5%89%B5%E8%B3%87%E9%87%91%E9%8F%88%E6%96%B7%E8%A3%82%E6%80%A5%E9%A0%88%E6%95%91%E4%BA%A1": 1527,
+    "https://hkwtia.org/2022/09/new-term-of-executive-committee-2022-2024": 1396,
+    "https://hkwtia.org/2020/03/postpone-asia-smart-app-awards-2020": 1846,
+    "https://hkwtia.org/2020/03/postpone-hong-kong-ict-awards-2020-ict-startup-award": 431,
+    "https://hkwtia.org/2020/03/postpone-joint-ict-spring-dinner-2020-%E9%A6%99%E6%B8%AF%E8%B3%87%E8%A8%8A%E5%8F%8A%E9%80%9A%E8%A8%8A%E7%A7%91%E6%8A%80%E6%A5%AD%E7%95%8C-%E5%BA%9A%E5%AD%90%E9%BC%A0%E5%B9%B4%E8%81%AF%E5%90%88": 293,
+    "https://hkwtia.org/2020/03/postpone-tokyo-industry-4-0-training-programme": 205,
+    "https://hkwtia.org/2021/03/simcardregistration": 2096,
+    "https://hkwtia.org/2022/10/wtia-201st-anniversary-commemorative-book-%E9%A6%99%E6%B8%AF%E7%84%A1%E7%B7%9A%E7%A7%91%E6%8A%80%E5%95%86%E6%9C%8320%EF%BC%8B1%E9%80%B1%E5%B9%B4%E7%B4%80%E5%BF%B5%E7%89%B9%E5%88%8A": 867,
+    "https://hkwtia.org/2022/09/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner": 1211
+  },
+  "assets": {
+    "https://hkwtia.org/wp-content/uploads/2001/01/2001-The-Inauguration-of-WTIA-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/f1d62c72a06848df.jpg",
+      "originalPath": "/images/news-archive/original/f1d62c72a06848df.jpg",
+      "sha256": "f1d62c72a06848df535679106822b1aadebdb7419c153cdee35f300e3dca98b9"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/3d-scaled.jpg": {
+      "localPath": "/images/news-archive/display/8f4089f0d1574ed7.jpg",
+      "originalPath": "/images/news-archive/original/8f4089f0d1574ed7.jpg",
+      "sha256": "8f4089f0d1574ed719b2e85e79fed3072cab88357de8d3b15fba112c03d58bcb"
+    },
+    "https://hkwtia.org/wp-content/uploads/2003/01/WDC-OPening03-1024x686-1.jpg": {
+      "localPath": "/images/news-archive/display/baca52ac07da75f1.jpg",
+      "originalPath": "/images/news-archive/original/baca52ac07da75f1.jpg",
+      "sha256": "baca52ac07da75f10ebd60397beaf46cb84503e6c840ca6bd6abb25fd74cbe80"
+    },
+    "https://hkwtia.org/wp-content/uploads/2003/01/wlan-wardriving-1024x620-1.jpg": {
+      "localPath": "/images/news-archive/display/21895aedb241042d.jpg",
+      "originalPath": "/images/news-archive/original/21895aedb241042d.jpg",
+      "sha256": "21895aedb241042d9d6403c79d7ff2a67c4f6eb46f939cd5a4065e762486dd1f"
+    },
+    "https://hkwtia.org/wp-content/uploads/2005/01/1st-hk-excellence-1024x625-1.jpg": {
+      "localPath": "/images/news-archive/display/3cadca32c7c40eee.jpg",
+      "originalPath": "/images/news-archive/original/3cadca32c7c40eee.jpg",
+      "sha256": "3cadca32c7c40eee79804de33713c890f36345ebbab31282ba0ee1db46f27aa0"
+    },
+    "https://hkwtia.org/wp-content/uploads/2005/01/Seminar-2005-1024x712-1.jpg": {
+      "localPath": "/images/news-archive/display/13587c583f666081.jpg",
+      "originalPath": "/images/news-archive/original/13587c583f666081.jpg",
+      "sha256": "13587c583f666081309a66a118c3b61b0e29a47e7ce55bf2702ada2bdd0f5757"
+    },
+    "https://hkwtia.org/wp-content/uploads/2005/01/GZ-Centre-1024x768-1.jpg": {
+      "localPath": "/images/news-archive/display/cc8d6a5b23227033.jpg",
+      "originalPath": "/images/news-archive/original/cc8d6a5b23227033.jpg",
+      "sha256": "cc8d6a5b2322703306a8c064c0f9d675141c0f59987a1c5e7dad76584337fc2b"
+    },
+    "https://hkwtia.org/wp-content/uploads/2006/01/ICTAwards01.jpg": {
+      "localPath": "/images/news-archive/display/e55f67b234268e35.jpg",
+      "originalPath": "/images/news-archive/original/e55f67b234268e35.jpg",
+      "sha256": "e55f67b234268e35e96556677ffb9b2fbed0b2e4eb149f1b6b2246899538684d"
+    },
+    "https://hkwtia.org/wp-content/uploads/2007/01/2nd-HKMFF-Launching01-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/6a35b5d31429a5b5.jpg",
+      "originalPath": "/images/news-archive/original/6a35b5d31429a5b5.jpg",
+      "sha256": "6a35b5d31429a5b513950f7615099a5b4c482568bea4c3a6a2529349b5f0f688"
+    },
+    "https://hkwtia.org/wp-content/uploads/2013/01/1978490_525772187522812_9029582140716785616_o-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/e43293717dfbc44b.jpg",
+      "originalPath": "/images/news-archive/original/e43293717dfbc44b.jpg",
+      "sha256": "e43293717dfbc44b81273cd9b1a027b0d28d18d53724ca176111448560e04c56"
+    },
+    "https://hkwtia.org/wp-content/uploads/2013/01/902576_358199000946799_1828693650_o-1024x684-1.jpg": {
+      "localPath": "/images/news-archive/display/c4f9ab44b887e38b.jpg",
+      "originalPath": "/images/news-archive/original/c4f9ab44b887e38b.jpg",
+      "sha256": "c4f9ab44b887e38b03cf595edd1ba8e1c3dc2ac19bb1c149e45fccfc086e2654"
+    },
+    "https://hkwtia.org/wp-content/uploads/2014/01/10669026_572211736212190_588421535425640444_o-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/877503a487ae93a2.jpg",
+      "originalPath": "/images/news-archive/original/877503a487ae93a2.jpg",
+      "sha256": "877503a487ae93a2bb98ec78bc355a3e4ce1e7ac1c5541c0afdb1a6d2f318501"
+    },
+    "https://hkwtia.org/wp-content/uploads/2014/01/10548114_546835835416447_7807130283769467394_o-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/5c8e540834f9d3b1.jpg",
+      "originalPath": "/images/news-archive/original/5c8e540834f9d3b1.jpg",
+      "sha256": "5c8e540834f9d3b12d6b615efe167308a803145de751df085f03a6316ccb02a2"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2016-Wi-Fi.HK_.png": {
+      "localPath": "/images/news-archive/display/aa109f1899b88382.jpg",
+      "originalPath": "/images/news-archive/original/aa109f1899b88382.png",
+      "sha256": "aa109f1899b88382ff3e6016a1f654a6e284387bf3146e39753b1f120f3c2d2d"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Picture1.png": {
+      "localPath": "/images/news-archive/display/a5d455363173996a.jpg",
+      "originalPath": "/images/news-archive/original/a5d455363173996a.png",
+      "sha256": "a5d455363173996a6c493603e8fd9121541e9720e72fdc146a1876605af32c7d"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-%E2%80%93-Asia-Smart-App-Summit-cum-Award-Presentation-Ceremony-1-1.png": {
+      "localPath": "/images/news-archive/display/7772ba060ec41425.jpg",
+      "originalPath": "/images/news-archive/original/7772ba060ec41425.png",
+      "sha256": "7772ba060ec41425e71cb5e9d7e21572c168a117aa9f1c59edf6085ab24b0285"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-Hong-Kong-ICT-Awards-%E2%80%93-Best-Mobile-App-Award-1.png": {
+      "localPath": "/images/news-archive/display/4bff323982900fc9.jpg",
+      "originalPath": "/images/news-archive/original/4bff323982900fc9.png",
+      "sha256": "4bff323982900fc9dd0841b1ac7bebc058c3cc90d9fce89a6caba00a21de8508"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2018-Meet-with-Y-Combinator.png": {
+      "localPath": "/images/news-archive/display/cf7081e577505757.jpg",
+      "originalPath": "/images/news-archive/original/cf7081e577505757.png",
+      "sha256": "cf7081e5775057577031751657ad85f775aa00e4547b593c9e831be676c5bb8b"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2018-Taipei-Delegation-Tour-1.png": {
+      "localPath": "/images/news-archive/display/6f1edbd14df24dfa.jpg",
+      "originalPath": "/images/news-archive/original/6f1edbd14df24dfa.png",
+      "sha256": "6f1edbd14df24dfa2a008da4a62739aacb3b7bd17400a0309a9e23e85c78b731"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2019-%E2%80%93-A-5G-Revolution-What-does-it-mean-for-me_-1.png": {
+      "localPath": "/images/news-archive/display/dec2110e266d1f11.jpg",
+      "originalPath": "/images/news-archive/original/dec2110e266d1f11.png",
+      "sha256": "dec2110e266d1f113b629ac21daf8c576752e2d02881d13e6c6671a5a39ed6f6"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2019-%E2%80%93-Asia-Smart-App-Awards-2018_-2019-1-1.png": {
+      "localPath": "/images/news-archive/display/b9d0cda87eb26373.jpg",
+      "originalPath": "/images/news-archive/original/b9d0cda87eb26373.png",
+      "sha256": "b9d0cda87eb26373f1fa09cfffd9f3e7d8134c2da4e9fce4789c12ca81ad9233"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2019-TechConnect-Conference-_-Festival.png": {
+      "localPath": "/images/news-archive/display/0e8e2f8344647711.jpg",
+      "originalPath": "/images/news-archive/original/0e8e2f8344647711.png",
+      "sha256": "0e8e2f8344647711fe6fb1d75c382a4f3e39f13ca3fac638fc329d14187a06d6"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2020-ICT-Awards-scaled.jpg": {
+      "localPath": "/images/news-archive/display/325491b52694f463.jpg",
+      "originalPath": "/images/news-archive/original/325491b52694f463.jpg",
+      "sha256": "325491b52694f46319a8281b99216cd9a302f19806dfa1625557dbf9997a2a06"
+    },
+    "https://hkwtia.org/wp-content/uploads/2022/09/301379874_4923078111125509_7909433195082011540_n-e1663858227423.jpg": {
+      "localPath": "/images/news-archive/display/1cb732039200f2c9.jpg",
+      "originalPath": "/images/news-archive/original/1cb732039200f2c9.jpg",
+      "sha256": "1cb732039200f2c9ab6718bf6adc40ca602036b93e4b81b12c9292f87848f4d9"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/ICT-StartUp-1024x1024.png": {
+      "localPath": "/images/news-archive/display/6f75e822b37823f1.jpg",
+      "originalPath": "/images/news-archive/original/6f75e822b37823f1.png",
+      "sha256": "6f75e822b37823f17619bc91b3a3c09e2d949bde9cf47977cfb28fedfb51921a"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/SPRING-DINNER.png": {
+      "localPath": "/images/news-archive/display/0161f09e3d0bc3fc.jpg",
+      "originalPath": "/images/news-archive/original/0161f09e3d0bc3fc.png",
+      "sha256": "0161f09e3d0bc3fc8268c74c34f8dfef87293427acf6dffa8c6f877fc301ae52"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/TOKYO.png": {
+      "localPath": "/images/news-archive/display/8ad79e04a4f69207.jpg",
+      "originalPath": "/images/news-archive/original/8ad79e04a4f69207.png",
+      "sha256": "8ad79e04a4f69207d30cafa4fb8c25ea3353305c15c74a652353963b42951f1a"
+    },
+    "https://hkwtia.org/wp-content/uploads/2022/10/Screenshot-2022-10-11-at-12.21.19-PM-2.png": {
+      "localPath": "/images/news-archive/display/50704031b382b1e6.jpg",
+      "originalPath": "/images/news-archive/original/50704031b382b1e6.png",
+      "sha256": "50704031b382b1e6e31930f37f811dee06c559fa4296a13bc96c627a5240e5bf"
+    },
+    "https://hkwtia.org/wp-content/uploads/2022/09/21.jpg": {
+      "localPath": "/images/news-archive/display/798edc50b1dacf38.jpg",
+      "originalPath": "/images/news-archive/original/798edc50b1dacf38.jpg",
+      "sha256": "798edc50b1dacf3896738b6021780e33e328cecff596f55509cf581c611126f2"
+    },
+    "https://hkwtia.org/wp-content/uploads/2022/09/304987776_4955423924557594_1709697925414704627_n-1-770x1024.jpg": {
+      "localPath": "/images/news-archive/display/546f9ee068816a41.jpg",
+      "originalPath": "/images/news-archive/original/546f9ee068816a41.jpg",
+      "sha256": "546f9ee068816a41c7954127ffa21079a2990a3a376adccb849c1d8fd014e246"
+    },
+    "https://hkwtia.org/wp-content/uploads/2026/03/562333706_1252562953570355_3640544314971024985_n-3-1.jpg": {
+      "localPath": "/images/news-archive/display/5d3b1c8089c573d9.jpg",
+      "originalPath": "/images/news-archive/original/5d3b1c8089c573d9.jpg",
+      "sha256": "5d3b1c8089c573d9c834534b4e4c24909a148a5932194b0b84a8342c63d21642"
+    },
+    "https://hkwtia.org/wp-content/uploads/2024/09/1.jpg": {
+      "localPath": "/images/news-archive/display/30f71637e84b2237.jpg",
+      "originalPath": "/images/news-archive/original/30f71637e84b2237.jpg",
+      "sha256": "30f71637e84b2237dc9e16bb241a1035df5babd93cef05d535c23df4d01b0a85"
+    },
+    "https://hkwtia.org/wp-content/uploads/2026/03/DSC08503-1-scaled.jpg": {
+      "localPath": "/images/news-archive/display/3b19bd2f2b80b42a.jpg",
+      "originalPath": "/images/news-archive/original/3b19bd2f2b80b42a.jpg",
+      "sha256": "3b19bd2f2b80b42a2ff7f6c07e6ac01033fe53977befe56e31adbcb44d92f131"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/04/20200409_IT界要求援助記招05_羅國明（香港無線科技商會主席）.jpg": {
+      "localPath": "/images/news-archive/display/689a6aaa0161bc42.jpg",
+      "originalPath": "/images/news-archive/original/689a6aaa0161bc42.jpg",
+      "sha256": "689a6aaa0161bc42b83663d2a4a091c134010c0aabf632a935c2098a920dcea2"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/ICT-StartUp.png": {
+      "localPath": "/images/news-archive/display/5c56f5444f826e93.jpg",
+      "originalPath": "/images/news-archive/original/5c56f5444f826e93.png",
+      "sha256": "5c56f5444f826e93e844ff2abb230f62de1a2c8ca7fc5dd7a954c4069c0212b4"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/ASA2020-banner_OP_02-scaled.jpg": {
+      "localPath": "/images/news-archive/display/74dd9dd2e9b2b778.jpg",
+      "originalPath": "/images/news-archive/original/74dd9dd2e9b2b778.jpg",
+      "sha256": "74dd9dd2e9b2b778aa9ec1d8dd0565615a1432b7e5678d23346fe80274e71dc1"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2020-ASA--scaled.jpg": {
+      "localPath": "/images/news-archive/display/3bc5bf29673e1a3c.jpg",
+      "originalPath": "/images/news-archive/original/3bc5bf29673e1a3c.jpg",
+      "sha256": "3bc5bf29673e1a3c944547f6182ffa29451d353e4a191e16a542e4b5b36bc9fc"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Joint-ICT-Spring-Dinner-2019-1.png": {
+      "localPath": "/images/news-archive/display/92bf24b9f2a49e69.jpg",
+      "originalPath": "/images/news-archive/original/92bf24b9f2a49e69.png",
+      "sha256": "92bf24b9f2a49e69643bd5669f959d235e3f5c229cedc7bcd9188f016ad2fabe"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/03/2018-–-Develop-Market-Network-of-Internet-of-Vehicles-IoV-in-Mainland-China-.png": {
+      "localPath": "/images/news-archive/display/dd2f64486c94dc7d.jpg",
+      "originalPath": "/images/news-archive/original/dd2f64486c94dc7d.png",
+      "sha256": "dd2f64486c94dc7d62599eb71546d45ad9c50c561b102a9faaaad0bc75d3ae45"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-Connected-City-Conference-1.png": {
+      "localPath": "/images/news-archive/display/09b4a711e1aae9d0.jpg",
+      "originalPath": "/images/news-archive/original/09b4a711e1aae9d0.png",
+      "sha256": "09b4a711e1aae9d0724361c56c101ab7ff93ae57956967de336c083184cfa127"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2017-–-IoV-Mission-Tour-to-Chongqing-1.png": {
+      "localPath": "/images/news-archive/display/f4ef37a4d64301a9.jpg",
+      "originalPath": "/images/news-archive/original/f4ef37a4d64301a9.png",
+      "sha256": "f4ef37a4d64301a9110565d6e7a49f6a4a8543b92c8f7c3215ec26570aaea399"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Picture1-1.png": {
+      "localPath": "/images/news-archive/display/6934d6a689ef3f79.jpg",
+      "originalPath": "/images/news-archive/original/6934d6a689ef3f79.png",
+      "sha256": "6934d6a689ef3f79e260879a4fbe6bef8bb8fd6bee77983fb15bacf677dc2533"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2016-SafeWiFi.png": {
+      "localPath": "/images/news-archive/display/681f503088509aaa.jpg",
+      "originalPath": "/images/news-archive/original/681f503088509aaa.png",
+      "sha256": "681f503088509aaa845f95837cf91cdfedbcc4b5cb486d59f55a0380ab402466"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2015-SafeWiFi.png": {
+      "localPath": "/images/news-archive/display/31e4b15f9f75a146.jpg",
+      "originalPath": "/images/news-archive/original/31e4b15f9f75a146.png",
+      "sha256": "31e4b15f9f75a146a1dee87bae50196df22894f9c01aef8774b813483ab09058"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2015-ICT-Awards.png": {
+      "localPath": "/images/news-archive/display/92adbe5cc1459bb0.jpg",
+      "originalPath": "/images/news-archive/original/92adbe5cc1459bb0.png",
+      "sha256": "92adbe5cc1459bb04df031f50ea64243f7dd548fa3df8d12c2e54d2098254597"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/ASA-2014.png": {
+      "localPath": "/images/news-archive/display/9a8fa410c8be0a79.jpg",
+      "originalPath": "/images/news-archive/original/9a8fa410c8be0a79.png",
+      "sha256": "9a8fa410c8be0a792498edc08b6061d8142a704a53756b350f79abbea2859d11"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/2014HKMFF.png": {
+      "localPath": "/images/news-archive/display/e407c2bb127b5fc6.jpg",
+      "originalPath": "/images/news-archive/original/e407c2bb127b5fc6.png",
+      "sha256": "e407c2bb127b5fc60cd2837e64004df869ba71fac3c70a487b24836ea45622ff"
+    },
+    "https://hkwtia.org/wp-content/uploads/2022/10/annualreport_preview.pdf": {
+      "localPath": "/files/news-archive/19b58667b0f39029.pdf",
+      "originalPath": null,
+      "sha256": "19b58667b0f39029855cfeae27802580aba8590b749f446dc162ccd4c834e82f"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/11/The-Strategies-for-Expanding-Global-IoT-Markets1.pdf": {
+      "localPath": "/files/news-archive/294d4968e0ecaf45.pdf",
+      "originalPath": null,
+      "sha256": "294d4968e0ecaf453b7a77a6a4600d0edbd2b837f8d6d97142869416c291d452"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/10/Survey-for-guidebook.pdf": {
+      "localPath": "/files/news-archive/1f8387cd0feb1a0d.pdf",
+      "originalPath": null,
+      "sha256": "1f8387cd0feb1a0d54d8011214961b01e511bb863f1a1ecea4542ccbdf9bde8d"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/09/Keith-Li-Brief-intro-to-UX.pdf": {
+      "localPath": "/files/news-archive/c89e38384978b900.pdf",
+      "originalPath": null,
+      "sha256": "c89e38384978b9005efbad57cc8bcccd8d53e2aaa739b56f4bd128050620ff84"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/09/Deck_UIUX_MoreThanYouThink_V4.pdf": {
+      "localPath": "/files/news-archive/6b3daf898bdd1573.pdf",
+      "originalPath": null,
+      "sha256": "6b3daf898bdd157358255b1c1d6df8bbd9de4f9905ebb74e7ffb91fd5ea573bd"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/Photo-1-scaled.jpg": {
+      "localPath": "/images/news-archive/display/f7a3cf49dffa074c.jpg",
+      "originalPath": "/images/news-archive/original/f7a3cf49dffa074c.jpg",
+      "sha256": "f7a3cf49dffa074cc2a4b39e876ef24086695279f06ffb3451bfd83139c7d63b"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/Photo-2-scaled.jpg": {
+      "localPath": "/images/news-archive/display/f9415cb71414e158.jpg",
+      "originalPath": "/images/news-archive/original/f9415cb71414e158.jpg",
+      "sha256": "f9415cb71414e158a55fbc82a80d93d01b8eaf27237ea8958f968b9f2e1b9957"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/Photo-3.jpeg": {
+      "localPath": "/images/news-archive/display/aa6f4bbd74274afb.jpg",
+      "originalPath": "/images/news-archive/original/aa6f4bbd74274afb.jpg",
+      "sha256": "aa6f4bbd74274afbd577a018a7acf2fff8db49a81c30aa5791a0dbc42dadcb3f"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/Photo-4.jpeg": {
+      "localPath": "/images/news-archive/display/a11973ec213f4237.jpg",
+      "originalPath": "/images/news-archive/original/a11973ec213f4237.jpg",
+      "sha256": "a11973ec213f423754a214b7001377a2b9dbc44af97acde368af0d62b3e7e526"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/Photo-5.jpg": {
+      "localPath": "/images/news-archive/display/c3319ef9700ee600.jpg",
+      "originalPath": "/images/news-archive/original/c3319ef9700ee600.jpg",
+      "sha256": "c3319ef9700ee6006fd7362d3aaf9efa4286d8f137e7d48537dd23bf1537e6b6"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-launches-5G-service-with-the-citys-widest-network-coverage-to-spearhead-smart-city-development-in-Hong-Kong.pdf": {
+      "localPath": "/files/news-archive/7dc16ad413c59b2c.pdf",
+      "originalPath": null,
+      "sha256": "7dc16ad413c59b2c19cda35d1da9f77c79f089776940d2cf91c17ef9bffa1e02"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/DSC04236-chosen-800x609.jpg": {
+      "localPath": "/images/news-archive/display/da31a23227631166.jpg",
+      "originalPath": "/images/news-archive/original/da31a23227631166.jpg",
+      "sha256": "da31a232276311669a9149f36bcdbf4c8a5cc7b9d6455357cc34c22d287bb8c2"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/DSC04236-chosen.jpg": {
+      "localPath": "/images/news-archive/display/2c70dc9bebc0b70e.jpg",
+      "originalPath": "/images/news-archive/original/2c70dc9bebc0b70e.jpg",
+      "sha256": "2c70dc9bebc0b70e90ac6c7da7edd02d489fc6c62b43972cf824f5061c24bd47"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Screenshot_1-1-1024x413-1.jpg": {
+      "localPath": "/images/news-archive/display/d25cc67f59e3f520.jpg",
+      "originalPath": "/images/news-archive/original/d25cc67f59e3f520.jpg",
+      "sha256": "d25cc67f59e3f5203d8d730e0a378148f62d64fd1c3ef0948f4a630ee14701e4"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Pixel-Networks.jpg": {
+      "localPath": "/images/news-archive/display/c7dba5b96970cad1.jpg",
+      "originalPath": "/images/news-archive/original/c7dba5b96970cad1.jpg",
+      "sha256": "c7dba5b96970cad1d6d26ff044b37ae778f49762274dc349d690e7ff7f1428c3"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/20643422_1300597410066619_149287315914085417_o-1024x768-1.jpg": {
+      "localPath": "/images/news-archive/display/4fad1c8bdce1e1e0.jpg",
+      "originalPath": "/images/news-archive/original/4fad1c8bdce1e1e0.jpg",
+      "sha256": "4fad1c8bdce1e1e0dfdf89aeb65de6786a5e0a10ee6f03accf9e0a50d5f186dc"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/20626672_1300597533399940_4575181880632892801_o-e1663654361897.jpg": {
+      "localPath": "/images/news-archive/display/3c656b669ae7bac3.jpg",
+      "originalPath": "/images/news-archive/original/3c656b669ae7bac3.jpg",
+      "sha256": "3c656b669ae7bac30b4a8b47611e952e8925a50564fd28c5512a16f16b8196cf"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Playnote-Grand-Award-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/40feef1a7ac60809.jpg",
+      "originalPath": "/images/news-archive/original/40feef1a7ac60809.jpg",
+      "sha256": "40feef1a7ac608090d09cb88dbe06e81482a0b6ed1f77d9f6499fcafb4fdec65"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Eric-Yung-Playnote-2-1024x683-1.jpg": {
+      "localPath": "/images/news-archive/display/0adb930174e9d4b1.jpg",
+      "originalPath": "/images/news-archive/original/0adb930174e9d4b1.jpg",
+      "sha256": "0adb930174e9d4b10285ef43d326068dd71685eeef88012ba5ec2235d361f0b8"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Playnote-Grand-Award-in-Gala-Dinner-1024x769-1.jpg": {
+      "localPath": "/images/news-archive/display/21f1ceb03401ef72.jpg",
+      "originalPath": "/images/news-archive/original/21f1ceb03401ef72.jpg",
+      "sha256": "21f1ceb03401ef72b290c9c843c2f4d6f0476dab983a9044a11f409a58cb0463"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Eric-Yung-Playnote.jpg": {
+      "localPath": "/images/news-archive/display/d05a9e98efc139d2.jpg",
+      "originalPath": "/images/news-archive/original/d05a9e98efc139d2.jpg",
+      "sha256": "d05a9e98efc139d26ce0569dac2209c101827ac8f4e30ce10eb7077d90d4a32c"
+    },
+    "https://hkwtia.org/wp-content/uploads/2017/04/Tania_2013.png": {
+      "localPath": "/images/news-archive/display/85a30a1330fb5ec9.jpg",
+      "originalPath": "/images/news-archive/original/85a30a1330fb5ec9.png",
+      "sha256": "85a30a1330fb5ec9d48ee8cff73c799b5ec11082e7d4fc969605982c8926c74b"
+    },
+    "https://hkwtia.org/wp-content/uploads/2017/04/Yahoo-1024x325-1.png": {
+      "localPath": "/images/news-archive/display/e1987639a385ddf8.jpg",
+      "originalPath": "/images/news-archive/original/e1987639a385ddf8.png",
+      "sha256": "e1987639a385ddf813999e059e55eb844fc871f35fde4b32a891ddb9a80708a9"
+    },
+    "https://hkwtia.org/wp-content/uploads/2017/04/Image00001-768x512-1.jpg": {
+      "localPath": "/images/news-archive/display/0a8cb55767e3ccda.jpg",
+      "originalPath": "/images/news-archive/original/0a8cb55767e3ccda.jpg",
+      "sha256": "0a8cb55767e3ccda87ab1b276d2ad61e1a4f541b00fecd5b48e6a111bd72c6fe"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/RS-1024x769.jpg": {
+      "localPath": "/images/news-archive/display/7fd9fbaeb8aac496.jpg",
+      "originalPath": "/images/news-archive/original/7fd9fbaeb8aac496.jpg",
+      "sha256": "7fd9fbaeb8aac4963eeb48afbf1aa80e0bb079620d3248f3171bdba87c20b462"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/RS.jpg": {
+      "localPath": "/images/news-archive/display/1752f0ff85e495b3.jpg",
+      "originalPath": "/images/news-archive/original/1752f0ff85e495b3.jpg",
+      "sha256": "1752f0ff85e495b30bf2b2b3e06f5440a1462d5cb381657f6410263e8371f5df"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/office-3-768x512-1.jpg": {
+      "localPath": "/images/news-archive/display/a7d412914f5ca770.jpg",
+      "originalPath": "/images/news-archive/original/a7d412914f5ca770.jpg",
+      "sha256": "a7d412914f5ca7701286e3e2e6ad73d1a046d17cca764031cda72dbb17edec53"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/HK_team_1-768x512-1.jpg": {
+      "localPath": "/images/news-archive/display/4f955e590f86c7fa.jpg",
+      "originalPath": "/images/news-archive/original/4f955e590f86c7fa.jpg",
+      "sha256": "4f955e590f86c7fae149656e6638c4b82012c051d2bdb39bd05897d6270d11ea"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/02/Vpon-Arthur-Chan-scaled.jpg": {
+      "localPath": "/images/news-archive/display/71e891498c73cbba.jpg",
+      "originalPath": "/images/news-archive/original/71e891498c73cbba.jpg",
+      "sha256": "71e891498c73cbba85155c72a639bd3ecf1b1a0cb98a65a1366266df6dd63a97"
+    },
+    "https://hkwtia.org/wp-content/uploads/2016/09/Cypher-Martin-Daniel-2-768x758-1.jpg": {
+      "localPath": "/images/news-archive/display/a16ecd2db197876b.jpg",
+      "originalPath": "/images/news-archive/original/a16ecd2db197876b.jpg",
+      "sha256": "a16ecd2db197876bb41c40e3d9dcc0945db2f9e8535677afc72964eb9950daa5"
+    },
+    "https://hkwtia.org/wp-content/uploads/2016/09/cypher-apple-2-768x789-1.jpg": {
+      "localPath": "/images/news-archive/display/f42eeb6fe73103a4.jpg",
+      "originalPath": "/images/news-archive/original/f42eeb6fe73103a4.jpg",
+      "sha256": "f42eeb6fe73103a4341bfbbb4e5c2b71d5a2771af109600c67d4fc068b9a883b"
+    },
+    "https://hkwtia.org/wp-content/uploads/2016/09/cypher-bear-768x1024-1.jpg": {
+      "localPath": "/images/news-archive/display/9ed29df805a53a8d.jpg",
+      "originalPath": "/images/news-archive/original/9ed29df805a53a8d.jpg",
+      "sha256": "9ed29df805a53a8dc3ac861222babe870cb3b8a4b7d805efb1ecf77bdd01098b"
+    },
+    "https://hkwtia.org/wp-content/uploads/2016/09/Cypher-Martin-Office-scaled.jpg": {
+      "localPath": "/images/news-archive/display/80b2b7917f38d325.jpg",
+      "originalPath": "/images/news-archive/original/80b2b7917f38d325.jpg",
+      "sha256": "80b2b7917f38d325095c038d579dcc1d5e7ea4b701ea13eb975a0591facc68c6"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-5G-服務啟動-網絡覆蓋全港至廣-帶動香港智慧城市發展.pdf": {
+      "localPath": "/files/news-archive/f454211c797d7a7c.pdf",
+      "originalPath": null,
+      "sha256": "f454211c797d7a7c28ad7da2a69ca0fe778a962b6ab58f1757dfc34cf1973582"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf": {
+      "localPath": "/files/news-archive/261eb8ed5ca4c69e.pdf",
+      "originalPath": null,
+      "sha256": "261eb8ed5ca4c69eaa03620c785d32ac0e3aca9032c892fb0d892ef99f58f009"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf": {
+      "localPath": "/files/news-archive/105e0e7ae2135ff5.pdf",
+      "originalPath": null,
+      "sha256": "105e0e7ae2135ff58210f0a1e4a67f37a5141872434c9c388c24fbd10e2a7eb1"
+    }
+  }
+}

@@ -2,6 +2,16 @@ import {z} from 'zod';
 
 import droppedArticleUrls from '@/content/media-and-press/dropped-article-urls.json';
 import liveClippings from '@/content/media-and-press/live-clippings.json';
+import type {AppLocale} from '@/i18n/routing';
+import {
+  isWireOutlet,
+  pressLinkKind,
+  pressSummaryByUrl,
+  pressSummaryCounts,
+  summaryForLocale,
+  type PressInclusionFlag,
+  type PressAccessStatus,
+} from '@/lib/media/press-summaries';
 
 const clippingSchema = z.object({
   date_as_on_live: z.string(),
@@ -65,3 +75,60 @@ export function listPressClippings(): readonly PressClipping[] {
 
 export const pressClippingSourceCount = source.length;
 export const droppedPressArticles = dropped;
+
+export type PressCard = PressClipping & Readonly<{
+  year: string | null;
+  distribution: "wire" | "unclassified";
+  linkKind: "internal-news" | "external";
+  summary: string | null;
+  summaryStatus: "draft" | "gap";
+  needsShortening: boolean;
+  gapReason: PressAccessStatus | null;
+  inclusionFlag: PressInclusionFlag | null;
+  auditRow: number | null;
+}>;
+
+export function listPressCards(locale: AppLocale): readonly PressCard[] {
+  const drafts = pressSummaryByUrl();
+  return listPressClippings()
+    .map((row, index) => {
+      const draft = drafts.get(row.articleUrl);
+      const summary = summaryForLocale(draft, locale);
+      return {
+        index,
+        card: {
+          ...row,
+          year: row.dateTime?.slice(0, 4) ?? null,
+          distribution: isWireOutlet(row.outlet) ? "wire" as const : "unclassified" as const,
+          linkKind: pressLinkKind(row.articleUrl),
+          summary: summary.text,
+          summaryStatus: summary.status,
+          needsShortening: summary.needsShortening,
+          gapReason: summary.gapReason,
+          inclusionFlag: draft?.inclusionFlag ?? null,
+          auditRow: draft?.auditRow ?? null,
+        },
+      };
+    })
+    .sort((a, b) => {
+      if (a.card.dateTime && b.card.dateTime && a.card.dateTime !== b.card.dateTime) return a.card.dateTime < b.card.dateTime ? 1 : -1;
+      if (a.card.dateTime && !b.card.dateTime) return -1;
+      if (!a.card.dateTime && b.card.dateTime) return 1;
+      return a.index - b.index;
+    })
+    .map(({card}) => card);
+}
+
+export function pressWallSummaryCounts() {
+  return pressSummaryCounts(listPressClippings().map((row) => row.articleUrl));
+}
+
+/** Publication date only. ZH 2025年11月1日, EN 1 Nov 2025. The calendar day is the wall date, not a fetch time. */
+export function formatPressDate(isoDate: string, locale: AppLocale): string {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year!, month! - 1, day));
+  if (locale === "zh-HK") {
+    return new Intl.DateTimeFormat("zh-HK", {year: "numeric", month: "long", day: "numeric", timeZone: "UTC"}).format(date);
+  }
+  return new Intl.DateTimeFormat("en-GB", {day: "numeric", month: "short", year: "numeric", timeZone: "UTC"}).format(date);
+}

@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2001/01/2001-establishment-of-wtia",
+  "sourceId": "3501",
+  "slug": "2001-establishment-of-wtia",
+  "title": "2001 - Establishment of WTIA",
+  "publishedAt": "2001-01-01T03:33:46+00:00",
+  "modifiedAt": "2020-02-20T08:17:51+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "The Inauguration Ceremony of WTIA was held at Hong Kong Productivity Council, with the exhibition Wireless Application Showcase. 20 companies showcased their latest mobile and wireless application in the Showcase.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2001/01/2001-The-Inauguration-of-WTIA-1024x683-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/f1d62c72a06848df.jpg",
+      "originalPath": "/images/news-archive/original/f1d62c72a06848df.jpg",
+      "sha256": "f1d62c72a06848df535679106822b1aadebdb7419c153cdee35f300e3dca98b9",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The Inauguration Ceremony of WTIA was held at Hong Kong Productivity Council, with the exhibition Wireless Application Showcase. 20 companies showcased their latest mobile and wireless application in the Showcase."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "43996574157a874013e9aab1fdf9fbdbbeef903d8e95301d11f88320cb6f1cb7"
+}

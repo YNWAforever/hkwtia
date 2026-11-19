@@ -1,0 +1,103 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2020/03/postpone-hong-kong-ict-awards-2020-ict-startup-award",
+  "sourceId": "4708",
+  "slug": "postpone-hong-kong-ict-awards-2020-ict-startup-award",
+  "title": "[POSTPONE] Hong Kong ICT Awards 2020 - ICT Startup Award",
+  "publishedAt": "2020-03-23T02:47:12+00:00",
+  "modifiedAt": "2020-03-23T02:52:15+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "News"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Dear Partners and Friends,\nWe regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 - ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed until further notice.\nLatest information of ICT Startup Award can be viewed at : https://www.ictstartup.org/\nIf there is any question, please contact Ms Kylie Li via (2989 9164, ictstartup@hkwtia.org).",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/ICT-StartUp.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/5c56f5444f826e93.jpg",
+      "originalPath": "/images/news-archive/original/5c56f5444f826e93.png",
+      "sha256": "5c56f5444f826e93e844ff2abb230f62de1a2c8ca7fc5dd7a954c4069c0212b4",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Dear Partners and Friends,"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "We regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 - ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed "
+        },
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "text": "until further notice"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Latest information of ICT Startup Award can be viewed at : "
+        },
+        {
+          "type": "link",
+          "href": "https://www.ictstartup.org/",
+          "children": [
+            {
+              "type": "text",
+              "text": "https://www.ictstartup.org/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "If there is any question, please contact Ms Kylie Li via (2989 9164, "
+        },
+        {
+          "type": "text",
+          "text": "ictstartup@hkwtia.org"
+        },
+        {
+          "type": "text",
+          "text": ")."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "b5867a2728b96e58b22383fe2cf3a23a3abe214d10845dd6ba3cdab6fae628de"
+}

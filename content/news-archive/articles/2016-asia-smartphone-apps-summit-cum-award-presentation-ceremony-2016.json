@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2016/01/2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
+  "sourceId": "3851",
+  "slug": "2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016",
+  "title": "2016 - Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016",
+  "publishedAt": "2016-01-30T01:52:26+00:00",
+  "modifiedAt": "2020-02-24T01:59:09+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "To recognize the excellence of innovative smartphone applications development and provide a platform for top smartphone applications professions in the region to meet, share and learn from each other, WTIA started to organise Asia Smartphone Contest in 2013, 9 Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan was the co-organiser of the Contest.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/Picture1-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/6934d6a689ef3f79.jpg",
+      "originalPath": "/images/news-archive/original/6934d6a689ef3f79.png",
+      "sha256": "6934d6a689ef3f79e260879a4fbe6bef8bb8fd6bee77983fb15bacf677dc2533",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "To recognize the excellence of innovative smartphone applications development and provide a platform for top smartphone applications professions in the region to meet, share and learn from each other, WTIA started to organise Asia Smartphone Contest in 2013, 9 Asia Regions, including Israel, Mainland China, Japan, Korea, Malaysia, Singapore, Taiwan was the co-organiser of the Contest."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "6730ea952710b0b5679266c0014eb61ef635e7376e9532333a2fe9172984a375"
+}

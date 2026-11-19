@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2016/01/2016-safewifi-campaign",
+  "sourceId": "3845",
+  "slug": "2016-safewifi-campaign",
+  "title": "2016 – SafeWiFi Campaign",
+  "publishedAt": "2016-01-07T09:14:04+00:00",
+  "modifiedAt": "2020-02-20T09:16:24+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "In order to raise public awareness in Wi-Fi security, WTIA started SafeWiFi.hk and set up the thematic website in 2001. SafeWiFi Campaign aim at investigating the WiFi usage, assessibility, security and the knowledge of it in Hong Kong, which conducted annual WiFi security survey and co-organize events to promote Wi-Fi security for the public.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/02/2016-SafeWiFi.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/681f503088509aaa.jpg",
+      "originalPath": "/images/news-archive/original/681f503088509aaa.png",
+      "sha256": "681f503088509aaa845f95837cf91cdfedbcc4b5cb486d59f55a0380ab402466",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-match"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "In order to raise public awareness in Wi-Fi security, WTIA started SafeWiFi.hk and set up the thematic website in 2001. SafeWiFi Campaign aim at investigating the WiFi usage, assessibility, security and the knowledge of it in Hong Kong, which conducted annual WiFi security survey and co-organize events to promote Wi-Fi security for the public."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "6908333c1a6d0aab9f055904c27f092e4e5460f6cf81cad00357a22517b67b02"
+}

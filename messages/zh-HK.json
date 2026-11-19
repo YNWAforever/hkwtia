@@ -1980,6 +1980,14 @@
     "h1": "傳媒及新聞報道",
     "intro": "節錄有關 WTIA 計劃、獎項及業界調查的報道。",
     "contact": "傳媒查詢，請聯絡傳媒組：contact@hkwtia.org",
+    "externalNote": "以下連結將前往外部網站。",
+    "wire": "新聞稿分發",
+    "inclusionHub": "編輯待決：此連結是專題匯總頁，不是單篇報道。先保留列出，不視為本會背書。",
+    "inclusionNoWtia": "編輯待決：檢索到的正文沒有提及本會。先保留列出，不補寫本會角色。",
+    "ctaExternal": "閱讀原文",
+    "ctaExternalA11y": "閱讀原文（在新分頁開啟，外部網站）",
+    "ctaInternal": "閱讀本會消息",
+    "ctaInternalA11y": "閱讀本會消息（本站頁面）",
     "table": {
       "date": "日期",
       "outlet": "媒體",
@@ -2004,8 +2012,25 @@
     "quality": {
       "eyebrow": "編採標準",
       "title": "WTIA 的報道方式",
-      "body": "每篇文章均由職員撰寫、註明日期及作者。只刊登已核實來源的稿件。"
-    }
+      "body": "歷史稿件是本會已註明日期的存檔，保留原文。在本網站撰寫的稿件由職員撰寫、註明日期及作者。"
+    },
+    "searchLabel": "搜尋消息",
+    "searchSubmit": "搜尋",
+    "previous": "上一頁",
+    "next": "下一頁",
+    "pageStatus": "第 {page} 頁，共 {pages} 頁",
+    "noMatches": "沒有符合這次搜尋的消息。",
+    "archiveOriginal": "存檔原文。措辭與日期維持來源所載。",
+    "archiveFallbackZh": "存檔原文為中文。這不是英文譯本。",
+    "archiveFallbackEn": "存檔原文為英文。來源沒有中文版本。",
+    "externalHint": "（在新分頁開啟）",
+    "missingPhoto": "這篇文章的一張照片未能存檔。",
+    "openPhoto": "這張照片列於正式匯出。檔案尚未放入此稿。",
+    "consentOpen": "未展示會員照片。公開這張肖像的同意仍然未決。",
+    "unprovenPhoto": "未展示這張照片。現時公開檔案未經證明與匯出檔相同。",
+    "missingFile": "原檔未能存檔。",
+    "photoAlt": "存檔照片。來源沒有圖說。",
+    "backToList": "全部消息"
   },
   "Contact": {
     "metaTitle": "聯絡我們｜香港無線科技商會 WTIA",

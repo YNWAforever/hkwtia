@@ -1,13 +1,13 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
-import {PressCoverageTable} from '@/components/marketing/press-coverage-table';
+import {PressCoverageList} from '@/components/marketing/press-coverage-list';
 import {StructuredData} from '@/components/seo/structured-data';
 import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
 import {siteConfig} from '@/config/site';
 import type {AppLocale} from '@/i18n/routing';
-import {listPressClippings} from '@/lib/media/press-clippings';
+import {listPressCards} from '@/lib/media/press-clippings';
 import {buildPageMetadata} from '@/lib/metadata';
 import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
 import {buildBreadcrumbData} from '@/lib/structured-data';
@@ -33,7 +33,7 @@ export default async function MediaAndPressPage({params}: Props) {
     getTranslations({locale, namespace: 'Common'}),
     getTranslations({locale}),
   ]);
-  const clippings = listPressClippings();
+  const clippings = listPressCards(locale as AppLocale);
   const email = siteConfig.contact.email;
 
   return (
@@ -47,9 +47,18 @@ export default async function MediaAndPressPage({params}: Props) {
       />
       <Section>
         <p className="press-contact">{contactWithEmail(t('contact'), email)}</p>
-        <PressCoverageTable
-          caption={t('h1')}
-          columns={{date: t('table.date'), outlet: t('table.outlet'), article: t('table.article')}}
+        <PressCoverageList
+          labels={{
+            externalNote: t('externalNote'),
+            wire: t('wire'),
+            inclusionHub: t('inclusionHub'),
+            inclusionNoWtia: t('inclusionNoWtia'),
+            ctaExternal: t('ctaExternal'),
+            ctaExternalA11y: t('ctaExternalA11y'),
+            ctaInternal: t('ctaInternal'),
+            ctaInternalA11y: t('ctaInternalA11y'),
+          }}
+          locale={locale as AppLocale}
           rows={clippings}
         />
       </Section>

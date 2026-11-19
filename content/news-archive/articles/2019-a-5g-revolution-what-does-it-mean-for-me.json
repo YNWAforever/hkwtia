@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2019/01/2019-a-5g-revolution-what-does-it-mean-for-me",
+  "sourceId": "4390",
+  "slug": "2019-a-5g-revolution-what-does-it-mean-for-me",
+  "title": "2019 – A 5G Revolution: What does it mean for me?",
+  "publishedAt": "2019-01-20T08:28:29+00:00",
+  "modifiedAt": "2020-03-10T08:31:06+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Hong Kong is actively deploying 5G Application in all areas. How will it affect the quality of life and improve the social efficiency in the near future? WTIA joined hands with The Hong Kong Productivity Council (HKPC), invited industry export to share and exchange views on 5G application, the latest global trends, 5G systems for new application and the new business models of 5G Era.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-A-5G-Revolution-What-does-it-mean-for-me_-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/dec2110e266d1f11.jpg",
+      "originalPath": "/images/news-archive/original/dec2110e266d1f11.png",
+      "sha256": "dec2110e266d1f113b629ac21daf8c576752e2d02881d13e6c6671a5a39ed6f6",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Hong Kong is actively deploying 5G Application in all areas. How will it affect the quality of life and improve the social efficiency in the near future? WTIA joined hands with The Hong Kong Productivity Council (HKPC), invited industry export to share and exchange views on 5G application, the latest global trends, 5G systems for new application and the new business models of 5G Era."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "08c4fc59732fdbb25538dc89fe5d69d151bf40368c8d9fc4d117d727b1a9be39"
+}

@@ -1,0 +1,33 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2003/01/2003-the-1st-wtia-awards-j2me-open-2003",
+  "sourceId": "3494",
+  "slug": "2003-the-1st-wtia-awards-j2me-open-2003",
+  "title": "2003 - The 1st WTIA Awards: J2ME Open 2003",
+  "publishedAt": "2003-01-15T03:09:21+00:00",
+  "modifiedAt": "2020-02-13T04:19:19+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "Aimed to encourage development of wireless applications for consumers and enterprises, the contest J2ME Open 2003 was organized by WTIA. Over 300 teams participated the contest.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Aimed to encourage development of wireless applications for consumers and enterprises, the contest J2ME Open 2003 was organized by WTIA. Over 300 teams participated the contest."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "bd49907ff1eec5dfb5cfc4d9312df53ff78bbd011c1a15ee590ce7d97e4c77b0"
+}

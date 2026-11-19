@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2019/01/2019-asia-smart-app-awards-2018-2019",
+  "sourceId": "4387",
+  "slug": "2019-asia-smart-app-awards-2018-2019",
+  "title": "2019 – Asia Smart App Awards 2018/ 2019",
+  "publishedAt": "2019-01-10T08:26:02+00:00",
+  "modifiedAt": "2020-03-10T08:28:15+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "With funding support from Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards (formerly known as Asia Smartphone Apps Contest) aim to promote Hong Kong as a capital of Smart App in Asia by gathering the top industry experts across the region. A regional contest for Smart App, the Asia Smart App Awards successfully gather 13 participating countries/ regions in Asia, namely the Israel, Indonesia, Japan, Korea, Mainland, Malaysia, Myanmar, Philippines, Singapore, Sri Lanka ,Taiwan, Thailand, and Vietnam, etc. with the support from more than 20 industry organizations in Asia.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-Asia-Smart-App-Awards-2018_-2019-1-1.png",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/b9d0cda87eb26373.jpg",
+      "originalPath": "/images/news-archive/original/b9d0cda87eb26373.png",
+      "sha256": "b9d0cda87eb26373f1fa09cfffd9f3e7d8134c2da4e9fce4789c12ca81ad9233",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "With funding support from Create Hong Kong of the Government of the Hong Kong Special Administrative Region, the Asia Smart App Awards (formerly known as Asia Smartphone Apps Contest) aim to promote Hong Kong as a capital of Smart App in Asia by gathering the top industry experts across the region. A regional contest for Smart App, the Asia Smart App Awards successfully gather 13 participating countries/ regions in Asia, namely the Israel, Indonesia, Japan, Korea, Mainland, Malaysia, Myanmar, Philippines, Singapore, Sri Lanka ,Taiwan, Thailand, and Vietnam, etc. with the support from more than 20 industry organizations in Asia."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "ca79bfeee8ea40db2058b8e737716a83bff68dae901dc7bf778afd1b0a922460"
+}

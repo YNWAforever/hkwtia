@@ -1,0 +1,45 @@
+{
+  "canonicalUrl": "https://hkwtia.org/2005/01/2005-1st-hong-kong-wireless-technology-excellence-awards",
+  "sourceId": "3517",
+  "slug": "2005-1st-hong-kong-wireless-technology-excellence-awards",
+  "title": "2005 - 1st Hong Kong Wireless Technology Excellence Awards",
+  "publishedAt": "2005-01-16T04:00:26+00:00",
+  "modifiedAt": "2020-02-20T08:12:16+00:00",
+  "visibleDateText": null,
+  "author": "hkwtia",
+  "categories": [
+    "Archive"
+  ],
+  "collection": "news-archive",
+  "sourceLanguages": [
+    "en"
+  ],
+  "plainText": "WTIA and Hong Kong Productivity Council (HKPC) organized the 1st Hong Kong Wireless Technology Excellence Awards to recognize the best mobile and wireless applications developed by local companies.",
+  "blocks": [
+    {
+      "type": "figure",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2005/01/1st-hk-excellence-1024x625-1.jpg",
+      "alt": "",
+      "caption": [],
+      "localPath": "/images/news-archive/display/3cadca32c7c40eee.jpg",
+      "originalPath": "/images/news-archive/original/3cadca32c7c40eee.jpg",
+      "sha256": "3cadca32c7c40eee79804de33713c890f36345ebbab31282ba0ee1db46f27aa0",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": null
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "WTIA and Hong Kong Productivity Council (HKPC) organized the 1st Hong Kong Wireless Technology Excellence Awards to recognize the best mobile and wireless applications developed by local companies."
+        }
+      ]
+    }
+  ],
+  "extractionStatus": "extracted",
+  "errors": [],
+  "waybackTimestamp": null,
+  "sourceSha256": "ff97e6b6b056bbed6b4f036f00173bf43485be8b4ad41bf925ed512ae55d6741"
+}

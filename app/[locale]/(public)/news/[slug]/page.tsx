@@ -2,14 +2,19 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
+import {NewsArchiveBody} from "@/components/marketing/news-archive-body";
 import {NewsDetail} from "@/components/marketing/news-detail";
 import {StructuredData} from "@/components/seo/structured-data";
+import {PageHero} from "@/components/wt/page-hero";
 import type {AppLocale} from "@/i18n/routing";
 import {
   getPublishedNewsBySlug,
   parsePublishedBuildLogSlug,
   type PublishedNewsDetail,
 } from "@/lib/db/repos/public-posts";
+import {archiveBySlug} from "@/lib/news/archive-catalog";
+import {archiveNotice, titleLangForLocale, type ArchiveArticle} from "@/lib/news/archive-document";
+import {localizedPath} from "@/lib/urls";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {buildArticleData} from "@/lib/structured-data";
@@ -45,19 +50,30 @@ function postSlugOrNotFound(slug: string): string {
   }
 }
 
-async function publishedNews(locale: AppLocale, slug: string): Promise<PublishedNewsDetail> {
+async function publishedNews(locale: AppLocale, slug: string): Promise<{cms: PublishedNewsDetail} | {archive: ArchiveArticle}> {
   const parsed = postSlugOrNotFound(slug);
-  const news = await getPublishedNewsBySlug(locale, parsed);
-  // Build logs are engineering notes. They are not public news. R3, 2026-11-03.
-  if (!news) notFound();
-  return news;
+  let news: PublishedNewsDetail | null = null;
+  let databaseError: unknown = null;
+  try {
+    news = await getPublishedNewsBySlug(locale, parsed);
+  } catch (error) {
+    databaseError = error;
+  }
+  if (news) return {cms: news};
+  const archive = archiveBySlug(parsed);
+  if (archive && archive.extractionStatus !== "failed") return {archive};
+  // A database outage must not become a 404, and it must not be renamed into a generic error.
+  if (databaseError) throw databaseError;
+  notFound();
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
   const appLocale = locale as AppLocale;
-  const post = await publishedNews(appLocale, slug);
+  const loaded = await publishedNews(appLocale, slug);
+  const post = "cms" in loaded ? loaded.cms : loaded.archive;
   const title = post.title;
+  const publishedAt = post.publishedAt instanceof Date ? post.publishedAt : new Date(post.publishedAt);
   const t = await getTranslations({locale, namespace: "News"});
   return buildPageMetadata({
     locale: appLocale,
@@ -66,7 +82,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     description: `${post.author} · ${new Intl.DateTimeFormat(locale, {
       dateStyle: "long",
       timeZone: "Asia/Hong_Kong",
-    }).format(post.publishedAt)}`,
+    }).format(publishedAt)}`,
     // Build logs share this route and are editorial too, so both post kinds get the
     // editorial card (neither carries an image column).
     image: ogImagePath({kind: "news", title, eyebrow: t("eyebrow"), imageUrl: null, locale: appLocale}),
@@ -76,20 +92,67 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsPostPage({params}: Props) {
   const {locale, slug} = await params;
   const appLocale = locale as AppLocale;
-  const post = await publishedNews(appLocale, slug);
+  const loaded = await publishedNews(appLocale, slug);
   setRequestLocale(locale);
+  if ("cms" in loaded) {
+    const post = loaded.cms;
+    return (
+      <>
+        <NewsDetail locale={appLocale} post={post}/>
+        <StructuredData data={buildArticleData({
+          slug: post.slug,
+          title: post.title,
+          description: articleExcerpt(post.body),
+          publishedAt: post.publishedAt,
+          updatedAt: null,
+          author: post.author,
+        }, appLocale)} />
+      </>
+    );
+  }
+  const article = loaded.archive;
+  const tNotice = await getTranslations({locale, namespace: "News"});
+  const publishedAt = new Date(article.publishedAt);
+  const notice = archiveNotice(appLocale, article.sourceLanguages);
+  const noticeKey = notice === "fallback-zh" ? "archiveFallbackZh" : notice === "fallback-en" ? "archiveFallbackEn" : "archiveOriginal";
+  const inLanguage = article.sourceLanguages.length === 1
+    ? (article.sourceLanguages[0] === "zh-Hant" ? "zh-HK" : "en-HK")
+    : undefined;
   return (
     <>
-      <NewsDetail locale={appLocale} post={post}/>
+      <PageHero
+        eyebrow={article.author}
+        lead={new Intl.DateTimeFormat(locale, {dateStyle: "long", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(publishedAt)}
+        title={article.title}
+        titleLang={titleLangForLocale(article.title, appLocale)}
+      />
+      <section className="section">
+        <div className="shell news-archive">
+          <p className="news-archive-notice" role="note">{tNotice(noticeKey)}</p>
+          {article.collection === "review-candidate" ? <p>{article.categories.join(", ")}</p> : null}
+          <p><a href={localizedPath(appLocale, "/news")}>{tNotice("backToList")}</a></p>
+          <NewsArchiveBody
+            blocks={article.blocks}
+            labels={{
+              externalHint: tNotice("externalHint"),
+              missingFile: tNotice("missingFile"),
+              missingPhoto: tNotice("missingPhoto"),
+              openPhoto: tNotice("openPhoto"),
+              photoAlt: tNotice("photoAlt"),
+              consentOpen: tNotice("consentOpen"),
+              unprovenPhoto: tNotice("unprovenPhoto"),
+            }}
+          />
+        </div>
+      </section>
       <StructuredData data={buildArticleData({
-        slug: post.slug,
-        title: post.title,
-        description: articleExcerpt(post.body),
-        publishedAt: post.publishedAt,
-        // The repository does not select posts.updated_at; a post that was never edited is
-        // unmodified rather than undated, which buildArticleData already handles.
-        updatedAt: null,
-        author: post.author,
+        slug: article.slug,
+        title: article.title,
+        description: articleExcerpt(article.plainText),
+        publishedAt,
+        updatedAt: article.modifiedAt ? new Date(article.modifiedAt) : null,
+        author: article.author,
+        inLanguage,
       }, appLocale)} />
     </>
   );
