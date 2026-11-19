@@ -193,6 +193,8 @@ describe("exco portrait fill against 46817a0f", () => {
   it("keeps the three derivatives off the public web root and records provenance", () => {
     const rosterSource = readFileSync(resolve(process.cwd(), "content/exco-roster.ts"), "utf8");
     expect(rosterSource).toContain("Old-site publication does not establish consent");
+    expect(rosterSource).toContain("Consent is not established in the supplied evidence");
+    expect(rosterSource).not.toContain("no later consent record exists");
     expect(rosterSource).toContain("content/exco-portraits-withheld/");
     expect(rosterSource).toContain("https://hkwtia.org/wp-content/uploads/2020/02/Jimmy-Chan.jpg");
     for (const source of Object.values(sourceProvenance)) {

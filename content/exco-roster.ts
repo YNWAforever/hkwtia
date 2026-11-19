@@ -37,7 +37,7 @@
 // source aspect; the 4:5 card crops with object-fit and does not pre-crop them.
 //
 // Alex Kun, Donald Chan, and Jimmy Chan derivatives are withheld.
-// Old-site publication does not establish consent, and no later consent record exists.
+// Old-site publication does not establish consent. Consent is not established in the supplied evidence. That note is not an exhaustive records search.
 // photo stays null, so the page keeps the letter-free fallback. The files are
 // not under public/ and are not served. They remain the t520u official-page
 // derivatives (mozjpeg progressive, quality 82, no crop, metadata stripped),
