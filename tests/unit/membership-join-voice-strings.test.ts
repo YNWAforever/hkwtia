@@ -13,7 +13,9 @@ import zh from "@/messages/zh-HK.json";
  * and Committees.metaDescription, then when Committees.roster was added,
  * and again for the WTIA role lines, name-only placeholders, typo fixes,
  * Larry Lam's profile link, Nelson's English role line, and the approved
- * zh-HK ExCo biographies, then Willy's zh-HK job title.
+ * zh-HK ExCo biographies, then Willy's zh-HK job title, then the CPAI
+ * correction (removed programmes audience, issuer, and course-partner
+ * labels; replaced the automatic certificate line).
  */
 const VOICE_ALLOWLIST = [
   "Membership.title",
@@ -170,7 +172,7 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "25729da90f8796a49c56eb9a54675e219c5f2ff6b92017c234051e5312defea6";
+const NON_ALLOWLIST_FINGERPRINT = "fc88a288acdb911dc0293882e323a14d55ba8837555e12c2c20796f52161558b";
 
 type MessageTree = Record<string, unknown>;
 

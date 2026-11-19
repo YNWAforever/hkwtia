@@ -226,35 +226,28 @@ export const hkictProgramSchema = z.object({
 }).strict();
 
 /**
- * CPAI is a credential, not an event series: no editions, no winners, no years.
+ * CPAI is not an event series: no editions, no winners, no years.
  *
- * Not for want of material -- the archive does name cohort dates (2026-03-02,
- * 逢週一晚), a 12-hour duration, a venue, and 「已成功舉辦兩屆，第三屆現正接受最後
- * 報名」. All of it is deliberately omitted: a credential page framed as a course
- * schedule is exactly the "when did CPAI run" framing the claims review warns
- * against, and enrolment happens on CUSCS systems rather than here. `.strict()`
- * makes the omission loud, so anyone who disagrees has to change this schema
- * rather than quietly adding a field.
+ * Cohort dates, duration, venue, and enrolment status are omitted on purpose.
+ * The archive names them and then disagrees with itself on the start date, and
+ * a schedule field would read as the next intake. `.strict()` makes the
+ * omission loud, so anyone who disagrees has to change this schema rather than
+ * quietly adding a field.
  *
- * WTIA issues CPAI alone. CUSCS separately issues its own completion
- * certificate to the same graduates -- 「一個課程，兩張認證」. The audit called it
- * a "joint WTIA x CUSCS certification", which understates what WTIA owns, so
- * the issuer and the course partner are separate required fields and there is
- * no field in which a joint issuer can be written.
+ * There is no issuer field. Who issues CPAI is not established, so the record
+ * cannot store one. `coursePartner*` keeps the school's name in the file and
+ * is not rendered; there is no field for a teaching claim or a promotional
+ * partnership sentence. `partnerCertificate*` is the completion-certificate
+ * application sentence. It is not an automatic award and it is not an issuer.
  */
 export const cpaiProgramSchema = z.object({
   id: z.literal('cpai'),
-  issuerEn: z.string().min(1),
-  issuerZh: z.string().min(1),
   coursePartnerEn: z.string().min(1),
   coursePartnerZh: z.string().min(1),
   courseNameEn: z.string().min(1),
   courseNameZh: z.string().min(1),
-  // The other half of 「一個課程，兩張認證」. Refusing to represent a joint issuer
-  // is only half the correction -- without somewhere to name CUSCS's own
-  // completion certificate the record still cannot state the real arrangement,
-  // and a reader learns only that CUSCS teaches the course. The course page is
-  // explicit: 「完成課程後同時獲頒 ... CUSCS 結業證書」.
+  // Both locales, so one language cannot keep an automatic-award sentence
+  // after the other has dropped it.
   partnerCertificateEn: z.string().min(1),
   partnerCertificateZh: z.string().min(1),
   // .min(1) for the same reason the winners union exists: an empty array under

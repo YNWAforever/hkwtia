@@ -1381,8 +1381,7 @@
     "cpai": {
       "title": "CPAI",
       "description": "A focused WTIA programme supporting applied innovation.",
-      "status": "Contact WTIA for the current programme timetable and how to take part.",
-      "audience": "Professionals completing WTIA's applied AI credential."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "hkict": {
       "title": "HKICT Awards",
@@ -1416,9 +1415,7 @@
       "winnersOffSite": "The full winner list is published on the edition's own site.",
       "winnersOffSiteLink": "View the winners",
       "winnersUnrecorded": "WTIA's archive does not record the winners for this edition.",
-      "credentialIssuer": "Issued by",
-      "credentialCoursePartner": "Course delivered with",
-      "credentialPartnerCertificate": "Graduates also receive",
+      "credentialPartnerCertificate": "Certificate of Completion",
       "credentialSyllabus": "Syllabus",
       "eventSeriesLabel": "Event series",
       "credentialLabel": "Credential",

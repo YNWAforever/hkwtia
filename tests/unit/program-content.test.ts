@@ -122,24 +122,22 @@ describe("HKICT record", () => {
 });
 
 describe("CPAI record", () => {
-  // The correction docs/wtia-programme-claims-review.md §2 asks for. The audit
-  // calls CPAI a "joint WTIA × CUSCS certification"; the course page is
-  // explicit that WTIA issues it alone — 「CPAI … 由 WTIA 頒發」 — and that CUSCS
-  // separately issues its own 結業證書 to the same graduates. cpaiProgramSchema
-  // has no field a joint issuer could be written into; this pins that the two
-  // fields it does have are not quietly filled with the same body.
-  it("names WTIA as the issuer and CUSCS only as the course partner", () => {
-    expect(cpai.issuerEn).toBe("WTIA");
-    expect(cpai.coursePartnerEn).not.toBe(cpai.issuerEn);
+  // Who issues CPAI is not established. The schema is strict, so the way to
+  // put an issuer back is to add a field, which this test will see.
+  it("does not store an issuer", () => {
+    expect(cpai).not.toHaveProperty("issuerEn");
+    expect(cpai).not.toHaveProperty("issuerZh");
+    expect(cpai.coursePartnerEn).not.toBe(cpai.courseNameEn);
   });
 
-  // The other half of 「一個課程，兩張認證。」 Refusing to represent a joint issuer
-  // states only half the arrangement: without CUSCS's own completion
-  // certificate named separately from the credential, a reader learns only that
-  // CUSCS teaches the course.
-  it("names CUSCS's completion certificate as distinct from CPAI itself", () => {
-    expect(cpai.partnerCertificateZh).toBe("CUSCS 結業證書");
+  // The certificate sentence is an application, kept distinct from the course
+  // name. It must not promise an automatic award.
+  it("states the completion certificate as an application, not an automatic award", () => {
+    expect(cpai.partnerCertificateEn).toBe("Participants with an attendance rate of at least 70% who pass the assignment can apply for a Certificate of Completion.");
+    expect(cpai.partnerCertificateZh).toBe("出席率達至少 70%，並且功課合格的學員，可申請結業證書。");
     expect(cpai.partnerCertificateEn).not.toBe(cpai.courseNameEn);
+    expect(cpai.partnerCertificateEn).not.toMatch(/automatic/i);
+    expect(cpai.partnerCertificateZh).not.toMatch(/自動/);
   });
 
   // The syllabus is the one part of this record with drafted English in every
