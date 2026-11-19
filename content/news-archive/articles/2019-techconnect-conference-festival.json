@@ -14,7 +14,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development. To assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies.",
+  "plainText": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development.\nTo assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies.",
   "blocks": [
     {
       "type": "figure",
@@ -33,7 +33,16 @@
       "children": [
         {
           "type": "text",
-          "text": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development. To assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies."
+          "text": "With the advent of the 5G era, IoT has been the hottest topic in the world. IoT is the key to connect all things, it is next industrial revolution which is now changing the quality of living in many ways that were never imagined before. This technology is undoubtedly an economic driver in the new era and for all industries, but a new model of development."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "To assist Hong Kong SMEs to connect with global industry and enhance their capabilities on IoT technologies, cyber security, related standards and regulation, WTIA had organised a full-day conference along 7 separate workshops, invited the most famous and reputable leaders in the cybersecurity & IoT industry to provide the relevant solving skill to Hong Kong SMEs about those technologies."
         }
       ]
     }

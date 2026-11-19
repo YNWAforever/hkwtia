@@ -68,6 +68,14 @@ function renderTag(name: string, attrs: Readonly<Record<string, string>>, inner:
     const alt = attrs.alt?.trim() ?? "";
     return `<img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" />`;
   }
+  if (tag === "pdf-embedder") {
+    const raw = attrs.url?.trim() ?? "";
+    if (!raw || /^(?:javascript|data):/i.test(raw)) return "";
+    const href = raw.startsWith("/") ? `https://hkwtia.org${raw}` : raw;
+    if (!/^https?:\/\//i.test(href)) return "";
+    const label = href.split("/").pop() || "PDF";
+    return `<p><a href="${escapeAttr(href)}">${escapeHtml(label)}</a></p>`;
+  }
   if (tag === "fusion_button") {
     const href = attrs.link?.trim() ?? "";
     const label = inner.trim() || attrs.title?.trim() || href;

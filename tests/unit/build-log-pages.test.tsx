@@ -98,13 +98,14 @@ describe("published posts through news routes", () => {
     expect(publicPosts.listPublishedBuildLogs).not.toHaveBeenCalled();
   });
 
-  it("shows the empty state when nothing is published", async () => {
+  it("keeps the dated archive visible when the CMS list is empty", async () => {
     publicPosts.listPublishedNews.mockResolvedValueOnce([]);
     publicPosts.listPublishedBuildLogs.mockResolvedValueOnce([]);
 
     render(await NewsPage({params: Promise.resolve({locale: "en"})}));
 
-    expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
+    expect(screen.queryByText("translated:emptyTitle")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", {name: "2025 亞洲智慧創新大獎 Asia Smart Innovation Awards 2025"})).toHaveAttribute("href", "/news/2025-asia-smart-innovation-awards-2025");
   });
 
   it("shows the unavailable state when both database reads fail", async () => {

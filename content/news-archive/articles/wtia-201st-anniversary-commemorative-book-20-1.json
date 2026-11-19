@@ -15,7 +15,7 @@
     "en",
     "zh-Hant"
   ],
-  "plainText": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊\n\nPDF\nWTIA 20+1st Anniversary Commemorative Book is Now Available Online!\nThis commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was over 100 industrial events has been held last year. In the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong.\n香港無線科技商會20＋1週年紀念特刊現供閱覽\n香港無線科技商會20＋1週年紀念特刊盛載著每位合作夥伴及各方友會送上的美好祝福。多年來，商會在各界鼎力相助下發展蓬勃，單單在過去一年，商會就舉辦了超過100場不同形式的行業活動。\n未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。\nDownload Here!",
+  "plainText": "WTIA 20+1st Anniversary Commemorative Book 香港無線科技商會20＋1週年紀念特刊\n\nPDF\nWTIA 20+1st Anniversary Commemorative Book is Now Available Online!\nThis commemorative book embodies the blessing from our prestigious partners and friendly supporting organisation. Throughout all these years, WTIA is glad and honored to have the support from all corners of the wireless industry, with the unfailing supporting, there was over 100 industrial events has been held last year.\nIn the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong.\n香港無線科技商會20＋1週年紀念特刊現供閱覽\n香港無線科技商會20＋1週年紀念特刊盛載著每位合作夥伴及各方友會送上的美好祝福。多年來，商會在各界鼎力相助下發展蓬勃，單單在過去一年，商會就舉辦了超過100場不同形式的行業活動。\n未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。\nDownload Here!",
   "blocks": [
     {
       "type": "heading",
@@ -82,7 +82,16 @@
         },
         {
           "type": "text",
-          "text": " has been held last year. In the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong. "
+          "text": " has been held last year."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "In the future, WTIA will continue to implement practical works that will help to advance the industry. By working together, we have faith in building a Tech-Friendly ecosystem in Hong Kong. "
         }
       ]
     },
@@ -127,7 +136,7 @@
       "children": [
         {
           "type": "text",
-          "text": " 未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。 "
+          "text": " 未來，商會將繼續與各界保持緊密合作，共同將香港打造成一個智慧城市。"
         }
       ]
     },

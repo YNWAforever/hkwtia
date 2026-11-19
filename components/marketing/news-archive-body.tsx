@@ -7,12 +7,12 @@ export function NewsArchiveBody({
   labels,
 }: Readonly<{
   blocks: readonly ArchiveBlock[];
-  labels: Readonly<{externalHint: string; missingPhoto: string; openPhoto: string; missingFile: string; photoAlt: string; consentOpen: string}>;
+  labels: Readonly<{externalHint: string; missingPhoto: string; openPhoto: string; missingFile: string; photoAlt: string; consentOpen: string; unprovenPhoto: string}>;
 }>) {
   return <div className="news-archive-body">{blocks.map((block, index) => renderBlock(block, index, labels))}</div>;
 }
 
-function renderBlock(block: ArchiveBlock, index: number, labels: {externalHint: string; missingPhoto: string; openPhoto: string; missingFile: string; photoAlt: string; consentOpen: string}): ReactNode {
+function renderBlock(block: ArchiveBlock, index: number, labels: {externalHint: string; missingPhoto: string; openPhoto: string; missingFile: string; photoAlt: string; consentOpen: string; unprovenPhoto: string}): ReactNode {
   const key = `block-${index}`;
   if (block.type === "heading") {
     const text = inlineNodes(block.children, `${key}-h`, labels.externalHint);
@@ -44,6 +44,7 @@ function renderBlock(block: ArchiveBlock, index: number, labels: {externalHint: 
   }
   if (block.type === "figure") {
     if (block.consent === "open-member-portrait") return <p key={key}>{labels.consentOpen}</p>;
+    if (block.byteClaim === "current-url-not-wxr-proven") return <p key={key}>{labels.unprovenPhoto}</p>;
     if (!block.localPath) return <p key={key}>{block.assetStatus === "open" ? labels.openPhoto : labels.missingPhoto}</p>;
     const alt = block.alt || labels.photoAlt;
     return (

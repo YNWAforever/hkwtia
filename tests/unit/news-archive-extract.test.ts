@@ -58,6 +58,38 @@ describe("news archive extraction", () => {
     expect(plainText(article.blocks)).not.toMatch(/<script/i);
   });
 
+  it("keeps blank lines as separate paragraphs and the link inside its sentence", () => {
+    const html = `<html><head>
+      <meta property="og:url" content="https://hkwtia.org/2022/09/new-term-of-executive-committee-2022-2024/" />
+      <meta property="article:published_time" content="2022-09-02T14:46:13+00:00" />
+      <meta name="author" content="Keith" />
+      </head><body class="postid-7551">
+      <h1 class="entry-title">New Term of Executive Committee (2022 - 2024)</h1>
+      <div class="post-content">Mr. Keith Li was elected as Chairman.
+
+The 19th term was held on 1 September 2022. Mr. Li King Wah (<a href="https://www.linkedin.com/in/example">Keith Li</a>), Co-founder, was elected.
+
+Mr. Li expressed appreciation.</div></body></html>`;
+    const article = extractNewsArticle(html, "https://hkwtia.org/2022/09/new-term-of-executive-committee-2022-2024/");
+    const paragraphs = article.blocks.filter((block) => block.type === "paragraph");
+    expect(paragraphs).toHaveLength(3);
+    expect(article.plainText).toContain("Keith Li");
+    expect(article.plainText).not.toContain("Mr. Li expressed appreciation. Mr.");
+  });
+
+  it("keeps a PDF link that sits in an unclosed paragraph inside the article", () => {
+    const html = `<html><head>
+      <meta property="og:url" content="${PAGE}" />
+      <meta property="article:published_time" content="2021-03-18T07:30:34+00:00" />
+      <meta name="author" content="WTIA" />
+      </head><body>
+      <h1 class="entry-title">Paper</h1>
+      <div class="post-content"><p><p><a href="https://hkwtia.org/wp-content/uploads/2020/06/paper.pdf">paper.pdf</a></p></div>
+      </body></html>`;
+    const article = extractNewsArticle(html, PAGE);
+    expect(article.blocks.some((block) => block.type === "file" && block.sourceUrl.endsWith("/paper.pdf"))).toBe(true);
+  });
+
   it("assigns stable ascii slugs and does not label a Chinese-only archive as English", () => {
     const chinese = canonicalNewsUrl("https://hkwtia.org/2020/04/%E6%96%B0%E8%81%9E%E7%A8%BF/");
     expect(slugFromCanonicalUrl(chinese)).toMatch(/^archive-2020-[a-f0-9]{10}$/);

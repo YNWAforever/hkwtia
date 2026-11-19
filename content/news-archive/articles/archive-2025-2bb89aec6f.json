@@ -15,7 +15,7 @@
     "en",
     "zh-Hant"
   ],
-  "plainText": "由數字政策辦公室主辦、香港無線科技商會（WTIA）籌辦的「2025 香港資訊及通訊科技獎：資訊科技初創企業獎」圓滿落幕。本屆賽事競爭激烈，旨在發掘具備創新潛力與市場影響力的本地初創。本屆「資訊科技初創企業大獎」由 Entoptica Limited 憑藉其創新技術 SLOPE device 奪得。評審團一致讚揚該項目在醫療科技上的突破及社會貢獻。Steered by the Digital Policy Office and organized by the Hong Kong Wireless Technology Industry Association (WTIA), the \"2025 Hong Kong ICT Awards: ICT Startup Award\" has concluded successfully. The awards aim to recognize local startups with exceptional innovation and market potential. This year’s \"ICT Startup Grand Award\" was presented to Entoptica Limited for their groundbreaking SLOPE device. The jury highly commended the project’s breakthrough in medical technology and its significant social contribution.",
+  "plainText": "由數字政策辦公室主辦、香港無線科技商會（WTIA）籌辦的「2025 香港資訊及通訊科技獎：資訊科技初創企業獎」圓滿落幕。本屆賽事競爭激烈，旨在發掘具備創新潛力與市場影響力的本地初創。本屆「資訊科技初創企業大獎」由 Entoptica Limited 憑藉其創新技術 SLOPE device 奪得。評審團一致讚揚該項目在醫療科技上的突破及社會貢獻。\nSteered by the Digital Policy Office and organized by the Hong Kong Wireless Technology Industry Association (WTIA), the \"2025 Hong Kong ICT Awards: ICT Startup Award\" has concluded successfully. The awards aim to recognize local startups with exceptional innovation and market potential. This year’s \"ICT Startup Grand Award\" was presented to Entoptica Limited for their groundbreaking SLOPE device. The jury highly commended the project’s breakthrough in medical technology and its significant social contribution.",
   "blocks": [
     {
       "type": "figure",
@@ -61,7 +61,12 @@
         {
           "type": "text",
           "text": " 奪得。評審團一致讚揚該項目在醫療科技上的突破及社會貢獻。"
-        },
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
         {
           "type": "text",
           "text": "Steered by the Digital Policy Office and organized by the Hong Kong Wireless Technology Industry Association (WTIA), the \"2025 Hong Kong ICT Awards: ICT Startup Award\" has concluded successfully. The awards aim to recognize local startups with exceptional innovation and market potential. This year’s \"ICT Startup Grand Award\" was presented to "

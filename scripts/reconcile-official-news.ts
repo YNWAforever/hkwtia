@@ -3,7 +3,7 @@ import {readFileSync, readdirSync, writeFileSync, existsSync, unlinkSync} from "
 import {join} from "node:path";
 
 import {canonicalNewsUrl, type ArchiveArticle} from "../lib/news/archive-document.ts";
-import {reconcileOfficialArchive, type OfficialPost, type StoredAsset} from "../lib/news/reconcile-official-news.ts";
+import {archiveAssetKey, reconcileOfficialArchive, type OfficialPost, type StoredAsset} from "../lib/news/reconcile-official-news.ts";
 
 const ROOT = "content/news-archive";
 const BASELINE = join(ROOT, "html-extract-baseline.json");
@@ -42,17 +42,22 @@ if (!existsSync(BASELINE)) {
 
 const baseline = JSON.parse(readFileSync(BASELINE, "utf8")) as Baseline;
 const byteClaimPath = join(ROOT, "asset-byte-claims.json");
-const byteClaims = existsSync(byteClaimPath)
-  ? new Map(Object.entries(JSON.parse(readFileSync(byteClaimPath, "utf8")) as Record<string, "wxr-size-match" | "current-url-not-wxr-proven" | "wxr-size-unknown">))
-  : new Map();
+const byteClaims = new Map<string, "wxr-size-match" | "current-url-not-wxr-proven" | "wxr-size-unknown">();
+if (existsSync(byteClaimPath)) {
+  for (const [url, claim] of Object.entries(JSON.parse(readFileSync(byteClaimPath, "utf8")) as Record<string, "wxr-size-match" | "current-url-not-wxr-proven" | "wxr-size-unknown">)) {
+    byteClaims.set(archiveAssetKey(url), claim);
+  }
+}
 const posts: OfficialPost[] = [
   ...official.news_archive.map((post) => ({...post, scope: "news_archive" as const})),
   ...official.review_candidates.map((post) => ({...post, scope: "review_candidate" as const})),
 ];
+const storedAssets = new Map<string, StoredAsset>();
+for (const [url, asset] of Object.entries(baseline.assets)) storedAssets.set(archiveAssetKey(url), asset);
 const result = reconcileOfficialArchive({
   posts,
-  storedAssets: new Map(Object.entries(baseline.assets)),
-  openUrls: new Set(media.download_plan_required_news_public_assets_only.map((item) => item.source_url.split("?")[0] ?? item.source_url)),
+  storedAssets,
+  openUrls: new Set(media.download_plan_required_news_public_assets_only.map((item) => archiveAssetKey(item.source_url))),
   previousPlainChars: new Map(Object.entries(baseline.plainChars).map(([url, chars]) => [canonicalNewsUrl(url), chars])),
   byteClaims,
 });

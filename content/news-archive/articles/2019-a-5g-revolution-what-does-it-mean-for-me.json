@@ -21,11 +21,12 @@
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/03/2019-–-A-5G-Revolution-What-does-it-mean-for-me_-1.png",
       "alt": "",
       "caption": [],
-      "localPath": null,
-      "originalPath": null,
-      "sha256": null,
+      "localPath": "/images/news-archive/display/dec2110e266d1f11.jpg",
+      "originalPath": "/images/news-archive/original/dec2110e266d1f11.png",
+      "sha256": "dec2110e266d1f113b629ac21daf8c576752e2d02881d13e6c6671a5a39ed6f6",
       "error": null,
-      "assetStatus": "unresolved"
+      "assetStatus": "stored",
+      "byteClaim": null
     },
     {
       "type": "paragraph",

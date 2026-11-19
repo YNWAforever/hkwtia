@@ -2027,6 +2027,7 @@
     "missingPhoto": "這篇文章的一張照片未能存檔。",
     "openPhoto": "這張照片列於正式匯出。檔案尚未放入此稿。",
     "consentOpen": "未展示會員照片。公開這張肖像的同意仍然未決。",
+    "unprovenPhoto": "未展示這張照片。現時公開檔案未經證明與匯出檔相同。",
     "missingFile": "原檔未能存檔。",
     "photoAlt": "存檔照片。來源沒有圖說。",
     "backToList": "全部消息"

@@ -72,15 +72,16 @@ export function parseHtml(input: string): readonly HtmlNode[] {
       const name = close.name.toLowerCase();
       for (let depth = stack.length - 1; depth >= 0; depth -= 1) {
         if (stack[depth]!.tag === name) {
-          const closed = stack.splice(depth);
-          const element = elementNode(closed[0]!);
-          if (depth === 0) parent().push(element);
-          else stack[depth - 1]!.children.push(element);
-          for (const ignored of closed.slice(1)) {
-            const loose = elementNode(ignored);
-            const host = stack.length > 0 ? stack[stack.length - 1]!.children : root;
-            host.push(loose);
+          // An unclosed <p> must stay inside the element that closes around it.
+          // Pushing it out used to drop the PDF link that followed a Fusion column.
+          while (stack.length > depth + 1) {
+            const inner = stack.pop()!;
+            stack[stack.length - 1]!.children.push(elementNode(inner));
           }
+          const closed = stack.pop()!;
+          const element = elementNode(closed);
+          if (stack.length === 0) root.push(element);
+          else stack[stack.length - 1]!.children.push(element);
           break;
         }
       }

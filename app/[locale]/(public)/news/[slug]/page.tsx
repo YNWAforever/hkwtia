@@ -53,17 +53,17 @@ function postSlugOrNotFound(slug: string): string {
 async function publishedNews(locale: AppLocale, slug: string): Promise<{cms: PublishedNewsDetail} | {archive: ArchiveArticle}> {
   const parsed = postSlugOrNotFound(slug);
   let news: PublishedNewsDetail | null = null;
-  let databaseFailed = false;
+  let databaseError: unknown = null;
   try {
     news = await getPublishedNewsBySlug(locale, parsed);
-  } catch {
-    databaseFailed = true;
+  } catch (error) {
+    databaseError = error;
   }
   if (news) return {cms: news};
   const archive = archiveBySlug(parsed);
   if (archive && archive.extractionStatus !== "failed") return {archive};
-  // A database outage must not become a 404 for a slug the archive does not own.
-  if (databaseFailed) throw new Error("NEWS_UNAVAILABLE");
+  // A database outage must not become a 404, and it must not be renamed into a generic error.
+  if (databaseError) throw databaseError;
   notFound();
 }
 
@@ -140,6 +140,7 @@ export default async function NewsPostPage({params}: Props) {
               openPhoto: tNotice("openPhoto"),
               photoAlt: tNotice("photoAlt"),
               consentOpen: tNotice("consentOpen"),
+              unprovenPhoto: tNotice("unprovenPhoto"),
             }}
           />
         </div>

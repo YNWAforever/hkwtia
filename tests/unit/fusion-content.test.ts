@@ -52,6 +52,8 @@ describe("official news reconciliation", () => {
     expect(first.articles.some((article) => article.categories.includes("Meet our Members"))).toBe(false);
     expect(new Set(first.reviewArticles.flatMap((article) => article.categories))).toEqual(new Set(["Resources", "Members' Update", "Meet our Members"]));
     expect(first.reviewArticles.filter((article) => article.categories.includes("Meet our Members")).every((article) => article.blocks.some((block) => block.type === "figure" && block.consent === "open-member-portrait"))).toBe(true);
+    const ericsson = first.reviewArticles.find((article) => article.sourceId === "5010");
+    expect(ericsson?.blocks.some((block) => block.type === "file" && block.sourceUrl.includes("SmarTone-selects-Ericsson") && block.sourceUrl.endsWith(".pdf"))).toBe(true);
     const asa = first.articles.find((article) => article.canonicalUrl.endsWith("/2020/01/2020-asia-smart-app-awards-2020"));
     expect(asa?.plainText).toContain("Create Hong Kong");
     expect(first.articles.some((article) => /\[fusion_/i.test(article.plainText))).toBe(false);

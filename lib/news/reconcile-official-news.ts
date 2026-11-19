@@ -50,6 +50,17 @@ const OPEN_ERROR = "open-awaiting-parent-file";
 
 export type ByteClaim = "wxr-size-match" | "current-url-not-wxr-proven" | "wxr-size-unknown";
 
+/** Unicode and percent-encoded upload URLs name the same official file. */
+export function archiveAssetKey(url: string): string {
+  const bare = url.split("?")[0] ?? url;
+  try {
+    const parsed = new URL(bare);
+    return decodeURI(`${parsed.origin}${parsed.pathname}`);
+  } catch {
+    return bare;
+  }
+}
+
 export function reconcileOfficialArchive(input: Readonly<{
   posts: readonly OfficialPost[];
   storedAssets: ReadonlyMap<string, StoredAsset>;
@@ -57,6 +68,12 @@ export function reconcileOfficialArchive(input: Readonly<{
   previousPlainChars: ReadonlyMap<string, number>;
   byteClaims?: ReadonlyMap<string, ByteClaim>;
 }>): {articles: ArchiveArticle[]; reviewArticles: ArchiveArticle[]; rows: ReconciliationRow[]; review: OfficialPost[]} {
+  const storedAssets = new Map<string, StoredAsset>();
+  for (const [url, asset] of input.storedAssets) storedAssets.set(archiveAssetKey(url), asset);
+  const openUrls = new Set([...input.openUrls].map((url) => archiveAssetKey(url)));
+  const byteClaims = new Map<string, ByteClaim>();
+  for (const [url, claim] of input.byteClaims ?? []) byteClaims.set(archiveAssetKey(url), claim);
+  const normalized = {...input, storedAssets, openUrls, byteClaims};
   const articles: ArchiveArticle[] = [];
   const reviewArticles: ArchiveArticle[] = [];
   const rows: ReconciliationRow[] = [];
@@ -64,7 +81,7 @@ export function reconcileOfficialArchive(input: Readonly<{
   const slugs = new Set<string>();
   for (const post of input.posts) {
     if (post.scope !== "news_archive" && post.scope !== "review_candidate") continue;
-    const built = buildOfficialArticle(post, input, slugs);
+    const built = buildOfficialArticle(post, normalized, slugs);
     if (post.scope === "review_candidate") reviewArticles.push(built.article);
     else articles.push(built.article);
     rows.push(built.row);
@@ -156,12 +173,12 @@ function addFeatured(article: ArchiveArticle, url: string): void {
 
 function applyAsset(block: ArchiveBlock, stored: ReadonlyMap<string, StoredAsset>, openUrls: ReadonlySet<string>, byteClaims: ReadonlyMap<string, ByteClaim>): ArchiveBlock {
   if (block.type !== "figure" && block.type !== "file") return block;
-  const key = block.sourceUrl.split("?")[0] ?? block.sourceUrl;
-  const asset = stored.get(key) ?? stored.get(block.sourceUrl);
+  const key = archiveAssetKey(block.sourceUrl);
+  const asset = stored.get(key);
   if (asset) {
-    return {...block, localPath: asset.localPath, originalPath: asset.originalPath, sha256: asset.sha256, error: null, assetStatus: "stored", byteClaim: byteClaims.get(key) ?? byteClaims.get(block.sourceUrl) ?? null};
+    return {...block, localPath: asset.localPath, originalPath: asset.originalPath, sha256: asset.sha256, error: null, assetStatus: "stored", byteClaim: byteClaims.get(key) ?? null};
   }
-  if (openUrls.has(key) || openUrls.has(block.sourceUrl)) {
+  if (openUrls.has(key)) {
     return {...block, localPath: null, originalPath: null, sha256: null, error: OPEN_ERROR, assetStatus: "open"};
   }
   return {...block, assetStatus: block.localPath ? "stored" : "unresolved"};

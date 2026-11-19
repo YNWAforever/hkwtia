@@ -15,7 +15,7 @@
     "en",
     "zh-Hant"
   ],
-  "plainText": "WTIA 積極推動業界數位轉型，本年度舉行的「Tech Connect 智創互聯」系列活動取得熱烈迴響。其中「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家，圍繞「生成式 AI 如何重塑商業模式」展開深度討論，協助本地中小企掌握最新 AI 工具並提升運營效率。WTIA continues to drive digital transformation within the industry through the highly successful \"Tech Connect\" event series. The \"AI Leaders Summit\" featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC. The summit focused on how Generative AI is reshaping business models, providing local SMEs with the insights needed to master cutting-edge AI tools and enhance operational efficiency.",
+  "plainText": "WTIA 積極推動業界數位轉型，本年度舉行的「Tech Connect 智創互聯」系列活動取得熱烈迴響。其中「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家，圍繞「生成式 AI 如何重塑商業模式」展開深度討論，協助本地中小企掌握最新 AI 工具並提升運營效率。\nWTIA continues to drive digital transformation within the industry through the highly successful \"Tech Connect\" event series. The \"AI Leaders Summit\" featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC. The summit focused on how Generative AI is reshaping business models, providing local SMEs with the insights needed to master cutting-edge AI tools and enhance operational efficiency.",
   "blocks": [
     {
       "type": "figure",
@@ -35,7 +35,12 @@
         {
           "type": "text",
           "text": "WTIA 積極推動業界數位轉型，本年度舉行的「Tech Connect 智創互聯」系列活動取得熱烈迴響。其中「人工智能領袖峰會」邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家，圍繞「生成式 AI 如何重塑商業模式」展開深度討論，協助本地中小企掌握最新 AI 工具並提升運營效率。"
-        },
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
         {
           "type": "text",
           "text": "WTIA continues to drive digital transformation within the industry through the highly successful \"Tech Connect\" event series. The \"AI Leaders Summit\" featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC. The summit focused on how Generative AI is reshaping business models, providing local SMEs with the insights needed to master cutting-edge AI tools and enhance operational efficiency."

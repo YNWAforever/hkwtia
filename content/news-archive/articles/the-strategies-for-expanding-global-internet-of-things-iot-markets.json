@@ -14,7 +14,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "The Strategies for Expanding Global Internet of Things (IoT) Markets\nInternet of things (IoT) is the key enabler to connect all things, it is next industrial revolution which is now changing our living in many ways that we never imagined before. Also, the 5G service in parts of Hong Kong was launched on 1 April 2020. This helps to enable most internet of things (IoT) and as smart city is essentially relied on IoT to function, 5G and smart city is inextricably linked. To develop IoT locally, it is beneficial to capitalise on the global technological infrastructure, such as the rapidly developing 5G mobile network that enables a faster data processing time and a connection of more IoT devices. It is also imperative to make alignments with the current standards regarding the IoT technologies and cyber security. Hong Kong has many talents enterprises in the information & communication technology (ICT) and electronic industries; however, the development of IoT products is affected by the inadequate connections between electronic and ICT industries. In addition, both industries are lacking in the resources to interpret the standards regarding to the IoT technologies and cyber security. To improve this situation, Hong Kong Wireless Technology Industry Association (WTIA) consigned Hong Kong Productivity Council (HKPC) to obtain the approval on SME Development Fund from Trade and Industry Department to launch two seminars, standards studies, ten technical workshops and a one-day TechConnect conference, supporting the enterprise to gain the first hand information about the latest standards and IoT technologies. This could help to tighter the connections between the enterprises and their counterparts worldwide, and ultimately augment their competitiveness.\nGuide Book:\n*For any comments of the Guide Book, please feel free to fill in and submit the survey to lorettayip@hkpc.org.\nDownload\nDownload\nDownload\nDownload\n*Any opinions, findings, conclusions or recommendations expressed in this material / event (or by members of the Project team) do not reflect the views of the Government of the Hong Kong Special Administrative Region, Trade and Industry Department or the Vetting Committee of the SME Development Fund and the Dedicated Fund on Branding, Upgrading and Domestic Sales (Organisation Support Programme).",
+  "plainText": "The Strategies for Expanding Global Internet of Things (IoT) Markets\nInternet of things (IoT) is the key enabler to connect all things, it is next industrial revolution which is now changing our living in many ways that we never imagined before. Also, the 5G service in parts of Hong Kong was launched on 1 April 2020. This helps to enable most internet of things (IoT) and as smart city is essentially relied on IoT to function, 5G and smart city is inextricably linked.\nTo develop IoT locally, it is beneficial to capitalise on the global technological infrastructure, such as the rapidly developing 5G mobile network that enables a faster data processing time and a connection of more IoT devices. It is also imperative to make alignments with the current standards regarding the IoT technologies and cyber security.\nHong Kong has many talents enterprises in the information & communication technology (ICT) and electronic industries; however, the development of IoT products is affected by the inadequate connections between electronic and ICT industries. In addition, both industries are lacking in the resources to interpret the standards regarding to the IoT technologies and cyber security.\nTo improve this situation, Hong Kong Wireless Technology Industry Association (WTIA) consigned Hong Kong Productivity Council (HKPC) to obtain the approval on SME Development Fund from Trade and Industry Department to launch two seminars, standards studies, ten technical workshops and a one-day TechConnect conference, supporting the enterprise to gain the first hand information about the latest standards and IoT technologies. This could help to tighter the connections between the enterprises and their counterparts worldwide, and ultimately augment their competitiveness.\nGuide Book:\n*For any comments of the Guide Book, please feel free to fill in and submit the survey to lorettayip@hkpc.org.\nThe-Strategies-for-Expanding-Global-IoT-Markets1.pdf\nThe-Strategies-for-Expanding-Global-IoT-Markets1.pdf\nDownload\nSurvey-for-guidebook.pdf\nSurvey-for-guidebook.pdf\nDownload\n*Any opinions, findings, conclusions or recommendations expressed in this material / event (or by members of the Project team) do not reflect the views of the Government of the Hong Kong Special Administrative Region, Trade and Industry Department or the Vetting Committee of the SME Development Fund and the Dedicated Fund on Branding, Upgrading and Domestic Sales (Organisation Support Programme).",
   "blocks": [
     {
       "type": "heading",
@@ -31,7 +31,34 @@
       "children": [
         {
           "type": "text",
-          "text": " Internet of things (IoT) is the key enabler to connect all things, it is next industrial revolution which is now changing our living in many ways that we never imagined before. Also, the 5G service in parts of Hong Kong was launched on 1 April 2020. This helps to enable most internet of things (IoT) and as smart city is essentially relied on IoT to function, 5G and smart city is inextricably linked. To develop IoT locally, it is beneficial to capitalise on the global technological infrastructure, such as the rapidly developing 5G mobile network that enables a faster data processing time and a connection of more IoT devices. It is also imperative to make alignments with the current standards regarding the IoT technologies and cyber security. Hong Kong has many talents enterprises in the information & communication technology (ICT) and electronic industries; however, the development of IoT products is affected by the inadequate connections between electronic and ICT industries. In addition, both industries are lacking in the resources to interpret the standards regarding to the IoT technologies and cyber security. To improve this situation, Hong Kong Wireless Technology Industry Association (WTIA) consigned Hong Kong Productivity Council (HKPC) to obtain the approval on SME Development Fund from Trade and Industry Department to launch two seminars, standards studies, ten technical workshops and a one-day TechConnect conference, supporting the enterprise to gain the first hand information about the latest standards and IoT technologies. This could help to tighter the connections between the enterprises and their counterparts worldwide, and ultimately augment their competitiveness. "
+          "text": "Internet of things (IoT) is the key enabler to connect all things, it is next industrial revolution which is now changing our living in many ways that we never imagined before.  Also, the 5G service in parts of Hong Kong was launched on 1 April 2020.  This helps to enable most internet of things (IoT) and as smart city is essentially relied on IoT to function, 5G and smart city is inextricably linked."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "To develop IoT locally, it is beneficial to capitalise on the global technological infrastructure, such as the rapidly developing 5G mobile network that enables a faster data processing time and a connection of more IoT devices. It is also imperative to make alignments with the current standards regarding the IoT technologies and cyber security."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Hong Kong has many talents enterprises in the information & communication technology (ICT) and electronic industries; however, the development of IoT products is affected by the inadequate connections between electronic and ICT industries.  In addition, both industries are lacking in the resources to interpret the standards regarding to the IoT technologies and cyber security."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "To improve this situation, Hong Kong Wireless Technology Industry Association (WTIA) consigned Hong Kong Productivity Council (HKPC) to obtain the approval on SME Development Fund from Trade and Industry Department to launch two seminars, standards studies, ten technical workshops and a one-day TechConnect conference, supporting the enterprise to gain the first hand information about the latest standards and IoT technologies.  This could help to tighter the connections between the enterprises and their counterparts worldwide, and ultimately augment their competitiveness."
         }
       ]
     },
@@ -72,7 +99,7 @@
           "children": [
             {
               "type": "text",
-              "text": "Download"
+              "text": "The-Strategies-for-Expanding-Global-IoT-Markets1.pdf"
             }
           ]
         }
@@ -81,10 +108,51 @@
     {
       "type": "file",
       "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/11/The-Strategies-for-Expanding-Global-IoT-Markets1.pdf",
-      "label": "Download",
+      "label": "The-Strategies-for-Expanding-Global-IoT-Markets1.pdf",
       "localPath": "/files/news-archive/294d4968e0ecaf45.pdf",
       "originalPath": null,
       "sha256": "294d4968e0ecaf453b7a77a6a4600d0edbd2b837f8d6d97142869416c291d452",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/11/The-Strategies-for-Expanding-Global-IoT-Markets1.pdf",
+          "children": [
+            {
+              "type": "text",
+              "text": "Download"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/10/Survey-for-guidebook.pdf",
+          "children": [
+            {
+              "type": "text",
+              "text": "Survey-for-guidebook.pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/10/Survey-for-guidebook.pdf",
+      "label": "Survey-for-guidebook.pdf",
+      "localPath": "/files/news-archive/1f8387cd0feb1a0d.pdf",
+      "originalPath": null,
+      "sha256": "1f8387cd0feb1a0d54d8011214961b01e511bb863f1a1ecea4542ccbdf9bde8d",
       "error": null,
       "assetStatus": "stored",
       "byteClaim": "wxr-size-unknown"
@@ -103,17 +171,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "file",
-      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/10/Survey-for-guidebook.pdf",
-      "label": "Download",
-      "localPath": "/files/news-archive/1f8387cd0feb1a0d.pdf",
-      "originalPath": null,
-      "sha256": "1f8387cd0feb1a0d54d8011214961b01e511bb863f1a1ecea4542ccbdf9bde8d",
-      "error": null,
-      "assetStatus": "stored",
-      "byteClaim": "wxr-size-unknown"
     },
     {
       "type": "paragraph",

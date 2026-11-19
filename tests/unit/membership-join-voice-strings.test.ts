@@ -178,7 +178,8 @@ const TIER_BENEFITS = {
   },
 } as const;
 
-const NON_ALLOWLIST_FINGERPRINT = "bdc753bcf4762cea4e4f6438f9dddbd810ec831d53db6d37c1ca664e884d2c07";
+// Moved when News.notice.unprovenPhoto was added in both locales. Membership and Join copy is unchanged.
+const NON_ALLOWLIST_FINGERPRINT = "61abf1b47b0ec09a06cd1ec79648fcf5cd81e7c1e8cef7c1936e7dfa23a3ef8f";
 
 type MessageTree = Record<string, unknown>;
 

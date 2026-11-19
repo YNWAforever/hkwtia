@@ -15,7 +15,7 @@
     "en",
     "zh-Hant"
   ],
-  "plainText": "SmarTone 選用愛立信5G\n共同推動香港5G數碼化\n\n愛立信將為SmarTone建構無線接入網 (RAN) 及核心網\nSmarTone 將採用愛立信獨有的頻譜共享功能，靈活彈性及有效地運用頻譜\n合作涵蓋雙模5G雲端核網的應用，包括全面網路功能虛擬化、人工智能驅動的無線接入網與愛立信網絡及業務編排平台",
+  "plainText": "SmarTone 選用愛立信5G\n共同推動香港5G數碼化\n\n愛立信將為SmarTone建構無線接入網 (RAN) 及核心網\nSmarTone 將採用愛立信獨有的頻譜共享功能，靈活彈性及有效地運用頻譜\n合作涵蓋雙模5G雲端核網的應用，包括全面網路功能虛擬化、人工智能驅動的無線接入網與愛立信網絡及業務編排平台\nSmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf\nSmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf\nSmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf\nSmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf",
   "blocks": [
     {
       "type": "heading",
@@ -84,6 +84,58 @@
           }
         ]
       ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-%E9%81%B8%E7%94%A8%E6%84%9B%E7%AB%8B%E4%BF%A15G-%E5%85%B1%E5%90%8C%E6%8E%A8%E5%8B%95%E9%A6%99%E6%B8%AF5G%E6%95%B8%E7%A2%BC%E5%8C%96_web.pdf",
+          "children": [
+            {
+              "type": "text",
+              "text": "SmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-%E9%81%B8%E7%94%A8%E6%84%9B%E7%AB%8B%E4%BF%A15G-%E5%85%B1%E5%90%8C%E6%8E%A8%E5%8B%95%E9%A6%99%E6%B8%AF5G%E6%95%B8%E7%A2%BC%E5%8C%96_web.pdf",
+      "label": "SmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf",
+      "localPath": "/files/news-archive/261eb8ed5ca4c69e.pdf",
+      "originalPath": null,
+      "sha256": "261eb8ed5ca4c69eaa03620c785d32ac0e3aca9032c892fb0d892ef99f58f009",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-selects-Ericsson%E2%80%99s-5G-to-power-digitalization-in-Hong-Kong_web.pdf",
+          "children": [
+            {
+              "type": "text",
+              "text": "SmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "sourceUrl": "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-selects-Ericsson%E2%80%99s-5G-to-power-digitalization-in-Hong-Kong_web.pdf",
+      "label": "SmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf",
+      "localPath": "/files/news-archive/105e0e7ae2135ff5.pdf",
+      "originalPath": null,
+      "sha256": "105e0e7ae2135ff58210f0a1e4a67f37a5141872434c9c388c24fbd10e2a7eb1",
+      "error": null,
+      "assetStatus": "stored",
+      "byteClaim": "wxr-size-unknown"
     }
   ],
   "extractionStatus": "extracted",

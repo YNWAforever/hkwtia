@@ -451,6 +451,16 @@
       "localPath": "/files/news-archive/f454211c797d7a7c.pdf",
       "originalPath": null,
       "sha256": "f454211c797d7a7c28ad7da2a69ca0fe778a962b6ab58f1757dfc34cf1973582"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/05/SmarTone-選用愛立信5G-共同推動香港5G數碼化_web.pdf": {
+      "localPath": "/files/news-archive/261eb8ed5ca4c69e.pdf",
+      "originalPath": null,
+      "sha256": "261eb8ed5ca4c69eaa03620c785d32ac0e3aca9032c892fb0d892ef99f58f009"
+    },
+    "https://hkwtia.org/wp-content/uploads/2020/06/SmarTone-selects-Ericsson’s-5G-to-power-digitalization-in-Hong-Kong_web.pdf": {
+      "localPath": "/files/news-archive/105e0e7ae2135ff5.pdf",
+      "originalPath": null,
+      "sha256": "105e0e7ae2135ff58210f0a1e4a67f37a5141872434c9c388c24fbd10e2a7eb1"
     }
   }
 }

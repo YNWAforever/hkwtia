@@ -14,7 +14,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "Mr. Keith Li was elected as Chairman of Hong Kong Wireless Technology Industry Association in the term of 2022-2024 The 19th term of Annual General Meeting of Hong Kong Wireless Technology Industry Association (WTIA) was held on 1 September 2022. Mr. Li King Wah (Keith Li), Co-founder and CEO, Innopage Limited was elected to be the Chairman in the term of 2022-2024, with 2 September 2022 as the commencement date. Mr. Li expressed appreciation to WTIA members and members of cabinet for their trust and support, and said he was very honoured to be elected as the Chairman of WTIA in the term of 2022-2024. He stated WTIA will organise various activities to create business opportunities, attract talent for members and the industry. Mr. Li said that he will strive to lead the new Executive Committees and WTIA members to face challenges and difficulties in the new term. The following is the list of WTIA committees in 2022-2024: Chairman Mr. Keith Li Vice-Chairman Mr. Donald Chan, Dr. Lawrence Cheung, Mr. Sunny Kok Treasurer Mr. Nelson Tse Executive Committee Mr. Alex Kun, Mr. Antony Ma, Mr. Ivan So (New), Mr. Jimmy Chan, Dr. Lawrence Poon, Mr. Leo To, Ms. Ping Wong, Mr. Vincent Tsui (New) About WTIA Hong Kong Wireless Technology Industry Association (WTIA), established in 2001, is a not-for-profit, politically-neutral trade association dedicated to the wireless and mobile industry.",
+  "plainText": "Mr. Keith Li was elected as Chairman of Hong Kong Wireless Technology Industry Association in the term of 2022-2024\nThe 19th term of Annual General Meeting of Hong Kong Wireless Technology Industry Association (WTIA) was held on 1 September 2022. Mr. Li King Wah (Keith Li), Co-founder and CEO, Innopage Limited was elected to be the Chairman in the term of 2022-2024, with 2 September 2022 as the commencement date.\nMr. Li expressed appreciation to WTIA members and members of cabinet for their trust and support, and said he was very honoured to be elected as the Chairman of WTIA in the term of 2022-2024. He stated WTIA will organise various activities to create business opportunities, attract talent for members and the industry.\nMr. Li said that he will strive to lead the new Executive Committees and WTIA members to face challenges and difficulties in the new term.\nThe following is the list of WTIA committees in 2022-2024:\nChairman Mr. Keith Li\nVice-Chairman Mr. Donald Chan, Dr. Lawrence Cheung, Mr. Sunny Kok\nTreasurer Mr. Nelson Tse\nExecutive Committee Mr. Alex Kun, Mr. Antony Ma, Mr. Ivan So (New), Mr. Jimmy Chan, Dr. Lawrence Poon, Mr. Leo To, Ms. Ping Wong, Mr. Vincent Tsui (New)\nAbout WTIA\nHong Kong Wireless Technology Industry Association (WTIA), established in 2001, is a not-for-profit, politically-neutral trade association dedicated to the wireless and mobile industry.",
   "blocks": [
     {
       "type": "figure",
@@ -32,7 +32,16 @@
       "children": [
         {
           "type": "text",
-          "text": " Mr. Keith Li was elected as Chairman of Hong Kong Wireless Technology Industry Association in the term of 2022-2024 The 19th term of Annual General Meeting of Hong Kong Wireless Technology Industry Association (WTIA) was held on 1 September 2022. Mr. Li King Wah ("
+          "text": "Mr. Keith Li was elected as Chairman of Hong Kong Wireless Technology Industry Association in the term of 2022-2024"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The 19th term of Annual General Meeting of Hong Kong Wireless Technology Industry Association (WTIA) was held on 1 September 2022. Mr. Li King Wah ("
         },
         {
           "type": "link",
@@ -46,7 +55,88 @@
         },
         {
           "type": "text",
-          "text": "), Co-founder and CEO, Innopage Limited was elected to be the Chairman in the term of 2022-2024, with 2 September 2022 as the commencement date. Mr. Li expressed appreciation to WTIA members and members of cabinet for their trust and support, and said he was very honoured to be elected as the Chairman of WTIA in the term of 2022-2024. He stated WTIA will organise various activities to create business opportunities, attract talent for members and the industry. Mr. Li said that he will strive to lead the new Executive Committees and WTIA members to face challenges and difficulties in the new term. The following is the list of WTIA committees in 2022-2024: Chairman Mr. Keith Li Vice-Chairman Mr. Donald Chan, Dr. Lawrence Cheung, Mr. Sunny Kok Treasurer Mr. Nelson Tse Executive Committee Mr. Alex Kun, Mr. Antony Ma, Mr. Ivan So (New), Mr. Jimmy Chan, Dr. Lawrence Poon, Mr. Leo To, Ms. Ping Wong, Mr. Vincent Tsui (New) About WTIA Hong Kong Wireless Technology Industry Association (WTIA), established in 2001, is a not-for-profit, politically-neutral trade association dedicated to the wireless and mobile industry."
+          "text": "), Co-founder and CEO, Innopage Limited was elected to be the Chairman in the term of 2022-2024, with 2 September 2022 as the commencement date."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Mr. Li expressed appreciation to WTIA members and members of cabinet for their trust and support, and said he was very honoured to be elected as the Chairman of WTIA in the term of 2022-2024. He stated WTIA will organise various activities to create business opportunities, attract talent for members and the industry."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Mr. Li said that he will strive to lead the new Executive Committees and WTIA members to face challenges and difficulties in the new term."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "The following is the list of WTIA committees in 2022-2024:"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Chairman Mr. Keith Li"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Vice-Chairman Mr. Donald Chan, Dr. Lawrence Cheung, Mr. Sunny Kok"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Treasurer Mr. Nelson Tse"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Executive Committee Mr. Alex Kun, Mr. Antony Ma, Mr. Ivan So (New), Mr. Jimmy Chan, Dr. Lawrence Poon, Mr. Leo To, Ms. Ping Wong, Mr. Vincent Tsui (New)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "About WTIA"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Hong Kong Wireless Technology Industry Association (WTIA), established in 2001, is a not-for-profit, politically-neutral trade association dedicated to the wireless and mobile industry."
         }
       ]
     }

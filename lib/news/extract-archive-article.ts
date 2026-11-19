@@ -135,8 +135,13 @@ function blocksFrom(nodes: readonly HtmlNode[], pageUrl: string): ArchiveBlock[]
   };
   for (const node of nodes) {
     if (node.type === "text") {
-      const text = node.text.replace(/\s+/g, " ");
-      if (text.trim()) inline.push({type: "text", text});
+      // Official Fusion text uses blank lines as paragraphs and has no <p> tags.
+      const pieces = node.text.split(/\n[ \t]*\n/);
+      pieces.forEach((piece, index) => {
+        if (index > 0) flush();
+        const text = piece.replace(/[ \t]*\n[ \t]*/g, " ").replace(/[ \t]{2,}/g, " ");
+        if (text.trim()) inline.push({type: "text", text});
+      });
       continue;
     }
     if (SKIP_CLASS.test(attr(node, "class")) || node.tag === "script" || node.tag === "style" || node.tag === "form" || node.tag === "noscript") continue;

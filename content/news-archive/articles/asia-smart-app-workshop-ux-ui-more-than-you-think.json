@@ -14,7 +14,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "Innopage x Green Tomato\n- UX/UI More Than You Think\nUser Experience and User Interface (UX/UI) design is more than creating good looking products. You will explore the valuable insights and experience with which design techniques that can help developer to make better apps, with more human-centred, innovative and funny elements. If you are planning to have your own mobile application, website, or custom web app or have any type of query or concern regarding its concept, technical know-how, the best way to get it done then don’t hesitate to join the Workshop. Date: 8th September 2020 (Tuesday) Time: 3:00 - 5:00pm (GMT+8) Format: Live Webinar Language: English\nSpeakers:\nMr. Keith Li, Co-Founder & CEO, Innopage\nMr. Kevin Kwok, Senior UI/UX Manager, GreenTomato\nWebinars replay:Presentation Deck:\nDownload\nDownload\nDownload\nDownload",
+  "plainText": "Innopage x Green Tomato\n- UX/UI More Than You Think\nUser Experience and User Interface (UX/UI) design is more than creating good looking products. You will explore the valuable insights and experience with which design techniques that can help developer to make better apps, with more human-centred, innovative and funny elements.\nIf you are planning to have your own mobile application, website, or custom web app or have any type of query or concern regarding its concept, technical know-how, the best way to get it done then don’t hesitate to join the Workshop.\nDate: 8th September 2020 (Tuesday) Time: 3:00 - 5:00pm (GMT+8) Format: Live Webinar Language: English\nSpeakers:\nMr. Keith Li, Co-Founder & CEO, Innopage\nMr. Kevin Kwok, Senior UI/UX Manager, GreenTomato\nWebinars replay:\nPresentation Deck:\nKeith-Li-Brief-intro-to-UX\nDownload\nDownload\nDeck_UIUX_MoreThanYouThink_V4\nDownload\nDownload",
   "blocks": [
     {
       "type": "heading",
@@ -50,7 +50,25 @@
         },
         {
           "type": "text",
-          "text": " design is more than creating good looking products. You will explore the valuable insights and experience with which design techniques that can help developer to make better apps, with more human-centred, innovative and funny elements. If you are planning to have your own mobile application, website, or custom web app or have any type of query or concern regarding its concept, technical know-how, the best way to get it done then don’t hesitate to join the Workshop. Date: "
+          "text": " design is more than creating good looking products. You will explore the valuable insights and experience with which design techniques that can help developer to make better apps, with more human-centred, innovative and funny elements."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "If you are planning to have your own mobile application, website, or custom web app or have any type of query or concern regarding its concept, technical know-how, the best way to get it done then don’t hesitate to join the Workshop."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Date: "
         },
         {
           "type": "strong",
@@ -110,13 +128,33 @@
               "text": "Webinars replay:"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
         {
           "type": "strong",
           "children": [
             {
               "type": "text",
               "text": "Presentation Deck:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/09/Keith-Li-Brief-intro-to-UX",
+          "children": [
+            {
+              "type": "text",
+              "text": "Keith-Li-Brief-intro-to-UX"
             }
           ]
         }
@@ -147,6 +185,21 @@
       "error": null,
       "assetStatus": "stored",
       "byteClaim": "wxr-size-unknown"
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "link",
+          "href": "https://hkwtia.org/wp-content/uploads/2020/09/Deck_UIUX_MoreThanYouThink_V4",
+          "children": [
+            {
+              "type": "text",
+              "text": "Deck_UIUX_MoreThanYouThink_V4"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",

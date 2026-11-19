@@ -14,7 +14,7 @@
   "sourceLanguages": [
     "en"
   ],
-  "plainText": "Dear Partners and Friends, We regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 - ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed until further notice. Latest information of ICT Startup Award can be viewed at : https://www.ictstartup.org/ If there is any question, please contact Ms Kylie Li via (2989 9164, ictstartup@hkwtia.org).",
+  "plainText": "Dear Partners and Friends,\nWe regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 - ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed until further notice.\nLatest information of ICT Startup Award can be viewed at : https://www.ictstartup.org/\nIf there is any question, please contact Ms Kylie Li via (2989 9164, ictstartup@hkwtia.org).",
   "blocks": [
     {
       "type": "figure",
@@ -33,7 +33,16 @@
       "children": [
         {
           "type": "text",
-          "text": "Dear Partners and Friends, We regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 - ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed "
+          "text": "Dear Partners and Friends,"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "We regret to inform you that all assessments and judging, along with the awards presentation ceremony of Hong Kong ICT Awards 2020 - ICT Startup Award originally scheduled for 3 Apr 2020, has been postponed "
         },
         {
           "type": "strong",
@@ -46,7 +55,16 @@
         },
         {
           "type": "text",
-          "text": ". Latest information of ICT Startup Award can be viewed at : "
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "text": "Latest information of ICT Startup Award can be viewed at : "
         },
         {
           "type": "link",
@@ -57,10 +75,15 @@
               "text": "https://www.ictstartup.org/"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
         {
           "type": "text",
-          "text": " If there is any question, please contact Ms Kylie Li via (2989 9164, "
+          "text": "If there is any question, please contact Ms Kylie Li via (2989 9164, "
         },
         {
           "type": "text",

@@ -2026,6 +2026,7 @@
     "missingPhoto": "A photograph from this article could not be archived.",
     "openPhoto": "This photograph is listed in the official export. The file is not in this draft yet.",
     "consentOpen": "Member photograph withheld. Consent to publish this portrait is still open.",
+    "unprovenPhoto": "This photograph is not shown. The current public file is not proven identical to the export.",
     "missingFile": "The original file could not be archived.",
     "photoAlt": "Archived photograph. The source did not include a caption.",
     "backToList": "All news"

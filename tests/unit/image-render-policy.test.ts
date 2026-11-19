@@ -51,7 +51,16 @@ describe("image render policy", () => {
   it.each(sources)("%s uses no raw img and only the authorized optimizer bypass", (path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
 
-    expect(source).not.toMatch(/<img[\s/>]/);
+    if (path === "components/marketing/news-archive-body.tsx") {
+      // Archive photos have no recorded frame. A guessed next/image ratio would crop them.
+      // The file is a local public derivative, not a private upload, and it is not unoptimized.
+      expect(source).toContain("Archival photographs have no fixed frame");
+      expect(source).toContain("src={block.localPath}");
+      expect(source).not.toContain("unoptimized");
+      expect(source).not.toMatch(/src=["']https?:/);
+    } else {
+      expect(source).not.toMatch(/<img[\s/>]/);
+    }
     if (revocationAwareConsumers.has(path)) {
       expect(source).toMatch(/from ['"]@\/lib\/media\/url['"]/);
       expect(source).toContain("unoptimized={isPrivateMediaDeliveryUrl(");

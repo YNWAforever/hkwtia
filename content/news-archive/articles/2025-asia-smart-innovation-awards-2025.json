@@ -15,7 +15,7 @@
     "en",
     "zh-Hant"
   ],
-  "plainText": "「亞洲智慧創新大獎 2025」（前身為亞洲智能應用大獎）於 10 月 16 日在香港康得思酒店舉行頒獎典禮。本屆賽事吸引了來自亞洲 17 個地區的頂尖團隊參與，規模創下歷年之最。本年度最高殊榮「亞洲智能創新大獎」由泰國團隊 RIFFAI 奪得。香港代表亦表現優異，其中 417 Technology Limited 奪得「生活與文化組別」銀獎。The \"Asia Smart Innovation Awards 2025\" (formerly Asia Smart App Awards) held its gala presentation ceremony at Cordis Hong Kong on October 16. Attracting top-tier teams from 17 Asian regions, this year's scale reached a historic high. The \"Asia Smart Innovation Grand Award\" was claimed by the Thai team RIFFAI. Hong Kong representatives also delivered outstanding performances, with 417 Technology Limited securing the Silver Award in the \"Living & Culture\" category.",
+  "plainText": "「亞洲智慧創新大獎 2025」（前身為亞洲智能應用大獎）於 10 月 16 日在香港康得思酒店舉行頒獎典禮。本屆賽事吸引了來自亞洲 17 個地區的頂尖團隊參與，規模創下歷年之最。本年度最高殊榮「亞洲智能創新大獎」由泰國團隊 RIFFAI 奪得。香港代表亦表現優異，其中 417 Technology Limited 奪得「生活與文化組別」銀獎。\nThe \"Asia Smart Innovation Awards 2025\" (formerly Asia Smart App Awards) held its gala presentation ceremony at Cordis Hong Kong on October 16. Attracting top-tier teams from 17 Asian regions, this year's scale reached a historic high. The \"Asia Smart Innovation Grand Award\" was claimed by the Thai team RIFFAI. Hong Kong representatives also delivered outstanding performances, with 417 Technology Limited securing the Silver Award in the \"Living & Culture\" category.",
   "blocks": [
     {
       "type": "figure",
@@ -61,7 +61,12 @@
         {
           "type": "text",
           "text": " 奪得「生活與文化組別」銀獎。"
-        },
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "children": [
         {
           "type": "text",
           "text": "The \"Asia Smart Innovation Awards 2025\" (formerly Asia Smart App Awards) held its gala presentation ceremony at Cordis Hong Kong on October 16. Attracting top-tier teams from 17 Asian regions, this year's scale reached a historic high. The \"Asia Smart Innovation Grand Award\" was claimed by the Thai team "
