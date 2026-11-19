@@ -52,6 +52,16 @@ describe("Ask WTIA clearance", () => {
     expect(chrome).toContain(".site-root main { padding-bottom: calc(54px + 22px + 24px); }");
   });
 
+  it("keeps headings and flagship blurbs out of the launcher by inline-end clearance, not more bottom padding", () => {
+    expect(chrome).toContain("padding-inline-end: var(--ask-wtia-inline-clearance);");
+    expect(chrome).toContain(".site-root main .section-heading,");
+    expect(chrome).toContain(".flagship-grid > .programme-card:last-child");
+    expect(chrome).not.toMatch(/@media \(min-width: 821px\)/);
+    expect(chrome).toContain("@media (max-width: 820px)");
+    const added = chrome.slice(chrome.indexOf("The launcher is fixed"), chrome.indexOf("@media (max-width: 430px)"));
+    expect(added).not.toContain("padding-bottom");
+  });
+
   it("keeps a scroll margin under the launcher up to 820px without changing main padding", () => {
     expect(chrome).toContain("@media (max-width: 820px)");
     expect(chrome).toContain("html { scroll-padding-bottom: 96px; }");

@@ -1,5 +1,5 @@
 import {createHash} from "node:crypto";
-import {readFileSync} from "node:fs";
+import {existsSync, readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {describe, expect, it} from "vitest";
@@ -151,15 +151,15 @@ function jpegSize(bytes: Buffer) {
 }
 
 describe("exco portrait fill against 46817a0f", () => {
-  it("changes only the three empty portrait refs", () => {
+  it("keeps the three portrait refs empty while consent is unproven", () => {
     const diff = portraitDiff(excoRoster.map(structural), baseRoster.map(structural));
     expect(diff.otherChanges).toEqual([]);
-    expect(diff.photoChanges).toEqual(["donald-chan", "jimmy-chan", "alex-kun"]);
-    for (const [slug, photo] of Object.entries(filledPhotos)) {
-      expect(excoRoster.find((member) => member.slug === slug)?.photo).toBe(photo);
-      expect(baseRoster.find((member) => member.slug === slug)?.photo).toBeNull();
+    expect(diff.photoChanges).toEqual([]);
+    for (const slug of Object.keys(filledPhotos)) {
+      expect(excoRoster.find((member) => member.slug === slug)?.photo).toBeNull();
     }
-    expect(excoRoster.filter((member) => member.photo === null)).toEqual([]);
+    const rendered = excoRoster.filter((member) => member.photo === null).map((member) => member.slug);
+    expect(rendered).toEqual(["donald-chan", "jimmy-chan", "alex-kun"]);
   });
 
   it("leaves EN and zh-HK committee copy, including Donald and Jimmy name-only bios, unchanged", () => {
@@ -190,16 +190,18 @@ describe("exco portrait fill against 46817a0f", () => {
     expect(sha256(committees)).not.toBe(baseCommitteesSha256.en);
   });
 
-  it("stores the three display derivatives and records official-page provenance", () => {
+  it("keeps the three derivatives off the public web root and records provenance", () => {
     const rosterSource = readFileSync(resolve(process.cwd(), "content/exco-roster.ts"), "utf8");
     expect(rosterSource).toContain("Old-site publication does not establish consent");
+    expect(rosterSource).toContain("content/exco-portraits-withheld/");
     expect(rosterSource).toContain("https://hkwtia.org/wp-content/uploads/2020/02/Jimmy-Chan.jpg");
     for (const source of Object.values(sourceProvenance)) {
       expect(rosterSource).toContain(source.url);
       expect(rosterSource).toContain(source.sha256);
     }
     for (const [fileName, expected] of Object.entries(displayDerivatives)) {
-      const bytes = readFileSync(resolve(process.cwd(), "public/images/exco", fileName));
+      expect(existsSync(resolve(process.cwd(), "public/images/exco", fileName))).toBe(false);
+      const bytes = readFileSync(resolve(process.cwd(), "content/exco-portraits-withheld", fileName));
       expect(createHash("sha256").update(bytes).digest("hex")).toBe(expected.sha256);
       expect(jpegSize(bytes)).toEqual({width: expected.width, height: expected.height});
     }

@@ -167,9 +167,9 @@ describe("exco roster source", () => {
     expect(enRoster["jimmy-chan"]).toEqual({name: "Jimmy Chan"});
     expect(zhRoster["donald-chan"]).toEqual({name: "Donald Chan"});
     expect(zhRoster["jimmy-chan"]).toEqual({name: "Jimmy Chan"});
-    expect(excoRoster.find((member) => member.slug === "alex-kun")?.photo).toBe("/images/exco/alex-kun.jpg");
-    expect(excoRoster.find((member) => member.slug === "donald-chan")?.photo).toBe("/images/exco/donald-chan.jpg");
-    expect(excoRoster.find((member) => member.slug === "jimmy-chan")?.photo).toBe("/images/exco/jimmy-chan.jpg");
+    expect(excoRoster.find((member) => member.slug === "alex-kun")?.photo).toBeNull();
+    expect(excoRoster.find((member) => member.slug === "donald-chan")?.photo).toBeNull();
+    expect(excoRoster.find((member) => member.slug === "jimmy-chan")?.photo).toBeNull();
     expect(excoRoster.find((member) => member.slug === "lawrence-cheung")?.photo).toBe("/images/exco/lawrence-cheung.jpg");
     expect(excoRoster.filter((member) => member.photoPosition === "top").map((member) => member.slug)).toEqual(["ricky-chan", "antony-ma"]);
   });

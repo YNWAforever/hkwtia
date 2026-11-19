@@ -36,11 +36,12 @@
 // lawrence-cheung.jpg (not lawrence-cheung-alt.jpg). Display files keep the
 // source aspect; the 4:5 card crops with object-fit and does not pre-crop them.
 //
-// Alex Kun, Donald Chan, and Jimmy Chan use derivatives of the official
-// executive-committee page (https://hkwtia.org/executive-committee/, CMS 1736,
-// saved 2026-11-17 01:01 HKT). Old-site publication does not establish consent
-// for this site. The fill is only the t520u authorization for these three
-// portraits. mozjpeg progressive, quality 82, no crop, metadata stripped.
+// Alex Kun, Donald Chan, and Jimmy Chan derivatives are withheld.
+// Old-site publication does not establish consent, and no later consent record exists.
+// photo stays null, so the page keeps the letter-free fallback. The files are
+// not under public/ and are not served. They remain the t520u official-page
+// derivatives (mozjpeg progressive, quality 82, no crop, metadata stripped),
+// stored at content/exco-portraits-withheld/<slug>.jpg until a consent decision.
 //   alex-kun — https://hkwtia.org/wp-content/uploads/2020/02/Alex-Kun-3-scaled-e1588757660518.jpg
 //     source 2310×2310 sha256 d0fa7c940ad63f59f17584fe2610d737220b042289fc81134f106a637271b85e
 //     derivative 1600×1600 (existing longest-edge convention), aspect 1:1.
@@ -78,13 +79,13 @@ export type ExcoRosterMember = Readonly<{
 
 export const excoRoster: readonly ExcoRosterMember[] = [
   {slug: "willy-lai", surname: "Lai", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/willy-lai.jpg", photoPosition: "center", zhPending: false},
-  {slug: "donald-chan", surname: "Chan", wtiaRole: false, title: false, organization: false, bio: false, photo: "/images/exco/donald-chan.jpg", photoPosition: "center", zhPending: true},
-  {slug: "jimmy-chan", surname: "Chan", wtiaRole: false, title: false, organization: false, bio: false, photo: "/images/exco/jimmy-chan.jpg", photoPosition: "center", zhPending: true},
+  {slug: "donald-chan", surname: "Chan", wtiaRole: false, title: false, organization: false, bio: false, photo: null, photoPosition: "center", zhPending: true},
+  {slug: "jimmy-chan", surname: "Chan", wtiaRole: false, title: false, organization: false, bio: false, photo: null, photoPosition: "center", zhPending: true},
   {slug: "ricky-chan", surname: "Chan", wtiaRole: false, title: true, organization: false, bio: true, photo: "/images/exco/ricky-chan.jpg", photoPosition: "top", zhPending: false},
   {slug: "burton-chau", surname: "Chau", wtiaRole: false, title: true, organization: false, bio: true, photo: "/images/exco/burton-chau.jpg", photoPosition: "center", zhPending: false},
   {slug: "lawrence-cheung", surname: "Cheung", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/lawrence-cheung.jpg", photoPosition: "center", zhPending: false},
   {slug: "simon-ha", surname: "Ha", wtiaRole: true, title: true, organization: false, bio: true, photo: "/images/exco/simon-ha.jpg", photoPosition: "center", zhPending: false},
-  {slug: "alex-kun", surname: "Kun", wtiaRole: false, title: true, organization: true, bio: true, photo: "/images/exco/alex-kun.jpg", photoPosition: "center", zhPending: false},
+  {slug: "alex-kun", surname: "Kun", wtiaRole: false, title: true, organization: true, bio: true, photo: null, photoPosition: "center", zhPending: false},
   {slug: "larry-lam", surname: "Lam", wtiaRole: false, title: false, organization: false, bio: true, linkedIn: true, photo: "/images/exco/larry-lam.jpg", photoPosition: "center", zhPending: false},
   {slug: "antony-ma", surname: "Ma", wtiaRole: false, title: true, organization: false, bio: true, photo: "/images/exco/antony-ma.jpg", photoPosition: "top", zhPending: false},
   {slug: "jess-mak", surname: "Mak", wtiaRole: false, title: true, organization: true, bio: true, photo: "/images/exco/jess-mak.jpg", photoPosition: "center", zhPending: false},
