@@ -1129,3 +1129,9 @@ html { scroll-padding-top: 112px; }
   }
 }
 .guest-rsvp-field-error { display: block; margin-top: 6px; color: #892e27; font-size: 12px; line-height: 1.45; }
+/* CPAI drops the unverified audience cell. Two columns fill the desktop row;
+   at the compass breakpoint they stack, so a 390px viewport has no empty track. */
+.rich-compass.cpai-compass .rich-compass-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 820px) {
+  .rich-compass.cpai-compass .rich-compass-grid { grid-template-columns: 1fr; }
+}

@@ -92,17 +92,13 @@ describe("programme editorial presentation", () => {
     expect(screen.queryByText("Category")).not.toBeInTheDocument();
   });
 
-  it("keeps CPAI facts, the separate partner certificate, syllabus, and localized gallery", () => {
+  it("states CPAI's completion-certificate application without an issuer or course partner", () => {
     render(
       <ProgramCredential
+        completionHeading="Certificate of Completion"
+        completionTerms="Participants with an attendance rate of at least 70% who pass the assignment can apply for a Certificate of Completion."
         courseName="Generative AI for Business Innovation and Applications"
-        coursePartner="CUHK School of Continuing and Professional Studies"
-        coursePartnerHeading="Course delivered with"
         images={localiseImages(recordImages, true)}
-        issuer="WTIA"
-        issuerHeading="Issued by"
-        partnerCertificate="CUSCS certificate of completion"
-        partnerCertificateHeading="Graduates also receive"
         syllabus={["Enterprise AI strategy"]}
         syllabusHeading="Syllabus"
       />,
@@ -110,10 +106,11 @@ describe("programme editorial presentation", () => {
 
     expect(screen.getByRole("heading", {level: 2, name: "Generative AI for Business Innovation and Applications"})).toBeVisible();
     expect(screen.getByRole("heading", {level: 3, name: "Syllabus"})).toBeVisible();
-    expect(screen.getByText("Issued by").nextElementSibling).toHaveTextContent("WTIA");
-    expect(screen.getByText("Course delivered with").nextElementSibling).toHaveTextContent("CUHK School of Continuing and Professional Studies");
-    expect(screen.getByText("Graduates also receive").nextElementSibling).toHaveTextContent("CUSCS certificate of completion");
-    expect(screen.getByText("CUSCS certificate of completion")).not.toHaveTextContent("WTIA");
+    expect(screen.getByText("Certificate of Completion").nextElementSibling).toHaveTextContent("can apply");
+    expect(screen.queryByText("Issued by")).not.toBeInTheDocument();
+    expect(screen.queryByText("Course delivered with")).not.toBeInTheDocument();
+    expect(screen.queryByText("Graduates also receive")).not.toBeInTheDocument();
+    expect(screen.getByText("Certificate of Completion").nextElementSibling).not.toHaveTextContent("WTIA");
     expect(screen.getByRole("img", {name: "得獎者在台上合照"})).toHaveAttribute("width", "960");
     expect(screen.getByRole("img", {name: "得獎者在台上合照"})).toHaveAttribute("height", "640");
     expect(screen.getByRole("img", {name: "得獎者在台上合照"})).toHaveAttribute("sizes", "(min-width: 768px) 50vw, 100vw");

@@ -47,16 +47,16 @@ export default async function CpaiPage({params}: Props) {
     <>
       <PageHero
         className="rich-page-hero"
-        eyebrow={facts.typeLabel}
         title={t('title')}
         lead={t('description')}
         breadcrumb={{homeHref: '/', homeLabel: common('breadcrumbHome'), current: t('title')}}
         breadcrumbLabel={common('breadcrumbLabel')}
       />
+      {/* Two cells, not a blank third column where the unverified audience sat. */}
       <RichCompass
+        className="cpai-compass"
         items={[
           {label: tr('compassFactLabel'), value: facts.fact},
-          {label: tr('compassAudienceLabel'), value: t('audience')},
           {label: tr('compassActionLabel'), value: tr('askProgrammeTeam'), href: mailto}
         ]}
       />
@@ -64,16 +64,10 @@ export default async function CpaiPage({params}: Props) {
         <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">{t('status')}</p>
       </StorySection>
       <ProgramCredential
+        completionHeading={tr('credentialPartnerCertificate')}
+        completionTerms={zh ? cpai.partnerCertificateZh : cpai.partnerCertificateEn}
         courseName={zh ? cpai.courseNameZh : cpai.courseNameEn}
-        coursePartner={zh ? cpai.coursePartnerZh : cpai.coursePartnerEn}
-        coursePartnerHeading={tr('credentialCoursePartner')}
         images={localiseImages(cpai.images, zh)}
-        issuer={zh ? cpai.issuerZh : cpai.issuerEn}
-        issuerHeading={tr('credentialIssuer')}
-        // 「一個課程，兩張認證」: WTIA issues CPAI, CUSCS separately issues its own completion
-        // certificate. Naming only the first two states half of it.
-        partnerCertificate={zh ? cpai.partnerCertificateZh : cpai.partnerCertificateEn}
-        partnerCertificateHeading={tr('credentialPartnerCertificate')}
         syllabus={cpai.syllabus.map((module) => (zh ? module.titleZh : module.titleEn))}
         syllabusHeading={tr('credentialSyllabus')}
       />

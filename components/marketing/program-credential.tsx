@@ -2,26 +2,18 @@ import {MediaGallery} from '@/components/marketing/media-gallery';
 import {StorySection} from '@/components/marketing/story-section';
 
 /**
- * CPAI, which is a credential and not an event series.
+ * CPAI course block. No editions and no issuer: who issues the credential is
+ * not established, and an empty issuer row would still look like a fact.
  *
- * No editions, no winners, no funder — the shape difference is the point, and
- * it is why this is a separate component rather than program-editions.tsx with
- * everything optional. A page that can render an empty editions list is a page
- * that invites someone to ask when CPAI last ran, which the archive cannot say.
- *
- * The partner certificate is not decoration. WTIA issues CPAI alone and CUSCS
- * separately issues its own completion certificate to the same graduates —
- * 「一個課程，兩張認證」. A page naming only the issuer and the course partner
- * states half of that, which is the half the content audit got wrong when it
- * called CPAI a joint certification.
+ * The only certificate row is an application condition. It must not be wired
+ * back up as something graduates receive automatically. The course partner is
+ * not a prop. Rendering the school here would need a promotional-name
+ * approval this block does not have, and a "delivered with" label would read
+ * as a claim that the partner teaches the course.
  */
 type ProgramCredentialProps = {
-  issuerHeading: string;
-  issuer: string;
-  coursePartnerHeading: string;
-  coursePartner: string;
-  partnerCertificateHeading: string;
-  partnerCertificate: string;
+  completionHeading: string;
+  completionTerms: string;
   courseName: string;
   syllabusHeading: string;
   syllabus: readonly string[];
@@ -29,12 +21,8 @@ type ProgramCredentialProps = {
 };
 
 export function ProgramCredential({
-  issuerHeading,
-  issuer,
-  coursePartnerHeading,
-  coursePartner,
-  partnerCertificateHeading,
-  partnerCertificate,
+  completionHeading,
+  completionTerms,
   courseName,
   syllabusHeading,
   syllabus,
@@ -43,10 +31,8 @@ export function ProgramCredential({
   return (
     <StorySection heading={courseName} tone="plain">
       <div className="rounded-shell-lg bg-shell-warm p-6 sm:p-8">
-        <dl className="mt-6 space-y-4">
-          <Fact label={issuerHeading} value={issuer} />
-          <Fact label={coursePartnerHeading} value={coursePartner} />
-          <Fact label={partnerCertificateHeading} value={partnerCertificate} />
+        <dl className="space-y-4">
+          <Fact label={completionHeading} value={completionTerms} />
         </dl>
       </div>
 

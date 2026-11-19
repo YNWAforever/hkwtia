@@ -72,7 +72,8 @@ describe("/programs/cpai", () => {
     const compass = document.querySelector(".rich-compass-grid");
     expect(compass?.textContent).toContain(en.programs.record.credentialFact);
     expect(compass?.textContent).not.toMatch(/\d+ editions?/);
-    expect(compass?.textContent).toContain(en.programs.cpai.audience);
+    expect(compass?.children).toHaveLength(2);
+    expect(compass?.textContent).not.toContain("Who it's for");
     const mailLink = screen.getByRole("link", {name: en.programs.record.askProgrammeTeam});
     expect(mailLink.getAttribute("href")).toMatch(/^mailto:contact@hkwtia\.org\?subject=/);
 

@@ -52,14 +52,12 @@ const tct = {
 
 const cpai = {
   id: "cpai" as const,
-  issuerEn: "WTIA",
-  issuerZh: "香港無線科技商會",
   coursePartnerEn: "CUHK School of Continuing and Professional Studies",
   coursePartnerZh: "香港中文大學專業進修學院",
   courseNameEn: "Generative AI for Business Innovation and Applications",
   courseNameZh: "生成式人工智能商業應用課程",
-  partnerCertificateEn: "CUSCS certificate of completion",
-  partnerCertificateZh: "CUSCS 結業證書",
+  partnerCertificateEn: "Participants with an attendance rate of at least 70% who pass the assignment can apply for a Certificate of Completion.",
+  partnerCertificateZh: "出席率達至少 70%，並且功課合格的學員，可申請結業證書。",
   syllabus: [{titleEn: "Foundations", titleZh: "基礎"}],
   images: [],
 };
@@ -69,7 +67,7 @@ describe("programme schemas", () => {
     expect(asaProgramSchema.parse(asa).editions).toHaveLength(1);
     expect(hkictProgramSchema.parse(hkict).editions).toHaveLength(1);
     expect(tctProgramSchema.parse(tct).editions).toHaveLength(1);
-    expect(cpaiProgramSchema.parse(cpai).issuerEn).toBe("WTIA");
+    expect(cpaiProgramSchema.parse(cpai).partnerCertificateEn).toMatch(/can apply/);
   });
 
   // The structural fix for the CCIDA error. CreateHK funded 2017 through
@@ -258,6 +256,12 @@ describe("programme schemas", () => {
     expect(() => cpaiProgramSchema.parse({...cpai, editions: []})).toThrow();
   });
 
+  // An issuer string is how the page used to state an unverified fact. Strict
+  // mode rejects the field so it cannot be filled back in beside the schema.
+  it("gives CPAI no issuer field", () => {
+    expect(() => cpaiProgramSchema.parse({...cpai, issuerEn: "WTIA", issuerZh: "WTIA"})).toThrow();
+  });
+
   // The CSP is `img-src 'self' data:` with no remotePatterns, so a remote src
   // renders nothing in the browser.
   it("rejects an image that is not own-origin under /images/programs/", () => {
@@ -269,7 +273,7 @@ describe("programme schemas", () => {
   });
 
   it("requires both locales everywhere one is required", () => {
-    expect(() => cpaiProgramSchema.parse({...cpai, issuerZh: ""})).toThrow();
+    expect(() => cpaiProgramSchema.parse({...cpai, coursePartnerZh: ""})).toThrow();
     expect(() => cpaiProgramSchema.parse({...cpai, courseNameZh: ""})).toThrow();
     expect(() => cpaiProgramSchema.parse({...cpai, partnerCertificateZh: ""})).toThrow();
     expect(() => tctProgramSchema.parse({

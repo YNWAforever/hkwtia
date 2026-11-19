@@ -1382,8 +1382,7 @@
     "cpai": {
       "title": "CPAI",
       "description": "支援應用創新的 WTIA 計劃。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
-      "audience": "修讀 WTIA 應用人工智能專業資格的在職人士。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     },
     "hkict": {
       "title": "香港資訊及通訊科技獎",
@@ -1417,9 +1416,7 @@
       "winnersOffSite": "完整得獎名單刊於該屆的專題網站。",
       "winnersOffSiteLink": "查看得獎名單",
       "winnersUnrecorded": "商會的存檔沒有記錄該屆得獎者。",
-      "credentialIssuer": "頒發機構",
-      "credentialCoursePartner": "課程合辦機構",
-      "credentialPartnerCertificate": "畢業學員另可獲頒",
+      "credentialPartnerCertificate": "結業證書",
       "credentialSyllabus": "課程內容",
       "eventSeriesLabel": "活動系列",
       "credentialLabel": "專業資格",

@@ -59,10 +59,9 @@ describe("contradicted claims stay off the programme pages", () => {
     for (const {locale, text} of messages) expect(text, locale).not.toMatch(/150/);
   });
 
-  // WTIA issues CPAI alone; CUSCS separately issues its own completion
-  // certificate to the same graduates. Calling it joint understates what WTIA
-  // owns, and the record carries partnerCertificate* precisely so the real
-  // arrangement can be stated instead.
+  // A partnership sentence is withheld. "joint" in a value would publish the
+  // unapproved promotional paragraph. The completion-certificate sentence is
+  // a separate application condition and does not use this word.
   it("does not describe CPAI as jointly issued", () => {
     expect(source("cpai")).not.toMatch(/joint/i);
     for (const {locale, text} of messages) expect(text, locale).not.toMatch(/joint/i);
@@ -129,10 +128,10 @@ describe("contradicted claims stay off the programme pages", () => {
     for (const {id, text} of SOURCES) expect(text.length, id).toBeGreaterThan(200);
 
     // Comment stripping must not eat the values it is meant to protect. Every
-    // record still carries its editions or its issuer after the strip, and the
-    // off-site url survives with its scheme intact.
+    // record still carries its editions or its course name after the strip, and
+    // the off-site url survives with its scheme intact.
     for (const {id, text} of SOURCES) {
-      expect(text, id).toMatch(/kind: '|issuerEn:/);
+      expect(text, id).toMatch(/kind: '|courseNameEn:/);
     }
     expect(source("asa")).toMatch(/https:\/\/contest2020\.bestasiaapp\.hk/);
 

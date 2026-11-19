@@ -170,7 +170,9 @@ describe("page copy scope", () => {
       // sentences with {agency}/{count}/{programme} placeholders -- so staff
       // can reword them. The facts they frame come from content/programs/*.ts
       // and lib/home/programme-summaries.ts, which /admin/page-copy cannot reach.
-      programs: 42,
+      // The CPAI claim correction removed cpai.audience, record.credentialIssuer
+      // and record.credentialCoursePartner. 42 - 3 = 39.
+      programs: 39,
       // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
       // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
       // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
@@ -228,7 +230,8 @@ describe("page copy scope", () => {
     // The ExCo roster added 37 Committees.roster leaves. 625 + 37 = 662.
     // Five WTIA roles, two placeholder names, and emptyBiography. 662 + 8 = 670.
     // Larry's profile link adds two Committees leaves. 670 + 2 = 672.
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(672);
+    // The CPAI claim correction removed three programmes leaves. 672 - 3 = 669.
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(669);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
