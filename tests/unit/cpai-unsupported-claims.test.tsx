@@ -1,4 +1,4 @@
-import {readFileSync} from "node:fs";
+import {existsSync, readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {cleanup, render, screen} from "@testing-library/react";
@@ -171,6 +171,13 @@ describe("CPAI unsupported claims", () => {
     expect(zh.programs.record).not.toHaveProperty("credentialIssuer");
     expect(en.programs.record).not.toHaveProperty("credentialCoursePartner");
     expect(zh.programs.record).not.toHaveProperty("credentialCoursePartner");
+  });
+
+  it("keeps the certificate template out of public/", () => {
+    const root = process.cwd();
+    expect(existsSync(resolve(root, "public/images/programs/CPAI-Certificate-F.jpg"))).toBe(false);
+    expect(existsSync(resolve(root, "content/cpai-certificate-withheld/CPAI-Certificate-F.jpg"))).toBe(true);
+    expect(cpai.images).toEqual([]);
   });
 
   it("does not leave withdrawn issuer or teaching sentences as implementation guidance", () => {

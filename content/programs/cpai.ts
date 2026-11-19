@@ -69,7 +69,9 @@ export const cpai: CpaiProgram = cpaiProgramSchema.parse({
       titleZh: '垂直行業 AI 應用案例'
     }
   ],
-  // Empty on purpose. The old template's alt text stated an issuer the record
-  // no longer claims, and the picture itself is not current verification.
+  // Empty on purpose. The template file is kept at
+  // content/cpai-certificate-withheld/ so it is not a public URL. A depiction
+  // is not current issuer verification, and the old alt text stated an issuer
+  // the record does not claim.
   images: []
 });
