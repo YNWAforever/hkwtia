@@ -136,8 +136,10 @@ describe("exco roster source", () => {
       if (!member.bio) {
         expect(copy.bio).toBeUndefined();
         expect(copy.title).toBeUndefined();
+        expect(copy.wtiaRole).toBeUndefined();
         expect(zhCopy.bio).toBeUndefined();
-        expect(member.photo).toBeNull();
+        expect(zhCopy.title).toBeUndefined();
+        expect(zhCopy.wtiaRole).toBeUndefined();
         continue;
       }
       const raw = sourceFence(member.slug);
@@ -161,7 +163,13 @@ describe("exco roster source", () => {
     }
     expect(enRoster["larry-lam"]?.title).toBeUndefined();
     expect(enRoster["lawrence-poon"]?.title).toBeUndefined();
+    expect(enRoster["donald-chan"]).toEqual({name: "Donald Chan"});
+    expect(enRoster["jimmy-chan"]).toEqual({name: "Jimmy Chan"});
+    expect(zhRoster["donald-chan"]).toEqual({name: "Donald Chan"});
+    expect(zhRoster["jimmy-chan"]).toEqual({name: "Jimmy Chan"});
     expect(excoRoster.find((member) => member.slug === "alex-kun")?.photo).toBeNull();
+    expect(excoRoster.find((member) => member.slug === "donald-chan")?.photo).toBeNull();
+    expect(excoRoster.find((member) => member.slug === "jimmy-chan")?.photo).toBeNull();
     expect(excoRoster.find((member) => member.slug === "lawrence-cheung")?.photo).toBe("/images/exco/lawrence-cheung.jpg");
     expect(excoRoster.filter((member) => member.photoPosition === "top").map((member) => member.slug)).toEqual(["ricky-chan", "antony-ma"]);
   });

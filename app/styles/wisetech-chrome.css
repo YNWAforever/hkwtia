@@ -327,6 +327,31 @@
 }
 .plan-grid { margin-inline-end: var(--ask-wtia-inline-clearance); }
 
+/* Bottom padding cannot keep a line out of the launcher: the control is
+   fixed, so a heading or a flagship blurb meets it whenever that line
+   shares its vertical band. The exclusion is inline-end, using the same
+   clearance as the plan grid, so the text box stops before the control at
+   every scroll position. Measured on this branch before the rule: the 44px
+   mark intrudes 40px into the 375/390 shell, and the 126px English pill
+   intrudes 110px into the 1440 shell. 64px and 112px cover those. */
+@media (max-width: 820px) {
+  .site-root main .section-heading,
+  .site-root main .inner-section-heading,
+  .flagship-grid > .programme-card {
+    padding-inline-end: var(--ask-wtia-inline-clearance);
+  }
+}
+@media (max-width: 1120px) {
+  .flagship-grid > .programme-card:nth-child(3n) {
+    padding-inline-end: var(--ask-wtia-inline-clearance);
+  }
+}
+@media (min-width: 1121px) {
+  .flagship-grid > .programme-card:last-child {
+    padding-inline-end: calc(var(--ask-wtia-inline-clearance) + 12px);
+  }
+}
+
 /* 375–430px: the fixed mark still covered the last body line and CTAs. A 44px
    footprint and bottom padding that includes the safe area let that content
    scroll clear. The unscoped rule above is what desktop keeps. */

@@ -6,6 +6,7 @@ import {NextIntlClientProvider} from "next-intl";
 import type {ImgHTMLAttributes, ReactElement} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+import {ExcoRoster} from "@/components/wt/exco-roster";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -146,15 +147,18 @@ describe("/about/committees", () => {
     expect(card("alex-kun").querySelector(".exco-roster-title")).toHaveTextContent("Principal Lead – Business Development & Innovation");
     expect(card("alex-kun").querySelector(".exco-roster-role")).toBeNull();
     expect(card("alex-kun").querySelector("img")).toBeNull();
-    expect(card("alex-kun").querySelector(".exco-roster-fallback")).toHaveTextContent("");
     expect(card("alex-kun").querySelector(".exco-roster-fallback")).toHaveAttribute("aria-hidden", "true");
+    expect(card("alex-kun").querySelector(".exco-roster-fallback")).toHaveTextContent("");
     expect(card("alex-kun").textContent).not.toMatch(/AK|A先|先生/);
     expect(within(card("alex-kun")).getByRole("heading", {level: 3})).toHaveTextContent("Alex Kun");
     expect(card("donald-chan").querySelector(".exco-roster-role")).toBeNull();
     expect(card("donald-chan").querySelector(".exco-roster-title")).toBeNull();
     expect(card("donald-chan").querySelector("img")).toBeNull();
-    expect(card("donald-chan").querySelector(".exco-roster-fallback")).toHaveTextContent("");
+    expect(card("donald-chan").querySelector(".exco-roster-fallback")).toHaveAttribute("aria-hidden", "true");
     expect(card("donald-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
+    expect(card("jimmy-chan").querySelector("img")).toBeNull();
+    expect(card("jimmy-chan").querySelector(".exco-roster-role")).toBeNull();
+    expect(card("jimmy-chan").querySelector(".exco-roster-fallback")).toHaveAttribute("aria-hidden", "true");
     expect(card("jimmy-chan").querySelector(".exco-roster-fallback")).toHaveTextContent("");
     expect(card("jimmy-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
     expect(card("jimmy-chan").querySelector(".exco-roster-bio")).toBeNull();
@@ -211,13 +215,40 @@ describe("/about/committees", () => {
     expect(card("larry-lam").querySelector(".exco-roster-title")).toBeNull();
     expect(card("lawrence-poon").querySelector(".exco-roster-title")).toBeNull();
     expect(card("donald-chan").querySelector(".exco-roster-pending")).toHaveTextContent("Biography to follow");
+    expect(card("donald-chan").querySelector(".exco-roster-role")).toBeNull();
+    expect(card("jimmy-chan").querySelector(".exco-roster-role")).toBeNull();
     expect(within(card("donald-chan")).getByRole("heading", {level: 3})).toHaveTextContent("Donald Chan");
     expect(within(card("jimmy-chan")).getByRole("heading", {level: 3})).toHaveTextContent("Jimmy Chan");
+    expect(card("alex-kun").querySelector("img")).toBeNull();
+    expect(card("alex-kun").querySelector(".exco-roster-fallback")).toHaveAttribute("aria-hidden", "true");
+    expect(card("donald-chan").querySelector("img")).toBeNull();
+    expect(card("jimmy-chan").querySelector("img")).toBeNull();
     const larryLink = within(card("larry-lam")).getByRole("link", {name: "LinkedIn"});
     expect(larryLink).toHaveAttribute("href", "https://www.linkedin.com/in/larry-lam-2175a216/?isSelfProfile=false");
     expect(card("larry-lam").querySelector(".exco-roster-bio")?.textContent).not.toMatch(/linkedin/i);
     expect(document.body.textContent).not.toMatch(/會長|陳甘泉|譯註|開放問題/);
     expect(document.body.textContent).toMatch(/副主席/);
+  });
+
+  it("keeps a letter-free fallback when a portrait is absent", () => {
+    renderWithIntl("en", <ExcoRoster members={[{
+      slug: "unrelated-entry",
+      name: "Unrelated Member",
+      wtiaRole: null,
+      title: null,
+      organization: null,
+      paragraphs: [],
+      pendingBiography: "Biography to follow",
+      linkedIn: null,
+      photo: null,
+      photoPosition: "center",
+    }]} />);
+    const card = document.querySelector<HTMLElement>('[data-slug="unrelated-entry"]');
+    expect(card).not.toBeNull();
+    expect(card?.querySelector("img")).toBeNull();
+    expect(card?.querySelector(".exco-roster-fallback")).toHaveAttribute("aria-hidden", "true");
+    expect(card?.querySelector(".exco-roster-fallback")?.textContent).toBe("");
+    expect(card?.textContent).not.toMatch(/UM|先生/);
   });
 
   it("stays server-only, with the roster in place of the unconfirmed-committee grid", () => {
